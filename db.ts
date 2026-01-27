@@ -99,6 +99,18 @@ const INITIAL_APP_PAGES: AppPage[] = [
   { id: 'packages', label: 'Service Plans', icon: 'Signal', category: 'Core', enabled: true, showInDirectory: true, isDefault: false, swatch: '#3b82f6' },
   { id: 'support', label: 'Help Center', icon: 'Headphones', category: 'Support', enabled: true, showInDirectory: true, isDefault: false, swatch: '#8b5cf6' },
   { id: 'live-usage', label: 'Live Usage', icon: 'Monitor', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#3b82f6' },
+  { id: 'billing', label: 'Billing History', icon: 'FileText', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#8b5cf6' },
+  { id: 'credit-score', label: 'Trust Score', icon: 'BarChart3', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
+  { id: 'namaz', label: 'Prayer Times', icon: 'Clock', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
+  { id: 'qibla', label: 'Qibla Finder', icon: 'Compass', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
+  { id: 'tasbih', label: 'Digital Tasbih', icon: 'Fingerprint', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
+  { id: 'quran', label: 'Al Quran', icon: 'BookOpen', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
+  { id: 'weather', label: 'Weather', icon: 'Cloud', category: 'Utility', enabled: true, showInDirectory: true, isDefault: false, swatch: '#0ea5e9' },
+  { id: 'speed-test', label: 'Speed Test', icon: 'Gauge', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#ef4444' },
+  { id: 'referral', label: 'Invite Friends', icon: 'Gift', category: 'Core', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f43f5e' },
+  { id: 'news', label: 'Announcements', icon: 'Megaphone', category: 'Communication', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f97316' },
+  { id: 'connected-devices', label: 'My Devices', icon: 'Smartphone', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#6366f1' },
+  { id: 'about-us', label: 'About Provider', icon: 'Info', category: 'Core', enabled: true, showInDirectory: true, isDefault: false, swatch: '#64748b' },
 ];
 
 const INITIAL_APP_SECTIONS: AppSection[] = [
