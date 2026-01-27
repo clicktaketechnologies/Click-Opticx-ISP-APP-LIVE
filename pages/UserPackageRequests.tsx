@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { AppState, PackageRequest } from '../types';
 import { db } from '../db';
@@ -19,7 +20,8 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
   const handleApprove = async (reqId: string) => {
     const req = pendingRequests.find(r => r.id === reqId);
     setIsProcessing(reqId);
-    await db.approvePackageRequest(reqId);
+    // FIXED: Use approveUnifiedRequest instead of approvePackageRequest
+    await db.approveUnifiedRequest(reqId, 'package');
     setIsProcessing(null);
     db.logNotification(req?.userId || 'all', 'success', 'Request Approved', 'Subscribed provisioned.');
   };
@@ -28,7 +30,8 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
     const reason = prompt("Enter Rejection Reason for Subscriber:");
     if (reason === null) return;
     setIsProcessing(reqId);
-    await db.rejectPackageRequest(reqId);
+    // FIXED: Use rejectUnifiedRequest instead of rejectPackageRequest
+    await db.rejectUnifiedRequest(reqId, 'package', reason);
     setIsProcessing(null);
   };
 
@@ -127,7 +130,7 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
             </div>
             <p className="text-xs text-slate-400 font-bold leading-relaxed uppercase">Approving a request will immediately generate a validated invoice and update the subscriber's expiry date in the persistent registry. Rejected requests will notify the user via the ISP App dashboard.</p>
          </div>
-         <HardDrive className="absolute -right-8 -bottom-8 opacity-5" size={240} />
+         <HardDrive className="absolute -right-8 -bottom-8 opacity-5 size={240} />
       </div>
     </div>
   );

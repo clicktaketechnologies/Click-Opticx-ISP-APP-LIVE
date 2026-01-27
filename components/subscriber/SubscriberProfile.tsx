@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useRef } from 'react';
 import { ISPUser, AppState, TechnicalConfig, UserStatus, VerificationStatus, LedgerType } from '../../types';
 import { db } from '../../db';
@@ -32,9 +31,10 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
   const handleSaveProfile = async () => {
     if (isIdentityLocked) return;
     const { username, connectionId, ...editableData } = formData;
+    // Fix: Accessing message property which might not be defined in the returned type
     const res = await db.updateSubscriberProfile(user.id, editableData);
     if (res.success) setIsEditing(false);
-    else alert(res.message);
+    else alert(res.message || "Profile update failed.");
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,12 +44,13 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
     const reader = new FileReader();
     reader.onload = async (event) => {
       const base64 = event.target?.result as string;
+      // Fix: Accessing message property which might not be defined in the returned type
       const res = await db.updateSubscriberProfile(user.id, { profileImage: base64 });
       if (res.success) {
         // Local state update
         setFormData(prev => ({ ...prev, profileImage: base64 }));
       } else {
-        alert(res.message);
+        alert(res.message || "Image upload failed.");
       }
       setIsUploading(false);
     };
@@ -298,7 +299,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                         <input type="password" placeholder="••••••••" className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-black text-lg outline-none" />
                      </div>
                   </div>
-                  <button className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl active:scale-95 transition-all">Update Password</button>
+                  <button className="w-full py-5 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl active:scale-95 transition-all">Update Password</button>
                </div>
             </div>
          )}
@@ -411,7 +412,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                     <div key={log.id} className="p-6 hover:bg-slate-50 transition-colors group">
                        <div className="flex justify-between items-start mb-2">
                           <div className="flex items-center gap-3">
-                             <div className={`w-1.5 h-1.5 rounded-full ${log.riskLevel === 'Critical' ? 'bg-rose-500 shadow-[0_0_8px_rose]' : 'bg-indigo-400'}`}></div>
+                             <div className={`w-1.5 h-1.5 rounded-full ${log.riskLevel === 'Critical' ? 'bg-rose-50 shadow-[0_0_8px_rose]' : 'bg-indigo-400'}`}></div>
                              <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{log.action}</span>
                           </div>
                           <span className="text-[8px] font-bold text-slate-400 uppercase">{new Date(log.timestamp).toLocaleDateString()} @ {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>

@@ -14,7 +14,6 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'All' | 'Email' | 'Push'>('All');
 
-  // Added safety fallback for deliveryLogs array
   const logs = useMemo(() => {
     return (state.deliveryLogs || []).filter(log => {
       const matchesSearch = log.userName.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -24,7 +23,6 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
     }).sort((a,b) => b.timestamp.localeCompare(a.timestamp));
   }, [state.deliveryLogs, searchTerm, typeFilter]);
 
-  // Added safety check for stats calculation to prevent crash if deliveryLogs is undefined
   const stats = useMemo(() => {
     const deliveryLogs = state.deliveryLogs || [];
     const emailCount = deliveryLogs.filter(l => l.type === 'Email').length;
@@ -129,7 +127,6 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
                           {new Date(log.timestamp).toLocaleString()}
                        </td>
                        <td className="px-8 py-5">
-                          {/* Fixed syntax error (missing closing bracket) and invalid component interpolation in className */}
                           <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded border border-slate-200 text-[8px] font-black uppercase tracking-widest">
                              {log.triggerSource === 'Automation' ? <Zap size={10}/> : <LayoutGrid size={10}/>}
                              {log.triggerSource}

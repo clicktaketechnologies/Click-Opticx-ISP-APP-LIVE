@@ -50,7 +50,8 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
       setSelectedTarget(null);
       db.logNotification(selectedTarget.id, 'success', 'Wallet Handshake', `Provisioned Rs.${amount} to ${selectedTarget.name}.`);
     } else {
-      alert(res.message);
+      // FIXED: Safely handle missing message in error case
+      alert(res.message || "Transfer handshake failed.");
     }
   };
 
@@ -70,13 +71,15 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
   const handleApproveRequest = async (reqId: string) => {
     setIsProcessing(reqId);
-    await db.approveTopupRequest(reqId);
+    // FIXED: Use approveUnifiedRequest instead of non-existent approveTopupRequest
+    await db.approveUnifiedRequest(reqId, 'topup');
     setIsProcessing(null);
   };
 
   const handleRejectRequest = async (reqId: string) => {
     setIsProcessing(reqId);
-    await db.rejectTopupRequest(reqId);
+    // FIXED: Use rejectUnifiedRequest instead of non-existent rejectTopupRequest
+    await db.rejectUnifiedRequest(reqId, 'topup', 'Admin Denial');
     setIsProcessing(null);
   };
 
