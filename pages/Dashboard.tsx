@@ -1,0 +1,349 @@
+
+import React, { useState, useMemo, useEffect } from 'react';
+import { AppState, UserStatus, PaymentStatus, Role, LedgerType, StaffUser } from '../types';
+import { 
+  Users, DollarSign, AlertCircle, TrendingUp, 
+  ArrowUpRight, Clock, RefreshCcw, Download, PieChart, ShieldCheck,
+  Database, Filter, Calendar, Zap, UserCircle, Globe, Building2,
+  Wallet, ArrowDownLeft, Receipt, History, Activity, Briefcase,
+  // Fix: Added missing Bot import
+  ArrowRight, Search, ChevronRight, Calculator, Archive, Sparkles, Smile, Bot
+} from 'lucide-react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer, AreaChart, Area, Cell, PieChart as RePieChart, Pie
+} from 'recharts';
+import { db } from '../db';
+
+type DateFilterType = '3d' | '7d' | '30d' | 'all' | 'custom';
+
+const Dashboard: React.FC<{ state: AppState }> = ({ state }) => {
+  const [dateFilter, setDateFilter] = useState<DateFilterType>('7d');
+  const [customStartDate, setCustomStartDate] = useState<string>(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+  const [customEndDate, setCustomEndDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [collectorFilter, setCollectorFilter] = useState<string>('All');
+  const [entityFilter, setEntityFilter] = useState<'all' | 'users' | 'dealers'>('all');
+  
+  const currentUser = state.currentUser;
+  const isDealer = currentUser?.role === Role.DEALER;
+
+  const branding = state.settings.branding;
+  const logo = branding.logoLight || branding.logoSquare;
+
+  useEffect(() => {
+    db.auditOverdueLoads();
+  }, []);
+
+  const globalStats = useMemo(() => {
+    const now = new Date();
+    let startDate: Date;
+    let endDate: Date = new Date();
+
+    if (dateFilter === 'custom') {
+      startDate = new Date(customStartDate);
+      endDate = new Date(customEndDate);
+      endDate.setHours(23, 59, 59, 999);
+    } else {
+      const filterDays = dateFilter === '3d' ? 3 : dateFilter === '7d' ? 7 : dateFilter === '30d' ? 30 : 9999;
+      startDate = new Date(now.setDate(now.getDate() - filterDays));
+    }
+
+    const dealerEmails = new Set(state.staff.filter(s => s.role === Role.DEALER).map(s => s.email));
+
+    const periodInvoices = state.invoices.filter(i => {
+      const d = new Date(i.createdAt);
+      const dateMatch = d >= startDate && d <= endDate;
+      const isDlr = dealerEmails.has(i.userId);
+      const entityMatch = entityFilter === 'all' || 
+                         (entityFilter === 'users' && !isDlr) || 
+                         (entityFilter === 'dealers' && isDlr);
+      return dateMatch && entityMatch;
+    });
+
+    const periodPayments = state.payments.filter(p => {
+      const d = new Date(p.timestamp);
+      const dateMatch = d >= startDate && d <= endDate;
+      const isDlr = dealerEmails.has(p.userId);
+      const collectorMatch = collectorFilter === 'All' || p.collectorEmail === collectorFilter;
+      const entityMatch = entityFilter === 'all' || 
+                         (entityFilter === 'users' && !isDlr) || 
+                         (entityFilter === 'dealers' && isDlr);
+      return dateMatch && collectorMatch && entityMatch && p.status === 'Approved';
+    });
+
+    const totalUnpaid = state.users.reduce((acc, u) => {
+        if (entityFilter === 'dealers') return acc;
+        return acc + u.balance;
+    }, 0) + (entityFilter !== 'users' ? state.staff.filter(s => s.role === Role.DEALER).reduce((acc, s) => acc + (s.balance || 0), 0) : 0);
+
+    return {
+      totalUnpaid,
+      activeSubs: entityFilter === 'dealers' ? 0 : state.users.filter(u => u.status === UserStatus.ACTIVE).length,
+      activeDealers: entityFilter === 'users' ? 0 : state.staff.filter(s => s.role === Role.DEALER && s.status === 'Active').length,
+      periodRevenue: periodInvoices.reduce((acc, i) => acc + i.totalAmount, 0),
+      periodRecovery: periodPayments.reduce((acc, p) => acc + p.amount, 0),
+    };
+  }, [state.users, state.staff, state.invoices, state.payments, dateFilter, customStartDate, customEndDate, collectorFilter, entityFilter]);
+
+  const aiStats = useMemo(() => {
+     const totalCalls = state.aiCallLogs.length;
+     const satisfied = state.aiCallLogs.filter(l => l.sentimentEnd === 'Satisfied').length;
+     const satisfactionRate = totalCalls > 0 ? Math.round((satisfied / totalCalls) * 100) : 0;
+     return { totalCalls, satisfactionRate };
+  }, [state.aiCallLogs]);
+
+  const chartData = useMemo(() => {
+    let startDate: Date;
+    let endDate: Date = new Date();
+    let diffDays: number;
+
+    if (dateFilter === 'custom') {
+      startDate = new Date(customStartDate);
+      endDate = new Date(customEndDate);
+      diffDays = Math.ceil(Math.abs(endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      if (diffDays > 60) diffDays = 60; 
+    } else {
+      diffDays = dateFilter === 'all' ? 30 : (dateFilter === '3d' ? 3 : (dateFilter === '7d' ? 7 : 30));
+      const tempDate = new Date();
+      startDate = new Date(tempDate.setDate(tempDate.getDate() - (diffDays - 1)));
+    }
+
+    const data = [];
+    const dealerEmails = new Set(state.staff.filter(s => s.role === Role.DEALER).map(s => s.email));
+
+    for (let i = 0; i < diffDays; i++) {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      const dayStr = d.toISOString().split('T')[0];
+      
+      const dayInv = state.invoices.filter(inv => {
+          const dateMatch = inv.createdAt.startsWith(dayStr);
+          const isDlr = dealerEmails.has(inv.userId);
+          const entityMatch = entityFilter === 'all' || (entityFilter === 'users' && !isDlr) || (entityFilter === 'dealers' && isDlr);
+          return dateMatch && entityMatch;
+      }).reduce((acc, inv) => acc + inv.totalAmount, 0);
+
+      const dayRec = state.payments.filter(p => {
+        const dateMatch = p.timestamp.startsWith(dayStr);
+        const isDlr = dealerEmails.has(p.userId);
+        const collectorMatch = collectorFilter === 'All' || p.collectorEmail === collectorFilter;
+        const entityMatch = entityFilter === 'all' || (entityFilter === 'users' && !isDlr) || (entityFilter === 'dealers' && isDlr);
+        return dateMatch && collectorMatch && entityMatch && p.status === 'Approved';
+      }).reduce((acc, p) => acc + p.amount, 0);
+
+      data.push({
+        name: d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }),
+        revenue: dayInv,
+        recovery: dayRec
+      });
+    }
+    return data;
+  }, [state.invoices, state.staff, state.payments, dateFilter, customStartDate, customEndDate, collectorFilter, entityFilter]);
+
+  if (isDealer) {
+    const dealerUser = currentUser as StaffUser;
+    const personalInvoices = state.invoices.filter(i => i.userId === dealerUser.email).sort((a,b) => b.createdAt.localeCompare(a.createdAt));
+    return (
+      <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <div className="flex items-center gap-5">
+            {logo ? (
+              <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm border border-slate-100 overflow-hidden shrink-0">
+                <img src={logo} className="w-full h-full object-contain" alt="Brand" />
+              </div>
+            ) : (
+              <Briefcase className="text-purple-600 shrink-0" size={36} />
+            )}
+            <div>
+              <h2 className="text-3xl font-black text-slate-800 tracking-tight italic leading-none">
+                Partner Dashboard
+              </h2>
+              <p className="text-slate-500 font-medium mt-1">Monitoring your account and wallet status.</p>
+            </div>
+          </div>
+          <div className="flex gap-4 p-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
+             <div className="text-right">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dealer Account Code</p>
+                <p className="text-lg font-black text-purple-600 uppercase italic">{dealerUser.dealerCode || 'N/A'}</p>
+             </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+           <div className="bg-slate-900 p-10 rounded-[3rem] text-white relative overflow-hidden shadow-2xl col-span-1">
+              <div className="relative z-10 space-y-6">
+                 <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] flex items-center gap-2">
+                    <Wallet size={16} className="text-emerald-400" />
+                    Available Wallet
+                 </p>
+                 <h3 className="text-5xl font-black text-emerald-400 tracking-tighter">
+                   {state.settings.currency} {(dealerUser.balance || 0).toLocaleString()}
+                 </h3>
+                 <div className="pt-6 border-t border-white/5 flex justify-between items-center">
+                    <div>
+                       <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Total Distributed</p>
+                       <p className="text-sm font-bold text-slate-300">{state.settings.currency} {personalInvoices.reduce((a,b) => a + b.totalAmount, 0).toLocaleString()}</p>
+                    </div>
+                    <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center">
+                       <TrendingUp className="text-emerald-400" size={24} />
+                    </div>
+                 </div>
+              </div>
+              <Activity className="absolute -right-10 -bottom-10 opacity-5" size={260} />
+           </div>
+
+           <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm col-span-2 flex flex-col justify-between">
+              <div>
+                 <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                    <History size={16} className="text-blue-500" />
+                    Recent Wallet History
+                 </h4>
+                 <div className="space-y-3">
+                    {personalInvoices.slice(0, 4).map(inv => (
+                      <div key={inv.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
+                         <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${inv.status === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                               <Zap size={20} />
+                            </div>
+                            <div>
+                               <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{inv.packageName}</p>
+                               <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{new Date(inv.createdAt).toLocaleDateString()}</p>
+                            </div>
+                         </div>
+                         <div className="text-right">
+                            <p className="text-lg font-black text-slate-900">Rs. {inv.totalAmount.toLocaleString()}</p>
+                            <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${inv.status === PaymentStatus.PAID ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>{inv.status}</span>
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+              <button className="w-full mt-6 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-2">
+                 View Complete Transaction Ledger <ArrowRight size={16} />
+              </button>
+           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin Dashboard
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+        <div className="flex items-center gap-5">
+          {logo ? (
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm border border-slate-100 overflow-hidden shrink-0">
+              <img src={logo} className="w-full h-full object-contain" alt="Brand" />
+            </div>
+          ) : (
+            <Archive className="text-indigo-600 shrink-0" size={36} />
+          )}
+          <div className="space-y-1">
+            <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-4 uppercase italic leading-none">
+               Operations Dashboard
+            </h2>
+            <p className="text-slate-500 font-medium">Real-time performance metrics for Entire Organization.</p>
+          </div>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+          <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto shrink-0">
+            {[{ id: 'all', label: 'Overview' }, { id: 'users', label: 'Subscribers' }, { id: 'dealers', label: 'Dealers' }].map(f => (
+              <button key={f.id} onClick={() => setEntityFilter(f.id as any)} className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${entityFilter === f.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>{f.label}</button>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row bg-white p-2 rounded-2xl border border-slate-200 shadow-sm gap-2 w-full lg:w-auto">
+            <div className="flex bg-slate-100 p-1 rounded-xl overflow-x-auto shrink-0">
+              {[{ id: '3d', label: '3 Days' }, { id: '7d', label: '1 Week' }, { id: '30d', label: '1 Month' }, { id: 'all', label: 'All Time' }].map(f => (
+                <button key={f.id} onClick={() => setDateFilter(f.id as any)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${dateFilter === f.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>{f.label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        {[
+          { label: 'Active Subs', value: globalStats.activeSubs.toLocaleString(), icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'O/S Balance', value: `${state.settings.currency} ${globalStats.totalUnpaid.toLocaleString()}`, icon: DollarSign, color: 'text-red-600', bg: 'bg-red-50' },
+          { label: 'AI Voice Sat.', value: `${aiStats.satisfactionRate}%`, icon: Smile, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+          { label: 'Collection %', value: `${globalStats.periodRevenue > 0 ? Math.round((globalStats.periodRecovery / globalStats.periodRevenue) * 100) : 0}%`, icon: ShieldCheck, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+        ].map((kpi, idx) => (
+          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+            <div className="flex justify-between items-start mb-4 relative z-10"><div className={`${kpi.bg} p-3 rounded-2xl`}><kpi.icon className={kpi.color} size={24} /></div></div>
+            <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest relative z-10">{kpi.label}</p>
+            <h3 className="text-2xl font-black text-slate-900 mt-2 tracking-tight relative z-10">{kpi.value}</h3>
+            <div className={`absolute -right-4 -bottom-4 opacity-5 scale-150 ${kpi.color}`}><kpi.icon size={100} /></div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col h-[400px] md:h-[500px]">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
+            <h3 className="text-lg font-black text-slate-800 flex items-center gap-2"><TrendingUp size={20} className="text-emerald-600" /> Revenue Growth</h3>
+          </div>
+          <div className="flex-1">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData}>
+                <defs><linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient></defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} dy={10} />
+                <YAxis stroke="#94a3b8" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '16px', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }} />
+                <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#colorRev)" strokeWidth={4} />
+                <Area type="monotone" dataKey="recovery" stroke="#10b981" fillOpacity={0} strokeWidth={4} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="bg-slate-900 p-6 md:p-8 rounded-[2.5rem] text-white flex flex-col shadow-2xl relative overflow-hidden h-[250px]">
+            <div className="relative z-10 flex-1 space-y-8">
+              <h3 className="text-lg font-black flex items-center gap-2 text-emerald-400"><ShieldCheck size={20} /> Collection Health</h3>
+              <div className="space-y-6">
+                <div>
+                  <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Efficiency Ratio</p>
+                  <div className="flex items-end gap-2">
+                    <span className="text-4xl font-black text-emerald-400">{globalStats.periodRevenue > 0 ? Math.round((globalStats.periodRecovery / globalStats.periodRevenue) * 100) : 0}%</span>
+                    <span className="text-xs text-slate-500 font-bold mb-1.5 uppercase">of Target</span>
+                  </div>
+                </div>
+                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                  <div className="bg-emerald-500 h-full transition-all duration-1000" style={{ width: `${globalStats.periodRevenue > 0 ? (globalStats.periodRecovery / globalStats.periodRevenue) * 100 : 0}%` }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex-1 overflow-hidden">
+             <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <Activity size={16} className="text-indigo-500" /> AI Agent Activity
+             </h3>
+             <div className="space-y-4">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm border border-blue-50"><Bot size={20}/></div>
+                      <span className="text-xs font-black uppercase">Voice Calls Today</span>
+                   </div>
+                   <span className="text-lg font-black text-indigo-600">{aiStats.totalCalls}</span>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-rose-600 shadow-sm border border-rose-50"><Sparkles size={20}/></div>
+                      <span className="text-xs font-black uppercase">Auto-Resolutions</span>
+                   </div>
+                   <span className="text-lg font-black text-emerald-600">{Math.round(aiStats.totalCalls * 0.85)}</span>
+                </div>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;

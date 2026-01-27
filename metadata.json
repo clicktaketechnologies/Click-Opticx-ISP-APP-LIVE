@@ -1,0 +1,9 @@
+{
+  "name": "Click Opticx ISP APP LIVE",
+  "description": "Professional ISP Billing and Recovery Management System with accounting-grade ledger, RBAC, technical dossier tracking, and automated Communication Hub for Email/Push marketing.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
