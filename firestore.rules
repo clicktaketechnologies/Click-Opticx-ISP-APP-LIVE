@@ -1,0 +1,17 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ISP Registry Master State
+    match /registry/master_state {
+      // For development, we allow read/write. 
+      // In production, you would check request.auth != null
+      allow read, write: if true; 
+    }
+    
+    // Default fallback
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
