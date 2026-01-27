@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { ISPUser, AppState, UserStatus, Package, PaymentStatus, VerificationStatus, AppSection, AppPage } from '../../types';
 import { db } from '../../db';
@@ -8,7 +7,7 @@ import {
   AlertTriangle, Clock, X, ShieldAlert, Sun, Bot, CheckCircle, BarChart3, RefreshCw,
   CreditCard, LayoutGrid, Smartphone, MapPin, MessageSquare, Headphones,
   Bell, History, Gift, User, FileText, Network, Compass, Fingerprint, Loader2,
-  Info, Home, Signal, Monitor, Key, Book, HeadphonesIcon, HelpCircle, UserCheck, Shield, LucideIcon, HardDrive,
+  Info, Home, Signal, Monitor, Key, Book, HelpCircle, UserCheck, Shield, LucideIcon, HardDrive,
   Cpu, Megaphone, Mic, PhoneCall, Moon, Box, Heart, ChevronDown, ChevronUp
 } from 'lucide-react';
 import SubscriberActivationFlow from './SubscriberActivationFlow';
@@ -84,7 +83,6 @@ const SubscriberHome: React.FC<Props> = ({
         <div key="status" className="space-y-6">
           <SubscriberQuickStatus user={user} currentPkg={currentPkg} />
 
-          {/* Transaction Heartbeat Node - Orange Card */}
           {pendingPkgReq && (
             <div className="mx-4 p-6 bg-amber-50 border-2 border-amber-200 rounded-[2.5rem] flex items-center justify-between shadow-xl animate-in slide-in-from-top-4 duration-500">
                <div className="flex items-center gap-5">
@@ -93,14 +91,13 @@ const SubscriberHome: React.FC<Props> = ({
                   </div>
                   <div>
                      <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest leading-none mb-1">Verifying Protocol</p>
-                     {/* Fix: Safely access packageName using type assertion to avoid union property error */}
                      <h4 className="text-sm font-black text-amber-950 uppercase italic tracking-tight">{(pendingPkgReq as any).packageName || 'Activation'} Handshake</h4>
                      <p className="text-[9px] text-amber-700 font-bold uppercase mt-1">Awaiting Administrative Clearance...</p>
                   </div>
                </div>
                <button 
                 onClick={async () => {
-                   if (confirm("ABORT PROTOCOL: Cancel your pending activation request and restore the terminal?")) {
+                   if (confirm("ABORT PROTOCOL: Cancel your pending activation request?")) {
                       await db.cancelUniversalRequest(pendingPkgReq.id);
                    }
                 }}
@@ -111,7 +108,6 @@ const SubscriberHome: React.FC<Props> = ({
             </div>
           )}
 
-          {/* 🤖 Intelligent Node Section */}
           <div className="space-y-4 px-4">
             <div className="flex justify-between items-end px-1">
               <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">🤖 Intelligent Node</h3>
@@ -160,7 +156,7 @@ const SubscriberHome: React.FC<Props> = ({
               <div className="flex justify-between items-start">
                  <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                       <div className={`w-2.5 h-2.5 rounded-full ${!isExpired ? 'bg-emerald-400 animate-pulse' : 'bg-white shadow-[0_0_10px_white]'}`}></div>
+                       <div className={`w-2.5 h-2.5 rounded-full ${!isExpired ? 'bg-emerald-400 animate-pulse' : 'bg-white'}`}></div>
                        <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{isExpired ? 'Service Expired' : 'Active Link'}</span>
                     </div>
                     <h2 className="text-3xl font-black tracking-tighter uppercase italic">{currentPkg?.name || 'OFFLINE'}</h2>
@@ -170,17 +166,7 @@ const SubscriberHome: React.FC<Props> = ({
                  </div>
               </div>
 
-              {pendingPkgReq ? (
-                 <div className="p-6 bg-white/10 border border-white/20 rounded-[2rem] flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in">
-                    <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-white shadow-lg animate-pulse"><Clock size={18}/></div>
-                       <div className="text-left">
-                          <p className="text-[10px] font-black uppercase text-white leading-none mb-1">Verifying Request</p>
-                          <p className="text-[8px] font-bold uppercase text-indigo-200 tracking-widest truncate max-w-[180px]">Administrator clearance in progress...</p>
-                       </div>
-                    </div>
-                 </div>
-              ) : (
+              {!pendingPkgReq && (
                 <div className="flex gap-3">
                   <button onClick={() => setShowActivation(true)} className="flex-1 py-5 bg-white text-slate-900 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 border-b-4 border-slate-200">
                     <Zap size={16} fill="currentColor" /> {isExpired ? 'Renew Link' : 'Modify Tier'}
@@ -211,7 +197,7 @@ const SubscriberHome: React.FC<Props> = ({
                         {isELPending ? 'Provisioning...' : isELPastDue ? 'Risk Threshold Passed' : 'Emergency Link Active'}
                       </h4>
                       <p className="text-[10px] font-bold uppercase opacity-90 tracking-widest leading-relaxed max-w-xs">
-                        {isELPending ? `Verifying advance Rs. ${activeEL.amount}. Ready in: ${timeLeft}` : isELPastDue ? `Settle Rs. ${activeEL.amount} immediately to prevent suspension.` : `Rs. ${activeEL.amount} credit. Clear by ${new Date(activeEL.expiryTimestamp).toLocaleDateString()}.`}
+                        {isELPending ? `Verifying advance Rs. ${activeEL.amount}. Ready in: ${timeLeft}` : isELPastDue ? `Settle Rs. ${activeEL.amount} immediately.` : `Rs. ${activeEL.amount} credit until ${new Date(activeEL.expiryTimestamp).toLocaleDateString()}.`}
                       </p>
                   </div>
                 </div>
@@ -273,7 +259,6 @@ const SubscriberHome: React.FC<Props> = ({
       ? appPages.filter(p => p.enabled && p.showInDirectory)
       : appPages.filter(p => section.itemIds.includes(p.id) && p.enabled);
 
-    // Limit Directory section to 4 cards if not expanded
     const isDirectory = section.id === 'directory';
     const items = (isDirectory && !isDirectoryExpanded) ? allItems.slice(0, 4) : allItems;
 
@@ -312,7 +297,6 @@ const SubscriberHome: React.FC<Props> = ({
                 }}
                 className="p-6 bg-white rounded-[2.5rem] border border-slate-100 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] hover:shadow-[0_25px_60px_-12px_rgba(0,0,0,0.15)] hover:-translate-y-2 hover:-rotate-1 transition-all duration-300 active:scale-95 group text-left flex flex-col gap-4 relative overflow-hidden h-full"
               >
-                {/* Categorical Background Glow */}
                 <div 
                    className="absolute inset-0 opacity-5 transition-opacity group-hover:opacity-10 pointer-events-none"
                    style={{ backgroundColor: item.swatch || '#f1f5f9' }}

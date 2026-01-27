@@ -1,4 +1,3 @@
-
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, Firestore } from 'firebase/firestore';
 import { 
@@ -272,7 +271,6 @@ class DB {
     const newUser = { id: 'USR-'+Date.now(), connectionId: 'NR-'+Math.floor(10000+Math.random()*90000), balance: 0, creditScore: 600, activationCount: 0, portalEnabled: true, ...u }; 
     this.state.users.push(newUser as any); await this.commit(); return { success: true, user: newUser }; 
   }
-  // Added explicit return type with optional message to support UI feedback in SubscriberProfile
   async updateUser(id: string, d: any): Promise<{ success: boolean; message?: string }> { 
     const idx = this.state.users.findIndex(u => u.id === id);
     if (idx !== -1) { 
@@ -315,7 +313,7 @@ class DB {
   async addManualPayment(userId: string, amount: number, method: PaymentMethod) {
     this.state.payments.push({ id: 'PAY-'+Date.now(), userId, userName: 'User', amount, status: 'Approved', method, timestamp: new Date().toISOString(), collectorEmail: 'admin', collectorName: 'Admin', invoiceId: 'MANUAL', isCleared: false });
     const userIdx = this.state.users.findIndex(u => u.id === userId);
-    if (userIdx !== -1) this.state.users[userIdx].balance = Math.max(0, this.state.users[userIdx].balance - amount);
+    if (userIdx !== -1) { this.state.users[userIdx].balance = Math.max(0, this.state.users[userIdx].balance - amount); }
     await this.commit();
   }
 
@@ -391,7 +389,7 @@ class DB {
     if (idx !== -1) { 
       this.state.permissions[idx] = { ...this.state.permissions[idx], ...updates }; 
     } else { 
-      this.state.permissions.push({ id: moduleId, ...updates }); 
+      this.state.permissions.push({ id: moduleId, view: [], edit: [], delete: [], ...updates }); 
     }
     await this.commit();
   }
@@ -497,10 +495,7 @@ class DB {
     }
     if (type === 'emergency') {
        const idx = this.state.emergencyLoads.findIndex(r => r.id === id);
-       if (idx !== -1) {
-          this.state.emergencyLoads[idx].status = 'Cancelled';
-          await this.commit();
-       }
+       if (idx !== -1) { this.state.emergencyLoads[idx].status = 'Cancelled'; await this.commit(); }
     }
     return { success: true };
   }
