@@ -11,7 +11,8 @@ import {
   ConnectedDevice, PasswordResetRequest, NetworkNode, AppPage, HomeCard, 
   Device, NetworkMapping, KYCDocument, AIActionLog, AIConfig, AIEvent, AISuggestion,
   NotificationAudience, NotificationPriority, AICallConfig, AICallLog, AICallRule,
-  EmailCampaign, EmailTemplate, AudienceSegment, CommunicationAutomationRule, DeliveryLog, CommunicationSettings, SenderIdentity, PaymentGateway, AppSection, InfrastructureConfig, LegalConfig
+  EmailCampaign, EmailTemplate, AudienceSegment, CommunicationAutomationRule, DeliveryLog, CommunicationSettings, SenderIdentity, PaymentGateway, AppSection, InfrastructureConfig, LegalConfig,
+  AIKeysConfig
 } from './types';
 
 // PASTE YOUR ACTUAL CONFIG FROM FIREBASE CONSOLE HERE
@@ -133,11 +134,7 @@ const INITIAL_STATE: AppState = {
   aiSuggestions: [],
   aiCallLogs: [],
   aiCallRules: [],
-  emailCampaigns: [],
-  emailTemplates: [],
-  audienceSegments: [],
-  commAutomationRules: [],
-  deliveryLogs: [],
+  // Removed duplicate properties from line 188-193 area as reported by errors
   settings: {
     branding: { businessName: "Click Opticx", shortName: "CO ISP", logoLight: "", logoDark: "", logoSquare: "", favicon: "", primaryColor: "#4f46e5", secondaryColor: "#10b981", accentColor: "#f59e0b", textColorLight: "#ffffff", textColorDark: "#0f172a", primaryFont: "Inter", secondaryFont: "Inter" },
     profile: { legalName: "Click Opticx Pvt Ltd", tradingName: "Click Opticx", tagline: "Fast Regional Connectivity", establishedYear: "2023", registrationNumber: "", taxNumber: "", headOffice: "Karachi", country: "Pakistan", timezone: "Asia/Karachi" },
@@ -190,7 +187,6 @@ const INITIAL_STATE: AppState = {
   audienceSegments: [],
   commAutomationRules: [],
   deliveryLogs: [],
-  tasks: []
 };
 
 class DB {
@@ -296,7 +292,7 @@ class DB {
     this.notify();
   }
 
-  // Common registry update methods
+  // Registry update methods
   async updateSettings(s: SystemSettings) { this.state.settings = s; await this.commit(); }
   async addUser(u: Partial<ISPUser>) { 
     const newUser = { id: 'USR-'+Date.now(), connectionId: 'NR-'+Math.floor(10000+Math.random()*90000), balance: 0, creditScore: 600, referralPoints: 0, activationCount: 0, portalEnabled: true, connectionType: 'Fiber', activityLog: [], ...u }; 
@@ -305,10 +301,10 @@ class DB {
   async updateUser(id: string, d: any) { 
     const idx = this.state.users.findIndex(u => u.id === id);
     if (idx !== -1) { this.state.users[idx] = { ...this.state.users[idx], ...d }; await this.commit(); return { success: true }; }
-    return { success: false };
+    return { success: false, message: 'Node not found' };
   }
 
-  // Fix: Added missing markNotificationRead method
+  // Mandatory registry logic
   async markNotificationRead(id: string) {
     const idx = this.state.notifications.findIndex(n => n.id === id);
     if (idx !== -1) {
@@ -317,7 +313,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing markAllNotificationsRead method
   async markAllNotificationsRead(targetId: string, audience: string) {
     this.state.notifications.forEach(n => {
       if (n.audience === audience && (n.targetId === targetId || n.targetId === 'all')) {
@@ -327,7 +322,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing logNotification method
   logNotification(targetId: string, type: 'success' | 'warning' | 'info' | 'error', title: string, message: string, audience: NotificationAudience = 'subscriber') {
     const n: SystemNotification = {
       id: 'NTF-' + Date.now() + Math.random().toString(36).substr(2, 4),
@@ -345,7 +339,6 @@ class DB {
     this.commit();
   }
 
-  // Fix: Added missing clearNotifications method
   async clearNotifications(targetId: string, audience: string) {
     this.state.notifications = this.state.notifications.filter(n => 
       !(n.audience === audience && (n.targetId === targetId || n.targetId === 'all'))
@@ -353,7 +346,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing auditOverdueLoads method
   async auditOverdueLoads() {
     const now = new Date();
     this.state.emergencyLoads.forEach(l => {
@@ -374,10 +366,9 @@ class DB {
     }
     this.state.ledger.push({ id: 'TOP_'+Date.now(), userId: target, amount, type: LedgerType.CREDIT, timestamp: new Date().toISOString(), description: 'Admin Refill', method: 'Registry Direct', balanceAfter: 0 });
     await this.commit();
-    return { success: true };
+    return { success: true, message: 'Node refill successful' };
   }
 
-  // Fix: Added missing addManualPayment method
   async addManualPayment(userId: string, amount: number, method: PaymentMethod) {
     const id = 'PAY-' + Date.now();
     const p: PaymentRecord = {
@@ -415,7 +406,6 @@ class DB {
     return { success: true };
   }
 
-  // Fix: Added missing activatePackage method
   async activatePackage(userId: string, packageId: string) {
     const userIdx = this.state.users.findIndex(u => u.id === userId);
     if (userIdx !== -1) {
@@ -423,10 +413,11 @@ class DB {
       this.state.users[userIdx].status = UserStatus.ACTIVE;
       this.state.users[userIdx].expiryDate = new Date(Date.now() + 30 * 86400000).toISOString();
       await this.commit();
+      return { success: true };
     }
+    return { success: false, message: 'Node not found' };
   }
 
-  // Fix: Added missing updateCustomerPassword method
   async updateCustomerPassword(id: string, pass: string) {
     const idx = this.state.users.findIndex(u => u.id === id || u.connectionId === id);
     if (idx !== -1) {
@@ -438,13 +429,11 @@ class DB {
     return { success: false, message: 'Subscriber not found' };
   }
 
-  // Fix: Added missing bulkDeleteUsers method
   async bulkDeleteUsers(ids: string[]) {
     this.state.users = this.state.users.filter(u => !ids.includes(u.id));
     await this.commit();
   }
 
-  // Fix: Added missing bulkSetAccountStatus method
   async bulkSetAccountStatus(ids: string[], status: UserStatus, details: string) {
     this.state.users.forEach(u => {
       if (ids.includes(u.id)) {
@@ -457,7 +446,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing bulkForcePasswordReset method
   async bulkForcePasswordReset(ids: string[]) {
     this.state.users.forEach(u => {
       if (ids.includes(u.id)) u.mustChangePassword = true;
@@ -465,7 +453,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing bulkActivatePackages method
   async bulkActivatePackages(ids: string[], packageId: string) {
     for (const id of ids) {
       await this.activatePackage(id, packageId);
@@ -473,7 +460,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing clearStaffCollections method
   async clearStaffCollections(email: string) {
     this.state.payments.forEach(p => {
       if (p.collectorEmail === email && p.status === 'Approved') {
@@ -483,7 +469,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing approvePayment method
   async approvePayment(id: string) {
     const idx = this.state.payments.findIndex(p => p.id === id);
     if (idx !== -1) {
@@ -497,7 +482,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing updatePackage method
   async updatePackage(id: string, d: Partial<Package>) {
     const idx = this.state.packages.findIndex(p => p.id === id);
     if (idx !== -1) {
@@ -508,7 +492,6 @@ class DB {
     return { success: false };
   }
 
-  // Fix: Added missing addPackage method
   async addPackage(p: Partial<Package>) {
     const newPkg = { id: 'PKG-' + Date.now(), ...p } as Package;
     this.state.packages.push(newPkg);
@@ -516,7 +499,6 @@ class DB {
     return { success: true, package: newPkg };
   }
 
-  // Fix: Added missing archiveMonth method
   async archiveMonth(month: string) {
     const invoices = this.state.invoices.filter(i => i.createdAt.startsWith(month));
     const payments = this.state.payments.filter(p => p.timestamp.startsWith(month));
@@ -529,10 +511,9 @@ class DB {
     };
     this.state.archives.push(archive);
     await this.commit();
-    return { success: true };
+    return { success: true, message: 'Month archived successfully' };
   }
 
-  // Fix: Added missing updateStaff method
   async updateStaff(email: string, d: Partial<StaffUser>) {
     const idx = this.state.staff.findIndex(s => s.email === email);
     if (idx !== -1) {
@@ -543,14 +524,12 @@ class DB {
     return { success: false };
   }
 
-  // Fix: Added missing addStaff method
   async addStaff(s: StaffUser) {
     this.state.staff.push(s);
     await this.commit();
     return { success: true };
   }
 
-  // Fix: Added missing updateModulePermission method
   async updateModulePermission(moduleId: string, updates: any) {
     const idx = this.state.permissions.findIndex(p => p.id === moduleId);
     if (idx !== -1) {
@@ -561,7 +540,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing addRole method
   async addRole(role: string) {
     if (!this.state.roles.includes(role)) {
       this.state.roles.push(role);
@@ -569,19 +547,16 @@ class DB {
     }
   }
 
-  // Fix: Added missing deleteRole method
   async deleteRole(role: string) {
     this.state.roles = this.state.roles.filter(r => r !== role);
     await this.commit();
   }
 
-  // Fix: Added missing updateAIKeys method
   async updateAIKeys(keys: AIKeysConfig) {
     this.state.settings.aiConfig.aiKeys = keys;
     await this.commit();
   }
 
-  // Fix: Added missing exportVault method
   async exportVault() {
     const data = JSON.stringify(this.state, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
@@ -592,7 +567,6 @@ class DB {
     link.click();
   }
 
-  // Fix: Added missing addDealerLoad method
   async addDealerLoad(email: string, amount: number, mode: string, dueDate: string) {
     const idx = this.state.staff.findIndex(s => s.email === email);
     if (idx !== -1) {
@@ -611,7 +585,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing generateAdHocInvoice method
   async generateAdHocInvoice(userId: string, packageId: string, totalAmount: number, items: LineItem[]) {
     const user = this.state.users.find(u => u.id === userId);
     if (!user) return null;
@@ -640,13 +613,11 @@ class DB {
     return inv;
   }
 
-  // Fix: Added missing sendInvoiceEmail method
   async sendInvoiceEmail(invoiceId: string) {
     console.log(`Simulating email dispatch for ${invoiceId}`);
     return true;
   }
 
-  // Fix: Added missing markVerificationSuccessShown method
   async markVerificationSuccessShown(userId: string) {
     const idx = this.state.users.findIndex(u => u.id === userId);
     if (idx !== -1) {
@@ -655,7 +626,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing approveSignup method
   async approveSignup(id: string) {
     const idx = this.state.signupRequests.findIndex(r => r.id === id);
     if (idx !== -1) {
@@ -675,7 +645,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing updateAppSection method
   async updateAppSection(section: AppSection) {
     const idx = this.state.settings.appearance.sections.findIndex(s => s.id === section.id);
     if (idx !== -1) {
@@ -684,7 +653,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing impersonateUser method
   async impersonateUser(userId: string) {
     const user = this.state.users.find(u => u.id === userId);
     if (user) {
@@ -695,7 +663,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing toggleDirectoryView method
   async toggleDirectoryView(pageId: string, show: boolean) {
     const idx = this.state.settings.appearance.appPages.findIndex(p => p.id === pageId);
     if (idx !== -1) {
@@ -704,7 +671,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing toggleAppPage method
   async toggleAppPage(pageId: string, enabled: boolean) {
     const idx = this.state.settings.appearance.appPages.findIndex(p => p.id === pageId);
     if (idx !== -1) {
@@ -713,7 +679,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing approvePackageRequest method
   async approvePackageRequest(id: string) {
     const idx = this.state.packageRequests.findIndex(r => r.id === id);
     if (idx !== -1) {
@@ -721,19 +686,21 @@ class DB {
       req.status = 'Approved';
       await this.activatePackage(req.userId, req.packageId);
       await this.commit();
+      return { success: true };
     }
+    return { success: false, message: 'Request not found' };
   }
 
-  // Fix: Added missing rejectPackageRequest method
   async rejectPackageRequest(id: string) {
     const idx = this.state.packageRequests.findIndex(r => r.id === id);
     if (idx !== -1) {
       this.state.packageRequests[idx].status = 'Rejected';
       await this.commit();
+      return { success: true };
     }
+    return { success: false, message: 'Request not found' };
   }
 
-  // Fix: Added missing approveTopupRequest method
   async approveTopupRequest(id: string) {
     const idx = this.state.topupRequests.findIndex(r => r.id === id);
     if (idx !== -1) {
@@ -741,19 +708,21 @@ class DB {
       req.status = 'Approved';
       await this.processTopup('Admin', req.userId, 'user', req.amount);
       await this.commit();
+      return { success: true };
     }
+    return { success: false, message: 'Request not found' };
   }
 
-  // Fix: Added missing rejectTopupRequest method
   async rejectTopupRequest(id: string) {
     const idx = this.state.topupRequests.findIndex(r => r.id === id);
     if (idx !== -1) {
       this.state.topupRequests[idx].status = 'Rejected';
       await this.commit();
+      return { success: true };
     }
+    return { success: false, message: 'Request not found' };
   }
 
-  // Fix: Added missing updateEmergencyLoad method
   async updateEmergencyLoad(id: string, d: Partial<EmergencyLoad>) {
     const idx = this.state.emergencyLoads.findIndex(l => l.id === id);
     if (idx !== -1) {
@@ -762,7 +731,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing extendEmergencyLoad method
   async extendEmergencyLoad(id: string, days: number, reason: string) {
     const idx = this.state.emergencyLoads.findIndex(l => l.id === id);
     if (idx !== -1) {
@@ -786,7 +754,6 @@ class DB {
     return { success: false };
   }
 
-  // Fix: Added missing clearEmergencyLoadManually method
   async clearEmergencyLoadManually(id: string) {
     const idx = this.state.emergencyLoads.findIndex(l => l.id === id);
     if (idx !== -1) {
@@ -794,10 +761,11 @@ class DB {
       this.state.emergencyLoads[idx].repaid = true;
       this.state.emergencyLoads[idx].settledAt = new Date().toISOString();
       await this.commit();
+      return { success: true };
     }
+    return { success: false };
   }
 
-  // Fix: Added missing getPendingUniversalRequest method
   getPendingUniversalRequest(userId: string) {
     const pkgReq = this.state.packageRequests.find(r => r.userId === userId && r.status === 'Pending');
     if (pkgReq) return { ...pkgReq, type: 'package' };
@@ -811,7 +779,6 @@ class DB {
     return null;
   }
 
-  // Fix: Added missing cancelUniversalRequest method
   async cancelUniversalRequest(id: string) {
     this.state.packageRequests = this.state.packageRequests.filter(r => r.id !== id);
     this.state.topupRequests = this.state.topupRequests.filter(r => r.id !== id);
@@ -819,18 +786,16 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing updateSubscriberProfile method
   async updateSubscriberProfile(userId: string, d: any) {
     const idx = this.state.users.findIndex(u => u.id === userId);
     if (idx !== -1) {
       this.state.users[idx] = { ...this.state.users[idx], ...d };
       await this.commit();
-      return { success: true };
+      return { success: true, message: 'Profile updated' };
     }
-    return { success: false };
+    return { success: false, message: 'Node not found' };
   }
 
-  // Fix: Added missing submitTicket method
   async submitTicket(data: any) {
     const ticket: SupportTicket = {
       id: 'TCK-' + Date.now(),
@@ -846,14 +811,12 @@ class DB {
     return { success: true };
   }
 
-  // Fix: Added missing submitTopupRequest method
   async submitTopupRequest(data: any) {
     const req = { id: 'TP-' + Date.now(), ...data, status: 'Pending', timestamp: new Date().toISOString(), requestType: 'Topup' };
     this.state.topupRequests.push(req);
     await this.commit();
   }
 
-  // Fix: Added missing convertPointsToWallet method
   async convertPointsToWallet(userId: string) {
     const idx = this.state.users.findIndex(u => u.id === userId);
     if (idx !== -1) {
@@ -867,7 +830,6 @@ class DB {
     return { success: false, message: 'User not found' };
   }
 
-  // Fix: Added missing settleEmergencyLoad method
   async settleEmergencyLoad(userId: string, method: PaymentMethod) {
     const idx = this.state.emergencyLoads.findIndex(l => l.userId === userId && !l.repaid);
     if (idx !== -1) {
@@ -881,7 +843,6 @@ class DB {
     return { success: false, message: 'No active rescue load found' };
   }
 
-  // Fix: Added missing requestEmergencyLoad method
   async requestEmergencyLoad(userId: string, packageId?: string) {
     const user = this.state.users.find(u => u.id === userId);
     if (!user) return { success: false, message: 'User not found' };
@@ -906,7 +867,6 @@ class DB {
     return { success: true };
   }
 
-  // Fix: Added missing submitUniversalActivation method
   async submitUniversalActivation(userId: string, packageId: string, method: PaymentMethod) {
     const user = this.state.users.find(u => u.id === userId);
     if (!user) return { success: false, message: 'User not found' };
@@ -927,13 +887,11 @@ class DB {
     return { success: true };
   }
 
-  // Fix: Added missing updateAIConfig method
   async updateAIConfig(c: AIConfig) {
     this.state.settings.aiConfig = c;
     await this.commit();
   }
 
-  // Fix: Added missing updateGatewayConfig method
   async updateGatewayConfig(id: string, updates: any) {
     const idx = this.state.settings.paymentGateways.findIndex(g => g.id === id);
     if (idx !== -1) {
@@ -942,7 +900,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing adjustScoreManually method
   async adjustScoreManually(userId: string, delta: number, reason: string, adminEmail: string) {
     const idx = this.state.users.findIndex(u => u.id === userId);
     if (idx !== -1) {
@@ -962,12 +919,10 @@ class DB {
     }
   }
 
-  // Fix: Added missing resetScoreManually method
   async resetScoreManually(userId: string, adminEmail: string) {
     await this.adjustScoreManually(userId, 600 - (this.state.users.find(u => u.id === userId)?.creditScore || 600), "System Default Reset", adminEmail);
   }
 
-  // Fix: Added missing submitWithdrawalRequest method
   async submitWithdrawalRequest(userId: string) {
     const user = this.state.users.find(u => u.id === userId);
     if (!user) return { success: false, message: 'User not found' };
@@ -988,7 +943,6 @@ class DB {
     return { success: true };
   }
 
-  // Fix: Added missing updateConnectionDetails method
   async updateConnectionDetails(userId: string, updates: any) {
     const idx = this.state.users.findIndex(u => u.id === userId);
     if (idx !== -1) {
@@ -997,7 +951,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing updateTicketStatus method
   async updateTicketStatus(id: string, status: TicketStatus) {
     const idx = this.state.tickets.findIndex(t => t.id === id);
     if (idx !== -1) {
@@ -1007,7 +960,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing assignTicket method
   async assignTicket(id: string, email: string) {
     const idx = this.state.tickets.findIndex(t => t.id === id);
     if (idx !== -1) {
@@ -1017,7 +969,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing addTicketComment method
   async addTicketComment(id: string, text: string, isInternal: boolean) {
     const idx = this.state.tickets.findIndex(t => t.id === id);
     if (idx !== -1) {
@@ -1036,7 +987,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing addNOCEvent method
   async addNOCEvent(data: Partial<NOCEvent>) {
     const event: NOCEvent = {
       id: 'NOC-' + Date.now(),
@@ -1051,7 +1001,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing resolveNOCEvent method
   async resolveNOCEvent(id: string) {
     const idx = this.state.nocEvents.findIndex(e => e.id === id);
     if (idx !== -1) {
@@ -1061,7 +1010,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing addTask method
   async addTask(text: string, priority: string, assignedTo?: string, dueDate?: string) {
     const task: InternalTask = {
       id: 'TSK-' + Date.now(),
@@ -1076,7 +1024,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing toggleTask method
   async toggleTask(id: string) {
     const idx = this.state.tasks.findIndex(t => t.id === id);
     if (idx !== -1) {
@@ -1085,19 +1032,16 @@ class DB {
     }
   }
 
-  // Fix: Added missing deleteTask method
   async deleteTask(id: string) {
     this.state.tasks = this.state.tasks.filter(t => t.id !== id);
     await this.commit();
   }
 
-  // Fix: Added missing reorderTasks method
   async reorderTasks(tasks: InternalTask[]) {
     this.state.tasks = tasks.map((t, i) => ({ ...t, order: i }));
     await this.commit();
   }
 
-  // Fix: Added missing approvePasswordRequest method
   async approvePasswordRequest(id: string) {
     const idx = this.state.passwordRequests.findIndex(r => r.id === id);
     if (idx !== -1) {
@@ -1106,7 +1050,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing rejectPasswordRequest method
   async rejectPasswordRequest(id: string) {
     const idx = this.state.passwordRequests.findIndex(r => r.id === id);
     if (idx !== -1) {
@@ -1115,7 +1058,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing approveUnifiedRequest method
   async approveUnifiedRequest(id: string, type: string) {
     if (type === 'package') return this.approvePackageRequest(id);
     if (type === 'topup') return this.approveTopupRequest(id);
@@ -1130,7 +1072,6 @@ class DB {
     return { success: false, message: 'Node type invalid' };
   }
 
-  // Fix: Added missing rejectUnifiedRequest method
   async rejectUnifiedRequest(id: string, type: string, reason: string) {
     if (type === 'package') return this.rejectPackageRequest(id);
     if (type === 'topup') return this.rejectTopupRequest(id);
@@ -1145,7 +1086,6 @@ class DB {
     return { success: false, message: 'Node type invalid' };
   }
 
-  // Fix: Added missing markWelcomeComplete method
   async markWelcomeComplete(userId: string) {
     const idx = this.state.users.findIndex(u => u.id === userId);
     if (idx !== -1) {
@@ -1154,7 +1094,6 @@ class DB {
     }
   }
 
-  // Fix: Added missing submitKYC method
   async submitKYC(userId: string, type: string, fileUrl: string) {
     const idx = this.state.users.findIndex(u => u.id === userId);
     if (idx !== -1) {
@@ -1166,13 +1105,11 @@ class DB {
     }
   }
 
-  // Fix: Added missing updateAICallConfig method
   async updateAICallConfig(c: AICallConfig) {
     this.state.settings.aiCallConfig = c;
     await this.commit();
   }
 
-  // Fix: Added missing addCallLog method
   async addCallLog(log: Partial<AICallLog>) {
     const call: AICallLog = {
       id: 'CAL-' + Date.now(),
@@ -1182,7 +1119,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing payInvoiceWithWallet method
   async payInvoiceWithWallet(invoiceId: string) {
     const invIdx = this.state.invoices.findIndex(i => i.id === invoiceId);
     if (invIdx === -1) return { success: false, message: 'Invoice not found' };
@@ -1213,19 +1149,11 @@ class DB {
     return { success: true };
   }
 
-  // Fix: Added missing toggleAIKillSwitch method
   async toggleAIKillSwitch(active: boolean) {
     this.state.settings.aiConfig.killSwitchActive = active;
     await this.commit();
   }
 
-  // Fix: Added missing updateAIKeys method
-  async updateAIKeys(keys: AIKeysConfig) {
-    this.state.settings.aiConfig.aiKeys = keys;
-    await this.commit();
-  }
-
-  // Fix: Added missing saveEmailCampaign method
   async saveEmailCampaign(data: Partial<EmailCampaign>) {
     if (data.id) {
       const idx = this.state.emailCampaigns.findIndex(c => c.id === data.id);
@@ -1240,7 +1168,6 @@ class DB {
     await this.commit();
   }
 
-  // Fix: Added missing sendCampaign method
   async sendCampaign(id: string) {
     const idx = this.state.emailCampaigns.findIndex(c => c.id === id);
     if (idx !== -1) {
@@ -1250,35 +1177,179 @@ class DB {
     }
   }
 
-  // Fix: Added missing saveAudienceSegment method
   async saveAudienceSegment(data: Partial<AudienceSegment>) {
     if (data.id) {
       const idx = this.state.audienceSegments.findIndex(s => s.id === data.id);
-      if (idx !== -1) this.state.audienceSegments[idx] = { ...this.state.audienceSegments[idx], ...data } as AudienceSegment;
+      if (idx !== -1) { this.state.audienceSegments[idx] = { ...this.state.audienceSegments[idx], ...data } as AudienceSegment; }
     } else {
       this.state.audienceSegments.push({ id: 'SEG-' + Date.now(), subscriberCount: 0, ...data } as AudienceSegment);
     }
     await this.commit();
   }
 
-  // Fix: Added missing saveCommRule method
   async saveCommRule(data: Partial<CommunicationAutomationRule>) {
     if (data.id) {
       const idx = this.state.commAutomationRules.findIndex(r => r.id === data.id);
-      if (idx !== -1) this.state.commAutomationRules[idx] = { ...this.state.commAutomationRules[idx], ...data } as CommunicationAutomationRule;
+      if (idx !== -1) { this.state.commAutomationRules[idx] = { ...this.state.commAutomationRules[idx], ...data } as CommunicationAutomationRule; }
     } else {
       this.state.commAutomationRules.push({ id: 'RULE-' + Date.now(), ...data } as CommunicationAutomationRule);
     }
     await this.commit();
   }
 
-  // Fix: Added missing testSMTPHandshake method
   async testSMTPHandshake(config: any) { return { success: true, message: 'SMTP Node Handshake Verified.' }; }
-  
-  // Fix: Added missing sendTestEmail method
   async sendTestEmail(config: any, data: any) { return { success: true, message: 'Dispatch Pulse Verified.' }; }
 
-  // Mandatory interfaces for system health
+  // Registry maintenance methods
+  async submitSignupRequest(data: any) {
+    const id = 'SRQ-' + Date.now();
+    this.state.signupRequests.push({ id, ...data, status: 'Pending', timestamp: new Date().toISOString() });
+    await this.commit();
+    return { success: true };
+  }
+
+  async cancelTopupRequest(id: string) {
+    this.state.topupRequests = this.state.topupRequests.filter(r => r.id !== id);
+    await this.commit();
+  }
+
+  getMappingForUser(userId: string) {
+    return this.state.networkMappings.find(m => m.userId === userId);
+  }
+
+  async saveMapping(m: NetworkMapping) {
+    const idx = this.state.networkMappings.findIndex(map => map.userId === m.userId);
+    if (idx !== -1) this.state.networkMappings[idx] = m;
+    else this.state.networkMappings.push(m);
+    await this.commit();
+  }
+
+  getLiveUsage(userId: string) {
+    const isMapped = this.getMappingForUser(userId)?.configured;
+    if (!isMapped) return { offline: true };
+    return {
+      down: (Math.random() * 50 + 10).toFixed(2),
+      up: (Math.random() * 20 + 5).toFixed(2),
+      ping: Math.floor(Math.random() * 20 + 5),
+      usageToday: (Math.random() * 5 + 1).toFixed(2),
+      usageMonth: (Math.random() * 100 + 50).toFixed(2),
+      offline: false
+    };
+  }
+
+  getConnectedDevices(userId: string) {
+    return [
+      { id: 'dev-1', name: 'Primary iPhone', ip: '192.168.1.5', mac: 'E4:A1:7F:C2:01', signal: -45, usageToday: 1.2, duration: '4h 12m', isBlocked: false },
+      { id: 'dev-2', name: 'Smart TV Node', ip: '192.168.1.12', mac: 'E4:A1:7F:C2:08', signal: -62, usageToday: 4.5, duration: '12h 05m', isBlocked: false }
+    ];
+  }
+
+  async blockDevice(userId: string, deviceId: string) {
+    await new Promise(r => setTimeout(r, 500));
+    return { success: true };
+  }
+
+  async renameDevice(userId: string, deviceId: string, name: string) {
+    await new Promise(r => setTimeout(r, 500));
+    return { success: true };
+  }
+
+  async submitWifiPasswordRequest(userId: string, newPassword: string) {
+    const user = this.state.users.find(u => u.id === userId);
+    const mapping = this.getMappingForUser(userId);
+    if (!user || !mapping) return { success: false };
+    
+    const req: PasswordResetRequest = {
+      id: 'PWR-' + Date.now(),
+      userId,
+      userName: user.name,
+      connectionType: user.connectionType,
+      ssid: mapping.ssidName || 'My WiFi',
+      newPassword,
+      status: 'Pending',
+      timestamp: new Date().toISOString()
+    };
+    this.state.passwordRequests.push(req);
+    await this.commit();
+    return { success: true };
+  }
+
+  async addNetworkNode(node: Partial<NetworkNode>) {
+    const newNode = { id: 'NODE-' + Date.now(), status: 'Connected', lastHeartbeat: new Date().toISOString(), ...node } as NetworkNode;
+    this.state.networkNodes.push(newNode);
+    await this.commit();
+    return { success: true };
+  }
+
+  async testNodeConnection(nodeId: string) {
+    await new Promise(r => setTimeout(r, 1000));
+    return { success: true, message: 'Node Handshake Verified' };
+  }
+
+  async addDevice(d: Partial<Device>) {
+    const newDev = { id: 'DEV-' + Date.now(), status: 'Connected', lastSeen: new Date().toISOString(), ...d } as Device;
+    this.state.devices.push(newDev);
+    await this.commit();
+    return { success: true };
+  }
+
+  async updateDevice(id: string, d: Partial<Device>) {
+    const idx = this.state.devices.findIndex(dev => dev.id === id);
+    if (idx !== -1) {
+      this.state.devices[idx] = { ...this.state.devices[idx], ...d };
+      await this.commit();
+    }
+  }
+
+  async deleteDevice(id: string) {
+    this.state.devices = this.state.devices.filter(d => d.id !== id);
+    await this.commit();
+  }
+
+  async testDeviceConnection(id: string) {
+    await new Promise(r => setTimeout(r, 1000));
+    return { success: true, message: 'Hardware Registry Synced' };
+  }
+
+  async saveEmailTemplate(t: Partial<EmailTemplate>) {
+    if (t.id) {
+      const idx = this.state.emailTemplates.findIndex(tmpl => tmpl.id === t.id);
+      if (idx !== -1) this.state.emailTemplates[idx] = { ...this.state.emailTemplates[idx], ...t, lastUpdated: new Date().toISOString() } as EmailTemplate;
+    } else {
+      this.state.emailTemplates.push({ id: 'TMPL-' + Date.now(), lastUpdated: new Date().toISOString(), ...t } as EmailTemplate);
+    }
+    await this.commit();
+  }
+
+  async deleteEmailTemplate(id: string) {
+    this.state.emailTemplates = this.state.emailTemplates.filter(t => t.id !== id);
+    await this.commit();
+  }
+
+  async sendPushNotification(targetId: string, payload: string, priority: string) {
+    this.logNotification(targetId, priority === 'critical' ? 'error' : 'info', 'Push Dispatch', payload);
+    return { success: true };
+  }
+
+  async addSenderIdentity(i: Partial<SenderIdentity>) {
+    const newIdent = { id: 'SDR-' + Date.now(), isVerified: false, isDefault: false, createdAt: new Date().toISOString(), ...i } as SenderIdentity;
+    this.state.settings.commConfig.senderIdentities.push(newIdent);
+    await this.commit();
+  }
+
+  async verifySenderIdentity(id: string) {
+    const idx = this.state.settings.commConfig.senderIdentities.findIndex(i => i.id === id);
+    if (idx !== -1) {
+      this.state.settings.commConfig.senderIdentities[idx].isVerified = true;
+      await this.commit();
+    }
+  }
+
+  async deleteSenderIdentity(id: string) {
+    this.state.settings.commConfig.senderIdentities = this.state.settings.commConfig.senderIdentities.filter(i => i.id !== id);
+    await this.commit();
+  }
+
   getHealth(): DBHealth { 
     return { 
       documentSize: JSON.stringify(this.state).length, 
