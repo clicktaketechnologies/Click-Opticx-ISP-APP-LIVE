@@ -43,7 +43,6 @@ import AdminLiveMonitoring from './pages/AdminLiveMonitoring';
 import AdminPasswordRequests from './pages/AdminPasswordRequests';
 import DeviceManagement from './pages/DeviceManagement';
 import UserDeviceMapping from './pages/UserDeviceMapping';
-import MasterApprovalDashboard from './pages/MasterApprovalDashboard';
 import AdminProfile from './pages/AdminProfile';
 import AIControlPlane from './pages/AIControlPlane';
 import AICallingAdmin from './pages/AICallingAdmin';
@@ -57,6 +56,8 @@ import AudienceSegments from './pages/comm/AudienceSegments';
 import DeliveryLogs from './pages/comm/DeliveryLogs';
 import CommunicationSettingsPage from './pages/comm/CommunicationSettings';
 import SenderIdentities from './pages/comm/SenderIdentities';
+// Import missing MasterApprovalDashboard
+import MasterApprovalDashboard from './pages/MasterApprovalDashboard';
 import { Loader2, ShieldAlert, LogOut, Cloud, X, Zap, ShieldCheck } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -114,7 +115,7 @@ const App: React.FC = () => {
       <>
         {dbState.isImpersonating && (
           <div className="fixed top-0 inset-x-0 bg-rose-600 text-white p-3 z-[1000] flex items-center justify-between shadow-2xl animate-in slide-in-from-top duration-500">
-             <div className="flex items-center gap-3"><ShieldAlert size={20} className="animate-pulse" /><p className="text-[10px] font-black uppercase tracking-widest">Admin View Active: Viewing as {authState.name}</p></div>
+             <div className="flex items-center gap-3"><ShieldAlert size={20} className="animate-pulse" /><p className="text-[10px] font-black uppercase tracking-widest">Admin View Active: {authState.name}</p></div>
              <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-lg text-[9px] font-black uppercase"><LogOut size={12} /> Exit</button>
           </div>
         )}
@@ -125,10 +126,10 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50 overflow-hidden">
+    <div className="flex min-h-screen bg-slate-50">
       {criticalAlert && (
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[3000] flex items-center justify-center p-6">
-           <div className="bg-white rounded-[3.5rem] w-full max-lg shadow-2xl overflow-hidden border-[8px] border-rose-500 animate-in zoom-in duration-300">
+           <div className="bg-white rounded-[2.5rem] w-full max-lg shadow-2xl overflow-hidden border-[8px] border-rose-500 animate-in zoom-in duration-300">
               <div className="p-10 text-center space-y-8">
                  <div className="w-24 h-24 bg-rose-600 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-pulse"><ShieldAlert size={56} strokeWidth={3}/></div>
                  <div className="space-y-3"><h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">{criticalAlert.title}</h3><p className="text-[11px] text-slate-500 font-bold uppercase tracking-[0.2em] leading-relaxed px-4">{criticalAlert.message}</p></div>
@@ -140,9 +141,9 @@ const App: React.FC = () => {
 
       {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
       <Sidebar current={currentPage} onNavigate={navigateTo} role={authState.role} onLogout={handleLogout} isOpen={isSidebarOpen} businessName={dbState.settings.branding.businessName} />
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0">
         <Header user={authState as any} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onProfileClick={() => navigateTo('admin-profile')} onLogout={handleLogout} />
-        <main className="p-4 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
+        <main className="p-4 md:p-8 flex-1 overflow-x-hidden">
            {(() => {
               switch (currentPage) {
                 case 'dashboard': return <Dashboard state={dbState} />;
@@ -185,7 +186,6 @@ const App: React.FC = () => {
                 case 'admin-device-mapping': return <UserDeviceMapping state={dbState} />;
                 case 'admin-profile': return <AdminProfile state={dbState} />;
                 case 'tasks': return <TaskManagement state={dbState} />;
-                // Communication Hub
                 case 'comm-campaigns': return <EmailCampaigns state={dbState} />;
                 case 'comm-templates': return <EmailTemplates state={dbState} />;
                 case 'comm-rules': return <AutomationRules state={dbState} />;

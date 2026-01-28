@@ -100,7 +100,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    };
 
    const renderLogin = () => (
-      <form onSubmit={handleLogin} className="space-y-6 animate-in fade-in duration-500">
+      <form onSubmit={handleLogin} className="space-y-6 animate-in fade-in duration-500" autoComplete="off">
          <div className="space-y-1.5">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email or Username</label>
             <div className="relative group">
@@ -112,6 +112,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   className="w-full pl-12 pr-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold text-slate-800"
                   placeholder="e.g. john@example.com"
                   required
+                  autoComplete="username"
                />
             </div>
          </div>
@@ -121,6 +122,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             value={password}
             onChange={setPassword}
             required
+            autoComplete="current-password"
          />
 
          <div className="flex items-center justify-between px-1">
@@ -176,12 +178,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                onChange={(v) => setSignupData({ ...signupData, password: v })}
                showStrength
                className="md:col-span-1"
+               autoComplete="new-password"
             />
             <PasswordInput
                label="Confirm Password"
                value={signupData.confirmPassword}
                onChange={(v) => setSignupData({ ...signupData, confirmPassword: v })}
                className="md:col-span-1"
+               autoComplete="new-password"
             />
          </div>
 
@@ -191,7 +195,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          </div>
 
          <div className="flex items-start gap-3 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl">
-            <input type="checkbox" required className="mt-1 w-4 h-4 accent-indigo-600 rounded" />
+            <input type="checkbox" required className="mt-1 w-4 h-4 accent-indigo-600 rounded shrink-0" />
             <div className="text-[8px] font-bold text-indigo-700 uppercase leading-relaxed">
                I agree to the
                <button type="button" onClick={() => setShowLegalModal('agreement')} className="mx-1 text-indigo-900 underline font-black">Service Agreement</button>
@@ -216,8 +220,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const renderResetRequest = () => (
       <form onSubmit={handleResetRequest} className="space-y-8 animate-in zoom-in duration-300">
          <div className="text-center space-y-4">
-            <div className="w-20 h-20 bg-amber-50 text-amber-600 rounded-[2rem] flex items-center justify-center mx-auto border-4 border-amber-100 shadow-xl">
-               <Key size={32} />
+            <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto border-4 border-amber-100 shadow-xl">
+               <Key size={28} />
             </div>
             <div className="space-y-1">
                <h3 className="text-xl font-black uppercase italic tracking-tighter text-slate-900">Reset Password</h3>
@@ -226,10 +230,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          </div>
 
          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email or Username</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Email or Username</label>
             <input
                type="text"
-               className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl font-black outline-none focus:border-amber-500 transition-all text-center uppercase tracking-tighter"
+               className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black outline-none focus:border-amber-500 transition-all text-center uppercase tracking-tighter"
                placeholder="Account Email or ID"
                value={resetIdentifier}
                onChange={e => setResetIdentifier(e.target.value)}
@@ -252,7 +256,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const renderResetFinalize = () => (
       <form onSubmit={handleResetFinalize} className="space-y-8 animate-in slide-in-from-right duration-500">
          <div className="p-6 bg-emerald-50 border-2 border-emerald-100 rounded-[2.5rem] flex items-start gap-4">
-            <CheckCircle size={24} className="text-emerald-500 shrink-0" />
+            <CheckCircle size={24} className="text-emerald-500 shrink-0 mt-0.5" />
             <p className="text-[9px] text-emerald-800 font-bold uppercase leading-relaxed">Reset code sent. Please check your email or mobile for the verification token.</p>
          </div>
 
@@ -268,6 +272,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                onChange={setNewPassword}
                showStrength
                required
+               autoComplete="new-password"
             />
          </div>
 
@@ -285,16 +290,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    if (view === 'pending') {
       return (
          <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-            <div className="max-w-md w-full bg-white rounded-[4rem] shadow-2xl p-12 text-center space-y-10 animate-in zoom-in duration-500 border border-slate-100">
-               <div className="w-28 h-28 bg-emerald-50 text-emerald-600 rounded-[3rem] flex items-center justify-center mx-auto shadow-inner border-4 border-emerald-100 relative">
-                  <Clock size={56} className="animate-spin-slow" />
-                  <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                     <MapPin size={24} className="text-rose-500" />
+            <div className="max-w-md w-full bg-white rounded-[3.5rem] sm:rounded-[4rem] shadow-2xl p-8 sm:p-12 text-center space-y-10 animate-in zoom-in duration-500 border border-slate-100">
+               <div className="w-24 h-24 sm:w-28 sm:h-28 bg-emerald-50 text-emerald-600 rounded-[2.5rem] sm:rounded-[3rem] flex items-center justify-center mx-auto shadow-inner border-4 border-emerald-100 relative">
+                  <Clock size={48} className="animate-spin-slow sm:w-14 sm:h-14" />
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg">
+                     <MapPin size={18} className="text-rose-500 sm:w-6 sm:h-6" />
                   </div>
                </div>
                <div className="space-y-4">
-                  <h2 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">Under Review</h2>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed px-6">
+                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">Under Review</h2>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed px-4 sm:px-6">
                      Our team is currently verifying network availability at your location. We will notify you via SMS within 24 hours.
                   </p>
                </div>
@@ -316,20 +321,20 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    }
 
    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-         <div className="max-w-md w-full bg-white rounded-[3.5rem] shadow-2xl p-10 border border-slate-100 animate-in fade-in zoom-in duration-700 relative overflow-hidden flex flex-col h-fit">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 py-12">
+         <div className="max-w-md w-full bg-white rounded-[3rem] sm:rounded-[3.5rem] shadow-2xl p-8 sm:p-10 border border-slate-100 animate-in fade-in zoom-in duration-700 relative flex flex-col h-auto overflow-hidden">
 
             <div className="absolute top-4 right-8 flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600 z-10">
                <Cpu size={12} className="animate-pulse" />
                <span className="text-[8px] font-black uppercase tracking-widest">Portal v8.6</span>
             </div>
 
-            <div className="flex flex-col items-center mb-10 pt-4">
-               <div className="w-24 h-24 bg-slate-950 rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-8 border-4 border-white overflow-hidden p-3 transform hover:rotate-3 transition-transform">
-                  {displayLogo ? <img src={displayLogo} className="h-full object-contain" /> : <Signal className="text-emerald-400" size={48} />}
+            <div className="flex flex-col items-center mb-8 pt-4">
+               <div className="w-20 h-20 sm:w-24 sm:h-24 bg-slate-950 rounded-3xl sm:rounded-[2.5rem] flex items-center justify-center shadow-2xl mb-6 sm:mb-8 border-4 border-white overflow-hidden p-3 transform hover:rotate-3 transition-transform">
+                  {displayLogo ? <img src={displayLogo} className="h-full object-contain" /> : <Signal className="text-emerald-400" size={40} />}
                </div>
-               <h1 className="text-4xl font-black text-slate-950 tracking-tighter uppercase italic leading-none">{branding.businessName}</h1>
-               <p className="text-slate-400 mt-2 font-black text-[10px] uppercase tracking-[0.4em] italic opacity-80">
+               <h1 className="text-3xl sm:text-4xl font-black text-slate-950 tracking-tighter uppercase italic leading-none text-center px-2">{branding.businessName}</h1>
+               <p className="text-slate-400 mt-2 font-black text-[9px] sm:text-[10px] uppercase tracking-[0.4em] italic opacity-80 text-center">
                   {view === 'login' ? 'Welcome Back' :
                      view === 'signup' ? 'Join Our Network' :
                         'Account Recovery'}
@@ -337,9 +342,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
 
             {error && (
-               <div className="p-4 mb-8 bg-rose-50 border-2 border-rose-100 rounded-2xl flex items-start gap-4 text-rose-600 animate-in shake duration-500">
-                  <AlertCircle className="shrink-0 mt-0.5" size={20} />
-                  <p className="text-[10px] font-black uppercase leading-relaxed tracking-tight">{error}</p>
+               <div className="p-4 mb-6 bg-rose-50 border-2 border-rose-100 rounded-2xl flex items-start gap-3 text-rose-600 animate-in shake duration-500">
+                  <AlertCircle className="shrink-0 mt-0.5" size={18} />
+                  <p className="text-[9px] font-black uppercase leading-relaxed tracking-tight flex-1">{error}</p>
                </div>
             )}
 
@@ -352,26 +357,26 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          </div>
 
          {showLegalModal && (
-            <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[2000] flex items-center justify-center p-6 animate-in fade-in duration-300">
-               <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col max-h-[80vh]">
-                  <div className="p-8 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
-                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                           <Scale size={24} />
+            <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[2000] flex items-center justify-center p-4 animate-in fade-in duration-300">
+               <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-[6px] border-slate-50 animate-in zoom-in duration-300 flex flex-col max-h-[85vh]">
+                  <div className="p-6 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                           <Scale size={20} />
                         </div>
-                        <h3 className="text-xl font-black uppercase italic tracking-tighter">
+                        <h3 className="text-lg font-black uppercase italic tracking-tighter">
                            {showLegalModal === 'terms' ? 'Terms of Use' : 'Service Agreement'}
                         </h3>
                      </div>
-                     <button onClick={() => setShowLegalModal(null)} className="p-2 text-slate-400 hover:text-white transition-all"><X size={24} /></button>
+                     <button onClick={() => setShowLegalModal(null)} className="p-2 text-slate-400 hover:text-white transition-all"><X size={20} /></button>
                   </div>
-                  <div className="p-10 flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50">
-                     <p className="text-sm font-bold text-slate-700 leading-relaxed uppercase italic whitespace-pre-wrap">
+                  <div className="p-8 flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50">
+                     <p className="text-xs sm:text-sm font-bold text-slate-700 leading-relaxed uppercase italic whitespace-pre-wrap">
                         {showLegalModal === 'terms' ? legal.termsAndConditions : legal.serviceAgreement}
                      </p>
                   </div>
-                  <div className="p-8 bg-white border-t flex justify-center shrink-0">
-                     <button onClick={() => setShowLegalModal(null)} className="px-12 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all">I Accept</button>
+                  <div className="p-6 bg-white border-t flex justify-center shrink-0">
+                     <button onClick={() => setShowLegalModal(null)} className="w-full max-w-[200px] py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all">I Accept</button>
                   </div>
                </div>
             </div>

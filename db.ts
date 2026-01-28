@@ -11,7 +11,7 @@ import {
   ConnectedDevice, PasswordResetRequest, NetworkNode, AppPage, HomeCard,
   Device, NetworkMapping, KYCDocument, AIActionLog, AIConfig, AIEvent, AISuggestion,
   NotificationAudience, NotificationPriority, AICallConfig, AICallLog, AICallRule,
-  EmailCampaign, EmailTemplate, AudienceSegment, CommunicationAutomationRule, DeliveryLog, CommunicationSettings, SenderIdentity, PaymentGateway, AppSection, InfrastructureConfig, LegalConfig
+  EmailCampaign, EmailTemplate, AudienceSegment, CommunicationAutomationRule, DeliveryLog, CommunicationSettings, SenderIdentity, PaymentGateway, AppSection, InfrastructureConfig, LegalConfig, AITrainingPrompt
 } from './types';
 
 // Add missing types for monitoring
@@ -116,12 +116,10 @@ const INITIAL_APP_PAGES: AppPage[] = [
   { id: 'credit-score', label: 'Trust Score', icon: 'BarChart3', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
   { id: 'weather', label: 'Weather', icon: 'Cloud', category: 'Utility', enabled: true, showInDirectory: true, isDefault: false, swatch: '#0ea5e9' },
   { id: 'speed-test', label: 'Speed Test', icon: 'Gauge', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#6366f1' },
-  { id: 'referral', label: 'Invite Friends', icon: 'Gift', category: 'Core', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f43f5e' },
-  { id: 'news', label: 'Announcements', icon: 'Megaphone', category: 'Communication', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f97316' },
-  { id: 'connected-devices', label: 'My Devices', icon: 'Smartphone', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#6366f1' },
-  { id: 'about-us', label: 'About Provider', icon: 'Info', category: 'Core', enabled: true, showInDirectory: true, isDefault: false, swatch: '#64748b' },
   { id: 'connection', label: 'Connection', icon: 'Signal', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#4f46e5' },
   { id: 'reset-password', label: 'Reset Wifi', icon: 'Key', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
+  { id: 'news', label: 'Broadcasts', icon: 'Bell', category: 'Communication', enabled: true, showInDirectory: true, isDefault: false, swatch: '#ef4444' },
+  { id: 'referral', label: 'Refer & Earn', icon: 'Gift', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
   { id: 'legal', label: 'Legal Center', icon: 'ShieldCheck', category: 'Legal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#64748b' },
 ];
 
@@ -165,6 +163,10 @@ const INITIAL_STATE: AppState = {
   aiSuggestions: [],
   aiCallLogs: [],
   aiCallRules: [],
+  aiTrainingPrompts: [
+    { id: 'PR-1', query: 'Why is my net red?', expectedOutcome: 'Technical Handshake - Router Check', actualOutcome: 'General Outage Check', confidence: 0.52, timestamp: new Date().toISOString(), status: 'PENDING' },
+    { id: 'PR-2', query: 'Can I pay next week?', expectedOutcome: 'Offer Emergency Load', actualOutcome: 'Billing Status Explained', confidence: 0.61, timestamp: new Date().toISOString(), status: 'PENDING' }
+  ],
   emailCampaigns: [],
   emailTemplates: [
     { id: 'TMP-1', name: 'Payment Reminder', content: 'Dear {{user.name}}, your balance is {{user.balance}}. Please clear it.', category: 'Billing', lastUpdated: new Date().toISOString() },
@@ -216,7 +218,7 @@ const INITIAL_STATE: AppState = {
     whiteLabelMode: false,
     allowWifiReset: true,
     aiConfig: INITIAL_AI_CONFIG,
-    aiCallConfig: { enabled: true, voiceName: 'Zephyr', persona: 'Professional', language: 'English', speakingSpeed: 1.0, maxCallDuration: 300, officeHours: { start: '09:00', end: '21:00', enabled: true }, knowledgeBase: { outageScripts: '', billingPolicy: '', emergencyTerms: '' } },
+    aiCallConfig: { enabled: true, voiceName: 'Zephyr', persona: 'Professional', language: 'English', speakingSpeed: 1.0, maxCallDuration: 300, officeHours: { start: '09:00', end: '21:00', enabled: true }, knowledgeBase: { outageScripts: '', billingPolicy: '', emergencyTerms: '', customRules: [] } },
     commConfig: INITIAL_COMM_CONFIG,
     infrastructure: INITIAL_INFRA_CONFIG,
     legal: INITIAL_LEGAL_CONFIG
@@ -997,7 +999,6 @@ class DB {
     }
     return isOnline;
   }
-
   async auditInfrastructure(): Promise<ConnectionAudit> { return { success: true, checks: [{ name: 'Firewall Registry', details: 'All gateways verified', passed: true }, { name: 'Ledger Node', details: 'Double-entry synced', passed: true }, { name: 'AI Core', details: 'Heuristic Pulse Active', passed: true }] }; }
   async impersonateUser(id: string) { this.state.isImpersonating = true; const user = this.state.users.find(u => u.id === id); if (user) this.state.currentUser = { ...user, role: Role.CUSTOMER }; this.notify(); }
 
@@ -1024,7 +1025,6 @@ class DB {
   async addPackage(d: any) { this.state.packages.push({ ...d, id: 'PKG_' + Date.now(), deleted: false }); await this.commit(); }
 
   async archiveMonth(m: string) { return { success: true, message: 'Registry snapshot committed to archive.' }; }
-
   async bulkDeleteUsers(ids: string[]) {
     this.state.users = this.state.users.filter(u => !ids.includes(u.id));
     await this.commit();
@@ -1079,6 +1079,7 @@ class DB {
     }
     await this.commit();
   }
+
   async addTask(t: string, p: any, a?: string, d?: string) { this.state.tasks.push({ id: 'TSK_' + Date.now(), text: t, completed: false, priority: p, assignedTo: a, dueDate: d, order: this.state.tasks.length }); await this.commit(); return { success: true }; }
   async toggleTask(id: string) { const idx = this.state.tasks.findIndex(t => t.id === id); if (idx !== -1) { this.state.tasks[idx].completed = !this.state.tasks[idx].completed; await this.commit(); } return { success: true }; }
   async deleteTask(id: string) { this.state.tasks = this.state.tasks.filter(t => t.id !== id); await this.commit(); return { success: true }; }

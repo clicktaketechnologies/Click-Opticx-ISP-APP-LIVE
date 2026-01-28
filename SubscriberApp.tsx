@@ -1,16 +1,19 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { AppState, ISPUser, PaymentMethod, TopupRequest, Role, Invoice, AppPage, VerificationStatus, UserStatus } from './types';
-import { db } from './db';
+import React, { useState, useMemo } from 'react';
+import { ISPUser, AppState, VerificationStatus, Invoice } from './types';
 import {
-   Home, Wallet, Signal, User, Headphones, Zap, Menu, Bell, MessageSquare, Megaphone, Share2, BarChart3, ShieldAlert, Lock, RefreshCw, Eye, EyeOff, ShieldCheck, Smartphone, Network, Info, Globe, Monitor, Key, Gauge, AlertCircle, CheckCircle, X, ArrowRight, Clock, ChevronRight, LogOut, Cpu, Sparkles, History, Mic, Scale
+   Home, Signal, Wallet, User, Bell, LogOut, Sparkles, Monitor, Globe,
+   CheckCircle, Clock, X, Lock, Mic, Headphones
 } from 'lucide-react';
-
+import { db } from './db';
 import SubscriberHome from './components/subscriber/SubscriberHome';
 import SubscriberWallet from './components/subscriber/SubscriberWallet';
 import SubscriberPackages from './components/subscriber/SubscriberPackages';
 import SubscriberBilling from './components/subscriber/SubscriberBilling';
 import SubscriberProfile from './components/subscriber/SubscriberProfile';
+import SubscriberSupport from './components/subscriber/SubscriberSupport';
+import SubscriberNotifications from './components/subscriber/SubscriberNotifications';
+import SubscriberWelcomeChecklist from './components/subscriber/SubscriberWelcomeChecklist';
 import SubscriberNamaz from './components/subscriber/SubscriberNamaz';
 import SubscriberQibla from './components/subscriber/SubscriberQibla';
 import SubscriberTasbih from './components/subscriber/SubscriberTasbih';
@@ -18,24 +21,19 @@ import SubscriberQuran from './components/subscriber/SubscriberQuran';
 import SubscriberWeather from './components/subscriber/SubscriberWeather';
 import SubscriberNetwork from './components/subscriber/SubscriberNetwork';
 import SubscriberInsights from './components/subscriber/SubscriberInsights';
-import SubscriberSupport from './components/subscriber/SubscriberSupport';
 import SubscriberCashPayment from './components/subscriber/SubscriberCashPayment';
 import SubscriberOnlinePayment from './components/subscriber/SubscriberOnlinePayment';
 import SubscriberAIChat from './components/subscriber/SubscriberAIChat';
-import SubscriberReferral from './components/subscriber/SubscriberReferral';
-import SubscriberNews from './components/subscriber/SubscriberNews';
-import SubscriberNotifications from './components/subscriber/SubscriberNotifications';
-import SubscriberQuickActions from './components/subscriber/SubscriberQuickActions';
-import SubscriberCreditScore from './components/subscriber/SubscriberCreditScore';
-import SubscriberConnection from './components/subscriber/SubscriberConnection';
-import SubscriberInvoiceViewer from './components/subscriber/SubscriberInvoiceViewer';
-import SubscriberWelcomeChecklist from './components/subscriber/SubscriberWelcomeChecklist';
+import SubscriberAICall from './pages/SubscriberAICall';
 import SubscriberAIHome from './components/subscriber/ai/SubscriberAIHome';
 import SubscriberAIInsights from './components/subscriber/ai/SubscriberAIInsights';
 import SubscriberAINetwork from './components/subscriber/ai/SubscriberAINetwork';
 import SubscriberAIRisk from './components/subscriber/ai/SubscriberAIRisk';
 import SubscriberAISuggestions from './components/subscriber/ai/SubscriberAISuggestions';
-import SubscriberAICall from './pages/SubscriberAICall';
+import SubscriberCreditScore from './components/subscriber/SubscriberCreditScore';
+import SubscriberConnection from './components/subscriber/SubscriberConnection';
+import SubscriberReferral from './components/subscriber/SubscriberReferral';
+import SubscriberNews from './components/subscriber/SubscriberNews';
 import AICentralDashboard from './pages/AICentralDashboard';
 import LiveUsage from './pages/LiveUsage';
 import ConnectedDevices from './pages/ConnectedDevices';
@@ -157,61 +155,69 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
    ].filter(item => item.id === 'home' || isPageEnabled(item.id));
 
    return (
-      <div className="h-screen bg-slate-50 flex flex-col overflow-hidden text-slate-900 pt-12 md:pt-0">
+      <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-indigo-100">
          {showWelcome && <SubscriberWelcomeChecklist user={user} onComplete={() => setShowWelcome(false)} />}
+
          {showVerificationSuccess && (
             <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[1000] flex items-center justify-center p-6 animate-in fade-in duration-500">
-               <div className="bg-white rounded-[3.5rem] w-full max-sm shadow-2xl p-10 text-center space-y-8 animate-in zoom-in border-[8px] border-emerald-50">
-                  <div className="w-24 h-24 bg-emerald-500 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce">
+               <div className="bg-white rounded-[3.5rem] w-full max-w-sm shadow-2xl p-10 text-center space-y-8 animate-in zoom-in border-[8px] border-emerald-50">
+                  <div className="w-24 h-24 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto shadow-2xl animate-bounce">
                      <CheckCircle size={56} strokeWidth={3} />
                   </div>
-                  <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">Account Verified</h3>
-                  <button onClick={acknowledgeVerification} className="w-full py-5 bg-slate-900 text-white rounded-3xl font-black text-xs uppercase tracking-widest">Explore Hub</button>
+                  <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">Verified</h3>
+                  <button onClick={acknowledgeVerification} className="w-full py-5 bg-slate-900 text-white rounded-3xl font-black text-xs uppercase tracking-widest">Acknowledge</button>
                </div>
             </div>
          )}
-         <header className="h-14 bg-white border-b border-slate-100 px-6 flex items-center justify-between sticky top-0 z-[200] shrink-0 shadow-sm">
+
+         <header className="h-16 bg-white border-b border-slate-100 px-6 flex items-center justify-between sticky top-0 z-[200] shrink-0 shadow-sm">
             <div className="flex items-center gap-3">
-               <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center border shadow-inner">
-                  {branding.logoSquare ? <img src={branding.logoSquare} className="w-full h-full object-contain p-1" /> : <Globe size={16} className="text-indigo-600" />}
+               <div className="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center border shadow-inner">
+                  {branding.logoSquare ? <img src={branding.logoSquare} className="w-full h-full object-contain p-1.5" /> : <Globe size={18} className="text-indigo-600" />}
                </div>
-               <h1 className="text-xs font-black uppercase italic tracking-tighter leading-none truncate max-w-[120px]">{branding.businessName}</h1>
+               <h1 className="text-sm font-black uppercase italic tracking-tighter leading-none truncate max-w-[140px]">{branding.businessName}</h1>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
                {appearance.showAICalling && (
-                  <button onClick={() => handleTabChange('ai-voice-call')} className="p-2 bg-indigo-50 text-indigo-600 rounded-xl relative group">
-                     <Mic size={16} className="group-hover:scale-110 transition-transform" />
-                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border border-white animate-pulse"></span>
+                  <button onClick={() => handleTabChange('ai-voice-call')} className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl relative group active:scale-90 transition-transform">
+                     <Mic size={18} className="group-hover:scale-110 transition-transform" />
+                     <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border border-white animate-pulse"></span>
                   </button>
                )}
-               <button onClick={() => handleTabChange('notifs')} className="p-2 bg-slate-100 text-slate-400 rounded-xl relative">
-                  <Bell size={16} />
-                  {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>}
+               <button onClick={() => handleTabChange('notifs')} className="p-2.5 bg-slate-100 text-slate-400 rounded-xl relative active:scale-90 transition-transform">
+                  <Bell size={18} />
+                  {unreadCount > 0 && <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>}
                </button>
-               <button onClick={() => handleTabChange('profile')} className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200 overflow-hidden">
-                  {user.profileImage ? <img src={user.profileImage} className="w-full h-full object-cover" /> : <User size={18} className="text-slate-400" />}
+               <button onClick={() => handleTabChange('profile')} className="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center border border-slate-200 overflow-hidden active:scale-90 transition-transform shadow-sm">
+                  {user.profileImage ? <img src={user.profileImage} className="w-full h-full object-cover" /> : <User size={20} className="text-slate-400" />}
                </button>
             </div>
          </header>
-         <main className="flex-1 overflow-y-auto p-4 pb-32 custom-scrollbar">
-            <div className="max-w-xl mx-auto h-full">
+
+         <main className="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar">
+            <div className="max-w-xl mx-auto pb-24">
                {renderContent()}
             </div>
          </main>
-         <nav className="fixed bottom-0 inset-x-0 h-16 bg-white border-t border-slate-100 flex items-center justify-around px-2 z-[400] pb-1 shadow-2xl">
+
+         <nav className="fixed bottom-0 inset-x-0 h-20 bg-white border-t border-slate-100 flex items-center justify-around px-4 z-[400] pb-6 pt-2 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
             {navItems.map(tab => (
                <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id as SubTab)}
-                  className={`flex flex-col items-center gap-1 flex-1 transition-all py-1 ${activeTab === tab.id || (activeTab.startsWith('ai-') && tab.id === 'ai-home') ? 'text-indigo-600' : 'text-slate-400'}`}
+                  className={`flex flex-col items-center gap-1.5 flex-1 transition-all py-1 active:scale-90 ${activeTab === tab.id || (activeTab.startsWith('ai-') && tab.id === 'ai-home') ? 'text-indigo-600' : 'text-slate-400'}`}
                >
-                  <tab.icon size={18} strokeWidth={activeTab === tab.id ? 3 : 2} />
-                  <span className="text-[8px] font-black uppercase tracking-widest">{tab.label}</span>
+                  <div className={`p-1.5 rounded-xl transition-all ${activeTab === tab.id || (activeTab.startsWith('ai-') && tab.id === 'ai-home') ? 'bg-indigo-50' : ''}`}>
+                     <tab.icon size={20} strokeWidth={activeTab === tab.id ? 3 : 2} />
+                  </div>
+                  <span className="text-[9px] font-black uppercase tracking-widest">{tab.label}</span>
                </button>
             ))}
-            <button onClick={onLogout} className="flex flex-col items-center gap-1 flex-1 py-1 text-slate-400">
-               <LogOut size={18} />
-               <span className="text-[8px] font-black uppercase tracking-widest">Sign Out</span>
+            <button onClick={onLogout} className="flex flex-col items-center gap-1.5 flex-1 py-1 text-slate-400 active:scale-90">
+               <div className="p-1.5 rounded-xl">
+                  <LogOut size={20} />
+               </div>
+               <span className="text-[9px] font-black uppercase tracking-widest">Sign Out</span>
             </button>
          </nav>
       </div>

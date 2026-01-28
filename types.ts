@@ -459,6 +459,17 @@ export interface AICallLog {
   sentimentStart: 'Frustrated' | 'Neutral' | 'Satisfied';
   sentimentEnd: 'Frustrated' | 'Neutral' | 'Satisfied';
   resolutionType: 'Self-Fix' | 'Ticket_Created' | 'Escalated_To_Human' | 'Unresolved' | 'Info_Only';
+  recording?: string; // Base64 Audio String
+}
+
+export interface AITrainingPrompt {
+  id: string;
+  query: string;
+  expectedOutcome: string;
+  actualOutcome: string;
+  confidence: number;
+  timestamp: string;
+  status: 'PENDING' | 'TRAINED' | 'REJECTED';
 }
 
 export type AICallPersona = 'Calm' | 'Friendly' | 'Professional' | 'Strict';
@@ -479,6 +490,7 @@ export interface AICallConfig {
     outageScripts: string;
     billingPolicy: string;
     emergencyTerms: string;
+    customRules: string[];
   };
 }
 
@@ -654,7 +666,7 @@ export interface AppState {
   networkMappings: NetworkMapping[];
   aiCallLogs: AICallLog[];
   aiCallRules: AICallRule[];
-
+  aiTrainingPrompts: AITrainingPrompt[];
   // Communication Hub
   emailCampaigns: EmailCampaign[];
   emailTemplates: EmailTemplate[];
