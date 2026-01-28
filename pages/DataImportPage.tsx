@@ -1,12 +1,12 @@
 
 import React, { useState, useRef } from 'react';
-import { AppState } from '../types';
+import { AppState, UserStatus } from '../types';
 import { FileInput, Upload, FileSpreadsheet, CheckCircle, AlertTriangle, Info, FileCode, Trash2, ListChecks, FileText } from 'lucide-react';
 import { db } from '../db';
 
 const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
   const [csvData, setCsvData] = useState<string>('');
-  const [importStatus, setImportStatus] = useState<{success: number, failed: number, errors: string[]} | null>(null);
+  const [importStatus, setImportStatus] = useState<{ success: number, failed: number, errors: string[] } | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,39 +21,67 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
       setIsProcessing(false);
       return;
     }
-    
+
     const parseRow = (row: string) => {
       const delimiter = row.includes('\t') ? '\t' : (row.includes(';') ? ';' : ',');
       return row.split(delimiter).map(v => v.replace(/^"|"$/g, '').trim());
     };
-    
+
     const rawHeaders = parseRow(lines[0]);
     const headers = rawHeaders.map(h => h.toLowerCase());
     const rows = lines.slice(1);
-    
+
     let success = 0;
     let fail = 0;
     const errors: string[] = [];
-    
+
     for (let idx = 0; idx < rows.length; idx++) {
       const row = rows[idx];
       try {
         const values = parseRow(row);
         if (values.length < 2) continue;
-        const userData: any = { name: '', phone: '', address: '', area: '', macIp: '', packageId: '' };
+        const userData: any = {
+          name: '', phone: '', address: '', area: '',
+          macIp: '', packageId: '', email: '', cnic: '',
+          subarea: '', pppoeId: '', nasId: '', vlanId: '',
+          connectionType: 'Fiber', status: UserStatus.ACTIVE
+        };
+
         headers.forEach((h, i) => {
           const val = values[i];
           if (!val) return;
+
           if (h.match(/name|subscriber|customer|identity/)) userData.name = val;
-          if (h.match(/phone|mobile|contact/)) userData.phone = val;
-          if (h.match(/address|location/)) userData.address = val;
+          if (h.match(/phone|mobile|contact|cell/)) userData.phone = val;
+          if (h.match(/email|mail/)) userData.email = val;
+          if (h.match(/cnic|nic|identity/)) userData.cnic = val;
+          if (h.match(/address|location|street/)) userData.address = val;
           if (h.match(/area|sector|zone/)) userData.area = val;
+          if (h.match(/subarea|block/)) userData.subarea = val;
+          if (h.match(/mac|ip|hardware/)) userData.macIp = val;
+          if (h.match(/pppoe|userid|login/)) userData.pppoeId = val;
+          if (h.match(/nas|mikrotik/)) userData.nasId = val;
+          if (h.match(/vlan/)) userData.vlanId = val;
+          if (h.match(/type|mode/)) userData.connectionType = val.toLowerCase().includes('wire') ? 'Wireless' : 'Fiber';
+
+          if (h.match(/package|plan|speed|tier/)) {
+            // Smart Package Mapping
+            const search = val.toLowerCase();
+            const matchedPkg = state.packages.find(p =>
+              p.id.toLowerCase() === search ||
+              p.name.toLowerCase().includes(search) ||
+              search.includes(p.name.toLowerCase()) ||
+              (p.speed && search.includes(p.speed.toLowerCase()))
+            );
+            if (matchedPkg) userData.packageId = matchedPkg.id;
+          }
         });
+
         if (!userData.name) throw new Error("Missing customer name");
         await db.addUser(userData);
         success++;
       } catch (e: any) {
-        errors.push(`Line ${idx+2}: ${e.message}`);
+        errors.push(`Line ${idx + 2}: ${e.message}`);
         fail++;
       }
     }
@@ -70,7 +98,7 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
           <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight">Bulk Customer Import</h2>
           <p className="text-slate-500 font-medium">Add multiple customers at once from Excel or CSV files.</p>
         </div>
-        <button 
+        <button
           onClick={() => fileInputRef.current?.click()}
           className="w-full md:w-auto flex items-center justify-center gap-3 px-6 py-3.5 bg-white border border-slate-200 rounded-2xl font-black text-xs hover:bg-slate-50 shadow-sm transition-all active:scale-95 uppercase tracking-widest"
         >
@@ -90,22 +118,22 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
 
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-6 md:p-10 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="p-5 bg-indigo-50 border border-indigo-100 rounded-2xl text-center">
-              <FileSpreadsheet className="text-indigo-500 mb-3 mx-auto" size={24} />
-              <p className="text-xs font-bold text-indigo-900">Spreadsheets Supported</p>
-           </div>
-           <div className="p-5 bg-purple-50 border border-purple-100 rounded-2xl text-center">
-              <FileText className="text-purple-500 mb-3 mx-auto" size={24} />
-              <p className="text-xs font-bold text-purple-900">Auto-Detects Columns</p>
-           </div>
-           <div className="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl text-center">
-              <CheckCircle className="text-emerald-500 mb-3 mx-auto" size={24} />
-              <p className="text-xs font-bold text-emerald-900">Safety Verification</p>
-           </div>
+          <div className="p-5 bg-indigo-50 border border-indigo-100 rounded-2xl text-center">
+            <FileSpreadsheet className="text-indigo-500 mb-3 mx-auto" size={24} />
+            <p className="text-xs font-bold text-indigo-900">Spreadsheets Supported</p>
+          </div>
+          <div className="p-5 bg-purple-50 border border-purple-100 rounded-2xl text-center">
+            <FileText className="text-purple-500 mb-3 mx-auto" size={24} />
+            <p className="text-xs font-bold text-purple-900">Auto-Detects Columns</p>
+          </div>
+          <div className="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl text-center">
+            <CheckCircle className="text-emerald-500 mb-3 mx-auto" size={24} />
+            <p className="text-xs font-bold text-emerald-900">Safety Verification</p>
+          </div>
         </div>
 
         <div className="relative">
-          <textarea 
+          <textarea
             className="w-full h-64 md:h-80 px-6 py-8 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none font-mono text-xs focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none shadow-inner"
             placeholder="Paste your customer list here (make sure the first row has column titles)..."
             value={csvData}
@@ -114,7 +142,7 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
           {fileName && <div className="absolute top-4 right-4 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase">{fileName}</div>}
         </div>
 
-        <button 
+        <button
           onClick={() => processData(csvData)}
           disabled={!csvData.trim() || isProcessing}
           className="w-full py-5 bg-slate-900 text-white font-black rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-4 shadow-xl uppercase tracking-[0.15em] text-xs disabled:opacity-50"

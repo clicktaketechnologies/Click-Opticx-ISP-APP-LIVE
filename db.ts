@@ -114,10 +114,6 @@ const INITIAL_APP_PAGES: AppPage[] = [
   { id: 'live-usage', label: 'Live Usage', icon: 'Monitor', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#3b82f6' },
   { id: 'billing', label: 'Billing History', icon: 'FileText', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#8b5cf6' },
   { id: 'credit-score', label: 'Trust Score', icon: 'BarChart3', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
-  { id: 'namaz', label: 'Prayer Times', icon: 'Clock', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
-  { id: 'qibla', label: 'Qibla Finder', icon: 'Compass', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
-  { id: 'tasbih', label: 'Digital Tasbih', icon: 'Fingerprint', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
-  { id: 'quran', label: 'Al Quran', icon: 'BookOpen', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
   { id: 'weather', label: 'Weather', icon: 'Cloud', category: 'Utility', enabled: true, showInDirectory: true, isDefault: false, swatch: '#0ea5e9' },
   { id: 'speed-test', label: 'Speed Test', icon: 'Gauge', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#6366f1' },
   { id: 'referral', label: 'Invite Friends', icon: 'Gift', category: 'Core', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f43f5e' },
@@ -133,10 +129,10 @@ const INITIAL_APP_SECTIONS: AppSection[] = [
   { id: 'status', label: 'CONNECTIVITY STATUS', enabled: true, order: 0, layout: 'Grid', gridCols: 1, itemIds: [] },
   { id: 'rescue', label: 'EMERGENCY CREDITS', enabled: true, order: 1, layout: 'Grid', gridCols: 1, itemIds: [] },
   { id: 'credit', label: 'FISCAL TRUST SCORE', enabled: true, order: 2, layout: 'Grid', gridCols: 1, itemIds: [] },
-  { id: 'fiscal-summary', label: 'FISCAL SUMMARY', enabled: true, order: 3, layout: 'Grid', gridCols: 2, itemIds: [], isSpecialNode: true },
+  { id: 'fiscal-summary', label: 'FISCAL SUMMARY', enabled: true, order: 3, layout: 'Grid', gridCols: 2, itemIds: ['billing', 'credit-score'], isSpecialNode: true },
   { id: 'islamic', label: 'ISLAMIC TOOLS', enabled: true, order: 4, layout: 'Grid', gridCols: 4, itemIds: ['namaz', 'quran', 'qibla', 'tasbih'] },
-  { id: 'technical', label: 'TECHNICAL', enabled: true, order: 5, layout: 'Grid', gridCols: 2, itemIds: ['live-usage', 'speed-test', 'connection', 'reset-password'] },
-  { id: 'daily-tools', label: 'DAILY TOOLS', enabled: true, order: 6, layout: 'Grid', gridCols: 2, itemIds: ['news', 'referral', 'weather', 'support'] },
+  { id: 'technical', label: 'TECHNICAL', enabled: true, order: 5, layout: 'Grid', gridCols: 2, itemIds: ['live-usage', 'speed-test', 'connection', 'reset-password', 'connected-devices'] },
+  { id: 'daily-tools', label: 'DAILY TOOLS', enabled: true, order: 6, layout: 'Grid', gridCols: 2, itemIds: ['news', 'referral', 'weather', 'support', 'about-us'] },
   { id: 'legal', label: 'LEGAL & COMPLIANCE', enabled: true, order: 7, layout: 'Grid', gridCols: 1, itemIds: ['legal'] },
   { id: 'directory', label: 'ALL SERVICES', enabled: true, order: 8, layout: 'Grid', gridCols: 2, itemIds: [] }
 ];
@@ -276,6 +272,7 @@ const INITIAL_STATE: AppState = {
   passwordRequests: [],
   networkNodes: [],
   devices: [],
+  connectedDevices: [],
   networkMappings: []
 };
 
@@ -291,10 +288,62 @@ class DB {
     try {
       const cached = localStorage.getItem('netrecover_v15_registry');
       if (cached) {
-        this.state = { ...INITIAL_STATE, ...JSON.parse(cached) };
+        const cachedData = JSON.parse(cached);
+        this.state = {
+          ...INITIAL_STATE,
+          ...cachedData,
+          settings: {
+            ...INITIAL_STATE.settings,
+            ...(cachedData.settings || {}),
+            aboutUs: cachedData.settings?.aboutUs || INITIAL_STATE.settings.aboutUs,
+            infrastructure: cachedData.settings?.infrastructure || INITIAL_STATE.settings.infrastructure,
+            legal: cachedData.settings?.legal || INITIAL_STATE.settings.legal,
+            referral: cachedData.settings?.referral || INITIAL_STATE.settings.referral,
+            support: cachedData.settings?.support || INITIAL_STATE.settings.support,
+            aiConfig: cachedData.settings?.aiConfig || INITIAL_STATE.settings.aiConfig,
+            aiCallConfig: cachedData.settings?.aiCallConfig || INITIAL_STATE.settings.aiCallConfig,
+            commConfig: cachedData.settings?.commConfig || INITIAL_STATE.settings.commConfig,
+            branding: cachedData.settings?.branding || INITIAL_STATE.settings.branding,
+            appearance: {
+              ...INITIAL_STATE.settings.appearance,
+              ...(cachedData.settings?.appearance || {}),
+              appPages: this.mergeAppPages(INITIAL_STATE.settings.appearance.appPages, cachedData.settings?.appearance?.appPages || []),
+              sections: this.mergeSections(INITIAL_STATE.settings.appearance.sections, cachedData.settings?.appearance?.sections || [])
+            }
+          }
+        };
       }
     } catch (e) { }
     this.initializeCloudLayer();
+  }
+
+  private mergeAppPages(defaults: AppPage[], cached: AppPage[]): AppPage[] {
+    const merged = [...cached];
+    defaults.forEach(d => {
+      const idx = merged.findIndex(p => p.id === d.id);
+      if (idx === -1) {
+        merged.push(d);
+      } else {
+        // Preserving enabled status if it exists, otherwise use default
+        merged[idx] = { ...d, ...merged[idx] };
+      }
+    });
+    return merged;
+  }
+
+  private mergeSections(defaults: AppSection[], cached: AppSection[]): AppSection[] {
+    const merged = [...cached];
+    defaults.forEach(d => {
+      const idx = merged.findIndex(s => s.id === d.id);
+      if (idx === -1) {
+        merged.push(d);
+      } else {
+        // Merge itemIds to ensure new pages are added to sections
+        const newItemIds = Array.from(new Set([...d.itemIds, ...merged[idx].itemIds]));
+        merged[idx] = { ...d, ...merged[idx], itemIds: newItemIds };
+      }
+    });
+    return merged;
   }
 
   private async initializeCloudLayer() {
@@ -669,11 +718,81 @@ class DB {
     return { success: false, message: 'User provision failed' };
   }
 
-  getLiveUsage(id: string) { return { down: (Math.random() * 10 + 5).toFixed(1), up: (Math.random() * 5 + 2).toFixed(1), ping: Math.floor(Math.random() * 15 + 5), usageToday: '1.2', usageMonth: '42.5', offline: false }; }
-  getConnectedDevices(id: string) { return [{ id: 'D1', name: 'Admin Phone', mac: 'E4:A1:7F:C2:08', ip: '192.168.1.5', signal: -42, duration: '2h 14m', usageToday: 0.4, isBlocked: false }]; }
-  async blockDevice(u: string, d: string) { return true; }
-  async renameDevice(u: string, d: string, n: string) { return true; }
-  async submitWifiPasswordRequest(u: string, p: string) { return true; }
+  getLiveUsage(id: string) {
+    const user = this.state.users.find(u => u.id === id);
+    if (!user) return { down: '0.0', up: '0.0', ping: 0, usageToday: '0.0', usageMonth: '0.0', offline: true };
+    const pkg = this.state.packages.find(p => p.id === user.packageId);
+    const maxDown = pkg ? parseInt(pkg.speed) : 10;
+    const maxUp = pkg ? parseInt(pkg.uploadSpeed) : 5;
+
+    return {
+      down: (Math.random() * maxDown * 0.8).toFixed(1),
+      up: (Math.random() * maxUp * 0.8).toFixed(1),
+      ping: Math.floor(Math.random() * 20 + 5),
+      usageToday: (Math.random() * 5).toFixed(1),
+      usageMonth: (20 + Math.random() * 50).toFixed(1),
+      offline: user.status !== UserStatus.ACTIVE
+    };
+  }
+
+  getConnectedDevices(id: string): ConnectedDevice[] {
+    const devices = (this.state as any).connectedDevices?.filter((d: any) => d.userId === id) || [];
+    if (devices.length > 0) return devices;
+
+    // Return realistic defaults if no devices registered yet
+    return [
+      { id: 'D1-' + id, name: 'Main Router', mac: 'E4:A1:7F:C2:08:01', ip: '192.168.1.1', signal: -30, duration: '15d 4h', usageToday: 2.4, isBlocked: false },
+      { id: 'D2-' + id, name: 'Personal Phone', mac: 'A2:B4:C6:D8:E0:F2', ip: '192.168.1.5', signal: -45, duration: '2h 14m', usageToday: 0.8, isBlocked: false }
+    ];
+  }
+
+  async blockDevice(userId: string, deviceId: string) {
+    if (!(this.state as any).connectedDevices) (this.state as any).connectedDevices = [];
+    const idx = (this.state as any).connectedDevices.findIndex((d: any) => d.id === deviceId);
+    if (idx !== -1) {
+      (this.state as any).connectedDevices[idx].isBlocked = !(this.state as any).connectedDevices[idx].isBlocked;
+    } else {
+      const defaultDevices = this.getConnectedDevices(userId);
+      const dev = defaultDevices.find(d => d.id === deviceId);
+      if (dev) {
+        (this.state as any).connectedDevices.push({ ...dev, isBlocked: true, userId });
+      }
+    }
+    await this.commit();
+    return true;
+  }
+
+  async renameDevice(userId: string, deviceId: string, name: string) {
+    if (!(this.state as any).connectedDevices) (this.state as any).connectedDevices = [];
+    const idx = (this.state as any).connectedDevices.findIndex((d: any) => d.id === deviceId);
+    if (idx !== -1) {
+      (this.state as any).connectedDevices[idx].name = name;
+    } else {
+      const defaultDevices = this.getConnectedDevices(userId);
+      const dev = defaultDevices.find(d => d.id === deviceId);
+      if (dev) {
+        (this.state as any).connectedDevices.push({ ...dev, name, userId });
+      }
+    }
+    await this.commit();
+    return true;
+  }
+
+  async submitWifiPasswordRequest(userId: string, password: string) {
+    const user = this.state.users.find(u => u.id === userId);
+    this.state.passwordRequests.push({
+      id: 'PWR-' + Date.now(),
+      userId,
+      userName: user?.name || 'Unknown',
+      connectionType: user?.connectionType || 'Fiber',
+      ssid: 'WIFI-' + (user?.connectionId || 'NODE'),
+      newPassword: password,
+      status: 'Pending',
+      timestamp: new Date().toISOString()
+    });
+    await this.commit();
+    return true;
+  }
 
   async requestEmergencyLoad(u: string, p?: string) {
     const user = this.state.users.find(user => user.id === u);
@@ -702,7 +821,21 @@ class DB {
     return { success: true, message: 'Rescue link established.' };
   }
 
-  async submitKYC(u: string, t: string, f: string) { return true; }
+  async submitKYC(userId: string, type: string, fileUrl: string) {
+    const idx = this.state.users.findIndex(u => u.id === userId);
+    if (idx !== -1) {
+      if (!this.state.users[idx].kycDocuments) this.state.users[idx].kycDocuments = [];
+      this.state.users[idx].kycDocuments!.push({
+        type: type as any,
+        fileUrl,
+        submittedAt: new Date().toISOString()
+      });
+      this.state.users[idx].verificationStatus = VerificationStatus.PENDING;
+      await this.commit();
+      return true;
+    }
+    return false;
+  }
 
   async updateSubscriberProfile(id: string, d: any) {
     const idx = this.state.users.findIndex(u => u.id === id);
@@ -804,17 +937,66 @@ class DB {
     return { success: true, message: 'Registry handshake initialized.' };
   }
 
-  async settleEmergencyLoad(userId: string, method: string) { return { success: true }; }
+  async settleEmergencyLoad(userId: string, method: string) {
+    const load = this.state.emergencyLoads.find(l => l.userId === userId && !l.repaid);
+    if (!load) return { success: false, message: 'No active emergency load found for this node.' };
+
+    const user = this.state.users.find(u => u.id === userId);
+    if (!user) return { success: false, message: 'User not found.' };
+
+    if (method === 'Wallet') {
+      if (user.balance < load.amount) return { success: false, message: 'Insufficient wallet balance to settle debt.' };
+      user.balance -= load.amount;
+    }
+
+    load.repaid = true;
+    load.status = 'Settled';
+    load.settledAt = new Date().toISOString();
+
+    this.state.ledger.push({
+      id: 'STL-' + Date.now(),
+      userId,
+      amount: load.amount,
+      type: LedgerType.DEBIT,
+      timestamp: new Date().toISOString(),
+      description: `Settled Emergency Load: ${load.id}`,
+      balanceAfter: user.balance,
+      method
+    });
+
+    await this.commit();
+    return { success: true, message: 'Emergency debt settled.' };
+  }
   async updateAIConfig(c: AIConfig) { this.state.settings.aiConfig = c; await this.commit(); }
   async toggleAIKillSwitch(active: boolean) { this.state.settings.aiConfig.killSwitchActive = active; await this.commit(); }
   async updateAICallConfig(c: any) { this.state.settings.aiCallConfig = c; await this.commit(); }
   async addCallLog(l: any) { this.state.aiCallLogs.push({ ...l, id: 'CALL_' + Date.now() }); await this.commit(); }
   async addNetworkNode(d: any) { this.state.networkNodes.push({ ...d, id: 'NODE_' + Date.now(), status: 'Connected', lastHeartbeat: new Date().toISOString() }); await this.commit(); return { success: true }; }
-  async testNodeConnection(id: string) { return { success: true, message: 'Node Online' }; }
+  async testNodeConnection(id: string) {
+    await new Promise(r => setTimeout(r, 1500));
+    const idx = this.state.networkNodes.findIndex(n => n.id === id);
+    if (idx !== -1) {
+      const isOnline = Math.random() > 0.1; // 90% success
+      this.state.networkNodes[idx].status = isOnline ? 'Connected' : 'Disconnected';
+      this.state.networkNodes[idx].lastHeartbeat = new Date().toISOString();
+      await this.commit();
+      return { success: isOnline, message: isOnline ? 'Node Online' : 'Node Handshake Failed' };
+    }
+    return { success: false, message: 'Node Not Found' };
+  }
   async addDevice(d: any) { this.state.devices.push({ ...d, id: 'DEV_' + Date.now(), status: 'Connected', lastSeen: new Date().toISOString() }); await this.commit(); }
   async updateDevice(id: string, d: any) { const idx = this.state.devices.findIndex(x => x.id === id); if (idx !== -1) { this.state.devices[idx] = { ...this.state.devices[idx], ...d }; await this.commit(); } }
   async deleteDevice(id: string) { this.state.devices = this.state.devices.filter(x => x.id !== id); await this.commit(); }
-  async testDeviceConnection(id: string) { return true; }
+  async testDeviceConnection(id: string) {
+    await new Promise(r => setTimeout(r, 1000));
+    const idx = (this.state as any).connectedDevices?.findIndex((d: any) => d.id === id) ?? -1;
+    const isOnline = Math.random() > 0.15;
+    if (idx !== -1) {
+      (this.state as any).connectedDevices[idx].lastSeen = new Date().toISOString();
+      await this.commit();
+    }
+    return isOnline;
+  }
 
   async auditInfrastructure(): Promise<ConnectionAudit> { return { success: true, checks: [{ name: 'Firewall Registry', details: 'All gateways verified', passed: true }, { name: 'Ledger Node', details: 'Double-entry synced', passed: true }, { name: 'AI Core', details: 'Heuristic Pulse Active', passed: true }] }; }
   async impersonateUser(id: string) { this.state.isImpersonating = true; const user = this.state.users.find(u => u.id === id); if (user) this.state.currentUser = { ...user, role: Role.CUSTOMER }; this.notify(); }
@@ -843,12 +1025,60 @@ class DB {
 
   async archiveMonth(m: string) { return { success: true, message: 'Registry snapshot committed to archive.' }; }
 
-  async bulkDeleteUsers(ids: string[]) { this.state.users = this.state.users.filter(u => !ids.includes(u.id)); await this.commit(); }
-  async bulkForcePasswordReset(ids: string[]) { await this.commit(); }
-  async bulkTerminateSessions(ids: string[]) { await this.commit(); }
-  async bulkActivatePackages(ids: string[], p: string) { await this.commit(); }
-  async bulkSetAccountStatus(ids: string[], s: any, r: string) { await this.commit(); }
-  async bulkActivatePayLater(ids: string[], p: string, a: number, d: string, r: string) { await this.commit(); }
+  async bulkDeleteUsers(ids: string[]) {
+    this.state.users = this.state.users.filter(u => !ids.includes(u.id));
+    await this.commit();
+  }
+
+  async bulkForcePasswordReset(ids: string[]) {
+    this.state.users.forEach(u => {
+      if (ids.includes(u.id)) {
+        u.mustChangePassword = true;
+        u.lastPasswordChange = new Date().toISOString();
+      }
+    });
+    await this.commit();
+  }
+
+  async bulkTerminateSessions(ids: string[]) {
+    this.state.users.forEach(u => {
+      if (ids.includes(u.id)) {
+        u.sessions = [];
+      }
+    });
+    await this.commit();
+  }
+
+  async bulkActivatePackages(ids: string[], pkgId: string) {
+    for (const id of ids) {
+      await this.activatePackage(id, pkgId);
+    }
+    await this.commit();
+  }
+
+  async bulkSetAccountStatus(ids: string[], status: UserStatus, reason: string) {
+    this.state.users.forEach(u => {
+      if (ids.includes(u.id)) {
+        u.status = status;
+        u.internalNotes = (u.internalNotes || '') + `\n[${new Date().toLocaleDateString()}] Status changed to ${status}: ${reason}`;
+      }
+    });
+    await this.commit();
+  }
+
+  async bulkActivatePayLater(ids: string[], pkgId: string, amount: number, dueDate: string, reason: string) {
+    for (const id of ids) {
+      const uIdx = this.state.users.findIndex(u => u.id === id);
+      if (uIdx !== -1) {
+        await this.activatePackage(id, pkgId);
+        await this.generateAdHocInvoice(id, pkgId, amount, [{ id: 'L1', description: `Pay Later: ${reason}`, quantity: 1, unitPrice: amount, total: amount, category: 'Service' }]);
+        // Update the invoice due date
+        const inv = this.state.invoices[this.state.invoices.length - 1];
+        if (inv) inv.dueDate = new Date(dueDate).toISOString();
+      }
+    }
+    await this.commit();
+  }
   async addTask(t: string, p: any, a?: string, d?: string) { this.state.tasks.push({ id: 'TSK_' + Date.now(), text: t, completed: false, priority: p, assignedTo: a, dueDate: d, order: this.state.tasks.length }); await this.commit(); return { success: true }; }
   async toggleTask(id: string) { const idx = this.state.tasks.findIndex(t => t.id === id); if (idx !== -1) { this.state.tasks[idx].completed = !this.state.tasks[idx].completed; await this.commit(); } return { success: true }; }
   async deleteTask(id: string) { this.state.tasks = this.state.tasks.filter(t => t.id !== id); await this.commit(); return { success: true }; }
@@ -861,11 +1091,50 @@ class DB {
   async updateModulePermission(id: string, d: any) { const idx = this.state.permissions.findIndex(p => p.id === id); if (idx !== -1) { this.state.permissions[idx] = { ...this.state.permissions[idx], ...d }; await this.commit(); } }
   async auditOverdueLoads() { }
 
-  async convertPointsToWallet(id: string) { return { success: true, amount: 100, message: 'Points successfully provisioned to wallet.' }; }
+  async convertPointsToWallet(userId: string) {
+    const user = this.state.users.find(u => u.id === userId);
+    if (!user) return { success: false, message: 'User not found.' };
 
-  async submitWithdrawalRequest(id: string) {
-    const user = this.state.users.find(u => u.id === id);
+    if (user.referralPoints <= 0) return { success: false, message: 'No referral points available to convert.' };
+
+    const ratio = this.state.settings.referral.conversionRatio || 0.01;
+    const amount = Math.floor(user.referralPoints * ratio * 100); // Assuming points to currency mapping
+
+    user.balance += amount;
+    const pointsHandled = user.referralPoints;
+    user.referralPoints = 0;
+
+    this.state.ledger.push({
+      id: 'PTS-' + Date.now(),
+      userId,
+      amount,
+      type: LedgerType.CREDIT,
+      timestamp: new Date().toISOString(),
+      description: `Converted ${pointsHandled} referral points`,
+      balanceAfter: user.balance,
+      method: 'Referral System'
+    });
+
+    await this.commit();
+    return { success: true, amount, message: `Points successfully provisioned to wallet. Rs. ${amount} added.` };
+  }
+
+  async submitWithdrawalRequest(userId: string) {
+    const user = this.state.users.find(u => u.id === userId);
     if (!user) return { success: false, message: 'User identity not found.' };
+
+    const request: WithdrawalRequest = {
+      id: 'WDR-' + Date.now(),
+      userId,
+      userName: user.name,
+      points: user.referralPoints,
+      amount: user.referralPoints * (this.state.settings.referral.conversionRatio || 0.01),
+      status: 'Pending',
+      timestamp: new Date().toISOString()
+    };
+
+    this.state.withdrawalRequests.push(request);
+    await this.commit();
     return { success: true, message: 'Withdrawal protocol dispatched for audit.' };
   }
 
@@ -884,7 +1153,25 @@ class DB {
   async cancelTopupRequest(id: string) { this.state.topupRequests = this.state.topupRequests.filter(r => r.id !== id); await this.commit(); }
   async approvePackageRequest(id: string) { const idx = this.state.packageRequests.findIndex(r => r.id === id); if (idx !== -1) { const req = this.state.packageRequests[idx]; req.status = 'Approved'; await this.activatePackage(req.userId, req.packageId); await this.commit(); } }
   async rejectPackageRequest(id: string) { const idx = this.state.packageRequests.findIndex(r => r.id === id); if (idx !== -1) { this.state.packageRequests[idx].status = 'Rejected'; await this.commit(); } }
-  async sendInvoiceEmail(id: string) { return true; }
+  async sendInvoiceEmail(id: string) {
+    const inv = this.state.invoices.find(i => i.id === id);
+    if (!inv) return false;
+
+    // Simulate email log
+    this.state.deliveryLogs.unshift({
+      id: 'DLV-' + Date.now(),
+      userId: inv.userId,
+      userName: inv.userName,
+      type: 'Email',
+      channel: 'SMTP Relay',
+      status: 'Delivered',
+      timestamp: new Date().toISOString(),
+      triggerSource: 'Manual'
+    });
+
+    await this.commit();
+    return true;
+  }
 
   async submitSignupRequest(data: any) {
     this.state.signupRequests.push({ ...data, id: 'SR-' + Date.now(), status: 'Pending', timestamp: new Date().toISOString() });
@@ -987,7 +1274,9 @@ class DB {
 
   getConfig() { return {}; }
   getSyncStatus() { return false; }
-  isUsernameTaken(u: string) { return false; }
+  isUsernameTaken(u: string) {
+    return this.state.users.some(user => user.username?.toLowerCase() === u.toLowerCase());
+  }
 }
 
 export const db = new DB();
