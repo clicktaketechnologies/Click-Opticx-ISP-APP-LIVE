@@ -167,7 +167,7 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
               sessionPromise.then(session => session.sendRealtimeInput({ media: pcmBlob }));
               
               const avg = inputData.reduce((a,b) => a + Math.abs(b), 0) / inputData.length;
-              setVisualizerBars(prev => prev.map(() => 10 + Math.random() * (avg * 600)));
+              setVisualizerBars(prev => prev.map(() => 10 + Math.random() * (avg * 1200)));
             };
             source.connect(scriptProcessor);
             scriptProcessor.connect(inputAudioContext.destination);
@@ -189,8 +189,18 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
                 if (sourcesRef.current.size === 0) setAiIsSpeaking(false);
               };
             }
+
+            const interrupted = message.serverContent?.interrupted;
+            if (interrupted) {
+              for (const s of sourcesRef.current) s.stop();
+              sourcesRef.current.clear();
+              nextStartTimeRef.current = 0;
+            }
           },
-          onerror: () => setPhase('landing'),
+          onerror: (e) => {
+            console.error("Live AI Node Error:", e);
+            setPhase('landing');
+          },
           onclose: () => setPhase('summary')
         },
         config: {

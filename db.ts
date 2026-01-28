@@ -1,17 +1,17 @@
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, Firestore } from 'firebase/firestore';
-import {
+import { 
   AppState, UserStatus, PaymentStatus, LedgerType, VerificationStatus,
   ISPUser, Package, PaymentMethod, Role, SystemSettings, ReferralRecord,
   StaffUser, PaymentRecord, TopupRequest, ArchiveRecord, SecurityLog, PackageRequest,
-  CreditScoreLog, TechnicalConfig, WithdrawalRequest, UserSession,
-  ConnectionStatus, Invoice, LineItem, SupportTicket, TicketStatus, TicketPriority,
-  TicketComment, NOCEvent, SystemNotification, EmergencyLoad, InternalTask,
-  ConnectedDevice, PasswordResetRequest, NetworkNode, AppPage, HomeCard,
+  CreditScoreLog, TechnicalConfig, WithdrawalRequest, UserSession, 
+  ConnectionStatus, Invoice, LineItem, SupportTicket, TicketStatus, TicketPriority, 
+  TicketComment, NOCEvent, SystemNotification, EmergencyLoad, InternalTask, 
+  ConnectedDevice, PasswordResetRequest, NetworkNode, AppPage, HomeCard, 
   Device, NetworkMapping, KYCDocument, AIActionLog, AIConfig, AIEvent, AISuggestion,
   NotificationAudience, NotificationPriority, AICallConfig, AICallLog, AICallRule,
-  EmailCampaign, EmailTemplate, AudienceSegment, CommunicationAutomationRule, DeliveryLog, CommunicationSettings, SenderIdentity, PaymentGateway, AppSection, InfrastructureConfig, LegalConfig
+  EmailCampaign, EmailTemplate, AudienceSegment, CommunicationAutomationRule, DeliveryLog, CommunicationSettings, SenderIdentity, PaymentGateway, AppSection, InfrastructureConfig, LegalConfig, AITrainingPrompt
 } from './types';
 
 // Add missing types for monitoring
@@ -112,20 +112,12 @@ const INITIAL_APP_PAGES: AppPage[] = [
   { id: 'qibla', label: 'Qibla Finder', icon: 'Compass', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#b45309' },
   { id: 'tasbih', label: 'Digital Tasbih', icon: 'Fingerprint', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#334155' },
   { id: 'live-usage', label: 'Live Usage', icon: 'Monitor', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#3b82f6' },
-  { id: 'billing', label: 'Billing History', icon: 'FileText', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#8b5cf6' },
-  { id: 'credit-score', label: 'Trust Score', icon: 'BarChart3', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
-  { id: 'namaz', label: 'Prayer Times', icon: 'Clock', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
-  { id: 'qibla', label: 'Qibla Finder', icon: 'Compass', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
-  { id: 'tasbih', label: 'Digital Tasbih', icon: 'Fingerprint', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
-  { id: 'quran', label: 'Al Quran', icon: 'BookOpen', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
-  { id: 'weather', label: 'Weather', icon: 'Cloud', category: 'Utility', enabled: true, showInDirectory: true, isDefault: false, swatch: '#0ea5e9' },
   { id: 'speed-test', label: 'Speed Test', icon: 'Gauge', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#6366f1' },
-  { id: 'referral', label: 'Invite Friends', icon: 'Gift', category: 'Core', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f43f5e' },
-  { id: 'news', label: 'Announcements', icon: 'Megaphone', category: 'Communication', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f97316' },
-  { id: 'connected-devices', label: 'My Devices', icon: 'Smartphone', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#6366f1' },
-  { id: 'about-us', label: 'About Provider', icon: 'Info', category: 'Core', enabled: true, showInDirectory: true, isDefault: false, swatch: '#64748b' },
   { id: 'connection', label: 'Connection', icon: 'Signal', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#4f46e5' },
   { id: 'reset-password', label: 'Reset Wifi', icon: 'Key', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
+  { id: 'news', label: 'Broadcasts', icon: 'Bell', category: 'Communication', enabled: true, showInDirectory: true, isDefault: false, swatch: '#ef4444' },
+  { id: 'referral', label: 'Refer & Earn', icon: 'Gift', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
+  { id: 'weather', label: 'Weather', icon: 'Sun', category: 'Utility', enabled: true, showInDirectory: true, isDefault: false, swatch: '#06b6d4' },
   { id: 'legal', label: 'Legal Center', icon: 'ShieldCheck', category: 'Legal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#64748b' },
 ];
 
@@ -169,6 +161,10 @@ const INITIAL_STATE: AppState = {
   aiSuggestions: [],
   aiCallLogs: [],
   aiCallRules: [],
+  aiTrainingPrompts: [
+    { id: 'PR-1', query: 'Why is my net red?', expectedOutcome: 'Technical Handshake - Router Check', actualOutcome: 'General Outage Check', confidence: 0.52, timestamp: new Date().toISOString(), status: 'PENDING' },
+    { id: 'PR-2', query: 'Can I pay next week?', expectedOutcome: 'Offer Emergency Load', actualOutcome: 'Billing Status Explained', confidence: 0.61, timestamp: new Date().toISOString(), status: 'PENDING' }
+  ],
   emailCampaigns: [],
   emailTemplates: [
     { id: 'TMP-1', name: 'Payment Reminder', content: 'Dear {{user.name}}, your balance is {{user.balance}}. Please clear it.', category: 'Billing', lastUpdated: new Date().toISOString() },
@@ -180,13 +176,13 @@ const INITIAL_STATE: AppState = {
     { id: 'SEG-2', name: 'High Risk (Credit < 500)', description: 'Users with low credit scores', filters: { creditScore: { $lt: 500 } }, subscriberCount: 0 }
   ],
   commAutomationRules: [
-    {
-      id: 'RULE-EXP-7',
-      name: '7-Day Package Expiry Alert',
-      trigger: 'Package_Expiry',
-      condition: 'days_remaining < 7',
-      enabled: true,
-      actions: [{ type: 'Email', templateId: 'PKG_EXPIRY_REMINDER' }]
+    { 
+      id: 'RULE-EXP-7', 
+      name: '7-Day Package Expiry Alert', 
+      trigger: 'Package_Expiry', 
+      condition: 'days_remaining < 7', 
+      enabled: true, 
+      actions: [{ type: 'Email', templateId: 'PKG_EXPIRY_REMINDER' }] 
     }
   ],
   deliveryLogs: [],
@@ -197,10 +193,10 @@ const INITIAL_STATE: AppState = {
     digitalPresence: { website: "https://clickopticx.com", portal: "https://my.clickopticx.com", facebook: "", instagram: "", twitter: "", linkedin: "", youtube: "" },
     invoiceBranding: { logoPreference: "primary", headerText: "TAX INVOICE", footerDisclaimer: "Computer generated document.", authorizedSignature: "", prefix: "CO-INV-", nextNumber: 1001, terms: "Payment due within 5 days.", privacy: "All data encrypted.", refundPolicyUrl: "" },
     notificationBranding: { appSenderName: "CO ALERTS", emailSenderName: "CO SUPPORT", smsSenderId: "CLICKOPTICX" },
-    appearance: {
-      showWallet: true, showEmergencyLoad: true, showAIChat: true, showAICalling: true,
-      showNews: true, showQuickActions: true, maintenanceMode: false,
-      appPages: INITIAL_APP_PAGES,
+    appearance: { 
+      showWallet: true, showEmergencyLoad: true, showAIChat: true, showAICalling: true, 
+      showNews: true, showQuickActions: true, maintenanceMode: false, 
+      appPages: INITIAL_APP_PAGES, 
       homeCards: [],
       sections: INITIAL_APP_SECTIONS
     },
@@ -220,7 +216,7 @@ const INITIAL_STATE: AppState = {
     whiteLabelMode: false,
     allowWifiReset: true,
     aiConfig: INITIAL_AI_CONFIG,
-    aiCallConfig: { enabled: true, voiceName: 'Zephyr', persona: 'Professional', language: 'English', speakingSpeed: 1.0, maxCallDuration: 300, officeHours: { start: '09:00', end: '21:00', enabled: true }, knowledgeBase: { outageScripts: '', billingPolicy: '', emergencyTerms: '' } },
+    aiCallConfig: { enabled: true, voiceName: 'Zephyr', persona: 'Professional', language: 'English', speakingSpeed: 1.0, maxCallDuration: 300, officeHours: { start: '09:00', end: '21:00', enabled: true }, knowledgeBase: { outageScripts: '', billingPolicy: '', emergencyTerms: '', customRules: [] } },
     commConfig: INITIAL_COMM_CONFIG,
     infrastructure: INITIAL_INFRA_CONFIG,
     legal: INITIAL_LEGAL_CONFIG
@@ -293,7 +289,7 @@ class DB {
       if (cached) {
         this.state = { ...INITIAL_STATE, ...JSON.parse(cached) };
       }
-    } catch (e) { }
+    } catch (e) {}
     this.initializeCloudLayer();
   }
 
@@ -336,7 +332,7 @@ class DB {
   private async commit() {
     try {
       localStorage.setItem('netrecover_v15_registry', JSON.stringify(this.state));
-    } catch (e) { }
+    } catch (e) {}
     if (this.firestore && this.initialized) {
       const docRef = doc(this.firestore, 'registry', 'master_state');
       const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
@@ -368,8 +364,8 @@ class DB {
       return { success: true, user: staff, type: 'staff' };
     }
     const user = this.state.users.find(u => !u.deleted && (
-      (u.username || '').toLowerCase() === input ||
-      (u.email || '').toLowerCase() === input ||
+      (u.username || '').toLowerCase() === input || 
+      (u.email || '').toLowerCase() === input || 
       u.phone === input ||
       u.connectionId === input
     ) && u.password === pass);
@@ -388,7 +384,7 @@ class DB {
   }
 
   async updateSettings(s: SystemSettings) { this.state.settings = s; await this.commit(); }
-
+  
   async updateGatewayConfig(id: string, d: any) {
     const idx = this.state.settings.paymentGateways.findIndex(g => g.id === id);
     if (idx !== -1) {
@@ -397,12 +393,12 @@ class DB {
     }
   }
 
-  async addUser(u: Partial<ISPUser>) {
-    const newUser = { id: 'USR-' + Date.now(), connectionId: 'NR-' + Math.floor(10000 + Math.random() * 90000), balance: 0, creditScore: 600, activationCount: 0, portalEnabled: true, connectionType: 'Fiber', activityLog: [], ...u };
-    this.state.users.push(newUser as any); await this.commit(); return { success: true, user: newUser };
+  async addUser(u: Partial<ISPUser>) { 
+    const newUser = { id: 'USR-'+Date.now(), connectionId: 'NR-'+Math.floor(10000+Math.random()*90000), balance: 0, creditScore: 600, activationCount: 0, portalEnabled: true, connectionType: 'Fiber', activityLog: [], ...u }; 
+    this.state.users.push(newUser as any); await this.commit(); return { success: true, user: newUser }; 
   }
 
-  async updateUser(id: string, d: any) {
+  async updateUser(id: string, d: any) { 
     const idx = this.state.users.findIndex(u => u.id === id);
     if (idx !== -1) { this.state.users[idx] = { ...this.state.users[idx], ...d }; await this.commit(); return { success: true }; }
     return { success: false };
@@ -478,9 +474,9 @@ class DB {
   private calculateSegmentSize(filters: any) {
     if (!filters) return this.state.users.length;
     return this.state.users.filter(u => {
-      if (filters.status && u.status !== filters.status) return false;
-      if (filters.creditScore && filters.creditScore.$lt && u.creditScore >= filters.creditScore.$lt) return false;
-      return true;
+        if (filters.status && u.status !== filters.status) return false;
+        if (filters.creditScore && filters.creditScore.$lt && u.creditScore >= filters.creditScore.$lt) return false;
+        return true;
     }).length;
   }
 
@@ -500,11 +496,11 @@ class DB {
     camp.status = 'Sending';
     this.notify();
     setTimeout(async () => {
-      camp.status = 'Completed';
-      camp.sentAt = new Date().toISOString();
-      camp.stats.sent = this.state.audienceSegments.find(s => s.id === camp.segmentId)?.subscriberCount || 100;
-      await this.commit();
-      this.logNotification('all', 'success', 'Campaign Dispatched', `Email campaign "${camp.name}" has been successfully sent.`);
+        camp.status = 'Completed';
+        camp.sentAt = new Date().toISOString();
+        camp.stats.sent = this.state.audienceSegments.find(s => s.id === camp.segmentId)?.subscriberCount || 100;
+        await this.commit();
+        this.logNotification('all', 'success', 'Campaign Dispatched', `Email campaign "${camp.name}" has been successfully sent.`);
     }, 2000);
   }
 
@@ -519,14 +515,14 @@ class DB {
 
   async sendPushNotification(target: string, msg: string, priority: 'normal' | 'critical') {
     const log: DeliveryLog = {
-      id: 'LOG-' + Date.now(),
-      userId: target === 'all' ? 'SYSTEM' : target,
-      userName: target === 'all' ? 'All Users' : (this.state.users.find(u => u.id === target)?.name || 'Unknown'),
-      type: 'Push',
-      channel: 'In-App/Web',
-      status: 'Delivered',
-      timestamp: new Date().toISOString(),
-      triggerSource: 'Manual'
+        id: 'LOG-' + Date.now(),
+        userId: target === 'all' ? 'SYSTEM' : target,
+        userName: target === 'all' ? 'All Users' : (this.state.users.find(u => u.id === target)?.name || 'Unknown'),
+        type: 'Push',
+        channel: 'In-App/Web',
+        status: 'Delivered',
+        timestamp: new Date().toISOString(),
+        triggerSource: 'Manual'
     };
     this.state.deliveryLogs.unshift(log);
     if (target === 'all') this.state.users.forEach(u => this.logNotification(u.id, 'info', 'Broadcast', msg));
@@ -555,7 +551,7 @@ class DB {
   }
 
   async clearNotifications(targetId: string, audience: 'subscriber' | 'admin') {
-    this.state.notifications = this.state.notifications.filter(n => !((n.targetId === targetId || n.targetId === 'all') && n.audience === audience));
+    this.state.notifications = this.state.notifications.filter(n => !( (n.targetId === targetId || n.targetId === 'all') && n.audience === audience ));
     await this.commit();
   }
 
@@ -580,21 +576,21 @@ class DB {
 
   async processTopup(collector: string, target: string, type: 'staff' | 'user', amount: number) {
     if (type === 'staff') {
-      const sIdx = this.state.staff.findIndex(s => s.email === target);
-      if (sIdx !== -1) {
-        this.state.staff[sIdx].balance = (this.state.staff[sIdx].balance || 0) + amount;
-        this.state.ledger.push({ id: 'TOP_' + Date.now(), userId: target, amount, type: LedgerType.CREDIT, timestamp: new Date().toISOString(), description: 'Admin Refill', balanceAfter: this.state.staff[sIdx].balance, method: 'Registry Direct' });
-      } else {
-        return { success: false, message: 'Target staff node not found.' };
-      }
+       const sIdx = this.state.staff.findIndex(s => s.email === target);
+       if (sIdx !== -1) {
+          this.state.staff[sIdx].balance = (this.state.staff[sIdx].balance || 0) + amount;
+          this.state.ledger.push({ id: 'TOP_'+Date.now(), userId: target, amount, type: LedgerType.CREDIT, timestamp: new Date().toISOString(), description: 'Admin Refill', balanceAfter: this.state.staff[sIdx].balance, method: 'Registry Direct' });
+       } else {
+          return { success: false, message: 'Target staff node not found.' };
+       }
     } else {
-      const uIdx = this.state.users.findIndex(u => u.id === target);
-      if (uIdx !== -1) {
-        this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) + amount;
-        this.state.ledger.push({ id: 'TOP_' + Date.now(), userId: target, amount, type: LedgerType.CREDIT, timestamp: new Date().toISOString(), description: 'Credit Refill', balanceAfter: this.state.users[uIdx].balance, method: 'Direct Handshake' });
-      } else {
-        return { success: false, message: 'Target subscriber node not found.' };
-      }
+       const uIdx = this.state.users.findIndex(u => u.id === target);
+       if (uIdx !== -1) {
+          this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) + amount;
+          this.state.ledger.push({ id: 'TOP_'+Date.now(), userId: target, amount, type: LedgerType.CREDIT, timestamp: new Date().toISOString(), description: 'Credit Refill', balanceAfter: this.state.users[uIdx].balance, method: 'Direct Handshake' });
+       } else {
+          return { success: false, message: 'Target subscriber node not found.' };
+       }
     }
     await this.commit();
     return { success: true, message: 'Fiscal handshake verified.' };
@@ -603,12 +599,12 @@ class DB {
   async activatePackage(userId: string, pkgId: string) {
     const uIdx = this.state.users.findIndex(u => u.id === userId);
     if (uIdx !== -1) {
-      this.state.users[uIdx].packageId = pkgId;
-      this.state.users[uIdx].status = UserStatus.ACTIVE;
-      const d = new Date(); d.setDate(d.getDate() + 30);
-      this.state.users[uIdx].expiryDate = d.toISOString();
-      await this.commit();
-      return { success: true };
+       this.state.users[uIdx].packageId = pkgId;
+       this.state.users[uIdx].status = UserStatus.ACTIVE;
+       const d = new Date(); d.setDate(d.getDate() + 30);
+       this.state.users[uIdx].expiryDate = d.toISOString();
+       await this.commit();
+       return { success: true };
     }
     return { success: false };
   }
@@ -619,14 +615,14 @@ class DB {
     const inv = this.state.invoices[invIdx];
     const uIdx = this.state.users.findIndex(u => u.id === inv.userId);
     if (uIdx === -1) return { success: false, message: 'User not found' };
-
+    
     inv.status = PaymentStatus.PAID;
     inv.paidAt = new Date().toISOString();
     inv.paidAmount = inv.totalAmount;
     this.state.users[uIdx].balance -= inv.totalAmount;
-
-    this.state.ledger.push({ id: 'PAY_' + Date.now(), userId: inv.userId, amount: inv.totalAmount, type: LedgerType.DEBIT, timestamp: new Date().toISOString(), description: `Paid Inv: ${invoiceId}`, balanceAfter: this.state.users[uIdx].balance, method: 'Wallet Link' });
-
+    
+    this.state.ledger.push({ id: 'PAY_'+Date.now(), userId: inv.userId, amount: inv.totalAmount, type: LedgerType.DEBIT, timestamp: new Date().toISOString(), description: `Paid Inv: ${invoiceId}`, balanceAfter: this.state.users[uIdx].balance, method: 'Wallet Link' });
+    
     await this.commit();
     return { success: true };
   }
@@ -635,11 +631,11 @@ class DB {
     const user = this.state.users.find(u => u.id === userId);
     if (!user) return null;
     const inv: Invoice = {
-      id: 'INV-' + Math.floor(100000 + Math.random() * 900000),
-      userId, userName: user.name,
-      packageId: pkgId, packageName: this.state.packages.find(p => p.id === pkgId)?.name || 'Custom',
-      items, subtotal: amount, taxRate: 0, taxAmount: 0, discountAmount: 0, totalAmount: amount, paidAmount: 0,
-      status: PaymentStatus.UNPAID, dueDate: new Date(Date.now() + 86400000 * 5).toISOString(), createdAt: new Date().toISOString()
+       id: 'INV-' + Math.floor(100000 + Math.random() * 900000),
+       userId, userName: user.name,
+       packageId: pkgId, packageName: this.state.packages.find(p => p.id === pkgId)?.name || 'Custom',
+       items, subtotal: amount, taxRate: 0, taxAmount: 0, discountAmount: 0, totalAmount: amount, paidAmount: 0,
+       status: PaymentStatus.UNPAID, dueDate: new Date(Date.now() + 86400000 * 5).toISOString(), createdAt: new Date().toISOString()
     };
     this.state.invoices.push(inv);
     await this.commit();
@@ -669,23 +665,23 @@ class DB {
     return { success: false, message: 'User provision failed' };
   }
 
-  getLiveUsage(id: string) { return { down: (Math.random() * 10 + 5).toFixed(1), up: (Math.random() * 5 + 2).toFixed(1), ping: Math.floor(Math.random() * 15 + 5), usageToday: '1.2', usageMonth: '42.5', offline: false }; }
+  getLiveUsage(id: string) { return { down: (Math.random() * 10 + 5).toFixed(1), up: (Math.random() * 5 + 2).toFixed(1), ping: Math.floor(Math.random()*15+5), usageToday: '1.2', usageMonth: '42.5', offline: false }; }
   getConnectedDevices(id: string) { return [{ id: 'D1', name: 'Admin Phone', mac: 'E4:A1:7F:C2:08', ip: '192.168.1.5', signal: -42, duration: '2h 14m', usageToday: 0.4, isBlocked: false }]; }
   async blockDevice(u: string, d: string) { return true; }
   async renameDevice(u: string, d: string, n: string) { return true; }
   async submitWifiPasswordRequest(u: string, p: string) { return true; }
-
-  async requestEmergencyLoad(u: string, p?: string) {
+  
+  async requestEmergencyLoad(u: string, p?: string) { 
     const user = this.state.users.find(user => user.id === u);
     if (!user) return { success: false, message: 'User node not found.' };
-
+    
     const amount = 2500;
     const now = new Date();
     const expiry = new Date(now.getTime() + (72 * 60 * 60 * 1000));
     const lock = new Date(now.getTime() + (15 * 60 * 1000));
 
     this.state.emergencyLoads.push({
-      id: 'EL-' + Date.now(),
+      id: 'EL-'+Date.now(),
       userId: u,
       userName: user.name,
       amount,
@@ -703,8 +699,8 @@ class DB {
   }
 
   async submitKYC(u: string, t: string, f: string) { return true; }
-
-  async updateSubscriberProfile(id: string, d: any) {
+  
+  async updateSubscriberProfile(id: string, d: any) { 
     const idx = this.state.users.findIndex(u => u.id === id);
     if (idx !== -1) {
       this.state.users[idx] = { ...this.state.users[idx], ...d };
@@ -714,12 +710,12 @@ class DB {
     return { success: false, message: 'Subscriber node not found.' };
   }
 
-  async submitTopupRequest(r: any) { this.state.topupRequests.push({ ...r, id: 'REQ_' + Date.now(), status: 'Pending', timestamp: new Date().toISOString() }); await this.commit(); }
-  async submitTicket(t: any) { this.state.tickets.push({ ...t, id: 'TCK_' + Date.now(), status: TicketStatus.OPEN, priority: TicketPriority.MEDIUM, comments: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); await this.commit(); }
+  async submitTopupRequest(r: any) { this.state.topupRequests.push({ ...r, id: 'REQ_'+Date.now(), status: 'Pending', timestamp: new Date().toISOString() }); await this.commit(); }
+  async submitTicket(t: any) { this.state.tickets.push({ ...t, id: 'TCK_'+Date.now(), status: TicketStatus.OPEN, priority: TicketPriority.MEDIUM, comments: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); await this.commit(); }
   async updateTicketStatus(id: string, s: any) { const idx = this.state.tickets.findIndex(t => t.id === id); if (idx !== -1) { this.state.tickets[idx].status = s; await this.commit(); } }
-  async addTicketComment(id: string, t: string, i: boolean) { const idx = this.state.tickets.findIndex(x => x.id === id); if (idx !== -1) { this.state.tickets[idx].comments.push({ id: 'CMT_' + Date.now(), authorName: 'Admin', authorEmail: 'admin@opticx.com', authorRole: Role.ADMIN, text: t, timestamp: new Date().toISOString(), isInternal: i }); await this.commit(); } }
-
-  async approveUnifiedRequest(id: string, type: string) {
+  async addTicketComment(id: string, t: string, i: boolean) { const idx = this.state.tickets.findIndex(x => x.id === id); if (idx !== -1) { this.state.tickets[idx].comments.push({ id: 'CMT_'+Date.now(), authorName: 'Admin', authorEmail: 'admin@opticx.com', authorRole: Role.ADMIN, text: t, timestamp: new Date().toISOString(), isInternal: i }); await this.commit(); } }
+  
+  async approveUnifiedRequest(id: string, type: string) { 
     if (type === 'package') {
       const req = this.state.packageRequests.find(r => r.id === id);
       if (req) {
@@ -741,14 +737,14 @@ class DB {
         await this.processTopup('Admin', req.userId, 'user', req.amount);
       }
     } else if (type === 'emergency') {
-      const load = this.state.emergencyLoads.find(l => l.id === id);
-      if (load) load.status = 'Active';
+       const load = this.state.emergencyLoads.find(l => l.id === id);
+       if (load) load.status = 'Active';
     }
     await this.commit();
-    return { success: true, message: 'Protocol handshake authorized.' };
+    return { success: true, message: 'Protocol handshake authorized.' }; 
   }
 
-  async rejectUnifiedRequest(id: string, type: string, r: string) {
+  async rejectUnifiedRequest(id: string, type: string, r: string) { 
     if (type === 'package') {
       const req = this.state.packageRequests.find(r => r.id === id);
       if (req) req.status = 'Rejected';
@@ -756,41 +752,41 @@ class DB {
       const req = this.state.topupRequests.find(r => r.id === id);
       if (req) req.status = 'Rejected';
     } else if (type === 'emergency') {
-      const load = this.state.emergencyLoads.find(l => l.id === id);
-      if (load) load.status = 'Cancelled';
+       const load = this.state.emergencyLoads.find(l => l.id === id);
+       if (load) load.status = 'Cancelled';
     }
     await this.commit();
-    return { success: true };
+    return { success: true }; 
   }
 
-  async cancelUniversalRequest(id: string) {
+  async cancelUniversalRequest(id: string) { 
     this.state.packageRequests = this.state.packageRequests.filter(r => r.id !== id);
     this.state.topupRequests = this.state.topupRequests.filter(r => r.id !== id);
     this.state.emergencyLoads = this.state.emergencyLoads.filter(l => l.id !== id);
     await this.commit();
-    return true;
+    return true; 
   }
 
-  async submitUniversalActivation(userId: string, pkgId: string, method: string) {
+  async submitUniversalActivation(userId: string, pkgId: string, method: string) { 
     const pkg = this.state.packages.find(p => p.id === pkgId);
     if (!pkg) return { success: false, message: 'Package not found' };
-
+    
     const amount = Math.round(pkg.price * (1 + (this.state.settings.autoTaxPercentage / 100)));
     const user = this.state.users.find(u => u.id === userId);
 
     if (method === 'Top-Up Balance') {
-      if (user && user.balance >= amount) {
-        await this.activatePackage(userId, pkgId);
-        user.balance -= amount;
-        this.state.ledger.push({ id: 'PAY_' + Date.now(), userId, amount, type: LedgerType.DEBIT, timestamp: new Date().toISOString(), description: `Sub: ${pkg.name}`, balanceAfter: user.balance, method: 'Wallet' });
-        await this.commit();
-        return { success: true };
-      }
-      return { success: false, message: 'Insufficient liquidity in wallet node.' };
+       if (user && user.balance >= amount) {
+          await this.activatePackage(userId, pkgId);
+          user.balance -= amount;
+          this.state.ledger.push({ id: 'PAY_'+Date.now(), userId, amount, type: LedgerType.DEBIT, timestamp: new Date().toISOString(), description: `Sub: ${pkg.name}`, balanceAfter: user.balance, method: 'Wallet' });
+          await this.commit();
+          return { success: true };
+       }
+       return { success: false, message: 'Insufficient liquidity in wallet node.' };
     }
 
     this.state.packageRequests.push({
-      id: 'PRQ-' + Date.now(),
+      id: 'PRQ-'+Date.now(),
       userId,
       userName: user?.name || 'Unknown',
       packageId: pkgId,
@@ -808,27 +804,34 @@ class DB {
   async updateAIConfig(c: AIConfig) { this.state.settings.aiConfig = c; await this.commit(); }
   async toggleAIKillSwitch(active: boolean) { this.state.settings.aiConfig.killSwitchActive = active; await this.commit(); }
   async updateAICallConfig(c: any) { this.state.settings.aiCallConfig = c; await this.commit(); }
-  async addCallLog(l: any) { this.state.aiCallLogs.push({ ...l, id: 'CALL_' + Date.now() }); await this.commit(); }
-  async addNetworkNode(d: any) { this.state.networkNodes.push({ ...d, id: 'NODE_' + Date.now(), status: 'Connected', lastHeartbeat: new Date().toISOString() }); await this.commit(); return { success: true }; }
+  
+  async addCallLog(l: any) { 
+    // Simulated Voice Recording for Admin Listening
+    const dummyAudio = "UklGRuYAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YYIAAAB"; 
+    this.state.aiCallLogs.push({ ...l, id: 'CALL_'+Date.now(), recording: dummyAudio }); 
+    await this.commit(); 
+  }
+
+  async addNetworkNode(d: any) { this.state.networkNodes.push({ ...d, id: 'NODE_'+Date.now(), status: 'Connected', lastHeartbeat: new Date().toISOString() }); await this.commit(); return { success: true }; }
   async testNodeConnection(id: string) { return { success: true, message: 'Node Online' }; }
-  async addDevice(d: any) { this.state.devices.push({ ...d, id: 'DEV_' + Date.now(), status: 'Connected', lastSeen: new Date().toISOString() }); await this.commit(); }
+  async addDevice(d: any) { this.state.devices.push({ ...d, id: 'DEV_'+Date.now(), status: 'Connected', lastSeen: new Date().toISOString() }); await this.commit(); }
   async updateDevice(id: string, d: any) { const idx = this.state.devices.findIndex(x => x.id === id); if (idx !== -1) { this.state.devices[idx] = { ...this.state.devices[idx], ...d }; await this.commit(); } }
   async deleteDevice(id: string) { this.state.devices = this.state.devices.filter(x => x.id !== id); await this.commit(); }
   async testDeviceConnection(id: string) { return true; }
-
+  
   async auditInfrastructure(): Promise<ConnectionAudit> { return { success: true, checks: [{ name: 'Firewall Registry', details: 'All gateways verified', passed: true }, { name: 'Ledger Node', details: 'Double-entry synced', passed: true }, { name: 'AI Core', details: 'Heuristic Pulse Active', passed: true }] }; }
   async impersonateUser(id: string) { this.state.isImpersonating = true; const user = this.state.users.find(u => u.id === id); if (user) this.state.currentUser = { ...user, role: Role.CUSTOMER }; this.notify(); }
-
-  async saveMapping(m: any) {
-    const idx = this.state.networkMappings.findIndex(x => x.userId === m.userId);
-    if (idx !== -1) { this.state.networkMappings[idx] = m; }
-    else { this.state.networkMappings.push(m); }
-    await this.commit();
+  
+  async saveMapping(m: any) { 
+    const idx = this.state.networkMappings.findIndex(x => x.userId === m.userId); 
+    if (idx !== -1) { this.state.networkMappings[idx] = m; } 
+    else { this.state.networkMappings.push(m); } 
+    await this.commit(); 
   }
-
+  
   getMappingForUser(id: string) { return this.state.networkMappings.find(m => m.userId === id); }
-
-  getPendingUniversalRequest(id: string) {
+  
+  getPendingUniversalRequest(id: string) { 
     const pkg = this.state.packageRequests.find(r => r.userId === id && r.status === 'Pending');
     if (pkg) return { ...pkg, unifiedType: 'package' };
     const top = this.state.topupRequests.find(r => r.userId === id && r.status === 'Pending');
@@ -839,44 +842,44 @@ class DB {
   }
 
   async updatePackage(id: string, d: any) { const idx = this.state.packages.findIndex(x => x.id === id); if (idx !== -1) { this.state.packages[idx] = { ...this.state.packages[idx], ...d }; await this.commit(); } }
-  async addPackage(d: any) { this.state.packages.push({ ...d, id: 'PKG_' + Date.now(), deleted: false }); await this.commit(); }
-
+  async addPackage(d: any) { this.state.packages.push({ ...d, id: 'PKG_'+Date.now(), deleted: false }); await this.commit(); }
+  
   async archiveMonth(m: string) { return { success: true, message: 'Registry snapshot committed to archive.' }; }
-
+  
   async bulkDeleteUsers(ids: string[]) { this.state.users = this.state.users.filter(u => !ids.includes(u.id)); await this.commit(); }
   async bulkForcePasswordReset(ids: string[]) { await this.commit(); }
   async bulkTerminateSessions(ids: string[]) { await this.commit(); }
   async bulkActivatePackages(ids: string[], p: string) { await this.commit(); }
   async bulkSetAccountStatus(ids: string[], s: any, r: string) { await this.commit(); }
   async bulkActivatePayLater(ids: string[], p: string, a: number, d: string, r: string) { await this.commit(); }
-  async addTask(t: string, p: any, a?: string, d?: string) { this.state.tasks.push({ id: 'TSK_' + Date.now(), text: t, completed: false, priority: p, assignedTo: a, dueDate: d, order: this.state.tasks.length }); await this.commit(); return { success: true }; }
+  async addTask(t: string, p: any, a?: string, d?: string) { this.state.tasks.push({ id: 'TSK_'+Date.now(), text: t, completed: false, priority: p, assignedTo: a, dueDate: d, order: this.state.tasks.length }); await this.commit(); return { success: true }; }
   async toggleTask(id: string) { const idx = this.state.tasks.findIndex(t => t.id === id); if (idx !== -1) { this.state.tasks[idx].completed = !this.state.tasks[idx].completed; await this.commit(); } return { success: true }; }
   async deleteTask(id: string) { this.state.tasks = this.state.tasks.filter(t => t.id !== id); await this.commit(); return { success: true }; }
   async reorderTasks(t: any[]) { this.state.tasks = t; await this.commit(); return { success: true }; }
   async addDealerLoad(e: string, a: number, m: string, d: string) { return { success: true }; }
   async clearStaffCollections(e: string) { return true; }
   async approvePayment(id: string) { const idx = this.state.payments.findIndex(p => p.id === id); if (idx !== -1) { this.state.payments[idx].status = 'Approved'; await this.commit(); } }
-  async addManualPayment(id: string, amount: number, method: any) { const user = this.state.users.find(u => u.id === id); if (user) { this.state.payments.push({ id: 'PAY_' + Date.now(), userId: id, userName: user.name, amount, status: 'Approved', method, timestamp: new Date().toISOString(), collectorEmail: 'admin@opticx.com', collectorName: 'System', invoiceId: 'MANUAL' }); user.balance -= amount; await this.commit(); } }
+  async addManualPayment(id: string, amount: number, method: any) { const user = this.state.users.find(u => u.id === id); if (user) { this.state.payments.push({ id: 'PAY_'+Date.now(), userId: id, userName: user.name, amount, status: 'Approved', method, timestamp: new Date().toISOString(), collectorEmail: 'admin@opticx.com', collectorName: 'System', invoiceId: 'MANUAL' }); user.balance -= amount; await this.commit(); } }
   async updateConnectionDetails(id: string, d: any) { const idx = this.state.users.findIndex(u => u.id === id); if (idx !== -1) { this.state.users[idx] = { ...this.state.users[idx], ...d }; await this.commit(); return { success: true }; } return { success: false }; }
   async updateModulePermission(id: string, d: any) { const idx = this.state.permissions.findIndex(p => p.id === id); if (idx !== -1) { this.state.permissions[idx] = { ...this.state.permissions[idx], ...d }; await this.commit(); } }
-  async auditOverdueLoads() { }
-
+  async auditOverdueLoads() {}
+  
   async convertPointsToWallet(id: string) { return { success: true, amount: 100, message: 'Points successfully provisioned to wallet.' }; }
-
-  async submitWithdrawalRequest(id: string) {
+  
+  async submitWithdrawalRequest(id: string) { 
     const user = this.state.users.find(u => u.id === id);
     if (!user) return { success: false, message: 'User identity not found.' };
-    return { success: true, message: 'Withdrawal protocol dispatched for audit.' };
+    return { success: true, message: 'Withdrawal protocol dispatched for audit.' }; 
   }
-
+  
   async resolveNOCEvent(id: string) { const idx = this.state.nocEvents.findIndex(e => e.id === id); if (idx !== -1) { this.state.nocEvents[idx].status = 'Resolved'; await this.commit(); } }
-  async addNOCEvent(e: any) { this.state.nocEvents.push({ ...e, id: 'NOC_' + Date.now(), status: 'Active', startTime: new Date().toISOString() }); await this.commit(); }
+  async addNOCEvent(e: any) { this.state.nocEvents.push({ ...e, id: 'NOC_'+Date.now(), status: 'Active', startTime: new Date().toISOString() }); await this.commit(); }
   async assignTicket(id: string, e: string) { const idx = this.state.tickets.findIndex(t => t.id === id); if (idx !== -1) { this.state.tickets[idx].assignedTo = e; await this.commit(); } }
-  async adjustScoreManually(id: string, delta: number, reason: string, admin: string) { const idx = this.state.users.findIndex(u => u.id === id); if (idx !== -1) { this.state.users[idx].creditScore += delta; this.state.creditLogs.push({ id: 'SCR_' + Date.now(), userId: id, delta, newScore: this.state.users[idx].creditScore, reason, timestamp: new Date().toISOString(), source: 'Admin', adminEmail: admin }); await this.commit(); } }
+  async adjustScoreManually(id: string, delta: number, reason: string, admin: string) { const idx = this.state.users.findIndex(u => u.id === id); if (idx !== -1) { this.state.users[idx].creditScore += delta; this.state.creditLogs.push({ id: 'SCR_'+Date.now(), userId: id, delta, newScore: this.state.users[idx].creditScore, reason, timestamp: new Date().toISOString(), source: 'Admin', adminEmail: admin }); await this.commit(); } }
   async resetScoreManually(id: string, admin: string) { const idx = this.state.users.findIndex(u => u.id === id); if (idx !== -1) { this.state.users[idx].creditScore = 600; await this.commit(); } }
   async addRole(n: string) { this.state.roles.push(n); await this.commit(); }
   async deleteRole(n: string) { this.state.roles = this.state.roles.filter(r => r !== n); await this.commit(); }
-  async exportVault() { }
+  async exportVault() {}
   async toggleDirectoryView(id: string, show: boolean) { const idx = this.state.settings.appearance.appPages.findIndex(p => p.id === id); if (idx !== -1) { this.state.settings.appearance.appPages[idx].showInDirectory = show; await this.commit(); } return { success: true }; }
   async toggleAppPage(id: string, enabled: boolean) { const idx = this.state.settings.appearance.appPages.findIndex(p => p.id === id); if (idx !== -1) { this.state.settings.appearance.appPages[idx].enabled = enabled; await this.commit(); } return { success: true }; }
   async approveTopupRequest(id: string) { const idx = this.state.topupRequests.findIndex(r => r.id === id); if (idx !== -1) { const req = this.state.topupRequests[idx]; req.status = 'Approved'; await this.processTopup('Admin', req.userId, 'user', req.amount); await this.commit(); } }
@@ -887,7 +890,7 @@ class DB {
   async sendInvoiceEmail(id: string) { return true; }
 
   async submitSignupRequest(data: any) {
-    this.state.signupRequests.push({ ...data, id: 'SR-' + Date.now(), status: 'Pending', timestamp: new Date().toISOString() });
+    this.state.signupRequests.push({ ...data, id: 'SR-'+Date.now(), status: 'Pending', timestamp: new Date().toISOString() });
     await this.commit();
     return { success: true, message: 'Signup node initialized.' };
   }
@@ -911,7 +914,7 @@ class DB {
       load.expiryTimestamp = newDate.toISOString();
       if (!load.extensions) load.extensions = [];
       load.extensions.push({
-        id: 'EXT-' + Date.now(),
+        id: 'EXT-'+Date.now(),
         emergencyLoadId: id,
         extendedByAdminId: 'admin',
         oldDueDate: oldDate.toISOString(),
@@ -956,13 +959,13 @@ class DB {
     return { success: false, message: 'Request not found.' };
   }
 
-  getHealth(): DBHealth {
-    return {
-      documentSize: JSON.stringify(this.state).length,
-      logs: this.state.notifications || [],
-      lastSync: new Date().toISOString(),
-      isCloudSynced: !!this.firestore
-    };
+  getHealth(): DBHealth { 
+    return { 
+      documentSize: JSON.stringify(this.state).length, 
+      logs: this.state.notifications || [], 
+      lastSync: new Date().toISOString(), 
+      isCloudSynced: !!this.firestore 
+    }; 
   }
 
   async updateAppSection(section: AppSection) {

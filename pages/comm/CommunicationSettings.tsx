@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { AppState, CommunicationSettings, EmailGatewayMode } from '@/types';
-import { db } from '@/db';
+import { AppState, CommunicationSettings, EmailGatewayMode } from '../../types';
+import { db } from '../../db';
 // Added missing icons to imports
 import { 
   Settings, Mail, Globe, Clock, ShieldCheck, 
