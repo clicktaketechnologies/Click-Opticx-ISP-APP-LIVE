@@ -9,12 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/genai": "^1.35.0",
+    "@vapi-ai/web": "^2.5.2",
+    "firebase": "10.13.1",
+    "lucide-react": "0.463.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "lucide-react": "0.463.0",
-    "recharts": "2.13.3",
-    "firebase": "10.13.1",
-    "@google/genai": "^1.35.0"
+    "recharts": "2.13.3"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

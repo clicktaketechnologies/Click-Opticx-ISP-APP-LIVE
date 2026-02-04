@@ -24,7 +24,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
    const [isSendingTest, setIsSendingTest] = useState(false);
    const [testEmailData, setTestEmailData] = useState({
       recipient: '',
-      subject: 'Operational Test Dispatch - NetRecover',
+      subject: 'Operational Test Dispatch - Click Opticx',
       templateId: state.emailTemplates[0]?.id || ''
    });
 

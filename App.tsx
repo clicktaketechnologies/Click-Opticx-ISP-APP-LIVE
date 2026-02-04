@@ -1,64 +1,65 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { db } from './db';
 import { Role, AppState, SystemNotification } from './types';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import UserManagement from './pages/UserManagement';
-import RecoveryDashboard from './pages/RecoveryDashboard';
-import AccountingLedger from './pages/AccountingLedger';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-import PackagesPage from './pages/PackagesPage';
-import ArchivePage from './pages/ArchivePage';
-import AccessControlPage from './pages/AccessControlPage';
-import DealerManagement from './pages/DealerManagement';
-import PermissionsPage from './pages/PermissionsPage';
-import DataImportPage from './pages/DataImportPage';
-import DatabaseMonitor from './pages/DatabaseMonitor';
-import BusinessSettings from './pages/BusinessSettings';
-import PaymentMethodsIndex from './pages/PaymentMethodsIndex';
-import StripeSettings from './pages/gateways/StripeSettings';
-import CashSettings from './pages/gateways/CashSettings';
-import JazzCashSettings from './pages/gateways/JazzCashSettings';
-import EasyPaisaSettings from './pages/gateways/EasyPaisaSettings';
-import PayPalSettings from './pages/gateways/PayPalSettings';
-import PayFastSettings from './pages/gateways/PayFastSettings';
-import HomeCollectionSettings from './pages/gateways/HomeCollectionSettings';
-import BankTransferSettings from './pages/gateways/BankTransferSettings';
-import InvoiceGenerator from './pages/InvoiceGenerator';
-import InvoiceManagementAdmin from './pages/InvoiceManagementAdmin';
-import CustomerPortal from './pages/CustomerPortal';
-import SubscriberApp from './SubscriberApp';
-import UserAppManagement from './pages/UserAppManagement';
-import WalletManagement from './pages/WalletManagement';
-import EmergencyLoadAdmin from './pages/EmergencyLoadAdmin';
-import CreditScoreAdmin from './pages/CreditScoreAdmin';
-import ReferralAdmin from './pages/ReferralAdmin';
-import ConnectionSetupAdmin from './pages/ConnectionSetupAdmin';
-import TicketManagementAdmin from './pages/TicketManagementAdmin';
-import TaskManagement from './pages/TaskManagement';
-import AboutUs from './pages/AboutUs';
-import AdminLiveMonitoring from './pages/AdminLiveMonitoring';
-import AdminPasswordRequests from './pages/AdminPasswordRequests';
-import DeviceManagement from './pages/DeviceManagement';
-import UserDeviceMapping from './pages/UserDeviceMapping';
-import AdminProfile from './pages/AdminProfile';
-import AIControlPlane from './pages/AIControlPlane';
-import AICallingAdmin from './pages/AICallingAdmin';
-import AICallLogs from './pages/AICallLogs';
 import AIAgentWidget from './components/AIAgentWidget';
-import EmailCampaigns from './pages/comm/EmailCampaigns';
-import EmailTemplates from './pages/comm/EmailTemplates';
-import AutomationRules from './pages/comm/AutomationRules';
-import PushNotifications from './pages/comm/PushNotifications';
-import AudienceSegments from './pages/comm/AudienceSegments';
-import DeliveryLogs from './pages/comm/DeliveryLogs';
-import CommunicationSettingsPage from './pages/comm/CommunicationSettings';
-import SenderIdentities from './pages/comm/SenderIdentities';
-// Import missing MasterApprovalDashboard
-import MasterApprovalDashboard from './pages/MasterApprovalDashboard';
 import { Loader2, ShieldAlert, LogOut, Cloud, X, Zap, ShieldCheck } from 'lucide-react';
+
+// Lazy load pages for performance
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
+const RecoveryDashboard = lazy(() => import('./pages/RecoveryDashboard'));
+const AccountingLedger = lazy(() => import('./pages/AccountingLedger'));
+const PackagesPage = lazy(() => import('./pages/PackagesPage'));
+const ArchivePage = lazy(() => import('./pages/ArchivePage'));
+const AccessControlPage = lazy(() => import('./pages/AccessControlPage'));
+const DealerManagement = lazy(() => import('./pages/DealerManagement'));
+const PermissionsPage = lazy(() => import('./pages/PermissionsPage'));
+const DataImportPage = lazy(() => import('./pages/DataImportPage'));
+const DatabaseMonitor = lazy(() => import('./pages/DatabaseMonitor'));
+const BusinessSettings = lazy(() => import('./pages/BusinessSettings'));
+const PaymentMethodsIndex = lazy(() => import('./pages/PaymentMethodsIndex'));
+const StripeSettings = lazy(() => import('./pages/gateways/StripeSettings'));
+const CashSettings = lazy(() => import('./pages/gateways/CashSettings'));
+const JazzCashSettings = lazy(() => import('./pages/gateways/JazzCashSettings'));
+const EasyPaisaSettings = lazy(() => import('./pages/gateways/EasyPaisaSettings'));
+const PayPalSettings = lazy(() => import('./pages/gateways/PayPalSettings'));
+const PayFastSettings = lazy(() => import('./pages/gateways/PayFastSettings'));
+const HomeCollectionSettings = lazy(() => import('./pages/gateways/HomeCollectionSettings'));
+const BankTransferSettings = lazy(() => import('./pages/gateways/BankTransferSettings'));
+const InvoiceGenerator = lazy(() => import('./pages/InvoiceGenerator'));
+const InvoiceManagementAdmin = lazy(() => import('./pages/InvoiceManagementAdmin'));
+const CustomerPortal = lazy(() => import('./pages/CustomerPortal'));
+const SubscriberApp = lazy(() => import('./SubscriberApp'));
+const UserAppManagement = lazy(() => import('./pages/UserAppManagement'));
+const WalletManagement = lazy(() => import('./pages/WalletManagement'));
+const EmergencyLoadAdmin = lazy(() => import('./pages/EmergencyLoadAdmin'));
+const CreditScoreAdmin = lazy(() => import('./pages/CreditScoreAdmin'));
+const ReferralAdmin = lazy(() => import('./pages/ReferralAdmin'));
+const ConnectionSetupAdmin = lazy(() => import('./pages/ConnectionSetupAdmin'));
+const TicketManagementAdmin = lazy(() => import('./pages/TicketManagementAdmin'));
+const TaskManagement = lazy(() => import('./pages/TaskManagement'));
+const AboutUs = lazy(() => import('./pages/AboutUs'));
+const AdminLiveMonitoring = lazy(() => import('./pages/AdminLiveMonitoring'));
+const AdminPasswordRequests = lazy(() => import('./pages/AdminPasswordRequests'));
+const DeviceManagement = lazy(() => import('./pages/DeviceManagement'));
+const UserDeviceMapping = lazy(() => import('./pages/UserDeviceMapping'));
+const AdminProfile = lazy(() => import('./pages/AdminProfile'));
+const AIControlPlane = lazy(() => import('./pages/AIControlPlane'));
+const AICallingAdmin = lazy(() => import('./pages/AICallingAdmin'));
+const AICallLogs = lazy(() => import('./pages/AICallLogs'));
+const EmailCampaigns = lazy(() => import('./pages/comm/EmailCampaigns'));
+const EmailTemplates = lazy(() => import('./pages/comm/EmailTemplates'));
+const AutomationRules = lazy(() => import('./pages/comm/AutomationRules'));
+const PushNotifications = lazy(() => import('./pages/comm/PushNotifications'));
+const AudienceSegments = lazy(() => import('./pages/comm/AudienceSegments'));
+const DeliveryLogs = lazy(() => import('./pages/comm/DeliveryLogs'));
+const CommunicationSettingsPage = lazy(() => import('./pages/comm/CommunicationSettings'));
+const SenderIdentities = lazy(() => import('./pages/comm/SenderIdentities'));
+const MasterApprovalDashboard = lazy(() => import('./pages/MasterApprovalDashboard'));
 
 const App: React.FC = () => {
   const [authState, setAuthState] = useState<AppState['currentUser']>(db.getState().currentUser);
@@ -76,8 +77,8 @@ const App: React.FC = () => {
       setIsConfigured(db.isConfigured());
       const user = newState.currentUser;
       if (user && user.role !== Role.CUSTOMER) {
-         const criticals = newState.notifications.filter(n => !n.read && n.priority === 'critical' && (n.audience === 'admin' || n.audience === 'system'));
-         if (criticals.length > 0) setCriticalAlert(criticals[0]);
+        const criticals = newState.notifications.filter(n => !n.read && n.priority === 'critical' && (n.audience === 'admin' || n.audience === 'system'));
+        if (criticals.length > 0) setCriticalAlert(criticals[0]);
       }
     });
     return () => unsubscribe();
@@ -95,12 +96,12 @@ const App: React.FC = () => {
 
   const handleLogin = (credential: string, pass: string) => db.login(credential, pass);
   const handleLogout = () => { db.logout(); setCurrentPage('dashboard'); };
-  
-  const navigateTo = (page: string, params?: { userId?: string }) => { 
+
+  const navigateTo = (page: string, params?: { userId?: string }) => {
     if (params?.userId) setTargetUserId(params.userId);
     else setTargetUserId(null);
-    setCurrentPage(page); 
-    setIsSidebarOpen(false); 
+    setCurrentPage(page);
+    setIsSidebarOpen(false);
   };
 
   const dismissCritical = () => {
@@ -108,20 +109,20 @@ const App: React.FC = () => {
     setCriticalAlert(null);
   };
 
-  if (!authState) return <Login onLogin={handleLogin} />;
-  
+  if (!authState) return <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center"><Loader2 className="text-white animate-spin" size={32} /></div>}><Login onLogin={handleLogin} /></Suspense>;
+
   if (authState.role === Role.CUSTOMER) {
     return (
-      <>
+      <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center"><Loader2 className="text-indigo-600 animate-spin" size={48} /></div>}>
         {dbState.isImpersonating && (
           <div className="fixed top-0 inset-x-0 bg-rose-600 text-white p-3 z-[1000] flex items-center justify-between shadow-2xl animate-in slide-in-from-top duration-500">
-             <div className="flex items-center gap-3"><ShieldAlert size={20} className="animate-pulse" /><p className="text-[10px] font-black uppercase tracking-widest">Admin View Active: {authState.name}</p></div>
-             <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-lg text-[9px] font-black uppercase"><LogOut size={12} /> Exit</button>
+            <div className="flex items-center gap-3"><ShieldAlert size={20} className="animate-pulse" /><p className="text-[10px] font-black uppercase tracking-widest">Admin View Active: {authState.name}</p></div>
+            <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-lg text-[9px] font-black uppercase"><LogOut size={12} /> Exit</button>
           </div>
         )}
         <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />
         <AIAgentWidget state={dbState} />
-      </>
+      </Suspense>
     );
   }
 
@@ -129,13 +130,13 @@ const App: React.FC = () => {
     <div className="flex min-h-screen bg-slate-50">
       {criticalAlert && (
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[3000] flex items-center justify-center p-6">
-           <div className="bg-white rounded-[2.5rem] w-full max-lg shadow-2xl overflow-hidden border-[8px] border-rose-500 animate-in zoom-in duration-300">
-              <div className="p-10 text-center space-y-8">
-                 <div className="w-24 h-24 bg-rose-600 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-pulse"><ShieldAlert size={56} strokeWidth={3}/></div>
-                 <div className="space-y-3"><h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">{criticalAlert.title}</h3><p className="text-[11px] text-slate-500 font-bold uppercase tracking-[0.2em] leading-relaxed px-4">{criticalAlert.message}</p></div>
-                 <button onClick={dismissCritical} className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 shadow-xl transition-all flex items-center justify-center gap-2">Acknowledge Handshake <ShieldCheck size={18}/></button>
-              </div>
-           </div>
+          <div className="bg-white rounded-[2.5rem] w-full max-lg shadow-2xl overflow-hidden border-[8px] border-rose-500 animate-in zoom-in duration-300">
+            <div className="p-10 text-center space-y-8">
+              <div className="w-24 h-24 bg-rose-600 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-pulse"><ShieldAlert size={56} strokeWidth={3} /></div>
+              <div className="space-y-3"><h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">{criticalAlert.title}</h3><p className="text-[11px] text-slate-500 font-bold uppercase tracking-[0.2em] leading-relaxed px-4">{criticalAlert.message}</p></div>
+              <button onClick={dismissCritical} className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 shadow-xl transition-all flex items-center justify-center gap-2">Acknowledge Handshake <ShieldCheck size={18} /></button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -144,7 +145,8 @@ const App: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <Header user={authState as any} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onProfileClick={() => navigateTo('admin-profile')} onLogout={handleLogout} />
         <main className="p-4 md:p-8 flex-1 overflow-x-hidden">
-           {(() => {
+          <Suspense fallback={<div className="h-full w-full flex items-center justify-center"><Loader2 className="text-indigo-600 animate-spin" size={48} /></div>}>
+            {(() => {
               switch (currentPage) {
                 case 'dashboard': return <Dashboard state={dbState} />;
                 case 'ai-control': return <AIControlPlane state={dbState} />;
@@ -196,10 +198,13 @@ const App: React.FC = () => {
                 case 'comm-identities': return <SenderIdentities state={dbState} />;
                 default: return <Dashboard state={dbState} />;
               }
-           })()}
+            })()}
+          </Suspense>
         </main>
       </div>
-      <AIAgentWidget state={dbState} />
+      <Suspense fallback={null}>
+        <AIAgentWidget state={dbState} />
+      </Suspense>
     </div>
   );
 };

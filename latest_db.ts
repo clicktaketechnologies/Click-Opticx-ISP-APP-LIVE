@@ -1,20 +1,20 @@
-
+﻿
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, Firestore } from 'firebase/firestore';
-import {
+import { 
   AppState, UserStatus, PaymentStatus, LedgerType, VerificationStatus,
   ISPUser, Package, PaymentMethod, Role, SystemSettings, ReferralRecord,
   StaffUser, PaymentRecord, TopupRequest, ArchiveRecord, SecurityLog, PackageRequest,
-  CreditScoreLog, TechnicalConfig, WithdrawalRequest, UserSession,
-  ConnectionStatus, Invoice, LineItem, SupportTicket, TicketStatus, TicketPriority,
-  TicketComment, NOCEvent, SystemNotification, EmergencyLoad, InternalTask,
-  ConnectedDevice, PasswordResetRequest, NetworkNode, AppPage, HomeCard,
+  CreditScoreLog, TechnicalConfig, WithdrawalRequest, UserSession, 
+  ConnectionStatus, Invoice, LineItem, SupportTicket, TicketStatus, TicketPriority, 
+  TicketComment, NOCEvent, SystemNotification, EmergencyLoad, InternalTask, 
+  ConnectedDevice, PasswordResetRequest, NetworkNode, AppPage, HomeCard, 
   Device, NetworkMapping, KYCDocument, AIActionLog, AIConfig, AIEvent, AISuggestion,
   NotificationAudience, NotificationPriority, AICallConfig, AICallLog, AICallRule,
-  EmailCampaign, EmailTemplate, AudienceSegment, CommunicationAutomationRule, DeliveryLog, CommunicationSettings, SenderIdentity, PaymentGateway, AppSection, InfrastructureConfig, LegalConfig, AITrainingPrompt
+  EmailCampaign, EmailTemplate, AudienceSegment, CommunicationAutomationRule, DeliveryLog, CommunicationSettings, SenderIdentity, PaymentGateway, AppSection, InfrastructureConfig, LegalConfig
 } from './types';
 
-// Add missing types for monitoring
+// Monitoring interface nodes
 export interface DBHealth {
   documentSize: number;
   logs: any[];
@@ -28,13 +28,12 @@ export interface ConnectionAudit {
 }
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBdJsGA5X-eIiRFKo1jtCSnsxC",
-  authDomain: "ap-click-opticx.firebaseapp.com",
-  projectId: "ap-click-opticx",
-  storageBucket: "ap-click-opticx.appspot.com",
-  messagingSenderId: "1036833166674",
-  appId: "1:1036833166674:web:2b53879968b8881c29a27e",
-  measurementId: "G-QG9XZZ3M4F"
+  apiKey: "api-key-placeholder",
+  authDomain: "click-opticx.firebaseapp.com",
+  projectId: "click-opticx",
+  storageBucket: "click-opticx.appspot.com",
+  messagingSenderId: "sender-id",
+  appId: "app-id"
 };
 
 const INITIAL_AI_CONFIG: AIConfig = {
@@ -55,14 +54,14 @@ const INITIAL_AI_CONFIG: AIConfig = {
     telemetry: true,
     adminActions: true
   },
-  aiKeys: { gemini: 'AIzaSyBt7ge_ClOrgTULZc8LltJ3TTKcVHt5s-0', openai: '', deepseek: '', anthropic: '' }
+  aiKeys: { gemini: '', openai: '', deepseek: '', anthropic: '' }
 };
 
 const INITIAL_INFRA_CONFIG: InfrastructureConfig = {
-  domainNode: 'clickopticx.com',
+  domainNode: 'netrecover.pk',
   targetIP: '103.14.55.1',
   dnsStatus: 'PROPAGATED',
-  nameservers: ['ns1.clickopticx.com', 'ns2.clickopticx.com']
+  nameservers: ['ns1.netrecover.pk', 'ns2.netrecover.pk']
 };
 
 const INITIAL_LEGAL_CONFIG: LegalConfig = {
@@ -78,8 +77,8 @@ const INITIAL_COMM_CONFIG: CommunicationSettings = {
   providerConfig: { apiKey: '', senderDomain: '' },
   smtpConfig: { host: 'smtp.clickopticx.com', port: 587, encryption: 'TLS', username: 'relay@clickopticx.com' },
   senderIdentities: [
-    { id: 'SDR-1', name: 'Click Opticx Support', email: 'support@clickopticx.com', isVerified: true, isDefault: true, createdAt: new Date().toISOString() },
-    { id: 'SDR-2', name: 'Click Opticx Billing', email: 'billing@clickopticx.com', isVerified: false, isDefault: false, createdAt: new Date().toISOString() }
+    { id: 'SDR-1', name: 'NetRecover Support', email: 'support@clickopticx.com', isVerified: true, isDefault: true, createdAt: new Date().toISOString() },
+    { id: 'SDR-2', name: 'NetRecover Billing', email: 'billing@clickopticx.com', isVerified: false, isDefault: false, createdAt: new Date().toISOString() }
   ],
   pushEnabled: true,
   quietHours: { start: '22:00', end: '08:00', enabled: true },
@@ -113,14 +112,12 @@ const INITIAL_APP_PAGES: AppPage[] = [
   { id: 'qibla', label: 'Qibla Finder', icon: 'Compass', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#b45309' },
   { id: 'tasbih', label: 'Digital Tasbih', icon: 'Fingerprint', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#334155' },
   { id: 'live-usage', label: 'Live Usage', icon: 'Monitor', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#3b82f6' },
-  { id: 'billing', label: 'Billing History', icon: 'FileText', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#8b5cf6' },
-  { id: 'credit-score', label: 'Trust Score', icon: 'BarChart3', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
-  { id: 'weather', label: 'Weather', icon: 'Cloud', category: 'Utility', enabled: true, showInDirectory: true, isDefault: false, swatch: '#0ea5e9' },
   { id: 'speed-test', label: 'Speed Test', icon: 'Gauge', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#6366f1' },
   { id: 'connection', label: 'Connection', icon: 'Signal', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#4f46e5' },
   { id: 'reset-password', label: 'Reset Wifi', icon: 'Key', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
   { id: 'news', label: 'Broadcasts', icon: 'Bell', category: 'Communication', enabled: true, showInDirectory: true, isDefault: false, swatch: '#ef4444' },
   { id: 'referral', label: 'Refer & Earn', icon: 'Gift', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
+  { id: 'weather', label: 'Weather', icon: 'Sun', category: 'Utility', enabled: true, showInDirectory: true, isDefault: false, swatch: '#06b6d4' },
   { id: 'legal', label: 'Legal Center', icon: 'ShieldCheck', category: 'Legal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#64748b' },
 ];
 
@@ -128,10 +125,10 @@ const INITIAL_APP_SECTIONS: AppSection[] = [
   { id: 'status', label: 'CONNECTIVITY STATUS', enabled: true, order: 0, layout: 'Grid', gridCols: 1, itemIds: [] },
   { id: 'rescue', label: 'EMERGENCY CREDITS', enabled: true, order: 1, layout: 'Grid', gridCols: 1, itemIds: [] },
   { id: 'credit', label: 'FISCAL TRUST SCORE', enabled: true, order: 2, layout: 'Grid', gridCols: 1, itemIds: [] },
-  { id: 'fiscal-summary', label: 'FISCAL SUMMARY', enabled: true, order: 3, layout: 'Grid', gridCols: 2, itemIds: ['billing', 'credit-score'], isSpecialNode: true },
+  { id: 'fiscal-summary', label: 'FISCAL SUMMARY', enabled: true, order: 3, layout: 'Grid', gridCols: 2, itemIds: [], isSpecialNode: true },
   { id: 'islamic', label: 'ISLAMIC TOOLS', enabled: true, order: 4, layout: 'Grid', gridCols: 4, itemIds: ['namaz', 'quran', 'qibla', 'tasbih'] },
-  { id: 'technical', label: 'TECHNICAL', enabled: true, order: 5, layout: 'Grid', gridCols: 2, itemIds: ['live-usage', 'speed-test', 'connection', 'reset-password', 'connected-devices'] },
-  { id: 'daily-tools', label: 'DAILY TOOLS', enabled: true, order: 6, layout: 'Grid', gridCols: 2, itemIds: ['news', 'referral', 'weather', 'support', 'about-us'] },
+  { id: 'technical', label: 'TECHNICAL', enabled: true, order: 5, layout: 'Grid', gridCols: 2, itemIds: ['live-usage', 'speed-test', 'connection', 'reset-password'] },
+  { id: 'daily-tools', label: 'DAILY TOOLS', enabled: true, order: 6, layout: 'Grid', gridCols: 2, itemIds: ['news', 'referral', 'weather', 'support'] },
   { id: 'legal', label: 'LEGAL & COMPLIANCE', enabled: true, order: 7, layout: 'Grid', gridCols: 1, itemIds: ['legal'] },
   { id: 'directory', label: 'ALL SERVICES', enabled: true, order: 8, layout: 'Grid', gridCols: 2, itemIds: [] }
 ];
@@ -139,34 +136,9 @@ const INITIAL_APP_SECTIONS: AppSection[] = [
 const ALL_ROLES = Object.values(Role).filter(r => r !== Role.CUSTOMER);
 
 const INITIAL_STATE: AppState = {
-  users: [
-    {
-      id: 'USR-DEMO-01',
-      connectionId: 'CO-KHI-4492',
-      name: 'Kashif Khan',
-      email: 'kashif.khan@gmail.com',
-      phone: '03001234567',
-      address: 'Flat 402, Al-Rehman Towers, Gulshan-e-Iqbal',
-      area: 'Gulshan-e-Iqbal',
-      balance: 1500,
-      status: UserStatus.ACTIVE,
-      packageId: 'PKG-2',
-      cnic: '42101-1234567-1',
-      password: 'user123',
-      creditScore: 780,
-      activationCount: 12,
-      portalEnabled: true,
-      connectionType: 'Fiber',
-      activityLog: [],
-      welcomeChecklistShown: true,
-      verificationStatus: VerificationStatus.VERIFIED,
-      verifiedStatus: { phone: true, email: true, identity: true },
-      verificationSuccessShown: true,
-      profileImage: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&fit=crop'
-    }
-  ],
+  users: [],
   staff: [
-    { email: 'admin@clickopticx.com', name: 'Admin Console', role: Role.SUPER_ADMIN, status: 'Active', password: 'superpass', balance: 1000000 },
+    { email: 'admin@clickopticx.com', name: 'System Administrator', role: Role.SUPER_ADMIN, status: 'Active', password: 'superpass', balance: 1000000 },
   ],
   packages: [
     { id: 'PKG-1', name: 'Home Basic 15M', subtitle: 'Standard Tier', speed: '15 Mbps', uploadSpeed: '10 Mbps', dataLimit: 'Unlimited', price: 1500, taxRate: 15, duration: 30, color: '#3b82f6', isRecommended: true },
@@ -189,10 +161,6 @@ const INITIAL_STATE: AppState = {
   aiSuggestions: [],
   aiCallLogs: [],
   aiCallRules: [],
-  aiTrainingPrompts: [
-    { id: 'PR-1', query: 'Why is my net red?', expectedOutcome: 'Technical Handshake - Router Check', actualOutcome: 'General Outage Check', confidence: 0.52, timestamp: new Date().toISOString(), status: 'PENDING' },
-    { id: 'PR-2', query: 'Can I pay next week?', expectedOutcome: 'Offer Emergency Load', actualOutcome: 'Billing Status Explained', confidence: 0.61, timestamp: new Date().toISOString(), status: 'PENDING' }
-  ],
   emailCampaigns: [],
   emailTemplates: [
     { id: 'TMP-1', name: 'Payment Reminder', content: 'Dear {{user.name}}, your balance is {{user.balance}}. Please clear it.', category: 'Billing', lastUpdated: new Date().toISOString() },
@@ -204,13 +172,13 @@ const INITIAL_STATE: AppState = {
     { id: 'SEG-2', name: 'High Risk (Credit < 500)', description: 'Users with low credit scores', filters: { creditScore: { $lt: 500 } }, subscriberCount: 0 }
   ],
   commAutomationRules: [
-    {
-      id: 'RULE-EXP-7',
-      name: '7-Day Package Expiry Alert',
-      trigger: 'Package_Expiry',
-      condition: 'days_remaining < 7',
-      enabled: true,
-      actions: [{ type: 'Email', templateId: 'PKG_EXPIRY_REMINDER' }]
+    { 
+      id: 'RULE-EXP-7', 
+      name: '7-Day Package Expiry Alert', 
+      trigger: 'Package_Expiry', 
+      condition: 'days_remaining < 7', 
+      enabled: true, 
+      actions: [{ type: 'Email', templateId: 'PKG_EXPIRY_REMINDER' }] 
     }
   ],
   deliveryLogs: [],
@@ -221,10 +189,10 @@ const INITIAL_STATE: AppState = {
     digitalPresence: { website: "https://clickopticx.com", portal: "https://my.clickopticx.com", facebook: "", instagram: "", twitter: "", linkedin: "", youtube: "" },
     invoiceBranding: { logoPreference: "primary", headerText: "TAX INVOICE", footerDisclaimer: "Computer generated document.", authorizedSignature: "", prefix: "CO-INV-", nextNumber: 1001, terms: "Payment due within 5 days.", privacy: "All data encrypted.", refundPolicyUrl: "" },
     notificationBranding: { appSenderName: "CO ALERTS", emailSenderName: "CO SUPPORT", smsSenderId: "CLICKOPTICX" },
-    appearance: {
-      showWallet: true, showEmergencyLoad: true, showAIChat: true, showAICalling: true,
-      showNews: true, showQuickActions: true, maintenanceMode: false,
-      appPages: INITIAL_APP_PAGES,
+    appearance: { 
+      showWallet: true, showEmergencyLoad: true, showAIChat: true, showAICalling: true, 
+      showNews: true, showQuickActions: true, maintenanceMode: false, 
+      appPages: INITIAL_APP_PAGES, 
       homeCards: [],
       sections: INITIAL_APP_SECTIONS
     },
@@ -232,7 +200,7 @@ const INITIAL_STATE: AppState = {
     aboutUs: { vision: "", mission: "", companyStory: "", features: [], values: [], version: "v8.6.0", lastUpdated: new Date().toISOString() },
     notificationTemplates: [],
     footerText: "Official ISP Management Portal",
-    copyrightLine: "© 2025 Click Opticx",
+    copyrightLine: "┬⌐ 2025 Click Opticx",
     socialLinks: [],
     appVersion: "v8.6.0",
     autoTaxPercentage: 15,
@@ -244,7 +212,7 @@ const INITIAL_STATE: AppState = {
     whiteLabelMode: false,
     allowWifiReset: true,
     aiConfig: INITIAL_AI_CONFIG,
-    aiCallConfig: { enabled: true, voiceName: 'Zephyr', persona: 'Professional', language: 'English', speakingSpeed: 1.0, maxCallDuration: 300, officeHours: { start: '09:00', end: '21:00', enabled: true }, knowledgeBase: { outageScripts: '', billingPolicy: '', emergencyTerms: '', customRules: [] } },
+    aiCallConfig: { enabled: true, voiceName: 'Zephyr', persona: 'Professional', language: 'English', speakingSpeed: 1.0, maxCallDuration: 300, officeHours: { start: '09:00', end: '21:00', enabled: true }, knowledgeBase: { outageScripts: '', billingPolicy: '', emergencyTerms: '' } },
     commConfig: INITIAL_COMM_CONFIG,
     infrastructure: INITIAL_INFRA_CONFIG,
     legal: INITIAL_LEGAL_CONFIG
@@ -300,7 +268,6 @@ const INITIAL_STATE: AppState = {
   passwordRequests: [],
   networkNodes: [],
   devices: [],
-  connectedDevices: [],
   networkMappings: []
 };
 
@@ -314,64 +281,12 @@ class DB {
   constructor() {
     this.state = INITIAL_STATE;
     try {
-      const cached = localStorage.getItem('clickopticx_v15_registry');
+      const cached = localStorage.getItem('netrecover_v15_registry');
       if (cached) {
-        const cachedData = JSON.parse(cached);
-        this.state = {
-          ...INITIAL_STATE,
-          ...cachedData,
-          settings: {
-            ...INITIAL_STATE.settings,
-            ...(cachedData.settings || {}),
-            aboutUs: cachedData.settings?.aboutUs || INITIAL_STATE.settings.aboutUs,
-            infrastructure: cachedData.settings?.infrastructure || INITIAL_STATE.settings.infrastructure,
-            legal: cachedData.settings?.legal || INITIAL_STATE.settings.legal,
-            referral: cachedData.settings?.referral || INITIAL_STATE.settings.referral,
-            support: cachedData.settings?.support || INITIAL_STATE.settings.support,
-            aiConfig: cachedData.settings?.aiConfig || INITIAL_STATE.settings.aiConfig,
-            aiCallConfig: cachedData.settings?.aiCallConfig || INITIAL_STATE.settings.aiCallConfig,
-            commConfig: cachedData.settings?.commConfig || INITIAL_STATE.settings.commConfig,
-            branding: cachedData.settings?.branding || INITIAL_STATE.settings.branding,
-            appearance: {
-              ...INITIAL_STATE.settings.appearance,
-              ...(cachedData.settings?.appearance || {}),
-              appPages: this.mergeAppPages(INITIAL_STATE.settings.appearance.appPages, cachedData.settings?.appearance?.appPages || []),
-              sections: this.mergeSections(INITIAL_STATE.settings.appearance.sections, cachedData.settings?.appearance?.sections || [])
-            }
-          }
-        };
+        this.state = { ...INITIAL_STATE, ...JSON.parse(cached) };
       }
-    } catch (e) { }
+    } catch (e) {}
     this.initializeCloudLayer();
-  }
-
-  private mergeAppPages(defaults: AppPage[], cached: AppPage[]): AppPage[] {
-    const merged = [...cached];
-    defaults.forEach(d => {
-      const idx = merged.findIndex(p => p.id === d.id);
-      if (idx === -1) {
-        merged.push(d);
-      } else {
-        // Preserving enabled status if it exists, otherwise use default
-        merged[idx] = { ...d, ...merged[idx] };
-      }
-    });
-    return merged;
-  }
-
-  private mergeSections(defaults: AppSection[], cached: AppSection[]): AppSection[] {
-    const merged = [...cached];
-    defaults.forEach(d => {
-      const idx = merged.findIndex(s => s.id === d.id);
-      if (idx === -1) {
-        merged.push(d);
-      } else {
-        // Merge itemIds to ensure new pages are added to sections
-        const newItemIds = Array.from(new Set([...d.itemIds, ...merged[idx].itemIds]));
-        merged[idx] = { ...d, ...merged[idx], itemIds: newItemIds };
-      }
-    });
-    return merged;
   }
 
   private async initializeCloudLayer() {
@@ -410,26 +325,15 @@ class DB {
     }
   }
 
-  private commitTimer: any = null;
-
   private async commit() {
     try {
-      localStorage.setItem('clickopticx_v15_registry', JSON.stringify(this.state));
-    } catch (e) { }
-
-    if (this.commitTimer) clearTimeout(this.commitTimer);
-    this.commitTimer = setTimeout(async () => {
-      if (this.firestore && this.initialized) {
-        try {
-          const docRef = doc(this.firestore, 'registry', 'master_state');
-          const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
-          await setDoc(docRef, cloudSafeState);
-        } catch (e) {
-          console.error('Cloud synchronization error:', e);
-        }
-      }
-    }, 1000); // 1s debounce for stability and speed
-
+      localStorage.setItem('netrecover_v15_registry', JSON.stringify(this.state));
+    } catch (e) {}
+    if (this.firestore && this.initialized) {
+      const docRef = doc(this.firestore, 'registry', 'master_state');
+      const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
+      await setDoc(docRef, cloudSafeState);
+    }
     this.notify();
   }
 
@@ -456,8 +360,8 @@ class DB {
       return { success: true, user: staff, type: 'staff' };
     }
     const user = this.state.users.find(u => !u.deleted && (
-      (u.username || '').toLowerCase() === input ||
-      (u.email || '').toLowerCase() === input ||
+      (u.username || '').toLowerCase() === input || 
+      (u.email || '').toLowerCase() === input || 
       u.phone === input ||
       u.connectionId === input
     ) && u.password === pass);
@@ -476,7 +380,7 @@ class DB {
   }
 
   async updateSettings(s: SystemSettings) { this.state.settings = s; await this.commit(); }
-
+  
   async updateGatewayConfig(id: string, d: any) {
     const idx = this.state.settings.paymentGateways.findIndex(g => g.id === id);
     if (idx !== -1) {
@@ -485,15 +389,32 @@ class DB {
     }
   }
 
-  async addUser(u: Partial<ISPUser>) {
-    const newUser = { id: 'USR-' + Date.now(), connectionId: 'NR-' + Math.floor(10000 + Math.random() * 90000), balance: 0, creditScore: 600, activationCount: 0, portalEnabled: true, connectionType: 'Fiber', activityLog: [], ...u };
-    this.state.users.push(newUser as any); await this.commit(); return { success: true, user: newUser };
+  async addUser(u: Partial<ISPUser>) { 
+    const newUser = { id: 'USR-'+Date.now(), connectionId: 'NR-'+Math.floor(10000+Math.random()*90000), balance: 0, creditScore: 600, activationCount: 0, portalEnabled: true, connectionType: 'Fiber', activityLog: [], referralPoints: 0, referralCode: 'REF-'+Math.random().toString(36).substr(2, 5).toUpperCase(), ...u }; 
+    this.state.users.push(newUser as any); await this.commit(); return { success: true, user: newUser }; 
   }
 
-  async updateUser(id: string, d: any) {
+  async updateUser(id: string, d: any) { 
     const idx = this.state.users.findIndex(u => u.id === id);
-    if (idx !== -1) { this.state.users[idx] = { ...this.state.users[idx], ...d }; await this.commit(); return { success: true }; }
+    if (idx !== -1) { 
+      this.state.users[idx] = { ...this.state.users[idx], ...d }; 
+      if (this.state.currentUser && this.state.currentUser.id === id) {
+        this.state.currentUser = { ...this.state.currentUser, ...d };
+      }
+      await this.commit(); 
+      return { success: true }; 
+    }
     return { success: false };
+  }
+
+  async findUserForReset(identifier: string) {
+    const input = identifier.toLowerCase().trim();
+    return this.state.users.find(u => !u.deleted && (
+      (u.username || '').toLowerCase() === input || 
+      (u.email || '').toLowerCase() === input || 
+      u.phone === input ||
+      u.connectionId === input
+    ));
   }
 
   async addSenderIdentity(ident: Partial<SenderIdentity>) {
@@ -527,7 +448,6 @@ class DB {
   }
 
   async sendTestEmail(config: any, testData: any) {
-    // Simulated dispatch handshake
     await new Promise(r => setTimeout(r, 2000));
     if (!testData.recipient || !testData.recipient.includes('@')) {
       return { success: false, message: 'Invalid Recipient: RFC 5322 compliance failure.' };
@@ -566,9 +486,9 @@ class DB {
   private calculateSegmentSize(filters: any) {
     if (!filters) return this.state.users.length;
     return this.state.users.filter(u => {
-      if (filters.status && u.status !== filters.status) return false;
-      if (filters.creditScore && filters.creditScore.$lt && u.creditScore >= filters.creditScore.$lt) return false;
-      return true;
+        if (filters.status && u.status !== filters.status) return false;
+        if (filters.creditScore && filters.creditScore.$lt && u.creditScore >= filters.creditScore.$lt) return false;
+        return true;
     }).length;
   }
 
@@ -588,11 +508,11 @@ class DB {
     camp.status = 'Sending';
     this.notify();
     setTimeout(async () => {
-      camp.status = 'Completed';
-      camp.sentAt = new Date().toISOString();
-      camp.stats.sent = this.state.audienceSegments.find(s => s.id === camp.segmentId)?.subscriberCount || 100;
-      await this.commit();
-      this.logNotification('all', 'success', 'Campaign Dispatched', `Email campaign "${camp.name}" has been successfully sent.`);
+        camp.status = 'Completed';
+        camp.sentAt = new Date().toISOString();
+        camp.stats.sent = this.state.audienceSegments.find(s => s.id === camp.segmentId)?.subscriberCount || 100;
+        await this.commit();
+        this.logNotification('all', 'success', 'Campaign Dispatched', `Email campaign "${camp.name}" has been successfully sent.`);
     }, 2000);
   }
 
@@ -607,14 +527,14 @@ class DB {
 
   async sendPushNotification(target: string, msg: string, priority: 'normal' | 'critical') {
     const log: DeliveryLog = {
-      id: 'LOG-' + Date.now(),
-      userId: target === 'all' ? 'SYSTEM' : target,
-      userName: target === 'all' ? 'All Users' : (this.state.users.find(u => u.id === target)?.name || 'Unknown'),
-      type: 'Push',
-      channel: 'In-App/Web',
-      status: 'Delivered',
-      timestamp: new Date().toISOString(),
-      triggerSource: 'Manual'
+        id: 'LOG-' + Date.now(),
+        userId: target === 'all' ? 'SYSTEM' : target,
+        userName: target === 'all' ? 'All Users' : (this.state.users.find(u => u.id === target)?.name || 'Unknown'),
+        type: 'Push',
+        channel: 'In-App/Web',
+        status: 'Delivered',
+        timestamp: new Date().toISOString(),
+        triggerSource: 'Manual'
     };
     this.state.deliveryLogs.unshift(log);
     if (target === 'all') this.state.users.forEach(u => this.logNotification(u.id, 'info', 'Broadcast', msg));
@@ -643,7 +563,7 @@ class DB {
   }
 
   async clearNotifications(targetId: string, audience: 'subscriber' | 'admin') {
-    this.state.notifications = this.state.notifications.filter(n => !((n.targetId === targetId || n.targetId === 'all') && n.audience === audience));
+    this.state.notifications = this.state.notifications.filter(n => !( (n.targetId === targetId || n.targetId === 'all') && n.audience === audience ));
     await this.commit();
   }
 
@@ -656,33 +576,48 @@ class DB {
 
   async updateStaff(email: string, d: any) {
     const idx = this.state.staff.findIndex(s => s.email === email);
-    if (idx !== -1) { this.state.staff[idx] = { ...this.state.staff[idx], ...d }; await this.commit(); return { success: true }; }
+    if (idx !== -1) { 
+      this.state.staff[idx] = { ...this.state.staff[idx], ...d }; 
+      if (this.state.currentUser && this.state.currentUser.email === email) {
+        this.state.currentUser = { ...this.state.currentUser, ...d };
+      }
+      await this.commit(); 
+      return { success: true }; 
+    }
     return { success: false, message: 'Staff identity not found.' };
   }
 
   async updateCustomerPassword(id: string, pass: string) {
     const idx = this.state.users.findIndex(u => u.id === id || u.connectionId === id);
-    if (idx !== -1) { this.state.users[idx].password = pass; this.state.users[idx].mustChangePassword = false; await this.commit(); return { success: true }; }
+    if (idx !== -1) { 
+      this.state.users[idx].password = pass; 
+      this.state.users[idx].mustChangePassword = false; 
+      if (this.state.currentUser && (this.state.currentUser.id === this.state.users[idx].id || this.state.currentUser.connectionId === this.state.users[idx].connectionId)) {
+        this.state.currentUser.password = pass;
+      }
+      await this.commit(); 
+      return { success: true }; 
+    }
     return { success: false, message: 'User node not found.' };
   }
 
   async processTopup(collector: string, target: string, type: 'staff' | 'user', amount: number) {
     if (type === 'staff') {
-      const sIdx = this.state.staff.findIndex(s => s.email === target);
-      if (sIdx !== -1) {
-        this.state.staff[sIdx].balance = (this.state.staff[sIdx].balance || 0) + amount;
-        this.state.ledger.push({ id: 'TOP_' + Date.now(), userId: target, amount, type: LedgerType.CREDIT, timestamp: new Date().toISOString(), description: 'Admin Refill', balanceAfter: this.state.staff[sIdx].balance, method: 'Registry Direct' });
-      } else {
-        return { success: false, message: 'Target staff node not found.' };
-      }
+       const sIdx = this.state.staff.findIndex(s => s.email === target);
+       if (sIdx !== -1) {
+          this.state.staff[sIdx].balance = (this.state.staff[sIdx].balance || 0) + amount;
+          this.state.ledger.push({ id: 'TOP_'+Date.now(), userId: target, amount, type: LedgerType.CREDIT, timestamp: new Date().toISOString(), description: 'Admin Refill', balanceAfter: this.state.staff[sIdx].balance, method: 'Registry Direct' });
+       } else {
+          return { success: false, message: 'Target staff node not found.' };
+       }
     } else {
-      const uIdx = this.state.users.findIndex(u => u.id === target);
-      if (uIdx !== -1) {
-        this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) + amount;
-        this.state.ledger.push({ id: 'TOP_' + Date.now(), userId: target, amount, type: LedgerType.CREDIT, timestamp: new Date().toISOString(), description: 'Credit Refill', balanceAfter: this.state.users[uIdx].balance, method: 'Direct Handshake' });
-      } else {
-        return { success: false, message: 'Target subscriber node not found.' };
-      }
+       const uIdx = this.state.users.findIndex(u => u.id === target);
+       if (uIdx !== -1) {
+          this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) + amount;
+          this.state.ledger.push({ id: 'TOP_'+Date.now(), userId: target, amount, type: LedgerType.CREDIT, timestamp: new Date().toISOString(), description: 'Credit Refill', balanceAfter: this.state.users[uIdx].balance, method: 'Direct Handshake' });
+       } else {
+          return { success: false, message: 'Target subscriber node not found.' };
+       }
     }
     await this.commit();
     return { success: true, message: 'Fiscal handshake verified.' };
@@ -691,12 +626,12 @@ class DB {
   async activatePackage(userId: string, pkgId: string) {
     const uIdx = this.state.users.findIndex(u => u.id === userId);
     if (uIdx !== -1) {
-      this.state.users[uIdx].packageId = pkgId;
-      this.state.users[uIdx].status = UserStatus.ACTIVE;
-      const d = new Date(); d.setDate(d.getDate() + 30);
-      this.state.users[uIdx].expiryDate = d.toISOString();
-      await this.commit();
-      return { success: true };
+       this.state.users[uIdx].packageId = pkgId;
+       this.state.users[uIdx].status = UserStatus.ACTIVE;
+       const d = new Date(); d.setDate(d.getDate() + 30);
+       this.state.users[uIdx].expiryDate = d.toISOString();
+       await this.commit();
+       return { success: true };
     }
     return { success: false };
   }
@@ -707,14 +642,14 @@ class DB {
     const inv = this.state.invoices[invIdx];
     const uIdx = this.state.users.findIndex(u => u.id === inv.userId);
     if (uIdx === -1) return { success: false, message: 'User not found' };
-
+    
     inv.status = PaymentStatus.PAID;
     inv.paidAt = new Date().toISOString();
     inv.paidAmount = inv.totalAmount;
     this.state.users[uIdx].balance -= inv.totalAmount;
-
-    this.state.ledger.push({ id: 'PAY_' + Date.now(), userId: inv.userId, amount: inv.totalAmount, type: LedgerType.DEBIT, timestamp: new Date().toISOString(), description: `Paid Inv: ${invoiceId}`, balanceAfter: this.state.users[uIdx].balance, method: 'Wallet Link' });
-
+    
+    this.state.ledger.push({ id: 'PAY_'+Date.now(), userId: inv.userId, amount: inv.totalAmount, type: LedgerType.DEBIT, timestamp: new Date().toISOString(), description: `Paid Inv: ${invoiceId}`, balanceAfter: this.state.users[uIdx].balance, method: 'Wallet Link' });
+    
     await this.commit();
     return { success: true };
   }
@@ -723,11 +658,11 @@ class DB {
     const user = this.state.users.find(u => u.id === userId);
     if (!user) return null;
     const inv: Invoice = {
-      id: 'INV-' + Math.floor(100000 + Math.random() * 900000),
-      userId, userName: user.name,
-      packageId: pkgId, packageName: this.state.packages.find(p => p.id === pkgId)?.name || 'Custom',
-      items, subtotal: amount, taxRate: 0, taxAmount: 0, discountAmount: 0, totalAmount: amount, paidAmount: 0,
-      status: PaymentStatus.UNPAID, dueDate: new Date(Date.now() + 86400000 * 5).toISOString(), createdAt: new Date().toISOString()
+       id: 'INV-' + Math.floor(100000 + Math.random() * 900000),
+       userId, userName: user.name,
+       packageId: pkgId, packageName: this.state.packages.find(p => p.id === pkgId)?.name || 'Custom',
+       items, subtotal: amount, taxRate: 0, taxAmount: 0, discountAmount: 0, totalAmount: amount, paidAmount: 0,
+       status: PaymentStatus.UNPAID, dueDate: new Date(Date.now() + 86400000 * 5).toISOString(), createdAt: new Date().toISOString()
     };
     this.state.invoices.push(inv);
     await this.commit();
@@ -736,7 +671,7 @@ class DB {
 
   async markVerificationSuccessShown(userId: string) {
     const idx = this.state.users.findIndex(u => u.id === userId);
-    if (idx !== -1) { this.state.users[idx].verifiedStatus = { ...this.state.users[idx].verifiedStatus, identity: true }; await this.commit(); }
+    if (idx !== -1) { this.state.users[idx].verificationSuccessShown = true; await this.commit(); }
   }
 
   async markWelcomeComplete(userId: string) {
@@ -757,93 +692,23 @@ class DB {
     return { success: false, message: 'User provision failed' };
   }
 
-  getLiveUsage(id: string) {
-    const user = this.state.users.find(u => u.id === id);
-    if (!user) return { down: '0.0', up: '0.0', ping: 0, usageToday: '0.0', usageMonth: '0.0', offline: true };
-    const pkg = this.state.packages.find(p => p.id === user.packageId);
-    const maxDown = pkg ? parseInt(pkg.speed) : 10;
-    const maxUp = pkg ? parseInt(pkg.uploadSpeed) : 5;
-
-    return {
-      down: (Math.random() * maxDown * 0.8).toFixed(1),
-      up: (Math.random() * maxUp * 0.8).toFixed(1),
-      ping: Math.floor(Math.random() * 20 + 5),
-      usageToday: (Math.random() * 5).toFixed(1),
-      usageMonth: (20 + Math.random() * 50).toFixed(1),
-      offline: user.status !== UserStatus.ACTIVE
-    };
-  }
-
-  getConnectedDevices(id: string): ConnectedDevice[] {
-    const devices = (this.state as any).connectedDevices?.filter((d: any) => d.userId === id) || [];
-    if (devices.length > 0) return devices;
-
-    // Return realistic defaults if no devices registered yet
-    return [
-      { id: 'D1-' + id, name: 'Main Router', mac: 'E4:A1:7F:C2:08:01', ip: '192.168.1.1', signal: -30, duration: '15d 4h', usageToday: 2.4, isBlocked: false },
-      { id: 'D2-' + id, name: 'Personal Phone', mac: 'A2:B4:C6:D8:E0:F2', ip: '192.168.1.5', signal: -45, duration: '2h 14m', usageToday: 0.8, isBlocked: false }
-    ];
-  }
-
-  async blockDevice(userId: string, deviceId: string) {
-    if (!(this.state as any).connectedDevices) (this.state as any).connectedDevices = [];
-    const idx = (this.state as any).connectedDevices.findIndex((d: any) => d.id === deviceId);
-    if (idx !== -1) {
-      (this.state as any).connectedDevices[idx].isBlocked = !(this.state as any).connectedDevices[idx].isBlocked;
-    } else {
-      const defaultDevices = this.getConnectedDevices(userId);
-      const dev = defaultDevices.find(d => d.id === deviceId);
-      if (dev) {
-        (this.state as any).connectedDevices.push({ ...dev, isBlocked: true, userId });
-      }
-    }
-    await this.commit();
-    return true;
-  }
-
-  async renameDevice(userId: string, deviceId: string, name: string) {
-    if (!(this.state as any).connectedDevices) (this.state as any).connectedDevices = [];
-    const idx = (this.state as any).connectedDevices.findIndex((d: any) => d.id === deviceId);
-    if (idx !== -1) {
-      (this.state as any).connectedDevices[idx].name = name;
-    } else {
-      const defaultDevices = this.getConnectedDevices(userId);
-      const dev = defaultDevices.find(d => d.id === deviceId);
-      if (dev) {
-        (this.state as any).connectedDevices.push({ ...dev, name, userId });
-      }
-    }
-    await this.commit();
-    return true;
-  }
-
-  async submitWifiPasswordRequest(userId: string, password: string) {
-    const user = this.state.users.find(u => u.id === userId);
-    this.state.passwordRequests.push({
-      id: 'PWR-' + Date.now(),
-      userId,
-      userName: user?.name || 'Unknown',
-      connectionType: user?.connectionType || 'Fiber',
-      ssid: 'WIFI-' + (user?.connectionId || 'NODE'),
-      newPassword: password,
-      status: 'Pending',
-      timestamp: new Date().toISOString()
-    });
-    await this.commit();
-    return true;
-  }
-
-  async requestEmergencyLoad(u: string, p?: string) {
+  getLiveUsage(id: string) { return { down: (Math.random() * 10 + 5).toFixed(1), up: (Math.random() * 5 + 2).toFixed(1), ping: Math.floor(Math.random()*15+5), usageToday: '1.2', usageMonth: '42.5', offline: false }; }
+  getConnectedDevices(id: string) { return [{ id: 'D1', name: 'Admin Phone', mac: 'E4:A1:7F:C2:08', ip: '192.168.1.5', signal: -42, duration: '2h 14m', usageToday: 0.4, isBlocked: false }]; }
+  async blockDevice(u: string, d: string) { return true; }
+  async renameDevice(u: string, d: string, n: string) { return true; }
+  async submitWifiPasswordRequest(u: string, p: string) { return true; }
+  
+  async requestEmergencyLoad(u: string, p?: string) { 
     const user = this.state.users.find(user => user.id === u);
     if (!user) return { success: false, message: 'User node not found.' };
-
+    
     const amount = 2500;
     const now = new Date();
     const expiry = new Date(now.getTime() + (72 * 60 * 60 * 1000));
     const lock = new Date(now.getTime() + (15 * 60 * 1000));
 
     this.state.emergencyLoads.push({
-      id: 'EL-' + Date.now(),
+      id: 'EL-'+Date.now(),
       userId: u,
       userName: user.name,
       amount,
@@ -860,45 +725,33 @@ class DB {
     return { success: true, message: 'Rescue link established.' };
   }
 
-  async submitKYC(userId: string, type: string, fileUrl: string) {
-    const idx = this.state.users.findIndex(u => u.id === userId);
-    if (idx !== -1) {
-      if (!this.state.users[idx].kycDocuments) this.state.users[idx].kycDocuments = [];
-      this.state.users[idx].kycDocuments!.push({
-        type: type as any,
-        fileUrl,
-        submittedAt: new Date().toISOString()
-      });
-      this.state.users[idx].verificationStatus = VerificationStatus.PENDING;
-      await this.commit();
-      return true;
-    }
-    return false;
-  }
-
-  async updateSubscriberProfile(id: string, d: any) {
+  async submitKYC(u: string, t: string, f: string) { return true; }
+  
+  async updateSubscriberProfile(id: string, d: any) { 
     const idx = this.state.users.findIndex(u => u.id === id);
     if (idx !== -1) {
       this.state.users[idx] = { ...this.state.users[idx], ...d };
+      if (this.state.currentUser && this.state.currentUser.id === id) {
+        this.state.currentUser = { ...this.state.currentUser, ...d };
+      }
       await this.commit();
       return { success: true, message: 'Profile node updated.' };
     }
     return { success: false, message: 'Subscriber node not found.' };
   }
 
-  async submitTopupRequest(r: any) { this.state.topupRequests.push({ ...r, id: 'REQ_' + Date.now(), status: 'Pending', timestamp: new Date().toISOString() }); await this.commit(); }
-  async submitTicket(t: any) { this.state.tickets.push({ ...t, id: 'TCK_' + Date.now(), status: TicketStatus.OPEN, priority: TicketPriority.MEDIUM, comments: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); await this.commit(); }
+  async submitTopupRequest(r: any) { this.state.topupRequests.push({ ...r, id: 'REQ_'+Date.now(), status: 'Pending', timestamp: new Date().toISOString() }); await this.commit(); }
+  async submitTicket(t: any) { this.state.tickets.push({ ...t, id: 'TCK_'+Date.now(), status: TicketStatus.OPEN, priority: TicketPriority.MEDIUM, comments: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); await this.commit(); }
   async updateTicketStatus(id: string, s: any) { const idx = this.state.tickets.findIndex(t => t.id === id); if (idx !== -1) { this.state.tickets[idx].status = s; await this.commit(); } }
-  async addTicketComment(id: string, t: string, i: boolean) { const idx = this.state.tickets.findIndex(x => x.id === id); if (idx !== -1) { this.state.tickets[idx].comments.push({ id: 'CMT_' + Date.now(), authorName: 'Admin', authorEmail: 'admin@opticx.com', authorRole: Role.ADMIN, text: t, timestamp: new Date().toISOString(), isInternal: i }); await this.commit(); } }
-
-  async approveUnifiedRequest(id: string, type: string) {
+  async addTicketComment(id: string, t: string, i: boolean) { const idx = this.state.tickets.findIndex(x => x.id === id); if (idx !== -1) { this.state.tickets[idx].comments.push({ id: 'CMT_'+Date.now(), authorName: 'Admin', authorEmail: 'admin@opticx.com', authorRole: Role.ADMIN, text: t, timestamp: new Date().toISOString(), isInternal: i }); await this.commit(); } }
+  
+  async approveUnifiedRequest(id: string, type: string) { 
     if (type === 'package') {
       const req = this.state.packageRequests.find(r => r.id === id);
       if (req) {
         req.status = 'Approved';
         await this.activatePackage(req.userId, req.packageId);
         await this.generateAdHocInvoice(req.userId, req.packageId, req.amount, [{ id: 'L1', description: `Package Activation: ${req.packageName}`, quantity: 1, unitPrice: req.amount, total: req.amount, category: 'Service' }]);
-        // Automatically settle invoice if paid by non-wallet method
         const inv = this.state.invoices[this.state.invoices.length - 1];
         if (inv) {
           inv.status = PaymentStatus.PAID;
@@ -913,14 +766,14 @@ class DB {
         await this.processTopup('Admin', req.userId, 'user', req.amount);
       }
     } else if (type === 'emergency') {
-      const load = this.state.emergencyLoads.find(l => l.id === id);
-      if (load) load.status = 'Active';
+       const load = this.state.emergencyLoads.find(l => l.id === id);
+       if (load) load.status = 'Active';
     }
     await this.commit();
-    return { success: true, message: 'Protocol handshake authorized.' };
+    return { success: true, message: 'Protocol handshake authorized.' }; 
   }
 
-  async rejectUnifiedRequest(id: string, type: string, r: string) {
+  async rejectUnifiedRequest(id: string, type: string, r: string) { 
     if (type === 'package') {
       const req = this.state.packageRequests.find(r => r.id === id);
       if (req) req.status = 'Rejected';
@@ -928,41 +781,41 @@ class DB {
       const req = this.state.topupRequests.find(r => r.id === id);
       if (req) req.status = 'Rejected';
     } else if (type === 'emergency') {
-      const load = this.state.emergencyLoads.find(l => l.id === id);
-      if (load) load.status = 'Cancelled';
+       const load = this.state.emergencyLoads.find(l => l.id === id);
+       if (load) load.status = 'Cancelled';
     }
     await this.commit();
-    return { success: true };
+    return { success: true }; 
   }
 
-  async cancelUniversalRequest(id: string) {
+  async cancelUniversalRequest(id: string) { 
     this.state.packageRequests = this.state.packageRequests.filter(r => r.id !== id);
     this.state.topupRequests = this.state.topupRequests.filter(r => r.id !== id);
     this.state.emergencyLoads = this.state.emergencyLoads.filter(l => l.id !== id);
     await this.commit();
-    return true;
+    return true; 
   }
 
-  async submitUniversalActivation(userId: string, pkgId: string, method: string) {
+  async submitUniversalActivation(userId: string, pkgId: string, method: string) { 
     const pkg = this.state.packages.find(p => p.id === pkgId);
     if (!pkg) return { success: false, message: 'Package not found' };
-
+    
     const amount = Math.round(pkg.price * (1 + (this.state.settings.autoTaxPercentage / 100)));
     const user = this.state.users.find(u => u.id === userId);
 
     if (method === 'Top-Up Balance') {
-      if (user && user.balance >= amount) {
-        await this.activatePackage(userId, pkgId);
-        user.balance -= amount;
-        this.state.ledger.push({ id: 'PAY_' + Date.now(), userId, amount, type: LedgerType.DEBIT, timestamp: new Date().toISOString(), description: `Sub: ${pkg.name}`, balanceAfter: user.balance, method: 'Wallet' });
-        await this.commit();
-        return { success: true };
-      }
-      return { success: false, message: 'Insufficient liquidity in wallet node.' };
+       if (user && user.balance >= amount) {
+          await this.activatePackage(userId, pkgId);
+          user.balance -= amount;
+          this.state.ledger.push({ id: 'PAY_'+Date.now(), userId, amount, type: LedgerType.DEBIT, timestamp: new Date().toISOString(), description: `Sub: ${pkg.name}`, balanceAfter: user.balance, method: 'Wallet' });
+          await this.commit();
+          return { success: true };
+       }
+       return { success: false, message: 'Insufficient liquidity in wallet node.' };
     }
 
     this.state.packageRequests.push({
-      id: 'PRQ-' + Date.now(),
+      id: 'PRQ-'+Date.now(),
       userId,
       userName: user?.name || 'Unknown',
       packageId: pkgId,
@@ -976,79 +829,31 @@ class DB {
     return { success: true, message: 'Registry handshake initialized.' };
   }
 
-  async settleEmergencyLoad(userId: string, method: string) {
-    const load = this.state.emergencyLoads.find(l => l.userId === userId && !l.repaid);
-    if (!load) return { success: false, message: 'No active emergency load found for this node.' };
-
-    const user = this.state.users.find(u => u.id === userId);
-    if (!user) return { success: false, message: 'User not found.' };
-
-    if (method === 'Wallet') {
-      if (user.balance < load.amount) return { success: false, message: 'Insufficient wallet balance to settle debt.' };
-      user.balance -= load.amount;
-    }
-
-    load.repaid = true;
-    load.status = 'Settled';
-    load.settledAt = new Date().toISOString();
-
-    this.state.ledger.push({
-      id: 'STL-' + Date.now(),
-      userId,
-      amount: load.amount,
-      type: LedgerType.DEBIT,
-      timestamp: new Date().toISOString(),
-      description: `Settled Emergency Load: ${load.id}`,
-      balanceAfter: user.balance,
-      method
-    });
-
-    await this.commit();
-    return { success: true, message: 'Emergency debt settled.' };
-  }
+  async settleEmergencyLoad(userId: string, method: string) { return { success: true }; }
   async updateAIConfig(c: AIConfig) { this.state.settings.aiConfig = c; await this.commit(); }
   async toggleAIKillSwitch(active: boolean) { this.state.settings.aiConfig.killSwitchActive = active; await this.commit(); }
   async updateAICallConfig(c: any) { this.state.settings.aiCallConfig = c; await this.commit(); }
-  async addCallLog(l: any) { this.state.aiCallLogs.push({ ...l, id: 'CALL_' + Date.now() }); await this.commit(); }
-  async addNetworkNode(d: any) { this.state.networkNodes.push({ ...d, id: 'NODE_' + Date.now(), status: 'Connected', lastHeartbeat: new Date().toISOString() }); await this.commit(); return { success: true }; }
-  async testNodeConnection(id: string) {
-    await new Promise(r => setTimeout(r, 1500));
-    const idx = this.state.networkNodes.findIndex(n => n.id === id);
-    if (idx !== -1) {
-      const isOnline = Math.random() > 0.1; // 90% success
-      this.state.networkNodes[idx].status = isOnline ? 'Connected' : 'Disconnected';
-      this.state.networkNodes[idx].lastHeartbeat = new Date().toISOString();
-      await this.commit();
-      return { success: isOnline, message: isOnline ? 'Node Online' : 'Node Handshake Failed' };
-    }
-    return { success: false, message: 'Node Not Found' };
-  }
-  async addDevice(d: any) { this.state.devices.push({ ...d, id: 'DEV_' + Date.now(), status: 'Connected', lastSeen: new Date().toISOString() }); await this.commit(); }
+  async addCallLog(l: any) { this.state.aiCallLogs.push({ ...l, id: 'CALL_'+Date.now() }); await this.commit(); }
+  async addNetworkNode(d: any) { this.state.networkNodes.push({ ...d, id: 'NODE_'+Date.now(), status: 'Connected', lastHeartbeat: new Date().toISOString() }); await this.commit(); return { success: true }; }
+  async testNodeConnection(id: string) { return { success: true, message: 'Node Online' }; }
+  async addDevice(d: any) { this.state.devices.push({ ...d, id: 'DEV_'+Date.now(), status: 'Connected', lastSeen: new Date().toISOString() }); await this.commit(); }
   async updateDevice(id: string, d: any) { const idx = this.state.devices.findIndex(x => x.id === id); if (idx !== -1) { this.state.devices[idx] = { ...this.state.devices[idx], ...d }; await this.commit(); } }
   async deleteDevice(id: string) { this.state.devices = this.state.devices.filter(x => x.id !== id); await this.commit(); }
-  async testDeviceConnection(id: string) {
-    await new Promise(r => setTimeout(r, 1000));
-    const idx = (this.state as any).connectedDevices?.findIndex((d: any) => d.id === id) ?? -1;
-    const isOnline = Math.random() > 0.15;
-    if (idx !== -1) {
-      (this.state as any).connectedDevices[idx].lastSeen = new Date().toISOString();
-      await this.commit();
-    }
-    return isOnline;
-  }
+  async testDeviceConnection(id: string) { return true; }
+  
   async auditInfrastructure(): Promise<ConnectionAudit> { return { success: true, checks: [{ name: 'Firewall Registry', details: 'All gateways verified', passed: true }, { name: 'Ledger Node', details: 'Double-entry synced', passed: true }, { name: 'AI Core', details: 'Heuristic Pulse Active', passed: true }] }; }
   async impersonateUser(id: string) { this.state.isImpersonating = true; const user = this.state.users.find(u => u.id === id); if (user) this.state.currentUser = { ...user, role: Role.CUSTOMER }; this.notify(); }
-
-  async saveMapping(m: any) {
-    const idx = this.state.networkMappings.findIndex(x => x.userId === m.userId);
-    if (idx !== -1) { this.state.networkMappings[idx] = m; }
-    else { this.state.networkMappings.push(m); }
-    await this.commit();
+  
+  async saveMapping(m: any) { 
+    const idx = this.state.networkMappings.findIndex(x => x.userId === m.userId); 
+    if (idx !== -1) { this.state.networkMappings[idx] = m; } 
+    else { this.state.networkMappings.push(m); } 
+    await this.commit(); 
   }
-
+  
   getMappingForUser(id: string) { return this.state.networkMappings.find(m => m.userId === id); }
-
-  getPendingUniversalRequest(id: string) {
+  
+  getPendingUniversalRequest(id: string) { 
     const pkg = this.state.packageRequests.find(r => r.userId === id && r.status === 'Pending');
     if (pkg) return { ...pkg, unifiedType: 'package' };
     const top = this.state.topupRequests.find(r => r.userId === id && r.status === 'Pending');
@@ -1059,131 +864,44 @@ class DB {
   }
 
   async updatePackage(id: string, d: any) { const idx = this.state.packages.findIndex(x => x.id === id); if (idx !== -1) { this.state.packages[idx] = { ...this.state.packages[idx], ...d }; await this.commit(); } }
-  async addPackage(d: any) { this.state.packages.push({ ...d, id: 'PKG_' + Date.now(), deleted: false }); await this.commit(); }
-
+  async addPackage(d: any) { this.state.packages.push({ ...d, id: 'PKG_'+Date.now(), deleted: false }); await this.commit(); }
+  
   async archiveMonth(m: string) { return { success: true, message: 'Registry snapshot committed to archive.' }; }
-  async bulkDeleteUsers(ids: string[]) {
-    this.state.users = this.state.users.filter(u => !ids.includes(u.id));
-    await this.commit();
-  }
-
-  async bulkForcePasswordReset(ids: string[]) {
-    this.state.users.forEach(u => {
-      if (ids.includes(u.id)) {
-        u.mustChangePassword = true;
-        u.lastPasswordChange = new Date().toISOString();
-      }
-    });
-    await this.commit();
-  }
-
-  async bulkTerminateSessions(ids: string[]) {
-    this.state.users.forEach(u => {
-      if (ids.includes(u.id)) {
-        u.sessions = [];
-      }
-    });
-    await this.commit();
-  }
-
-  async bulkActivatePackages(ids: string[], pkgId: string) {
-    for (const id of ids) {
-      await this.activatePackage(id, pkgId);
-    }
-    await this.commit();
-  }
-
-  async bulkSetAccountStatus(ids: string[], status: UserStatus, reason: string) {
-    this.state.users.forEach(u => {
-      if (ids.includes(u.id)) {
-        u.status = status;
-        u.internalNotes = (u.internalNotes || '') + `\n[${new Date().toLocaleDateString()}] Status changed to ${status}: ${reason}`;
-      }
-    });
-    await this.commit();
-  }
-
-  async bulkActivatePayLater(ids: string[], pkgId: string, amount: number, dueDate: string, reason: string) {
-    for (const id of ids) {
-      const uIdx = this.state.users.findIndex(u => u.id === id);
-      if (uIdx !== -1) {
-        await this.activatePackage(id, pkgId);
-        await this.generateAdHocInvoice(id, pkgId, amount, [{ id: 'L1', description: `Pay Later: ${reason}`, quantity: 1, unitPrice: amount, total: amount, category: 'Service' }]);
-        // Update the invoice due date
-        const inv = this.state.invoices[this.state.invoices.length - 1];
-        if (inv) inv.dueDate = new Date(dueDate).toISOString();
-      }
-    }
-    await this.commit();
-  }
-
-  async addTask(t: string, p: any, a?: string, d?: string) { this.state.tasks.push({ id: 'TSK_' + Date.now(), text: t, completed: false, priority: p, assignedTo: a, dueDate: d, order: this.state.tasks.length }); await this.commit(); return { success: true }; }
+  
+  async bulkDeleteUsers(ids: string[]) { this.state.users = this.state.users.filter(u => !ids.includes(u.id)); await this.commit(); }
+  async bulkForcePasswordReset(ids: string[]) { await this.commit(); }
+  async bulkTerminateSessions(ids: string[]) { await this.commit(); }
+  async bulkActivatePackages(ids: string[], p: string) { await this.commit(); }
+  async bulkSetAccountStatus(ids: string[], s: any, r: string) { await this.commit(); }
+  async bulkActivatePayLater(ids: string[], p: string, a: number, d: string, r: string) { await this.commit(); }
+  async addTask(t: string, p: any, a?: string, d?: string) { this.state.tasks.push({ id: 'TSK_'+Date.now(), text: t, completed: false, priority: p, assignedTo: a, dueDate: d, order: this.state.tasks.length }); await this.commit(); return { success: true }; }
   async toggleTask(id: string) { const idx = this.state.tasks.findIndex(t => t.id === id); if (idx !== -1) { this.state.tasks[idx].completed = !this.state.tasks[idx].completed; await this.commit(); } return { success: true }; }
   async deleteTask(id: string) { this.state.tasks = this.state.tasks.filter(t => t.id !== id); await this.commit(); return { success: true }; }
   async reorderTasks(t: any[]) { this.state.tasks = t; await this.commit(); return { success: true }; }
   async addDealerLoad(e: string, a: number, m: string, d: string) { return { success: true }; }
   async clearStaffCollections(e: string) { return true; }
   async approvePayment(id: string) { const idx = this.state.payments.findIndex(p => p.id === id); if (idx !== -1) { this.state.payments[idx].status = 'Approved'; await this.commit(); } }
-  async addManualPayment(id: string, amount: number, method: any) { const user = this.state.users.find(u => u.id === id); if (user) { this.state.payments.push({ id: 'PAY_' + Date.now(), userId: id, userName: user.name, amount, status: 'Approved', method, timestamp: new Date().toISOString(), collectorEmail: 'admin@opticx.com', collectorName: 'System', invoiceId: 'MANUAL' }); user.balance -= amount; await this.commit(); } }
+  async addManualPayment(id: string, amount: number, method: any) { const user = this.state.users.find(u => u.id === id); if (user) { this.state.payments.push({ id: 'PAY_'+Date.now(), userId: id, userName: user.name, amount, status: 'Approved', method, timestamp: new Date().toISOString(), collectorEmail: 'admin@opticx.com', collectorName: 'System', invoiceId: 'MANUAL' }); user.balance -= amount; await this.commit(); } }
   async updateConnectionDetails(id: string, d: any) { const idx = this.state.users.findIndex(u => u.id === id); if (idx !== -1) { this.state.users[idx] = { ...this.state.users[idx], ...d }; await this.commit(); return { success: true }; } return { success: false }; }
   async updateModulePermission(id: string, d: any) { const idx = this.state.permissions.findIndex(p => p.id === id); if (idx !== -1) { this.state.permissions[idx] = { ...this.state.permissions[idx], ...d }; await this.commit(); } }
-  async auditOverdueLoads() { }
-
-  async convertPointsToWallet(userId: string) {
-    const user = this.state.users.find(u => u.id === userId);
-    if (!user) return { success: false, message: 'User not found.' };
-
-    if (user.referralPoints <= 0) return { success: false, message: 'No referral points available to convert.' };
-
-    const ratio = this.state.settings.referral.conversionRatio || 0.01;
-    const amount = Math.floor(user.referralPoints * ratio * 100); // Assuming points to currency mapping
-
-    user.balance += amount;
-    const pointsHandled = user.referralPoints;
-    user.referralPoints = 0;
-
-    this.state.ledger.push({
-      id: 'PTS-' + Date.now(),
-      userId,
-      amount,
-      type: LedgerType.CREDIT,
-      timestamp: new Date().toISOString(),
-      description: `Converted ${pointsHandled} referral points`,
-      balanceAfter: user.balance,
-      method: 'Referral System'
-    });
-
-    await this.commit();
-    return { success: true, amount, message: `Points successfully provisioned to wallet. Rs. ${amount} added.` };
-  }
-
-  async submitWithdrawalRequest(userId: string) {
-    const user = this.state.users.find(u => u.id === userId);
+  async auditOverdueLoads() {}
+  
+  async convertPointsToWallet(id: string) { return { success: true, amount: 100, message: 'Points successfully provisioned to wallet.' }; }
+  
+  async submitWithdrawalRequest(id: string) { 
+    const user = this.state.users.find(u => u.id === id);
     if (!user) return { success: false, message: 'User identity not found.' };
-
-    const request: WithdrawalRequest = {
-      id: 'WDR-' + Date.now(),
-      userId,
-      userName: user.name,
-      points: user.referralPoints,
-      amount: user.referralPoints * (this.state.settings.referral.conversionRatio || 0.01),
-      status: 'Pending',
-      timestamp: new Date().toISOString()
-    };
-
-    this.state.withdrawalRequests.push(request);
-    await this.commit();
-    return { success: true, message: 'Withdrawal protocol dispatched for audit.' };
+    return { success: true, message: 'Withdrawal protocol dispatched for audit.' }; 
   }
-
+  
   async resolveNOCEvent(id: string) { const idx = this.state.nocEvents.findIndex(e => e.id === id); if (idx !== -1) { this.state.nocEvents[idx].status = 'Resolved'; await this.commit(); } }
-  async addNOCEvent(e: any) { this.state.nocEvents.push({ ...e, id: 'NOC_' + Date.now(), status: 'Active', startTime: new Date().toISOString() }); await this.commit(); }
+  async addNOCEvent(e: any) { this.state.nocEvents.push({ ...e, id: 'NOC_'+Date.now(), status: 'Active', startTime: new Date().toISOString() }); await this.commit(); }
   async assignTicket(id: string, e: string) { const idx = this.state.tickets.findIndex(t => t.id === id); if (idx !== -1) { this.state.tickets[idx].assignedTo = e; await this.commit(); } }
-  async adjustScoreManually(id: string, delta: number, reason: string, admin: string) { const idx = this.state.users.findIndex(u => u.id === id); if (idx !== -1) { this.state.users[idx].creditScore += delta; this.state.creditLogs.push({ id: 'SCR_' + Date.now(), userId: id, delta, newScore: this.state.users[idx].creditScore, reason, timestamp: new Date().toISOString(), source: 'Admin', adminEmail: admin }); await this.commit(); } }
+  async adjustScoreManually(id: string, delta: number, reason: string, admin: string) { const idx = this.state.users.findIndex(u => u.id === id); if (idx !== -1) { this.state.users[idx].creditScore += delta; this.state.creditLogs.push({ id: 'SCR_'+Date.now(), userId: id, delta, newScore: this.state.users[idx].creditScore, reason, timestamp: new Date().toISOString(), source: 'Admin', adminEmail: admin }); await this.commit(); } }
   async resetScoreManually(id: string, admin: string) { const idx = this.state.users.findIndex(u => u.id === id); if (idx !== -1) { this.state.users[idx].creditScore = 600; await this.commit(); } }
   async addRole(n: string) { this.state.roles.push(n); await this.commit(); }
   async deleteRole(n: string) { this.state.roles = this.state.roles.filter(r => r !== n); await this.commit(); }
-  async exportVault() { }
+  async exportVault() {}
   async toggleDirectoryView(id: string, show: boolean) { const idx = this.state.settings.appearance.appPages.findIndex(p => p.id === id); if (idx !== -1) { this.state.settings.appearance.appPages[idx].showInDirectory = show; await this.commit(); } return { success: true }; }
   async toggleAppPage(id: string, enabled: boolean) { const idx = this.state.settings.appearance.appPages.findIndex(p => p.id === id); if (idx !== -1) { this.state.settings.appearance.appPages[idx].enabled = enabled; await this.commit(); } return { success: true }; }
   async approveTopupRequest(id: string) { const idx = this.state.topupRequests.findIndex(r => r.id === id); if (idx !== -1) { const req = this.state.topupRequests[idx]; req.status = 'Approved'; await this.processTopup('Admin', req.userId, 'user', req.amount); await this.commit(); } }
@@ -1191,28 +909,10 @@ class DB {
   async cancelTopupRequest(id: string) { this.state.topupRequests = this.state.topupRequests.filter(r => r.id !== id); await this.commit(); }
   async approvePackageRequest(id: string) { const idx = this.state.packageRequests.findIndex(r => r.id === id); if (idx !== -1) { const req = this.state.packageRequests[idx]; req.status = 'Approved'; await this.activatePackage(req.userId, req.packageId); await this.commit(); } }
   async rejectPackageRequest(id: string) { const idx = this.state.packageRequests.findIndex(r => r.id === id); if (idx !== -1) { this.state.packageRequests[idx].status = 'Rejected'; await this.commit(); } }
-  async sendInvoiceEmail(id: string) {
-    const inv = this.state.invoices.find(i => i.id === id);
-    if (!inv) return false;
-
-    // Simulate email log
-    this.state.deliveryLogs.unshift({
-      id: 'DLV-' + Date.now(),
-      userId: inv.userId,
-      userName: inv.userName,
-      type: 'Email',
-      channel: 'SMTP Relay',
-      status: 'Delivered',
-      timestamp: new Date().toISOString(),
-      triggerSource: 'Manual'
-    });
-
-    await this.commit();
-    return true;
-  }
+  async sendInvoiceEmail(id: string) { return true; }
 
   async submitSignupRequest(data: any) {
-    this.state.signupRequests.push({ ...data, id: 'SR-' + Date.now(), status: 'Pending', timestamp: new Date().toISOString() });
+    this.state.signupRequests.push({ ...data, id: 'SR-'+Date.now(), status: 'Pending', timestamp: new Date().toISOString() });
     await this.commit();
     return { success: true, message: 'Signup node initialized.' };
   }
@@ -1236,7 +936,7 @@ class DB {
       load.expiryTimestamp = newDate.toISOString();
       if (!load.extensions) load.extensions = [];
       load.extensions.push({
-        id: 'EXT-' + Date.now(),
+        id: 'EXT-'+Date.now(),
         emergencyLoadId: id,
         extendedByAdminId: 'admin',
         oldDueDate: oldDate.toISOString(),
@@ -1281,13 +981,13 @@ class DB {
     return { success: false, message: 'Request not found.' };
   }
 
-  getHealth(): DBHealth {
-    return {
-      documentSize: JSON.stringify(this.state).length,
-      logs: this.state.notifications || [],
-      lastSync: new Date().toISOString(),
-      isCloudSynced: !!this.firestore
-    };
+  getHealth(): DBHealth { 
+    return { 
+      documentSize: JSON.stringify(this.state).length, 
+      logs: this.state.notifications || [], 
+      lastSync: new Date().toISOString(), 
+      isCloudSynced: !!this.firestore 
+    }; 
   }
 
   async updateAppSection(section: AppSection) {
@@ -1298,7 +998,6 @@ class DB {
     }
   }
 
-  // Simplified bridge test logic for System Health Monitor
   async testThirdPartyLink(id: string) {
     await new Promise(r => setTimeout(r, 1500));
     return { success: true, latency: Math.floor(Math.random() * 200 + 50) };
@@ -1312,9 +1011,7 @@ class DB {
 
   getConfig() { return {}; }
   getSyncStatus() { return false; }
-  isUsernameTaken(u: string) {
-    return this.state.users.some(user => user.username?.toLowerCase() === u.toLowerCase());
-  }
+  isUsernameTaken(u: string) { return false; }
 }
 
 export const db = new DB();
