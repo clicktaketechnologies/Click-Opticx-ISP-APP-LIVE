@@ -598,6 +598,10 @@ class DB {
     if (!Array.isArray(this.state.securityLogs)) this.state.securityLogs = [];
     if (!Array.isArray(this.state.passwordRequests)) this.state.passwordRequests = [];
     if (!Array.isArray(this.state.networkNodes)) this.state.networkNodes = [];
+    if (!Array.isArray(this.state.oltNodes)) this.state.oltNodes = INITIAL_STATE.oltNodes;
+    if (!Array.isArray(this.state.onus)) this.state.onus = INITIAL_STATE.onus;
+    if (!Array.isArray(this.state.nocAlerts)) this.state.nocAlerts = INITIAL_STATE.nocAlerts;
+    if (!Array.isArray(this.state.upstreamLinks)) this.state.upstreamLinks = INITIAL_STATE.upstreamLinks;
 
     if (!Array.isArray(this.state.networkMappings)) this.state.networkMappings = [];
     if (!Array.isArray(this.state.emailCampaigns)) this.state.emailCampaigns = [];
@@ -608,12 +612,8 @@ class DB {
     if (!Array.isArray(this.state.recoveryLogs)) this.state.recoveryLogs = [];
     if (!Array.isArray(this.state.commLogs)) this.state.commLogs = [];
     if (!Array.isArray(this.state.adminReminders)) this.state.adminReminders = [];
-    if (!Array.isArray(this.state.nasNodes)) this.state.nasNodes = [];
+    if (!Array.isArray(this.state.nasNodes)) this.state.nasNodes = INITIAL_STATE.nasNodes;
     if (!Array.isArray(this.state.liveUsage)) this.state.liveUsage = [];
-    if (!Array.isArray(this.state.oltNodes)) this.state.oltNodes = [];
-    if (!Array.isArray(this.state.onus)) this.state.onus = [];
-    if (!Array.isArray(this.state.upstreamLinks)) this.state.upstreamLinks = INITIAL_STATE.upstreamLinks;
-    if (!Array.isArray(this.state.nocAlerts)) this.state.nocAlerts = [];
     if (!Array.isArray(this.state.roles)) this.state.roles = INITIAL_STATE.roles;
     if (!Array.isArray(this.state.permissions)) this.state.permissions = INITIAL_STATE.permissions;
     if (!Array.isArray(this.state.otps)) this.state.otps = [];
@@ -3324,21 +3324,39 @@ class DB {
   }
 
   async bulkSendReminders(userIds: string[], channel: 'WhatsApp' | 'Email', templateId?: string) {
-    userIds.forEach(id => {
+    const timestamp = new Date().toISOString();
+    const adminName = this.state.currentUser?.name || 'System';
+    let sentCount = 0;
+
+    for (const id of userIds) {
       const user = this.state.users.find(u => u.id === id);
       if (user) {
-        this.logCommunication({
+        // Dispatch based on channel
+        if (channel === 'Email' && user.email) {
+            await this.dispatchEmail(user.email, 'Payment Reminder', `Dear ${user.name}, you have an outstanding balance of Rs. ${user.balance}.`);
+        } else if (channel === 'WhatsApp' && user.phone) {
+            await this.dispatchSMS(user.phone, `[CLICK OPTIX] Reminder: Outstanding balance Rs. ${user.balance}. Please clear to avoid suspension.`);
+        }
+
+        // Log Communication
+        if (!this.state.commLogs) this.state.commLogs = [];
+        this.state.commLogs.push({
+          id: 'CL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
           userId: id,
-          email: user.email,
+          email: user.email || 'N/A',
           subject: 'Payment Reminder',
-          sentBy: this.state.currentUser?.name || 'System',
+          sentBy: adminName,
+          sentAt: timestamp,
           status: 'Sent',
           templateId
-        });
+        } as any);
+
+        sentCount++;
       }
-    });
+    }
     await this.commit();
-    return { success: true, count: userIds.length };
+    this.notify();
+    return { success: true, count: sentCount };
   }
 
   async bulkGenerateInvoices(userIds: string[], onProgress?: (current: number, total: number, itemName: string) => void) {
@@ -3474,54 +3492,67 @@ class DB {
     return { success: true, count: userIds.length };
   }
 
-  async bulkActivatePackages(userIds: string[], pkgId: string, paymentStatus: 'Paid' | 'Unpaid', onProgress?: (current: number, total: number, itemName: string) => void) {
-    const pkg = this.state.packages.find(p => p.id === pkgId);
-    if (!pkg) return { success: false, message: 'Package not found' };
+  async getOLTPulse(id: string) {
+    const olt = this.state.oltNodes.find(n => n.id === id);
+    if (!olt) return { success: false, message: 'OLT not found' };
 
-    let successCount = 0;
-    let skipCount = 0;
-
-    for (let i = 0; i < userIds.length; i++) {
-      const id = userIds[i];
-      const user = this.state.users.find(u => u.id === id);
-      if (user) {
-        // STRICT RULES: Prevent duplicate activation of the same package if currently active
-        const isActive = [UserStatus.ACTIVE, UserStatus.PAYMENT_DUE, UserStatus.ACTIVE_UNPAID, UserStatus.EMERGENCY_ACTIVE].includes(user.status);
-        const isSamePkg = user.packageId === pkgId;
-        const isNotExpired = user.expiryDate && new Date(user.expiryDate) > new Date();
-
-        if (isActive && isSamePkg && isNotExpired) {
-            skipCount++;
-            if (onProgress) onProgress(i + 1, userIds.length, `${user.name} (Skipped - Already Active)`);
-            continue;
-        }
-
-        user.packageId = pkgId;
-        user.status = UserStatus.ACTIVE;
-        
-        successCount++;
-        if (onProgress) onProgress(i + 1, userIds.length, user.name);
-      }
-      if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
+    try {
+      const res = await fetch(`${this.backendUrl}/api/olt/pulse`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ olt })
+      });
+      const data = await res.json();
+      return { success: true, ...data };
+    } catch (e: any) {
+      return { success: false, message: 'OLT Pulse unreachable.' };
     }
-    
-    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com', adminIp: '127.0.0.1', action: 'Bulk Package Reactivation', targetId: 'Multiple', targetName: `${userIds.length} users updated`, details: `Package: ${pkg.name}. Status: ${paymentStatus}. Success: ${successCount}, Skipped: ${skipCount}.`, riskLevel: 'Medium' });
-    await this.commit();
+  }
 
-    // NAS Sync for bulk activation
-    if (this.state.settings.nasSystemEnabled) {
-      for (const id of userIds) {
-        const u = this.state.users.find(x => x.id === id);
-        if (u && u.managementMode === 'NAS_Controlled' && u.routerId) {
-          await this.syncUserToNAS(u.id, 'upsert');
-          // Kick session to apply new profile speed
-          await this.sendCoACommand(u.id, 'SpeedChange');
-        }
+  async getOnuStatus(onuId: string) {
+    const onu = this.state.onus.find(o => o.id === onuId);
+    if (!onu) return { success: false, message: 'ONU not found' };
+    const olt = this.state.oltNodes.find(n => n.id === onu.oltId);
+    if (!olt) return { success: false, message: 'OLT parent missing' };
+
+    try {
+      const res = await fetch(`${this.backendUrl}/api/olt/onu/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ olt, onu })
+      });
+      const data = await res.json();
+      if (data.success) {
+        onu.status = data.status || onu.status;
+        onu.signalStrength = data.signalStrength || onu.signalStrength;
+        onu.opticalPower = data.opticalPower;
+        onu.onlineTime = data.onlineTime;
+        onu.lastActive = new Date().toISOString();
+        await this.commit();
+        this.notify();
       }
+      return data;
+    } catch (e: any) {
+      return { success: false, message: 'ONU status unreachable.' };
     }
+  }
 
-    this.notify();
-    return { success: true, count: successCount, skipped: skipCount };
+  async resetOnuPassword(onuId: string, newPassword: string) {
+    const onu = this.state.onus.find(o => o.id === onuId);
+    if (!onu) return { success: false, message: 'ONU not found' };
+    const olt = this.state.oltNodes.find(n => n.id === onu.oltId);
+    if (!olt) return { success: false, message: 'OLT parent missing' };
+
+    try {
+      const res = await fetch(`${this.backendUrl}/api/olt/onu/password-reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ olt, onu, newPassword })
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: 'Command failed to reach backend.' };
+    }
   }
 
   async bulkResolveReminders(reminderIds: string[]) {

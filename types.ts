@@ -1148,6 +1148,9 @@ export interface ONU {
   subscriberId: string | null;
   status: 'Online' | 'Offline' | 'DyingGasp' | 'LOS';
   signalStrength: number; // in dBm
+  opticalPower?: number; // Real-time optical level
+  onlineTime?: string; // Uptime/Online duration
+  onlineNow?: boolean; // Real-time connectivity flag
   lastActive: string;
   model?: string;
   firmware?: string;

@@ -15,6 +15,8 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
    const [isNocMode, setIsNocMode] = useState(true); // Default to NOC Dark Mode
    const [activeFilter, setActiveFilter] = useState<'All' | 'Critical' | 'Warning'>('All');
    const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' | null }>({ message: '', type: null });
+   const [pulseData, setPulseData] = useState<{ speed: string, devices: number, usage: string }>({ speed: '0 Mbps', devices: 0, usage: '0 GB' });
+   const [isPulseSyncing, setIsPulseSyncing] = useState(false);
 
    // Auto-dismiss toast
    useEffect(() => {
@@ -50,14 +52,32 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
       });
    };
 
-   // Auto-refresh timer
+   // Auto-refresh timer & Pulse Fetcher
    useEffect(() => {
+      const fetchPulse = async () => {
+         const onlineOlt = state.oltNodes.find(o => o.status === 'Online');
+         if (onlineOlt) {
+            setIsPulseSyncing(true);
+            const res = await db.getOLTPulse(onlineOlt.id);
+            if (res.success) {
+               setPulseData({
+                  speed: res.liveSpeed,
+                  devices: res.devices,
+                  usage: res.todayUsage
+               });
+            }
+            setIsPulseSyncing(false);
+         }
+      };
+
       const interval = setInterval(() => {
          setLastUpdated(new Date());
-         // In a real app, this would trigger a background re-fetch of telemetry
+         fetchPulse();
       }, refreshRate * 1000);
+      
+      fetchPulse(); // Initial fetch
       return () => clearInterval(interval);
-   }, [refreshRate]);
+   }, [refreshRate, state.oltNodes]);
 
    // Derived Data
    const stats = useMemo(() => {
@@ -130,6 +150,43 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                >
                   {isNocMode ? 'Light UI' : 'NOC Mode'}
                </button>
+            </div>
+         </div>
+
+         {/* NOC OPERATIONAL PULSE SECTION */}
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-4">
+            <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden transition-all ${isNocMode ? 'bg-indigo-600 border-indigo-500 shadow-[0_20px_50px_rgba(79,70,229,0.3)]' : 'bg-indigo-600 text-white shadow-xl'}`}>
+               <div className="flex items-center justify-between mb-4 relative z-10">
+                  <div className="flex items-center gap-3">
+                     <Zap size={24} className="text-white" />
+                     <h3 className="text-sm font-black uppercase tracking-widest text-white/70 italic">Live Speed</h3>
+                  </div>
+                  {isPulseSyncing && <RefreshCw size={14} className="text-white animate-spin opacity-40" />}
+               </div>
+               <div className="text-5xl font-black italic tracking-tighter text-white relative z-10">{pulseData.speed}</div>
+               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-[40px] rounded-full -m-16 animate-pulse" />
+            </div>
+
+            <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden transition-all ${isNocMode ? 'bg-cyan-600 border-cyan-500 shadow-[0_20px_40px_rgba(8,145,178,0.3)]' : 'bg-cyan-600 text-white shadow-xl'}`}>
+               <div className="flex items-center justify-between mb-4 relative z-10">
+                  <div className="flex items-center gap-3">
+                     <Users size={24} className="text-white" />
+                     <h3 className="text-sm font-black uppercase tracking-widest text-white/70 italic">Devices</h3>
+                  </div>
+               </div>
+               <div className="text-5xl font-black italic tracking-tighter text-white relative z-10">{pulseData.devices}</div>
+               <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mt-2 italic">Active ONUs on Cluster</div>
+            </div>
+
+            <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden transition-all ${isNocMode ? 'bg-emerald-600 border-emerald-500 shadow-[0_20px_40px_rgba(5,150,105,0.3)]' : 'bg-emerald-600 text-white shadow-xl'}`}>
+               <div className="flex items-center justify-between mb-4 relative z-10">
+                  <div className="flex items-center gap-3">
+                     <Database size={24} className="text-white" />
+                     <h3 className="text-sm font-black uppercase tracking-widest text-white/70 italic">Today Usage</h3>
+                  </div>
+               </div>
+               <div className="text-5xl font-black italic tracking-tighter text-white relative z-10">{pulseData.usage}</div>
+               <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mt-2 italic">Aggregated OLT Traffic</div>
             </div>
          </div>
 

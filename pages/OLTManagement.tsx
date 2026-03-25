@@ -241,13 +241,45 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                               <td className="p-6">
                                  <StatusBadge status={onu.status} />
                               </td>
-                              <td className="p-6">
-                                 <SignalBadge dbm={onu.signalStrength} />
+                               <td className="p-6">
+                                 <div className="flex flex-col">
+                                    <SignalBadge dbm={onu.signalStrength} />
+                                    {onu.opticalPower !== undefined && (
+                                       <div className="text-[9px] font-bold text-slate-400 uppercase mt-1">
+                                          Power: {onu.opticalPower} dBm
+                                       </div>
+                                    )}
+                                    {onu.onlineTime && (
+                                       <div className="text-[9px] font-bold text-blue-400 uppercase">
+                                          Uptime: {onu.onlineTime}
+                                       </div>
+                                    )}
+                                 </div>
                               </td>
-                              <td className="p-6">
+                               <td className="p-6">
                                  <div className="flex gap-2">
-                                    <button className="p-2 bg-slate-50 text-slate-400 hover:text-blue-500 rounded-lg transition-colors"><RefreshCw size={16} /></button>
-                                    <button className="p-2 bg-slate-50 text-slate-400 hover:text-blue-500 rounded-lg transition-colors"><Settings size={16} /></button>
+                                    <button 
+                                       onClick={async () => {
+                                          const btn = document.getElementById(`refresh-onu-${onu.id}`);
+                                          btn?.classList.add('animate-spin');
+                                          await db.getOnuStatus(onu.id);
+                                          btn?.classList.remove('animate-spin');
+                                       }}
+                                       title="Refresh Status"
+                                       className="p-2 bg-slate-50 text-slate-400 hover:text-blue-500 rounded-lg transition-colors"
+                                    >
+                                       <RefreshCw id={`refresh-onu-${onu.id}`} size={16} />
+                                    </button>
+                                    <button 
+                                       onClick={() => {
+                                          const newPass = prompt('Enter New WiFi/Admin Password:');
+                                          if (newPass) db.resetOnuPassword(onu.id, newPass).then(res => alert(res.message));
+                                       }}
+                                       title="Reset Password"
+                                       className="p-2 bg-slate-50 text-slate-400 hover:text-amber-500 rounded-lg transition-colors"
+                                    >
+                                       <Zap size={16} />
+                                    </button>
                                     <button onClick={() => db.deleteONU(onu.id)} className="p-2 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-lg transition-colors"><Trash size={16} /></button>
                                  </div>
                               </td>
