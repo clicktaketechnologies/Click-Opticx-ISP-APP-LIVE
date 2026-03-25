@@ -37,6 +37,16 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
+// Root Welcome Message
+app.get('/', (req, res) => {
+    res.json({
+        service: 'Click Optix ISP Backend Relay',
+        status: 'Operational',
+        timestamp: new Date().toISOString(),
+        documentation: 'https://isp-click-opticx.web.app'
+    });
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
     res.json({
