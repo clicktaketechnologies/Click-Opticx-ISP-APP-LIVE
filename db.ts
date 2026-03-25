@@ -338,7 +338,7 @@ class DB {
   private firestore: Firestore | null = null;
   private app: FirebaseApp | null = null;
   private socket: Socket | null = null;
-  private backendUrl = window.location.hostname === 'localhost' ? 'http://127.0.0.1:5000' : 'https://click-opticx-backend.onrender.com';
+  private backendUrl = window.location.hostname === 'localhost' ? 'http://127.0.0.1:5000' : 'https://click-opticx-isp-app-live.onrender.com';
 
   constructor() {
     this.state = INITIAL_STATE;
