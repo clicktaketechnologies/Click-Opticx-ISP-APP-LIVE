@@ -147,10 +147,12 @@ app.post('/api/communicate', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    logger.info(`🚀 Backend middleware running on port ${PORT}`);
+const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
+
+server.listen(PORT, HOST, () => {
+    logger.info(`🚀 Backend middleware running on ${HOST}:${PORT}`);
     logger.info(`📡 WebSocket server ready for real-time telemetry`);
-    logger.info(`🔒 Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`🔒 Environment: ${process.env.NODE_ENV || 'production'}`);
     logger.info(`📧 Communication Gateway: ${nodemailer ? 'OPTIMAL' : 'SLEEP MODE'}`);
 });
 
