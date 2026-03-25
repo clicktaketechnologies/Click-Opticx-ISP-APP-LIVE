@@ -849,9 +849,47 @@ class DB {
   }
 
   async testSMTPHandshake(config: any) {
-    // Standard simulation for diagnostic check
-    await new Promise(r => setTimeout(r, 1200));
-    return { success: true, message: 'Gateway Handshake Successful. Latency 112ms. Registry Node Active.' };
+    try {
+      const start = Date.now();
+      const res = await fetch(`${this.backendUrl}/api/verify-smtp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config })
+      });
+      const data = await res.json();
+      const latency = Date.now() - start;
+
+      const currentStatus = data.success ? (latency > 3000 ? 'Slow' : 'Healthy') : 'Failed';
+
+      const healthUpdate = {
+        status: currentStatus as 'Healthy' | 'Slow' | 'Failed',
+        lastCheck: new Date().toISOString(),
+        latency: latency,
+        bounceRate: data.success ? 0.1 : 99.9
+      };
+
+      // Persistence
+      this.state.settings.commConfig.health = healthUpdate;
+      await this.commit();
+      this.notify();
+
+      if (data.success) {
+        return { success: true, message: `Gateway Handshake Successful. Latency ${latency}ms.`, health: healthUpdate };
+      } else {
+        return { success: false, error: data.message || 'SMTP Handshake Failed', health: healthUpdate };
+      }
+    } catch (err: any) {
+      const errorHealth = {
+        status: 'Failed' as const,
+        lastCheck: new Date().toISOString(),
+        latency: 0,
+        bounceRate: 100
+      };
+      this.state.settings.commConfig.health = errorHealth;
+      await this.commit();
+      this.notify();
+      return { success: false, error: `CONNECTION_ERR: ${err.message}`, health: errorHealth };
+    }
   }
 
   async sendTestEmail(config: any, testData: any) {
@@ -2832,13 +2870,15 @@ class DB {
         const data = await res.json();
         realLatency = Date.now() - start;
         
-        if (!data.success) {
+        if (data.success) {
+          dispatchStatus = 'Sent';
+        } else {
           dispatchStatus = 'Failed';
           errorMsg = data.message || 'Node Transmission Error';
         }
       } catch (err: any) {
         dispatchStatus = 'Failed';
-        errorMsg = `TRANSMISSION_FAILED: ${err.message || 'Network Relay Timeout'}. Ensure backend node is active on port 5000.`;
+        errorMsg = `TRANSMISSION_FAILED: ${err.message || 'Network Relay Timeout'}.`;
       }
     } else {
       await new Promise(r => setTimeout(r, 1200));
@@ -2866,16 +2906,26 @@ class DB {
     let dispatchStatus: 'Sent' | 'Failed' = 'Sent';
     let errorMsg = '';
 
-    if (!config.simulationMode && config.smsConfig?.apiKey) {
-      try {
-        await fetch(`${this.backendUrl}/api/sms`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ to, message, provider: config.smsProvider })
-        });
-      } catch (e: any) {
+    if (!config.simulationMode) {
+      if (config.smsConfig?.apiKey) {
+        try {
+          const res = await fetch(`${this.backendUrl}/api/sms`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, message, provider: config.smsProvider })
+          });
+          const data = await res.json();
+          if (!data.success) {
+            dispatchStatus = 'Failed';
+            errorMsg = data.message || 'SMS Gateway Error';
+          }
+        } catch (e: any) {
+          dispatchStatus = 'Failed';
+          errorMsg = `SMS_TRANSMISSION_FAILED: ${e.message}`;
+        }
+      } else {
         dispatchStatus = 'Failed';
-        errorMsg = e.message;
+        errorMsg = 'SMS_CONFIG_MISSING: No API Key identified in registry.';
       }
     } else {
       await new Promise(r => setTimeout(r, 600));
@@ -2900,16 +2950,26 @@ class DB {
     let dispatchStatus: 'Sent' | 'Failed' = 'Sent';
     let errorMsg = '';
 
-    if (!config.simulationMode && config.whatsappConfig?.apiKey) {
-      try {
-        await fetch(`${this.backendUrl}/api/whatsapp`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ to, message, provider: config.whatsappProvider })
-        });
-      } catch (e: any) {
+    if (!config.simulationMode) {
+      if (config.whatsappConfig?.apiKey) {
+        try {
+          const res = await fetch(`${this.backendUrl}/api/whatsapp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ to, message, provider: config.whatsappProvider })
+          });
+          const data = await res.json();
+          if (!data.success) {
+            dispatchStatus = 'Failed';
+            errorMsg = data.message || 'WhatsApp Gateway Error';
+          }
+        } catch (e: any) {
+          dispatchStatus = 'Failed';
+          errorMsg = `WA_TRANSMISSION_FAILED: ${e.message}`;
+        }
+      } else {
         dispatchStatus = 'Failed';
-        errorMsg = e.message;
+        errorMsg = 'WA_CONFIG_MISSING: No API Key identified in registry.';
       }
     } else {
       await new Promise(r => setTimeout(r, 800));
