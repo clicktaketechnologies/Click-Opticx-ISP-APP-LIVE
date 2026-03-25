@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from './Mini5GMicroLoader';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { db } from '../db';
@@ -101,7 +102,7 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
                         className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all border group/btn ${showToUsers ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/20 border-rose-500/30 text-rose-400'}`}
                         title={showToUsers ? 'Disable for Subscribers' : 'Enable for Subscribers'}
                       >
-                         {isUpdating ? <RefreshCw size={14} className="animate-spin" /> : showToUsers ? <Eye size={14} /> : <EyeOff size={14} />}
+                         {isUpdating ? <Mini5GMicroLoader size={14} /> : showToUsers ? <Eye size={14} /> : <EyeOff size={14} />}
                          <span className="text-[7px] font-black uppercase tracking-tighter hidden sm:inline">User Side: {showToUsers ? 'ON' : 'OFF'}</span>
                       </button>
                     )}

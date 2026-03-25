@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 import React, { useState, useMemo } from 'react';
 import { AppState, EmailCampaign } from '../../types';
@@ -175,7 +176,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                     <div className="space-y-2">
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Subject Line</label>
-                       <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all" placeholder="Action Required: Your NetRecover Invoice" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} />
+                       <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all" placeholder="Action Required: Your Click Opticx Invoice" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} />
                     </div>
                  </div>
 
@@ -209,7 +210,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
                   disabled={isProcessing}
                   className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
-                    {isProcessing ? <RefreshCw className="animate-spin" size={18}/> : <CheckCircle size={18}/>}
+                    {isProcessing ? <Mini5GMicroLoader size={18} /> : <CheckCircle size={18}/>}
                     Commit Campaign Node
                  </button>
               </div>

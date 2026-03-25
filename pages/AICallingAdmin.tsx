@@ -65,7 +65,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
         </div>
         <div className={`p-4 rounded-[2rem] border-2 flex items-center gap-6 transition-all ${!callConfig.enabled ? 'border-rose-200 bg-rose-50' : 'border-emerald-200 bg-emerald-50'}`}>
             <div className="space-y-1">
-               <p className="text-[9px] font-black uppercase text-slate-500">Node Status</p>
+               <p className="text-[9px] font-black uppercase text-slate-500">AI Status</p>
                <p className={`text-xs font-black uppercase italic ${!callConfig.enabled ? 'text-rose-600' : 'text-emerald-600'}`}>
                   {callConfig.enabled ? 'OPERATIONAL' : 'LOCKED'}
                </p>
@@ -233,7 +233,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
               
               <div className="space-y-10">
                  <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Node Archetype (Persona)</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Voice Persona</label>
                     <div className="grid grid-cols-2 gap-3">
                        {['Calm', 'Friendly', 'Professional', 'Strict'].map((p: any) => (
                          <button 
@@ -340,7 +340,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     <tr>
                        <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Subscriber</th>
                        <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Handshake Metrics</th>
-                       <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Result Node</th>
+                       <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Outcome</th>
                        <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Audit</th>
                     </tr>
                  </thead>

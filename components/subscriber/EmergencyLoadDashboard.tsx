@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { ISPUser, AppState, EmergencyLoad } from '../../types';
@@ -68,7 +69,7 @@ const EmergencyLoadDashboard: React.FC<Props> = ({ user, state, onAction }) => {
            <div className="relative z-10 space-y-8">
               <div className="flex justify-between items-start">
                  <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-md border border-white/10">
-                    {activeEL.status === 'Pending_Activation' ? <RefreshCw className="animate-spin" size={32} /> : <ShieldAlert size={32} />}
+                    {activeEL.status === 'Pending_Activation' ? <Mini5GMicroLoader size={32} /> : <ShieldAlert size={32} />}
                  </div>
                  <div className="text-right">
                     <p className="text-[10px] font-black text-white/60 uppercase tracking-widest">Protocol Status</p>

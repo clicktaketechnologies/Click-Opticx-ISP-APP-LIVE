@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 import React, { useState, useMemo } from 'react';
 import { AppState, Role, UserStatus, PackageRequest, TopupRequest, EmergencyLoad, PaymentStatus, Package } from '../types';
@@ -35,9 +36,18 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
       packageName: l.packageId ? (state.packages.find(p => p.id === l.packageId)?.name || 'Rescue') : 'Rescue Credit',
       paymentMethod: 'Auto-Advance'
     }));
+    const signups = (state.signupRequests || []).filter(r => r.status === 'Pending').map(r => ({
+      ...r,
+      unifiedType: 'signup' as const,
+      paymentMethod: 'N/A',
+      amount: 0,
+      userId: 'NEW',
+      userName: r.name,
+      packageName: 'New Connection'
+    }));
 
-    return [...pkgs, ...topups, ...emer].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-  }, [state.packageRequests, state.topupRequests, state.emergencyLoads, state.packages]);
+    return [...pkgs, ...topups, ...emer, ...signups].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  }, [state.packageRequests, state.topupRequests, state.emergencyLoads, state.signupRequests, state.packages]);
 
   const filteredRequests = useMemo(() => {
     return unifiedRequests.filter(r => {
@@ -82,6 +92,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
       case 'package': return <FileText className="text-blue-500" size={18} />;
       case 'topup': return <Wallet className="text-emerald-500" size={18} />;
       case 'emergency': return <Zap className="text-orange-500" size={18} />;
+      case 'signup': return <User className="text-indigo-500" size={18} />;
       default: return <FileText className="text-slate-400" size={18} />;
     }
   };
@@ -102,6 +113,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
             { id: 'package', label: 'Packages' },
             { id: 'topup', label: 'Top-Ups' },
             { id: 'emergency', label: 'Emergency' },
+            { id: 'signup', label: 'Signups' },
           ].map(tab => (
             <button 
               key={tab.id} 
@@ -214,7 +226,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
               <div className="p-10 space-y-10 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
-                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">Subscriber Node</h4>
+                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">Subscriber</h4>
                        <div className="flex items-center gap-4">
                           <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center border shadow-sm"><User size={28} className="text-slate-300"/></div>
                           <div>
@@ -242,7 +254,14 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                           <span className="text-[10px] font-bold text-slate-500 uppercase">Active Package Collision</span>
                           {(() => {
                              const user = state.users.find(u => u.id === selectedRequestData.userId);
-                             const isExpired = user?.expiryDate ? new Date(user.expiryDate) < new Date() : true;
+                             let isExpired = true;
+                             if (user?.expiryDate) {
+                               const exp = new Date(user.expiryDate);
+                               exp.setHours(0, 0, 0, 0);
+                               const today = new Date();
+                               today.setHours(0, 0, 0, 0);
+                               isExpired = exp.getTime() < today.getTime();
+                             }
                              return isExpired ? (
                                <span className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-1"><CheckCircle size={12}/> NONE DETECTED</span>
                              ) : (
@@ -289,7 +308,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                   disabled={isProcessing}
                   className="flex-[2] py-5 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-emerald-700 transition-all active:scale-95 flex items-center justify-center gap-3"
                  >
-                    {isProcessing ? <RefreshCw className="animate-spin" size={18}/> : <ShieldCheck size={18}/>}
+                    {isProcessing ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
                     Authorize Provisioning
                  </button>
               </div>

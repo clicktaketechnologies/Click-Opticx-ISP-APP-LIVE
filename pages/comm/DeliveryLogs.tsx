@@ -95,8 +95,8 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
                <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol Type</th>
-                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Identity Node</th>
-                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Handshake Status</th>
+                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Caller Details</th>
+                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Connection Status</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Timestamp</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Trigger Source</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right pr-12">Audit</th>

@@ -57,8 +57,8 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
       {/* KPI Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
          {[
-           { label: 'Total Node Calls', value: stats.total, icon: PhoneCall, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-           { label: 'Escalation Node', value: stats.escalated, icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50' },
+           { label: 'Total Connected Calls', value: stats.total, icon: PhoneCall, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+           { label: 'Escalations', value: stats.escalated, icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50' },
            { label: 'Avg Pulse Width', value: formatDuration(stats.avgDuration), icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50' },
            { label: 'Decision Accuracy', value: `${stats.avgConf}%`, icon: Sparkles, color: 'text-emerald-600', bg: 'bg-emerald-50' }
          ].map((kpi, idx) => (
@@ -105,7 +105,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
             <table className="w-full text-left min-w-[1200px]">
                <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
-                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Subscriber Node</th>
+                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Subscriber</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Registry Timestamp</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Pulse Width</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Context Topics</th>
@@ -205,7 +205,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
                  {/* Identity Summary */}
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm space-y-4">
-                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic border-b border-slate-50 pb-2">Identity Node</p>
+                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic border-b border-slate-50 pb-2">Caller Details</p>
                        <div className="flex items-center gap-4">
                           <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center border shadow-inner"><UserCircle size={28} className="text-slate-300"/></div>
                           <div>
@@ -256,7 +256,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
                                 {selectedCall.escalationNeeded ? <ShieldAlert size={28}/> : <ShieldCheck size={28}/>}
                              </div>
                              <div>
-                                <p className="text-sm font-black uppercase italic tracking-tight">{selectedCall.escalationNeeded ? 'Escalation Node Active' : 'Autonomous Resolution'}</p>
+                                <p className="text-sm font-black uppercase italic tracking-tight">{selectedCall.escalationNeeded ? 'Escalations Active' : 'Autonomous Resolution'}</p>
                                 <p className={`text-[8px] font-black uppercase tracking-widest ${selectedCall.escalationNeeded ? 'text-rose-400' : 'text-emerald-400'}`}>Integrity Handshake</p>
                              </div>
                           </div>

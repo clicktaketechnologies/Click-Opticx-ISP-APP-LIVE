@@ -114,7 +114,7 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
             <table className="w-full text-left min-w-[1200px]">
                <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
-                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Node Identity</th>
+                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Identity</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Provisioned Plan</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol State</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Due Registry</th>

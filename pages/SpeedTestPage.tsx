@@ -1,33 +1,80 @@
 
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Gauge, Play, Loader2, ArrowDownCircle, ArrowUpCircle, Activity, Globe, Wifi, ShieldCheck, History } from 'lucide-react';
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
+import { runPingTest, runDownloadTest, runUploadTest } from '../utils/speedtest';
 
 const SpeedTestPage: React.FC = () => {
   const [isTesting, setIsTesting] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [phase, setPhase] = useState<'idle' | 'ping' | 'download' | 'upload' | 'completed'>('idle');
   const [results, setResults] = useState<{dl: number, ul: number, ping: number} | null>(null);
   const [testHistory, setTestHistory] = useState<any[]>([]);
 
-  const startTest = () => {
+  useEffect(() => {
+     const savedHistory = localStorage.getItem('isp_speedHistory');
+     if (savedHistory) {
+         try { setTestHistory(JSON.parse(savedHistory)); } catch (e) {}
+     }
+  }, []);
+
+  const startTest = async () => {
+    if (isTesting) return;
     setIsTesting(true);
-    setResults(null);
-    let p = 0;
-    const interval = setInterval(() => {
-      p += 2;
-      setProgress(p);
-      if (p >= 100) {
-        clearInterval(interval);
-        setIsTesting(false);
-        const finalResults = {
-          dl: Number((Math.random() * 40 + 60).toFixed(1)),
-          ul: Number((Math.random() * 20 + 30).toFixed(1)),
-          ping: Math.floor(Math.random() * 15 + 5)
-        };
-        setResults(finalResults);
-        setTestHistory(prev => [{ ...finalResults, timestamp: new Date().toLocaleString() }, ...prev].slice(0, 5));
-      }
-    }, 50);
+    setResults({ dl: 0, ul: 0, ping: 0 });
+    setPhase('ping');
+
+    // Ping
+    const pingRes = await runPingTest();
+    setResults(prev => ({ ...prev!, ping: pingRes }));
+
+    // Download
+    setPhase('download');
+    const dlRes = await runDownloadTest((progressDl) => {
+        setResults(prev => ({ ...prev!, dl: progressDl }));
+    });
+    setResults(prev => ({ ...prev!, dl: dlRes }));
+
+    // Upload
+    setPhase('upload');
+    const ulRes = await runUploadTest((progressUl) => {
+        setResults(prev => ({ ...prev!, ul: progressUl }));
+    });
+
+    const finalResults = { dl: dlRes, ul: ulRes, ping: pingRes };
+    setResults(finalResults);
+    setPhase('completed');
+
+    const newEntry = { ...finalResults, timestamp: new Date().toLocaleString() };
+    const newHistory = [newEntry, ...testHistory].slice(0, 5);
+    setTestHistory(newHistory);
+    localStorage.setItem('isp_speedHistory', JSON.stringify(newHistory));
+
+    setIsTesting(false);
   };
+
+  // Visual Progress calculation
+  let progress = 0;
+  if (phase === 'ping') progress = 10;
+  else if (phase === 'download') progress = 10 + (results ? Math.min((results.dl / 100) * 40, 40) : 0);
+  else if (phase === 'upload') progress = 50 + (results ? Math.min((results.ul / 50) * 50, 50) : 0);
+  else if (phase === 'completed') progress = 100;
+
+  const displayValue = phase === 'idle' || phase === 'completed'
+     ? (results ? results.dl.toFixed(1) : '0.0')
+     : phase === 'download'
+         ? (results ? results.dl.toFixed(1) : '0.0')
+         : phase === 'upload'
+             ? (results ? results.ul.toFixed(1) : '0.0')
+             : (results?.ping ? results.ping.toString() : '0');
+
+  const displayLabel = phase === 'idle' || phase === 'completed'
+      ? 'Mbps Download'
+      : phase === 'ping'
+          ? 'Measuring Ping (ms)...'
+          : phase === 'download'
+              ? 'Downloading...'
+              : 'Uploading...';
 
   return (
     <div className="space-y-8 pb-24 animate-in fade-in duration-500">
@@ -39,12 +86,18 @@ const SpeedTestPage: React.FC = () => {
 
         <div className="relative w-64 h-64 flex items-center justify-center z-10">
            <div className="absolute inset-0 rounded-full border-[15px] border-slate-50 shadow-inner"></div>
-           <div className="absolute inset-0 rounded-full border-[15px] border-indigo-600 transition-all duration-300 border-t-transparent border-r-transparent border-l-transparent" style={{ transform: `rotate(${progress * 3.6}deg)` }}></div>
-           <div className="flex flex-col items-center">
+           <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none">
+             <circle
+               cx="50%" cy="50%" r="44%" fill="none" stroke="currentColor" strokeWidth="15"
+               strokeDasharray="276" strokeDashoffset={`${276 - (276 * progress) / 100}`}
+               className={`transition-all duration-300 ${phase === 'upload' ? 'text-emerald-500' : 'text-indigo-600'}`}
+             />
+           </svg>
+           <div className="flex flex-col items-center z-10">
               <h2 className="text-6xl font-black text-slate-900 italic tracking-tighter">
-                {isTesting ? (progress * 0.96).toFixed(1) : (results ? results.dl : '0.0')}
+                {displayValue}
               </h2>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Mbps Download</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{displayLabel}</p>
            </div>
         </div>
 
@@ -53,25 +106,25 @@ const SpeedTestPage: React.FC = () => {
           disabled={isTesting}
           className="w-full max-w-sm py-6 bg-slate-950 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-4 relative z-10"
         >
-           {isTesting ? <Loader2 className="animate-spin" size={20} /> : <Play size={20} fill="currentColor" />}
-           {isTesting ? 'Initializing Scans...' : 'Execute Full Audit'}
+           {isTesting ? <Mini5GMicroLoader size={20} /> : <Play size={20} fill="currentColor" />}
+           {isTesting ? 'Initializing Scans...' : (phase === 'completed' ? 'Restart Audit' : 'Execute Full Audit')}
         </button>
 
         <Activity className="absolute -right-12 -bottom-12 opacity-[0.03] scale-[4] pointer-events-none text-indigo-900" size={200} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center gap-4 group hover:bg-blue-50 transition-all">
-            <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+         <div className={`p-8 rounded-[2rem] border shadow-sm flex flex-col items-center gap-4 transition-all ${phase === 'upload' ? 'bg-white border-emerald-400 scale-105 z-10' : 'bg-white border-slate-100 hover:bg-emerald-50'}`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform ${phase === 'upload' ? 'bg-emerald-100 text-emerald-600 animate-bounce' : 'bg-slate-50 text-emerald-600'}`}>
                <ArrowUpCircle size={28} />
             </div>
             <div className="text-center">
                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Peak Upload</p>
-               <p className="text-2xl font-black text-slate-900 italic tracking-tighter">{results?.ul || '0.0'} Mbps</p>
+               <p className="text-2xl font-black text-slate-900 italic tracking-tighter">{results?.ul ? results.ul.toFixed(1) : '0.0'} Mbps</p>
             </div>
          </div>
-         <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center gap-4 group hover:bg-emerald-50 transition-all">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+         <div className={`p-8 rounded-[2rem] border shadow-sm flex flex-col items-center gap-4 transition-all ${phase === 'ping' ? 'bg-white border-blue-400 scale-105 z-10' : 'bg-white border-slate-100 hover:bg-blue-50'}`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform ${phase === 'ping' ? 'bg-blue-100 text-blue-600 animate-pulse' : 'bg-slate-50 text-blue-600'}`}>
                <Activity size={28} />
             </div>
             <div className="text-center">

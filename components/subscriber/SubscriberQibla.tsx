@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Compass, ShieldCheck, MapPin, RefreshCw, AlertTriangle, Settings2, Globe } from 'lucide-react';
 import QiblaCompass from './QiblaCompass';
@@ -196,7 +197,7 @@ const SubscriberQibla: React.FC = () => {
                 disabled={isCalibrating}
                 className="p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/5 shrink-0"
               >
-                <RefreshCw size={20} className={`text-indigo-400 ${isCalibrating ? 'animate-spin' : ''}`} />
+                <Mini5GMicroLoader size={20} />
               </button>
            </div>
            <Compass className="text-white/10 absolute -right-4 -bottom-4" size={140} />

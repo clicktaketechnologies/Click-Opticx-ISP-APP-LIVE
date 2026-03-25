@@ -33,7 +33,7 @@ const AdminLiveMonitoring: React.FC<{ state: AppState }> = ({ state }) => {
             <Monitor className="text-indigo-600" size={32} />
             NOC Operational Pulse
           </h2>
-          <p className="text-slate-500 font-medium">Real-time telemetry and handshake audit for all active subscriber nodes.</p>
+          <p className="text-slate-500 font-medium">Real-time telemetry and handshake audit for all active Subscribers.</p>
         </div>
         <div className="px-6 py-3 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
@@ -61,7 +61,7 @@ const AdminLiveMonitoring: React.FC<{ state: AppState }> = ({ state }) => {
             <table className="w-full text-left min-w-[1200px]">
                <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
-                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Node Identity</th>
+                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Identity</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Live Speed</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Devices</th>
@@ -107,7 +107,7 @@ const AdminLiveMonitoring: React.FC<{ state: AppState }> = ({ state }) => {
                         <td className="px-8 py-5 font-black text-slate-900">
                            <div className="flex items-center gap-2">
                               <Smartphone size={16} className="text-slate-400"/>
-                              <span>{Math.floor(Math.random() * 5 + 1)} Connected</span>
+                              <span>{db.getConnectedDevices(u.id).length} Connected</span>
                            </div>
                         </td>
                         <td className="px-8 py-5 font-black text-slate-900">

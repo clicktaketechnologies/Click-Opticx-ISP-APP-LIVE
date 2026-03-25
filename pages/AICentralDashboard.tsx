@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { AppState, Role, UserStatus, LedgerType, AIActionLog, ISPUser } from '../types';
@@ -91,7 +92,7 @@ const AICentralDashboard: React.FC<{ state: AppState }> = ({ state }) => {
            </div>
            <div>
               <h1 className="text-3xl font-black text-slate-950 tracking-tighter uppercase italic leading-none">AI Control Plane</h1>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] mt-3">Heuristic Command & Orchestration Node v8.5</p>
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] mt-3">AI Command Center v8.5</p>
            </div>
         </div>
         
@@ -126,10 +127,10 @@ const AICentralDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                        </div>
                        <div className="flex gap-4">
                           <button onClick={refreshAI} disabled={isSyncing} className="p-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl shadow-xl transition-all active:scale-95 disabled:opacity-50">
-                             {isSyncing ? <RefreshCw className="animate-spin" size={24}/> : <RefreshCw size={24}/>}
+                             {isSyncing ? <Mini5GMicroLoader size={24} /> : <RefreshCw size={24}/>}
                           </button>
                           <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
-                             <p className="text-[9px] font-black text-slate-500 uppercase">Latency Node</p>
+                             <p className="text-[9px] font-black text-slate-500 uppercase">Network Latency</p>
                              <p className="text-xl font-black text-emerald-400">14ms</p>
                           </div>
                        </div>
@@ -168,7 +169,7 @@ const AICentralDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                        ))}
                     </div>
                     <button onClick={() => setActiveTab('modules')} className="w-full py-4 bg-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/20 transition-all flex items-center justify-center gap-2">
-                       Full Node Grid <ChevronRight size={14} />
+                       Full Service Grid <ChevronRight size={14} />
                     </button>
                  </div>
               </div>
@@ -217,7 +218,7 @@ const AICentralDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="p-6 bg-rose-50 border border-rose-100 rounded-[2rem] space-y-3">
                        <p className="text-[10px] font-black text-rose-900 uppercase">Eligibility Lockdown</p>
                        <p className="text-[9px] text-rose-700 font-bold uppercase leading-relaxed">
-                          AI has restricted Emergency Load protocol for 14 identity nodes due to high default correlation.
+                          AI has restricted Emergency Access for 14 Caller Detailss due to high default correlation.
                        </p>
                     </div>
                     <div className="space-y-2">

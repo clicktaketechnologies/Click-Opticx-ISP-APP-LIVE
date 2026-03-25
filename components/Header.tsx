@@ -9,9 +9,11 @@ interface HeaderProps {
   toggleSidebar: () => void;
   onProfileClick: () => void;
   onLogout: () => void;
+  searchTerm: string;
+  onSearch: (term: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, onLogout }) => {
+const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, onLogout, searchTerm, onSearch }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const state = db.getState();
   const branding = state.settings.branding;
@@ -43,30 +45,41 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
   const renderConnectionBadge = () => {
     if (isSyncing) {
       return (
-        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 animate-pulse whitespace-nowrap">
+        <button 
+          disabled
+          className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 text-blue-600 rounded-lg border border-blue-100 animate-pulse whitespace-nowrap cursor-wait"
+        >
            <CloudUpload size={10} />
            <span className="text-[8px] font-black uppercase tracking-widest leading-none">Handshaking</span>
-        </div>
+        </button>
       );
     }
 
     switch(state.connectionStatus) {
       case 'online':
         return (
-          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 whitespace-nowrap group">
+          <button 
+            onClick={() => db.forceSync()}
+            title="Manual Registry Sync"
+            className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 whitespace-nowrap group hover:bg-emerald-100 transition-all active:scale-95"
+          >
              <div className="relative">
                 <Cloud size={10} />
                 <div className="absolute -top-0.5 -right-0.5 w-1 h-1 bg-emerald-500 rounded-full animate-ping"></div>
              </div>
              <span className="text-[8px] font-black uppercase tracking-widest leading-none">Synced</span>
-          </div>
+          </button>
         );
       default:
         return (
-          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-red-50 text-red-600 rounded-lg border border-red-100 whitespace-nowrap">
+          <button 
+            onClick={() => db.forceSync()}
+            title="Attempt Cloud Reconnection"
+            className="flex items-center gap-1.5 px-2 py-0.5 bg-red-50 text-red-600 rounded-lg border border-red-100 whitespace-nowrap hover:bg-red-100 transition-all active:scale-95"
+          >
              <CloudOff size={10} />
              <span className="text-[8px] font-black uppercase tracking-widest leading-none">Local</span>
-          </div>
+          </button>
         );
     }
   };
@@ -94,13 +107,23 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
            </div>
         </div>
 
-        <div className="relative hidden md:block w-36 lg:w-48">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" size={12} />
+        <div className="relative hidden md:block w-36 lg:w-48 group">
+          <Search className={`absolute left-2 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-indigo-500' : 'text-slate-400'}`} size={12} />
           <input 
             type="text" 
+            value={searchTerm}
+            onChange={(e) => onSearch(e.target.value)}
             placeholder="Registry search..." 
-            className="w-full pl-7 pr-3 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/10 text-[9px] font-bold transition-all"
+            className="w-full pl-7 pr-7 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-[9px] font-bold transition-all placeholder:text-slate-300"
           />
+          {searchTerm && (
+            <button 
+              onClick={() => onSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-rose-500 transition-colors"
+            >
+              <X size={10} />
+            </button>
+          )}
         </div>
         {renderConnectionBadge()}
       </div>

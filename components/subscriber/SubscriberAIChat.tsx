@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI } from "@google/genai";
@@ -77,22 +78,22 @@ const SubscriberAIChat: React.FC<{ user: ISPUser, state: AppState }> = ({ user, 
   }, [input, isLoading, state.settings.branding.businessName, user, state.packages, state.nocEvents]);
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl overflow-hidden animate-in zoom-in duration-300">
-      <header className="p-8 bg-slate-900 text-white flex justify-between items-center shrink-0 relative overflow-hidden">
+    <div className="flex flex-col h-full bg-white rounded-2xl sm:rounded-[2.5rem] border border-slate-100 shadow-2xl overflow-hidden animate-in zoom-in duration-300">
+      <header className="p-4 sm:p-8 bg-slate-900 text-white flex justify-between items-center shrink-0 relative overflow-hidden">
          <div className="relative z-10 flex items-center gap-4">
             <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg animate-pulse">
                <Bot size={28} />
             </div>
             <div>
-               <h3 className="text-xl font-black uppercase tracking-tight italic leading-none">NetRecover Hybrid AI</h3>
-               <p className="text-[9px] text-emerald-400 font-black uppercase tracking-[0.4em] mt-1">Shared Intelligence Link</p>
+               <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight italic leading-none">Strategic QNA Protocol</h3>
+               <p className="text-[9px] text-emerald-400 font-black uppercase tracking-[0.4em] mt-1">Autonomous Knowledge Node</p>
             </div>
          </div>
          <button className="relative z-10 p-3 bg-white/5 border border-white/10 rounded-2xl text-slate-500 hover:text-white transition-all"><X size={24}/></button>
          <Sparkles className="absolute -right-4 -bottom-4 opacity-5" size={140} />
       </header>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-slate-50/50" ref={scrollRef}>
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6 custom-scrollbar bg-slate-50/50" ref={scrollRef}>
          {messages.map((m, i) => (
            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
               <div className={`max-w-[85%] p-5 rounded-3xl shadow-sm border ${m.role === 'user' ? 'bg-indigo-600 text-white border-indigo-700 rounded-tr-none' : 'bg-white text-slate-800 border-slate-100 rounded-tl-none'}`}>
@@ -103,12 +104,12 @@ const SubscriberAIChat: React.FC<{ user: ISPUser, state: AppState }> = ({ user, 
                  <p className="text-xs font-bold leading-relaxed whitespace-pre-wrap">{m.text}</p>
                  
                  {m.type === 'action' && (
-                   <div className="mt-4 flex gap-2">
-                      <button className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-[8px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
-                         <Phone size={12}/> AI Call
+                   <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                      <button className="flex-1 px-4 py-3 sm:py-2 bg-indigo-600 text-white rounded-xl text-[10px] sm:text-[8px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg">
+                         <Phone size={14}/> AI Call
                       </button>
-                      <button className="px-4 py-2 bg-slate-900 text-white rounded-xl text-[8px] font-black uppercase tracking-widest flex items-center gap-2 shadow-lg">
-                         <ExternalLink size={12}/> Ticket
+                      <button className="flex-1 px-4 py-3 sm:py-2 bg-slate-900 text-white rounded-xl text-[10px] sm:text-[8px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-lg">
+                         <ExternalLink size={14}/> Ticket
                       </button>
                    </div>
                  )}
@@ -118,7 +119,7 @@ const SubscriberAIChat: React.FC<{ user: ISPUser, state: AppState }> = ({ user, 
          {isLoading && (
            <div className="flex justify-start">
               <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-3">
-                 <Loader2 className="animate-spin text-indigo-500" size={16} />
+                 <Mini5GMicroLoader size={16} />
                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Synthesizing Logic...</span>
               </div>
            </div>
@@ -131,10 +132,10 @@ const SubscriberAIChat: React.FC<{ user: ISPUser, state: AppState }> = ({ user, 
          )}
       </div>
 
-      <div className="p-6 bg-white border-t border-slate-100 shrink-0">
+      <div className="p-4 sm:p-6 bg-white border-t border-slate-100 shrink-0">
          <div className="relative flex items-center gap-3">
             <input 
-              className="flex-1 pl-6 pr-14 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold text-sm uppercase placeholder:lowercase"
+              className="flex-1 pl-4 sm:pl-6 pr-14 py-4 sm:py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 transition-all font-bold text-sm uppercase placeholder:lowercase"
               placeholder="Query the hybrid node..."
               value={input}
               onChange={e => setInput(e.target.value)}

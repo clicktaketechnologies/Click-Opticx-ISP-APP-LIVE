@@ -1,63 +1,125 @@
-
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense, Component } from 'react';
 import { db } from './db';
 import { Role, AppState, SystemNotification } from './types';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import UserManagement from './pages/UserManagement';
-import RecoveryDashboard from './pages/RecoveryDashboard';
-import AccountingLedger from './pages/AccountingLedger';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import PackagesPage from './pages/PackagesPage';
-import ArchivePage from './pages/ArchivePage';
-import AccessControlPage from './pages/AccessControlPage';
-import DealerManagement from './pages/DealerManagement';
-import PermissionsPage from './pages/PermissionsPage';
-import DataImportPage from './pages/DataImportPage';
-import DatabaseMonitor from './pages/DatabaseMonitor';
-import BusinessSettings from './pages/BusinessSettings';
-import PaymentMethodsIndex from './pages/PaymentMethodsIndex';
-import StripeSettings from './pages/gateways/StripeSettings';
-import CashSettings from './pages/gateways/CashSettings';
-import JazzCashSettings from './pages/gateways/JazzCashSettings';
-import EasyPaisaSettings from './pages/gateways/EasyPaisaSettings';
-import PayPalSettings from './pages/gateways/PayPalSettings';
-import PayFastSettings from './pages/gateways/PayFastSettings';
-import HomeCollectionSettings from './pages/gateways/HomeCollectionSettings';
-import BankTransferSettings from './pages/gateways/BankTransferSettings';
-import InvoiceGenerator from './pages/InvoiceGenerator';
-import InvoiceManagementAdmin from './pages/InvoiceManagementAdmin';
-import CustomerPortal from './pages/CustomerPortal';
-import SubscriberApp from './SubscriberApp';
-import UserAppManagement from './pages/UserAppManagement';
-import WalletManagement from './pages/WalletManagement';
-import EmergencyLoadAdmin from './pages/EmergencyLoadAdmin';
-import CreditScoreAdmin from './pages/CreditScoreAdmin';
-import ReferralAdmin from './pages/ReferralAdmin';
-import ConnectionSetupAdmin from './pages/ConnectionSetupAdmin';
-import TicketManagementAdmin from './pages/TicketManagementAdmin';
-import TaskManagement from './pages/TaskManagement';
-import AboutUs from './pages/AboutUs';
-import AdminLiveMonitoring from './pages/AdminLiveMonitoring';
-import AdminPasswordRequests from './pages/AdminPasswordRequests';
-import DeviceManagement from './pages/DeviceManagement';
-import UserDeviceMapping from './pages/UserDeviceMapping';
-import MasterApprovalDashboard from './pages/MasterApprovalDashboard';
-import AdminProfile from './pages/AdminProfile';
-import AIControlPlane from './pages/AIControlPlane';
-import AICallingAdmin from './pages/AICallingAdmin';
-import AICallLogs from './pages/AICallLogs';
-import AIAgentWidget from './components/AIAgentWidget';
-import EmailCampaigns from './pages/comm/EmailCampaigns';
-import EmailTemplates from './pages/comm/EmailTemplates';
-import AutomationRules from './pages/comm/AutomationRules';
-import PushNotifications from './pages/comm/PushNotifications';
-import AudienceSegments from './pages/comm/AudienceSegments';
-import DeliveryLogs from './pages/comm/DeliveryLogs';
-import CommunicationSettingsPage from './pages/comm/CommunicationSettings';
-import SenderIdentities from './pages/comm/SenderIdentities';
-import { Loader2, ShieldAlert, LogOut, Cloud, X, Zap, ShieldCheck } from 'lucide-react';
+import {
+  Receipt, Wallet, ShieldCheck, LogOut,
+  Signal, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap, Loader2, Cloud, X, Zap, RefreshCcw
+} from 'lucide-react';
+
+// Lazy load pages for performance
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
+const Recovery = lazy(() => import('./pages/Recovery'));
+const RecoveryDashboard = lazy(() => import('./pages/RecoveryDashboard'));
+const AccountingLedger = lazy(() => import('./pages/AccountingLedger'));
+const Sidebar = lazy(() => import('./components/Sidebar'));
+const Header = lazy(() => import('./components/Header'));
+const PackagesPage = lazy(() => import('./pages/PackagesPage'));
+const ArchivePage = lazy(() => import('./pages/ArchivePage'));
+const AccessControlPage = lazy(() => import('./pages/AccessControlPage'));
+const DealerManagement = lazy(() => import('./pages/DealerManagement'));
+const PermissionsPage = lazy(() => import('./pages/PermissionsPage'));
+const DataImportPage = lazy(() => import('./pages/DataImportPage'));
+const DatabaseMonitor = lazy(() => import('./pages/DatabaseMonitor'));
+const CacheManagement = lazy(() => import('./pages/CacheManagement'));
+const BusinessSettings = lazy(() => import('./pages/BusinessSettings'));
+const PaymentMethodsIndex = lazy(() => import('./pages/PaymentMethodsIndex'));
+const StripeSettings = lazy(() => import('./pages/gateways/StripeSettings'));
+const CashSettings = lazy(() => import('./pages/gateways/CashSettings'));
+const JazzCashSettings = lazy(() => import('./pages/gateways/JazzCashSettings'));
+const EasyPaisaSettings = lazy(() => import('./pages/gateways/EasyPaisaSettings'));
+const PayPalSettings = lazy(() => import('./pages/gateways/PayPalSettings'));
+const PayFastSettings = lazy(() => import('./pages/gateways/PayFastSettings'));
+const HomeCollectionSettings = lazy(() => import('./pages/gateways/HomeCollectionSettings'));
+const BankTransferSettings = lazy(() => import('./pages/gateways/BankTransferSettings'));
+const InvoiceGenerator = lazy(() => import('./pages/InvoiceGenerator'));
+const InvoiceManagementAdmin = lazy(() => import('./pages/InvoiceManagementAdmin'));
+const CustomerPortal = lazy(() => import('./pages/CustomerPortal'));
+const SubscriberApp = lazy(() => import('./SubscriberApp'));
+const UserAppManagement = lazy(() => import('./pages/UserAppManagement'));
+const WalletManagement = lazy(() => import('./pages/WalletManagement'));
+const EmergencyLoadAdmin = lazy(() => import('./pages/EmergencyLoadAdmin'));
+const CreditScoreAdmin = lazy(() => import('./pages/CreditScoreAdmin'));
+const ReferralAdmin = lazy(() => import('./pages/ReferralAdmin'));
+const ConnectionSetupAdmin = lazy(() => import('./pages/ConnectionSetupAdmin'));
+const TicketManagementAdmin = lazy(() => import('./pages/TicketManagementAdmin'));
+const TaskManagement = lazy(() => import('./pages/TaskManagement'));
+const AboutUs = lazy(() => import('./pages/AboutUs'));
+const AdminLiveMonitoring = lazy(() => import('./pages/AdminLiveMonitoring'));
+const AdminPasswordRequests = lazy(() => import('./pages/AdminPasswordRequests'));
+const UserDeviceMapping = lazy(() => import('./pages/UserDeviceMapping'));
+const MasterApprovalDashboard = lazy(() => import('./pages/MasterApprovalDashboard'));
+const AdminProfile = lazy(() => import('./pages/AdminProfile'));
+const AIControlPlane = lazy(() => import('./pages/AIControlPlane'));
+const AICallingAdmin = lazy(() => import('./pages/AICallingAdmin'));
+const AICallLogs = lazy(() => import('./pages/AICallLogs'));
+const AIAgentWidget = lazy(() => import('./components/AIAgentWidget'));
+const EmailCampaigns = lazy(() => import('./pages/comm/EmailCampaigns'));
+const EmailTemplates = lazy(() => import('./pages/comm/EmailTemplates'));
+const AutomationRules = lazy(() => import('./pages/comm/AutomationRules'));
+const PushNotifications = lazy(() => import('./pages/comm/PushNotifications'));
+const AudienceSegments = lazy(() => import('./pages/comm/AudienceSegments'));
+const DeliveryLogs = lazy(() => import('./pages/comm/DeliveryLogs'));
+const CommunicationSettingsPage = lazy(() => import('./pages/comm/CommunicationSettings'));
+const AdminReminders = lazy(() => import('./pages/AdminReminders'));
+const SenderIdentities = lazy(() => import('./pages/comm/SenderIdentities'));
+const NASManagement = lazy(() => import('./pages/NASManagement'));
+const OLTManagement = lazy(() => import('./pages/OLTManagement'));
+const NOCDashboard = lazy(() => import('./pages/NOCDashboard'));
+const AuthControlCenter = lazy(() => import('./pages/AuthControlCenter'));
+import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
+import { FiveGLaunchAnimation } from './components/FiveGLaunchAnimation';
+
+interface EBProps {
+  children: React.ReactNode;
+}
+
+interface EBState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class ErrorBoundary extends React.Component<EBProps, EBState> {
+  state: EBState = { hasError: false, error: null };
+
+  constructor(props: EBProps) {
+    super(props);
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 text-white text-center">
+          <ShieldAlert className="text-rose-500 mb-6" size={64} />
+          <h1 className="text-3xl font-black uppercase italic tracking-tighter mb-4">Registry Fault Detected</h1>
+          <p className="text-slate-400 max-w-md text-xs font-bold uppercase tracking-widest leading-relaxed mb-8">
+            An unexpected runtime error has occurred. Our secondary containment has isolated the issue.
+            Detailed trace logged to console.
+          </p>
+          <div className="bg-white/5 p-4 rounded-2xl border border-white/10 mb-8 max-w-lg overflow-auto">
+            <code className="text-rose-400 text-[10px] break-all">{this.state.error?.message}</code>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-8 py-4 bg-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-2"
+          >
+            <RefreshCcw size={16} /> Re-Initialize Node
+          </button>
+        </div>
+      );
+    }
+    return (this as any).props.children;
+  }
+}
 
 const App: React.FC = () => {
   const [authState, setAuthState] = useState<AppState['currentUser']>(db.getState().currentUser);
@@ -66,40 +128,51 @@ const App: React.FC = () => {
   const [isConfigured, setIsConfigured] = useState(db.isConfigured());
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [targetUserId, setTargetUserId] = useState<string | null>(null);
+  const [targetAction, setTargetAction] = useState<string | null>(null);
   const [criticalAlert, setCriticalAlert] = useState<SystemNotification | null>(null);
+  const [show5G, setShow5G] = useState(true);
+  const [globalSearchTerm, setGlobalSearchTerm] = useState('');
 
   useEffect(() => {
     const unsubscribe = db.onStateChange((newState) => {
+      console.log('App state updated:', newState.currentUser?.email, 'Configured:', db.isConfigured());
       setDbState(newState);
       setAuthState(newState.currentUser);
       setIsConfigured(db.isConfigured());
       const user = newState.currentUser;
       if (user && user.role !== Role.CUSTOMER) {
-         const criticals = newState.notifications.filter(n => !n.read && n.priority === 'critical' && (n.audience === 'admin' || n.audience === 'system'));
-         if (criticals.length > 0) setCriticalAlert(criticals[0]);
+        const criticals = newState.notifications.filter(n => !n.read && n.priority === 'critical' && (n.audience === 'admin' || n.audience === 'system'));
+        if (criticals.length > 0) setCriticalAlert(criticals[0]);
       }
     });
+
+    // Ensure state transition if already configured on mount
+    if (db.isConfigured()) setIsConfigured(true);
+
     return () => unsubscribe();
   }, []);
 
-  if (!isConfigured) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center">
-        <div className="relative mb-8"><Cloud className="text-blue-500 animate-pulse" size={64} /><div className="absolute inset-0 flex items-center justify-center"><Loader2 className="text-white animate-spin" size={32} /></div></div>
-        <h1 className="text-3xl font-black tracking-tighter uppercase italic">Click Opticx</h1>
-        <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] mt-4">Cloud Node Handshake in Progress...</p>
-      </div>
-    );
-  }
+  const handleLogin = async (credential: string, pass: string) => {
+    console.log('App.tsx: Login attempt initiated for credential:', credential);
+    const res = await db.login(credential, pass);
+    console.log('App.tsx: Login result:', res.success ? 'Success' : 'Failed', res.message || '');
+    return res;
+  };
+  const handleLogout = () => {
+    console.log('App.tsx: Logout initiated.');
+    db.logout();
+    setCurrentPage('dashboard');
+  };
 
-  const handleLogin = (credential: string, pass: string) => db.login(credential, pass);
-  const handleLogout = () => { db.logout(); setCurrentPage('dashboard'); };
-  
-  const navigateTo = (page: string, params?: { userId?: string }) => { 
+  const navigateTo = (page: string, params?: { userId?: string, action?: string }) => {
     if (params?.userId) setTargetUserId(params.userId);
     else setTargetUserId(null);
-    setCurrentPage(page); 
-    setIsSidebarOpen(false); 
+
+    if (params?.action) setTargetAction(params.action);
+    else setTargetAction(null);
+
+    setCurrentPage(page);
+    setIsSidebarOpen(false);
   };
 
   const dismissCritical = () => {
@@ -107,100 +180,199 @@ const App: React.FC = () => {
     setCriticalAlert(null);
   };
 
-  if (!authState) return <Login onLogin={handleLogin} />;
-  
-  if (authState.role === Role.CUSTOMER) {
+  const renderConfiguring = () => {
+    const branding = dbState.settings?.branding || { businessName: 'Click Optix', shortName: 'CO ISP', logoLight: '', logoDark: '', logoSquare: '', favicon: '', primaryColor: '#4f46e5', secondaryColor: '#10b981', accentColor: '#f59e0b', textColorLight: '#ffffff', textColorDark: '#0f172a', primaryFont: 'Inter', secondaryFont: 'Inter' };
+    const profile = dbState.settings?.profile || { tagline: 'Connecting to Cloud Securely' };
+
     return (
-      <>
-        {dbState.isImpersonating && (
-          <div className="fixed top-0 inset-x-0 bg-rose-600 text-white p-3 z-[1000] flex items-center justify-between shadow-2xl animate-in slide-in-from-top duration-500">
-             <div className="flex items-center gap-3"><ShieldAlert size={20} className="animate-pulse" /><p className="text-[10px] font-black uppercase tracking-widest">Admin View Active: Viewing as {authState.name}</p></div>
-             <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-lg text-[9px] font-black uppercase"><LogOut size={12} /> Exit</button>
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center selection:bg-indigo-500/30 overflow-hidden relative">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+
+        <div className="relative z-10 flex flex-col items-center max-w-sm w-full">
+          <div className="mb-12 relative group">
+            <div className="absolute -inset-4 bg-gradient-to-tr from-indigo-600 to-emerald-500 rounded-[2.5rem] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-1000"></div>
+            <div className="w-28 h-28 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] flex items-center justify-center shadow-2xl border border-white/10 relative overflow-hidden">
+              {branding.logoDark ? (
+                <img src={branding.logoDark} className="w-full h-full object-contain p-4 animate-in zoom-in-50 duration-700" alt="Logo" />
+              ) : (
+                <Signal className="text-indigo-400 animate-pulse" size={48} />
+              )}
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg border-2 border-slate-950 animate-bounce">
+              <Zap size={14} className="text-white" />
+            </div>
           </div>
-        )}
-        <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />
-        <AIAgentWidget state={dbState} />
-      </>
+
+          <div className="space-y-4">
+            <h1 className="text-4xl font-black tracking-tighter uppercase italic bg-gradient-to-r from-white via-indigo-100 to-slate-400 bg-clip-text text-transparent transform hover:scale-105 transition-transform duration-500">
+              {branding.shortName || branding.businessName}
+            </h1>
+            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em] leading-relaxed opacity-80 max-w-[200px]">
+              {profile.tagline || "Connecting to Cloud Securely"}
+            </p>
+          </div>
+
+          <div className="mt-16 w-full max-w-[180px] space-y-6">
+            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-emerald-500 to-indigo-600 w-full animate-loading-bar shadow-[0_0_15px_rgba(79,70,229,0.5)]"></div>
+            </div>
+            <div className="flex items-center justify-center gap-3">
+              <Mini5GMicroLoader size={14} />
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Nodes Synchronizing</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30 hover:opacity-100 transition-opacity duration-300">
+          <p className="text-[8px] text-slate-500 font-mono tracking-tighter">BUILD {dbState.settings?.appVersion || "v1.2.5"}-LIVE-PATCH</p>
+          <div className="flex items-center gap-4 text-[8px] font-black uppercase text-slate-600 tracking-widest">
+            <span>CLOUD SECURE</span>
+            <div className="w-1 h-1 rounded-full bg-emerald-500"></div>
+            <span>REGIONAL NODE</span>
+          </div>
+        </div>
+        {show5G && <FiveGLaunchAnimation state={dbState} onComplete={() => setShow5G(false)} />}
+      </div>
     );
-  }
+  };
+
+  const renderApp = () => {
+    console.log('Rendering App branch. Configured:', isConfigured, 'Auth:', authState?.email);
+    if (!isConfigured) return renderConfiguring();
+
+    if (!authState) {
+      return (
+        <>
+          {show5G && <FiveGLaunchAnimation state={dbState} onComplete={() => setShow5G(false)} />}
+          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center"><div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div><p className="mt-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Security Handshake...</p></div>}>
+            <Login onLogin={handleLogin} />
+          </Suspense>
+        </>
+      );
+    }
+
+    if (authState.role === Role.CUSTOMER) {
+      console.log('Rendering Customer Portal');
+      return (
+        <Suspense fallback={<div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center"><div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin shadow-2xl"></div><p className="mt-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Loading Portal...</p></div>}>
+          {dbState.isImpersonating && (
+            <div className="fixed top-0 inset-x-0 bg-rose-600 text-white p-3 z-[1000] flex items-center justify-between shadow-2xl animate-in slide-in-from-top duration-500">
+              <div className="flex items-center gap-3"><ShieldAlert size={20} className="animate-pulse" /><p className="text-[10px] font-black uppercase tracking-widest">Admin View Active: Viewing as {authState.name}</p></div>
+              <button onClick={handleLogout} className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-lg text-[9px] font-black uppercase"><LogOut size={12} /> Exit</button>
+            </div>
+          )}
+          <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />
+          <AIAgentWidget state={dbState} />
+          {show5G && <FiveGLaunchAnimation state={dbState} onComplete={() => setShow5G(false)} />}
+        </Suspense>
+      );
+    }
+
+    console.log('Rendering Admin Layout, Page:', currentPage);
+    return (
+      <div className="flex min-h-screen bg-slate-50 overflow-hidden">
+        {show5G && <FiveGLaunchAnimation state={dbState} onComplete={() => setShow5G(false)} />}
+        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-950"><Mini5GMicroLoader size={48} /></div>}>
+          {criticalAlert && (
+            <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[3000] flex items-center justify-center p-6">
+              <div className="bg-white rounded-[3.5rem] w-full max-lg shadow-2xl overflow-hidden border-[8px] border-rose-500 animate-in zoom-in duration-300">
+                <div className="p-10 text-center space-y-8">
+                  <div className="w-24 h-24 bg-rose-600 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-pulse"><ShieldAlert size={56} strokeWidth={3} /></div>
+                  <div className="space-y-3"><h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">{criticalAlert.title}</h3><p className="text-[11px] text-slate-500 font-bold uppercase tracking-[0.2em] leading-relaxed px-4">{criticalAlert.message}</p></div>
+                  <button onClick={dismissCritical} className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 shadow-xl transition-all flex items-center justify-center gap-2">Acknowledge Alert <ShieldCheck size={18} /></button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
+          <Sidebar current={currentPage} onNavigate={navigateTo} role={authState.role} onLogout={handleLogout} isOpen={isSidebarOpen} businessName={dbState.settings.branding.businessName} />
+          <div className="flex-1 flex flex-col h-screen overflow-hidden">
+            <Header 
+              user={authState as any} 
+              toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
+              onProfileClick={() => navigateTo('admin-profile')} 
+              onLogout={handleLogout}
+              searchTerm={globalSearchTerm}
+              onSearch={setGlobalSearchTerm}
+            />
+            <main className="p-4 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
+              <Suspense fallback={<div className="h-full w-full flex flex-col items-center justify-center animate-premium"><div className="w-10 h-10 border-4 border-slate-100 border-t-indigo-500 rounded-full animate-spin"></div></div>}>
+                {(() => {
+                  switch (currentPage) {
+                    case 'dashboard': return <Dashboard state={dbState} onNavigate={navigateTo} searchTerm={globalSearchTerm} />;
+                    case 'ai-control': return <AIControlPlane state={dbState} />;
+                    case 'ai-calling': return <AICallingAdmin state={dbState} />;
+                    case 'ai-call-logs': return <AICallLogs state={dbState} />;
+                    case 'users': return <UserManagement state={dbState} autoOpenAction={targetAction || undefined} searchTerm={globalSearchTerm} />;
+                    case 'packages': return <PackagesPage state={dbState} />;
+                    case 'approval-desk': return <MasterApprovalDashboard state={dbState} />;
+                    case 'recovery': return <Recovery state={dbState} autoOpenAction={targetAction || undefined} searchTerm={globalSearchTerm} />;
+                    case 'recovery-dashboard': return <RecoveryDashboard state={dbState} />;
+                    case 'accounting': return <AccountingLedger state={dbState} />;
+                    case 'archive': return <ArchivePage state={dbState} />;
+                    case 'staff': return <AccessControlPage state={dbState} />;
+                    case 'permissions': return <PermissionsPage state={dbState} />;
+                    case 'import': return <DataImportPage state={dbState} />;
+                    case 'monitor': return <DatabaseMonitor state={dbState} />;
+                    case 'cache': return <CacheManagement state={dbState} />;
+                    case 'business-settings': return <BusinessSettings state={dbState} />;
+                    case 'auth-control': return <AuthControlCenter state={dbState} />;
+                    case 'gateway-settings': return <PaymentMethodsIndex state={dbState} onNavigate={navigateTo} />;
+                    case 'gateway-stripe': return <StripeSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
+                    case 'gateway-cash': return <CashSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
+                    case 'gateway-jazzcash': return <JazzCashSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
+                    case 'gateway-easypaisa': return <EasyPaisaSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
+                    case 'gateway-paypal': return <PayPalSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
+                    case 'gateway-payfast': return <PayFastSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
+                    case 'gateway-home': return <HomeCollectionSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
+                    case 'gateway-bank': return <BankTransferSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
+                    case 'invoice-engine': return <InvoiceGenerator state={dbState} preSelectedUserId={targetUserId || undefined} onNavigate={navigateTo} />;
+                    case 'invoice-management': return <InvoiceManagementAdmin state={dbState} onNavigate={navigateTo} />;
+                    case 'customer-360': return <CustomerPortal state={dbState} />;
+                    case 'user-app': return <UserAppManagement state={dbState} />;
+                    case 'wallet': return <WalletManagement state={dbState} />;
+                    case 'dealers': return <DealerManagement state={dbState} />;
+                    case 'emergency-load': return <EmergencyLoadAdmin state={dbState} />;
+                    case 'connection-setup': return <ConnectionSetupAdmin state={dbState} />;
+                    case 'tickets': return <TicketManagementAdmin state={dbState} />;
+                    case 'about-us': return <AboutUs state={dbState} />;
+                    case 'admin-live-monitoring': return <AdminLiveMonitoring state={dbState} />;
+                    case 'admin-password-requests': return <AdminPasswordRequests state={dbState} />;
+                    case 'admin-device-mapping': return <UserDeviceMapping state={dbState} />;
+                    case 'admin-profile': return <AdminProfile state={dbState} />;
+                    case 'tasks': return <TaskManagement state={dbState} />;
+                    case 'comm-campaigns': return <EmailCampaigns state={dbState} />;
+                    case 'comm-templates': return <EmailTemplates state={dbState} />;
+                    case 'comm-rules': return <AutomationRules state={dbState} />;
+                    case 'comm-push': return <PushNotifications state={dbState} />;
+                    case 'comm-segments': return <AudienceSegments state={dbState} />;
+                    case 'comm-logs': return <DeliveryLogs state={dbState} />;
+                    case 'comm-settings': return <CommunicationSettingsPage state={dbState} />;
+                    case 'comm-identities': return <SenderIdentities state={dbState} />;
+                    case 'admin-reminders': return <AdminReminders state={dbState} onNavigate={navigateTo} />;
+                    case 'nas-management': return <NASManagement state={dbState} />;
+                    case 'olt-management': return <OLTManagement state={dbState} />;
+                    case 'noc-dashboard': return <NOCDashboard state={dbState} />;
+                    default: return <Dashboard state={dbState} onNavigate={navigateTo} />;
+                  }
+                })()}
+              </Suspense>
+            </main>
+          </div>
+          <Suspense fallback={null}>
+            <AIAgentWidget state={dbState} />
+          </Suspense>
+        </Suspense>
+      </div>
+    );
+  };
 
   return (
-    <div className="flex min-h-screen bg-slate-50 overflow-hidden">
-      {criticalAlert && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[3000] flex items-center justify-center p-6">
-           <div className="bg-white rounded-[3.5rem] w-full max-lg shadow-2xl overflow-hidden border-[8px] border-rose-500 animate-in zoom-in duration-300">
-              <div className="p-10 text-center space-y-8">
-                 <div className="w-24 h-24 bg-rose-600 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-pulse"><ShieldAlert size={56} strokeWidth={3}/></div>
-                 <div className="space-y-3"><h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">{criticalAlert.title}</h3><p className="text-[11px] text-slate-500 font-bold uppercase tracking-[0.2em] leading-relaxed px-4">{criticalAlert.message}</p></div>
-                 <button onClick={dismissCritical} className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 shadow-xl transition-all flex items-center justify-center gap-2">Acknowledge Handshake <ShieldCheck size={18}/></button>
-              </div>
-           </div>
-        </div>
-      )}
-
-      {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
-      <Sidebar current={currentPage} onNavigate={navigateTo} role={authState.role} onLogout={handleLogout} isOpen={isSidebarOpen} businessName={dbState.settings.branding.businessName} />
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <Header user={authState as any} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} onProfileClick={() => navigateTo('admin-profile')} onLogout={handleLogout} />
-        <main className="p-4 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
-           {(() => {
-              switch (currentPage) {
-                case 'dashboard': return <Dashboard state={dbState} />;
-                case 'ai-control': return <AIControlPlane state={dbState} />;
-                case 'ai-calling': return <AICallingAdmin state={dbState} />;
-                case 'ai-call-logs': return <AICallLogs state={dbState} />;
-                case 'users': return <UserManagement state={dbState} />;
-                case 'packages': return <PackagesPage state={dbState} />;
-                case 'approval-desk': return <MasterApprovalDashboard state={dbState} />;
-                case 'recovery': return <RecoveryDashboard state={dbState} />;
-                case 'accounting': return <AccountingLedger state={dbState} />;
-                case 'archive': return <ArchivePage state={dbState} />;
-                case 'staff': return <AccessControlPage state={dbState} />;
-                case 'permissions': return <PermissionsPage state={dbState} />;
-                case 'import': return <DataImportPage state={dbState} />;
-                case 'monitor': return <DatabaseMonitor state={dbState} />;
-                case 'business-settings': return <BusinessSettings state={dbState} />;
-                case 'gateway-settings': return <PaymentMethodsIndex state={dbState} onNavigate={navigateTo} />;
-                case 'gateway-stripe': return <StripeSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-                case 'gateway-cash': return <CashSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-                case 'gateway-jazzcash': return <JazzCashSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-                case 'gateway-easypaisa': return <EasyPaisaSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-                case 'gateway-paypal': return <PayPalSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-                case 'gateway-payfast': return <PayFastSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-                case 'gateway-home': return <HomeCollectionSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-                case 'gateway-bank': return <BankTransferSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-                case 'invoice-engine': return <InvoiceGenerator state={dbState} preSelectedUserId={targetUserId || undefined} onNavigate={navigateTo} />;
-                case 'invoice-management': return <InvoiceManagementAdmin state={dbState} onNavigate={navigateTo} />;
-                case 'customer-360': return <CustomerPortal state={dbState} />;
-                case 'user-app': return <UserAppManagement state={dbState} />;
-                case 'wallet': return <WalletManagement state={dbState} />;
-                case 'dealers': return <DealerManagement state={dbState} />;
-                case 'emergency-load': return <EmergencyLoadAdmin state={dbState} />;
-                case 'connection-setup': return <ConnectionSetupAdmin state={dbState} />;
-                case 'tickets': return <TicketManagementAdmin state={dbState} />;
-                case 'about-us': return <AboutUs state={dbState} />;
-                case 'admin-live-monitoring': return <AdminLiveMonitoring state={dbState} />;
-                case 'admin-password-requests': return <AdminPasswordRequests state={dbState} />;
-                case 'admin-devices': return <DeviceManagement state={dbState} />;
-                case 'admin-device-mapping': return <UserDeviceMapping state={dbState} />;
-                case 'admin-profile': return <AdminProfile state={dbState} />;
-                case 'tasks': return <TaskManagement state={dbState} />;
-                // Communication Hub
-                case 'comm-campaigns': return <EmailCampaigns state={dbState} />;
-                case 'comm-templates': return <EmailTemplates state={dbState} />;
-                case 'comm-rules': return <AutomationRules state={dbState} />;
-                case 'comm-push': return <PushNotifications state={dbState} />;
-                case 'comm-segments': return <AudienceSegments state={dbState} />;
-                case 'comm-logs': return <DeliveryLogs state={dbState} />;
-                case 'comm-settings': return <CommunicationSettingsPage state={dbState} />;
-                case 'comm-identities': return <SenderIdentities state={dbState} />;
-                default: return <Dashboard state={dbState} />;
-              }
-           })()}
-        </main>
-      </div>
-      <AIAgentWidget state={dbState} />
-    </div>
+    <ErrorBoundary>
+      {renderApp()}
+    </ErrorBoundary>
   );
 };
 

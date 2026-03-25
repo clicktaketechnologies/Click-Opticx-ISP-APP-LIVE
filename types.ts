@@ -5,9 +5,12 @@ export enum UserStatus {
   EXPIRED = 'Expired',
   GRACE_PERIOD = 'Grace Period Active',
   PAYMENT_DUE = 'Active - Payment Due',
+  RECOVERY_MODE = 'Recovery Mode Active',
   DISABLED = 'Disabled',
   BLOCKED = 'Blocked',
-  PENDING_VERIFICATION = 'Verification Pending'
+  PENDING_VERIFICATION = 'Verification Pending',
+  ACTIVE_UNPAID = 'Active - Unpaid',
+  EMERGENCY_ACTIVE = 'Emergency Active'
 }
 
 export enum VerificationStatus {
@@ -21,6 +24,74 @@ export enum ConnectionStatus {
   PENDING = 'Pending',
   INSTALLED = 'Installed',
   ACTIVE = 'Active'
+}
+
+export type RecoveryActionType = 'Suspend' | 'Activate' | 'Recover' | 'Mark Paid' | 'Advanced Billing' | 'Bulk Suspend' | 'Bulk Status Change';
+export type BillingPaymentType = 'Full Paid' | 'Half Paid' | 'Advance Paid' | 'Unpaid';
+export type BillingCycle = '15 days' | '30 days' | 'Custom' | 'Manual';
+
+export interface RecoveryLog {
+  id: string;
+  adminId: string;
+  adminName: string;
+  adminIp: string;
+  userId: string;
+  userName: string;
+  action: RecoveryActionType;
+  details: string;
+  amount?: number;
+  oldState: string;
+  newState: string;
+  timestamp: string;
+}
+
+export interface TestLog {
+  id: string;
+  timestamp: string;
+  module: string;
+  action: string;
+  status: 'Working' | 'Failed' | 'Warning';
+  details: string;
+}
+
+export interface CommunicationLog {
+  id: string;
+  userId: string;
+  email: string;
+  subject: string;
+  sentBy: string;
+  sentAt: string;
+  status: 'Sent' | 'Failed';
+  error?: string;
+  templateId?: string;
+}
+
+export enum ReminderStatus {
+  NEW = 'New',
+  IN_PROGRESS = 'In Progress',
+  RESOLVED = 'Resolved',
+  IGNORED = 'Ignored'
+}
+
+export enum ReminderIssueType {
+  UNPAID_BILL = 'Unpaid Bill',
+  PLAN_NOT_ACTIVATED = 'Plan Not Activated',
+  PAYMENT_MISSING = 'Payment Missing (Admin Error)'
+}
+
+export interface AdminReminder {
+  id: string;
+  userId: string;
+  userName: string;
+  area: string;
+  issueType: ReminderIssueType;
+  daysPending: number;
+  billAmount: number;
+  status: ReminderStatus;
+  createdAt: string;
+  resolvedAt?: string;
+  resolvedBy?: string;
+  ignoreReason?: string;
 }
 
 export enum Role {
@@ -98,6 +169,25 @@ export interface UserSession {
   lastActive: string;
 }
 
+export interface OTP {
+  userId: string;
+  identifier: string; // The email/phone value mapped to
+  otpCode: string;
+  expiry: string;
+  attempts: number;
+  type: 'Email' | 'SMS' | 'Reset';
+}
+
+export interface DuplicateActionLog {
+  id: string;
+  timestamp: string;
+  action: 'Merge' | 'Create_New' | 'Block' | 'Ignore';
+  originalUserIds: string[];
+  resolvedUserId?: string;
+  adminId: string;
+  details: string;
+}
+
 export interface SecurityLog {
   id: string;
   action: string;
@@ -171,12 +261,14 @@ export interface Invoice {
   discountAmount: number;
   totalAmount: number;
   paidAmount: number;
+  dueAmount: number;
   status: PaymentStatus;
   dueDate: string;
   createdAt: string;
   paidAt?: string;
   paymentMethod?: PaymentMethod;
   notes?: string;
+  type?: 'Monthly' | 'Activation' | 'Extension' | 'Other';
 }
 
 export interface ConnectedDevice {
@@ -234,11 +326,17 @@ export interface ISPUser {
   packageId?: string;
   balance: number;
   creditScore: number;
-  referralPoints: number;
+  referralPoints?: number;
+  managementMode: 'Manual' | 'NAS_Controlled';
+  routerId?: string;
+  nasConnectionType: 'PPPoE' | 'Hotspot' | 'Static IP' | 'Manual';
+  macAddress?: string;
   referralCode: string;
   referredBy?: string;
   activationCount: number;
   expiryDate?: string;
+  activationDate?: string;
+  createdAt?: string;
   deleted?: boolean;
   portalEnabled: boolean;
   role?: Role.CUSTOMER;
@@ -290,17 +388,16 @@ export interface ISPUser {
   sessions?: UserSession[];
   securityFlags?: string[];
   internalNotes?: string;
+  notes?: string;
+  isRecoveryMode?: boolean;
+  lastPaymentDate?: string;
+  promiseToPayDate?: string;
+  collectedBy?: string;
+  collectorName?: string;
+  collectionDate?: string;
 }
 
-export interface Device {
-  id: string;
-  name: string;
-  type: 'MikroTik' | 'VSOL_OLT';
-  ip: string;
-  username: string;
-  status: 'Connected' | 'Offline' | 'Error';
-  lastSeen: string;
-}
+
 
 export interface KYCDocument {
   type: 'CNIC' | 'Passport' | 'Driving License';
@@ -567,6 +664,7 @@ export interface SenderIdentity {
 }
 
 export interface CommunicationSettings {
+  simulationMode: boolean;
   emailMode: EmailGatewayMode;
   emailProvider: 'SMTP' | 'SendGrid' | 'AWS_SES' | 'Gmail' | 'Mailgun' | 'Brevo';
   providerConfig: any;
@@ -584,6 +682,10 @@ export interface CommunicationSettings {
     end: string;
     enabled: boolean;
   };
+  smsProvider?: 'Twilio' | 'Infobip' | 'Vonage' | 'Clickatell' | 'Custom';
+  smsConfig?: { apiKey: string; apiSecret?: string; from: string };
+  whatsappProvider?: 'Twilio' | 'Meta_Graph' | 'MessageBird' | 'Custom';
+  whatsappConfig?: { apiKey: string; phoneNumberId?: string; wabaId?: string };
   rateLimits: {
     emailsPerHour: number;
     emailsPerDay: number;
@@ -649,17 +751,30 @@ export interface AppState {
   isImpersonating?: boolean;
   passwordRequests: PasswordResetRequest[];
   networkNodes: NetworkNode[];
-  devices: Device[];
+
   networkMappings: NetworkMapping[];
   aiCallLogs: AICallLog[];
   aiCallRules: AICallRule[];
-  
+
   // Communication Hub
   emailCampaigns: EmailCampaign[];
   emailTemplates: EmailTemplate[];
   audienceSegments: AudienceSegment[];
   commAutomationRules: CommunicationAutomationRule[];
   deliveryLogs: DeliveryLog[];
+  recoveryLogs: RecoveryLog[];
+  commLogs: CommunicationLog[];
+  testLogs: TestLog[];
+  adminReminders: AdminReminder[];
+  nasNodes: NASConfig[];
+  liveUsage: LiveUsage[];
+  oltNodes: OLTConfig[];
+  onus: ONU[];
+  upstreamLinks: UpstreamLink[];
+  nocAlerts: NOCAlert[];
+  otps: OTP[];
+  duplicateLogs: DuplicateActionLog[];
+  approvalRequests: ApprovalRequest[];
 }
 
 export interface StaffUser {
@@ -685,26 +800,31 @@ export interface PaymentRecord {
   collectorName: string;
   invoiceId: string;
   isCleared?: boolean;
+  clearedAt?: string;
+  collectionDate?: string;
+  collectionTime?: string;
+  notes?: string;
+  collectedBy?: string;
 }
 
-export interface Package { 
-  id: string; 
-  name: string; 
-  subtitle?: string; 
-  speed: string; 
+export interface Package {
+  id: string;
+  name: string;
+  subtitle?: string;
+  speed: string;
   uploadSpeed: string;
   dataLimit: string;
-  price: number; 
-  discountPrice?: number; 
-  discountExpiry?: string; 
-  taxRate: number; 
-  duration: number; 
-  deleted?: boolean; 
-  features?: string; 
-  descriptionBullets?: string[]; 
-  isRecommended?: boolean; 
-  trustTags?: string[]; 
-  discount?: number; 
+  price: number;
+  discountPrice?: number;
+  discountExpiry?: string;
+  taxRate: number;
+  duration: number;
+  deleted?: boolean;
+  features?: string;
+  descriptionBullets?: string[];
+  isRecommended?: boolean;
+  trustTags?: string[];
+  discount?: number;
   color?: string;
   networkFeatures?: any;
   techStats?: any;
@@ -806,6 +926,7 @@ export interface InvoiceBranding {
   terms: string;
   privacy: string;
   refundPolicyUrl: string;
+  customNotes: string;
 }
 
 export interface NotificationBranding {
@@ -814,15 +935,15 @@ export interface NotificationBranding {
   smsSenderId: string;
 }
 
-export interface BrandingConfig { 
-  businessName: string; 
-  shortName: string; 
-  logoLight: string; 
-  logoDark: string; 
+export interface BrandingConfig {
+  businessName: string;
+  shortName: string;
+  logoLight: string;
+  logoDark: string;
   logoSquare: string;
-  favicon: string; 
-  primaryColor: string; 
-  secondaryColor: string; 
+  favicon: string;
+  primaryColor: string;
+  secondaryColor: string;
   accentColor: string;
   textColorLight: string;
   textColorDark: string;
@@ -830,15 +951,15 @@ export interface BrandingConfig {
   secondaryFont: string;
 }
 
-export interface SupportConfig { 
-  email: string; 
-  phone: string; 
-  whatsapp: string; 
+export interface SupportConfig {
+  email: string;
+  phone: string;
+  whatsapp: string;
   emergencyPhone: string;
-  address: string; 
+  address: string;
   workingHoursWeekdays: string;
   workingHoursWeekends: string;
-  emergencySupport: boolean; 
+  emergencySupport: boolean;
   afterHoursMessage: string;
   phoneEnabled: boolean;
   whatsappEnabled: boolean;
@@ -847,14 +968,15 @@ export interface SupportConfig {
   autoReplyFooter: string;
 }
 
-export interface AppearanceConfig { 
-  showWallet: boolean; 
-  showEmergencyLoad: boolean; 
-  showAIChat: boolean; 
-  showAICalling: boolean; 
-  showNews: boolean; 
-  showQuickActions: boolean; 
-  maintenanceMode: boolean; 
+export interface AppearanceConfig {
+  showWallet: boolean;
+  showEmergencyLoad: boolean;
+  showAIChat: boolean;
+  showAICalling: boolean;
+  showNews: boolean;
+  showQuickActions: boolean;
+  maintenanceMode: boolean;
+  show5GLaunchAnimation: boolean;
   appPages: AppPage[];
   homeCards: HomeCard[];
   sections: AppSection[];
@@ -868,6 +990,48 @@ export interface ReferralConfig {
   pkg3Points: number;
   minPkgPrice: number;
   conversionRatio: number;
+}
+
+export interface AuthSettings {
+  loginEnabled: boolean;
+  signupEnabled: boolean;
+  forgotPasswordEnabled: boolean;
+  otpEnabled: boolean;
+  dealerSignupEnabled: boolean;
+  enableUniversalLogin: boolean;
+  allowedIdentifiers: {
+    email: boolean;
+    phone: boolean;
+    cnic: boolean;
+    username: boolean;
+    pppoe: boolean;
+  };
+  signupMode: 'Auto' | 'Manual' | 'Dealer';
+  requireEmailVerification: boolean;
+  requirePhoneOTP: boolean;
+  requireCNIC: boolean;
+  defaultRole: Role;
+  duplicateControl: {
+    enabled: boolean;
+    blockDuplicate: boolean;
+    allowWithWarning: boolean;
+  };
+  securitySettings: {
+    maxLoginAttempts: number;
+    blockDurationMin: number;
+    enableCaptcha: boolean;
+    enable2FA: boolean;
+  };
+  forgotPasswordSettings: {
+    resetViaEmail: boolean;
+    resetViaOTP: boolean;
+    resetViaUsername: boolean;
+  };
+  postSignup: {
+    welcomePopup: boolean;
+    customMessage: string;
+    redirectUrl: string;
+  };
 }
 
 export interface SystemSettings {
@@ -886,6 +1050,8 @@ export interface SystemSettings {
   socialLinks: any[];
   appVersion: string;
   autoTaxPercentage: number;
+  enableTax: boolean;
+  taxLabel: string;
   globalEmergencyLimit: number;
   paymentGateways: PaymentGateway[];
   techConfig: TechnicalConfig;
@@ -893,11 +1059,13 @@ export interface SystemSettings {
   taxId: string;
   whiteLabelMode: boolean;
   allowWifiReset: boolean;
+  nasSystemEnabled: boolean;
   aiConfig: AIConfig;
   aiCallConfig: AICallConfig;
   commConfig: CommunicationSettings;
   infrastructure: InfrastructureConfig;
   legal: LegalConfig;
+  authSettings: AuthSettings;
 }
 
 export interface CreditScoreLog {
@@ -932,8 +1100,88 @@ export interface NetworkNode {
   protocol?: 'SSH' | 'SNMP' | 'API' | 'Telnet';
   username?: string;
   password?: string;
-  status: 'Connected' | 'Disconnected' | 'Error';
+  status: 'Connected' | 'Disconnected' | 'Error' | 'Pending Approval';
   lastHeartbeat: string;
+}
+
+export interface NASConfig {
+  id: string;
+  name: string;
+  ip: string;
+  dealerAssigned: string | null;
+  radiusSecret: string;
+  authPort: number;
+  accountingPort: number;
+  apiUsername: string;
+  apiPassword?: string;
+  apiPort: number;
+  coaEnabled: boolean;
+  coaPort: number;
+  nasEnabled: boolean;
+  location: string;
+  status: 'Online' | 'Offline' | 'Error';
+  lastCheck?: string;
+}
+
+export interface OLTConfig {
+  id: string;
+  name: string;
+  ip: string;
+  brand: 'Huawei' | 'ZTE' | 'BDCOM' | 'VSOL' | 'Raisecom' | 'FiberHome';
+  accessType: 'SSH' | 'Telnet' | 'SNMP' | 'API';
+  username: string;
+  password?: string;
+  port: number;
+  snmpCommunity?: string;
+  location: string;
+  dealerAssigned: string | null;
+  status: 'Online' | 'Offline' | 'Error';
+  lastCheck?: string;
+  ponPorts: number;
+}
+
+export interface ONU {
+  id: string;
+  serialNumber: string;
+  oltId: string;
+  ponPort: string;
+  subscriberId: string | null;
+  status: 'Online' | 'Offline' | 'DyingGasp' | 'LOS';
+  signalStrength: number; // in dBm
+  lastActive: string;
+  model?: string;
+  firmware?: string;
+  alias?: string;
+}
+
+export interface UpstreamLink {
+  id: string;
+  name: string;
+  status: 'Online' | 'Offline' | 'Standby';
+  latency: number;
+  usageMbps: number;
+  capacityMbps: number;
+  type: 'Primary' | 'Backup';
+}
+
+export interface NOCAlert {
+  id: string;
+  title: string;
+  message: string;
+  severity: 'Info' | 'Warning' | 'Critical';
+  timestamp: string;
+  category: 'Network' | 'Power' | 'Security';
+  actionTaken?: boolean;
+}
+
+export interface LiveUsage {
+  userId: string;
+  nasId: string;
+  upload: number;
+  download: number;
+  sessionTime: string;
+  ipAddress: string;
+  timestamp: string;
 }
 
 export interface PasswordResetRequest {
@@ -946,3 +1194,19 @@ export interface PasswordResetRequest {
   status: 'Pending' | 'Applied' | 'Failed' | 'Rejected';
   timestamp: string;
 }
+
+export interface ApprovalRequest {
+  id: string;
+  type: 'Payment_Collection' | 'Status_Change' | 'Plan_Activation' | 'Clear_Dues' | 'Staff_Addition';
+  userId: string;
+  userName: string;
+  requestedBy: string;
+  requestedByEmail: string;
+  amount?: number;
+  method?: PaymentMethod;
+  notes?: string;
+  payload: any;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  timestamp: string;
+}
+

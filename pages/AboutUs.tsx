@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 import React, { useState, useRef } from 'react';
 import { AppState, Role, AboutUsConfig, BrandingConfig, InfrastructureConfig } from '../types';
@@ -92,7 +93,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="flex gap-3 w-full sm:w-auto">
               <button onClick={() => setIsEditing(false)} className="flex-1 sm:flex-none px-6 py-4 bg-slate-100 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all">Discard</button>
               <button onClick={handleSave} disabled={isSaving} className="flex-1 sm:flex-none px-10 py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
-                 {isSaving ? <RefreshCw className="animate-spin" size={16}/> : <ShieldCheck size={16}/>}
+                 {isSaving ? <Mini5GMicroLoader size={16} /> : <ShieldCheck size={16}/>}
                  Deploy Identity
               </button>
            </div>
@@ -172,11 +173,11 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="space-y-8 pt-8 border-t border-slate-100">
               <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
                  <Network className="text-indigo-600" size={24} />
-                 <h3 className="text-lg font-black uppercase italic tracking-tight">Infrastructure Node (DNS)</h3>
+                 <h3 className="text-lg font-black uppercase italic tracking-tight">Infrastructure Settings (DNS)</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Domain Node</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Domain Name</label>
                   <input 
                     type="text" 
                     className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600" 
@@ -267,7 +268,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                      <span className="text-[10px] font-black uppercase tracking-widest">{formData.version}</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-500 text-[8px] font-bold uppercase mr-1">
-                     <Clock size={10} /> Node Synced: {new Date(formData.lastUpdated).toLocaleDateString()}
+                     <Clock size={10} /> Last Synced: {new Date(formData.lastUpdated).toLocaleDateString()}
                   </div>
                </div>
             </div>
@@ -313,7 +314,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between group hover:bg-white transition-all">
                <div>
-                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Domain Node</p>
+                  <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Domain Name</p>
                   <p className="text-base font-black text-slate-900 uppercase">{state.settings.infrastructure.domainNode}</p>
                </div>
                <div className="text-right">
@@ -327,7 +328,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                   <p className="text-base font-black text-emerald-600 uppercase">{state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? 'HEALTHY' : 'PENDING_LINK'}</p>
                </div>
                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
-                  {state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? <CheckCircle size={20} /> : <RefreshCw size={20} className="animate-spin" />}
+                  {state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? <CheckCircle size={20} /> : <Mini5GMicroLoader size={20} />}
                </div>
             </div>
          </div>
@@ -368,7 +369,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="px-6 flex justify-between items-end">
             <div>
                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] flex items-center gap-3">
-                  <Layers size={20} className="text-blue-600" /> Technical Edge Nodes
+                  <Layers size={20} className="text-blue-600" /> Technical Endpoints
                </h3>
                <p className="text-[9px] text-slate-500 font-bold uppercase mt-1 tracking-widest">Global Network Capabilities</p>
             </div>

@@ -16,7 +16,7 @@ interface PasswordInputProps {
   autoComplete?: string;
 }
 
-const PasswordInput: React.FC<PasswordInputProps> = ({ 
+const PasswordInput: React.FC<PasswordInputProps> = ({
   label, value, onChange, placeholder = "••••••••", required = false, className = "", showStrength = false, minChars = 8,
   // Added autoComplete to destructuring
   autoComplete
@@ -54,25 +54,24 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
       </div>
       <div className="relative group">
         <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={16} />
-        <input 
+        <input
           type={show ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           required={required}
-          // Added autoComplete to input element
           autoComplete={autoComplete}
-          className="w-full pl-11 pr-14 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold text-slate-800 shadow-inner placeholder:text-slate-200"
+          className="w-full pl-11 pr-14 py-4 bg-white/50 backdrop-blur-sm border-2 border-slate-100/50 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-slate-800 shadow-sm placeholder:text-slate-300"
         />
-        <button 
+        <button
           type="button"
           onClick={() => setShow(!show)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-xl transition-all"
         >
           {show ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       </div>
-      
+
       {showStrength && value && (
         <div className="flex gap-1 px-1 h-1">
           {[1, 2, 3, 4].map(step => (
@@ -80,19 +79,19 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           ))}
         </div>
       )}
-      
+
       {showStrength && value && (
         <div className="flex flex-wrap gap-2 px-1 mt-2">
-           {[
-             { label: `${minChars}+ Chars`, pass: value.length >= minChars },
-             { label: 'A-Z', pass: /[A-Z]/.test(value) },
-             { label: '0-9', pass: /[0-9]/.test(value) },
-             { label: '@#$', pass: /[^A-Za-z0-9]/.test(value) }
-           ].map((rule, i) => (
-             <div key={i} className={`flex items-center gap-1 text-[7px] font-black uppercase tracking-tighter ${rule.pass ? 'text-emerald-500' : 'text-slate-300'}`}>
-                {rule.pass ? <CheckCircle size={8}/> : <X size={8}/>} {rule.label}
-             </div>
-           ))}
+          {[
+            { label: `${minChars}+ Chars`, pass: value.length >= minChars },
+            { label: 'A-Z', pass: /[A-Z]/.test(value) },
+            { label: '0-9', pass: /[0-9]/.test(value) },
+            { label: '@#$', pass: /[^A-Za-z0-9]/.test(value) }
+          ].map((rule, i) => (
+            <div key={i} className={`flex items-center gap-1 text-[7px] font-black uppercase tracking-tighter ${rule.pass ? 'text-emerald-500' : 'text-slate-300'}`}>
+              {rule.pass ? <CheckCircle size={8} /> : <X size={8} />} {rule.label}
+            </div>
+          ))}
         </div>
       )}
     </div>

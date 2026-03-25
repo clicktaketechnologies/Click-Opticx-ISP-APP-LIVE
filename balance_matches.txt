@@ -1,0 +1,13 @@
+941: this.state.staff[sIdx].balance = (this.state.staff[sIdx].balance || 0) + amount;
+949: this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) + amount;
+1027: this.state.users[uIdx].balance -= inv.totalAmount;
+1276: user.balance -= amount;
+1454: user.balance -= amount;
+1484: user.balance = 0;
+1788: user.balance -= amount;
+1835: user.balance -= config.amount;
+1876: user.balance -= amount;
+2840: user.balance += totalAmount;
+2866: user.balance = 0;
+2975: user.balance += totalCost;
+3280: user.balance = 0;

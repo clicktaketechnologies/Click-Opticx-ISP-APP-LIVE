@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useState, useMemo, useEffect } from 'react';
 import { AppState, ISPUser, Package, LineItem } from '../types';
 import { db } from '../db';
@@ -65,8 +66,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
     if (userPkg) {
       setSelectedPkg(userPkg);
       const base = userPkg.price;
-      const tax = Math.round(base * ((userPkg.taxRate || state.settings.autoTaxPercentage) / 100));
-      setCustomAmount(base + tax);
+      setCustomAmount(base);
     }
     setStep(2);
   };
@@ -254,8 +254,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                                 if (p) {
                                   setSelectedPkg(p);
                                   const base = p.price;
-                                  const tax = Math.round(base * ((p.taxRate || state.settings.autoTaxPercentage) / 100));
-                                  setCustomAmount(base + tax);
+                                  setCustomAmount(base);
                                 }
                               }}
                              >
@@ -325,7 +324,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                   disabled={isProcessing}
                   className="w-full py-6 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
                  >
-                    {isProcessing ? <RefreshCw className="animate-spin" size={20} /> : <ShieldCheck size={20} />}
+                    {isProcessing ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20} />}
                     {isProcessing ? 'Verifying Registry...' : 'Manufacture Official Invoice'}
                  </button>
               </div>

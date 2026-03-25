@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, X, Loader2, Globe, ChevronRight } from 'lucide-react';
 
@@ -70,7 +71,7 @@ const WeatherLocationSelector: React.FC<Props> = ({ onClose, onSelect }) => {
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
             />
-            {loading && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-500 animate-spin" size={18} />}
+            {loading && <Mini5GMicroLoader size={18} />}
           </div>
 
           <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">

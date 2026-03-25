@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 
 import React, { useState, useMemo } from 'react';
 import { db } from '../../db';
@@ -212,7 +213,7 @@ const SubscriberSupport: React.FC = () => {
                    disabled={isSubmitting || !formData.subject || !formData.description}
                    className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
-                    {isSubmitting ? <RefreshCw className="animate-spin" size={18}/> : <Send size={18}/>}
+                    {isSubmitting ? <Mini5GMicroLoader size={18} /> : <Send size={18}/>}
                     Dispatch Ticket
                  </button>
               </div>

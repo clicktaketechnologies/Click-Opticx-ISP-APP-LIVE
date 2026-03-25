@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Cloud, Sun, CloudRain, Wind, Droplets, Thermometer, MapPin, 
@@ -202,7 +203,7 @@ const SubscriberWeather: React.FC = () => {
     return (
       <div className="h-full flex flex-col items-center justify-center space-y-6">
         <div className="w-20 h-20 bg-slate-900 rounded-[2.5rem] flex items-center justify-center shadow-2xl">
-          <Loader2 className="text-emerald-400 animate-spin" size={40} />
+          <Mini5GMicroLoader size={40} />
         </div>
         <div className="text-center">
            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Acquiring Geospatial Link...</p>
@@ -241,7 +242,7 @@ const SubscriberWeather: React.FC = () => {
                 disabled={refreshing}
                 className="p-4 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/5 shadow-xl active:scale-95"
               >
-                <RefreshCw size={20} className={refreshing ? 'animate-spin' : ''} />
+                <Mini5GMicroLoader size={20} />
               </button>
             </div>
 

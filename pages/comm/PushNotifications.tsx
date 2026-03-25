@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 import React, { useState } from 'react';
 import { AppState, UserStatus } from '../../types';
@@ -70,7 +71,7 @@ const PushNotifications: React.FC<{ state: AppState }> = ({ state }) => {
                <div className="space-y-6">
                   {targetType === 'Individual' && (
                     <div className="space-y-2 animate-in slide-in-from-top-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Target Identity Node</label>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Target Caller Details</label>
                        <select className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600" value={targetId} onChange={e => setTargetId(e.target.value)}>
                           <option value="">Choose Subscriber...</option>
                           {state.users.filter(u => !u.deleted).map(u => <option key={u.id} value={u.id}>{u.name} ({u.connectionId})</option>)}
@@ -123,7 +124,7 @@ const PushNotifications: React.FC<{ state: AppState }> = ({ state }) => {
                  disabled={isSending || !title || !message || (targetType !== 'Global' && !targetId)}
                  className="w-full py-6 bg-slate-950 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-4"
                >
-                  {isSending ? <RefreshCw className="animate-spin" size={24}/> : <Send size={24}/>}
+                  {isSending ? <Mini5GMicroLoader size={24} /> : <Send size={24}/>}
                   {isSending ? 'Syncing Relay...' : 'Initialize Push Handshake'}
                </button>
             </div>

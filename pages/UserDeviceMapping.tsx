@@ -1,7 +1,8 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 import React, { useState, useMemo } from 'react';
 import { db } from '../db';
-import { AppState, ISPUser, NetworkMapping, Device } from '../types';
+import { AppState, ISPUser, NetworkMapping } from '../types';
 import { 
   Map, Search, Filter, HardDrive, UserCircle, 
   ChevronRight, RefreshCw, X, Save, ShieldCheck,
@@ -34,9 +35,9 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
       setMapping({
         userId: user.id,
         connectionType: user.connectionType,
-        deviceId: state.devices.find(d => (user.connectionType === 'Fiber' ? d.type === 'VSOL_OLT' : d.type === 'MikroTik'))?.id || '',
+        deviceId: user.connectionType === 'Fiber' ? state.oltNodes[0]?.id || '' : state.nasNodes[0]?.id || '',
         configured: false,
-        ssidName: user.username ? user.username + "_WIFI" : "NETRECOVER_NODE"
+        ssidName: user.username ? user.username + "_WIFI" : "CLICKOPTICX_NODE"
       });
     }
   };
@@ -144,7 +145,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                       disabled={isSaving}
                       className="px-10 py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                     >
-                       {isSaving ? <RefreshCw className="animate-spin" size={18}/> : <ShieldCheck size={18}/>}
+                       {isSaving ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
                        Commit Mapping
                     </button>
                  </div>
@@ -167,9 +168,10 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                                onChange={e => setMapping({...mapping, deviceId: e.target.value})}
                              >
                                 <option value="">Select Reg Node...</option>
-                                {state.devices.filter(d => (mapping.connectionType === 'Fiber' ? d.type === 'VSOL_OLT' : d.type === 'MikroTik')).map(d => (
-                                  <option key={d.id} value={d.id}>{d.name} ({d.ip})</option>
-                                ))}
+                                {mapping.connectionType === 'Fiber' 
+                                  ? state.oltNodes.map(d => <option key={d.id} value={d.id}>{d.name} ({d.ip})</option>)
+                                  : state.nasNodes.map(d => <option key={d.id} value={d.id}>{d.name} ({d.ip})</option>)
+                                }
                              </select>
                           </div>
                        </div>
@@ -227,7 +229,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="flex-1">
                        <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1">Mapping Authorization</p>
                        <p className="text-[9px] text-blue-700 font-bold uppercase leading-relaxed opacity-80">
-                          Binding this identity to the <strong className="text-blue-900">{state.devices.find(d => d.id === mapping.deviceId)?.name || 'unselected'}</strong> node will enable real-time telemetry and self-service password protocols in the subscriber terminal.
+                          Binding this identity to the <strong className="text-blue-900">{mapping.connectionType === 'Fiber' ? state.oltNodes.find(d => d.id === mapping.deviceId)?.name : state.nasNodes.find(d => d.id === mapping.deviceId)?.name || 'unselected'}</strong> node will enable real-time telemetry and self-service password protocols in the subscriber terminal.
                        </p>
                     </div>
                  </div>

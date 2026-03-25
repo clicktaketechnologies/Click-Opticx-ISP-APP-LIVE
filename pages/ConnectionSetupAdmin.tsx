@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { AppState, ISPUser, ConnectionStatus, Role, TechnicalConfig } from '../types';
@@ -504,7 +505,7 @@ const ConnectionSetupAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                         disabled={isSaving}
                         className="px-10 py-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                       >
-                         {isSaving ? <RefreshCw className="animate-spin" size={20} /> : <ShieldCheck size={20} />}
+                         {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20} />}
                          Deploy Parameters
                       </button>
                    </div>
@@ -796,7 +797,7 @@ const ConnectionSetupAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                       disabled={isSaving}
                       className="w-full py-5 bg-blue-600 text-white font-black rounded-2xl shadow-xl hover:bg-blue-700 transition-all uppercase tracking-widest text-[11px] flex items-center justify-center gap-3 disabled:opacity-50"
                     >
-                       {isSaving ? <RefreshCw className="animate-spin" size={18}/> : <Save size={18}/>}
+                       {isSaving ? <Mini5GMicroLoader size={18} /> : <Save size={18}/>}
                        Commit Hardware Registry
                     </button>
                  </div>

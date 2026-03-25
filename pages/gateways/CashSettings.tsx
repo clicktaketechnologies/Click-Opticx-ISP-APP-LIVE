@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 import React, { useState } from 'react';
 import { AppState, PaymentGateway } from '../../types';
@@ -34,7 +35,7 @@ const CashSettings: React.FC<Props> = ({ state, onBack }) => {
          </button>
          <div>
             <h2 className="text-3xl font-black text-slate-800 tracking-tight italic uppercase">Retail Cash Hub</h2>
-            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Physical Asset Handshake Management</p>
+            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Physical Cash Flow Logging</p>
          </div>
       </div>
 
@@ -80,7 +81,7 @@ const CashSettings: React.FC<Props> = ({ state, onBack }) => {
                  disabled={isSaving}
                  className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
                >
-                  {isSaving ? <RefreshCw className="animate-spin" size={20}/> : <ShieldCheck size={20}/>}
+                  {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20}/>}
                   Publish Protocol State
                </button>
             </div>

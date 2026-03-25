@@ -13,10 +13,16 @@ import {
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
 
-const UserManagement: React.FC<{ state: AppState }> = ({ state }) => {
+const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?: string }> = ({ state, searchTerm: globalSearchTerm, autoOpenAction }) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    if (globalSearchTerm !== undefined) {
+      setSearchTerm(globalSearchTerm);
+    }
+  }, [globalSearchTerm]);
   
   // Modal States
   const [onboardingStep, setOnboardingStep] = useState(1);
@@ -140,7 +146,25 @@ const UserManagement: React.FC<{ state: AppState }> = ({ state }) => {
     if (!selectedUserId || !selectedPkgId) return;
     setIsProcessing(true);
     const pkg = state.packages.find(p => p.id === selectedPkgId);
-    if (!pkg) return;
+    if (!pkg) { setIsProcessing(false); return; }
+
+    const isApprover = [Role.SUPER_ADMIN, Role.ADMIN, Role.FINANCE_ADMIN, Role.MANAGER].includes(currentUserRole as Role);
+
+    if (!isApprover) {
+      // Non-admin: route to Approval Desk
+      await db.submitApprovalRequest(
+        'Plan_Activation', selectedUserId,
+        pkg.price, selectedMethod, '',
+        { pkgId: selectedPkgId, amount: pkg.price, paymentStatus, method: selectedMethod,
+          activationStartDate: new Date().toISOString().split('T')[0],
+          details: { collectorName: state.currentUser?.name || 'Staff', collectionDate: new Date().toISOString().split('T')[0] }
+        }
+      );
+      setIsProcessing(false);
+      setIsActivationModal(false);
+      setIsSuccessModal(true);
+      return;
+    }
 
     if (paymentStatus === 'Paid') {
       await db.processTopup('Admin', selectedUserId, 'user', pkg.price);
@@ -163,6 +187,22 @@ const UserManagement: React.FC<{ state: AppState }> = ({ state }) => {
     if (!selectedUserId || collectAmount <= 0) return;
     setIsProcessing(true);
     
+    const isApprover = [Role.SUPER_ADMIN, Role.ADMIN, Role.FINANCE_ADMIN, Role.MANAGER].includes(currentUserRole as Role);
+
+    if (!isApprover) {
+      // Non-admin: route to Approval Desk
+      await db.submitApprovalRequest(
+        'Payment_Collection', selectedUserId,
+        collectAmount, selectedMethod, '',
+        { collectAmount, method: selectedMethod, shouldActivatePkg, isGraceActive,
+          pkgId: selectedPkgId, taxMultiplier: 1 }
+      );
+      setIsProcessing(false);
+      setIsCollectPaymentModal(false);
+      setIsSuccessModal(true);
+      return;
+    }
+
     await db.addManualPayment(selectedUserId, collectAmount, selectedMethod);
     
     const updates: any = {};
@@ -293,7 +333,7 @@ const UserManagement: React.FC<{ state: AppState }> = ({ state }) => {
               <button onClick={() => { setSelectedPkgId(''); setIsBulkPackageModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl transition-all border border-indigo-500/20">
                  <PackageIcon size={16}/><span className="text-[9px] font-black uppercase">Mass Prov.</span>
               </button>
-              <button onClick={async () => { 
+               <button onClick={async () => { 
                 if(confirm(`AUTHORIZE ROTATION: Force credential reset for ${selectedIds.size} nodes?`)) {
                   setIsProcessing(true);
                   await db.bulkForcePasswordReset(Array.from(selectedIds)); 
@@ -304,9 +344,39 @@ const UserManagement: React.FC<{ state: AppState }> = ({ state }) => {
               }} className="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 rounded-xl transition-all border border-orange-500/20">
                  <Key size={16}/><span className="text-[9px] font-black uppercase">Rotation</span>
               </button>
-              <button onClick={executeBulkPurge} className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl transition-all border border-rose-500/20">
-                 <Trash2 size={16}/><span className="text-[9px] font-black uppercase">Purge</span>
-              </button>
+              <button 
+                  onClick={async () => {
+                    if(confirm(`SYSTEM BROADCAST: Dispatch recovery reminders to ${selectedIds.size} nodes?`)) {
+                      setIsProcessing(true);
+                      for(const id of Array.from(selectedIds)) {
+                         await db.sendRecoveryReminder(id as string, 'SMS');
+                      }
+                      setSelectedIds(new Set());
+                      setIsProcessing(false);
+                      setIsSuccessModal(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-xl transition-all border border-emerald-500/20"
+               >
+                  <MessageSquare size={16}/><span className="text-[9px] font-black uppercase">Broadcast</span>
+               </button>
+               <button 
+                  onClick={async () => {
+                    if(confirm(`SERVICE TRANSITION: Suspend physical link for ${selectedIds.size} nodes?`)) {
+                      setIsProcessing(true);
+                      await db.bulkSetAccountStatus(Array.from(selectedIds), UserStatus.SUSPENDED, 'Manual Batch Suspension');
+                      setSelectedIds(new Set());
+                      setIsProcessing(false);
+                      setIsSuccessModal(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl transition-all border border-rose-500/20"
+               >
+                  <Ban size={16}/><span className="text-[9px] font-black uppercase">Suspend</span>
+               </button>
+               <button onClick={executeBulkPurge} className="flex items-center gap-2 px-4 py-2 bg-slate-500/10 hover:bg-slate-500/20 text-slate-400 rounded-xl transition-all border border-slate-500/20">
+                  <Trash2 size={16}/><span className="text-[9px] font-black uppercase">Purge</span>
+               </button>
            </div>
            <button onClick={() => setSelectedIds(new Set())} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-slate-500 hover:text-white transition-all"><X size={18} /></button>
         </div>
@@ -904,7 +974,7 @@ const UserManagement: React.FC<{ state: AppState }> = ({ state }) => {
                    onClick={async () => {
                      if(!selectedPkgId) return;
                      setIsProcessing(true);
-                     await db.bulkActivatePackages(Array.from(selectedIds), selectedPkgId);
+                      await db.bulkActivatePackages(Array.from(selectedIds), selectedPkgId, 'Unpaid');
                      setIsBulkPackageModal(false);
                      setSelectedIds(new Set());
                      setIsProcessing(false);

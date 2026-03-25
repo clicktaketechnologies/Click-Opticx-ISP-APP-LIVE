@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 import React, { useState } from 'react';
 import { AppState, PaymentGateway } from '../../types';
@@ -83,7 +84,7 @@ const EasyPaisaSettings: React.FC<Props> = ({ state, onBack }) => {
                  disabled={isSaving}
                  className="w-full py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
                >
-                  {isSaving ? <RefreshCw className="animate-spin" size={20}/> : <ShieldCheck size={20}/>}
+                  {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20}/>}
                   Authorize EasyPaisa Node
                </button>
             </div>

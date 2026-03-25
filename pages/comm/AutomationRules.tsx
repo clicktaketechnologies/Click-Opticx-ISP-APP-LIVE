@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 import React, { useState } from 'react';
 import { AppState, CommunicationAutomationRule } from '../../types';
@@ -195,7 +196,7 @@ const AutomationRules: React.FC<{ state: AppState }> = ({ state }) => {
                   disabled={isSaving}
                   className="flex-[2] py-5 bg-amber-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-amber-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
-                    {isSaving ? <RefreshCw className="animate-spin" size={18}/> : <ShieldCheck size={18}/>}
+                    {isSaving ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
                     Authorize Protocol
                  </button>
               </div>

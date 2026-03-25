@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 import React, { useState } from 'react';
 import { AppState, PaymentGateway } from '../../types';
@@ -24,7 +25,7 @@ const PayFastSettings: React.FC<Props> = ({ state, onBack }) => {
          <div>
             <h3 className="text-xl font-black text-slate-900 uppercase italic">PayFast Node Not Provisioned</h3>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 max-w-xs">
-              Handshake registry is missing PayFast identity nodes.
+              Handshake registry is missing PayFast Caller Detailss.
             </p>
          </div>
          <button onClick={onBack} className="px-8 py-3 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">Back to Gateways</button>
@@ -83,7 +84,7 @@ const PayFastSettings: React.FC<Props> = ({ state, onBack }) => {
             <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-xl space-y-10">
                <div className="flex justify-between items-center bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
                   <div>
-                    <h4 className="text-sm font-black uppercase text-slate-900 leading-none mb-1">Handshake Mode</h4>
+                    <h4 className="text-sm font-black uppercase text-slate-900 leading-none mb-1">Integration Mode</h4>
                     <p className="text-[9px] text-slate-400 font-black uppercase">Toggle Test Mode for Node Validation</p>
                   </div>
                   <div className="flex bg-white p-1 rounded-2xl border shadow-sm">
@@ -116,7 +117,7 @@ const PayFastSettings: React.FC<Props> = ({ state, onBack }) => {
                  disabled={isSaving}
                  className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
                >
-                  {isSaving ? <RefreshCw className="animate-spin" size={20}/> : <ShieldCheck size={20}/>}
+                  {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20}/>}
                   Update Registry Node
                </button>
             </div>

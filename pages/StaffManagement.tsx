@@ -130,7 +130,7 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
                   value={formData.email}
                   onChange={e => setFormData({...formData, email: e.target.value})}
-                  placeholder="name@netrecover.com"
+                  placeholder="name@clickopticx.com"
                   disabled={!!editingStaff}
                 />
               </div>

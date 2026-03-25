@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 
 import React, { useState } from 'react';
 import { X, ShieldCheck, Wallet, ArrowRight, CheckCircle, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
@@ -75,7 +76,7 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
 
         {step === 'processing' && (
           <div className="p-24 text-center space-y-8 animate-pulse">
-            <Loader2 size={64} className="mx-auto text-indigo-600 animate-spin" />
+            <Mini5GMicroLoader size={64} />
             <div className="space-y-1">
                <h4 className="text-xl font-black uppercase italic tracking-tighter">Registry Syncing...</h4>
                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em]">Submitting Payout Request</p>

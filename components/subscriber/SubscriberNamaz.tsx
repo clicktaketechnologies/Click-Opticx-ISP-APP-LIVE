@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
@@ -138,7 +139,7 @@ const SubscriberNamaz: React.FC = () => {
     return (
       <div className="h-full flex flex-col items-center justify-center space-y-6">
         <div className="w-20 h-20 bg-slate-900 rounded-[2rem] flex items-center justify-center shadow-2xl">
-          <Loader2 className="text-emerald-400 animate-spin" size={40} />
+          <Mini5GMicroLoader size={40} />
         </div>
         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Querying Aladhan Nodes...</p>
       </div>
@@ -178,7 +179,7 @@ const SubscriberNamaz: React.FC = () => {
                   <div className="flex gap-2">
                      <button onClick={() => setShowSettings(true)} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/5"><Settings2 size={20} className="text-indigo-400" /></button>
                      <button onClick={() => fetchTimes(true)} disabled={refreshing} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/5">
-                        <RefreshCw size={20} className={`text-emerald-400 ${refreshing ? 'animate-spin' : ''}`} />
+                        <Mini5GMicroLoader size={20} />
                      </button>
                   </div>
                </div>

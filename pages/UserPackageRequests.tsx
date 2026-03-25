@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useMemo, useState } from 'react';
 import { AppState, PackageRequest } from '../types';
 import { db } from '../db';
@@ -102,7 +103,7 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
                    onClick={() => handleApprove(req.id)}
                    className="flex-[2] py-5 bg-emerald-600 text-white hover:bg-emerald-700 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-100 transition-all active:scale-95 flex items-center justify-center gap-3"
                  >
-                    {isProcessing === req.id ? <RefreshCw className="animate-spin" /> : <ShieldCheck size={20} />}
+                    {isProcessing === req.id ? <Mini5GMicroLoader /> : <ShieldCheck size={20} />}
                     Authorize Provisioning
                  </button>
               </div>
@@ -113,7 +114,7 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
          {pendingRequests.length === 0 && (
            <div className="col-span-full bg-white p-32 rounded-[4rem] border-4 border-dashed border-slate-50 flex flex-col items-center text-center">
               <ShieldCheck className="text-slate-100 mb-8" size={80} />
-              <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">Handshake Queue Synchronized</h3>
+              <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">Request Queue Synchronized</h3>
               <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">No pending activation requests detected in registry nodes.</p>
            </div>
          )}

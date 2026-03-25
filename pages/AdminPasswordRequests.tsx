@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useMemo, useState } from 'react';
 import { db } from '../db';
 import { AppState, PasswordResetRequest } from '../types';
@@ -83,7 +84,7 @@ const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {
                    onClick={() => handleAction(req.id, 'approve')}
                    className="flex-[2] py-5 bg-indigo-600 text-white hover:bg-indigo-700 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-100 transition-all active:scale-95 flex items-center justify-center gap-3"
                  >
-                    {isProcessing === req.id ? <RefreshCw className="animate-spin" /> : <ShieldCheck size={20} />}
+                    {isProcessing === req.id ? <Mini5GMicroLoader /> : <ShieldCheck size={20} />}
                     Push to Node
                  </button>
               </div>

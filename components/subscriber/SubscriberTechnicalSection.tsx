@@ -1,8 +1,8 @@
 
 import React, { useMemo } from 'react';
-import { 
-  BarChart3, User, Headphones, ShieldAlert, 
-  Zap, Package, Wallet, Bell, FileText 
+import {
+  BarChart3, User, Headphones, ShieldAlert,
+  Zap, Package, Wallet, Bell, FileText
 } from 'lucide-react';
 import { ISPUser, AppState } from '../../types';
 import TechnicalCard from './TechnicalCard';
@@ -14,21 +14,21 @@ interface Props {
 }
 
 const SubscriberTechnicalSection: React.FC<Props> = ({ user, state, onAction }) => {
-  const unreadCount = useMemo(() => 
-    state.notifications.filter(n => !n.read).length, 
-  [state.notifications]);
+  const unreadCount = useMemo(() =>
+    state.notifications.filter(n => !n.read).length,
+    [state.notifications]);
 
-  const activeEL = useMemo(() => 
-    state.emergencyLoads.find(l => l.userId === user.id && l.status === 'Active'), 
-  [state.emergencyLoads, user.id]);
+  const activeEL = useMemo(() =>
+    state.emergencyLoads.find(l => l.userId === user.id && l.status === 'Active'),
+    [state.emergencyLoads, user.id]);
 
-  const currentPkg = useMemo(() => 
-    state.packages.find(p => p.id === user.packageId), 
-  [state.packages, user.packageId]);
+  const currentPkg = useMemo(() =>
+    state.packages.find(p => p.id === user.packageId),
+    [state.packages, user.packageId]);
 
-  const unpaidInvoicesCount = useMemo(() => 
+  const unpaidInvoicesCount = useMemo(() =>
     state.invoices.filter(i => i.userId === user.id && i.status !== 'Paid').length,
-  [state.invoices, user.id]);
+    [state.invoices, user.id]);
 
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -38,88 +38,88 @@ const SubscriberTechnicalSection: React.FC<Props> = ({ user, state, onAction }) 
           <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mt-0.5">System & account management tools</p>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-3 gap-3 px-4">
         {/* 1. Credit Score */}
-        <TechnicalCard 
+        <TechnicalCard
           title="Credit"
           icon={BarChart3}
           onClick={() => onAction('credit-score')}
           badge={user.creditScore}
           badgeColor="bg-slate-900"
-          sublabel="Risk Audit"
+          sublabel="Score"
         />
 
         {/* 2. Profile */}
-        <TechnicalCard 
+        <TechnicalCard
           title="Profile"
           icon={User}
           onClick={() => onAction('profile')}
-          sublabel="Identity"
+          sublabel="Settings"
         />
 
         {/* 3. Support */}
-        <TechnicalCard 
+        <TechnicalCard
           title="Support"
           icon={Headphones}
           onClick={() => onAction('support')}
-          sublabel="Registry Help"
+          sublabel="Help Center"
         />
 
         {/* 4. Emergency Load */}
-        <TechnicalCard 
+        <TechnicalCard
           title="Rescue"
           icon={ShieldAlert}
           onClick={() => onAction('wallet')}
           badge={activeEL ? "Active" : undefined}
           badgeColor="bg-rose-600"
-          sublabel="Adv. Load"
+          sublabel="Emergency"
         />
 
         {/* 5. Quick Pay */}
-        <TechnicalCard 
+        <TechnicalCard
           title="Quick Pay"
           icon={Zap}
           onClick={() => onAction('online_pay')}
-          sublabel="Instant Link"
+          sublabel="Pay Now"
         />
 
         {/* 6. Package Plan */}
-        <TechnicalCard 
+        <TechnicalCard
           title="Plan"
           icon={Package}
           onClick={() => onAction('packages')}
-          sublabel={currentPkg?.speed || "Link Tier"}
+          sublabel={currentPkg?.speed || "Internet"}
         />
 
         {/* 7. Wallet */}
-        <TechnicalCard 
+        <TechnicalCard
           title="Wallet"
           icon={Wallet}
           onClick={() => onAction('wallet')}
-          badge={`Rs.${user.balance}`}
+          badge={user.balance > 0 ? `Rs.${user.balance}` : "Current"}
           badgeColor="bg-emerald-600"
-          sublabel="Liquidity"
+          sublabel="Balance"
         />
 
         {/* 8. Notifications */}
-        <TechnicalCard 
+        <TechnicalCard
           title="Alerts"
           icon={Bell}
           onClick={() => onAction('notifs')}
           badge={unreadCount > 0 ? unreadCount : undefined}
           badgeColor="bg-blue-600"
-          sublabel="Relay Node"
+          sublabel="Latest"
         />
 
         {/* 9. Invoices (Updated) */}
-        <TechnicalCard 
+        <TechnicalCard
           title="Invoices"
           icon={FileText}
           onClick={() => onAction('billing')}
           badge={unpaidInvoicesCount > 0 ? unpaidInvoicesCount : undefined}
           badgeColor="bg-rose-500"
-          sublabel="Fiscal Log"
+          sublabel="Billing"
         />
       </div>
     </div>

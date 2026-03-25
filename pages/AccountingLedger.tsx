@@ -7,7 +7,7 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
   const [methodFilter, setMethodFilter] = useState<string>('All');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
-  
+
   const currentUser = state.currentUser;
   const isDealer = currentUser?.role === Role.DEALER;
 
@@ -38,9 +38,9 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
   const handleExportCSV = () => {
     const headers = ['Date', 'Entity', 'Ref #', 'Description', 'Method', 'Paid Out', 'Paid In', 'Running Balance'];
     const rows = filteredLedger.map(entry => {
-      const entityName = state.users.find(u => u.id === entry.userId)?.name || 
-                        state.staff.find(s => s.email === entry.userId)?.name || 
-                        'System/External';
+      const entityName = state.users.find(u => u.id === entry.userId)?.name ||
+        state.staff.find(s => s.email === entry.userId)?.name ||
+        'System';
       return [
         new Date(entry.timestamp).toLocaleString(),
         entityName,
@@ -67,13 +67,13 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
           <div>
             <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
               <UserCircle className="text-emerald-600" size={32} />
-              {isDealer ? 'My Transaction Ledger' : 'Global Fiscal Audit'}
+              {isDealer ? 'My Transaction Ledger' : 'Financial Transactions'}
             </h2>
             <p className="text-slate-500 font-medium">
               {isDealer ? 'Track your wallet activations and bandwidth credit loads.' : 'Complete list of all payments and charges across the organization.'}
             </p>
           </div>
-          <button 
+          <button
             onClick={handleExportCSV}
             className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black hover:bg-emerald-700 transition-all shadow-xl active:scale-95 uppercase tracking-widest"
           >
@@ -85,16 +85,16 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-end gap-6 overflow-x-auto no-scrollbar">
           <div className="flex flex-col gap-1.5 min-w-[180px]">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Channel</label>
-            <select 
+            <select
               value={methodFilter}
               onChange={(e) => setMethodFilter(e.target.value)}
               className="w-full px-5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/10 transition-all"
             >
-              <option value="All">All Protocols</option>
-              <option value="Cash">Cash Ledger</option>
-              <option value="Online">Digital Gateway</option>
-              <option value="Dealer Load">Wallet Load</option>
-              <option value="Bank">Bank Wire</option>
+              <option value="All">All Methods</option>
+              <option value="Cash">Cash Payment</option>
+              <option value="Online">Online Payment</option>
+              <option value="Dealer Load">Balance Topup</option>
+              <option value="Bank">Bank Transfer</option>
             </select>
           </div>
           <div className="flex gap-4">
@@ -119,11 +119,11 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
             <thead className="bg-slate-900 text-white">
               <tr>
                 <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em]">Timestamp</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em]">Target Entity</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em]">Fiscal Details</th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em]">Account Name</th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em]">Transaction Details</th>
                 <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-right">Debit (Out)</th>
                 <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-right">Credit (In)</th>
-                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-right">Running Total</th>
+                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-right">Running Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -146,7 +146,7 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
                       </td>
                       <td className="px-8 py-5">
                         <p className="text-[11px] font-bold text-slate-600 uppercase leading-none">{entry.description}</p>
-                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{entry.method || 'Protocol: Internal'}</span>
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{entry.method || 'System Transaction'}</span>
                       </td>
                       <td className="px-8 py-5 text-right font-black">
                         {entry.type === LedgerType.DEBIT ? <span className="text-red-600">{state.settings.currency} {entry.amount.toLocaleString()}</span> : '-'}

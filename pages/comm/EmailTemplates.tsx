@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 import React, { useState, useMemo } from 'react';
 import { AppState, EmailTemplate } from '../../types';
@@ -182,20 +183,34 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
                  </div>
 
                  {/* Preview Panel */}
-                 <div className="hidden lg:flex flex-1 p-10 bg-slate-50 flex-col items-center justify-center relative overflow-hidden">
-                    <div className={`transition-all duration-700 bg-white shadow-2xl overflow-hidden border-8 border-slate-900 ${previewMode === 'mobile' ? 'w-80 h-[500px] rounded-[3rem]' : 'w-full h-full rounded-2xl'}`}>
-                       <div className="p-8 space-y-6">
-                          <div className="flex items-center gap-3 pb-6 border-b border-slate-50">
-                             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black italic">CO</div>
-                             <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{state.settings.branding.businessName}</span>
+                 <div className={`hidden lg:flex flex-1 p-10 bg-slate-100 flex-col items-center justify-center relative overflow-hidden transition-all ${previewMode === 'mobile' ? 'p-4' : 'p-10'}`}>
+                    <div className={`transition-all duration-700 bg-white shadow-2xl overflow-hidden border-[12px] border-slate-900 relative ${previewMode === 'mobile' ? 'w-[320px] h-[580px] rounded-[3rem]' : 'w-full h-full rounded-3xl'}`}>
+                       {/* Mobile Notch emulation */}
+                       {previewMode === 'mobile' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-900 rounded-b-2xl z-20"></div>}
+                       
+                       <div className="h-full overflow-y-auto custom-scrollbar flex flex-col bg-[#f8fafc]">
+                          {/* Branded Header */}
+                          <div className="bg-[#0f172a] p-10 text-center shrink-0">
+                             <h1 className="text-white font-black italic tracking-tighter uppercase text-xl m-0">
+                                {state.settings.branding.businessName || 'Click Opticx'}
+                             </h1>
                           </div>
-                          <div className="prose max-w-none">
-                             <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap uppercase font-bold italic opacity-80">
-                                {renderPreviewContent(editingTemplate.content || '')}
-                             </p>
+                          
+                          {/* Content Body */}
+                          <div className="flex-1 p-10 bg-white min-h-[300px]">
+                             <div className="prose max-w-none text-slate-800">
+                                {renderPreviewContent(editingTemplate.content || '').split('\n').map((line, i) => (
+                                   <p key={i} className="text-sm leading-relaxed mb-4">
+                                      {line}
+                                   </p>
+                                ))}
+                             </div>
                           </div>
-                          <div className="pt-10 mt-10 border-t border-slate-50 text-center">
-                             <p className="text-[8px] text-slate-300 font-black uppercase tracking-widest">Sent via ClickOpticx Hub Registry</p>
+                          
+                          {/* Footer */}
+                          <div className="p-8 bg-slate-50 border-t border-slate-100 text-center shrink-0">
+                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Secure Communication Hub</p>
+                             <p className="text-[7px] font-bold text-slate-300 uppercase tracking-widest italic">&copy; {new Date().getFullYear()} ClickOpticx • Infrastructure Node Verified</p>
                           </div>
                        </div>
                     </div>
@@ -210,7 +225,7 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
                   disabled={isSaving}
                   className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
-                    {isSaving ? <RefreshCw className="animate-spin" size={18}/> : <Save size={18}/>}
+                    {isSaving ? <Mini5GMicroLoader size={18} /> : <Save size={18}/>}
                     Authorize Publishing
                  </button>
               </div>

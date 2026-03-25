@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useMemo, useState } from 'react';
 import { AppState, ReferralRecord, Role } from '../types';
 import { db } from '../db';
@@ -120,7 +121,7 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     disabled={isSaving}
                     className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl active:scale-95 disabled:opacity-50"
                   >
-                     {isSaving ? <RefreshCw className="animate-spin" size={16}/> : 'Synchronize All Nodes'}
+                     {isSaving ? <Mini5GMicroLoader size={16} /> : 'Synchronize All Nodes'}
                   </button>
                </div>
             </div>

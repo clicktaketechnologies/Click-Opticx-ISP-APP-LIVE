@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useState, useRef } from 'react';
 import { AppState, StaffUser } from '../types';
 import { db } from '../db';
@@ -203,7 +204,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                     disabled={isSaving}
                     className="w-full py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"
                   >
-                    {isSaving ? <RefreshCw className="animate-spin" size={20}/> : <ShieldCheck size={20}/>}
+                    {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20}/>}
                     Authorize Account Updates
                   </button>
                 )}

@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 import React, { useState, useMemo } from 'react';
 import { AppState, AudienceSegment, UserStatus } from '../../types';
@@ -59,7 +60,7 @@ const AudienceSegments: React.FC<{ state: AppState }> = ({ state }) => {
               <div className="flex justify-between items-start mb-8 relative z-10">
                  <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-[1.5rem] flex items-center justify-center border shadow-inner group-hover:scale-105 transition-transform"><Layers size={32}/></div>
                  <div className="text-right">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nodes Linked</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Subscribers Included</p>
                     <p className="text-3xl font-black text-slate-900 italic tracking-tighter">{seg.subscriberCount}</p>
                  </div>
               </div>
@@ -173,7 +174,7 @@ const AudienceSegments: React.FC<{ state: AppState }> = ({ state }) => {
                   disabled={isSaving}
                   className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
-                    {isSaving ? <RefreshCw className="animate-spin" size={18}/> : <ShieldCheck size={18}/>}
+                    {isSaving ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
                     Synchronize Segment
                  </button>
               </div>

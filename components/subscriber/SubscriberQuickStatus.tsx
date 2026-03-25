@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { ISPUser, Package } from '../../types';
-import { Zap, Package as PackageIcon, Wifi, ChevronRight, ShieldCheck, Sparkles, User as UserIcon } from 'lucide-react';
+import { Zap, Package as PackageIcon, Wifi, ChevronRight, ShieldCheck, Sparkles, User as UserIcon, Activity } from 'lucide-react';
 import SpeedTestModal from './SpeedTestModal';
 
 interface Props {
@@ -24,17 +24,17 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
           </div>
         )}
       </div>
-      
+
       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8 group hover:shadow-xl transition-all duration-500">
         <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left flex-1">
           <div className="w-20 h-20 bg-slate-900 rounded-[2rem] flex items-center justify-center shadow-2xl group-hover:rotate-3 transition-transform duration-500 border-4 border-slate-50 overflow-hidden shrink-0">
-             {user.profileImage ? (
-               <img src={user.profileImage} className="w-full h-full object-cover" alt="User Profile" />
-             ) : (
-               <div className="w-full h-full flex items-center justify-center bg-indigo-600">
-                  <UserIcon size={32} className="text-white" />
-               </div>
-             )}
+            {user.profileImage ? (
+              <img src={user.profileImage} className="w-full h-full object-cover" alt="User Profile" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-indigo-600">
+                <UserIcon size={32} className="text-white" />
+              </div>
+            )}
           </div>
           <div className="space-y-3 flex-1">
             <div className="flex flex-col">
@@ -60,12 +60,12 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
           </div>
         </div>
 
-        <button 
+        <button
           onClick={() => setShowSpeedTest(true)}
           className="w-full md:w-auto px-8 py-5 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center gap-3 shrink-0"
         >
-          <Zap size={16} fill="currentColor" />
-          Test My Speed
+          <Activity size={16} fill="none" />
+          Initialize Infrastructure Audit
           <ChevronRight size={14} className="opacity-50" />
         </button>
       </div>

@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 import React, { useState, useMemo } from 'react';
 import { db } from '../db';
@@ -127,7 +128,7 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
               </div>
 
               <div className="space-y-3">
-                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Verify Token Handshake</label>
+                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Verify Reset Token</label>
                  <div className="relative">
                     <ShieldCheck className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
                     <input 
@@ -155,7 +156,7 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
                 disabled={isSubmitting || !newPass || !confirmPass}
                 className="w-full py-6 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale"
               >
-                 {isSubmitting ? <RefreshCw className="animate-spin" size={20}/> : <Zap size={20} fill="currentColor"/>}
+                 {isSubmitting ? <Mini5GMicroLoader size={20} /> : <Zap size={20} fill="currentColor"/>}
                  Authorize Security Push
               </button>
            </form>

@@ -22,7 +22,7 @@ const SubscriberReferral: React.FC = () => {
   const walletValue = currentPoints * config.conversionRatio;
 
   const handleCopyLink = () => {
-    const link = `https://netrecover.pk/signup?ref=${user.referralCode}`;
+    const link = `https://clickopticx.com/signup?ref=${user.referralCode}`;
     navigator.clipboard.writeText(link);
     alert("Referral link cloned to clipboard protocol.");
   };

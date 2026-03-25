@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Play, Pause, Square, Languages, Loader2, BookOpen, Volume2, AlertCircle } from 'lucide-react';
 import { SurahMetadata } from './QuranData';
@@ -144,7 +145,7 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
         {isLoading ? (
           <div className="h-full flex flex-col items-center justify-center gap-6">
             <div className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center border border-emerald-100 shadow-inner">
-               <Loader2 className="text-emerald-500 animate-spin" size={32} />
+               <Mini5GMicroLoader size={32} />
             </div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Downloading Holy Text...</p>
           </div>
@@ -227,7 +228,7 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
                 } ${isAudioLoading ? 'opacity-80 grayscale' : ''}`}
               >
                 {isAudioLoading ? (
-                  <Loader2 className="animate-spin" size={28} />
+                  <Mini5GMicroLoader size={28} />
                 ) : isPlaying ? (
                   <Pause size={28} fill="currentColor" />
                 ) : (

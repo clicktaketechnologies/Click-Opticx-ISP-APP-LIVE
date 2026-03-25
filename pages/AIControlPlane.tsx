@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 import React, { useState, useMemo } from 'react';
 import { AppState, Role, AIConfig, AIActionLog, UserStatus } from '../types';
@@ -81,7 +82,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
           { label: 'System Health', value: `${healthScore}%`, icon: HeartPulse, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
           { label: 'UX Friction', value: `${frictionScore}%`, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-500/10' },
           { label: 'Bug Alerts', value: state.aiEvents.filter(e => e.isError).length, icon: ShieldAlert, color: 'text-rose-500', bg: 'bg-rose-500/10' },
-          { label: 'Active Rules', value: '14', icon: Code2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+          { label: 'Active Rules', value: state.commAutomationRules.length.toString(), icon: Code2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
         ].map((kpi, idx) => (
           <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
              <div className={`${kpi.bg} ${kpi.color} w-10 h-10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}><kpi.icon size={20}/></div>
@@ -229,7 +230,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
                <div className="md:w-48 flex flex-col gap-3 shrink-0 justify-center">
                   <button className="w-full py-3 bg-white border border-slate-200 text-slate-700 rounded-xl font-black text-[9px] uppercase hover:bg-slate-50 shadow-sm transition-all">Simulation Test</button>
                   <button className="w-full py-3 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase shadow-xl transition-all">Modify Rule</button>
-                  <button className="w-full py-3 text-rose-500 font-black text-[9px] uppercase hover:bg-rose-50 rounded-xl transition-all">Destroy Node</button>
+                  <button className="w-full py-3 text-rose-500 font-black text-[9px] uppercase hover:bg-rose-50 rounded-xl transition-all">Delete AI Engine</button>
                </div>
             </div>
           ))}
@@ -301,7 +302,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
             onClick={handleToggleKillSwitch}
             className={`w-full py-8 rounded-[2.5rem] font-black text-lg uppercase tracking-[0.3em] transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-6 ${config.killSwitchActive ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}
           >
-             {config.killSwitchActive ? <RefreshCw className="animate-spin-slow" size={32}/> : <ShieldAlert size={32} />}
+             {config.killSwitchActive ? <Mini5GMicroLoader size={32} /> : <ShieldAlert size={32} />}
              {config.killSwitchActive ? 'RE-INITIALIZE AUTONOMY' : 'ENGAGE TOTAL KILL-SWITCH'}
           </button>
        </div>
@@ -456,27 +457,26 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
 
        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <div className="space-y-8">
-             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic border-b border-slate-100 pb-2">Active Abuse Watchlist</h4>
-             <div className="space-y-3">
-                {[
-                  { user: 'USR-842', risk: 0.94, reason: 'Cyclical EL Default' },
-                  { user: 'USR-112', risk: 0.88, reason: 'Rapid Package Migration' },
-                  { user: 'USR-339', risk: 0.82, reason: 'High Wallet Volatility' }
-                ].map(r => (
-                  <div key={r.user} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-rose-300 transition-all">
-                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-rose-500 group-hover:text-white transition-all"><FileSearch size={18}/></div>
-                        <div>
-                           <p className="text-xs font-black text-slate-900 uppercase">{r.user}</p>
-                           <p className="text-[8px] text-slate-400 font-bold uppercase">{r.reason}</p>
+             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic border-b border-slate-100 pb-2">Active Abuse Watchlist</h4>             <div className="space-y-3">
+                {state.users.filter(u => u.status === UserStatus.RECOVERY_MODE).length > 0 ? (
+                  state.users.filter(u => u.status === UserStatus.RECOVERY_MODE).slice(0, 3).map(u => (
+                    <div key={u.id} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-rose-300 transition-all">
+                       <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-rose-500 group-hover:text-white transition-all"><FileSearch size={18}/></div>
+                          <div>
+                             <p className="text-xs font-black text-slate-900 uppercase">{u.connectionId}</p>
+                             <p className="text-[8px] text-slate-400 font-bold uppercase">{u.name}</p>
+                          </div>
+                       </div>
+                       <div className="text-right">
+                           <p className="text-lg font-black text-rose-600 italic">{Math.round((1 - u.creditScore / 850) * 100)}%</p>
+                           <p className="text-[7px] font-black text-slate-400 uppercase">RISK RANK</p>
                         </div>
-                     </div>
-                     <div className="text-right">
-                        <p className="text-lg font-black text-rose-600 italic">{(r.risk * 100).toFixed(0)}%</p>
-                        <p className="text-[7px] font-black text-slate-400 uppercase">RISK RANK</p>
-                     </div>
-                  </div>
-                ))}
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-10 text-center opacity-30 italic text-[10px] uppercase font-black tracking-widest">No active abuse nodes detected.</div>
+                )}
              </div>
           </div>
 

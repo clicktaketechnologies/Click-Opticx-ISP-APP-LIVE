@@ -22,7 +22,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
     price: 0, 
     discountPrice: undefined,
     discountExpiry: '',
-    taxRate: 15, 
+    taxRate: state.settings.autoTaxPercentage, 
     duration: 30, 
     descriptionBullets: [], 
     trustTags: [], 
@@ -170,7 +170,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-2">
                   <Activity size={18} className="text-indigo-600" />
-                  <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">1. Node Identity</h4>
+                  <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">1. Identity</h4>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1">
@@ -260,7 +260,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
                     <input type="datetime-local" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold text-xs" value={formData.discountExpiry ? new Date(formData.discountExpiry).toISOString().slice(0, 16) : ''} onChange={e => setFormData({...formData, discountExpiry: e.target.value ? new Date(e.target.value).toISOString() : ''})} />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Regulatory Tax %</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{state.settings.taxLabel || 'Tax'} %</label>
                     <input type="number" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-black text-slate-700" value={formData.taxRate} onChange={e => setFormData({...formData, taxRate: Number(e.target.value)})} />
                   </div>
                 </div>

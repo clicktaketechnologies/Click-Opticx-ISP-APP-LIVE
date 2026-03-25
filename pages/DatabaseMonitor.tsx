@@ -1,10 +1,11 @@
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { AppState } from '../types';
 import { db, DBHealth, ConnectionAudit } from '../db';
 import { 
   Database, Activity, Server, ShieldCheck, 
-  Terminal, AlertTriangle, RefreshCw, 
+  Terminal, AlertTriangle, RefreshCw, Loader2,
   Settings, Download, Upload, X, Eye, EyeOff, Globe, DatabaseZap, Flame,
   CheckCircle2, HardDrive, FileJson, Monitor, Save, Key, Wifi, WifiOff, XCircle, Code2, Cpu, Zap, Search, ShieldAlert, AlertCircle, CloudLightning, Github, Play, Box, ChevronRight, ExternalLink, ListChecks, Layers, Link2, Sparkles, Command, Send, CreditCard
 } from 'lucide-react';
@@ -23,6 +24,9 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
   const [isSavingKeys, setIsSavingKeys] = useState(false);
   const [revealKeys, setRevealKeys] = useState(false);
 
+  // Real-time backend logs
+  const [backendLogs, setBackendLogs] = useState<{timestamp: string, level: string, message: string, service: string}[]>([]);
+
   // Bridge States
   const [bridgeStatus, setBridgeStatus] = useState<Record<string, 'IDLE' | 'SYNCING' | 'VERIFIED'>>({
     'gemini': 'VERIFIED',
@@ -38,11 +42,37 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setHealth(db.getHealth());
-    }, 2000);
+    const fetchHealth = () => setHealth(db.getHealth());
+    fetchHealth();
+    const interval = setInterval(fetchHealth, 2000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        // @ts-ignore
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/health-monitor/logs`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.success) {
+          setBackendLogs(data.logs);
+        }
+      } catch (err) {
+        console.error('Failed to fetch backend logs', err);
+      }
+    };
+    
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 3000); // Polling every 3 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [backendLogs]);
 
   const runAudit = async () => {
     setIsAuditing(true);
@@ -132,7 +162,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
             disabled={isAuditing}
             className="flex items-center gap-3 px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-[10px] hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 uppercase tracking-widest disabled:opacity-50"
           >
-            {isAuditing ? <RefreshCw size={18} className="animate-spin" /> : <Search size={18} />}
+            {isAuditing ? <Mini5GMicroLoader size={18} /> : <Search size={18} />}
             {isAuditing ? 'Auditing Link...' : 'Audit Grid'}
           </button>
         </div>
@@ -165,7 +195,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                {[
                  { id: 'gemini', label: 'AI Core (Gemini)', icon: Cpu, color: 'text-indigo-400', desc: 'LLM & Heuristic Link' },
                  { id: 'firebase', label: 'Cloud Node (DB)', icon: Database, color: 'text-orange-400', desc: 'Firestore Registry' },
-                 { id: 'smtp', label: 'Comm Relay (Mail)', icon: Send, color: 'text-blue-400', desc: 'Outbound Dispatch' },
+                 { id: 'smtp', label: 'Comm Email Gateway', icon: Send, color: 'text-blue-400', desc: 'Outbound Dispatch' },
                  { id: 'payment', label: 'Fiscal Node (API)', icon: CreditCard, color: 'text-emerald-400', desc: 'Payment Gateway Link' }
                ].map(bridge => (
                  <div key={bridge.id} className="p-6 bg-white/5 border border-white/10 rounded-[2.5rem] group hover:bg-white/10 transition-all flex flex-col justify-between h-56">
@@ -217,7 +247,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
               >
                  <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-sm transition-colors ${gitStatus === 'SYNCING' ? 'bg-white' : 'bg-white group-hover:bg-white/10'}`}>
-                       {gitStatus === 'SYNCING' ? <RefreshCw className="animate-spin text-indigo-600" size={24}/> : <Github size={24} className="text-slate-900 group-hover:text-white"/>}
+                       {gitStatus === 'SYNCING' ? <Mini5GMicroLoader size={24} /> : <Github size={24} className="text-slate-900 group-hover:text-white"/>}
                     </div>
                     <div>
                        <p className="text-[10px] font-black uppercase text-slate-400 group-hover:text-slate-500">Git Remote</p>
@@ -253,7 +283,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                 disabled={isCheckingUpdate}
                 className="flex-1 py-5 bg-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"
               >
-                 {isCheckingUpdate ? <RefreshCw className="animate-spin" size={18}/> : <RefreshCw size={18}/>}
+                 {isCheckingUpdate ? <Mini5GMicroLoader size={18} /> : <RefreshCw size={18}/>}
                  Check For Updates
               </button>
               <button 
@@ -290,23 +320,35 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
       </div>
 
       {/* Logs Table Wrapper for Responsiveness */}
-      <div className="bg-slate-950 rounded-[2.5rem] border border-slate-800 shadow-2xl flex flex-col h-[400px] overflow-hidden">
+      <div className="bg-slate-950 rounded-[2.5rem] border border-slate-800 shadow-2xl flex flex-col h-[400px] overflow-hidden mt-8">
         <div className="p-6 bg-slate-900/50 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Terminal size={18} className="text-blue-400" />
-            <h3 className="text-white font-black uppercase tracking-widest text-[10px]">Real-Time Registry Log</h3>
+            <h3 className="text-white font-black uppercase tracking-widest text-[10px]">Real-Time Server Logs</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Live Stream</span>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-2 font-mono text-[11px]" ref={scrollRef}>
-          {health.logs.map((log, i) => (
-            <div key={i} className={`flex gap-4 p-3 rounded-xl transition-all border ${log.status === 'success' ? 'bg-white/[0.02] border-white/5' : log.status === 'error' ? 'bg-red-50/5 border-red-50/10' : 'bg-blue-50/5 border-blue-50/10'}`}>
-              <span className="text-slate-600 shrink-0">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
-              <span className={`font-black uppercase tracking-tighter shrink-0 min-w-[90px] ${log.status === 'success' ? 'text-emerald-500' : log.status === 'error' ? 'text-red-500' : 'text-blue-500'}`}>
-                {log.action}
-              </span>
-              <span className={log.status === 'success' ? 'text-slate-400' : 'text-error' ? 'text-red-300' : 'text-slate-500'}>{log.message}</span>
+          {backendLogs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-10 h-full text-slate-500">
+               <Mini5GMicroLoader size={24} />
+               <p className="uppercase font-black text-[10px] tracking-widest">Awaiting log stream...</p>
             </div>
-          ))}
+          ) : (
+            backendLogs.map((log, i) => (
+              <div key={i} className={`flex gap-4 p-3 rounded-xl transition-all border ${log.level === 'info' ? 'bg-white/[0.02] border-white/5' : log.level === 'warn' ? 'bg-amber-50/5 border-amber-50/10' : 'bg-red-50/5 border-red-50/10'}`}>
+                <span className="text-slate-600 shrink-0">[{log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : new Date().toLocaleTimeString()}]</span>
+                <span className={`font-black uppercase tracking-tighter shrink-0 min-w-[70px] ${log.level === 'info' ? 'text-blue-400' : log.level === 'warn' ? 'text-amber-400' : 'text-red-400'}`}>
+                  {log.level}
+                </span>
+                <span className="text-slate-500 shrink-0 font-bold w-20 truncate">[{log.service || 'system'}]</span>
+                <span className={log.level === 'info' ? 'text-slate-300' : log.level === 'warn' ? 'text-amber-300' : 'text-red-300'}>{log.message}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -339,7 +381,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                     {[
                       { key: 'gemini', label: 'Google Gemini Core', icon: Cpu, color: 'text-indigo-500' },
                       { key: 'openai', label: 'OpenAI GPT Link', icon: Sparkles, color: 'text-emerald-500' },
-                      { key: 'deepseek', label: 'DeepSeek Relay', icon: Activity, color: 'text-blue-500' }
+                      { key: 'deepseek', label: 'DeepSeek AI Model', icon: Activity, color: 'text-blue-500' }
                     ].map(item => (
                       <div key={item.key} className="space-y-2">
                         <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">{item.label}</label>
@@ -372,7 +414,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                   disabled={isSavingKeys}
                   className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
-                    {isSavingKeys ? <RefreshCw className="animate-spin" size={18}/> : <ShieldCheck size={18}/>}
+                    {isSavingKeys ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
                     Authorize Provisioning
                  </button>
               </div>

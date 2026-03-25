@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 
 import React, { useState, useMemo } from 'react';
 import { AppState, ISPUser, Package, PaymentMethod, PaymentGateway, PaymentMethodUsage } from '../../types';
@@ -28,7 +29,8 @@ const SubscriberActivationFlow: React.FC<Props> = ({ user, state, packageId, isR
 
   const selectedPkgId = packageId || user.packageId || (state.packages[0]?.id);
   const selectedPkg = state.packages.find(p => p.id === selectedPkgId);
-  const total = isRepayment ? 2500 : (selectedPkg ? Math.round(selectedPkg.price * (1 + (state.settings.autoTaxPercentage / 100))) : 0);
+  const taxMultiplier = state.settings.enableTax ? (1 + (state.settings.autoTaxPercentage / 100)) : 1;
+  const total = isRepayment ? 2500 : (selectedPkg ? Math.round(selectedPkg.price * taxMultiplier) : 0);
 
   const enabledGateways = useMemo(() => {
     let requiredUsage: PaymentMethodUsage = 'packages';
@@ -228,7 +230,7 @@ const SubscriberActivationFlow: React.FC<Props> = ({ user, state, packageId, isR
 
             {step === 'processing' && (
               <div className="p-24 text-center space-y-6">
-                <Loader2 size={64} className="mx-auto text-blue-600 animate-spin" />
+                <Mini5GMicroLoader size={64} />
                 <div className="space-y-1">
                    <h4 className="text-xl font-black uppercase italic tracking-tighter">Syncing Node...</h4>
                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em]">Updating Persistent Registry</p>

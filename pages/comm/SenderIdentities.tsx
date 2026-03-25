@@ -1,3 +1,4 @@
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 import React, { useState, useMemo } from 'react';
 import { AppState, SenderIdentity } from '../../types';
@@ -114,7 +115,7 @@ const SenderIdentities: React.FC<{ state: AppState }> = ({ state }) => {
                          disabled={isProcessing === ident.id}
                          className="flex-1 py-4 bg-amber-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-600 shadow-lg shadow-amber-100 active:scale-95 transition-all flex items-center justify-center gap-2"
                        >
-                          {isProcessing === ident.id ? <RefreshCw className="animate-spin" size={14}/> : <ShieldCheck size={14}/>}
+                          {isProcessing === ident.id ? <Mini5GMicroLoader size={14} /> : <ShieldCheck size={14}/>}
                           Verify Node
                        </button>
                     ) : (
@@ -136,7 +137,7 @@ const SenderIdentities: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="col-span-full py-32 text-center bg-white rounded-[4rem] border-4 border-dashed border-slate-50 flex flex-col items-center">
               <UserCheck className="text-slate-100 mb-8" size={80} />
               <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">Identity Grid Dormant</h3>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">Establish your first sender identity node to begin digital dispatch.</p>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">Establish your first sender Caller Details to begin digital dispatch.</p>
            </div>
          )}
       </div>
@@ -164,7 +165,7 @@ const SenderIdentities: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                     <div>
                        <h3 className="text-2xl font-black uppercase italic tracking-tighter">Provision Identity</h3>
-                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Handshake Registry Setup</p>
+                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Email Setup Status</p>
                     </div>
                  </div>
                  <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all rounded-xl">
@@ -187,7 +188,7 @@ const SenderIdentities: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem] flex items-start gap-4 shadow-inner">
                     <Info size={24} className="text-blue-600 mt-1 shrink-0" />
                     <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed tracking-tighter">
-                       Provisioning triggers a verification handshake. The identity node will remain 'Standby' until the email link is confirmed.
+                       Provisioning triggers a verification handshake. The Caller Details will remain 'Standby' until the email link is confirmed.
                     </p>
                  </div>
               </div>
@@ -199,8 +200,8 @@ const SenderIdentities: React.FC<{ state: AppState }> = ({ state }) => {
                   disabled={isProcessing === 'new' || !formData.email || !formData.name}
                   className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
-                    {isProcessing === 'new' ? <RefreshCw className="animate-spin" size={18}/> : <Save size={18}/>}
-                    Commit Identity Node
+                    {isProcessing === 'new' ? <Mini5GMicroLoader size={18} /> : <Save size={18}/>}
+                    Commit Caller Details
                  </button>
               </div>
            </div>

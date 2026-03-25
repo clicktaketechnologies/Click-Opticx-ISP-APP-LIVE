@@ -2,10 +2,10 @@
 import React from 'react';
 import { Role } from '../types';
 import { db } from '../db';
-import { 
-  LayoutDashboard, Users, Package, 
+import {
+  LayoutDashboard, Users, Package,
   Receipt, Wallet, ShieldCheck, LogOut,
-  Signal, Building2, FileText, Search, FileInput, ShieldAlert, Server, Smartphone, Zap, CreditCard, BarChart3, Trophy, ChevronRight, Network, 
+  Signal, Building2, FileText, Search, FileInput, ShieldAlert, Server, Smartphone, Zap, CreditCard, BarChart3, Trophy, ChevronRight, Network,
   ClipboardList, LifeBuoy, ListTodo, Info, Database, Monitor, Key, HardDrive, Map, Cpu, Sparkles, Calculator, History, Activity, Mic,
   Mail, Send, ListChecks, BellRing, Settings, UserCheck
 } from 'lucide-react';
@@ -57,18 +57,21 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
         { id: 'comm-rules', label: 'Automation Rules', icon: Zap },
         { id: 'comm-push', label: 'Push Relay', icon: BellRing },
         { id: 'comm-segments', label: 'Segments', icon: Users },
-        { id: 'comm-identities', label: 'Sender Identities', icon: UserCheck },
         { id: 'comm-logs', label: 'Delivery Logs', icon: ListChecks },
-        { id: 'comm-settings', label: 'Comm Settings', icon: Settings },
+        { id: 'comm-settings', label: 'Dispatch Hub', icon: Zap },
       ]
+
     },
     {
       title: 'Network Operations',
       items: [
         { id: 'admin-live-monitoring', label: 'Network Monitor', icon: Monitor },
+        { id: 'noc-dashboard', label: 'NOC Command Center', icon: Zap },
         { id: 'admin-devices', label: 'Network Devices', icon: HardDrive },
         { id: 'admin-device-mapping', label: 'Device Mapping', icon: Map },
         { id: 'connection-setup', label: 'Connection Setup', icon: Network },
+        { id: 'nas-management', label: 'NAS Control Plane', icon: Server },
+        { id: 'olt-management', label: 'OLT Control Hub', icon: Monitor },
         { id: 'tasks', label: 'Task Manager', icon: ListTodo },
         { id: 'tickets', label: 'Support Tickets', icon: LifeBuoy },
       ]
@@ -90,10 +93,11 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
         { id: 'invoice-engine', label: 'Billing Engine', icon: Calculator },
         { id: 'invoice-management', label: 'Invoices', icon: ClipboardList },
         { id: 'gateway-settings', label: 'Payment Gateways', icon: CreditCard },
-        { id: 'recovery', label: 'Collections', icon: Receipt },
+        { id: 'recovery', label: 'Recovery Module', icon: Receipt },
         { id: 'wallet', label: 'Financial Wallet', icon: Wallet },
         { id: 'accounting', label: 'Financial Ledger', icon: History },
         { id: 'emergency-load', label: 'Emergency Loads', icon: Zap },
+        { id: 'admin-reminders', label: 'Admin Reminders', icon: BellRing },
       ]
     },
     {
@@ -109,6 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       items: [
         { id: 'staff', label: 'Staff Accounts', icon: ShieldAlert },
         { id: 'permissions', label: 'Permissions', icon: ShieldCheck },
+        { id: 'auth-control', label: 'Auth Control Center', icon: Key },
       ]
     },
     {
@@ -126,7 +131,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
     const modulePerm = state.permissions.find(p => p.id === item.id);
     if (modulePerm) return modulePerm.view.includes(role);
     if (role === Role.ADMIN) return true;
-    if (role === Role.BUSINESS_ADMIN && ['business-settings', 'dashboard', 'about-us'].includes(item.id)) return true;
+    if (role === Role.BUSINESS_ADMIN && ['business-settings', 'dashboard', 'about-us', 'auth-control'].includes(item.id)) return true;
     if (role === Role.FINANCE_ADMIN && ['approval-desk', 'wallet', 'recovery', 'accounting', 'invoice-engine', 'invoice-management', 'gateway-settings', 'emergency-load'].includes(item.id)) return true;
     if (role === Role.SUPPORT_ADMIN && ['approval-desk', 'customer-360', 'user-app', 'tickets', 'about-us', 'admin-password-requests'].includes(item.id)) return true;
     if (role === Role.NETWORK_ADMIN && ['admin-live-monitoring', 'admin-devices', 'admin-device-mapping', 'connection-setup', 'about-us'].includes(item.id)) return true;
@@ -148,16 +153,15 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
             const isActive = current === item.id || (item.id === 'gateway-settings' && current.startsWith('gateway-'));
             const isAI = item.id === 'ai-control' || item.id === 'ai-calling' || item.id === 'monitor' || item.id === 'ai-call-logs';
             const isComm = item.id.startsWith('comm-');
-            
+
             return (
-              <button 
-                key={item.id} 
-                onClick={() => onNavigate(item.id)} 
-                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                  isActive 
-                    ? isAI ? 'bg-slate-900 text-indigo-400 shadow-2xl border-l-4 border-indigo-500' : isComm ? 'bg-indigo-900 text-white border-l-4 border-emerald-400' : 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/40 border-l-4 border-white' 
-                    : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
-                }`}
+              <button
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-200 group ${isActive
+                  ? isAI ? 'bg-slate-900 text-indigo-400 shadow-2xl border-l-4 border-indigo-500' : isComm ? 'bg-indigo-900 text-white border-l-4 border-emerald-400' : 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/40 border-l-4 border-white'
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <item.icon size={16} className={isActive ? (isAI ? 'text-indigo-400' : 'text-white') : 'text-slate-500 group-hover:text-indigo-400'} />
@@ -183,14 +187,14 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
             {branding.logoDark ? (
               <img src={branding.logoDark} className="w-full h-full object-contain p-1.5" />
             ) : branding.logoSquare ? (
-               <img src={branding.logoSquare} className="w-full h-full object-contain p-1" />
+              <img src={branding.logoSquare} className="w-full h-full object-contain p-1" />
             ) : (
               <Signal className="text-indigo-500" size={24} />
             )}
           </div>
           <div>
             <h1 className="text-xl font-black tracking-tighter truncate w-32 uppercase italic leading-none">{branding.shortName || businessName}</h1>
-            <p className="text-[7px] text-slate-500 font-black uppercase tracking-[0.3em] mt-1">Version v{state.settings.appVersion}</p>
+            <p className="text-[7px] text-slate-500 font-black uppercase tracking-[0.3em] mt-1">v1.2.5-LIVE-PATCH</p>
           </div>
         </div>
       </div>
@@ -199,11 +203,11 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       </nav>
       <div className="p-4 border-t border-slate-800 bg-slate-950/50 space-y-4 shrink-0">
         <div className="px-4 py-3 bg-white/5 rounded-2xl border border-white/5">
-           <div className="flex justify-between items-center mb-1">
-              <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Active Role</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-           </div>
-           <p className="text-[10px] font-black text-indigo-400 uppercase truncate">{role}</p>
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Active Role</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          </div>
+          <p className="text-[10px] font-black text-indigo-400 uppercase truncate">{role}</p>
         </div>
         <button onClick={onLogout} className="w-full flex items-center justify-center gap-3 px-4 py-3 text-slate-500 hover:text-rose-400 hover:bg-rose-400/10 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest">
           <LogOut size={18} />
