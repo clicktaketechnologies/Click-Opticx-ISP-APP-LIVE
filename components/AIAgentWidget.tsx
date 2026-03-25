@@ -6,7 +6,7 @@ import {
   ShieldAlert, Zap, HeartPulse, ShieldCheck, 
   Settings, RefreshCw, BarChart3, TrendingUp, Power, Eye, EyeOff, Lock
 } from 'lucide-react';
-import { AppState, AISuggestion, Role } from '../types';
+import { AppState, AISuggestion, Role, AIConfig } from '../types';
 
 const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,7 +16,9 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
   const user = state.currentUser;
   const isCustomer = user?.role === Role.CUSTOMER;
   const isAdmin = user?.role === Role.SUPER_ADMIN || user?.role === Role.ADMIN;
-  const aiConfig = state.settings.aiConfig || { killSwitchActive: false, showWidgetToUsers: true };
+  
+  // Fixed: Removed partial fallback object as it causes type union mismatches with full AIConfig
+  const aiConfig = state.settings.aiConfig;
   const killSwitch = aiConfig.killSwitchActive;
   const showToUsers = aiConfig.showWidgetToUsers;
 
@@ -40,7 +42,8 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
   const handleToggleUserVisibility = async () => {
     if (!isAdmin) return;
     setIsUpdating(true);
-    const nextConfig = {
+    // Spreading full aiConfig to ensure all properties required by AIConfig type are present
+    const nextConfig: AIConfig = {
       ...aiConfig,
       showWidgetToUsers: !showToUsers
     };

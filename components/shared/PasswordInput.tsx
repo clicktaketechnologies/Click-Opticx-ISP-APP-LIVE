@@ -12,10 +12,14 @@ interface PasswordInputProps {
   className?: string;
   showStrength?: boolean;
   minChars?: number;
+  // Added autoComplete to fix property not found errors in consuming components
+  autoComplete?: string;
 }
 
 const PasswordInput: React.FC<PasswordInputProps> = ({ 
-  label, value, onChange, placeholder = "••••••••", required = false, className = "", showStrength = false, minChars = 8 
+  label, value, onChange, placeholder = "••••••••", required = false, className = "", showStrength = false, minChars = 8,
+  // Added autoComplete to destructuring
+  autoComplete
 }) => {
   const [show, setShow] = useState(false);
 
@@ -56,6 +60,8 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           required={required}
+          // Added autoComplete to input element
+          autoComplete={autoComplete}
           className="w-full pl-11 pr-14 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white transition-all font-bold text-slate-800 shadow-inner placeholder:text-slate-200"
         />
         <button 

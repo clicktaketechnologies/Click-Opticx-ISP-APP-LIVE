@@ -459,17 +459,6 @@ export interface AICallLog {
   sentimentStart: 'Frustrated' | 'Neutral' | 'Satisfied';
   sentimentEnd: 'Frustrated' | 'Neutral' | 'Satisfied';
   resolutionType: 'Self-Fix' | 'Ticket_Created' | 'Escalated_To_Human' | 'Unresolved' | 'Info_Only';
-  recording?: string; // Base64 Audio String
-}
-
-export interface AITrainingPrompt {
-  id: string;
-  query: string;
-  expectedOutcome: string;
-  actualOutcome: string;
-  confidence: number;
-  timestamp: string;
-  status: 'PENDING' | 'TRAINED' | 'REJECTED';
 }
 
 export type AICallPersona = 'Calm' | 'Friendly' | 'Professional' | 'Strict';
@@ -490,7 +479,6 @@ export interface AICallConfig {
     outageScripts: string;
     billingPolicy: string;
     emergencyTerms: string;
-    customRules: string[];
   };
 }
 
@@ -662,11 +650,10 @@ export interface AppState {
   passwordRequests: PasswordResetRequest[];
   networkNodes: NetworkNode[];
   devices: Device[];
-  connectedDevices: ConnectedDevice[];
   networkMappings: NetworkMapping[];
   aiCallLogs: AICallLog[];
   aiCallRules: AICallRule[];
-  aiTrainingPrompts: AITrainingPrompt[];
+  
   // Communication Hub
   emailCampaigns: EmailCampaign[];
   emailTemplates: EmailTemplate[];
@@ -700,24 +687,24 @@ export interface PaymentRecord {
   isCleared?: boolean;
 }
 
-export interface Package {
-  id: string;
-  name: string;
-  subtitle?: string;
-  speed: string;
+export interface Package { 
+  id: string; 
+  name: string; 
+  subtitle?: string; 
+  speed: string; 
   uploadSpeed: string;
   dataLimit: string;
-  price: number;
-  discountPrice?: number;
-  discountExpiry?: string;
-  taxRate: number;
-  duration: number;
-  deleted?: boolean;
-  features?: string;
-  descriptionBullets?: string[];
-  isRecommended?: boolean;
-  trustTags?: string[];
-  discount?: number;
+  price: number; 
+  discountPrice?: number; 
+  discountExpiry?: string; 
+  taxRate: number; 
+  duration: number; 
+  deleted?: boolean; 
+  features?: string; 
+  descriptionBullets?: string[]; 
+  isRecommended?: boolean; 
+  trustTags?: string[]; 
+  discount?: number; 
   color?: string;
   networkFeatures?: any;
   techStats?: any;
@@ -827,15 +814,15 @@ export interface NotificationBranding {
   smsSenderId: string;
 }
 
-export interface BrandingConfig {
-  businessName: string;
-  shortName: string;
-  logoLight: string;
-  logoDark: string;
+export interface BrandingConfig { 
+  businessName: string; 
+  shortName: string; 
+  logoLight: string; 
+  logoDark: string; 
   logoSquare: string;
-  favicon: string;
-  primaryColor: string;
-  secondaryColor: string;
+  favicon: string; 
+  primaryColor: string; 
+  secondaryColor: string; 
   accentColor: string;
   textColorLight: string;
   textColorDark: string;
@@ -843,15 +830,15 @@ export interface BrandingConfig {
   secondaryFont: string;
 }
 
-export interface SupportConfig {
-  email: string;
-  phone: string;
-  whatsapp: string;
+export interface SupportConfig { 
+  email: string; 
+  phone: string; 
+  whatsapp: string; 
   emergencyPhone: string;
-  address: string;
+  address: string; 
   workingHoursWeekdays: string;
   workingHoursWeekends: string;
-  emergencySupport: boolean;
+  emergencySupport: boolean; 
   afterHoursMessage: string;
   phoneEnabled: boolean;
   whatsappEnabled: boolean;
@@ -860,14 +847,14 @@ export interface SupportConfig {
   autoReplyFooter: string;
 }
 
-export interface AppearanceConfig {
-  showWallet: boolean;
-  showEmergencyLoad: boolean;
-  showAIChat: boolean;
-  showAICalling: boolean;
-  showNews: boolean;
-  showQuickActions: boolean;
-  maintenanceMode: boolean;
+export interface AppearanceConfig { 
+  showWallet: boolean; 
+  showEmergencyLoad: boolean; 
+  showAIChat: boolean; 
+  showAICalling: boolean; 
+  showNews: boolean; 
+  showQuickActions: boolean; 
+  maintenanceMode: boolean; 
   appPages: AppPage[];
   homeCards: HomeCard[];
   sections: AppSection[];
