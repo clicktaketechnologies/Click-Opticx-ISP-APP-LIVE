@@ -82,7 +82,7 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
                     <p className="text-lg font-black text-slate-800 uppercase tracking-tighter">{req.packageName}</p>
                  </div>
                  <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Payment Protocol</p>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Payment Status</p>
                     <div className="flex items-center gap-2">
                        {getMethodIcon(req.paymentMethod)}
                        <p className="text-lg font-black text-slate-800 uppercase tracking-tighter">{req.paymentMethod}</p>
@@ -115,7 +115,7 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="col-span-full bg-white p-32 rounded-[4rem] border-4 border-dashed border-slate-50 flex flex-col items-center text-center">
               <ShieldCheck className="text-slate-100 mb-8" size={80} />
               <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">Request Queue Synchronized</h3>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">No pending activation requests detected in registry nodes.</p>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">No pending activation requests found.</p>
            </div>
          )}
       </div>
@@ -126,7 +126,7 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
                <ShieldAlert size={28} />
                <h3 className="text-xl font-black uppercase tracking-tight">Authority Guideline</h3>
             </div>
-            <p className="text-xs text-slate-400 font-bold leading-relaxed uppercase">Approving a request will immediately generate a validated invoice and update the subscriber's expiry date in the persistent registry. Rejected requests will notify the user via the ISP App dashboard.</p>
+            <p className="text-xs text-slate-400 font-bold leading-relaxed uppercase">Approving a request will immediately generate a validated invoice and update the subscriber's expiry date in the system. Rejected requests will notify the user via the ISP App dashboard.</p>
          </div>
          <HardDrive className="absolute -right-8 -bottom-8 opacity-5" size={240} />
       </div>

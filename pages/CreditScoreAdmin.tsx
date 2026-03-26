@@ -85,7 +85,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
             <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[600px]">
                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subscriber Registry</h3>
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">User List</h3>
                   <span className="text-[9px] font-black text-slate-500 uppercase">Sort: Risk High to Low</span>
                </div>
                <div className="divide-y divide-slate-50 overflow-y-auto custom-scrollbar">

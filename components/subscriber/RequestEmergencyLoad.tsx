@@ -192,7 +192,7 @@ const RequestEmergencyLoad: React.FC<Props> = ({ user, state, onBack, onFinish }
            </div>
 
            <button onClick={onFinish} className="w-full py-6 bg-slate-950 text-white font-black rounded-3xl shadow-xl active:scale-95 transition-all uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-2">
-              Acknowledge Dispatch <ArrowRight size={18} />
+              Acknowledge - Payment Due <ArrowRight size={18} />
            </button>
         </div>
       )}

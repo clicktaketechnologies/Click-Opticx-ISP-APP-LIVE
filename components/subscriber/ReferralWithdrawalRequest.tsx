@@ -90,13 +90,13 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
                 <CheckCircle size={56} />
              </div>
              <div className="space-y-3">
-                <h3 className="text-3xl font-black uppercase tracking-tighter italic text-slate-900">Request Dispatched</h3>
+                <h3 className="text-3xl font-black uppercase tracking-tighter italic text-slate-900">Request - Payment Dueed</h3>
                 <p className="text-[11px] text-slate-500 font-bold uppercase tracking-[0.2em] leading-relaxed px-4">
                   Conversion protocol initiated. An administrator will audit the linked nodes. You will be notified via the alert relay upon clearance.
                 </p>
              </div>
              <button onClick={() => { onWithdraw(); onClose(); }} className="w-full py-6 bg-slate-900 text-white font-black rounded-3xl shadow-xl active:scale-95 transition-all uppercase text-xs tracking-[0.2em]">
-                Return to Registry
+                Back to List
              </button>
           </div>
         )}

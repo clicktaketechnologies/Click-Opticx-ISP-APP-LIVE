@@ -25,7 +25,7 @@ const PayFastSettings: React.FC<Props> = ({ state, onBack }) => {
          <div>
             <h3 className="text-xl font-black text-slate-900 uppercase italic">PayFast Node Not Provisioned</h3>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 max-w-xs">
-              Handshake registry is missing PayFast Caller Detailss.
+              PayFast is not configured. Please enter your merchant details.
             </p>
          </div>
          <button onClick={onBack} className="px-8 py-3 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">Back to Gateways</button>
@@ -40,7 +40,7 @@ const PayFastSettings: React.FC<Props> = ({ state, onBack }) => {
 
   const handleSave = async () => {
     if (!formData.config.merchantId || !formData.config.merchantKey) {
-      setError("API Handshake Blocked: Merchant ID and Key are required for regional routing.");
+      setError("Error: Merchant ID and Key are required.");
       return;
     }
 

@@ -137,7 +137,7 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
          <div className="relative z-10 max-w-xl space-y-4">
             <div className="flex items-center gap-3 text-indigo-400">
                <ShieldAlert size={28} />
-               <h3 className="text-xl font-black uppercase tracking-tight italic leading-none">Registry Security Audit</h3>
+               <h3 className="text-xl font-black uppercase tracking-tight italic leading-none">Password Updated Audit</h3>
             </div>
             <p className="text-xs text-slate-400 font-bold leading-relaxed uppercase">
               Modular payment logic prevents cross-protocol failure. Enabling a node allows subscribers to choose it as a fiscal entry point for service activations and wallet credit.

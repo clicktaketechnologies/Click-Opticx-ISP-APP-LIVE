@@ -23,7 +23,7 @@ const CashSettings: React.FC<Props> = ({ state, onBack }) => {
     await db.updateGatewayConfig('cash', formData);
     setTimeout(() => {
       setIsSaving(false);
-      db.logNotification('all', 'success', 'Retail Node Synced', 'Cash protocol rules updated for all regional nodes.');
+      db.logNotification('all', 'success', 'Retail Data Synced', 'Cash protocol rules updated for all regional nodes.');
     }, 800);
   };
 
@@ -53,7 +53,7 @@ const CashSettings: React.FC<Props> = ({ state, onBack }) => {
                </div>
 
                <div className="space-y-6">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Allowed Usage Handshakes</h4>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Allowed Payment Methods</h4>
                   <div className="grid grid-cols-2 gap-4">
                      {['packages', 'wallet', 'emergency', 'invoices'].map((usage: any) => {
                        const active = formData.allowedFor.includes(usage);

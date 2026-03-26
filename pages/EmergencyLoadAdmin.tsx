@@ -36,7 +36,7 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
     if (!editingLoad) return;
     await db.updateEmergencyLoad(editingLoad.id, editingLoad);
     setEditingLoad(null);
-    db.logNotification('all', 'info', 'Dossier Override', `Parameters for ${editingLoad.userName} modified by authority.`);
+    db.logNotification('all', 'info', 'Settings Updated', `Settings for ${editingLoad.userName} updated by admin.`);
   };
 
   const handleApplyExtension = async () => {
@@ -71,7 +71,7 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
             <Zap className="text-orange-500" size={32} />
             Rescue Authority Grid
           </h2>
-          <p className="text-slate-500 font-medium">Heuristic monitoring of advance liquidity handshakes and debt aging protocols.</p>
+          <p className="text-slate-500 font-medium">Monitor advance credit requests and payment aging.</p>
         </div>
         <div className="flex bg-white px-8 py-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-6">
             <div className="text-right">
@@ -173,7 +173,7 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                             </button>
                             <button 
                               onClick={() => setEditingLoad({...load})}
-                              title="Modify Dossier"
+                              title="Edit User"
                               className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all shadow-sm"
                             >
                                <Pencil size={16}/>
@@ -268,7 +268,7 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     </select>
                  </div>
                  <button onClick={handleUpdateLoad} className="w-full py-5 bg-indigo-600 text-white rounded-2xl shadow-xl hover:bg-indigo-700 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-3">
-                    <Save size={18}/> Authorize Dossier Sync
+                    <Save size={18}/> Save Changes
                  </button>
               </div>
            </div>

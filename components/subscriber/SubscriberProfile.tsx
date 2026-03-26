@@ -311,7 +311,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                      />
                      <hr className="border-slate-50" />
                      <PasswordInput
-                        label="New Node Secret"
+                        label="New Password"
                         value={passForm.next}
                         onChange={v => setPassForm({ ...passForm, next: v })}
                         showStrength

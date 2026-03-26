@@ -113,7 +113,7 @@ const BankTransferSettings: React.FC<Props> = ({ state, onBack }) => {
                </div>
 
                <div className="space-y-6">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Allowed Usage Handshakes</h4>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Allowed Payment Methods</h4>
                   <div className="grid grid-cols-2 gap-4">
                      {['packages', 'wallet', 'emergency', 'invoices'].map((usage: any) => {
                        const active = formData.allowedFor.includes(usage);
@@ -142,7 +142,7 @@ const BankTransferSettings: React.FC<Props> = ({ state, onBack }) => {
                  className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
                >
                   {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20}/>}
-                  Authorize Node Handshake
+                  Save Settings
                </button>
             </div>
          </div>

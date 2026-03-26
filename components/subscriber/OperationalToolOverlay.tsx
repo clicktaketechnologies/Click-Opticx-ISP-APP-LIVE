@@ -40,7 +40,7 @@ const OperationalToolOverlay: React.FC<Props> = ({ onClose, onAction }) => {
             </button>
             <button 
               className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:bg-white hover:shadow-xl hover:border-blue-500 transition-all text-left group"
-              onClick={() => { alert("Router Restart Signal Dispatched to Node MAC..."); onClose(); }}
+              onClick={() => { alert("Router Restart Signal - Payment Dueed to Node MAC..."); onClose(); }}
             >
                <RefreshCw size={28} className="text-blue-500 mb-4 group-hover:rotate-180 transition-transform duration-700" />
                <h4 className="text-[11px] font-black uppercase tracking-widest leading-none">Node Reset</h4>
@@ -52,7 +52,7 @@ const OperationalToolOverlay: React.FC<Props> = ({ onClose, onAction }) => {
             >
                <Headphones size={28} className="text-indigo-500 mb-4 group-hover:scale-110 transition-transform" />
                <h4 className="text-[11px] font-black uppercase tracking-widest leading-none">Registry Help</h4>
-               <p className="text-[8px] font-bold text-slate-400 mt-2 uppercase">Human Dispatch</p>
+               <p className="text-[8px] font-bold text-slate-400 mt-2 uppercase">Human - Payment Due</p>
             </button>
             <button 
               className="p-8 bg-rose-50 rounded-[2.5rem] border border-rose-100 hover:bg-rose-600 hover:text-white transition-all text-left group"

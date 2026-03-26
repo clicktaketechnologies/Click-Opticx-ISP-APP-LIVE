@@ -116,7 +116,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
     setIsProcessing(null);
     setSelectedIds(new Set());
     // Fixed: Added 'all' as the first argument (targetId) to db.logNotification
-    db.logNotification('all', 'info', 'Bulk Reminder', 'Dispatched payment alerts to selected Subscribers.');
+    db.logNotification('all', 'info', 'Bulk Reminder', '- Payment Dueed payment alerts to selected Subscribers.');
   };
 
   const getStatusStyle = (status: PaymentStatus) => {

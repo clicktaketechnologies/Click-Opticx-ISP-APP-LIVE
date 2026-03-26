@@ -124,9 +124,9 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="space-y-8 animate-in fade-in duration-500 pb-20">
          <ModuleGuide
             moduleName="Infrastructure Nodes"
-            description="Hardware provisioning, API handshakes, and health monitoring"
+            description="Hardware provisioning, connections, and health monitoring"
             items={[
-               { title: "Physical Nodes", description: "Register and monitor OLTs, BRAS routers, and switches. Performance is tracked via SNMP/SSH handshakes." },
+               { title: "Physical Nodes", description: "Register and monitor OLTs, BRAS routers, and switches. Performance is tracked via SNMP/SSH connections." },
                { title: "Node Provisioning", description: "Deploy new hardware by specifying vendor architecture (Huawei, ZTE, etc.) and communication secrets." },
                { title: "Command Console", description: "Real-time log stream showing active polling events and authorized WIFI rotation signals." }
             ]}
@@ -137,7 +137,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
                   <Link2 className="text-blue-600" size={32} />
                   Infrastructure Nodes
                </h2>
-               <p className="text-slate-500 font-medium mt-2">Manage connected OLTs, BRAS routers, and legacy hardware API handshakes.</p>
+               <p className="text-slate-500 font-medium mt-2">Manage connected OLTs, BRAS routers, and legacy hardware API connections.</p>
             </div>
             <button
                onClick={() => setIsAddModalOpen(true)}
@@ -231,7 +231,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
                         <p className="flex gap-4"><span className="text-blue-500 shrink-0">12:00:05</span> [OLT-02] Syncing hardware registry v8.5...</p>
                         <p className="flex gap-4"><span className="text-amber-500 shrink-0">12:00:10</span> [SYSTEM] Pushing authorized WIFI rotation signals...</p>
                         <p className="flex gap-4"><span className="text-indigo-400 shrink-0">12:04:22</span> [SNMP] Global health audit heartbeat recorded.</p>
-                        <p className="flex gap-4"><span className="text-emerald-500 shrink-0">12:05:00</span> [API] Handshake successful with 22 vendor nodes.</p>
+                        <p className="flex gap-4"><span className="text-emerald-500 shrink-0">12:05:00</span> [API] Connected successfully with 22 vendor devices.</p>
                      </div>
                   </div>
                   <Globe className="absolute -right-16 -bottom-16 opacity-5 scale-150 pointer-events-none" size={300} />
@@ -270,7 +270,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
 
                <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 space-y-6">
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                     <Activity size={16} className="text-emerald-500" /> Handshake Statistics
+                     <Activity size={16} className="text-emerald-500" /> Connection Statistics
                   </h3>
                   <div className="space-y-4">
                      {[
@@ -303,7 +303,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
                         </div>
                         <div>
                            <h3 className="text-2xl font-black uppercase italic tracking-tighter">Provision Node</h3>
-                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Hardware Deployment Handshake</p>
+                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Hardware Deployment</p>
                         </div>
                      </div>
                      <button onClick={() => setIsAddModalOpen(false)} className="p-3 hover:bg-red-50 text-slate-300 hover:text-red-500 transition-all rounded-xl">
@@ -406,7 +406,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
                      <div className="p-6 bg-blue-50 border border-blue-100 rounded-3xl flex items-start gap-4">
                         <ShieldAlert size={24} className="text-blue-600 shrink-0 mt-1" />
                         <p className="text-[9px] text-blue-700 font-bold uppercase leading-relaxed tracking-tighter">
-                           Provisioning a node requires verified physical presence in the POP registry. API link will attempt immediate handshake after deployment using the specified protocol.
+                           Provisioning a node requires verified physical presence in the POP location. API will attempt immediate connection after deployment using the specified protocol.
                         </p>
                      </div>
 

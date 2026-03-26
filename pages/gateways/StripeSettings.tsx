@@ -22,7 +22,7 @@ const StripeSettings: React.FC<Props> = ({ state, onBack }) => {
 
   const handleSave = async () => {
     if (!formData.config.publishableKey || !formData.config.secretKey) {
-      setError("Handshake Error: API Publishable and Secret Keys are mandatory.");
+      setError("Error: API Publishable and Secret Keys are required.");
       return;
     }
 
@@ -66,7 +66,7 @@ const StripeSettings: React.FC<Props> = ({ state, onBack }) => {
             <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-xl space-y-10">
                <div className="flex justify-between items-center bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
                   <div>
-                    <h4 className="text-sm font-black uppercase text-slate-900 leading-none mb-1">Handshake Env</h4>
+                    <h4 className="text-sm font-black uppercase text-slate-900 leading-none mb-1">Environment</h4>
                     <p className="text-[9px] text-slate-400 font-black uppercase">Toggle Sandbox vs Production</p>
                   </div>
                   <div className="flex bg-white p-1 rounded-2xl border shadow-sm">
@@ -104,7 +104,7 @@ const StripeSettings: React.FC<Props> = ({ state, onBack }) => {
                  className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
                >
                   {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20}/>}
-                  Authorize Node Handshake
+                  Save Settings
                </button>
             </div>
          </div>

@@ -517,8 +517,8 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         }
     };
 
-    const openAuditDossier = async (userId: string) => {
-        const data = await db.getAuditDossier(userId);
+    const openUserProfile = async (userId: string) => {
+        const data = await db.getAuditProfile(userId);
         setAuditData(data);
         setIsAuditModalOpen(true);
     };
@@ -532,7 +532,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                 items={[
                     { title: "Financial States", description: "Green/Full Paid = Clear balance. Yellow/Half = Partial payment. Red/Unpaid = Arrears detected." },
                     { title: "Batch Actions", description: "Select multiple identities to execute bulk suspensions or generate collective reminders." },
-                    { title: "Dossier Access", description: "Click the File icon to view a detailed financial and activity history for any subscriber." }
+                    { title: "User Profile", description: "Click the File icon to view detailed financial and activity history for any user." }
                 ]}
             />
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -889,8 +889,8 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         <td className="px-6 py-6">
                                             <div className="flex items-center gap-2">
                                                 <button
-                                                    onClick={() => openAuditDossier(user.id)}
-                                                    title="View Identity Dossier"
+                                                    onClick={() => openUserProfile(user.id)}
+                                                    title="View User Profile"
                                                     className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 rounded-xl transition-all active:scale-90"
                                                 >
                                                     <FileText size={14} />
@@ -1072,12 +1072,12 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Collector Notes & Handshake Memo</label>
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Collector Notes</label>
                                     <textarea
                                         className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-indigo-500/10 min-h-[80px]"
                                         value={collectionDetails.notes}
                                         onChange={(e) => setCollectionDetails({ ...collectionDetails, notes: e.target.value })}
-                                        placeholder="Input collection notes, promise details, or handshake remarks..."
+                                        placeholder="Enter collection notes or payment details..."
                                     />
                                 </div>
                             </div>
@@ -1182,7 +1182,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                     <FileText size={32} strokeWidth={3} />
                                 </div>
                                 <div>
-                                    <h3 className="text-4xl font-black uppercase italic tracking-tighter text-slate-950 font-sans leading-none mb-2">Audit Dossier: {auditData.identity.name}</h3>
+                                    <h3 className="text-4xl font-black uppercase italic tracking-tighter text-slate-950 font-sans leading-none mb-2">User Profile: {auditData.identity.name}</h3>
                                     <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] italic">Comprehensive Asset & Ledger Investigation Protocol</p>
                                 </div>
                             </div>
@@ -1262,7 +1262,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                         <div className="p-10 bg-slate-950 text-white shrink-0 flex justify-between items-center italic">
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Security Hash: {Math.random().toString(36).substring(7).toUpperCase()}</p>
                             <div className="flex gap-4">
-                                <button className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"><Printer size={16} /> Print Full Dossier</button>
+                                <button className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"><Printer size={16} /> Print Report</button>
                                 <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-900/40"><Download size={16} /> Export CSV</button>
                             </div>
                         </div>
@@ -1336,7 +1336,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Handshake Memo / Notes <span className="text-rose-500 font-black">(REQUIRED)</span></label>
+                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Collection Notes <span className="text-rose-500 font-black">(REQUIRED)</span></label>
                                         <textarea
                                             className={`w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none transition-all min-h-[100px] resize-none ${!bulkUnpaidConfig.notes ? 'border-rose-100 placeholder:text-rose-300' : 'border-slate-100 focus:border-indigo-500'}`}
                                             placeholder="MUST INPUT REASON FOR AUDIT LOG..."
@@ -1348,7 +1348,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                             </div>
 
                             <div className="bg-slate-50 p-6 rounded-3xl border border-dashed border-indigo-200">
-                                <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1 italic">Financial Preview Handshake:</p>
+                                <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1 italic">Payment Summary:</p>
                                 <p className="text-xl font-black text-slate-900 leading-none">
                                     Total Charge: Rs. {((state.packages.find(p => p.id === bulkUnpaidConfig.packageId)?.price || 0) * bulkUnpaidConfig.months).toLocaleString()} 
                                     <span className="text-[10px] text-slate-400 ml-2 font-black italic">

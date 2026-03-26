@@ -153,7 +153,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
             <Calculator className="text-emerald-600" size={32} />
             Billing Engine
           </h2>
-          <p className="text-slate-500 font-medium">Auto-calculate service dues and provision commercial handshakes.</p>
+          <p className="text-slate-500 font-medium">Auto-calculate service dues and generate digital invoices.</p>
         </div>
         <div className="flex gap-2">
           {[1, 2, 3].map(s => (
@@ -374,7 +374,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
            </div>
            
            <div className="space-y-2">
-              <h3 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Fiscal Dispatch Successful</h3>
+              <h3 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic">Fiscal - Payment Due Successful</h3>
               <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[11px]">System Reference: {generatedInv.id}</p>
            </div>
 

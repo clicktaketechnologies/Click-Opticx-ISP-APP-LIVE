@@ -220,7 +220,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      <div className="col-span-full py-32 text-center bg-white rounded-[3rem] border-4 border-dashed border-slate-50 flex flex-col items-center">
                         <ShieldCheck className="text-slate-100 mb-6" size={80} />
                         <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">Onboarding Synchronized</h3>
-                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">No pending signup handshakes detected.</p>
+                        <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">No pending signups found.</p>
                      </div>
                   )}
                </div>
@@ -275,7 +275,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
                         <div className="space-y-8">
                            <div className="space-y-4">
-                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Column Scaling Protocol</label>
+                              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Column Layout</label>
                               <div className="grid grid-cols-4 gap-2">
                                  {[1, 2, 3, 4].map(cols => (
                                     <button
@@ -347,7 +347,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
          {activeTab === 'layout' && (
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 animate-in slide-in-from-right-4 duration-500">
-               {/* GLOBAL FUNCTIONAL REGISTRY */}
+               {/* GLOBAL FEATURES */}
                <div className="bg-slate-900 rounded-[3rem] p-10 text-white space-y-10 shadow-2xl relative overflow-hidden">
                   <div className="relative z-10">
                      <h3 className="text-xl font-black uppercase tracking-tighter italic leading-none">Global Scope Matrix</h3>
@@ -384,7 +384,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                   <Activity className="absolute -right-20 -bottom-20 opacity-5 scale-[3]" size={300} />
                </div>
 
-               {/* DYNAMIC PAGE REGISTRY */}
+               {/* APP PAGES */}
                <div className="bg-white rounded-[3.5rem] border border-slate-100 p-10 shadow-sm flex flex-col space-y-10">
                   <div className="flex justify-between items-center">
                      <div>
@@ -427,7 +427,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            </div>
 
                            <div className="space-y-2 pt-2 border-t border-slate-50">
-                              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Industrial Swatch Registry</p>
+                              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Color Palette</p>
                               <div className="flex flex-wrap gap-2">
                                  {industrialSwatches.map(color => (
                                     <button
@@ -466,7 +466,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="flex items-center gap-4">
                      <div className="w-12 h-12 bg-rose-600 rounded-2xl flex items-center justify-center shadow-lg"><ShieldAlert size={28} /></div>
                      <div>
-                        <h3 className="text-xl font-black uppercase italic tracking-tighter">Security Registry</h3>
+                        <h3 className="text-xl font-black uppercase italic tracking-tighter">Security Settings</h3>
                         <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em]">Service Audit Trail</p>
                      </div>
                   </div>
@@ -478,7 +478,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      <thead className="sticky top-0 bg-white border-b z-10">
                         <tr>
                            <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Timestamp</th>
-                           <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Protocol Action</th>
+                           <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Action</th>
                            <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Node Target</th>
                            <th className="px-8 py-5 text-[9px] font-black text-slate-400 uppercase tracking-widest">Risk Level</th>
                         </tr>

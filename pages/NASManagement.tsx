@@ -117,7 +117,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
             ))}
          </div>
 
-         {/* NODES GRID */}
+         {/* Users GRID */}
          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {filteredNodes.map(nas => (
                <div key={nas.id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden group hover:border-indigo-200 transition-all">
@@ -298,7 +298,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      
                      <div className="space-y-3">
                         <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none">
-                           {isChecking ? 'Analyzing Node' : healthCheckResult?.status === 'Online' ? 'Node Integrity Verified' : 'Handshake Failed'}
+                           {isChecking ? 'Analyzing Node' : healthCheckResult?.status === 'Online' ? 'Device Online' : 'Connection Failed'}
                         </h3>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em] px-8">
                            {isChecking ? `Contacting Router ${healthCheckResult?.name || ''}...` : `Remote Router Presence ${healthCheckResult?.status === 'Online' ? 'Confirmed' : 'Unreachable'}`}
@@ -329,7 +329,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      className="w-full py-6 bg-slate-900 hover:bg-black text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:shadow-2xl transition-all active:scale-95 disabled:opacity-20 flex items-center justify-center gap-2"
                   >
                      {isChecking ? <Plus className="animate-spin opacity-40" /> : <ShieldCheck size={18} />} 
-                     {isChecking ? 'SECURE HANDSHAKE...' : 'Acknowledge Integrity'}
+                     {isChecking ? 'CHECKING STATUS...' : 'Confirm Status'}
                   </button>
                </div>
             </div>

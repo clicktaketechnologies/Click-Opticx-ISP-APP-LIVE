@@ -63,7 +63,7 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
          await db.processTopup('GATEWAY', user.id, 'user', total);
          await db.activatePackage(user.id, selectedPkgId);
 
-         db.logNotification(user.id, 'success', 'Package Provisioned', `Link established via ${selectedGateway.name}. Fiscal handshake verified. Ext: ${result.transactionId}`);
+         db.logNotification(user.id, 'success', 'Package Provisioned', `Link established via ${selectedGateway.name}. Fiscal action completed. Ext: ${result.transactionId}`);
 
          setIsProcessing(false);
          onSuccess();

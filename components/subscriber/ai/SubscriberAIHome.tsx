@@ -55,7 +55,7 @@ const SubscriberAIHome: React.FC<Props> = ({ user, state, onNavigate }) => {
                <HeartPulse size={32} />
             </div>
             <div className="text-left">
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Fiscal Health Insight</p>
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Billing Summary Insight</p>
                <h4 className="text-xl font-black text-slate-900 uppercase italic tracking-tight">Trust Score: {user.creditScore}</h4>
                <p className="text-[9px] text-emerald-600 font-bold uppercase mt-1">AI Rank: High Performance Node</p>
             </div>

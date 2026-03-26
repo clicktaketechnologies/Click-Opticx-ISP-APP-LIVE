@@ -104,7 +104,7 @@ const EmailComposer: React.FC<Props> = ({
                     <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-[2rem] flex items-center justify-center mx-auto border border-emerald-100 shadow-inner">
                         <CheckCircle size={48} className="animate-bounce" />
                     </div>
-                    <h3 className="text-2xl font-black italic text-slate-900 uppercase tracking-tighter">Dispatch Verified</h3>
+                    <h3 className="text-2xl font-black italic text-slate-900 uppercase tracking-tighter">- Payment Due Verified</h3>
                     <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest leading-relaxed">
                         Message nodes successfully synchronized with recipient's endpoint.
                     </p>
@@ -120,7 +120,7 @@ const EmailComposer: React.FC<Props> = ({
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg"><Mail size={24} /></div>
                         <div>
-                            <h3 className="text-xl font-black italic tracking-tighter uppercase leading-none">Communication Relay</h3>
+                            <h3 className="text-xl font-black italic tracking-tighter uppercase leading-none">Communication Service</h3>
                             <p className="text-indigo-400 text-[9px] font-black uppercase tracking-[0.3em] mt-1">Direct Node Handshake v3.0</p>
                         </div>
                     </div>
@@ -163,7 +163,7 @@ const EmailComposer: React.FC<Props> = ({
                     {/* Subject & Message */}
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Dispatch Subject</label>
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">- Payment Due Subject</label>
                             <div className="relative">
                                 <Type className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                                 <input
@@ -227,7 +227,7 @@ const EmailComposer: React.FC<Props> = ({
                         className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                     >
                         {isSending ? <Mini5GMicroLoader size={18} /> : <Send size={18} />}
-                        {user.email ? 'Authorize Dispatch' : 'Email Node Missing'}
+                        {user.email ? 'Authorize - Payment Due' : 'Email Node Missing'}
                     </button>
                 </footer>
             </div>

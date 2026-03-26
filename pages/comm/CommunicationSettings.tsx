@@ -30,7 +30,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
    const [isSendingTest, setIsSendingTest] = useState(false);
    const [testEmailData, setTestEmailData] = useState({
       recipient: '',
-      subject: 'Operational Test Dispatch - Click Opticx',
+      subject: 'Operational Test - Payment Due - Click Opticx',
       templateId: state.emailTemplates[0]?.id || ''
    });
 
@@ -414,7 +414,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                         <div className="col-span-full py-32 text-center bg-slate-50 rounded-[4rem] border-4 border-dashed border-slate-200 flex flex-col items-center justify-center">
                            <UserCheck size={80} className="text-slate-200 mb-6" />
                            <h3 className="text-2xl font-black text-slate-400 uppercase italic tracking-tighter">Identity Grid Dormant</h3>
-                           <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest max-w-sm leading-relaxed mt-2">NO AUTHORIZED SENDER NODES IDENTIFIED. PROVISION YOUR FIRST IDENTITY TO ENABLE CORPORATE DISPATCH PROTOCOLS.</p>
+                           <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest max-w-sm leading-relaxed mt-2">NO AUTHORIZED SENDER Users IDENTIFIED. PROVISION YOUR FIRST IDENTITY TO ENABLE CORPORATE DISPATCH PROTOCOLS.</p>
                         </div>
                      )}
                   </div>
@@ -605,7 +605,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                            <input className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl font-black text-sm outline-none focus:border-indigo-600 transition-all shadow-inner uppercase" placeholder="e.g. SYSTEM NOTIFICATIONS" value={newIdentity.name} onChange={e => setNewIdentity({ ...newIdentity, name: e.target.value })} />
                         </div>
                         <div className="space-y-2">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Authorized Dispatch Email</label>
+                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Authorized - Payment Due Email</label>
                            <input type="email" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl font-black text-sm outline-none focus:border-indigo-600 transition-all shadow-inner" placeholder="notify@clickopticx.com" value={newIdentity.email} onChange={e => setNewIdentity({ ...newIdentity, email: e.target.value })} />
                         </div>
                      </div>

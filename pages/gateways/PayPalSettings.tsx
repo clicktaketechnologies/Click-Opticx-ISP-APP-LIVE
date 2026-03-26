@@ -26,7 +26,7 @@ const PayPalSettings: React.FC<Props> = ({ state, onBack }) => {
          <div>
             <h3 className="text-xl font-black text-slate-900 uppercase italic">PayPal Node Not Provisioned</h3>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2 max-w-xs">
-              This digital handshake is missing from the global registry. Re-initialize system state or contact core infrastructure.
+              This payment method is not configured. Please set up the payment gateway or contact your administrator.
             </p>
          </div>
          <button onClick={onBack} className="px-8 py-3 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all">Back to Gateways</button>
@@ -41,7 +41,7 @@ const PayPalSettings: React.FC<Props> = ({ state, onBack }) => {
 
   const handleSave = async () => {
     if (!formData.config.clientId || !formData.config.secret) {
-      setError("API Node Failure: Client ID and Secret Key are mandatory for handshake.");
+      setError("Error: Client ID and Secret Key are required.");
       return;
     }
     

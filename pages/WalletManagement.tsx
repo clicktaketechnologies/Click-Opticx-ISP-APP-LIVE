@@ -57,7 +57,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
    const handleAutoRefill = async () => {
       setIsRefilling(true);
-      // Crediting 10 Million via SYSTEM protocol
+      // System Credit
       const refillAmount = 10000000;
       const res = await db.processTopup('SYSTEM', currentUser.email, 'staff', refillAmount);
 

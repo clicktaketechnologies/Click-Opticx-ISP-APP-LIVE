@@ -195,7 +195,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                {[
                  { id: 'gemini', label: 'AI Core (Gemini)', icon: Cpu, color: 'text-indigo-400', desc: 'LLM & Heuristic Link' },
                  { id: 'firebase', label: 'Cloud Node (DB)', icon: Database, color: 'text-orange-400', desc: 'Firestore Registry' },
-                 { id: 'smtp', label: 'Comm Email Gateway', icon: Send, color: 'text-blue-400', desc: 'Outbound Dispatch' },
+                 { id: 'smtp', label: 'Comm Email Gateway', icon: Send, color: 'text-blue-400', desc: 'Outbound - Payment Due' },
                  { id: 'payment', label: 'Fiscal Node (API)', icon: CreditCard, color: 'text-emerald-400', desc: 'Payment Gateway Link' }
                ].map(bridge => (
                  <div key={bridge.id} className="p-6 bg-white/5 border border-white/10 rounded-[2.5rem] group hover:bg-white/10 transition-all flex flex-col justify-between h-56">

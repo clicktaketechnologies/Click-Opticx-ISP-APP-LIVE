@@ -65,7 +65,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                   <CreditCard className="text-blue-600" size={32} />
                   Fiscal Gateway Control
                </h2>
-               <p className="text-slate-500 font-medium">Centrally manage payment handshakes, API credentials, and system-wide visibility.</p>
+               <p className="text-slate-500 font-medium">Centrally manage payment methods, API credentials, and system-wide visibility.</p>
             </div>
             <div className="flex bg-white p-1.5 rounded-[1.5rem] border border-slate-200 shadow-sm overflow-x-auto w-full md:w-auto">
                {[
@@ -140,7 +140,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                   <h3 className="text-xl font-black uppercase tracking-tight italic">Registry Node Monitor</h3>
                </div>
                <p className="text-xs text-slate-400 font-bold leading-relaxed uppercase">
-                  All digital payment handshakes are encrypted via 256-bit AES registry protocols. Unauthorized gateway configuration changes trigger high-priority system alerts.
+                  All digital payments are encrypted via 256-bit AES protocols. Unauthorized gateway configuration changes trigger high-priority system alerts.
                </p>
             </div>
             <div className="relative z-10 flex gap-4">
@@ -183,7 +183,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                      {selectedGateway.type !== 'offline' && (
                         <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between">
                            <div>
-                              <h4 className="text-sm font-black uppercase text-slate-900">Handshake Environment</h4>
+                              <h4 className="text-sm font-black uppercase text-slate-900">Environmentironment</h4>
                               <p className="text-[10px] text-slate-400 font-bold uppercase">Toggle between Sandbox and Production nodes</p>
                            </div>
                            <div className="flex p-1 bg-white border rounded-2xl shadow-sm">

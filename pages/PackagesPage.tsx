@@ -292,7 +292,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
                   {/* Trust Tags */}
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Trust Handshakes (Tags)</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Trust Tags</label>
                       <button onClick={() => addToList('trustTags')} className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"><PlusCircle size={18} /></button>
                     </div>
                     <div className="space-y-2">

@@ -876,9 +876,9 @@ class DB {
       this.notify();
 
       if (data.success) {
-        return { success: true, message: `Gateway Handshake Successful. Latency ${latency}ms.`, health: healthUpdate };
+        return { success: true, message: `Email Gateway Successful. Latency ${latency}ms.`, health: healthUpdate };
       } else {
-        return { success: false, error: data.message || 'SMTP Handshake Failed', health: healthUpdate };
+        return { success: false, error: data.message || 'SMTP Connection Failed', health: healthUpdate };
       }
     } catch (err: any) {
       const errorHealth = {
@@ -2481,7 +2481,7 @@ class DB {
     return res;
   }
 
-  async getAuditDossier(userId: string) {
+  async getAuditProfile(userId: string) {
     const user = this.state.users.find(u => u.id === userId);
     if (!user) return null;
 

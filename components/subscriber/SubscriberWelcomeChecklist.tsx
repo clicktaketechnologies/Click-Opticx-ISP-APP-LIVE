@@ -53,7 +53,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
       markStepComplete('Verify Identity');
       setActiveSubStep(null);
     } catch (err) {
-      alert("Identity Verification Failed.");
+      alert("Verify Your Identity Failed.");
     } finally {
       setIsProcessing(false);
     }

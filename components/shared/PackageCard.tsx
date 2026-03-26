@@ -138,7 +138,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
          </div>
       </div>
 
-      {/* Pricing & Protocol Actions */}
+      {/* Pricing & Actions */}
       <div className="p-8 pt-6 mt-auto flex flex-col gap-6">
          <div className="flex items-end justify-between border-t border-slate-100 pt-6">
             <div>

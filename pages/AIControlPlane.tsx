@@ -60,7 +60,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="space-y-4">
                <div className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${config.killSwitchActive ? 'bg-rose-500' : 'bg-emerald-500 animate-pulse'}`}></div>
-                  <h3 className="text-xl font-black uppercase tracking-widest text-white">System Status: {config.killSwitchActive ? 'OFFLINE (KILL-SWITCH ACTIVE)' : 'OPERATIONAL'}</h3>
+                  <h3 className="text-xl font-black uppercase tracking-widest text-white">System Status: {config.killSwitchActive ? 'OFFLINE (SUSPEND ACTIVE)' : 'OPERATIONAL'}</h3>
                </div>
                <p className="text-sm font-bold text-slate-400 uppercase leading-relaxed max-w-xl italic">
                   Registry integrity verified at {healthScore}%. AI core is currently processing regional behavioral telemetry.
@@ -303,7 +303,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
             className={`w-full py-8 rounded-[2.5rem] font-black text-lg uppercase tracking-[0.3em] transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-6 ${config.killSwitchActive ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}
           >
              {config.killSwitchActive ? <Mini5GMicroLoader size={32} /> : <ShieldAlert size={32} />}
-             {config.killSwitchActive ? 'RE-INITIALIZE AUTONOMY' : 'ENGAGE TOTAL KILL-SWITCH'}
+             {config.killSwitchActive ? 'RE-INITIALIZE AUTONOMY' : 'ENGAGE TOTAL SUSPEND'}
           </button>
        </div>
 

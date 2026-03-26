@@ -301,7 +301,7 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
             </div>
             <div className="p-10 bg-slate-50 border-t border-slate-100 flex gap-4 shrink-0">
               <button onClick={() => setIsModalOpen(false)} className="flex-1 py-5 font-black text-slate-400 hover:bg-white hover:text-red-500 rounded-2xl transition-all uppercase tracking-widest text-[11px]">Abort Mission</button>
-              <button onClick={handleSave} className="flex-[2] py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-2xl shadow-indigo-100 active:scale-95 transition-all uppercase tracking-[0.2em] text-xs">{editingStaff ? 'Authorize Updates' : 'Commit to Team'}</button>
+              <button onClick={handleSave} className="flex-[2] py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-2xl shadow-indigo-100 active:scale-95 transition-all uppercase tracking-[0.2em] text-xs">{editingStaff ? 'Save Changes' : 'Commit to Team'}</button>
             </div>
           </div>
         </div>

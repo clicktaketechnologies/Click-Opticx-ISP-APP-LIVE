@@ -234,7 +234,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
              <div className="flex items-center gap-3">
                 <ShieldCheck size={20} className="text-indigo-600" />
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900">Task Protocol</h4>
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900">Task Details</h4>
              </div>
              <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed">
                All operational tasks are logged for internal auditing. Urgent items will trigger a priority relay to assigned staff members.
@@ -254,7 +254,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                    </div>
                    <div>
                       <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">New Task</h3>
-                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">Operational Protocol</p>
+                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">Task Status</p>
                    </div>
                 </div>
                 <button onClick={() => setIsAdding(false)} className="p-3 hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all rounded-2xl">

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../db';
 import { AppState, AuthSettings, Role } from '../types';
 import { ShieldCheck, Save, CheckCircle, ToggleLeft, ToggleRight, LayoutGrid, AlertCircle, Settings2, Key, Users, CopyPlus, MessageSquare, Play, FileText, Terminal, Activity, Download } from 'lucide-react';
@@ -58,9 +58,9 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
     setIsVerifying(true);
     const res = await db.verifySMTP(state.settings.commConfig.smtpConfig);
     if (res.success) {
-      alert('âœ… SMTP Handshake Successful! Relay node operational.');
+      alert('✅ SMTP Handshake Successful! Relay node operational.');
     } else {
-      alert(`âŒ Handshake Failed: ${res.message}. Check credentials or firewall.`);
+      alert(`❌ Connection Failed: ${res.message}. Check credentials or firewall.`);
     }
     setIsVerifying(false);
   };
@@ -277,7 +277,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                       <div className="flex items-center gap-3">
                          <Terminal size={20} className="text-amber-600" />
                          <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-amber-800">Dispatch Simulation Mode</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-amber-800">- Payment Due Simulation Mode</p>
                             <p className="text-[9px] text-amber-600 font-bold uppercase tracking-widest opacity-70">When active, no real Email/SMS will be sent. Logs only.</p>
                          </div>
                       </div>
@@ -329,7 +329,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                          <div className="space-y-1">
                             <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Access Key / Pass</label>
                             <input 
-                               type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" 
+                               type="password" placeholder="••••••••" 
                                className="w-full p-3 bg-white border border-slate-200 rounded-xl font-bold text-xs" 
                                onChange={e => db.updateSettings({...state.settings, commConfig: {...state.settings.commConfig, smtpConfig: {...state.settings.commConfig.smtpConfig, password: e.target.value}}})}
                             />
@@ -344,7 +344,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                          <button 
                             onClick={async () => {
                                const res = await db.testCommunication('Email', state.currentUser?.email || 'admin@clickoptix.com');
-                               if(res.success) alert('âœ… Diagnostic Email Dispatched! Check communication logs.');
+                               if(res.success) alert('✅ Diagnostic Email - Payment Dueed! Check communication logs.');
                             }}
                             className="px-6 py-4 bg-white text-indigo-600 border border-indigo-200 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm active:scale-95"
                          >
@@ -353,7 +353,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                          <button 
                             onClick={async () => {
                                const res = await db.testCommunication('SMS', '03456789012');
-                               if(res.success) alert('âœ… Diagnostic SMS Routed! Check gateway logs.');
+                               if(res.success) alert('✅ Diagnostic SMS Routed! Check gateway logs.');
                             }}
                             className="px-6 py-4 bg-white text-indigo-600 border border-indigo-200 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm active:scale-95"
                          >

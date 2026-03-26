@@ -132,7 +132,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             alert("Success! Your password has been updated. You can now sign in.");
          } else {
             setIsProcessing(false);
-            setError("REGISTRY_FAULT: Verification handshake timed out.");
+            setError("Login verification timed out. Please try again.");
          }
       } else {
          setIsProcessing(false);

@@ -202,7 +202,7 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
                  onClick={onBack}
                  className="px-12 py-5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl active:scale-95 transition-all mt-6"
                >
-                 Return to Registry
+                 Back to List
                </button>
             </div>
           </>

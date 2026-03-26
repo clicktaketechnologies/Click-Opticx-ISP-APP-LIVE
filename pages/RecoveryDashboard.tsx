@@ -524,7 +524,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                             </span>
                           </div>
                           <button
-                            title="View User Dossier"
+                            title="View User Details"
                             className="p-3 bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white rounded-2xl transition-all"
                             onClick={() => alert("Forwarding to Customer 360: " + p.userName)}
                           >
@@ -573,7 +573,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                 </div>
               </div>
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block ml-1">Payment Protocol</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block ml-1">Payment Status</label>
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     { id: 'Cash', label: 'Cash Entry', icon: Landmark },

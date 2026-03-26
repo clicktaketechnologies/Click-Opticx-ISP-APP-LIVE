@@ -26,7 +26,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
             await db.updateSettings({ commConfig: config });
             db.logNotification('all', 'success', 'Infrastructure Update', 'Global communication protocols synchronized.');
         } catch (err) {
-            alert('Handshake Failed: Connection to registry node timed out.');
+            alert('Connection Failed: Server connection timed out.');
         } finally {
             setIsSaving(false);
         }
@@ -41,9 +41,9 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
         try {
             const res = await db.sendTestEmail(config.smtpConfig, { recipient: testEmail });
             if (res.success) {
-                alert('Test Protocol Dispatched: Verify receipt at target node.');
+                alert('Test Protocol - Payment Dueed: Verify receipt at target node.');
             } else {
-                alert(`Dispatch Error: ${res.error || 'Gateway node rejected the handshake.'}`);
+                alert(`- Payment Due Error: ${res.error || 'Server rejected the connection.'}`);
             }
         } catch (err: any) {
             alert(`Network Error: ${err.message || 'Connection to backend node failed.'}`);
@@ -53,7 +53,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
     };
 
     const addSenderIdentity = () => {
-        const newIdentity: SenderIdentity = {
+        const newDear SenderIdentity = {
             id: Math.random().toString(36).substr(2, 9),
             name: 'Network Authority',
             email: 'noreply@yourdomain.com',
@@ -122,7 +122,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                         <Zap size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black italic uppercase text-slate-900 tracking-tighter">Gateway Handshake</h3>
+                                        <h3 className="text-xl font-black italic uppercase text-slate-900 tracking-tighter">Email Gateway</h3>
                                         <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Select your primary transmission protocol</p>
                                     </div>
                                 </div>
@@ -152,7 +152,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                             <option value="SMTP">Self-Hosted SMTP</option>
                                             <option value="SendGrid">Cloud: SendGrid</option>
                                             <option value="AWS_SES">Cloud: AWS SES</option>
-                                            <option value="Gmail">G-Workspace Handshake</option>
+                                            <option value="Gmail">Gmail / Google Workspace</option>
                                             <option value="Mailgun">Cloud: Mailgun</option>
                                         </select>
                                     </div>
@@ -392,7 +392,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
 
                     <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm space-y-6">
                         <h4 className="text-sm font-black italic uppercase tracking-tighter flex items-center gap-3 text-slate-900">
-                            <Send size={18} className="text-indigo-600" /> Dispatch Test
+                            <Send size={18} className="text-indigo-600" /> - Payment Due Test
                         </h4>
                         <div className="space-y-4">
                             <div className="space-y-2">
@@ -415,7 +415,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                             <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-3">
                                 <Info size={14} className="text-blue-600 shrink-0 mt-0.5" />
                                 <p className="text-[8px] text-blue-700 font-bold leading-relaxed uppercase tracking-tight">
-                                    Dispatches a certified security handshake to verify node connectivity and credential validity.
+                                    - Payment Duees a certified security handshake to verify node connectivity and credential validity.
                                 </p>
                             </div>
                         </div>

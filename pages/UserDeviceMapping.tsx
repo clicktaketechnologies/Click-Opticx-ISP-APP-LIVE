@@ -64,7 +64,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
             <Map className="text-indigo-600" size={32} />
             Node Mapping
           </h2>
-          <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Hardware Binding Protocol</p>
+          <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Device Binding</p>
         </div>
 
         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
@@ -81,7 +81,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
 
         <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[600px]">
            <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Subscriber Registry</h3>
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">User List</h3>
               <span className="text-[8px] font-black text-slate-400 bg-white border px-2 py-0.5 rounded uppercase">Verified</span>
            </div>
            <div className="divide-y divide-slate-50 overflow-y-auto custom-scrollbar flex-1">
@@ -121,7 +121,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
               <Database className="text-slate-100 mb-8" size={80} />
               <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter italic">Select Target Identity</h3>
               <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] max-w-xs mt-2 leading-relaxed">
-                 Choose a subscriber from the registry hub to bind their account to a physical MikroTik or OLT node.
+                 Choose a subscriber from the user list to bind their account to a physical MikroTik or OLT node.
               </p>
            </div>
          ) : (
@@ -180,7 +180,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="space-y-8">
                        <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                           <Zap size={18} className="text-emerald-600"/>
-                          <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-900">Protocol Binding</h4>
+                          <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-900">Connection Setup</h4>
                        </div>
                        <div className="space-y-4">
                           {mapping.connectionType === 'Wireless' ? (
@@ -229,7 +229,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="flex-1">
                        <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1">Mapping Authorization</p>
                        <p className="text-[9px] text-blue-700 font-bold uppercase leading-relaxed opacity-80">
-                          Binding this identity to the <strong className="text-blue-900">{mapping.connectionType === 'Fiber' ? state.oltNodes.find(d => d.id === mapping.deviceId)?.name : state.nasNodes.find(d => d.id === mapping.deviceId)?.name || 'unselected'}</strong> node will enable real-time telemetry and self-service password protocols in the subscriber terminal.
+                          Binding this identity to the <strong className="text-blue-900">{mapping.connectionType === 'Fiber' ? state.oltNodes.find(d => d.id === mapping.deviceId)?.name : state.nasNodes.find(d => d.id === mapping.deviceId)?.name || 'unselected'}</strong> node will enable real-time telemetry and self-service password management in the user portal.
                        </p>
                     </div>
                  </div>
@@ -238,7 +238,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
               <div className="p-8 bg-slate-100 rounded-[2rem] flex items-center justify-between mx-2 opacity-50 grayscale hover:opacity-100 hover:grayscale-0 transition-all">
                  <div className="flex items-center gap-4">
                     <ShieldCheck size={24} className="text-slate-400" />
-                    <p className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em]">Validated by Registry Node v8.5.2</p>
+                    <p className="text-[9px] font-black uppercase text-slate-500 tracking-[0.2em]">System Validated</p>
                  </div>
                  <Activity size={24} className="text-slate-300" />
               </div>

@@ -20,7 +20,7 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
     if (!isConfigured) return;
 
     if (newPass.length < 8) {
-      alert("Validation Error: Access secret must be at least 8 characters.");
+      alert("Validation Error: Password must be at least 8 characters.");
       return;
     }
     if (!/\d/.test(newPass)) {

@@ -232,7 +232,7 @@ const CustomerPortal: React.FC<{ state: AppState }> = ({ state }) => {
                               className="w-full p-4 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-indigo-100 active:scale-95 transition-all"
                            >
                               {isProcessing ? <RefreshCcw className="animate-spin" size={16} /> : <Bell size={16} />}
-                              Dispatch Reminder
+                              - Payment Due Reminder
                            </button>
                         </div>
                      </div>
@@ -342,7 +342,7 @@ const CustomerPortal: React.FC<{ state: AppState }> = ({ state }) => {
                            <div className="space-y-8">
                               <div className="flex items-center justify-between">
                                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                                    <Receipt size={16} className="text-blue-500" /> Historical Billing Dispatches
+                                    <Receipt size={16} className="text-blue-500" /> Historical Billing - Payment Duees
                                  </h4>
                                  <span className="text-[8px] font-black text-slate-300 uppercase">{userInvoices.length} RECORDS FOUND</span>
                               </div>
@@ -351,7 +351,7 @@ const CustomerPortal: React.FC<{ state: AppState }> = ({ state }) => {
                                  <table className="w-full text-left">
                                     <thead className="bg-slate-50">
                                        <tr>
-                                          <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 tracking-tighter">Dispatch Date</th>
+                                          <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 tracking-tighter">- Payment Due Date</th>
                                           <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 tracking-tighter">Line Description</th>
                                           <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 tracking-tighter text-center">Protocol</th>
                                           <th className="px-8 py-5 text-[10px] font-black uppercase text-slate-400 tracking-tighter text-right">Value</th>
