@@ -101,15 +101,15 @@ const SubscriberHome: React.FC<Props> = ({
                   <Clock size={28} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest leading-none mb-1">Verifying Protocol</p>
+                  <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest leading-none mb-1">Verifying Request</p>
                   {/* Fix: Safely access packageName using type assertion to avoid union property error */}
-                  <h4 className="text-sm font-black text-amber-950 uppercase italic tracking-tight">{(pendingPkgReq as any).packageName || 'Activation'} Handshake</h4>
-                  <p className="text-[9px] text-amber-700 font-bold uppercase mt-1">Awaiting Administrative Clearance...</p>
+                  <h4 className="text-sm font-black text-amber-950 uppercase italic tracking-tight">{(pendingPkgReq as any).packageName || 'Activation'} Request</h4>
+                  <p className="text-[9px] text-amber-700 font-bold uppercase mt-1">Waiting for Admin Approval...</p>
                 </div>
               </div>
               <button
                 onClick={async () => {
-                  if (confirm("ABORT PROTOCOL: Cancel your pending activation request and restore the terminal?")) {
+                  if (confirm("Cancel your pending activation request?")) {
                     await db.cancelUniversalRequest(pendingPkgReq.id);
                   }
                 }}
@@ -120,7 +120,7 @@ const SubscriberHome: React.FC<Props> = ({
             </div>
           )}
 
-          {/* 🤖 Intelligent Node Section -> Insights & Suggestions */}
+          {/* Insights & Suggestions */}
           <div className="space-y-4 px-4">
             <div className="flex justify-between items-end px-1">
               <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-400">Insights & Suggestions</h3>
@@ -136,7 +136,6 @@ const SubscriberHome: React.FC<Props> = ({
                       <PhoneCall size={24} />
                     </div>
                     <h4 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-1">Voice Support</h4>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1 leading-snug">Start a conversation with support anytime to check your connection or billing.</p>
                   </div>
                   <Mic size={100} className="absolute -right-4 -bottom-4 opacity-10 text-indigo-400 pointer-events-none group-hover:scale-125 transition-transform duration-700" />
                 </button>
@@ -147,7 +146,7 @@ const SubscriberHome: React.FC<Props> = ({
                   <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400 mb-2 border border-indigo-500/30 group-hover:scale-110 transition-transform shadow-md">
                     <Cpu size={20} />
                   </div>
-                  <h4 className="text-[10px] font-black text-white uppercase italic tracking-tighter">AI Insight</h4>
+                  <h4 className="text-[10px] font-black text-white uppercase italic tracking-tighter">AI Analysis</h4>
                   <Activity size={40} className="absolute -right-2 -bottom-2 opacity-10 text-indigo-400 pointer-events-none" />
                 </button>
                 {appearance.showAIChat && (
@@ -169,7 +168,7 @@ const SubscriberHome: React.FC<Props> = ({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <div className={`w-2.5 h-2.5 rounded-full ${!isExpired ? 'bg-emerald-400 animate-pulse' : 'bg-white shadow-[0_0_10px_white]'}`}></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{isExpired ? 'Service Expired' : 'Active Link'}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{isExpired ? 'Service Expired' : 'Active Account'}</span>
                   </div>
                   <h2 className="text-3xl font-black tracking-tighter uppercase italic">{currentPkg?.name || 'OFFLINE'}</h2>
                 </div>
@@ -184,17 +183,17 @@ const SubscriberHome: React.FC<Props> = ({
                     <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-white shadow-lg animate-pulse"><Clock size={18} /></div>
                     <div className="text-left">
                       <p className="text-[10px] font-black uppercase text-white leading-none mb-1">Verifying Request</p>
-                      <p className="text-[8px] font-bold uppercase text-indigo-200 tracking-widest truncate max-w-[180px]">Administrator clearance in progress...</p>
+                      <p className="text-[8px] font-bold uppercase text-indigo-200 tracking-widest truncate max-w-[180px]">Administrator approval in progress...</p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="flex gap-3">
                   <button onClick={() => setShowActivation(true)} className="flex-1 py-5 bg-white text-slate-900 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 border-b-4 border-slate-200">
-                    <Zap size={16} fill="currentColor" /> {isExpired ? 'Renew Link' : 'Modify Tier'}
+                    <Zap size={16} fill="currentColor" /> {isExpired ? 'Renew Account' : 'Change Plan'}
                   </button>
                   <button onClick={() => onAction('packages')} className="px-8 py-5 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95 transition-all border-b-4 border-white/5">
-                    Plans
+                    My Plans
                   </button>
                 </div>
               )}
@@ -216,7 +215,7 @@ const SubscriberHome: React.FC<Props> = ({
                 </div>
                 <div className="flex-1">
                   <h4 className="text-xl font-black uppercase tracking-tight leading-none mb-1">
-                    {isELPending ? 'Provisioning...' : isELPastDue ? 'Risk Threshold Passed' : 'Emergency Link Active'}
+                    {isELPending ? 'Processing...' : isELPastDue ? 'Payment Overdue' : 'Emergency Loan Active'}
                   </h4>
                   <p className="text-[10px] font-bold uppercase opacity-90 tracking-widest leading-relaxed max-w-xs">
                     {isELPending ? `Verifying advance Rs. ${activeEL.amount}. Ready in: ${timeLeft}` : isELPastDue ? `Settle Rs. ${activeEL.amount} immediately to prevent suspension.` : `Rs. ${activeEL.amount} credit. Clear by ${new Date(activeEL.expiryTimestamp).toLocaleDateString()}.`}
@@ -244,7 +243,7 @@ const SubscriberHome: React.FC<Props> = ({
           <div className="flex items-center gap-5">
             <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border border-indigo-100 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-transform"><BarChart3 size={28} /></div>
             <div className="text-left space-y-1">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Node Trust Score</p>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Trust Score</p>
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-black italic tracking-tighter text-slate-900">{user.creditScore}</span>
                 <span className={`text-[9px] font-black uppercase ${scoreRange.color}`}>{scoreRange.label}</span>
@@ -338,7 +337,7 @@ const SubscriberHome: React.FC<Props> = ({
                 </div>
                 <div className="z-10">
                   <h4 className="text-[13px] font-black text-slate-900 uppercase tracking-tight leading-none mb-1 group-hover:text-indigo-600 transition-colors">{item.label}</h4>
-                  <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest leading-tight">{item.category} Node</p>
+                  <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest leading-tight">{item.category}</p>
                 </div>
                 <Icon
                   size={100}

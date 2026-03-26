@@ -43,17 +43,17 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
 
   return (
     <div className={`space-y-1.5 ${className}`}>
-      <div className="flex justify-between items-center ml-1">
-        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</label>
+      <div className="flex justify-between items-center ml-1 mb-1">
+        <label className="text-sm font-semibold text-slate-700">{label}</label>
         {showStrength && value && (
           <div className="flex items-center gap-1.5">
-            <strengthData.icon size={10} className={strengthData.text} />
-            <span className={`text-[8px] font-black uppercase tracking-tighter ${strengthData.text}`}>{strengthData.label}</span>
+            <strengthData.icon size={12} className={strengthData.text} />
+            <span className={`text-[10px] font-bold uppercase tracking-wide ${strengthData.text}`}>{strengthData.label}</span>
           </div>
         )}
       </div>
       <div className="relative group">
-        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={16} />
+        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
         <input
           type={show ? "text" : "password"}
           value={value}
@@ -61,7 +61,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           placeholder={placeholder}
           required={required}
           autoComplete={autoComplete}
-          className="w-full pl-11 pr-14 py-4 bg-white/50 backdrop-blur-sm border-2 border-slate-100/50 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-slate-800 shadow-sm placeholder:text-slate-300"
+          className="w-full pl-12 pr-12 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium text-slate-800 placeholder:text-slate-400"
         />
         <button
           type="button"

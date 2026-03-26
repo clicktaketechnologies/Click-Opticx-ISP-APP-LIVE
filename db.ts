@@ -2679,15 +2679,18 @@ class DB {
 
     let duplicateFound = false;
     if (settings.duplicateControl.enabled) {
-      const exists = this.state.users.some(existing => {
+      const isDuplicate = (existing: any) => {
         const checkEmail = data.email && (existing.email || '').toLowerCase().trim() === data.email.toLowerCase().trim();
-        const checkPhone = data.phone && (existing.phone || '').trim() === data.phone.trim();
-        const checkCnic = data.cnic && (existing.cnic || '').trim() === data.cnic.trim();
+        const checkPhone = data.phone && data.phone.replace(/\D/g, '') !== '' && (existing.phone || '').replace(/\D/g, '') === data.phone.replace(/\D/g, '');
+        const checkCnic = data.cnic && data.cnic.replace(/\D/g, '') !== '' && (existing.cnic || '').replace(/\D/g, '') === data.cnic.replace(/\D/g, '');
         const checkUsername = data.username && (existing.username || '').toLowerCase().trim() === data.username.toLowerCase().trim();
         return checkEmail || checkPhone || checkCnic || checkUsername;
-      });
+      };
 
-      if (exists) {
+      const existsInUsers = this.state.users.some(isDuplicate);
+      const existsInRequests = this.state.signupRequests.some(r => r.status === 'Pending' && isDuplicate(r));
+
+      if (existsInUsers || existsInRequests) {
         if (settings.duplicateControl.blockDuplicate) {
           return { success: false, message: 'IDENTITY_CONFLICT: A subscriber with this Email, Phone, National Identity, or Username already exists. Please verify your details or use the recovery tool.' };
         } else if (settings.duplicateControl.allowWithWarning) {
@@ -3183,14 +3186,24 @@ class DB {
 
   async findUserForReset(identifier: string) {
     const input = identifier.toLowerCase().trim();
-    return this.state.users.find(u => !u.deleted && (
-      (u.username || '').toLowerCase() === input ||
-      (u.email || '').toLowerCase() === input ||
-      u.phone === input ||
-      u.cnic === input ||
-      (u.pppoeId || '').toLowerCase() === input ||
-      u.connectionId === input
-    ));
+    const searchDigits = input.replace(/\D/g, '');
+    
+    return this.state.users.find(u => {
+      if (u.deleted) return false;
+      const uUsername = (u.username || '').toLowerCase().trim();
+      const uEmail = (u.email || '').toLowerCase().trim();
+      const uPhone = (u.phone || '').replace(/\D/g, '');
+      const uCnic = (u.cnic || '').replace(/\D/g, '');
+      const uPppoe = (u.pppoeId || '').toLowerCase().trim();
+      const uConnId = (u.connectionId || '').toLowerCase().trim();
+
+      return uUsername === input ||
+             uEmail === input ||
+             (uPhone !== '' && uPhone === searchDigits) ||
+             (uCnic !== '' && uCnic === searchDigits) ||
+             uPppoe === input ||
+             uConnId === input;
+    });
   }
 
   async updateEmergencyLoad(id: string, d: any) {

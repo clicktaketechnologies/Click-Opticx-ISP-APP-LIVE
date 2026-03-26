@@ -143,19 +143,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
    const renderLogin = () => (
       <form onSubmit={handleLogin} className="space-y-6 animate-in fade-in duration-500" autoComplete="off">
-         <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-               ➡ Enter Email, Phone, CNIC or Username
+         <div className="space-y-1.5 mb-2">
+            <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">
+               Mobile Number, Email or Username
             </label>
             <div className="relative group">
-               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={18} />
+               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
                <input
                   type="text"
                   autoComplete="off"
                   value={credential}
                   onChange={(e) => setCredential(e.target.value)}
-                  className="w-full pl-12 pr-5 py-4 bg-white/50 backdrop-blur-sm border-2 border-slate-100/50 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-slate-800 shadow-sm placeholder:text-slate-300"
-                  placeholder="Type your details here"
+                  className="w-full pl-12 pr-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                  placeholder="Enter your details"
                   required
                />
             </div>
@@ -169,29 +169,29 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             required
          />
 
-         <div className="flex items-center justify-between px-1">
+         <div className="flex flex-wrap items-center justify-between px-1 pt-2 gap-4">
             <label className="flex items-center gap-2 cursor-pointer group">
-               <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberMe ? 'bg-slate-900 border-slate-900 shadow-lg' : 'bg-white border-slate-200'}`}>
-                  {rememberMe && <CheckCircle size={12} className="text-emerald-400" />}
+               <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberMe ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-200'}`}>
+                  {rememberMe && <CheckCircle size={12} className="text-white" />}
                </div>
                <input type="checkbox" className="hidden" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
-               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600">Save Identity</span>
+               <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Remember me</span>
             </label>
-            <button type="button" onClick={() => setView('reset_request')} className="text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-800 transition-colors">Credential Recovery</button>
+            <button type="button" onClick={() => setView('reset_request')} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">Forgot Password?</button>
          </div>
 
          <button
             type="submit"
             disabled={isProcessing}
-            className="w-full bg-slate-950 text-white font-black py-5 rounded-2xl hover:bg-black shadow-xl hover:shadow-indigo-500/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs disabled:opacity-50 group"
+            className="w-full bg-slate-950 text-white font-bold py-4 rounded-2xl hover:bg-black shadow-lg shadow-black/5 active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-sm mt-6 disabled:opacity-50 group"
          >
-            {isProcessing ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18} className="group-hover:text-emerald-400 transition-colors" />}
-            Authorize Access
+            {isProcessing ? <Mini5GMicroLoader size={18} /> : null}
+            Sign In to Account
          </button>
 
-         <div className="text-center pt-4">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-               Don't have an account? <button type="button" onClick={() => setView('signup')} className="text-indigo-600 hover:underline ml-1">Sign Up</button>
+         <div className="text-center pt-2">
+            <p className="text-sm font-medium text-slate-500">
+               Don't have an account? <button type="button" onClick={() => setView('signup')} className="text-indigo-600 font-bold hover:text-indigo-700 ml-1">Sign Up</button>
             </p>
          </div>
       </form>
@@ -201,54 +201,54 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <form onSubmit={handleSignup} className="space-y-6 animate-in slide-in-from-bottom-10 duration-700" autoComplete="off">
          {/* Section 1: Identity Profile */}
          <div className="space-y-4">
-            <div className="flex items-center gap-3 mb-2 px-1">
+            <div className="flex items-center gap-3 mb-4 px-1">
                <div className="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
-               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] italic">01. Your Basic Information</h4>
+               <h4 className="text-sm font-bold text-slate-900">Basic Information</h4>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Username (Choose a name for login)</label>
-                  <input className="w-full px-4 py-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-xl font-bold text-xs focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" placeholder="Full Name" value={signupData.name} onChange={e => setSignupData({ ...signupData, name: e.target.value })} required autoComplete="off" />
+                  <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Username</label>
+                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="Choose a username" value={signupData.name} onChange={e => setSignupData({ ...signupData, name: e.target.value })} required autoComplete="off" />
                </div>
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-right-4 duration-500 delay-100">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Number</label>
-                  <input className="w-full px-4 py-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-xl font-bold text-xs focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" placeholder="03XX-XXXXXXX" value={signupData.phone} onChange={e => setSignupData({ ...signupData, phone: e.target.value })} required={state.settings.authSettings?.requirePhoneOTP} autoComplete="off" />
+                  <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Contact Number</label>
+                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="03XX-XXXXXXX" value={signupData.phone} onChange={e => setSignupData({ ...signupData, phone: e.target.value })} required={state.settings.authSettings?.requirePhoneOTP} autoComplete="off" />
                </div>
             </div>
 
             {state.settings.authSettings?.requireCNIC && (
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">National Identity (CNIC)</label>
-                  <input className="w-full px-4 py-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-xl font-bold text-xs focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" placeholder="XXXXX-XXXXXXX-X" value={signupData.cnic} onChange={e => setSignupData({ ...signupData, cnic: e.target.value })} required autoComplete="off" />
+                  <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">National Identity (CNIC)</label>
+                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="XXXXX-XXXXXXX-X" value={signupData.cnic} onChange={e => setSignupData({ ...signupData, cnic: e.target.value })} required autoComplete="off" />
                </div>
             )}
 
             <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-               <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
-               <input className="w-full px-4 py-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-xl font-bold text-xs focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" type="email" placeholder="name@domain.com" value={signupData.email} onChange={e => setSignupData({ ...signupData, email: e.target.value })} required={state.settings.authSettings?.requireEmailVerification} autoComplete="off" />
+               <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Email Address</label>
+               <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-slate-800 placeholder:text-slate-400" type="email" placeholder="name@domain.com" value={signupData.email} onChange={e => setSignupData({ ...signupData, email: e.target.value })} required={state.settings.authSettings?.requireEmailVerification} autoComplete="off" />
             </div>
          </div>
 
          {/* Section 2: Access Credentials */}
          <div className="space-y-4 pt-2">
-            <div className="flex items-center gap-3 mb-2 px-1">
+            <div className="flex items-center gap-3 mb-4 px-1">
                <div className="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
-               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] italic">02. Signup Credentials</h4>
+               <h4 className="text-sm font-bold text-slate-900">Account Credentials</h4>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <PasswordInput
                   label="Create Password"
                   value={signupData.password}
                   onChange={(v) => setSignupData({ ...signupData, password: v })}
                   showStrength
-                  className="sm:col-span-1 animate-in fade-in slide-in-from-left-4 duration-500 delay-300"
+                  className="md:col-span-1 animate-in fade-in slide-in-from-left-4 duration-500 delay-300"
                   autoComplete="new-password"
                />
                <PasswordInput
                   label="Retype Password"
                   value={signupData.confirmPassword}
                   onChange={(v) => setSignupData({ ...signupData, confirmPassword: v })}
-                  className="sm:col-span-1 animate-in fade-in slide-in-from-right-4 duration-500 delay-300"
+                  className="md:col-span-1 animate-in fade-in slide-in-from-right-4 duration-500 delay-300"
                   autoComplete="new-password"
                />
             </div>
@@ -256,38 +256,38 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
          {/* Section 3: Physical Location */}
          <div className="space-y-4 pt-2">
-            <div className="flex items-center gap-3 mb-2 px-1">
+            <div className="flex items-center gap-3 mb-4 px-1">
                <div className="w-1.5 h-4 bg-amber-500 rounded-full"></div>
-               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] italic">03. Installation Address</h4>
+               <h4 className="text-sm font-bold text-slate-900">Installation Details</h4>
             </div>
             <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400">
-               <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Installation Address </label>
-               <input className="w-full px-4 py-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-xl font-bold text-xs uppercase focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" placeholder="Complete Physical Address" value={signupData.area} onChange={e => setSignupData({ ...signupData, area: e.target.value })} required autoComplete="off" />
+               <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Installation Address</label>
+               <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="Complete Physical Address" value={signupData.area} onChange={e => setSignupData({ ...signupData, area: e.target.value })} required autoComplete="off" />
             </div>
          </div>
 
          <div className="flex items-start gap-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl group transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-500">
-            <input type="checkbox" required className="mt-1 w-5 h-5 accent-slate-900 rounded-md border-slate-300 cursor-pointer" />
-            <div className="text-[9px] font-black text-slate-400 uppercase leading-relaxed tracking-widest">
+            <input type="checkbox" required className="mt-1 w-5 h-5 accent-indigo-600 rounded-md border-slate-300 cursor-pointer" />
+            <div className="text-sm font-medium text-slate-600 leading-relaxed">
                I have read and agree to the 
-               <button type="button" onClick={() => setShowLegalModal('agreement')} className="mx-1 text-indigo-600 hover:text-indigo-800 transition-colors">Service Agreement</button>
+               <button type="button" onClick={() => setShowLegalModal('agreement')} className="mx-1 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors">Service Agreement</button>
                &
-               <button type="button" onClick={() => setShowLegalModal('terms')} className="ml-1 text-indigo-600 hover:text-indigo-800 transition-colors">Terms of Use</button>.
+               <button type="button" onClick={() => setShowLegalModal('terms')} className="ml-1 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors">Terms of Use</button>.
             </div>
          </div>
 
-         <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-600">
+         <div className="space-y-4 pt-4 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-600">
             <button
                type="submit"
                disabled={isProcessing}
-               className="w-full bg-slate-950 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-black active:scale-[0.98] transition-all flex items-center justify-center gap-4 uppercase tracking-[0.2em] text-[10px]"
+               className="w-full bg-slate-950 text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-black active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-sm"
             >
-               {isProcessing ? <Mini5GMicroLoader size={16} /> : <Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
-               Register Me Now
+               {isProcessing ? <Mini5GMicroLoader size={16} /> : null}
+               Create Account
             </button>
 
-            <button type="button" onClick={() => setView('login')} className="w-full text-slate-400 font-black uppercase text-[9px] tracking-[0.4em] py-2 hover:text-slate-600 transition-colors flex items-center justify-center gap-2 group">
-               <ArrowLeft size={10} className="group-hover:-translate-x-1 transition-transform" /> Back to Authentication
+            <button type="button" onClick={() => setView('login')} className="w-full text-slate-500 font-semibold text-sm hover:text-slate-800 transition-colors flex items-center justify-center py-2">
+               &larr; Back to Login
             </button>
          </div>
       </form>
@@ -299,18 +299,18 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto border-2 border-amber-100/50 shadow-xl shadow-amber-500/5">
                <Key size={28} />
             </div>
-            <div className="space-y-1">
-               <h3 className="text-xl font-black uppercase italic tracking-tighter text-slate-900">Credential Recovery</h3>
-               <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em]">Locate your Subscriber</p>
+            <div className="space-y-2">
+               <h3 className="text-2xl font-bold text-slate-900">Forgot your password?</h3>
+               <p className="text-sm text-slate-500">Reset your account securely.</p>
             </div>
          </div>
 
          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Identity Identifier</label>
+            <label className="text-sm font-semibold text-slate-700 ml-1">Find Your Account</label>
             <input
                type="text"
-               className="w-full py-5 px-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black outline-none focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/5 transition-all text-center uppercase tracking-widest text-sm"
-               placeholder="Email, Phone, CNIC or Username"
+               className="w-full py-4 px-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-amber-500 focus:bg-white focus:ring-4 focus:ring-amber-500/10 transition-all text-slate-800 placeholder:text-slate-400"
+               placeholder="Enter your email, phone number, CNIC, or username to locate your account"
                value={resetIdentifier}
                onChange={e => setResetIdentifier(e.target.value)}
                required
@@ -318,15 +318,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             />
          </div>
 
-         <button
-            type="submit"
-            disabled={isProcessing || !resetIdentifier}
-            className="w-full py-5 bg-amber-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-amber-500/10 hover:bg-amber-700 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
-         >
-            {isProcessing ? <Mini5GMicroLoader size={18} /> : <History size={18} />}
-            Initiate Recovery
-         </button>
-         <button type="button" onClick={() => setView('login')} className="w-full text-slate-400 font-black uppercase text-[9px] tracking-[0.4em] hover:text-slate-600 transition-colors">Abort Recovery</button>
+         <div className="space-y-3">
+            <button
+               type="submit"
+               disabled={isProcessing || !resetIdentifier}
+               className="w-full py-4 bg-amber-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-amber-500/10 hover:bg-amber-700 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            >
+               {isProcessing ? <Mini5GMicroLoader size={18} /> : null}
+               Recover Account &rarr;
+            </button>
+            <button type="button" onClick={() => setView('login')} className="w-full py-3 text-slate-500 font-semibold text-sm hover:text-slate-700 transition-colors flex items-center justify-center">
+               Cancel &rarr;
+            </button>
+         </div>
       </form>
    );
 
@@ -429,14 +433,23 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   </div>
 
                   <div className="space-y-6 mt-20">
-                     <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-[0.9] max-w-[300px]">
-                        EXPERIENCE <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">UNRESTRICTED</span> <br />
-                        VELOCITY.
+                     <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-[0.9] max-w-[350px]">
+                        Fast, <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">Reliable</span> <br />
+                        Connection
                      </h1>
-                     <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-[350px]">
-                        Welcome to the next generation of connectivity. Secure, ultra-fast, and designed for the modern digital era.
-                     </p>
+                     <div className="text-slate-400 text-sm font-medium leading-relaxed max-w-[350px] space-y-2 mt-4">
+                        <p className="flex items-center gap-2">
+                           <Loader2 size={16} className="animate-spin text-emerald-400" />
+                           System initializing...
+                        </p>
+                        <p className="text-white/80 font-bold">
+                           Click Optix – Your 5G Ultra Node
+                        </p>
+                        <p>
+                           Ready to connect you.
+                        </p>
+                     </div>
                   </div>
                </div>
 
@@ -470,29 +483,35 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
 
             {/* Right Side: Form (All Screens) */}
-            <div className="flex flex-col justify-center p-6 sm:p-10 lg:p-20 bg-white relative">
+            <div className="flex flex-col justify-center px-6 py-10 sm:p-14 lg:p-20 bg-white relative">
                {/* Mobile Logo (Visible only on small screens) */}
                <div className="lg:hidden flex flex-col items-center mb-8">
-                  <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center shadow-xl mb-4 relative overflow-hidden group">
-                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                     {displayLogo ? <img src={displayLogo} className="h-8 object-contain relative z-10" /> : <Wifi className="text-emerald-400 relative z-10" size={32} />}
-                  </div>
-                  <h1 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Click Optix</h1>
+                  {displayLogo ? (
+                     <img src={displayLogo} className="w-full max-w-[200px] h-auto object-contain mb-4" alt="5G Logo" />
+                  ) : (
+                     <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center shadow-xl mb-4 relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <Wifi className="text-emerald-400 relative z-10" size={32} />
+                     </div>
+                  )}
+                  {!displayLogo && <h1 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Click Optix</h1>}
                </div>
 
                <div className="max-w-[400px] mx-auto w-full">
-                  <div className="mb-10 text-center lg:text-left">
-                     <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight">
-                        {view === 'login' ? 'Login to Your Account' :
-                           view === 'signup' ? 'Get Connected' :
-                              'Forgot Password?'}
-                     </h3>
-                     <p className="text-slate-400 mt-2 font-black text-[10px] uppercase tracking-[0.3em] opacity-80">
-                        {view === 'login' ? 'Access your internet account easily' :
-                           view === 'signup' ? 'Start Your Internet Connection' :
-                              'Secure Identity Reset'}
-                     </p>
-                  </div>
+                  {view !== 'reset_request' && (
+                     <div className="mb-10 text-center lg:text-left">
+                        <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight">
+                           {view === 'login' ? 'Login to Your Account' :
+                              view === 'signup' ? 'Get Connected' :
+                                 'Reset Password'}
+                        </h3>
+                        <p className="text-slate-400 mt-2 font-black text-[10px] uppercase tracking-[0.3em] opacity-80">
+                           {view === 'login' ? 'Access your internet account easily' :
+                              view === 'signup' ? 'Start Your Internet Connection' :
+                                 'Enter verification code and new password'}
+                        </p>
+                     </div>
+                  )}
 
                   {error && (
                      <div className="p-4 mb-8 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-4 text-rose-600 animate-in shake duration-500">
