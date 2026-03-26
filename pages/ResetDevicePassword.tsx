@@ -24,11 +24,11 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
       return;
     }
     if (!/\d/.test(newPass)) {
-      alert("Validation Error: Access secret requires at least 1 numerical token.");
+      alert("Password must contain at least 1 number.");
       return;
     }
     if (newPass !== confirmPass) {
-      alert("Protocol Error: Secrets do not match.");
+      alert("Passwords do not match.");
       return;
     }
 

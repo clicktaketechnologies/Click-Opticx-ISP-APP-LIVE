@@ -40,7 +40,7 @@ app.use('/api/', limiter);
 // Root Welcome Message
 app.get('/', (req, res) => {
     res.json({
-        service: 'Click Optix ISP Backend Relay',
+        service: 'Click Optix ISP Backend',
         status: 'Operational',
         timestamp: new Date().toISOString(),
         documentation: 'https://isp-click-opticx.web.app'
@@ -92,12 +92,12 @@ let nodemailer;
 try {
     nodemailer = require('nodemailer');
 } catch (e) {
-    logger.warn('CRITICAL WARNING: nodemailer not found. Real-time email dispatch is in SLEEP MODE.');
+    logger.warn('WARNING: nodemailer not found. Email sending is disabled.');
 }
 
 app.post('/api/verify-smtp', async (req, res) => {
     const { config } = req.body;
-    if (!nodemailer) return res.status(503).json({ success: false, message: 'Nodemailer Sleep Mode' });
+    if (!nodemailer) return res.status(503).json({ success: false, message: 'Email service unavailable' });
 
     try {
         const transporter = nodemailer.createTransport({
@@ -107,10 +107,10 @@ app.post('/api/verify-smtp', async (req, res) => {
             auth: { user: config.username, pass: config.password },
         });
         await transporter.verify();
-        logger.info(`[INFRA-VERIFY] SMTP Handshake Successful: ${config.host}`);
-        res.json({ success: true, message: 'Handshake Successful' });
+        logger.info(`[SMTP-VERIFY] Connection Successful: ${config.host}`);
+        res.json({ success: true, message: 'Connection Successful' });
     } catch (error) {
-        logger.error(`[INFRA-VERIFY] Handshake Failed: ${error.message}`);
+        logger.error(`[SMTP-VERIFY] Connection Failed: ${error.message}`);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -121,12 +121,12 @@ app.post('/api/communicate', async (req, res) => {
     if (!nodemailer) {
         return res.status(503).json({
             success: false,
-            message: 'TRANSMISSION_FAILURE: Node does not have nodemailer installed. Handshake aborted.'
+            message: 'Email service unavailable. Nodemailer is not installed on this server.'
         });
     }
 
     try {
-        logger.info(`[INFRA-DISPATCH] Attempting relay via ${config.host}:${config.port} for ${payload.to}`);
+        logger.info(`[EMAIL] Sending via ${config.host}:${config.port} to ${payload.to}`);
         const transporter = nodemailer.createTransport({
             host: config.host,
             port: config.port,
@@ -141,17 +141,17 @@ app.post('/api/communicate', async (req, res) => {
         await transporter.verify();
 
         const info = await transporter.sendMail({
-            from: `"${payload.senderName || 'NetRecover Relay'}" <${payload.from}>`,
+            from: `"${payload.senderName || 'Click Opticx'}" <${payload.from}>`,
             to: payload.to,
             subject: payload.subject,
             text: payload.text,
             html: payload.html,
         });
 
-        logger.info(`[INFRA-DISPATCH] Success. MessageId: ${info.messageId}`);
+        logger.info(`[EMAIL] Sent successfully. MessageId: ${info.messageId}`);
         res.json({ success: true, messageId: info.messageId });
     } catch (error) {
-        logger.error(`[INFRA-DISPATCH] Delivery Error: ${error.message} (Host: ${config.host})`);
+        logger.error(`[EMAIL] Delivery Error: ${error.message} (Host: ${config.host})`);
         res.status(500).json({ success: false, message: error.message });
     }
 });
@@ -163,7 +163,7 @@ server.listen(PORT, HOST, () => {
     logger.info(`🚀 Backend middleware running on ${HOST}:${PORT}`);
     logger.info(`📡 WebSocket server ready for real-time telemetry`);
     logger.info(`🔒 Environment: ${process.env.NODE_ENV || 'production'}`);
-    logger.info(`📧 Communication Gateway: ${nodemailer ? 'OPTIMAL' : 'SLEEP MODE'}`);
+    logger.info(`📧 Email Service: ${nodemailer ? 'Active' : 'Disabled'}`);
 });
 
 

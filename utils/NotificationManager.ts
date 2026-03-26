@@ -23,8 +23,8 @@ class NotificationManager {
     }
 
     /**
-     * Dispatches an email through the centralized communication hub.
-     * Leverages the global configuration stored in the system registry.
+     * Sends an email through the centralized communication hub.
+     * Uses the global configuration stored in settings.
      */
     async sendEmail(payload: EmailPayload): Promise<{ success: boolean; message: string }> {
         const state = db.getState();
@@ -52,34 +52,34 @@ class NotificationManager {
 
             const result = await response.json();
             if (result.success) {
-                db.logNotification('all', 'success', 'Email Transmitted', `Message "${payload.subject}" successfully dispatched to ${payload.to}`);
-                return { success: true, message: 'Dispatch Successful' };
+                db.logNotification('all', 'success', 'Email Sent', `Message "${payload.subject}" successfully sent to ${payload.to}`);
+                return { success: true, message: 'Email Sent Successfully' };
             } else {
-                throw new Error(result.message || 'Transmission handshaked failed.');
+                throw new Error(result.message || 'Email delivery failed.');
             }
         } catch (error: any) {
-            console.error('[NotificationManager] Dispatch Error:', error);
-            db.logNotification('all', 'error', 'Transmission Failed', `Failed to send to ${payload.to}: ${error.message}`);
+            console.error('[NotificationManager] Email Error:', error);
+            db.logNotification('all', 'error', 'Email Failed', `Failed to send to ${payload.to}: ${error.message}`);
             return { success: false, message: error.message };
         }
     }
 
     /**
-     * Dispatches a One-Time Password (OTP) sequence.
+     * Sends a One-Time Password (OTP) verification email.
      */
     async sendOTP(email: string, code: string): Promise<{ success: boolean; message: string }> {
         return this.sendEmail({
             to: email,
-            subject: 'Security Protocol: Identity Verification Code',
+            subject: 'Your Verification Code',
             html: `
         <div style="font-family: sans-serif; background: #f8fafc; padding: 40px; border-radius: 20px;">
           <div style="max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
-            <h2 style="color: #4f46e5; margin-bottom: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -1px; font-style: italic;">Identity Verification</h2>
-            <p style="color: #64748b; font-size: 14px; margin-bottom: 30px; font-weight: 500;">A secure access request was initiated. Use the following code to continue:</p>
+            <h2 style="color: #4f46e5; margin-bottom: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -1px; font-style: italic;">Verify Your Identity</h2>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 30px; font-weight: 500;">A login attempt was made on your account. Use the following code to continue:</p>
             <div style="background: #f1f5f9; padding: 24px; border-radius: 16px; text-align: center; margin-bottom: 30px; border: 2px dashed #cbd5e1;">
               <span style="font-size: 32px; font-weight: 900; color: #1e293b; letter-spacing: 4px; font-family: monospace;">${code}</span>
             </div>
-            <p style="color: #94a3b8; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Security Notice: This code will expire in 10 minutes. If you did not request this, please secure your terminal immediately.</p>
+            <p style="color: #94a3b8; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Security Notice: This code will expire in 10 minutes. If you did not request this, please secure your account immediately.</p>
           </div>
         </div>
       `
@@ -87,12 +87,12 @@ class NotificationManager {
     }
 
     /**
-    * Dispatches a real-time invoice dispatch.
+    * Sends an invoice notification email.
     */
     async sendInvoice(email: string, invoiceId: string, amount: string): Promise<{ success: boolean; message: string }> {
         return this.sendEmail({
             to: email,
-            subject: `Billing Node: ${invoiceId} Dispatch`,
+            subject: `Invoice ${invoiceId} - Payment Due`,
             html: `
         <div style="font-family: sans-serif; background: #f8fafc; padding: 40px; border-radius: 20px;">
           <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 24px; border: 1px solid #e2e8f0;">
@@ -115,12 +115,12 @@ class NotificationManager {
     }
 
     /**
-     * Dispatches a recovery warning for users in RECOVERY_MODE.
+     * Sends a recovery warning for users with overdue payments.
      */
     async sendRecoveryWarning(email: string, userName: string, balance: number): Promise<{ success: boolean; message: string }> {
         return this.sendEmail({
             to: email,
-            subject: 'System Alert: Recovery Oversight Protocol Initiated',
+            subject: 'Action Required: Payment Overdue',
             html: `
         <div style="font-family: sans-serif; background: #fff7ed; padding: 40px; border-radius: 20px;">
           <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 24px; border: 1px solid #fed7aa; box-shadow: 0 10px 15px -3px rgba(251, 146, 60, 0.1);">
@@ -143,21 +143,21 @@ class NotificationManager {
     }
 
     /**
-     * Dispatches a final suspension notice.
+     * Sends a final suspension notice.
      */
     async sendSuspensionNotice(email: string, userName: string): Promise<{ success: boolean; message: string }> {
         return this.sendEmail({
             to: email,
-            subject: 'CRITICAL: Service Isolation Protocol Executed',
+            subject: 'Important: Your Internet Service Has Been Suspended',
             html: `
         <div style="font-family: sans-serif; background: #fef2f2; padding: 40px; border-radius: 20px;">
           <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 24px; border: 1px solid #fecaca;">
              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #fef2f2; padding-bottom: 20px; margin-bottom: 30px;">
                 <h2 style="color: #dc2626; margin: 0; font-weight: 900; font-style: italic;">Service Suspended</h2>
-                <span style="font-size: 10px; font-weight: 900; color: #ef4444; text-transform: uppercase; padding: 6px 12px; background: #fef2f2; border-radius: 8px;">TERMINAL ALERT</span>
+                <span style="font-size: 10px; font-weight: 900; color: #ef4444; text-transform: uppercase; padding: 6px 12px; background: #fef2f2; border-radius: 8px;">URGENT</span>
              </div>
-             <p style="color: #450a0a; line-height: 1.6; font-weight: 600;">Identity: ${userName}</p>
-             <p style="color: #7f1d1d; line-height: 1.6;">Protocol Enforced: Your internet service has been <b>Suspended</b> due to non-payment. Network access is now restricted.</p>
+             <p style="color: #450a0a; line-height: 1.6; font-weight: 600;">Dear ${userName},</p>
+             <p style="color: #7f1d1d; line-height: 1.6;">Your internet service has been <b>Suspended</b> due to non-payment. Network access is now restricted.</p>
              <div style="margin-top: 40px;">
                 <a href="http://localhost:3000/portal/support" style="display: block; width: 100%; padding: 16px; border: 2px solid #dc2626; color: #dc2626; text-decoration: none; border-radius: 12px; font-weight: 900; text-align: center; text-transform: uppercase; font-size: 11px;">Contact Support for Restoration</a>
              </div>

@@ -223,7 +223,7 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
               onClick={initializeCall}
               className="w-full py-6 bg-slate-950 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"
             >
-              <Phone size={20} fill="currentColor" /> Initialize Call
+              <Phone size={20} fill="currentColor" /> Start Call
             </button>
           </div>
         </div>
@@ -232,7 +232,7 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
       {phase === 'connecting' && (
         <div className="flex-1 flex flex-col items-center justify-center space-y-8 animate-in zoom-in h-full">
           <Mini5GMicroLoader size={80} />
-          <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] animate-pulse">Syncing AI Node...</p>
+          <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] animate-pulse">Connecting...</p>
         </div>
       )}
 
@@ -292,9 +292,9 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
             </div>
             <div className="space-y-2">
               <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none">Session Complete</h3>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-4">Registry Timeline Action Recorded</p>
+              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-4">Call Ended</p>
             </div>
-            <button onClick={onBack} className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all">Exit Module</button>
+            <button onClick={onBack} className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all">Go Back</button>
           </div>
         </div>
       )}

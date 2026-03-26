@@ -87,7 +87,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
     setIsRotating(true);
     const res = await db.updateCustomerPassword(user.id, newPass);
     if (res.success) {
-      db.logNotification(user.id, 'success', 'Registry Security', 'Credential rotation confirmed.');
+      db.logNotification(user.id, 'success', 'Password Updated', 'Your Wi-Fi password has been changed successfully.');
       setIsRotating(false);
     }
   };
