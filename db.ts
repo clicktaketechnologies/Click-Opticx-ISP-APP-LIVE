@@ -338,7 +338,9 @@ class DB {
   private firestore: Firestore | null = null;
   private app: FirebaseApp | null = null;
   private socket: Socket | null = null;
-  private backendUrl = window.location.hostname === 'localhost' ? 'http://127.0.0.1:5000' : 'https://click-opticx-isp-app-live.onrender.com';
+  private backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'http://127.0.0.1:5000' 
+    : 'https://click-opticx-isp-app-live.onrender.com';
 
   constructor() {
     this.state = INITIAL_STATE;
@@ -1869,18 +1871,6 @@ class DB {
     }
   }
 
-  async discoverOnus(oltId: string) {
-    try {
-      const res = await fetch(`${this.backendUrl}/api/olt/discover`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ oltId })
-      });
-      return await res.json();
-    } catch (e: any) {
-      return { success: false, message: e.message };
-    }
-  }
 
   async getNasStats() {
     try {
@@ -3124,7 +3114,7 @@ class DB {
             return res.ok ? 'Working' : 'Failed';
           } catch(e) { return 'Failed'; }
         },
-        info: 'Verifies the connection to the Node.js backend relay (Port 5000).'
+        info: 'Verifies the connection to the Node.js backend relay.'
       },
       { 
         module: 'Inventory', 
@@ -3830,13 +3820,30 @@ class DB {
       olt.lastCheck = new Date().toISOString();
       await this.commit();
       this.notify();
-      return { success: true, status: olt.status, details: data };
+      return { success: data.success, status: olt.status, details: data };
     } catch (e: any) {
       olt.status = 'Offline';
       olt.lastCheck = new Date().toISOString();
       await this.commit();
       this.notify();
       return { success: false, status: 'Offline', error: e.message };
+    }
+  }
+
+  async discoverOnus(oltId: string) {
+    const olt = this.state.oltNodes.find(n => n.id === oltId);
+    if (!olt) return { success: false, message: 'OLT not found' };
+
+    try {
+      const res = await fetch(`${this.backendUrl}/api/olt/discover`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ olt })
+      });
+      const data = await res.json();
+      return data;
+    } catch (e: any) {
+      return { success: false, error: e.message };
     }
   }
 

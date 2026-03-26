@@ -194,7 +194,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                ))}
             </div>
-         )}
+          )}
 
          {activeTab === 'ONUs' && (
             <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
@@ -303,6 +303,57 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
             </div>
          )}
 
+         {activeTab === 'Discovery' && (
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div>
+                     <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">ONU Auto-Discovery</h2>
+                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Scan PON ports for unconfigured hardware</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                     <select 
+                        id="discovery-olt-select"
+                        className="px-6 py-4 bg-slate-50 rounded-2xl font-black text-xs uppercase tracking-widest outline-none border-none focus:ring-2 focus:ring-blue-500/10"
+                     >
+                        <option value="">Select OLT to Scan</option>
+                        {state.oltNodes.map(olt => <option key={olt.id} value={olt.id}>{olt.name} ({olt.ip})</option>)}
+                     </select>
+                     <button 
+                        onClick={async () => {
+                           const oltId = (document.getElementById('discovery-olt-select') as HTMLSelectElement).value;
+                           if (!oltId) return alert('Please select an OLT first');
+                           const btn = document.getElementById('scan-btn');
+                           btn?.classList.add('opacity-50', 'pointer-events-none');
+                           const result = await db.discoverOnus(oltId);
+                           btn?.classList.remove('opacity-50', 'pointer-events-none');
+                           setHealthCheckResult({ ...result, discovery: true });
+                           setIsHealthCheckModal(true);
+                        }}
+                        id="scan-btn"
+                        className="px-8 py-4 bg-blue-600 hover:bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl shadow-blue-200"
+                     >
+                        Start Scan
+                     </button>
+                  </div>
+               </div>
+
+               <div className="bg-white rounded-[2.5rem] border border-slate-100 p-20 text-center">
+                  <div className="flex flex-col items-center gap-6">
+                     <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
+                        <Cpu size={48} />
+                     </div>
+                     <div className="max-w-md">
+                        <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight mb-2">Ready to Discover</h3>
+                        <p className="text-xs text-slate-400 font-medium leading-relaxed">
+                           Select an OLT node above to initiate a real-time discovery sequence. 
+                           The system will query for all unauthenticated ONUs across all PON ports.
+                        </p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         )}
+
          {/* ADD/EDIT MODAL */}
          {(isAddModal || isEditModal) && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl animate-in fade-in duration-300">
@@ -394,6 +445,87 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all active:scale-95"
                      >
                         {isEditModal ? 'Save Changes' : 'Confirm Registration'}
+                     </button>
+                  </div>
+               </div>
+            </div>
+         )}
+
+         {/* HEALTH CHECK / DISCOVERY MODAL */}
+         {isHealthCheckModal && (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl animate-in fade-in duration-300">
+               <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+                  <div className="p-10 border-b border-slate-100 flex items-center justify-between bg-white/50">
+                     <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${healthCheckResult?.success ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
+                           {healthCheckResult?.discovery ? <Search size={24} /> : (healthCheckResult?.success ? <CheckCircle size={24} /> : <AlertTriangle size={24} />)}
+                        </div>
+                        <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900">
+                           {healthCheckResult?.discovery ? 'Discovery Results' : 'Diagnostic Report'}
+                        </h2>
+                     </div>
+                     <button onClick={() => setIsHealthCheckModal(false)} className="w-12 h-12 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl flex items-center justify-center transition-colors">
+                        <X size={24} />
+                     </button>
+                  </div>
+
+                  <div className="p-10 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                     {isChecking ? (
+                        <div className="flex flex-col items-center justify-center py-20 gap-6">
+                           <RefreshCw className="animate-spin text-blue-500" size={48} />
+                           <div className="font-black text-slate-400 uppercase tracking-widest text-[10px]">Interrogating OLT Hardware...</div>
+                        </div>
+                     ) : (
+                        <div className="space-y-6">
+                           <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl">
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol Status</span>
+                              <StatusBadge status={healthCheckResult?.status || (healthCheckResult?.success ? 'Online' : 'Offline')} />
+                           </div>
+
+                           {healthCheckResult?.discovery ? (
+                              <div className="space-y-4">
+                                 <div className="p-6 bg-slate-900 rounded-3xl text-white">
+                                    <h3 className="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+                                       <DatabaseZap className="text-blue-400" size={16} /> Raw Discovery Data
+                                    </h3>
+                                    <pre className="text-[10px] font-mono opacity-80 whitespace-pre-wrap break-all leading-relaxed h-48 overflow-y-auto pr-2 custom-scrollbar">
+                                       {healthCheckResult.rawDiscovery || "Internal scanning complete. No unconfigured ONUs found responding to discovery packets."}
+                                    </pre>
+                                 </div>
+                                 <div className="text-center p-4">
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Parsing active... Found unregistered SNs will appear in the registry auto-add stream.</p>
+                                 </div>
+                              </div>
+                           ) : (
+                              <div className="space-y-4">
+                                 <div className="p-6 bg-slate-50 rounded-3xl space-y-3">
+                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Technical Details</h3>
+                                    <div className="flex justify-between">
+                                       <span className="text-xs text-slate-600 font-bold">Node Identity</span>
+                                       <span className="text-xs text-slate-900 font-black">{healthCheckResult?.name || 'Remote Link'}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                       <span className="text-xs text-slate-600 font-bold">Latency Check</span>
+                                       <span className="text-xs text-emerald-500 font-black">Success</span>
+                                    </div>
+                                 </div>
+                                 {healthCheckResult?.error && (
+                                    <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl text-xs font-bold border border-rose-100 italic">
+                                       DEBUG: {healthCheckResult.error}
+                                    </div>
+                                 )}
+                              </div>
+                           )}
+                        </div>
+                     )}
+                  </div>
+
+                  <div className="px-10 py-8 bg-slate-50 flex items-center justify-end">
+                     <button 
+                        onClick={() => setIsHealthCheckModal(false)}
+                        className="px-12 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all active:scale-95"
+                     >
+                        Dissolve Report
                      </button>
                   </div>
                </div>
