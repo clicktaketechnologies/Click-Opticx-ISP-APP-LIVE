@@ -39,7 +39,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
         { label: 'Hardware Clips', value: `${w.clipsQty} Units`, price: w.clipsQty * w.clipPrice },
         { label: 'Brackets', value: `${w.ravalBoldPairs} Pairs`, price: w.ravalBoldPairs * w.ravalBoldPrice },
         { label: 'Pole Setup', value: w.pollHeight, price: w.pollPrice },
-        { label: 'Signal Quality', value: w.signalStrength, price: w.signalStrengthPrice },
+        { label: 'Wifi Quality', value: w.signalStrength, price: w.signalStrengthPrice },
         { label: 'Wireless Antenna', value: w.receiverModel, price: w.receiverPrice },
         { label: 'Local Router', value: w.onuModel, price: w.onuPrice },
         { label: 'Tower Access', value: w.towerAPDevice, price: w.towerAPPrice },
@@ -58,7 +58,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
          <div className="relative z-10 space-y-10">
             <div className="flex justify-between items-start">
                <div className="space-y-1">
-                  <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] italic">Infrastructure Details</p>
+                  <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] italic">Connection Details</p>
                   <h2 className="text-4xl font-black tracking-tighter uppercase italic flex items-center gap-3">
                      {user.connectionType === 'Fiber' ? <Flame className="text-blue-400" /> : <Wifi className="text-emerald-400" />}
                      {user.connectionType} Account
@@ -76,7 +76,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
                   <p className="text-lg font-black text-white uppercase italic tracking-tighter">{user.connectionId}</p>
                </div>
                <div className="text-right">
-                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Account Type</p>
+                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Type</p>
                   <p className="text-lg font-black text-indigo-400 uppercase italic tracking-tighter">{user.connectionType === 'Fiber' ? 'FTTH / Fiber' : 'PTP / Wireless'}</p>
                </div>
             </div>
@@ -87,7 +87,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
       {/* Equipment Breakdown */}
       <div className="space-y-5">
          <div className="flex justify-between items-end px-4">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Installation Details</h3>
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Installation Overview</h3>
             <span className="text-[8px] font-black text-slate-400 uppercase">Itemized Costs</span>
          </div>
 
@@ -96,7 +96,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
                {breakdown.length === 0 ? (
                  <div className="p-20 text-center flex flex-col items-center">
                     <ShieldAlert size={48} className="text-slate-100 mb-6" />
-                    <p className="text-slate-400 font-black uppercase tracking-widest text-[9px]">Awaiting hardware mapping from technical team...</p>
+                    <p className="text-slate-400 font-black uppercase tracking-widest text-[9px]">Awaiting hardware mapping...</p>
                  </div>
                ) : (
                  breakdown.map((item, i) => (
@@ -118,7 +118,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
             
             <div className="p-8 bg-slate-900 text-white flex justify-between items-center relative overflow-hidden">
                <div className="relative z-10">
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic mb-1">Total Installation Value</p>
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic mb-1">Total Value</p>
                   <h4 className="text-3xl font-black text-emerald-400 italic tracking-tighter">Rs. {grandTotal.toLocaleString()}</h4>
                </div>
                <div className="relative z-10">
@@ -135,12 +135,12 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
       <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem] flex items-start gap-5 shadow-sm mx-1">
          <Info className="text-blue-500 mt-1 shrink-0" size={24} />
          <p className="text-[9px] text-blue-700 font-bold uppercase leading-relaxed">
-            These values represent the equipment assigned to your account. Pricing includes all hardware and initial setup.
+            All costs included in setup. Infrastructure is healthy ✅. Full audit logs available.
          </p>
       </div>
 
       <button className="w-full py-6 bg-white border-2 border-slate-100 text-slate-400 rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-sm">
-         <Activity size={18} /> View Technical Records
+         <Activity size={18} /> View Network Details
       </button>
     </div>
   );

@@ -70,8 +70,8 @@ const PackageCard: React.FC<PackageCardProps> = ({
   const getStatusBadge = () => {
     if (pkg.deleted) return { label: 'Disabled', color: 'bg-rose-100 text-rose-700 border-rose-200' };
     if (isThisPackageRequested) return { label: 'Verifying...', color: 'bg-orange-100 text-orange-700 border-orange-200' };
-    if (isActive) return { label: 'Active Node', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
-    return { label: 'Ready', color: 'bg-blue-100 text-blue-700 border-blue-200' };
+    if (isActive) return { label: 'Active', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
+    return { label: 'Available', color: 'bg-blue-100 text-blue-700 border-blue-200' };
   };
 
   const badge = getStatusBadge();
@@ -106,7 +106,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
               )}
            </div>
            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-             {pkg.subtitle || 'Production Registry Protocol'}
+             {pkg.subtitle || 'Reliable internet for everyday use'}
            </p>
         </div>
         <div className={`px-3 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest shadow-sm ${badge.color}`}>
@@ -142,7 +142,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
       <div className="p-8 pt-6 mt-auto flex flex-col gap-6">
          <div className="flex items-end justify-between border-t border-slate-100 pt-6">
             <div>
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Authorized Value</p>
+               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Price</p>
                <div className="flex flex-col">
                   {hasDiscount && !isActive && (
                     <span className="text-sm font-black text-slate-300 line-through tracking-tighter decoration-rose-400/50">
@@ -171,7 +171,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
                   /* 🟠 STATE 2: REQUEST SENT / UNDER VERIFICATION */
                   <div className="w-full py-5 bg-orange-500 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.15em] shadow-xl shadow-orange-100 flex items-center justify-center gap-3 border-b-4 border-orange-600 animate-pulse cursor-not-allowed">
                     <Clock size={18} strokeWidth={3} className="animate-spin-slow" />
-                    WE ARE VERIFYING YOUR REQUEST
+                    ACTIVATION PENDING
                   </div>
                 ) : (
                   /* 🔵 STATE 1: DEFAULT STATE – NOT REQUESTED */
@@ -185,7 +185,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
                     }`}
                   >
                     {hasAnyPendingPackageRequest ? (
-                      <><Lock size={18} /> PROTOCOL LOCKED</>
+                      <><Lock size={18} /> ACTIVATION LOCKED</>
                     ) : (
                       <><Zap size={18} /> ACTIVATE PACKAGE</>
                     )}
@@ -194,7 +194,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
                 
                 {hasAnyPendingPackageRequest && !isThisPackageRequested && !isActive && (
                    <p className="text-[7px] font-black text-rose-500 uppercase text-center mt-2 tracking-[0.3em]">
-                     Identity node linked to another pending protocol.
+                     You already have a pending package activation.
                    </p>
                 )}
               </>

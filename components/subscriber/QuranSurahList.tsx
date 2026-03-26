@@ -63,7 +63,7 @@ const QuranSurahList: React.FC<Props> = ({ onSelectSurah }) => {
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex-1 flex flex-col min-h-0 mx-4">
         <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-             <BookOpen size={14} className="text-emerald-500"/> Noble Quran Registry
+             <BookOpen size={14} className="text-emerald-500"/> Noble Quran
            </h3>
            <span className="text-[10px] font-black text-slate-500 bg-white border px-3 py-1 rounded-full uppercase">
              {filteredSurahs.length} Surahs
@@ -102,12 +102,12 @@ const QuranSurahList: React.FC<Props> = ({ onSelectSurah }) => {
           {filteredSurahs.length === 0 && (
             <div className="p-20 text-center flex flex-col items-center gap-4">
                <Search size={48} className="text-slate-100" />
-               <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">No matches found for your search parameters.</p>
+               <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">No matches found for your search.</p>
                <button 
                  onClick={() => { setSearchTerm(''); setFilterType('All'); }}
                  className="mt-2 text-emerald-600 font-black uppercase text-[10px] tracking-widest underline"
                >
-                 Clear Protocol
+                 Clear Search
                </button>
             </div>
           )}

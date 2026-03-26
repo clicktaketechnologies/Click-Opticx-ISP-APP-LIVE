@@ -248,11 +248,11 @@ const Dashboard: React.FC<{
     <div className="space-y-6 animate-in fade-in duration-500 pb-10">
       <ModuleGuide
         moduleName="Operations Dashboard"
-        description="High-level metrics and fast access to critical functions"
+        description="➡ See your business performance and system status in one place"
         items={[
-          { title: "Fast Operations", description: "Use the quick action buttons to instantly add subscribers, generate invoices, or collect funds from anywhere." },
-          { title: "Metric Cards", description: "Real-time snapshot of active vs suspended users, outstanding dues, and overall system health." },
-          { title: "Revenue Flow", description: "Interactive chart showing Collections vs Receivables. Filter by date or specific franchise nodes." }
+          { title: "Quick Actions", description: "Use the quick action buttons to instantly add users, create invoices, or receive payments from anywhere." },
+          { title: "Dashboard Stats", description: "Real-time snapshot of active vs suspended users, outstanding bills, and overall system status." },
+          { title: "Income Overview", description: "Interactive chart showing collections vs totals. Filter by date or specific groups." }
         ]}
       />
 
@@ -267,22 +267,22 @@ const Dashboard: React.FC<{
           )}
           <div className="space-y-1">
             <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-4 uppercase italic leading-none">
-              Operations Dashboard
+              Business Overview
             </h2>
-            <p className="text-slate-500 font-medium">Real-time performance metrics for Entire Organization.</p>
+            <p className="text-slate-500 font-medium">➡ Track users, payments, and network performance</p>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
           <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto shrink-0">
             {[{ id: 'all', label: 'Overview' }, { id: 'users', label: 'Subscribers' }, { id: 'dealers', label: 'Dealers' }].map(f => (
-              <button key={f.id} onClick={() => setEntityFilter(f.id as any)} className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${entityFilter === f.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>{f.label}</button>
+              <button key={f.id} onClick={() => setEntityFilter(f.id as any)} className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${entityFilter === f.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>{f.id === 'all' ? 'Overview' : f.id === 'users' ? 'Users' : 'Dealers'}</button>
             ))}
           </div>
 
           <div className="flex flex-col sm:flex-row bg-white p-2 rounded-2xl border border-slate-200 shadow-sm gap-2 w-full lg:w-auto">
             <div className="flex bg-slate-100 p-1 rounded-xl overflow-x-auto shrink-0">
-              {[{ id: '3d', label: '3 Days' }, { id: '7d', label: '1 Week' }, { id: '30d', label: '1 Month' }, { id: 'all', label: 'All Time' }].map(f => (
+              {[{ id: '3d', label: 'Last 3 Days' }, { id: '7d', label: 'Last 7 Days' }, { id: '30d', label: 'Last 30 Days' }, { id: 'all', label: 'All Time' }].map(f => (
                 <button key={f.id} onClick={() => setDateFilter(f.id as any)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${dateFilter === f.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>{f.label}</button>
               ))}
             </div>
@@ -294,31 +294,31 @@ const Dashboard: React.FC<{
       <div className="flex flex-wrap items-center gap-3 mb-8 bg-indigo-900/5 p-3 rounded-3xl border border-indigo-500/10 backdrop-blur-sm shadow-inner">
         <div className="flex items-center gap-2 px-3 border-r border-indigo-500/10 mr-1">
           <Zap size={16} className="text-indigo-500 animate-pulse" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-800">Fast Operations</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-800">Quick Actions</span>
         </div>
         <button onClick={() => onNavigate && onNavigate('users', { action: 'add-user' })} className="flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-indigo-200">
-          <UserPlus size={16} /> Add Subscriber
+          <UserPlus size={16} /> + Add User
         </button>
         <button onClick={() => onNavigate && onNavigate('users', { action: 'receive-funds' })} className="flex items-center gap-2 px-5 py-2.5 bg-white text-emerald-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-emerald-200">
-          <Banknote size={16} /> Receive Funds
+          <Banknote size={16} /> Receive Payment
         </button>
         <button onClick={() => onNavigate && onNavigate('invoice-engine')} className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-blue-200">
-          <Receipt size={16} /> New Invoice
+          <Receipt size={16} /> Create Invoice
         </button>
         <button onClick={() => onNavigate && onNavigate('comm-campaigns')} className="flex items-center gap-2 px-5 py-2.5 bg-white text-purple-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-purple-200">
-          <Send size={16} /> Campaign
+          <Send size={16} /> Send Message
         </button>
       </div>
 
       {/* Advanced Data Metrics Matrix */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 border-b border-slate-100 pb-8 mb-8">
         {[
-          { label: 'Total Base', value: globalStats.totalUsers.toLocaleString(), icon: Users, color: 'text-slate-600', bg: 'bg-slate-50' },
-          { label: 'Active Lines', value: globalStats.activeSubs.toLocaleString(), icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Radius Online', value: globalStats.onlineUsers.toLocaleString(), icon: Globe, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'New Subs', value: globalStats.newUsers.toLocaleString(), icon: UserPlus, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-          { label: 'Suspended', value: globalStats.expiredUsers.toLocaleString(), icon: Archive, color: 'text-rose-600', bg: 'bg-rose-50' },
-          { label: 'Disabled', value: globalStats.disabledUsers.toLocaleString(), icon: ShieldCheck, color: 'text-slate-400', bg: 'bg-slate-50' },
+          { label: 'Total Users', value: globalStats.totalUsers.toLocaleString(), icon: Users, color: 'text-slate-600', bg: 'bg-slate-50' },
+          { label: 'Active Users', value: globalStats.activeSubs.toLocaleString(), icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Server Online', value: globalStats.onlineUsers.toLocaleString(), icon: Globe, color: 'text-blue-600', bg: 'bg-blue-50' },
+          { label: 'New Users', value: globalStats.newUsers.toLocaleString(), icon: UserPlus, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+          { label: 'Suspended Users', value: globalStats.expiredUsers.toLocaleString(), icon: Archive, color: 'text-rose-600', bg: 'bg-rose-50' },
+          { label: 'Disabled Users', value: globalStats.disabledUsers.toLocaleString(), icon: ShieldCheck, color: 'text-slate-400', bg: 'bg-slate-50' },
         ].map((kpi, idx) => (
           <div key={idx} className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group overflow-hidden relative flex flex-col items-center text-center">
             <div className={`p-4 rounded-[1.8rem] mb-3 transition-transform group-hover:scale-110 ${kpi.bg}`}><kpi.icon className={kpi.color} size={24} /></div>
@@ -332,9 +332,9 @@ const Dashboard: React.FC<{
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         <div className="bg-gradient-to-br from-rose-500 to-rose-600 p-8 rounded-[3rem] text-white shadow-xl shadow-rose-200 relative overflow-hidden group">
           <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-4">Critical Expiry (24h)</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-4">Expiring in 24 Hours</p>
             <h4 className="text-5xl font-black italic tracking-tighter mb-2">{globalStats.expiring1d}</h4>
-            <p className="text-[11px] font-bold">Subscribers losing access tomorrow</p>
+            <p className="text-[11px] font-bold">➡ Users expiring tomorrow</p>
           </div>
           <AlertCircle size={120} className="absolute -right-6 -bottom-6 opacity-20 group-hover:scale-110 transition-transform duration-700" />
         </div>
@@ -350,12 +350,12 @@ const Dashboard: React.FC<{
           <div className="flex gap-4">
             <div className="flex-1">
               <p className="text-2xl font-black text-slate-800 tracking-tighter">{globalStats.expiring3d}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">In 3 Days</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Expiring in 3 Days</p>
             </div>
             <div className="w-px h-8 bg-slate-100 self-center"></div>
             <div className="flex-1">
               <p className="text-2xl font-black text-slate-800 tracking-tighter">{globalStats.expiring1w}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">In 1 Week</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Expiring in 7 Days</p>
             </div>
           </div>
         </div>
@@ -364,26 +364,26 @@ const Dashboard: React.FC<{
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:rotate-12 transition-transform"><DollarSign size={24} /></div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Fiscal Health</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">➡ Payments Overview</p>
               <p className="text-xs font-bold text-slate-700">Payment Status</p>
             </div>
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
               <p className="text-2xl font-black text-emerald-600 tracking-tighter">{globalStats.paidUsers}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Paid Subs</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Paid Users</p>
             </div>
             <div className="w-px h-8 bg-slate-100 self-center"></div>
             <div className="flex-1">
               <p className="text-2xl font-black text-rose-500 tracking-tighter">{globalStats.unpaidUsers}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Unpaid Subs</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Unpaid Users</p>
             </div>
           </div>
         </div>
 
         <div className="bg-slate-900 p-8 rounded-[3rem] text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group">
           <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-4">Total Outstanding</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-4">Total Due</p>
             <h4 className="text-4xl font-black italic tracking-tighter mb-2">{state.settings.currency} {globalStats.totalUnpaidAmount.toLocaleString()}</h4>
             <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-400">
               <ArrowUpRight size={14} /> 12% vs last month
@@ -398,17 +398,17 @@ const Dashboard: React.FC<{
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/5 transition-colors duration-700"></div>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 relative z-10">
             <div>
-              <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-3 uppercase italic leading-none"><TrendingUp size={24} className="text-indigo-600" /> Revenue Flow</h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">{dateFilter === 'all' ? 'Historical' : 'Recent'} Income vs Recovery Analysis</p>
+              <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-3 uppercase italic leading-none"><TrendingUp size={24} className="text-indigo-600" /> Income Overview</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">{dateFilter === 'all' ? 'Historical' : 'Recent'} Total vs Received Analysis</p>
             </div>
             <div className="flex items-center gap-4 px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                <span className="text-[9px] font-black uppercase text-slate-500">Billed</span>
+                <span className="text-[9px] font-black uppercase text-slate-500">Total</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                <span className="text-[9px] font-black uppercase text-slate-500">Recovered</span>
+                <span className="text-[9px] font-black uppercase text-slate-500">Received</span>
               </div>
             </div>
           </div>
@@ -443,7 +443,7 @@ const Dashboard: React.FC<{
                   <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200 tracking-tighter leading-none">
                     {globalStats.periodRevenue > 0 ? Math.round((globalStats.periodRecovery / globalStats.periodRevenue) * 100) : 0}%
                   </span>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-1.5 leading-none">Yield</span>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-1.5 leading-none">Collection Rate</span>
                 </div>
                 <div className="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden border border-white/5 backdrop-blur-sm">
                   <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{ width: `${globalStats.periodRevenue > 0 ? (globalStats.periodRecovery / globalStats.periodRevenue) * 100 : 0}%` }}></div>
@@ -456,9 +456,9 @@ const Dashboard: React.FC<{
           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm flex-1 h-[215px] flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-black text-slate-800 uppercase italic tracking-tight flex items-center gap-2">
-                <Bot size={18} className="text-indigo-600" /> AI Support Hub
+                <Bot size={18} className="text-indigo-600" /> AI Assistant
               </h3>
-              <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[8px] font-black uppercase tracking-widest">Active</span>
+              <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[8px] font-black uppercase tracking-widest">➡ Smart system to help automate tasks and detect issues</span>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-6">
               <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center text-center group hover:bg-white hover:shadow-md hover:border-indigo-100 transition-all">
@@ -480,8 +480,8 @@ const Dashboard: React.FC<{
           <div className="bg-white w-full max-w-4xl rounded-[3rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden flex flex-col max-h-[70vh]">
             <div className="p-10 border-b border-slate-50 flex items-center justify-between">
               <div>
-                <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Global Registry Pulse</h3>
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Search Query: "{searchTerm}"</p>
+                <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Global System Records</h3>
+                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Searching for: "{searchTerm}"</p>
               </div>
               <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
                 <Search size={24} />
@@ -492,7 +492,7 @@ const Dashboard: React.FC<{
               {/* Subscribers Section */}
               <section className="space-y-6">
                 <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.4em] flex items-center gap-2 italic">
-                  Matched Subscribers
+                  Matched Users
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {state.users.filter(u => 
@@ -518,14 +518,14 @@ const Dashboard: React.FC<{
                           </div>
                           <div>
                             <p className="text-xs font-black text-slate-900 uppercase leading-none mb-1">{u.name}</p>
-                            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">{u.connectionId || 'NEW_NODE'}</p>
+                            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">{u.connectionId || 'NEW_USER'}</p>
                           </div>
                         </div>
                         <ChevronRight size={16} className="text-slate-300 group-hover:text-indigo-600 transition-colors" />
                       </div>
                     ))
                   ) : (
-                    <div className="col-span-2 py-6 text-center opacity-30 italic text-[10px] uppercase font-black tracking-widest border-2 border-dashed border-slate-100 rounded-2xl">No subscriber nodes matched.</div>
+                    <div className="col-span-2 py-6 text-center opacity-30 italic text-[10px] uppercase font-black tracking-widest border-2 border-dashed border-slate-100 rounded-2xl">No user records matched.</div>
                   )}
                 </div>
               </section>
@@ -533,7 +533,7 @@ const Dashboard: React.FC<{
               {/* Transactions Section */}
               <section className="space-y-6">
                 <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.4em] flex items-center gap-2 italic">
-                  Financial Records
+                  Payment Records
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {state.invoices.filter(i => 
@@ -561,14 +561,14 @@ const Dashboard: React.FC<{
                       </div>
                     ))
                   ) : (
-                    <div className="col-span-2 py-6 text-center opacity-30 italic text-[10px] uppercase font-black tracking-widest border-2 border-dashed border-slate-100 rounded-2xl">No fiscal nodes matched.</div>
+                    <div className="col-span-2 py-6 text-center opacity-30 italic text-[10px] uppercase font-black tracking-widest border-2 border-dashed border-slate-100 rounded-2xl">No records matched.</div>
                   )}
                 </div>
               </section>
             </div>
 
             <div className="p-8 bg-slate-50 border-t border-slate-100 text-center">
-              <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Global Repository Lookup • {state.users.length + state.invoices.length} Total Handshakes Analyzed</p>
+              <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Global System Lookup • {state.users.length + state.invoices.length} Total Records Checked</p>
             </div>
           </div>
         </div>

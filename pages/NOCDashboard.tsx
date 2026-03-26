@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-   Activity, Shield, Server, Monitor, Signal, Zap, AlertCircle, 
+   Activity, Shield, Server, Monitor, Wifi, Zap, AlertCircle, 
    CheckCircle2, ArrowUpRight, ArrowDownRight, Users, Globe, 
    Clock, Bell, Search, Filter, MoreVertical, RefreshCw, 
    HardDrive, Network, MapPin, Database, Cpu, PieChart, Info,
@@ -12,7 +12,7 @@ import { db } from '../db';
 const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
    const [refreshRate, setRefreshRate] = useState(10);
    const [lastUpdated, setLastUpdated] = useState(new Date());
-   const [isNocMode, setIsNocMode] = useState(true); // Default to NOC Dark Mode
+   const [isNocMode, setIsNocMode] = useState(true); // Default to System Dark Mode
    const [activeFilter, setActiveFilter] = useState<'All' | 'Critical' | 'Warning'>('All');
    const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' | null }>({ message: '', type: null });
    const [pulseData, setPulseData] = useState<{ speed: string, devices: number, usage: string }>({ speed: '0 Mbps', devices: 0, usage: '0 GB' });
@@ -47,8 +47,8 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 
       // Log the action to security logs
       await db.addSecurityLog({
-         action: `NOC-${label}`,
-         details: `${label} operation triggered from NOC Dashboard. Result: ${res?.message || 'N/A'}`,
+         action: `ACTION-${label}`,
+         details: `${label} operation triggered from Network Control Panel. Result: ${res?.message || 'N/A'}`,
       });
    };
 
@@ -117,9 +117,9 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   <Activity size={32} />
                </div>
                <div>
-                  <h1 className="text-3xl font-black uppercase italic tracking-tighter leading-none">NOC COMMAND CENTER</h1>
+                  <h1 className="text-3xl font-black uppercase italic tracking-tighter leading-none">NETWORK CONTROL PANEL</h1>
                   <p className="text-[10px] font-black uppercase tracking-[0.4em] mt-2 opacity-50 flex items-center gap-2 text-indigo-400">
-                     <Shield size={12} /> Network Integrity Monitoring Active
+                     <Shield size={12} /> ➡ Real-time system monitoring and health alerts
                   </p>
                </div>
             </div>
@@ -148,18 +148,18 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   onClick={() => setIsNocMode(!isNocMode)}
                   className={`px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${isNocMode ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'bg-slate-900 text-white hover:bg-black'}`}
                >
-                  {isNocMode ? 'Light UI' : 'NOC Mode'}
+                  {isNocMode ? 'Light UI' : 'Dark Mode'}
                </button>
             </div>
          </div>
 
-         {/* NOC OPERATIONAL PULSE SECTION */}
+         {/* SYSTEM HEALTH OVERVIEW */}
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-4">
             <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden transition-all ${isNocMode ? 'bg-indigo-600 border-indigo-500 shadow-[0_20px_50px_rgba(79,70,229,0.3)]' : 'bg-indigo-600 text-white shadow-xl'}`}>
                <div className="flex items-center justify-between mb-4 relative z-10">
                   <div className="flex items-center gap-3">
                      <Zap size={24} className="text-white" />
-                     <h3 className="text-sm font-black uppercase tracking-widest text-white/70 italic">Live Speed</h3>
+                     <h3 className="text-sm font-black uppercase tracking-widest text-white/70 italic">Real-time Speed</h3>
                   </div>
                   {isPulseSyncing && <RefreshCw size={14} className="text-white animate-spin opacity-40" />}
                </div>
@@ -193,14 +193,14 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
          {/* 1. TOP NETWORK SUMMARY BAR */}
          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-4 mb-8">
             {[
-               { label: 'Subscribers', val: stats.totalSubscribers, color: 'text-indigo-400', icon: Users, isLive: true },
+               { label: 'Users', val: stats.totalSubscribers, color: 'text-indigo-400', icon: Users, isLive: true },
                { label: 'Online Users', val: stats.onlineUsers, color: 'text-emerald-400', icon: CheckCircle2, isLive: true },
                { label: 'Offline Users', val: stats.offlineUsers, color: 'text-rose-400', icon: AlertCircle, isLive: true },
-               { label: 'Suspended', val: stats.suspendedUsers, color: 'text-amber-400', icon: Info, isLive: true },
+               { label: 'Suspended Users', val: stats.suspendedUsers, color: 'text-amber-400', icon: Info, isLive: true },
                { label: 'Routers', val: stats.routersOnline, color: 'text-blue-400', icon: Server, isLive: true },
-               { label: 'OLT Nodes', val: stats.oltDevices, color: 'text-cyan-400', icon: Network, isLive: true },
+               { label: 'OLT Devices', val: stats.oltDevices, color: 'text-cyan-400', icon: Network, isLive: true },
                { label: 'ONUs Online', val: stats.onusOnline, color: 'text-teal-400', icon: Monitor, isLive: true },
-               { label: 'Weak Signals', val: stats.weakSignals, color: 'text-rose-500', icon: Signal, pulse: stats.weakSignals > 0, isLive: true }
+               { label: 'Low Wifi', val: stats.weakSignals, color: 'text-rose-500', icon: Wifi, pulse: stats.weakSignals > 0, isLive: true }
             ].map((stat, i) => (
                <div key={i} className={`p-5 rounded-3xl border transition-all hover:scale-105 ${isNocMode ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-slate-100 hover:shadow-xl'}`}>
                   <div className="flex items-center justify-between mb-3">
@@ -231,9 +231,9 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="flex items-center justify-between mb-8">
                      <div className="flex items-center gap-3">
                         <Globe className="text-indigo-400" size={24} />
-                        <h2 className="text-lg font-black uppercase tracking-tighter">Upstream Links</h2>
+                        <h2 className="text-lg font-black uppercase tracking-tighter">Main Internet Links</h2>
                      </div>
-                     <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full italic">Backhaul Active</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full italic">Main Connection Active</span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -335,7 +335,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                      <div className="flex items-center justify-between mb-8">
                         <div className="flex items-center gap-3">
                            <Network className="text-cyan-400" size={24} />
-                           <h2 className="text-lg font-black uppercase tracking-tighter">OLT Infrastructure</h2>
+                           <h2 className="text-lg font-black uppercase tracking-tighter">System Infrastructure</h2>
                         </div>
                         <span className="text-2xl font-black text-cyan-400/20 italic">{state.oltNodes.length}</span>
                      </div>
@@ -390,8 +390,8 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                <div className={`p-8 rounded-[2.5rem] border overflow-hidden ${isNocMode ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
                   <div className="flex items-center justify-between mb-8 px-2">
                      <div className="flex items-center gap-3">
-                        <Signal className="text-rose-500" size={24} />
-                        <h2 className="text-lg font-black uppercase tracking-tighter">Weak Fiber Signals</h2>
+                        <Wifi className="text-rose-500" size={24} />
+                        <h2 className="text-lg font-black uppercase tracking-tighter">Connection Issues</h2>
                      </div>
                      <span className="px-4 py-2 bg-rose-500/10 text-rose-500 rounded-2xl font-black text-[9px] uppercase tracking-widest shadow-lg shadow-rose-500/5 transition-all">Inspection Required</span>
                   </div>
@@ -447,8 +447,8 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="flex items-center justify-between mb-10">
                      <div className="flex items-center gap-3">
                         <PieChart className="text-indigo-400" size={24} />
-                        <h2 className="text-lg font-black uppercase tracking-tighter">Live Traffic Performance</h2>
-                        <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[7px] font-black uppercase tracking-tighter">LIVE TELEMETRY</span>
+                        <h2 className="text-lg font-black uppercase tracking-tighter">Network Activity</h2>
+                        <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[7px] font-black uppercase tracking-tighter">LIVE DATA</span>
                      </div>
                      <div className="flex items-center gap-2 bg-black/20 p-1 rounded-2xl">
                         {['5M', '1H', '24H'].map(r => (
@@ -506,7 +506,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="flex items-center justify-between mb-8">
                      <div className="flex items-center gap-3">
                         <Bell className="text-rose-500" size={24} />
-                        <h2 className="text-lg font-black uppercase tracking-tighter">Active Network Alerts</h2>
+                        <h2 className="text-lg font-black uppercase tracking-tighter">System Alerts</h2>
                      </div>
                      <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl">
                         {(['All', 'Critical', 'Warning'] as const).map(f => (
@@ -568,7 +568,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                <div className={`p-8 rounded-[2.5rem] border ${isNocMode ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
                   <h2 className="text-lg font-black uppercase tracking-tighter mb-8 flex items-center gap-3">
                      <Zap className="text-amber-400" size={24} />
-                     NOC Operations
+                     Quick Actions
                   </h2>
                   <div className="grid grid-cols-2 gap-4">
                      {[
@@ -597,7 +597,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                <div className={`p-8 rounded-[2.5rem] border ${isNocMode ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
                   <h2 className="text-lg font-black uppercase tracking-tighter mb-8 flex items-center gap-3">
                      <History size={24} className="text-emerald-400" />
-                     Audit Stream
+                     Activity Log
                   </h2>
                   <div className="space-y-6">
                      {state.securityLogs.slice(0, 5).map(log => (

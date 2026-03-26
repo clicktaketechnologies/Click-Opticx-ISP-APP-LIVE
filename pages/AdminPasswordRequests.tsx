@@ -34,13 +34,13 @@ const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none">
             <Key className="text-amber-500" size={32} />
-            Hardware Credential Queue
+            Wi-Fi Password Requests
           </h2>
-          <p className="text-slate-500 font-medium">Auditing subscriber Wi-Fi password reset handshakes and OLT push requests.</p>
+          <p className="text-slate-500 font-medium">Review and approve Wi-Fi password changes requested by your users.</p>
         </div>
         <div className="px-6 py-3 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
-          <span className="text-[10px] font-black uppercase text-slate-700">{pendingRequests.length} Pending Handshakes</span>
+          <span className="text-[10px] font-black uppercase text-slate-700">{pendingRequests.length} Requests Waiting</span>
         </div>
       </div>
 
@@ -57,16 +57,16 @@ const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {
                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{new Date(req.timestamp).toLocaleString()}</p>
                     </div>
                  </div>
-                 <div className="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">WIFI Protocol Reset</div>
+                 <div className="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">Wi-Fi Password Reset</div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-10 relative z-10">
                  <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Target SSID</p>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Wi-Fi Name (SSID)</p>
                     <p className="text-lg font-black text-slate-800 uppercase tracking-tighter truncate">{req.ssid}</p>
                  </div>
                  <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Proposed Secret</p>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">New Password</p>
                     <p className="text-lg font-black text-slate-800 uppercase tracking-tighter truncate">••••••••</p>
                  </div>
               </div>
@@ -77,7 +77,7 @@ const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {
                    onClick={() => handleAction(req.id, 'reject')}
                    className="flex-1 py-5 bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95"
                  >
-                    Reject Identity
+                    Reject Request
                  </button>
                  <button 
                    disabled={!!isProcessing}
@@ -85,7 +85,7 @@ const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {
                    className="flex-[2] py-5 bg-indigo-600 text-white hover:bg-indigo-700 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-100 transition-all active:scale-95 flex items-center justify-center gap-3"
                  >
                     {isProcessing === req.id ? <Mini5GMicroLoader /> : <ShieldCheck size={20} />}
-                    Push to Node
+                    Approve & Update Router
                  </button>
               </div>
               <Activity className="absolute -right-12 -bottom-12 opacity-[0.03] scale-[3] text-indigo-900 pointer-events-none" size={200} />
@@ -93,18 +93,18 @@ const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {
          ))}
          
          {pendingRequests.length === 0 && (
-           <div className="col-span-full bg-white p-32 rounded-[4rem] border-4 border-dashed border-slate-50 flex flex-col items-center text-center">
-              <ShieldCheck className="text-slate-100 mb-8" size={80} />
-              <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">Queue Synchronized</h3>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">No pending password reset handshakes detected in the registry.</p>
-           </div>
+            <div className="col-span-full bg-white p-32 rounded-[4rem] border-4 border-dashed border-slate-50 flex flex-col items-center text-center">
+               <ShieldCheck className="text-slate-100 mb-8" size={80} />
+               <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">No Pending Requests</h3>
+               <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">No one is currently waiting for a Wi-Fi password reset.</p>
+            </div>
          )}
       </div>
 
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
          <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-               <History size={14} className="text-indigo-600"/> Handshake Audit Trail
+               <History size={14} className="text-indigo-600"/> Recent History
             </h3>
          </div>
          <div className="divide-y divide-slate-50">

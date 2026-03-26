@@ -3,7 +3,7 @@ import { AppState, SystemSettings, TechnicalConfig } from '../types';
 import { db } from '../db';
 import {
   Settings, Building2, Save, Info, Lock, Database,
-  CreditCard, ChevronRight, Banknote, Globe, Signal, Cpu,
+  CreditCard, ChevronRight, Banknote, Globe, Wifi, Cpu,
   Layers, Zap, Smartphone, Plus, Trash2, Edit3, CheckCircle, Flame
 } from 'lucide-react';
 import ModuleGuide from '../components/shared/ModuleGuide';
@@ -18,38 +18,38 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
     await db.updateSettings(formData);
     setTimeout(() => {
       setIsSaving(false);
-      db.logNotification('all', 'success', 'Config Applied', 'Global infrastructure nodes updated.');
+      db.logNotification('all', 'success', 'Configuration Saved', 'System rules and pricing have been successfully updated.');
     }, 800);
   };
 
   const tabs = [
-    { id: 'business', label: 'Organization', icon: Building2 },
-    { id: 'gateways', label: 'Payment Gateways', icon: CreditCard },
-    { id: 'tech', label: 'Tech Config', icon: Signal },
-    { id: 'security', label: 'Access Layer', icon: Lock },
+    { id: 'business', label: 'Business Info', icon: Building2 },
+    { id: 'gateways', label: 'Payment Methods', icon: CreditCard },
+    { id: 'tech', label: 'Installation Pricing', icon: Wifi },
+    { id: 'security', label: 'Security & Access', icon: Lock },
   ];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-12">
       <ModuleGuide
-        moduleName="Global Control"
-        description="System parameters, hardware pricing, and gateway security."
+        moduleName="System Settings"
+        description="Manage infrastructure costs, payment methods, and core system rules."
         items={[
-          { title: "Organization Dossier", description: "Manage brand identity, corporate titles, and fiscal identifiers (Tax ID) for official documents." },
-          { title: "Topology Engine", description: "Define material pricing for CAT6 and Fiber infrastructure to automate deployment estimates." },
-          { title: "Payment Gateways", description: "Enable or disable physical and digital payment gateways for regional commercial operations." }
+          { title: "Business Info", description: "Manage brand identity, business names, and tax identifiers for official documents." },
+          { title: "Installation Pricing", description: "Define material pricing for CAT6 and Fiber infrastructure to automate deployment estimates." },
+          { title: "Payment Methods", description: "Enable or disable physical and digital payment options for your customers." }
         ]}
       />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
             <Settings className="text-blue-600" size={32} />
-            Global Control
+            System Settings
           </h2>
-          <p className="text-slate-500 font-medium">Centrally manage system parameters and commercial gateway logic.</p>
+          <p className="text-slate-500 font-medium">Manage infrastructure costs, payment methods, and core system rules.</p>
         </div>
         <button onClick={handleSave} disabled={isSaving} className="px-10 py-5 bg-emerald-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-2xl active:scale-95 disabled:opacity-50">
-          {isSaving ? 'Synchronizing...' : 'Save Configuration'}
+          {isSaving ? 'Updating...' : 'Save Configuration'}
         </button>
       </div>
 
@@ -75,10 +75,10 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
             {/* Business Tab */}
             {activeTab === 'business' && (
               <div className="space-y-10 animate-in slide-in-from-right-4">
-                <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Building2 className="text-blue-500" size={32} /> Organization Dossier</h3>
+                <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Building2 className="text-blue-500" size={32} /> Business Info</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Corporate Title</label><input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg" value={formData.branding.businessName} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, businessName: e.target.value } })} /></div>
-                  <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Financial Identifier (Tax ID)</label><input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg" value={formData.taxId} onChange={e => setFormData({ ...formData, taxId: e.target.value })} /></div>
+                  <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Business Name</label><input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg" value={formData.branding.businessName} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, businessName: e.target.value } })} /></div>
+                  <div className="space-y-2"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Tax / Registration ID</label><input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg" value={formData.taxId} onChange={e => setFormData({ ...formData, taxId: e.target.value })} /></div>
                 </div>
               </div>
             )}
@@ -87,26 +87,26 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
             {activeTab === 'tech' && (
               <div className="space-y-12 animate-in slide-in-from-right-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Signal className="text-indigo-600" size={32} /> Topology Engine</h3>
+                  <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Wifi className="text-indigo-600" size={32} /> Installation Pricing</h3>
                 </div>
 
                 {/* Wireless Config */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                     <Zap className="text-amber-500" size={20} />
-                    <h4 className="text-sm font-black uppercase tracking-widest">Wireless Infrastructure Pricing</h4>
+                    <h4 className="text-sm font-black uppercase tracking-widest">Wireless (WiFi) Parts Pricing</h4>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">CAT6 Price/Meter</label>
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">CAT6 Cable (per meter)</label>
                       <input type="number" className="w-full p-4 bg-slate-50 border rounded-xl font-black" value={formData.techConfig.wireless.cat6PricePerMeter} onChange={e => setFormData({ ...formData, techConfig: { ...formData.techConfig, wireless: { ...formData.techConfig.wireless, cat6PricePerMeter: Number(e.target.value) } } })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Clip Price/Unit</label>
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Cable Clips (per unit)</label>
                       <input type="number" className="w-full p-4 bg-slate-50 border rounded-xl font-black" value={formData.techConfig.wireless.clipPrice} onChange={e => setFormData({ ...formData, techConfig: { ...formData.techConfig, wireless: { ...formData.techConfig.wireless, clipPrice: Number(e.target.value) } } })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Raval Bold/Pair</label>
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Raval Bold (per pair)</label>
                       <input type="number" className="w-full p-4 bg-slate-50 border rounded-xl font-black" value={formData.techConfig.wireless.ravalBoldPricePerPair} onChange={e => setFormData({ ...formData, techConfig: { ...formData.techConfig, wireless: { ...formData.techConfig.wireless, ravalBoldPricePerPair: Number(e.target.value) } } })} />
                     </div>
                   </div>
@@ -116,15 +116,15 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 pb-2 border-b border-slate-100">
                     <Flame className="text-blue-500" size={20} />
-                    <h4 className="text-sm font-black uppercase tracking-widest">Fiber Path Infrastructure</h4>
+                    <h4 className="text-sm font-black uppercase tracking-widest">Fiber Optic Parts Pricing</h4>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Fiber Price/Meter</label>
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Fiber Cable (per meter)</label>
                       <input type="number" className="w-full p-4 bg-slate-50 border rounded-xl font-black" value={formData.techConfig.fiber.wirePricePerMeter} onChange={e => setFormData({ ...formData, techConfig: { ...formData.techConfig, fiber: { ...formData.techConfig.fiber, wirePricePerMeter: Number(e.target.value) } } })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Base Installation</label>
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Standard Installation Fee</label>
                       <input type="number" className="w-full p-4 bg-slate-50 border rounded-xl font-black" value={formData.techConfig.fiber.baseInstallation} onChange={e => setFormData({ ...formData, techConfig: { ...formData.techConfig, fiber: { ...formData.techConfig.fiber, baseInstallation: Number(e.target.value) } } })} />
                     </div>
                   </div>
@@ -135,7 +135,7 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
             {/* Gateway Tab */}
             {activeTab === 'gateways' && (
               <div className="space-y-10 animate-in slide-in-from-right-4">
-                <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><CreditCard className="text-indigo-500" size={32} /> Payment Gateways</h3>
+                <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><CreditCard className="text-indigo-500" size={32} /> Payment Methods</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {(() => {
                     const cashGateway = formData.paymentGateways.find(g => g.id === 'cash');
@@ -145,7 +145,7 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-4">
                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${isCashEnabled ? 'bg-emerald-600' : 'bg-slate-400'}`}><Banknote size={24} /></div>
-                            <span className="font-black text-slate-900 uppercase tracking-widest">Physical Cash</span>
+                            <span className="font-black text-slate-900 uppercase tracking-widest">Cash Payments</span>
                           </div>
                           <button
                             onClick={() => {
@@ -156,10 +156,10 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
                             }}
                             className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${isCashEnabled ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-400'}`}
                           >
-                            {isCashEnabled ? 'Active' : 'Off'}
+                            {isCashEnabled ? 'Enabled' : 'Disabled'}
                           </button>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase">Allow subscribers to initiate activation requests by committing to physical cash payment at regional shops.</p>
+                        <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase">Allow users to pay with cash at your office or authorized shops.</p>
                       </div>
                     );
                   })()}

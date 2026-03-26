@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-   Cpu, Signal, Network, Globe, Plus, X, Pencil, Trash2, 
+   Cpu, Wifi, Network, Globe, Plus, X, Pencil, Trash2, 
    Activity, RefreshCw, AlertTriangle, CheckCircle, Search, 
    ChevronRight, Zap, Info, DatabaseZap, Monitor, HardDrive, Settings, Trash, Eye
 } from 'lucide-react';
@@ -89,7 +89,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                <div>
                   <h1 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none">OLT Management</h1>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
-                     <Signal size={12} className="text-blue-500" /> Infrastructure Access Hub
+                     <Wifi size={12} className="text-blue-500" /> Infrastructure Access Hub
                   </p>
                </div>
             </div>

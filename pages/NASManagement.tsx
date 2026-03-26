@@ -2,7 +2,7 @@ import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useState } from 'react';
 import { 
    Server, ShieldCheck, Activity, RefreshCw, Plus, X, Pencil, Trash2, 
-   Cpu, Signal, Network, Globe, AlertTriangle, CheckCircle, Search, 
+   Cpu, Wifi, Network, Globe, AlertTriangle, CheckCircle, Search, 
    ChevronRight, Zap, Info, DatabaseZap, HardDrive
 } from 'lucide-react';
 import { AppState, NASConfig } from '../types';

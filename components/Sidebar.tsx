@@ -5,7 +5,7 @@ import { db } from '../db';
 import {
   LayoutDashboard, Users, Package,
   Receipt, Wallet, ShieldCheck, LogOut,
-  Signal, Building2, FileText, Search, FileInput, ShieldAlert, Server, Smartphone, Zap, CreditCard, BarChart3, Trophy, ChevronRight, Network,
+  Wifi, Building2, FileText, Search, FileInput, ShieldAlert, Server, Smartphone, Zap, CreditCard, BarChart3, Trophy, ChevronRight, Network,
   ClipboardList, LifeBuoy, ListTodo, Info, Database, Monitor, Key, HardDrive, Map, Cpu, Sparkles, Calculator, History, Activity, Mic,
   Mail, Send, ListChecks, BellRing, Settings, UserCheck
 } from 'lucide-react';
@@ -38,82 +38,82 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
   const sections: SidebarSection[] = [
     {
       title: null,
-      items: [{ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }]
+      items: [{ id: 'dashboard', label: 'Business Overview', icon: LayoutDashboard }]
     },
     {
-      title: 'AI & Automation',
+      title: 'AI Assistant',
       items: [
-        { id: 'ai-control', label: 'AI Control Plane', icon: Cpu },
-        { id: 'ai-calling', label: 'AI Voice Relay', icon: Mic },
-        { id: 'ai-call-logs', label: 'AI Call History', icon: History },
-        { id: 'monitor', label: 'System Health', icon: Server },
+        { id: 'ai-control', label: 'AI System', icon: Cpu },
+        { id: 'ai-calling', label: 'AI Call System', icon: Mic },
+        { id: 'ai-call-logs', label: 'Call Logs', icon: History },
+        { id: 'monitor', label: 'System Status', icon: Server },
       ]
     },
     {
-      title: 'Communication Hub',
+      title: 'Messages & Notifications',
       items: [
-        { id: 'comm-campaigns', label: 'Email Campaigns', icon: Send },
+        { id: 'comm-campaigns', label: 'Email Messages', icon: Send },
         { id: 'comm-templates', label: 'Email Templates', icon: FileText },
-        { id: 'comm-rules', label: 'Automation Rules', icon: Zap },
-        { id: 'comm-push', label: 'Push Relay', icon: BellRing },
-        { id: 'comm-segments', label: 'Segments', icon: Users },
-        { id: 'comm-logs', label: 'Delivery Logs', icon: ListChecks },
-        { id: 'comm-settings', label: 'Dispatch Hub', icon: Zap },
+        { id: 'comm-rules', label: 'Auto Messages', icon: Zap },
+        { id: 'comm-push', label: 'Send Notifications', icon: BellRing },
+        { id: 'comm-segments', label: 'User Groups', icon: Users },
+        { id: 'comm-logs', label: 'Message History', icon: ListChecks },
+        { id: 'comm-settings', label: 'Email Settings', icon: Zap },
       ]
 
     },
     {
-      title: 'Network Operations',
+      title: 'Network Monitor',
       items: [
         { id: 'admin-live-monitoring', label: 'Network Monitor', icon: Monitor },
-        { id: 'noc-dashboard', label: 'NOC Command Center', icon: Zap },
-        { id: 'admin-devices', label: 'Network Devices', icon: HardDrive },
-        { id: 'admin-device-mapping', label: 'Device Mapping', icon: Map },
-        { id: 'connection-setup', label: 'Connection Setup', icon: Network },
-        { id: 'nas-management', label: 'NAS Control Plane', icon: Server },
-        { id: 'olt-management', label: 'OLT Control Hub', icon: Monitor },
-        { id: 'tasks', label: 'Task Manager', icon: ListTodo },
+        { id: 'noc-dashboard', label: 'Network Control Panel', icon: Zap },
+        { id: 'admin-devices', label: 'OLT Devices', icon: HardDrive },
+        { id: 'admin-device-mapping', label: 'User Device Mapping', icon: Map },
+        { id: 'connection-setup', label: 'Setup Connection', icon: Network },
+        { id: 'nas-management', label: 'Router Settings', icon: Server },
+        { id: 'olt-management', label: 'OLT Settings', icon: Monitor },
+        { id: 'tasks', label: 'Tasks', icon: ListTodo },
         { id: 'tickets', label: 'Support Tickets', icon: LifeBuoy },
       ]
     },
     {
-      title: 'User Management',
+      title: 'Users & System',
       items: [
-        { id: 'users', label: 'User Database', icon: Users },
-        { id: 'customer-360', label: 'Search Users', icon: Search },
-        { id: 'approval-desk', label: 'Approval Desk', icon: ShieldCheck },
-        { id: 'admin-password-requests', label: 'Reset Requests', icon: Key },
-        { id: 'user-app', label: 'User App Settings', icon: Smartphone },
-        { id: 'dealers', label: 'Partners', icon: Building2 },
+        { id: 'users', label: 'All Users', icon: Users },
+        { id: 'customer-360', label: 'Find Users', icon: Search },
+        { id: 'approval-desk', label: 'Approval Requests', icon: ShieldCheck },
+        { id: 'admin-password-requests', label: 'Password Reset Requests', icon: Key },
+        { id: 'user-app', label: 'App Settings', icon: Smartphone },
+        { id: 'dealers', label: 'Dealers / Partners', icon: Building2 },
       ]
     },
     {
-      title: 'Payments & Finance',
+      title: 'Billing & Payments',
       items: [
-        { id: 'invoice-engine', label: 'Billing Engine', icon: Calculator },
+        { id: 'invoice-engine', label: 'Billing System', icon: Calculator },
         { id: 'invoice-management', label: 'Invoices', icon: ClipboardList },
-        { id: 'gateway-settings', label: 'Payment Gateways', icon: CreditCard },
-        { id: 'recovery', label: 'Recovery Module', icon: Receipt },
-        { id: 'wallet', label: 'Financial Wallet', icon: Wallet },
-        { id: 'accounting', label: 'Financial Ledger', icon: History },
-        { id: 'emergency-load', label: 'Emergency Loads', icon: Zap },
-        { id: 'admin-reminders', label: 'Admin Reminders', icon: BellRing },
+        { id: 'gateway-settings', label: 'Payment Methods', icon: CreditCard },
+        { id: 'recovery', label: 'Payment Recovery', icon: Receipt },
+        { id: 'wallet', label: 'Wallet & Balance', icon: Wallet },
+        { id: 'accounting', label: 'Transaction History', icon: History },
+        { id: 'emergency-load', label: 'Emergency Balance', icon: Zap },
+        { id: 'admin-reminders', label: 'Admin Alerts', icon: BellRing },
       ]
     },
     {
-      title: 'Packages & Plans',
+      title: 'Internet Packages',
       items: [
-        { id: 'packages', label: 'ISP Packages', icon: Package },
-        { id: 'import', label: 'Bulk Operations', icon: FileInput },
-        { id: 'archive', label: 'Archives', icon: Database },
+        { id: 'packages', label: 'Internet Packages', icon: Package },
+        { id: 'import', label: 'Import Users', icon: FileInput },
+        { id: 'archive', label: 'Old Records', icon: Database },
       ]
     },
     {
-      title: 'Security & Permissions',
+      title: 'Staff Management',
       items: [
-        { id: 'staff', label: 'Staff Accounts', icon: ShieldAlert },
-        { id: 'permissions', label: 'Permissions', icon: ShieldCheck },
-        { id: 'auth-control', label: 'Auth Control Center', icon: Key },
+        { id: 'staff', label: 'Staff Management', icon: ShieldAlert },
+        { id: 'permissions', label: 'Roles & Permissions', icon: ShieldCheck },
+        { id: 'auth-control', label: 'Login & Security Settings', icon: Key },
       ]
     },
     {
@@ -189,7 +189,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
             ) : branding.logoSquare ? (
               <img src={branding.logoSquare} className="w-full h-full object-contain p-1" />
             ) : (
-              <Signal className="text-indigo-500" size={24} />
+              <Wifi className="text-indigo-500" size={24} />
             )}
           </div>
           <div>

@@ -17,13 +17,13 @@ const SubscriberTasbih: React.FC = () => {
   return (
     <div className="space-y-12 animate-in fade-in duration-500 flex flex-col items-center">
       <div className="text-center space-y-2">
-        <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em]">Spiritual Pulse Registry</h3>
+        <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em]">Digital Counting</h3>
         <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">Digital Tasbih</h2>
       </div>
 
       <div className="relative">
         <div className={`w-72 h-72 bg-slate-950 rounded-[4rem] shadow-[0_40px_100px_rgba(0,0,0,0.15)] border-[12px] border-slate-900 flex flex-col items-center justify-center transition-all duration-150 ${isPulsing ? 'scale-95 border-indigo-600 shadow-indigo-500/20' : ''}`}>
-           <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-4">Registry Cycle</p>
+           <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-4">Current Count</p>
            <h2 className="text-8xl font-black text-white italic tracking-tighter leading-none">{count}</h2>
            <p className="text-[11px] font-black text-slate-600 uppercase mt-4">Target: {target}</p>
         </div>
@@ -52,13 +52,13 @@ const SubscriberTasbih: React.FC = () => {
         className="w-48 h-48 bg-indigo-600 text-white rounded-full shadow-[0_30px_60px_rgba(79,70,229,0.3)] hover:bg-indigo-700 active:scale-90 transition-all flex flex-col items-center justify-center group border-[8px] border-white/20"
       >
         <Fingerprint size={64} className="group-hover:scale-110 transition-transform mb-2" />
-        <span className="text-[10px] font-black uppercase tracking-widest opacity-60 italic">Engage Link</span>
+        <span className="text-[10px] font-black uppercase tracking-widest opacity-60 italic">Count</span>
       </button>
 
       <div className="bg-slate-900 rounded-3xl p-6 w-full max-w-sm flex items-center justify-between text-white shadow-xl relative overflow-hidden">
          <div className="relative z-10">
-            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Lifetime Pulse Registry</p>
-            <h4 className="text-xl font-black text-indigo-400 italic">24,482 Cycles</h4>
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Progress Tiers</p>
+            <h4 className="text-xl font-black text-indigo-400 italic">Keep tracking your spiritual cycles digitally.</h4>
          </div>
          <History className="text-indigo-500/20 absolute -right-4 -bottom-4" size={100} />
       </div>

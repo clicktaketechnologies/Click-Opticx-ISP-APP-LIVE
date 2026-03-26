@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { AppState, ISPUser, SystemNotification } from '../../types';
-import { Bell, Receipt, Signal, User, ShieldAlert, Clock, CheckCircle, Trash2, ListChecks } from 'lucide-react';
+import { Bell, Receipt, Wifi, User, ShieldAlert, Clock, CheckCircle, Trash2, ListChecks } from 'lucide-react';
 import { db } from '../../db';
 
 const SubscriberNotifications: React.FC<{ user: ISPUser, state: AppState }> = ({ user, state }) => {
@@ -13,7 +13,7 @@ const SubscriberNotifications: React.FC<{ user: ISPUser, state: AppState }> = ({
   }, [state.notifications, user.id]);
 
   const handleClear = async () => {
-    if (confirm("PURGE PROTOCOL: Are you sure you want to clear all notifications from your terminal registry?")) {
+    if (confirm("Are you sure you want to clear all notifications?")) {
       await db.clearNotifications(user.id, 'subscriber');
     }
   };
@@ -31,8 +31,8 @@ const SubscriberNotifications: React.FC<{ user: ISPUser, state: AppState }> = ({
                   <Bell size={24} />
                </div>
                <div>
-                  <h3 className="text-lg font-black uppercase tracking-tight italic">Personal Relay</h3>
-                  <p className="text-[9px] text-indigo-300 font-black uppercase tracking-widest">Subscriber Node Handshakes</p>
+                  <h3 className="text-lg font-black uppercase tracking-tight italic">Your Notifications</h3>
+                  <p className="text-[9px] text-indigo-300 font-black uppercase tracking-widest">Recent Account Activity</p>
                </div>
             </div>
             <div className="flex gap-2">
@@ -56,8 +56,8 @@ const SubscriberNotifications: React.FC<{ user: ISPUser, state: AppState }> = ({
          <div className="divide-y divide-slate-50 overflow-y-auto max-h-[600px] custom-scrollbar">
             {userNotifs.length === 0 ? (
               <div className="p-32 text-center flex flex-col items-center">
-                 <Signal size={48} className="text-slate-100 mb-6" />
-                 <p className="text-slate-400 font-black uppercase tracking-widest text-xs">No active alerts in registry node.</p>
+                 <Wifi size={48} className="text-slate-100 mb-6" />
+                 <p className="text-slate-400 font-black uppercase tracking-widest text-xs">No new notifications.</p>
               </div>
             ) : (
               userNotifs.map(n => (

@@ -40,7 +40,7 @@ const SubscriberSupport: React.FC = () => {
     setShowTicketForm(false);
     setFormData({ subject: '', category: 'Technical', priority: TicketPriority.MEDIUM, description: '' });
     // Fixed: Expected 4 arguments, but got 3. Added user.id as targetId.
-    db.logNotification(user.id, 'success', 'Ticket Dispatched', 'Your support request has been logged in the registry.');
+    db.logNotification(user.id, 'success', 'Ticket Submitted', 'Your support request has been submitted.');
   };
 
   const getStatusColor = (s: TicketStatus) => {
@@ -57,11 +57,11 @@ const SubscriberSupport: React.FC = () => {
       <div className="bg-slate-950 rounded-[3rem] p-10 text-white border border-white/5 shadow-xl relative overflow-hidden group">
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
            <div className="space-y-4 max-w-md">
-              <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">Support Command</h2>
-              <p className="text-sm text-slate-400 font-bold leading-relaxed uppercase pt-2">Our technical registry node is operational during {cfg.workingHoursWeekdays} (Weekdays) and {cfg.workingHoursWeekends} (Weekends). Connect with a human agent for regional infrastructure handshakes.</p>
+              <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">Help & Support</h2>
+              <p className="text-sm text-slate-400 font-bold leading-relaxed uppercase pt-2">Our support team is available during {cfg.workingHoursWeekdays} (Weekdays) and {cfg.workingHoursWeekends} (Weekends). Connect with a human agent for any internet related queries.</p>
               <div className="flex items-center gap-3 text-emerald-400">
                  <div className={`w-2.5 h-2.5 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)] ${cfg.emergencySupport ? 'bg-emerald-400' : 'bg-rose-50'}`}></div>
-                 <span className="text-[10px] font-black uppercase tracking-widest">Global Node: {cfg.emergencySupport ? 'Operational' : 'Maintenance'}</span>
+                 <span className="text-[10px] font-black uppercase tracking-widest">Support Status: {cfg.emergencySupport ? 'Available' : 'Offline'}</span>
               </div>
            </div>
            <div className="w-48 h-48 bg-white/5 rounded-full flex items-center justify-center text-indigo-400 shadow-2xl relative border border-white/10 backdrop-blur-md">
@@ -75,13 +75,13 @@ const SubscriberSupport: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-8">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-               <MessageSquare size={16} className="text-indigo-600"/> Rapid Handshakes
+               <MessageSquare size={16} className="text-indigo-600"/> Contact Options
             </h3>
             <div className="space-y-4">
                {[
-                 { label: 'WhatsApp Relay', icon: MessageSquare, sub: cfg.whatsapp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                 { label: 'Voice Link', icon: Phone, sub: cfg.phone, color: 'text-blue-500', bg: 'bg-blue-50' },
-                 { label: 'Registry Mail', icon: Mail, sub: cfg.email, color: 'text-rose-500', bg: 'bg-rose-50' }
+                 { label: 'WhatsApp', icon: MessageSquare, sub: cfg.whatsapp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                 { label: 'Phone', icon: Phone, sub: cfg.phone, color: 'text-blue-500', bg: 'bg-blue-50' },
+                 { label: 'Email', icon: Mail, sub: cfg.email, color: 'text-rose-500', bg: 'bg-rose-50' }
                ].map(chan => (
                  <button key={chan.label} className="w-full p-6 bg-slate-100 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all border-2 border-transparent hover:border-indigo-600">
                     <div className="flex items-center gap-5">
@@ -99,7 +99,7 @@ const SubscriberSupport: React.FC = () => {
 
          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-8 flex flex-col">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-               <LifeBuoy size={16} className="text-indigo-600"/> Ticket Registry
+               <LifeBuoy size={16} className="text-indigo-600"/> Support Tickets
             </h3>
             
             <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar max-h-[300px] pr-2">
@@ -116,7 +116,7 @@ const SubscriberSupport: React.FC = () => {
                {userTickets.length === 0 && (
                  <div className="h-full flex flex-col items-center justify-center text-center py-10 opacity-40">
                     <Clock size={32} className="text-slate-300 mb-2" />
-                    <p className="text-[9px] font-black uppercase tracking-widest">No active cases</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest">No active tickets</p>
                  </div>
                )}
             </div>
@@ -138,9 +138,9 @@ const SubscriberSupport: React.FC = () => {
                     <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
                        <Plus size={28} />
                     </div>
-                    <div>
+                     <div>
                        <h3 className="text-2xl font-black uppercase italic tracking-tighter">Open Ticket</h3>
-                       <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest">Dossier Initialization</p>
+                       <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest">New Support Request</p>
                     </div>
                  </div>
                  <button onClick={() => setShowTicketForm(false)} className="p-3 hover:bg-white/10 rounded-2xl text-slate-500 hover:text-white transition-all"><X size={32} /></button>
@@ -149,7 +149,7 @@ const SubscriberSupport: React.FC = () => {
               <form onSubmit={handleSubmit} className="p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1">
                  <div className="space-y-6">
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Incident Category</label>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Category</label>
                        <div className="grid grid-cols-2 gap-3">
                           {['Technical', 'Billing', 'Sales', 'Upgrade'].map(cat => (
                             <button 
@@ -168,7 +168,7 @@ const SubscriberSupport: React.FC = () => {
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Subject</label>
                        <input 
                          className="w-full p-5 bg-slate-100 border-none rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 uppercase placeholder:lowercase"
-                         placeholder="Brief summary of incident..."
+                         placeholder="Brief summary of your issue..."
                          value={formData.subject}
                          onChange={e => setFormData({...formData, subject: e.target.value})}
                          required
@@ -176,7 +176,7 @@ const SubscriberSupport: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Priority Protocol</label>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Priority</label>
                        <select 
                          className="w-full p-4 bg-slate-100 border-none rounded-2xl font-black text-slate-700 outline-none uppercase text-xs"
                          value={formData.priority}
@@ -187,10 +187,10 @@ const SubscriberSupport: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Incident Dossier (Description)</label>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
                        <textarea 
                          className="w-full p-5 bg-slate-100 border-none rounded-2xl font-bold text-xs h-32 resize-none outline-none focus:ring-4 focus:ring-indigo-500/10 uppercase"
-                         placeholder="Describe the network fault in detail..."
+                         placeholder="Please describe your issue in detail..."
                          value={formData.description}
                          onChange={e => setFormData({...formData, description: e.target.value})}
                          required
@@ -201,20 +201,20 @@ const SubscriberSupport: React.FC = () => {
                  <div className="p-6 bg-blue-50 border border-blue-100 rounded-3xl flex items-start gap-4">
                     <AlertTriangle size={24} className="text-blue-600 shrink-0 mt-1" />
                     <p className="text-[9px] text-blue-700 font-bold uppercase leading-relaxed tracking-tighter">
-                       Standard SLA for technical handshakes is 4-6 business hours. High priority nodes are audited within 2 hours.
+                       Standard response time is within 4-6 business hours. High priority issues are addressed as soon as possible.
                     </p>
                  </div>
               </form>
 
               <div className="p-10 bg-slate-100 border-t flex gap-4 shrink-0">
-                 <button onClick={() => setShowTicketForm(false)} className="flex-1 py-5 font-black text-slate-500 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Abandon</button>
+                 <button onClick={() => setShowTicketForm(false)} className="flex-1 py-5 font-black text-slate-500 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Cancel</button>
                  <button 
                    onClick={handleSubmit}
                    disabled={isSubmitting || !formData.subject || !formData.description}
                    className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
                     {isSubmitting ? <Mini5GMicroLoader size={18} /> : <Send size={18}/>}
-                    Dispatch Ticket
+                    Send Ticket
                  </button>
               </div>
            </div>

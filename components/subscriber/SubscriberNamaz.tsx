@@ -141,7 +141,7 @@ const SubscriberNamaz: React.FC = () => {
         <div className="w-20 h-20 bg-slate-900 rounded-[2rem] flex items-center justify-center shadow-2xl">
           <Mini5GMicroLoader size={40} />
         </div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Querying Aladhan Nodes...</p>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Loading Prayer Times...</p>
       </div>
     );
   }
@@ -154,14 +154,14 @@ const SubscriberNamaz: React.FC = () => {
               <AlertTriangle size={32} />
            </div>
            <div className="space-y-2">
-              <h3 className="text-xl font-black text-rose-900 uppercase italic">Atmospheric Link Error</h3>
+              <h3 className="text-xl font-black text-rose-900 uppercase italic">Connection Error</h3>
               <p className="text-[10px] text-rose-700 font-bold uppercase tracking-widest">{fetchError}</p>
            </div>
            <button 
              onClick={() => fetchTimes()}
              className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
            >
-              <RefreshCw size={16} /> Re-Initialize Link
+              <RefreshCw size={16} /> Re-Sync
            </button>
         </div>
       ) : (
@@ -170,7 +170,7 @@ const SubscriberNamaz: React.FC = () => {
             <div className="relative z-10 space-y-10">
                <div className="flex justify-between items-start">
                   <div>
-                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Authority Node</p>
+                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Prayer Times</p>
                      <h3 className="text-2xl font-black italic tracking-tighter uppercase flex items-center gap-2">
                         <MapPin className="text-rose-500" size={20} />
                         {locationName}
@@ -194,9 +194,9 @@ const SubscriberNamaz: React.FC = () => {
                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${settings.alerts.enabled ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-500/20 text-slate-400'}`}>
                         {settings.alerts.enabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
                      </div>
-                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Azan Relay {settings.alerts.enabled ? 'Enabled' : 'Disabled'}</p>
+                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Azan {settings.alerts.enabled ? 'Enabled' : 'Disabled'}</p>
                   </div>
-                  <p className="text-xs font-black text-indigo-400 uppercase italic">{settings.asrMethod === 1 ? 'Hanafi' : 'Shafi'}</p>
+                  <p className="text-xs font-black text-indigo-400 uppercase italic">School: {settings.asrMethod === 1 ? 'Hanafi' : 'Shafi'}</p>
                </div>
             </div>
             <Timer className="absolute -right-20 -bottom-20 opacity-5 pointer-events-none" size={360} />
@@ -218,7 +218,7 @@ const SubscriberNamaz: React.FC = () => {
                     </div>
                     <div>
                       <h4 className={`text-base font-black uppercase tracking-widest leading-none ${passed ? 'text-slate-300' : 'text-slate-800'}`}>{p.name}</h4>
-                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter mt-1.5">{passed ? 'Registry Passed' : isNext ? 'Upcoming Handshake' : 'Registry Standby'}</p>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter mt-1.5">{passed ? 'Completed ✅' : isNext ? 'Coming up ⏳' : 'Standby ⏱️'}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-6">

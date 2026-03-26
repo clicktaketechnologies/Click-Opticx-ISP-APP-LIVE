@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { AppState, Role, StaffUser } from '../types';
 import { db } from '../db';
@@ -42,15 +41,15 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Staff & Access Control</h2>
-          <p className="text-slate-500">Manage internal users, assign roles, and define system permissions.</p>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Staff Management</h2>
+          <p className="text-slate-500">Add and manage your team members, their roles, and what they can access in the system.</p>
         </div>
         <button 
           onClick={() => handleOpenModal()}
           className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-100 active:scale-95"
         >
           <Plus size={18} />
-          Create Staff Account
+          + Add Staff Member
         </button>
       </div>
 
@@ -59,8 +58,8 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
           <thead className="bg-slate-50 border-b border-slate-100">
             <tr>
               <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Name / Email</th>
-              <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Assigned Role</th>
-              <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Status</th>
+              <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Role</th>
+              <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
               <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
             </tr>
           </thead>
@@ -93,7 +92,7 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
                     <button 
                       onClick={() => db.updateStaff(staff.email, { status: staff.status === 'Active' ? 'Suspended' : 'Active' })}
                       className={`p-2 rounded-lg transition-all ${staff.status === 'Active' ? 'text-red-400 hover:bg-red-50 hover:text-red-600' : 'text-emerald-400 hover:bg-emerald-50 hover:text-emerald-600'}`}
-                      title={staff.status === 'Active' ? 'Suspend Access' : 'Restore Access'}
+                      title={staff.status === 'Active' ? 'Disable Account' : 'Enable Account'}
                     >
                       <Power size={16} />
                     </button>
@@ -109,12 +108,12 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200 overflow-hidden border border-slate-100">
             <div className="p-6 border-b flex justify-between items-center bg-slate-50">
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight">{editingStaff ? 'Update Staff Permissions' : 'New Staff Account'}</h3>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight">{editingStaff ? 'Edit Staff Member' : 'Add New Staff Member'}</h3>
               <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-xl transition-all text-slate-400 hover:text-slate-900"><X size={24} /></button>
             </div>
             <div className="p-8 space-y-5">
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-2">Display Name</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-2">Full Name</label>
                 <input 
                   type="text" 
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
@@ -124,7 +123,7 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-2">Corporate Email</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-2">Email Address</label>
                 <input 
                   type="email" 
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
@@ -135,7 +134,7 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
                 />
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-2">System Role</label>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-2">Job Role / Permission Level</label>
                 <select 
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-bold text-slate-700"
                   value={formData.role}
@@ -146,7 +145,7 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
               </div>
               <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-xs text-blue-700 font-medium">
                 <Shield size={16} className="shrink-0" />
-                <p>Default credentials are set to 'superpass' for demo. Users should reset passwords on first sign-in.</p>
+                <p>Note: New staff members can login using 'superpass' initially. They should change their password after the first login.</p>
               </div>
             </div>
             <div className="p-6 bg-slate-50 border-t flex gap-4">
@@ -155,7 +154,7 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
                 onClick={handleSave}
                 className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-xl shadow-blue-200 active:scale-95 transition-all"
               >
-                {editingStaff ? 'Update Account' : 'Initialize Account'}
+                {editingStaff ? 'Update Account' : 'Add Staff Member'}
               </button>
             </div>
           </div>

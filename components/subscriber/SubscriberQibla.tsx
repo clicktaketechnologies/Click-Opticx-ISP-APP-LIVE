@@ -151,9 +151,9 @@ const SubscriberQibla: React.FC = () => {
   return (
     <div className="space-y-8 pb-24 animate-in fade-in duration-500 flex flex-col items-center">
       <div className="text-center space-y-2 w-full px-4">
-        <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em]">Geospatial Protocol</h3>
+        <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em]">Compass</h3>
         <div className="flex items-center justify-center gap-4">
-          <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">Qibla Locator</h2>
+          <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">Qibla Finder</h2>
           <button 
             onClick={() => setShowSelector(true)}
             className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm"
@@ -187,7 +187,7 @@ const SubscriberQibla: React.FC = () => {
                  </div>
                  <div className="flex-1 min-w-0">
                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">
-                       {location.source === 'GPS' ? 'Verified GPS Handshake' : 'Regional Timezone Node'}
+                       Accuracy: High ✅
                     </p>
                     <h4 className="text-lg font-black italic text-white uppercase tracking-tight truncate">{location.name}</h4>
                  </div>
@@ -209,9 +209,9 @@ const SubscriberQibla: React.FC = () => {
              <ShieldCheck size={20} className="text-blue-500" />
           </div>
           <div>
-            <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1">Node Calibration</p>
+            <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1">Calibration Tips:</p>
             <p className="text-[9px] text-blue-700 font-bold leading-relaxed uppercase opacity-80">
-              Bearing accuracy depends on stable magnetometer data. If the needle jitters, move your device in a 'Figure-8' motion to re-align registry sensors.
+              If the needle moves erratically, wave your device in a Figure-8 motion to realign.
             </p>
           </div>
         </div>

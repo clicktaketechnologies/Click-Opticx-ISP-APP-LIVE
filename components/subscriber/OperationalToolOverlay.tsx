@@ -2,7 +2,7 @@
 import React from 'react';
 import { 
   X, Zap, Gauge, Headphones, RefreshCw, 
-  ShieldAlert, Globe, Activity, Smartphone, Signal 
+  ShieldAlert, Globe, Activity, Smartphone, Wifi 
 } from 'lucide-react';
 
 interface Props {
@@ -69,7 +69,7 @@ const OperationalToolOverlay: React.FC<Props> = ({ onClose, onAction }) => {
                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Network POP Node</p>
                <h4 className="text-xl font-black italic text-indigo-400">KHI-NORTH-Z2</h4>
             </div>
-            <Signal className="text-white/10 absolute -right-4 -bottom-4" size={120} />
+            <Wifi className="text-white/10 absolute -right-4 -bottom-4" size={120} />
             <div className="relative z-10 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full text-[10px] font-black uppercase">
                Synced
             </div>

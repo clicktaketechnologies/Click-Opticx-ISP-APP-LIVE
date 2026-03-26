@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { AppState, SupportTicket, TicketStatus, TicketPriority, Role, NOCEvent } from '../types';
 import { db } from '../db';
@@ -62,7 +61,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
   const handleAssignTicket = async (id: string, email: string) => {
     await db.assignTicket(id, email);
-    db.logNotification(state.currentUser?.email || 'admin', 'info', 'Registry Assignment', `Ticket ${id} assigned to ${email}`);
+    db.logNotification(state.currentUser?.email || 'admin', 'info', 'Ticket Assigned', `Ticket has been assigned to ${email}`);
   };
 
   const handleAddComment = async () => {
@@ -76,7 +75,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
     await db.addNOCEvent(nocFormData);
     setIsAddNOCModalOpen(false);
     setNocFormData({ title: '', description: '', area: '', severity: 'Info' });
-    db.logNotification('all', 'warning', 'NOC Advisory', `New incident broadcasted: ${nocFormData.title}`);
+    db.logNotification('all', 'warning', 'Network Alert Issued', `New alert posted: ${nocFormData.title}`);
   };
 
   const getPriorityColor = (p: TicketPriority) => {
@@ -104,9 +103,9 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-slate-950 tracking-tight flex items-center gap-3 italic leading-none">
             <LifeBuoy className="text-indigo-600" size={32} />
-            Service Desk Authority
+            Support Tickets
           </h2>
-          <p className="text-slate-600 font-medium uppercase text-[10px] tracking-widest">Infrastructure Incident & Support Orchestration</p>
+          <p className="text-slate-600 font-medium uppercase text-[10px] tracking-widest">Manage customer support requests and network alerts</p>
         </div>
         <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
            <button 
@@ -119,7 +118,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
              onClick={() => setActiveTab('noc')}
              className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'noc' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
            >
-              <Activity size={16}/> NOC Events
+              <Activity size={16}/> Network Alerts
            </button>
         </div>
       </div>
@@ -132,7 +131,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
                   className="w-full pl-11 pr-4 py-4 bg-slate-100 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-black text-slate-900"
-                  placeholder="Audit tickets by keyword..."
+                  placeholder="Search tickets..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
@@ -143,7 +142,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                    value={statusFilter}
                    onChange={e => setStatusFilter(e.target.value)}
                  >
-                    <option value="All">All Status</option>
+                    <option value="All">All Statuses</option>
                     {Object.values(TicketStatus).map(s => <option key={s} value={s}>{s}</option>)}
                  </select>
                  <select 
@@ -151,7 +150,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                    value={priorityFilter}
                    onChange={e => setPriorityFilter(e.target.value)}
                  >
-                    <option value="All">All Priority</option>
+                    <option value="All">All Priorities</option>
                     {Object.values(TicketPriority).map(p => <option key={p} value={p}>{p}</option>)}
                  </select>
               </div>
@@ -161,7 +160,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                    value={assigneeFilter}
                    onChange={e => setAssigneeFilter(e.target.value)}
                  >
-                    <option value="All">All Assignees</option>
+                    <option value="All">All Assigned Staff</option>
                     {state.staff.map(s => <option key={s.email} value={s.email}>{s.name}</option>)}
                  </select>
                  <div className="grid grid-cols-2 gap-2">
@@ -173,14 +172,14 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                 onClick={() => { setStatusFilter('All'); setPriorityFilter('All'); setAssigneeFilter('All'); setDateStartFilter(''); setDateEndFilter(''); setSearchTerm(''); }}
                 className="w-full py-2 text-[8px] font-black uppercase text-slate-400 hover:text-indigo-600 transition-colors"
               >
-                Clear Audit Filters
+                Clear Filters
               </button>
             </div>
 
             <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[650px]">
                <div className="p-6 bg-slate-950 border-b border-white/5 flex items-center justify-between">
-                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Incident Registry</h3>
-                  <span className="text-[9px] font-black text-indigo-400 bg-white/5 px-2 py-0.5 rounded uppercase">Synced</span>
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ticket List</h3>
+                  <span className="text-[9px] font-black text-indigo-400 bg-white/5 px-2 py-0.5 rounded uppercase">Live</span>
                </div>
                <div className="divide-y divide-slate-100 overflow-y-auto custom-scrollbar flex-1 bg-white">
                   {filteredTickets.map(ticket => {
@@ -205,7 +204,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                          <div className="flex justify-between items-center pt-2">
                             <div className="flex items-center gap-2">
                                <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${getStatusColor(ticket.status)}`}>{ticket.status}</div>
-                               {ticket.assignedTo && <div className="p-1 bg-slate-100 rounded-lg text-[7px] font-black uppercase text-slate-500 border border-slate-200">A: {ticket.assignedTo.split('@')[0]}</div>}
+                               {ticket.assignedTo && <div className="p-1 bg-slate-100 rounded-lg text-[7px] font-black uppercase text-slate-500 border border-slate-200">Staff: {ticket.assignedTo.split('@')[0]}</div>}
                             </div>
                             <span className="text-[8px] font-black text-slate-400 uppercase">{new Date(ticket.createdAt).toLocaleDateString()}</span>
                          </div>
@@ -215,7 +214,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                   {filteredTickets.length === 0 && (
                     <div className="p-20 text-center flex flex-col items-center gap-4">
                        <CheckCircle size={48} className="text-slate-100" />
-                       <p className="text-slate-400 font-black uppercase tracking-widest text-[9px]">Queue Pristine</p>
+                       <p className="text-slate-400 font-black uppercase tracking-widest text-[9px]">Great! No tickets match these filters.</p>
                     </div>
                   )}
                </div>
@@ -226,9 +225,9 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
             {!selectedTicket ? (
               <div className="bg-white rounded-[3rem] border-4 border-dashed border-slate-200 h-full min-h-[600px] flex flex-col items-center justify-center text-center p-20">
                  <LifeBuoy className="text-slate-100 mb-8" size={80} />
-                 <h3 className="text-2xl font-black text-slate-950 uppercase tracking-tighter italic">Select Incident Dossier</h3>
+                 <h3 className="text-2xl font-black text-slate-950 uppercase tracking-tighter italic">Select a Ticket</h3>
                  <p className="text-slate-600 font-bold uppercase tracking-widest text-[10px] max-w-xs mt-2 leading-relaxed">
-                    Choose a support request from the registry node to begin resolution sequence.
+                    Choose a support ticket from the list on the left to view details and reply to the customer.
                  </p>
               </div>
             ) : (
@@ -237,7 +236,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="space-y-4 flex-1">
                        <div className="flex items-center gap-3">
                           <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${getPriorityColor(selectedTicket.priority)}`}>{selectedTicket.priority} Priority</span>
-                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Protocol: {selectedTicket.category}</span>
+                          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Category: {selectedTicket.category}</span>
                        </div>
                        <h3 className="text-3xl font-black uppercase tracking-tighter italic leading-none">{selectedTicket.subject}</h3>
                        <div className="flex items-center gap-4">
@@ -251,7 +250,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                     <div className="flex items-center gap-2">
                        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2">
-                          <p className="text-[8px] font-black uppercase text-slate-500">Assign Authority</p>
+                          <p className="text-[8px] font-black uppercase text-slate-500">Assigned To</p>
                           <select 
                             className="bg-transparent text-xs font-black uppercase outline-none text-indigo-400"
                             value={selectedTicket.assignedTo || ''}
@@ -267,13 +266,13 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
                  <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar bg-slate-50/50">
                     <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
-                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 italic">Original Incident Log</h4>
+                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 italic">Customer Description</h4>
                        <p className="text-sm font-bold text-slate-950 leading-relaxed uppercase whitespace-pre-wrap">{selectedTicket.description}</p>
                     </div>
 
                     <div className="space-y-6">
                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-200 pb-2">
-                          <Layers size={14} className="text-indigo-600" /> Correspondence Chain
+                          <Layers size={14} className="text-indigo-600" /> Conversation History
                        </h4>
                        <div className="space-y-4">
                           {selectedTicket.comments.map(comment => (
@@ -288,7 +287,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                             </div>
                           ))}
                           {selectedTicket.comments.length === 0 && (
-                            <p className="text-center py-10 text-slate-400 italic font-black uppercase text-[10px] tracking-widest">Awaiting internal response initialization.</p>
+                            <p className="text-center py-10 text-slate-400 italic font-black uppercase text-[10px] tracking-widest">No replies yet.</p>
                           )}
                        </div>
                     </div>
@@ -303,12 +302,11 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                        >
                           {Object.values(TicketStatus).map(s => <option key={s} value={s}>{s}</option>)}
                        </select>
-                       <button className="px-6 py-4 bg-slate-950 text-indigo-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all">Internal Note</button>
                     </div>
                     <div className="relative flex items-center gap-4">
                        <textarea 
                          className="flex-1 pl-6 pr-16 py-5 bg-slate-100 border-none rounded-3xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-sm h-16 resize-none uppercase"
-                         placeholder="Dispatch resolution protocol..."
+                         placeholder="Type your reply to the customer..."
                          value={commentText}
                          onChange={e => setCommentText(e.target.value)}
                        />
@@ -328,12 +326,12 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
       ) : (
         <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
            <div className="flex justify-between items-center px-4">
-              <h3 className="text-xl font-black text-slate-800 uppercase italic tracking-tighter">NOC Operational Advisories</h3>
+              <h3 className="text-xl font-black text-slate-800 uppercase italic tracking-tighter">Network Alerts</h3>
               <button 
                 onClick={() => setIsAddNOCModalOpen(true)}
                 className="flex items-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-100 hover:bg-rose-700 transition-all active:scale-95"
               >
-                <Plus size={18}/> Broadcast Incident
+                <Plus size={18}/> Post New Alert
               </button>
            </div>
            
@@ -360,7 +358,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                             <span className="text-[9px] font-black uppercase">{new Date(event.startTime).toLocaleString()}</span>
                          </div>
                          {event.status === 'Active' && (
-                           <button onClick={() => db.resolveNOCEvent(event.id)} className="text-emerald-600 font-black text-[10px] uppercase tracking-widest hover:underline transition-all">Mark Resolved</button>
+                           <button onClick={() => db.resolveNOCEvent(event.id)} className="text-emerald-600 font-black text-[10px] uppercase tracking-widest hover:underline transition-all">Mark as Resolved</button>
                          )}
                       </div>
                    </div>
@@ -381,8 +379,8 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                        <Activity size={28} />
                     </div>
                     <div>
-                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">NOC Broadcast</h3>
-                       <p className="text-rose-100 text-[10px] font-black uppercase tracking-widest">New Incident Advisory</p>
+                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">New Network Alert</h3>
+                       <p className="text-rose-100 text-[10px] font-black uppercase tracking-widest">Post a public service announcement</p>
                     </div>
                  </div>
                  <button onClick={() => setIsAddNOCModalOpen(false)} className="p-3 hover:bg-white/10 rounded-2xl text-rose-100 hover:text-white transition-all"><X size={32} /></button>
@@ -390,17 +388,17 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
               <div className="p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1">
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Incident Title</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Alert Title</label>
                     <input 
                       className="w-full p-4 bg-slate-50 border rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-rose-500/10 uppercase"
-                      placeholder="e.g. Fiber Cut - Bypass Node..."
+                      placeholder="e.g. Fiber Cut near Main Street..."
                       value={nocFormData.title}
                       onChange={e => setNocFormData({...nocFormData, title: e.target.value})}
                     />
                  </div>
                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Affected Region</label>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Affected Area</label>
                        <input 
                          className="w-full p-4 bg-slate-50 border rounded-2xl font-black text-slate-900 outline-none uppercase"
                          placeholder="e.g. North Zone..."
@@ -409,7 +407,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                        />
                     </div>
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Severity Node</label>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Severity</label>
                        <select 
                          className="w-full p-4 bg-slate-50 border rounded-2xl font-black text-slate-900 outline-none uppercase text-xs"
                          value={nocFormData.severity}
@@ -422,10 +420,10 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                  </div>
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Technical Briefing</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
                     <textarea 
                       className="w-full p-5 bg-slate-50 border rounded-2xl font-bold text-xs h-32 resize-none outline-none focus:ring-4 focus:ring-rose-500/10 uppercase"
-                      placeholder="Detailed incident description..."
+                      placeholder="Please explain the issue and expected fix time..."
                       value={nocFormData.description}
                       onChange={e => setNocFormData({...nocFormData, description: e.target.value})}
                     />
@@ -433,18 +431,18 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="p-6 bg-rose-50 border border-rose-100 rounded-3xl flex items-start gap-4">
                     <ShieldAlert size={24} className="text-rose-600 shrink-0 mt-1" />
                     <p className="text-[9px] text-rose-700 font-bold uppercase leading-relaxed tracking-tighter">
-                       Publishing this advisory will instantly relay the notification to all active subscribers in the registry node. Use only for confirmed infrastructure faults.
+                       Publishing this alert will make it visible to customers on their portal and in the app. Use only for confirmed issues.
                     </p>
                  </div>
               </div>
 
               <div className="p-10 bg-slate-50 border-t flex gap-4 shrink-0">
-                 <button onClick={() => setIsAddNOCModalOpen(false)} className="flex-1 py-5 font-black text-slate-500 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Abandon</button>
+                 <button onClick={() => setIsAddNOCModalOpen(false)} className="flex-1 py-5 font-black text-slate-500 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Cancel</button>
                  <button 
                    onClick={handleAddNOC}
                    className="flex-[2] py-5 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-rose-700 transition-all active:scale-95 flex items-center justify-center gap-3"
                  >
-                    <Send size={18}/> Authorize Broadcast
+                    <Send size={18}/> Post Alert Now
                  </button>
               </div>
            </div>

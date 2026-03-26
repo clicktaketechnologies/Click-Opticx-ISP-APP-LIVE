@@ -8,7 +8,7 @@ import {
   Square, CheckSquare, Layers, AlertTriangle, Key, Cpu, Zap, SignalHigh, Calendar, Banknote, Globe, Loader2, XCircle, RefreshCw, Lock, LogOut, Eye, UserCircle, Fingerprint, Map as MapIcon, Smartphone, Bell, ListChecks,
   User, Hash, MessageSquare, Package as PackageIcon, LockKeyhole, ArrowRight, MousePointer2, Settings2, Power,
   SearchCode, EyeOff, ExternalLink, ArrowUpRight, ArrowDownLeft,
-  Mail, Signal, FileText
+  Mail, Wifi, FileText
 } from 'lucide-react';
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
@@ -17,6 +17,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<'All' | 'Expired' | 'Unpaid' | 'Paid' | 'Half Paid' | 'Half Data' | 'Unverified' | 'Verified'>('All');
 
   useEffect(() => {
     if (globalSearchTerm !== undefined) {
@@ -68,13 +69,32 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   
   const filteredUsers = useMemo(() => {
     const term = searchTerm.toLowerCase().trim();
-    return activeUsers.filter(u => 
+    let users = activeUsers;
+
+    // Apply Filter Logic
+    if (filterType !== 'All') {
+      users = users.filter(u => {
+        const pkg = state.packages.find(p => p.id === u.packageId);
+        switch (filterType) {
+          case 'Expired': return u.status === UserStatus.EXPIRED || (u.expiryDate && new Date(u.expiryDate) < new Date());
+          case 'Unpaid': return u.balance > 0;
+          case 'Paid': return u.balance <= 0 && u.packageId;
+          case 'Half Paid': return pkg && u.balance > 0 && u.balance < pkg.price;
+          case 'Half Data': return u.dataUsed && u.dataLimit && (u.dataUsed / u.dataLimit) >= 0.5;
+          case 'Unverified': return u.verificationStatus === VerificationStatus.PENDING || u.status === UserStatus.PENDING_VERIFICATION;
+          case 'Verified': return u.verificationStatus === VerificationStatus.VERIFIED;
+          default: return true;
+        }
+      });
+    }
+
+    return users.filter(u => 
       u.name.toLowerCase().includes(term) || 
       (u.connectionId || '').toLowerCase().includes(term) ||
       (u.phone || '').includes(term) ||
       (u.macIp || '').toLowerCase().includes(term)
     );
-  }, [activeUsers, searchTerm]);
+  }, [activeUsers, searchTerm, filterType, state.packages]);
 
   const selectedUser = useMemo(() => activeUsers.find(u => u.id === selectedUserId), [activeUsers, selectedUserId]);
 
@@ -290,29 +310,46 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       {/* Header Zone */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-1 shrink-0">
         <div className="space-y-1">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight uppercase italic leading-none">Subscriber Database</h2>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Identity & Link Registry Node</p>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight uppercase italic leading-none">Users & System</h2>
+          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">User Records</p>
         </div>
         <button 
           onClick={() => { setOnboardingStep(1); setIsNewUserModal(true); }}
           className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-black shadow-2xl active:scale-95 transition-all"
         >
           <UserPlus size={18} />
-          <span>Provision User</span>
+          <span>+ Add New User</span>
         </button>
       </div>
 
       {/* Global Filter Bar */}
       <div className="bg-white p-4 sm:p-5 rounded-[2rem] border border-slate-100 shadow-sm shrink-0">
-        <div className="relative">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-          <input 
-            type="text" 
-            placeholder="Registry Scan: Name, Link ID, Phone, or MAC..." 
-            className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-indigo-500/10 text-base font-black placeholder:text-slate-300 transition-all shadow-inner" 
-            value={searchTerm} 
-            onChange={e => setSearchTerm(e.target.value)} 
-          />
+        <div className="flex flex-col gap-4">
+          <div className="relative">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <input 
+              type="text" 
+              placeholder="Search by Name, User ID, or Phone Number" 
+              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-indigo-500/10 text-base font-black placeholder:text-slate-300 transition-all shadow-inner" 
+              value={searchTerm} 
+              onChange={e => setSearchTerm(e.target.value)} 
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {(['All', 'Expired', 'Unpaid', 'Paid', 'Half Paid', 'Half Data', 'Unverified', 'Verified'] as const).map(f => (
+              <button
+                key={f}
+                onClick={() => setFilterType(f)}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight shadow-sm transition-all border ${
+                  filterType === f 
+                    ? 'bg-indigo-600 text-white border-indigo-600' 
+                    : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300'
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -334,7 +371,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                  <PackageIcon size={16}/><span className="text-[9px] font-black uppercase">Mass Prov.</span>
               </button>
                <button onClick={async () => { 
-                if(confirm(`AUTHORIZE ROTATION: Force credential reset for ${selectedIds.size} nodes?`)) {
+                if(confirm(`Reset passwords for ${selectedIds.size} users?`)) {
                   setIsProcessing(true);
                   await db.bulkForcePasswordReset(Array.from(selectedIds)); 
                   setSelectedIds(new Set());
@@ -342,11 +379,11 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                   setIsSuccessModal(true);
                 }
               }} className="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 rounded-xl transition-all border border-orange-500/20">
-                 <Key size={16}/><span className="text-[9px] font-black uppercase">Rotation</span>
+                 <Key size={16}/><span className="text-[9px] font-black uppercase">Reset Passwords</span>
               </button>
               <button 
                   onClick={async () => {
-                    if(confirm(`SYSTEM BROADCAST: Dispatch recovery reminders to ${selectedIds.size} nodes?`)) {
+                    if(confirm(`Send payment reminders to ${selectedIds.size} users?`)) {
                       setIsProcessing(true);
                       for(const id of Array.from(selectedIds)) {
                          await db.sendRecoveryReminder(id as string, 'SMS');
@@ -358,11 +395,11 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                   }}
                   className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 rounded-xl transition-all border border-emerald-500/20"
                >
-                  <MessageSquare size={16}/><span className="text-[9px] font-black uppercase">Broadcast</span>
+                  <MessageSquare size={16}/><span className="text-[9px] font-black uppercase">Send Message</span>
                </button>
                <button 
                   onClick={async () => {
-                    if(confirm(`SERVICE TRANSITION: Suspend physical link for ${selectedIds.size} nodes?`)) {
+                    if(confirm(`Suspend ${selectedIds.size} users?`)) {
                       setIsProcessing(true);
                       await db.bulkSetAccountStatus(Array.from(selectedIds), UserStatus.SUSPENDED, 'Manual Batch Suspension');
                       setSelectedIds(new Set());
@@ -374,8 +411,8 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                >
                   <Ban size={16}/><span className="text-[9px] font-black uppercase">Suspend</span>
                </button>
-               <button onClick={executeBulkPurge} className="flex items-center gap-2 px-4 py-2 bg-slate-500/10 hover:bg-slate-500/20 text-slate-400 rounded-xl transition-all border border-slate-500/20">
-                  <Trash2 size={16}/><span className="text-[9px] font-black uppercase">Purge</span>
+               <button onClick={() => { if(confirm(`Are you sure you want to delete ${selectedIds.size} users?`)) executeBulkPurge(); }} className="flex items-center gap-2 px-4 py-2 bg-slate-500/10 hover:bg-slate-500/20 text-slate-400 rounded-xl transition-all border border-slate-500/20">
+                  <Trash2 size={16}/><span className="text-[9px] font-black uppercase">Delete Users</span>
                </button>
            </div>
            <button onClick={() => setSelectedIds(new Set())} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-slate-500 hover:text-white transition-all"><X size={18} /></button>
@@ -384,6 +421,13 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
 
       {/* Main Registry Node */}
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex-1 flex flex-col relative">
+        <div className="flex flex-wrap items-center gap-3 py-4 px-8 border-b border-slate-50 bg-slate-50/50 shrink-0">
+          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.status === UserStatus.EXPIRED || (u.expiryDate && new Date(u.expiryDate) < new Date())).map(u => u.id)))} className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-[10px] font-black uppercase tracking-tighter border border-rose-100 hover:bg-rose-100 transition-all shadow-sm">Select Expired</button>
+          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.balance > 0).map(u => u.id)))} className="px-4 py-2 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-black uppercase tracking-tighter border border-amber-100 hover:bg-amber-100 transition-all shadow-sm">Select Unpaid</button>
+          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => !u.packageId).map(u => u.id)))} className="px-4 py-2 bg-slate-100 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-tighter border border-slate-200 hover:bg-slate-200 transition-all shadow-sm">Select N/A</button>
+          <div className="h-4 w-px bg-slate-200 mx-2"></div>
+          <button onClick={() => setSelectedIds(new Set())} className="px-4 py-2 text-slate-400 hover:text-rose-600 text-[10px] font-black uppercase tracking-tighter transition-all">Clear All</button>
+        </div>
         <div className="overflow-x-auto flex-1 custom-scrollbar">
           <table className="w-full text-left min-w-[1150px] border-collapse">
             <thead className="sticky top-0 bg-slate-50 z-30 border-b border-slate-100">
@@ -393,11 +437,11 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                       {selectedIds.size === filteredUsers.length && filteredUsers.length > 0 ? <CheckSquare size={22} className="text-indigo-600" /> : <Square size={22} />}
                    </button>
                 </th>
-                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Subscriber Identity</th>
-                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Node Ref</th>
-                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Registry State</th>
-                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">O/S Balance</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Protocol Handshakes</th>
+                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">User Name</th>
+                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">User ID</th>
+                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Due Balance</th>
+                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Connection Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -406,7 +450,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                    <td colSpan={6} className="py-20 text-center">
                       <div className="flex flex-col items-center justify-center opacity-30">
                          <SearchCode size={64} className="mb-4" />
-                         <p className="text-sm font-black uppercase tracking-widest">No nodes detected in current scan</p>
+                         <p className="text-sm font-black uppercase tracking-widest">No users found in current search</p>
                       </div>
                    </td>
                 </tr>
@@ -443,13 +487,13 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                     </td>
                     <td className="px-6 py-5 text-right">
                       <div className="flex items-center justify-end gap-1.5 transition-all">
-                        <ActionIcon icon={Pencil} color="text-blue-600" label="Modify Dossier" onClick={() => handleAction(user, 'edit')} disabled={!canPerformAction} />
-                        <ActionIcon icon={LockKeyhole} color="text-orange-600" label="Auth Reset" onClick={() => handleAction(user, 'reset')} disabled={!canPerformAction} />
-                        <ActionIcon icon={PackageIcon} color="text-indigo-600" label="Provision Plan" onClick={() => handleAction(user, 'package')} disabled={!canPerformAction} />
-                        <ActionIcon icon={Banknote} color="text-emerald-600" label="Fiscal Collect" onClick={() => handleAction(user, 'payment')} disabled={!canPerformAction} />
-                        <ActionIcon icon={Eye} color="text-slate-600" label="Customer 360" onClick={() => handleAction(user, 'view')} />
-                        <ActionIcon icon={Ban} color="text-rose-600" label="Kill-Switch" onClick={() => handleAction(user, 'suspend')} disabled={!isAdmin} />
-                        <ActionIcon icon={RefreshCw} color="text-purple-600" label="Cold Boot" onClick={() => handleAction(user, 'reconnect')} disabled={!isAdmin} />
+                        <ActionIcon icon={Pencil} color="text-blue-600" label="Edit User" onClick={() => handleAction(user, 'edit')} disabled={!canPerformAction} />
+                        <ActionIcon icon={LockKeyhole} color="text-orange-600" label="Change Password" onClick={() => handleAction(user, 'reset')} disabled={!canPerformAction} />
+                        <ActionIcon icon={PackageIcon} color="text-indigo-600" label="Setup Connection" onClick={() => handleAction(user, 'package')} disabled={!canPerformAction} />
+                        <ActionIcon icon={Banknote} color="text-emerald-600" label="Receive Payment" onClick={() => handleAction(user, 'payment')} disabled={!canPerformAction} />
+                        <ActionIcon icon={Eye} color="text-slate-600" label="View Profile" onClick={() => handleAction(user, 'view')} />
+                        <ActionIcon icon={Ban} color="text-rose-600" label="Suspend User" onClick={() => handleAction(user, 'suspend')} disabled={!isAdmin} />
+                        <ActionIcon icon={RefreshCw} color="text-purple-600" label="Restart Connection" onClick={() => handleAction(user, 'reconnect')} disabled={!isAdmin} />
                       </div>
                     </td>
                   </tr>
@@ -468,8 +512,8 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                  <div className="flex items-center gap-5">
                     <div className="w-12 h-12 sm:w-14 sm:h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl italic font-black">S{onboardingStep}</div>
                     <div>
-                       <h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter">Onboarding Protocol</h3>
-                       <p className="text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Handshake Phase {onboardingStep} of 5</p>
+                       <h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter">Your Basic Information</h3>
+                       <p className="text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Step {onboardingStep} of 5</p>
                     </div>
                  </div>
                  <button onClick={() => setIsNewUserModal(false)} className="p-2 hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all"><X size={28}/></button>
@@ -479,7 +523,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                     switch(onboardingStep) {
                       case 1: return (
                         <div className="space-y-6">
-                           <h4 className="text-xs font-black uppercase text-slate-900 border-b pb-2 italic">1. Identity (KYC) Registry</h4>
+                           <h4 className="text-xs font-black uppercase text-slate-900 border-b pb-2 italic">1. Your Basic Information</h4>
                            <div className="space-y-4">
                               <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Identity Full Name</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-black text-sm" value={newUserData.name} onChange={e => setNewUserData({...newUserData, name: e.target.value})} /></div>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -491,7 +535,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                       );
                       case 2: return (
                         <div className="space-y-6">
-                           <h4 className="text-xs font-black uppercase text-slate-900 border-b pb-2 italic">2. Service Layer Mapping</h4>
+                           <h4 className="text-xs font-black uppercase text-slate-900 border-b pb-2 italic">2. Internet Data Plan</h4>
                            <div className="space-y-4">
                               <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Select Bandwidth Tier</label>
                               <div className="grid grid-cols-1 gap-2">
@@ -518,7 +562,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                       );
                       case 4: return (
                         <div className="space-y-6">
-                           <h4 className="text-xs font-black uppercase text-slate-900 border-b pb-2 italic">4. Authentication Logic</h4>
+                           <h4 className="text-xs font-black uppercase text-slate-900 border-b pb-2 italic">4. Signup Credentials</h4>
                            <div className="space-y-4">
                               <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Registry Username</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-black text-sm" value={newUserData.username} onChange={e => setNewUserData({...newUserData, username: e.target.value})} /></div>
                               <PasswordInput label="Access Secret" value={newUserData.password || ''} onChange={v => setNewUserData({...newUserData, password: v})} showStrength />
@@ -527,7 +571,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                       );
                       case 5: return (
                         <div className="space-y-8 text-center py-10">
-                           <h4 className="text-xl font-black uppercase text-slate-900 italic">5. Authorize Provisioning</h4>
+                           <h4 className="text-xl font-black uppercase text-slate-900 italic">5. Register Me Now</h4>
                            <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed max-w-md mx-auto">
                               Ready to synchronize identity nodes. This will enable portal access and initialize the physical internet handshake protocol.
                            </p>
@@ -549,7 +593,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                  {onboardingStep < 5 ? (
                    <button onClick={() => setOnboardingStep(onboardingStep + 1)} className="px-6 sm:px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl flex items-center gap-2">Advance Sequence <ChevronRight size={14}/></button>
                  ) : (
-                   <button onClick={async () => { setIsProcessing(true); await db.addUser(newUserData); setIsProcessing(false); setIsNewUserModal(false); setIsSuccessModal(true); }} className="px-6 sm:px-10 py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl flex items-center gap-2">Commit Synchronize <ShieldCheck size={18}/></button>
+                   <button onClick={async () => { setIsProcessing(true); await db.addUser(newUserData); setIsProcessing(false); setIsNewUserModal(false); setIsSuccessModal(true); }} className="px-6 sm:px-10 py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl flex items-center gap-2">Save User <ShieldCheck size={18}/></button>
                  )}
               </footer>
            </div>
@@ -852,7 +896,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
 
                     {/* Link Layer Node */}
                     <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
-                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><Signal size={14} className="text-blue-500"/> Link Layer</h4>
+                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><Wifi size={14} className="text-blue-500"/> Link Layer</h4>
                        <div className="space-y-4">
                           <div className="flex justify-between items-center">
                              <span className="text-[9px] font-black text-slate-400 uppercase">Status</span>
@@ -974,7 +1018,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                    onClick={async () => {
                      if(!selectedPkgId) return;
                      setIsProcessing(true);
-                      await db.bulkActivatePackages(Array.from(selectedIds), selectedPkgId, 'Unpaid');
+                      await db.bulkActivateSubscribers(Array.from(selectedIds), { packageId: selectedPkgId, paymentStatus: 'Unpaid', expiryDate: new Date(Date.now() + 30 * 86400000).toISOString(), notes: 'Bulk Manual Provision' });
                      setIsBulkPackageModal(false);
                      setSelectedIds(new Set());
                      setIsProcessing(false);

@@ -4,7 +4,7 @@ import { AppState, ISPUser, LedgerType, UserStatus } from '../types';
 import {
    Search, User, Contact, ShieldCheck, MapPin,
    History, Wallet, ArrowUpRight, ArrowDownLeft,
-   CreditCard, Signal, Fingerprint, Smartphone, Globe,
+   CreditCard, Wifi, Fingerprint, Smartphone, Globe,
    Activity, Calendar, Receipt, Info, UserCircle,
    Zap, Power, RefreshCcw, Bell, AlertTriangle, Cpu,
    Database, HardDrive, Wifi, Lock

@@ -37,16 +37,16 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Permanently purge this template node?")) {
+    if (confirm("Are you sure you want to delete this template?")) {
       await db.deleteEmailTemplate(id);
     }
   };
 
   const variables = [
-    { key: '{{user.name}}', desc: 'Subscriber Full Name' },
-    { key: '{{user.balance}}', desc: 'Current Ledger Balance' },
-    { key: '{{user.expiryDate}}', desc: 'Package Expiry Registry' },
-    { key: '{{user.connectionId}}', desc: 'Unique Handshake ID' }
+    { key: '{{user.name}}', desc: "User's Full Name" },
+    { key: '{{user.balance}}', desc: 'Account Balance' },
+    { key: '{{user.expiryDate}}', desc: 'Package Expiry Date' },
+    { key: '{{user.connectionId}}', desc: 'User ID' }
   ];
 
   const renderPreviewContent = (content: string) => {
@@ -63,15 +63,15 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
             <Layout className="text-blue-600" size={32} />
-            Visual Blueprint Registry
+            Message Templates
           </h2>
-          <p className="text-slate-500 font-medium">Design and authorize global communication templates.</p>
+          <p className="text-slate-500 font-medium">Create and manage templates for your emails and messages.</p>
         </div>
         <button 
           onClick={() => handleOpenEdit()}
           className="flex items-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs hover:bg-indigo-700 shadow-xl active:scale-95 transition-all uppercase tracking-widest"
         >
-          <Plus size={18} /> New Blueprint
+          <Plus size={18} /> + Create Template
         </button>
       </div>
 
@@ -80,7 +80,7 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input 
               className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-black text-slate-900"
-              placeholder="Filter by Blueprint ID or Name..."
+              placeholder="Search templates..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
@@ -89,34 +89,34 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
          {filteredTemplates.map(t => (
-           <div key={t.id} className="bg-white rounded-[3rem] p-8 border border-slate-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden flex flex-col">
-              <div className="flex justify-between items-start mb-6 relative z-10">
-                 <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border shadow-inner"><FileText size={28}/></div>
-                 <span className="px-3 py-1 bg-slate-50 text-slate-500 rounded-full text-[8px] font-black uppercase tracking-widest border border-slate-100">{t.category}</span>
-              </div>
-              <div className="space-y-2 mb-8 relative z-10">
-                 <h4 className="text-lg font-black text-slate-900 uppercase italic tracking-tight truncate leading-none">{t.name}</h4>
-                 <p className="text-[10px] text-slate-400 font-bold uppercase">ID: {t.id} • Refreshed: {new Date(t.lastUpdated).toLocaleDateString()}</p>
-              </div>
-              <div className="p-4 bg-slate-50 rounded-2xl text-[9px] text-slate-400 uppercase font-black mb-8 line-clamp-3 leading-relaxed">
-                 {t.content}
-              </div>
-              <div className="mt-auto flex gap-2 relative z-10">
-                 <button 
-                  onClick={() => handleOpenEdit(t)}
-                  className="flex-1 py-3.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all active:scale-95"
-                 >
-                    Modify Node
-                 </button>
-                 <button 
-                  onClick={() => handleDelete(t.id)}
-                  className="p-3.5 bg-slate-50 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
-                 >
-                    <Trash2 size={18}/>
-                 </button>
-              </div>
-              <Globe className="absolute -right-8 -bottom-8 opacity-[0.03] scale-150" size={160} />
-           </div>
+            <div key={t.id} className="bg-white rounded-[3rem] p-8 border border-slate-100 shadow-sm hover:shadow-xl transition-all group relative overflow-hidden flex flex-col">
+               <div className="flex justify-between items-start mb-6 relative z-10">
+                  <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border shadow-inner"><FileText size={28}/></div>
+                  <span className="px-3 py-1 bg-slate-50 text-slate-500 rounded-full text-[8px] font-black uppercase tracking-widest border border-slate-100">{t.category}</span>
+               </div>
+               <div className="space-y-2 mb-8 relative z-10">
+                  <h4 className="text-lg font-black text-slate-900 uppercase italic tracking-tight truncate leading-none">{t.name}</h4>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">ID: {t.id} • Last Updated: {new Date(t.lastUpdated).toLocaleDateString()}</p>
+               </div>
+               <div className="p-4 bg-slate-50 rounded-2xl text-[9px] text-slate-400 uppercase font-black mb-8 line-clamp-3 leading-relaxed">
+                  {t.content}
+               </div>
+               <div className="mt-auto flex gap-2 relative z-10">
+                  <button 
+                   onClick={() => handleOpenEdit(t)}
+                   className="flex-1 py-3.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all active:scale-95"
+                  >
+                     Edit Template
+                  </button>
+                  <button 
+                   onClick={() => handleDelete(t.id)}
+                   className="p-3.5 bg-slate-50 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                  >
+                     <Trash2 size={18}/>
+                  </button>
+               </div>
+               <Globe className="absolute -right-8 -bottom-8 opacity-[0.03] scale-150" size={160} />
+            </div>
          ))}
       </div>
 
@@ -127,8 +127,8 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="flex items-center gap-5">
                     <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg"><Code2 size={28}/></div>
                     <div>
-                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">Blueprint Architect</h3>
-                       <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest">Protocol: Variable Injection v2.1</p>
+                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">Template Editor</h3>
+                       <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest">Tip: Use tags to personalize your messages</p>
                     </div>
                  </div>
                  <div className="flex gap-4">
@@ -145,29 +145,30 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="flex-1 p-10 space-y-8 overflow-y-auto custom-scrollbar bg-white border-r border-slate-100">
                     <div className="grid grid-cols-2 gap-6">
                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Blueprint Name</label>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Template Name</label>
                           <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all" value={editingTemplate.name} onChange={e => setEditingTemplate({...editingTemplate, name: e.target.value})} />
                        </div>
                        <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Classification</label>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Category</label>
                           <select className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-indigo-500" value={editingTemplate.category} onChange={e => setEditingTemplate({...editingTemplate, category: e.target.value as any})}>
-                             <option value="Billing">Billing Node</option>
-                             <option value="Technical">Technical Handshake</option>
-                             <option value="Marketing">Growth Protocol</option>
-                             <option value="System">Core Relay</option>
+                             <option value="Billing">Billing</option>
+                             <option value="Technical">Technical</option>
+                             <option value="Marketing">Marketing</option>
+                             <option value="System">System</option>
                           </select>
                        </div>
                     </div>
 
                     <div className="space-y-4">
                        <div className="flex justify-between items-center">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Content Structure (HTML/Markdown)</label>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Message Content</label>
                           <div className="flex gap-2">
                              {variables.map(v => (
                                <button 
                                 key={v.key} 
                                 onClick={() => setEditingTemplate({...editingTemplate, content: (editingTemplate.content || '') + ' ' + v.key})}
                                 className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[8px] font-black border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-all"
+                                title={v.desc}
                                >
                                   {v.key}
                                </button>
@@ -209,8 +210,8 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
                           
                           {/* Footer */}
                           <div className="p-8 bg-slate-50 border-t border-slate-100 text-center shrink-0">
-                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Secure Communication Hub</p>
-                             <p className="text-[7px] font-bold text-slate-300 uppercase tracking-widest italic">&copy; {new Date().getFullYear()} ClickOpticx • Infrastructure Node Verified</p>
+                             <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Automated Message System</p>
+                             <p className="text-[7px] font-bold text-slate-300 uppercase tracking-widest italic">&copy; {new Date().getFullYear()} ClickOpticx • System Verified</p>
                           </div>
                        </div>
                     </div>
@@ -219,14 +220,14 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
               </div>
 
               <div className="p-10 bg-slate-50 border-t flex gap-4 shrink-0">
-                 <button onClick={() => setIsModalOpen(false)} className="flex-1 py-5 font-black text-slate-400 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Abort Process</button>
+                 <button onClick={() => setIsModalOpen(false)} className="flex-1 py-5 font-black text-slate-400 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Cancel</button>
                  <button 
                   onClick={handleSave}
                   disabled={isSaving}
                   className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
                     {isSaving ? <Mini5GMicroLoader size={18} /> : <Save size={18}/>}
-                    Authorize Publishing
+                    Save Template
                  </button>
               </div>
            </div>

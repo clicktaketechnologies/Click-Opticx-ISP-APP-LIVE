@@ -6,7 +6,7 @@ import { db } from '../db';
 import { 
   Network, Search, UserCircle, ChevronRight, HardDrive, 
   Cpu, Save, RefreshCw, Layers, ShieldCheck, Globe, 
-  Signal, Wifi, Flame, Info, CheckCircle, Smartphone,
+  Wifi, Flame, Info, CheckCircle, Smartphone,
   Plus, Trash2, Settings2, Database, Zap, ListPlus, Box,
   ArrowRight, DollarSign, BarChart3, Activity, PieChart,
   Server, ShieldAlert, TrendingUp, CheckSquare, Square, 
@@ -702,7 +702,7 @@ const ConnectionSetupAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
                     {[
                        { label: 'Poll Elevation Registry', key: 'polls', template: { height: 'New Poll', price: 0 }, icon: ListPlus },
-                       { label: 'Link Receivers (PTP)', key: 'receivers', template: { model: 'New Receiver', price: 0 }, icon: Signal },
+                       { label: 'Link Receivers (PTP)', key: 'receivers', template: { model: 'New Receiver', price: 0 }, icon: Wifi },
                        { label: 'WiFi ONU / Routers', key: 'onus', template: { model: 'New Router', price: 0 }, icon: Smartphone }
                     ].map(list => (
                        <div key={list.key} className="space-y-4">

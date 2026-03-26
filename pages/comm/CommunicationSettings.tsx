@@ -40,11 +40,11 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
          await db.updateSettings({ ...state.settings, commConfig: formData });
          setTimeout(() => {
             setIsSaving(false);
-            db.logNotification('all', 'success', 'Infrastructure Sync', 'Global communication protocols updated across all nodes.');
+            db.logNotification('all', 'success', 'Settings Saved', 'Message settings have been updated successfully.');
          }, 800);
       } catch (err) {
          setIsSaving(false);
-         alert('Handshake Failed: Registry node rejected the update.');
+         alert('Update Failed: The system could not save the changes.');
       }
    };
 
@@ -105,9 +105,9 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
             <div className="space-y-1">
                <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none">
                   <Mail className="text-indigo-600" size={32} />
-                  Communication Control Plane
+                  Message Center Settings
                </h2>
-               <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Global Dispatch Protocol • SMTP | API | Hybrid v4.0</p>
+               <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Manage how the system sends emails and messages.</p>
             </div>
             <div className="flex gap-3">
                <button
@@ -116,7 +116,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                   className="px-6 py-4 bg-white border border-slate-200 text-slate-700 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2"
                >
                   {isTesting ? <Mini5GMicroLoader size={16} /> : <Activity size={16} className="text-indigo-600" />}
-                  Diagnostic Check
+                  Test Connection
                </button>
                <button
                   onClick={handleSave}
@@ -124,7 +124,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                   className="flex items-center gap-3 px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-indigo-100 active:scale-95 transition-all disabled:opacity-50"
                >
                   {isSaving ? <Mini5GMicroLoader size={18} /> : <Save size={18} />}
-                  Commit Configuration
+                  Save Settings
                </button>
             </div>
          </div>
@@ -134,28 +134,28 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                onClick={() => setActiveTab('gateway')}
                className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'gateway' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
             >
-               <Server size={14} /> Transceiver Node
+               <Server size={14} /> Message Gateway
             </button>
             <button
                onClick={() => setActiveTab('identities')}
                className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'identities' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
             >
-               <UserCheck size={14} /> Identity Registry
+               <UserCheck size={14} /> Sender Accounts
             </button>
             <button
                onClick={() => setActiveTab('advanced')}
                className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'advanced' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
             >
-               <Sliders size={14} /> Rule Processor
+               <Sliders size={14} /> Automated Rules
             </button>
          </div>
 
          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
-               { label: 'Gateway Node', value: formData.health.status, icon: ShieldCheck, color: getStatusColor(formData.health.status) },
-               { label: 'Registry Latency', value: `${formData.health.latency}ms`, icon: Activity, color: 'bg-blue-500' },
-               { label: 'Negative Feedback', value: `${formData.health.bounceRate}%`, icon: ShieldAlert, color: 'bg-rose-500' },
-               { label: 'Warm-up Phase', value: `Day ${formData.warmup.currentDay}`, icon: Flame, color: 'bg-orange-500' },
+               { label: 'System Status', value: formData.health.status, icon: ShieldCheck, color: getStatusColor(formData.health.status) },
+               { label: 'Response Time', value: `${formData.health.latency}ms`, icon: Activity, color: 'bg-blue-500' },
+               { label: 'Bounce Rate', value: `${formData.health.bounceRate}%`, icon: ShieldAlert, color: 'bg-rose-500' },
+               { label: 'Scaling Status', value: `Day ${formData.warmup.currentDay}`, icon: Flame, color: 'bg-orange-500' },
             ].map((kpi, idx) => (
                <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-md transition-all">
                   <div className="space-y-1">
@@ -177,7 +177,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                      {testResult.success ? <CheckCircle size={24} /> : <XCircle size={24} />}
                   </div>
                   <div>
-                     <p className="text-xs font-black uppercase">System Diagnostic Feedback</p>
+                     <p className="text-xs font-black uppercase">Connection Test Result</p>
                      <p className="text-[10px] font-bold opacity-75 uppercase tracking-wide">{testResult.message}</p>
                   </div>
                </div>
@@ -190,9 +190,9 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                <div className="lg:col-span-2 bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl space-y-10 animate-in slide-in-from-left-4">
                   <div className="flex bg-slate-100 p-1.5 rounded-2xl gap-1">
                      {[
-                        { id: 'CUSTOM_SMTP', label: 'Custom SMTP', icon: Server, desc: 'Your own domain/hosting' },
-                        { id: 'PROVIDER_API', label: 'Cloud API', icon: Globe, desc: 'AWS SES, SendGrid, etc' },
-                        { id: 'HYBRID', label: 'Hybrid Relay', icon: Cpu, desc: 'Auto-fallback logic active' }
+                        { id: 'CUSTOM_SMTP', label: 'Standard Email (SMTP)', icon: Server, desc: 'Your own domain/hosting' },
+                        { id: 'PROVIDER_API', label: 'Cloud Service (API)', icon: Globe, desc: 'AWS SES, SendGrid, etc' },
+                        { id: 'HYBRID', label: 'Automatic (Hybrid)', icon: Cpu, desc: 'Auto-fallback logic active' }
                      ].map((mode) => (
                         <button
                            key={mode.id}
@@ -210,23 +210,23 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                         <div className="flex items-center justify-between border-b border-slate-50 pb-4">
                            <div className="flex items-center gap-3">
                               <Server className="text-indigo-600" size={24} />
-                              <h3 className="text-lg font-black uppercase italic tracking-tighter">SMTP Transceiver Node</h3>
+                              <h3 className="text-lg font-black uppercase italic tracking-tighter">Email Server Settings (SMTP)</h3>
                            </div>
                            <button
                               onClick={() => setIsTestModalOpen(true)}
                               className="px-6 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-indigo-100 transition-all flex items-center gap-3 shadow-sm"
                            >
-                              <Send size={14} /> Send Test Dispatch
+                              <Send size={14} /> Send Test Email
                            </button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                            <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-400 uppercase ml-1 italic tracking-widest">Host Address</label>
+                              <label className="text-[10px] font-black text-slate-400 uppercase ml-1 italic tracking-widest">Server Address</label>
                               <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all shadow-inner" value={formData.smtpConfig.host} onChange={e => setFormData({ ...formData, smtpConfig: { ...formData.smtpConfig, host: e.target.value } })} />
                            </div>
                            <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                 <label className="text-[10px] font-black text-slate-400 uppercase ml-1 italic tracking-widest">Port Mapping</label>
+                                 <label className="text-[10px] font-black text-slate-400 uppercase ml-1 italic tracking-widest">Port</label>
                                  <input type="number" className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm shadow-inner" value={formData.smtpConfig.port} onChange={e => setFormData({ ...formData, smtpConfig: { ...formData.smtpConfig, port: Number(e.target.value) } })} />
                               </div>
                               <div className="space-y-2">
@@ -242,7 +242,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                         <div className="p-8 bg-slate-950 rounded-[2.5rem] space-y-6 shadow-2xl relative overflow-hidden border border-white/5">
                            <div className="relative z-10 flex items-center justify-between">
                               <h4 className="text-xs font-black uppercase italic tracking-widest text-indigo-400 flex items-center gap-3">
-                                 <Key size={18} /> Credentials & Tokens
+                                 <Key size={18} /> Login Details
                               </h4>
                               <button onClick={() => setShowSecrets(!showSecrets)} className="text-[9px] font-black uppercase text-slate-500 hover:text-white transition-colors flex items-center gap-2">
                                  {showSecrets ? <EyeOff size={14} /> : <Eye size={14} />} {showSecrets ? 'Mask' : 'Reveal'}
@@ -250,11 +250,11 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                            </div>
                            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6">
                               <div className="space-y-1">
-                                 <label className="text-[8px] font-black text-slate-500 uppercase ml-1 tracking-widest">Transceiver ID</label>
+                                 <label className="text-[8px] font-black text-slate-500 uppercase ml-1 tracking-widest">Username</label>
                                  <input className="w-full p-4 bg-white/5 border border-white/10 rounded-xl font-black text-white text-xs outline-none focus:border-indigo-500" value={formData.smtpConfig.username} onChange={e => setFormData({ ...formData, smtpConfig: { ...formData.smtpConfig, username: e.target.value } })} />
                               </div>
                               <div className="space-y-1">
-                                 <label className="text-[8px] font-black text-slate-500 uppercase ml-1 tracking-widest">Secret Handshake</label>
+                                 <label className="text-[8px] font-black text-slate-500 uppercase ml-1 tracking-widest">Password</label>
                                  <input type={showSecrets ? 'text' : 'password'} placeholder="••••••••" className="w-full p-4 bg-white/5 border border-white/10 rounded-xl font-black text-white text-xs focus:border-indigo-500 outline-none" value={formData.smtpConfig.password || ''} onChange={e => setFormData({ ...formData, smtpConfig: { ...formData.smtpConfig, password: e.target.value } })} />
                               </div>
                            </div>
@@ -266,13 +266,13 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                         <div className="flex items-center justify-between border-b border-slate-50 pb-4">
                            <div className="flex items-center gap-3">
                               <Globe className="text-blue-600" size={24} />
-                              <h3 className="text-lg font-black uppercase italic tracking-tighter">Cloud Gateway Provider</h3>
+                              <h3 className="text-lg font-black uppercase italic tracking-tighter">Cloud Email Provider</h3>
                            </div>
                            <button
                               onClick={() => setIsTestModalOpen(true)}
                               className="px-6 py-3 bg-blue-50 text-blue-600 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-blue-100 transition-all flex items-center gap-3 shadow-sm"
                            >
-                              <Send size={14} /> Exec Call Test
+                              <Send size={14} /> Run Test
                            </button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -335,12 +335,12 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
 
                   <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-8">
                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 italic">
-                        <Zap size={14} className="text-amber-500" /> Transmission Throttling
+                        <Zap size={14} className="text-amber-500" /> Message Limits
                      </h3>
                      <div className="space-y-4">
                         {[
-                           { label: 'Emails / Hour', key: 'emailsPerHour', icon: Clock },
-                           { label: 'Daily Burst', key: 'emailsPerDay', icon: Calendar },
+                           { label: 'Max Emails / Hour', key: 'emailsPerHour', icon: Clock },
+                           { label: 'Max Emails / Day', key: 'emailsPerDay', icon: Calendar },
                         ].map(limit => (
                            <div key={limit.key} className="p-5 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-indigo-600 transition-all shadow-inner">
                               <div className="flex items-center gap-3 mb-2">
@@ -364,15 +364,15 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                         <UserCheck size={32} />
                      </div>
                      <div>
-                        <h3 className="text-2xl font-black italic uppercase text-slate-900 tracking-tighter">Digital Signature Registry</h3>
-                        <p className="text-[11px] text-slate-400 font-black uppercase tracking-[0.2em]">Authorized transceivers for corporate dispatch</p>
+                        <h3 className="text-2xl font-black italic uppercase text-slate-900 tracking-tighter">Approved Senders List</h3>
+                        <p className="text-[11px] text-slate-400 font-black uppercase tracking-[0.2em]">Emails that are allowed to send messages.</p>
                      </div>
                   </div>
                   <button
                      onClick={() => setIsIdentityModalOpen(true)}
                      className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-3"
                   >
-                     <Plus size={18} /> Provision Node
+                     <Plus size={18} /> Add New Sender
                   </button>
                </div>
 
@@ -429,8 +429,8 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                      <Sliders size={32} />
                   </div>
                   <div>
-                     <h3 className="text-2xl font-black italic uppercase text-slate-900 tracking-tighter">Rule Implementation Engine</h3>
-                     <p className="text-[11px] text-slate-400 font-black uppercase tracking-[0.2em]">Asynchronous dispatch and reputation algorithms</p>
+                     <h3 className="text-2xl font-black italic uppercase text-slate-900 tracking-tighter">Automatic Action Settings</h3>
+                     <p className="text-[11px] text-slate-400 font-black uppercase tracking-[0.2em]">Settings for automatic messages and system health.</p>
                   </div>
                </div>
 
@@ -439,15 +439,15 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                      <div className="space-y-8">
                         <div className="space-y-2">
                            <h4 className="text-sm font-black text-indigo-600 uppercase italic tracking-widest flex items-center gap-3">
-                              <Bell size={18} /> Global Notifications
+                              <Bell size={18} /> System Alerts
                            </h4>
-                           <p className="text-[10px] font-medium text-slate-400 uppercase leading-relaxed">System-wide triggers for automated dispatch cycles.</p>
+                           <p className="text-[10px] font-medium text-slate-400 uppercase leading-relaxed">Automatic messages sent by the system.</p>
                         </div>
 
                         <div className="grid grid-cols-1 gap-4">
                            {[
                               { label: 'Push Notifications', key: 'pushEnabled', icon: Smartphone, desc: 'Mobile terminal push notification socket' },
-                              { label: 'Quiet Hours Protocol', key: 'quietHoursEnabled', icon: Clock, desc: 'Silence automated dispatches during specific cycles' }
+                              { label: 'Do Not Disturb Hours', key: 'quietHoursEnabled', icon: Clock, desc: 'Don\'t send automatic messages during these times.' }
                            ].map((rule) => (
                               <div key={rule.key} className="p-6 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-between group hover:border-indigo-600 transition-all">
                                  <div className="flex items-center gap-5">
@@ -476,16 +476,16 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                      <div className="space-y-8">
                         <div className="space-y-2">
                            <h4 className="text-sm font-black text-emerald-600 uppercase italic tracking-widest flex items-center gap-3">
-                              <Flame size={18} /> IP Warm-up Logic
+                              <Flame size={18} /> Gradual Scaling
                            </h4>
-                           <p className="text-[10px] font-medium text-slate-400 uppercase leading-relaxed">Gradual transmission scaling to protect registry reputation.</p>
+                           <p className="text-[10px] font-medium text-slate-400 uppercase leading-relaxed">Slowly increase message limits to stay safe.</p>
                         </div>
 
                         <div className="p-10 bg-emerald-50 border border-emerald-100 rounded-[3rem] space-y-8 shadow-inner shadow-emerald-500/5">
                            <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-emerald-100">
                               <div>
-                                 <p className="text-[10px] font-black text-emerald-700 uppercase italic tracking-widest leading-none mb-1">Reputation Shield</p>
-                                 <p className="text-[8px] font-bold text-emerald-600/60 uppercase">Scales daily limits automatically</p>
+                                 <p className="text-[10px] font-black text-emerald-700 uppercase italic tracking-widest leading-none mb-1">Protection System</p>
+                                 <p className="text-[8px] font-bold text-emerald-600/60 uppercase">Increases daily limits automatically</p>
                               </div>
                               <button
                                  onClick={() => setFormData({ ...formData, warmup: { ...formData.warmup, enabled: !formData.warmup.enabled } })}
@@ -497,7 +497,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
 
                            <div className="grid grid-cols-2 gap-6">
                               <div className="space-y-2">
-                                 <label className="text-[10px] font-black text-emerald-800 uppercase italic tracking-widest ml-1">Current Scale Level</label>
+                                 <label className="text-[10px] font-black text-emerald-800 uppercase italic tracking-widest ml-1">Current Limit</label>
                                  <div className="p-4 bg-white border border-emerald-100 rounded-2xl font-black text-2xl text-emerald-900 italic shadow-sm">
                                     {formData.warmup.limit} <span className="text-[10px] font-bold uppercase text-emerald-500">Msg/Day</span>
                                  </div>
@@ -529,8 +529,8 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                            <Send size={28} />
                         </div>
                         <div>
-                           <h3 className="text-2xl font-black uppercase italic tracking-tighter">Diagnostic Dispatch</h3>
-                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Verify Transceiver Connectivity</p>
+                           <h3 className="text-2xl font-black uppercase italic tracking-tighter">Connection Test</h3>
+                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Test if the system can send messages.</p>
                         </div>
                      </div>
                      <button onClick={() => setIsTestModalOpen(false)} className="p-3 hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all rounded-xl">
@@ -541,7 +541,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                   <div className="p-10 space-y-8">
                      <div className="space-y-6">
                         <div className="space-y-2">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Target Recipient Node</label>
+                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Send Test To (Email)</label>
                            <input
                               className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl font-black text-sm outline-none focus:border-indigo-600 transition-all shadow-inner"
                               placeholder="admin@domain.com"
@@ -550,7 +550,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                            />
                         </div>
                         <div className="space-y-2">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Instruction Payload (Subject)</label>
+                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Test Subject</label>
                            <input
                               className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl font-black text-sm outline-none focus:border-indigo-600 transition-all shadow-inner"
                               value={testEmailData.subject}
@@ -562,7 +562,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                      <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem] flex items-start gap-5 shadow-inner">
                         <Info size={24} className="text-blue-600 mt-1 shrink-0" />
                         <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed tracking-tighter">
-                           SECURITY PROTOCOL: TEST DISPATCHES ARE LOGGED IN THE AUDIT REGISTRY. THIS HANDSHAKE VERIFIES ENCRYPTION VALIDITY AND PROVIDER RESPONSE TIMES.
+                           ➡ Note: Test messages are logged for security. This helps ensure your connection is working correctly.
                         </p>
                      </div>
 
@@ -572,7 +572,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                         className="w-full py-6 bg-indigo-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                      >
                         {isSendingTest ? <Mini5GMicroLoader size={18} /> : <Send size={18} />}
-                        {isSendingTest ? 'EXECUTING DISPATCH...' : 'EXECUTE HANDSHAKE'}
+                        {isSendingTest ? 'SENDING...' : 'SEND TEST'}
                      </button>
                   </div>
                </div>
@@ -589,8 +589,8 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                            <UserCheck size={28} />
                         </div>
                         <div>
-                           <h3 className="text-2xl font-black uppercase italic tracking-tighter">Provision Node</h3>
-                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Digital Signature Provisioning</p>
+                           <h3 className="text-2xl font-black uppercase italic tracking-tighter">Add New Sender</h3>
+                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Adding New Sender</p>
                         </div>
                      </div>
                      <button onClick={() => setIsIdentityModalOpen(false)} className="p-3 hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all rounded-xl">
@@ -613,7 +613,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                      <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem] flex items-start gap-5 shadow-inner">
                         <Info size={24} className="text-blue-600 mt-1 shrink-0" />
                         <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed tracking-tighter">
-                           NODE PROVISIONING TRIGGERS AN AUTOMATED VERIFICATION LINK. THE IDENTITY WILL REMAIN IN 'STANDBY' UNTIL THE HANDSHAKE IS COMPLETED BY THE END-USER.
+                           ➡ After adding, we will send a verification email. The account will stay 'pending' until verified.
                         </p>
                      </div>
                   </div>
@@ -626,7 +626,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
                         className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                      >
                         {isProcessing === 'new' ? <Mini5GMicroLoader size={18} /> : <Plus size={18} />}
-                        Commit Node
+                        Save Sender
                      </button>
                   </div>
                </div>

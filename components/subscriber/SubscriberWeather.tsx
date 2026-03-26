@@ -81,7 +81,7 @@ const SubscriberWeather: React.FC = () => {
       });
       setLocation(loc);
     } catch (err) {
-      setError("Atmospheric Relay Fault: Node unreachable.");
+      setError("Could not fetch weather data.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -170,7 +170,7 @@ const SubscriberWeather: React.FC = () => {
       animation: ''
     };
     if (code >= 45 && code <= 48) return { 
-      label: 'Foggy Node', 
+      label: 'Foggy', 
       icon: Cloud, 
       bg: 'from-slate-400 to-slate-600',
       iconColor: 'text-white',
@@ -184,7 +184,7 @@ const SubscriberWeather: React.FC = () => {
       animation: 'animate-bounce'
     };
     if (code >= 95) return { 
-      label: 'Storm Cell', 
+      label: 'Stormy', 
       icon: CloudLightning, 
       bg: 'from-slate-900 via-indigo-950 to-slate-900',
       iconColor: 'text-yellow-400',
@@ -206,8 +206,8 @@ const SubscriberWeather: React.FC = () => {
           <Mini5GMicroLoader size={40} />
         </div>
         <div className="text-center">
-           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Acquiring Geospatial Link...</p>
-           <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest mt-1">GNSS / IP Handshake active</p>
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Locating you...</p>
+           <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest mt-1">Please wait</p>
         </div>
       </div>
     );
@@ -225,7 +225,7 @@ const SubscriberWeather: React.FC = () => {
               <div>
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-2 flex items-center gap-2">
                    {location.source === 'GPS' ? <Navigation size={10} className="text-emerald-400 animate-pulse"/> : <Globe size={10} className="text-blue-400"/>}
-                   {location.source === 'GPS' ? 'Verified GPS Uplink' : location.source === 'Timezone' ? 'Timezone Node' : 'Manual Registry'}
+                   {location.source === 'GPS' ? 'GPS Verified' : location.source === 'Timezone' ? 'Estimated Location' : 'Selected Location'}
                 </p>
                 <div className="flex items-center gap-3">
                    <h3 className="text-2xl font-black italic tracking-tighter uppercase">{location.name}</h3>
@@ -288,7 +288,7 @@ const SubscriberWeather: React.FC = () => {
         <div className="p-5 bg-amber-50 border border-amber-100 rounded-[2rem] flex items-center gap-4 text-amber-700 animate-in shake">
            <AlertCircle size={20} className="shrink-0" />
            <div className="flex-1">
-              <p className="text-[10px] font-black uppercase tracking-widest">Diagnostic Interruption</p>
+              <p className="text-[10px] font-black uppercase tracking-widest">Weather Unavailable</p>
               <p className="text-[9px] font-bold opacity-60 uppercase">{error}</p>
            </div>
            <button onClick={() => window.location.reload()} className="p-2 bg-amber-100 rounded-lg font-black text-[9px] uppercase">Reset</button>
@@ -330,9 +330,9 @@ const SubscriberWeather: React.FC = () => {
         <div className="flex justify-between items-center">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
             <Zap size={16} className="text-indigo-500" />
-            Atmospheric Outlook (7d)
+            7-Day Forecast
           </h3>
-          <span className="text-[8px] font-black text-slate-300 uppercase tracking-tighter">Satellite Sync</span>
+          <span className="text-[8px] font-black text-slate-300 uppercase tracking-tighter">Updated</span>
         </div>
         <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2 snap-x">
            {weather?.daily.time.map((time, idx) => (

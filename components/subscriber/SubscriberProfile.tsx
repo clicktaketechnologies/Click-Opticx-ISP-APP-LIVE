@@ -4,7 +4,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { ISPUser, AppState, TechnicalConfig, UserStatus, VerificationStatus, LedgerType } from '../../types';
 import { db } from '../../db';
 import {
-   User, Shield, Signal, HardDrive, ListChecks, History,
+   User, Shield, Wifi, HardDrive, ListChecks, History,
    Camera, CheckCircle, Mail, Smartphone, MapPin,
    CreditCard, Info, Save, X, Edit3, Lock, Eye, EyeOff,
    Activity, ArrowRight, Zap, Layers, Globe, Fingerprint, LockIcon,
@@ -210,7 +210,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
             {[
                { id: 'personal', label: 'Account', icon: User },
                { id: 'security', label: 'Security', icon: Shield },
-               { id: 'connection', label: 'Link Layer', icon: Signal },
+               { id: 'connection', label: 'Link Layer', icon: Wifi },
                { id: 'audit', label: 'Registry Logs', icon: History }
             ].map(tab => (
                <button
@@ -340,7 +340,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 space-y-8">
                   <div className="flex justify-between items-start">
                      <div className="space-y-1">
-                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><Signal size={18} className="text-blue-600" /> Link Parameters</h3>
+                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><Wifi size={18} className="text-blue-600" /> Link Parameters</h3>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active infrastructure mapping</p>
                      </div>
                      <div className="px-4 py-2 bg-slate-900 text-emerald-400 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">

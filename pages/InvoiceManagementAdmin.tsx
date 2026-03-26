@@ -99,15 +99,14 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
   };
 
   const handleBulkMarkPaid = async () => {
-    if (!confirm(`AUTHORIZE BULK SETTLEMENT: Mark ${selectedIds.size} invoices as PAID in the ledger?`)) return;
+    if (!confirm(`CONFIRM PAYMENTS: Mark ${selectedIds.size} invoices as PAID?`)) return;
     setIsProcessing('bulk');
     for (const id of selectedIds) {
       await db.payInvoiceWithWallet(id);
     }
     setIsProcessing(null);
     setSelectedIds(new Set());
-    // Fixed: Added 'all' as the first argument (targetId) to db.logNotification
-    db.logNotification('all', 'success', 'Bulk Settlement', 'Mass invoice liquidation complete.');
+    db.logNotification('all', 'success', 'Bulk Payment', 'Bulk payment clearing complete.');
   };
 
   const handleBulkReminder = async () => {
@@ -132,34 +131,34 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <ModuleGuide
-        moduleName="Fiscal Asset Hub"
-        description="Billing, collections, and client financial registry"
+        moduleName="Billing & Payments"
+        description="Manage user bills, payments, and financial records"
         items={[
-          { title: "Invoice Ledger", description: "Monitor all billing events. Use mass settlement to authorize multiple payments at once." },
-          { title: "Client Registry", description: "Quickly generate ad-hoc invoices for any Subscriber by locating them in the registry." },
-          { title: "Financial Risk", description: "KPI cards highlight exposure to overdue invoices. Use the 'Remind' protocol to dispatch alerts." }
+          { title: "Billing Record", description: "Track all bills and payments. Pay multiple invoices at once with bulk actions." },
+          { title: "User List", description: "Quickly create new bills for any user by finding them in the list." },
+          { title: "Unpaid Dues", description: "See who hasn't paid yet and send them a quick reminder." }
         ]}
       />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none">
             <Archive className="text-indigo-600" size={32} />
-            Fiscal Asset Hub
+            Billing & Payments
           </h2>
-          <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Authority Control • Billing & Collections v8.5</p>
+          <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">System Billing Management</p>
         </div>
         <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
           <button
             onClick={() => setActiveView('invoices')}
             className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeView === 'invoices' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
           >
-            <FileText size={16} /> Invoice Ledger
+            <FileText size={16} /> Billing Record
           </button>
           <button
             onClick={() => setActiveView('clients')}
             className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeView === 'clients' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
           >
-            <Users size={16} /> Client Registry
+            <Users size={16} /> User List
           </button>
         </div>
       </div>
@@ -167,10 +166,10 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
       {/* KPI Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Gross Billed', value: stats.totalBilled, icon: DollarSign, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-          { label: 'Net Collected', value: stats.totalPaid, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-          { label: 'Outstanding', value: stats.totalPending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
-          { label: 'Risk Exposure', value: stats.totalOverdue, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
+          { label: 'Total Billed', value: stats.totalBilled, icon: DollarSign, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+          { label: 'Total Paid', value: stats.totalPaid, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Total Unpaid', value: stats.totalPending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+          { label: 'Unpaid Dues', value: stats.totalOverdue, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
         ].map((kpi, idx) => (
           <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
             <div className="relative z-10 flex justify-between items-start mb-4">
@@ -202,11 +201,11 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
             </div>
             <div className="space-y-1">
               <h1 className="text-3xl font-black italic tracking-tighter uppercase leading-none">{state.settings.branding.businessName}</h1>
-              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] italic opacity-80">Official Billing Registry</p>
+              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] italic opacity-80">Billing & Payments</p>
               <div className="flex items-center gap-3 pt-3">
                 <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-lg border border-white/10">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                  <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Ledger Active</span>
+                  <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Billing System Active</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-lg border border-white/10">
                   <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Tax ID: {state.settings.taxId || 'N/A'}</span>
@@ -216,12 +215,12 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
           </div>
           <div className="relative z-10 hidden lg:flex items-center gap-8 text-right">
             <div>
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Fiscal Status</p>
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Billing Status</p>
               <p className="text-sm font-black text-white uppercase italic">Synchronized</p>
             </div>
             <div className="h-10 w-px bg-white/10"></div>
             <div>
-              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Document Count</p>
+              <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Bills</p>
               <p className="text-xl font-black text-indigo-400 italic leading-none">{invoices.length}</p>
             </div>
           </div>
@@ -258,10 +257,10 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
             </button>
             <button
               // Fixed: Added state.currentUser?.email as targetId to db.logNotification call
-              onClick={() => { setSelectedIds(new Set()); db.logNotification(state.currentUser?.email || 'admin', 'info', 'Archive Node', 'Selection cleared.'); }}
+              onClick={() => { setSelectedIds(new Set()); db.logNotification(state.currentUser?.email || 'admin', 'info', 'Clear History', 'Selection cleared.'); }}
               className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
             >
-              <X size={16} /> Archive
+              <X size={16} /> Clear Selection
             </button>
           </div>
         </div>
@@ -273,7 +272,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
             className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-black text-slate-900"
-            placeholder={activeView === 'invoices' ? "Search Invoices by ID or Subscriber..." : "Search Clients by Name, ID or Phone..."}
+            placeholder={activeView === 'invoices' ? "Search Invoices by ID or User..." : "Search Users by Name, ID or Phone..."}
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -312,9 +311,9 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
                       {selectedIds.size === filteredInvoices.length && filteredInvoices.length > 0 ? <CheckSquare size={20} /> : <Square size={20} />}
                     </button>
                   </th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Document Ref</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Subscriber Identity</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Gross Total</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Bill ID</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">User Name</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Amount</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Status</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                 </tr>
@@ -395,10 +394,10 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
             <table className="w-full text-left min-w-[1000px]">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Identity</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Connection ID</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">User Name</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">User ID</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Plan</th>
-                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Outstanding</th>
+                  <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Amount Due</th>
                   <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
                 </tr>
               </thead>
@@ -452,7 +451,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
                           }}
                           className="px-6 py-3 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center gap-2 ml-auto"
                         >
-                          <Plus size={16} /> Generate Invoice
+                          <Plus size={16} /> Create Bill
                         </button>
                       </td>
                     </tr>

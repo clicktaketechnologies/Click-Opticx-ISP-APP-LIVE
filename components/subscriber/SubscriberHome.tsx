@@ -9,7 +9,7 @@ import {
   AlertTriangle, Clock, X, ShieldAlert, Sun, Bot, CheckCircle, BarChart3, RefreshCw,
   CreditCard, LayoutGrid, Smartphone, MapPin, MessageSquare, Headphones,
   Bell, History, Gift, User, FileText, Network, Compass, Fingerprint, Loader2,
-  Info, Home, Signal, Monitor, Key, Book, HelpCircle, UserCheck, Shield, HardDrive,
+  Info, Home, Monitor, Key, Book, HelpCircle, UserCheck, Shield, HardDrive,
   Cpu, Megaphone, Mic, PhoneCall, Moon, Box, Heart, ChevronDown, ChevronUp
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -26,7 +26,7 @@ interface Props {
 }
 
 const iconMap: Record<string, LucideIcon> = {
-  Home, Wallet, Signal, User, Headphones, Zap, LayoutGrid, Monitor, Smartphone, Key, Gauge, Bell, MessageSquare, Globe, ShieldCheck, Clock, Book, History, HelpCircle, UserCheck, Shield, Activity, Wifi, HardDrive, BookOpen, FileText, CreditCard, Target, Compass, Fingerprint, Mic, Sun, Gift, Megaphone, Moon, Box, Heart
+  Home, Wallet, Wifi, User, Headphones, Zap, LayoutGrid, Monitor, Smartphone, Key, Gauge, Bell, MessageSquare, Globe, ShieldCheck, Clock, Book, History, HelpCircle, UserCheck, Shield, Activity, HardDrive, BookOpen, FileText, CreditCard, Target, Compass, Fingerprint, Mic, Sun, Gift, Megaphone, Moon, Box, Heart
 };
 
 const SubscriberHome: React.FC<Props> = ({
@@ -120,11 +120,10 @@ const SubscriberHome: React.FC<Props> = ({
             </div>
           )}
 
-          {/* 🤖 Intelligent Node Section */}
+          {/* 🤖 Intelligent Node Section -> Insights & Suggestions */}
           <div className="space-y-4 px-4">
             <div className="flex justify-between items-end px-1">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">🤖 Intelligent Node</h3>
-              <span className="text-[8px] font-black text-indigo-600 animate-pulse">Core Pulse Active</span>
+              <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-400">Insights & Suggestions</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {appearance.showAICalling && (
@@ -136,8 +135,8 @@ const SubscriberHome: React.FC<Props> = ({
                     <div className="w-12 h-12 bg-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400 mb-4 border border-indigo-500/30 group-hover:scale-110 transition-transform shadow-lg">
                       <PhoneCall size={24} />
                     </div>
-                    <h4 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-1">AI Call</h4>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Instant Voice Support</p>
+                    <h4 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-1">Voice Support</h4>
+                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1 leading-snug">Start a conversation with support anytime to check your connection or billing.</p>
                   </div>
                   <Mic size={100} className="absolute -right-4 -bottom-4 opacity-10 text-indigo-400 pointer-events-none group-hover:scale-125 transition-transform duration-700" />
                 </button>
@@ -261,17 +260,16 @@ const SubscriberHome: React.FC<Props> = ({
       return (
         <div key="fiscal-summary" className="bg-white rounded-3xl border-b-8 border-slate-100 shadow-xl overflow-hidden flex flex-col mx-4 animate-in fade-in duration-700 hover:shadow-2xl transition-all hover:-translate-y-1">
           <div className="p-6 bg-slate-50/50 border-b border-slate-50 flex items-center justify-between">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-2"><Receipt size={14} className="text-indigo-600" /> {section.label}</h3>
-            <span className="text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 uppercase">Synced</span>
+            <h3 className="text-[12px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2"><Wallet size={16} className="text-indigo-600" /> Account Balance</h3>
           </div>
           <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <div className="flex justify-between items-end"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Registry Expiry</p><p className={`text-xs font-black uppercase tracking-tight ${isExpired ? 'text-red-600' : 'text-slate-900'}`}>{user.expiryDate ? new Date(user.expiryDate).toLocaleDateString() : 'OFFLINE'}</p></div>
+              <div className="flex justify-between items-end"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Plan Expiry</p><p className={`text-xs font-black uppercase tracking-tight ${isExpired ? 'text-red-600' : 'text-slate-900'}`}>{user.expiryDate ? new Date(user.expiryDate).toLocaleDateString() : 'OFFLINE'}</p></div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden shadow-inner"><div className={`h-full transition-all duration-1000 ${isExpired ? 'bg-red-500' : 'bg-indigo-500'}`} style={{ width: isExpired ? '100%' : '65%' }}></div></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Unpaid Dues</p><p className="text-lg font-black text-slate-900">{activeUnpaidCount}</p></div>
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Balance</p><p className={`text-lg font-black ${user.balance > 0 ? 'text-red-600' : 'text-emerald-600'}`}>Rs. {user.balance.toLocaleString()}</p></div>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Wallet Balance</p><p className={`text-lg font-black ${user.balance > 0 ? 'text-red-600' : 'text-emerald-600'}`}>Rs. {user.balance.toLocaleString()}</p></div>
             </div>
           </div>
         </div>

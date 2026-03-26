@@ -5,7 +5,7 @@ import {
    X, Printer, Download, CreditCard, ShieldCheck,
    Info, Landmark, Globe, Activity, FileText, CheckCircle, Wallet, Loader2,
    History, ArrowRightLeft, User, ShieldAlert, BadgeCheck, Calendar, TrendingUp,
-   Signal, Zap, ShoppingBag, Receipt, AlertTriangle, Phone, MapPin,
+   Wifi, Zap, ShoppingBag, Receipt, AlertTriangle, Phone, MapPin,
    Package, Hash, Clock, Wifi, Building2
 } from 'lucide-react';
 import { db } from '../../db';
@@ -195,7 +195,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                     {displayLogo ? (
                                        <img src={displayLogo} alt="Logo" className="w-full h-full object-contain p-2" />
                                     ) : (
-                                       <Signal className="text-indigo-400" size={40} />
+                                       <Wifi className="text-indigo-400" size={40} />
                                     )}
                                  </div>
                                  <div className="space-y-1">

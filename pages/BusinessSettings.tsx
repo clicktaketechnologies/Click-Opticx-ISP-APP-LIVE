@@ -3,7 +3,6 @@ import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useState, useRef } from 'react';
 import { AppState, SystemSettings } from '../types';
 import { db } from '../db';
-// Add missing Wallet and Megaphone icons to imports
 import {
   Building2, Image as ImageIcon, Headphones, Smartphone, Bell,
   Save, Eye, Globe, MessageSquare, ShieldCheck,
@@ -28,7 +27,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
     await db.updateSettings(formData);
     setTimeout(() => {
       setIsSaving(false);
-      db.logNotification('all', 'success', 'Global Settings Applied', 'Organizational architecture and branding nodes synchronized.');
+      db.logNotification('all', 'success', 'Settings Saved', 'Your business identity and settings have been updated.');
     }, 800);
   };
 
@@ -51,7 +50,6 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
   };
 
   const triggerUpload = (slot: string, parent: 'branding' | 'invoiceBranding' = 'branding') => {
-    // Current target selection logic
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -60,14 +58,14 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
   };
 
   const tabs = [
-    { id: 'branding', label: 'Brand Identity', icon: ImageIcon },
+    { id: 'branding', label: 'Branding', icon: ImageIcon },
     { id: 'profile', label: 'Business Profile', icon: Building2 },
     { id: 'support', label: 'Contact & Support', icon: Headphones },
     { id: 'digital', label: 'Digital Presence', icon: Globe },
-    { id: 'invoices', label: 'Invoice Branding', icon: FileText },
-    { id: 'notifications', label: 'Message Identity', icon: Bell },
-    { id: 'appearance', label: 'UI Parameters', icon: Smartphone },
-    { id: 'ai-agent', label: 'AI Agent (Global)', icon: Bot },
+    { id: 'invoices', label: 'Invoice Design', icon: FileText },
+    { id: 'notifications', label: 'Notification Branding', icon: Bell },
+    { id: 'appearance', label: 'App Features', icon: Smartphone },
+    { id: 'ai-agent', label: 'AI Settings', icon: Bot },
     { id: 'legal', label: 'Legal Policies', icon: Scale },
   ];
 
@@ -77,9 +75,9 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none">
             <Building2 className="text-blue-600" size={32} />
-            Architecture Command
+            Business Settings
           </h2>
-          <p className="text-slate-500 font-medium">Provision global organizational identity and functional scope control.</p>
+          <p className="text-slate-500 font-medium">Manage your business details, branding, and system preferences.</p>
         </div>
         <div className="flex gap-4 w-full md:w-auto">
           <button
@@ -94,7 +92,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
             className="flex-1 md:flex-none flex items-center justify-center gap-3 px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl active:scale-95 disabled:opacity-50"
           >
             {isSaving ? <Mini5GMicroLoader size={18} /> : <Save size={18} />}
-            Authorize Publishing
+            Save Changes
           </button>
         </div>
       </div>
@@ -123,16 +121,16 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'branding' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Palette className="text-indigo-600" size={32} /> Brand Identity</h3>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Brand Assets</p>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Palette className="text-indigo-600" size={32} /> Branding</h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Logo & Icons</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Authorized Trading Name</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Business Name</label>
                       <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-indigo-500 transition-all outline-none" value={formData.branding.businessName} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, businessName: e.target.value } })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Registry Short Name</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Short Name (Display)</label>
                       <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-indigo-600 outline-none transition-all" value={formData.branding.shortName} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, shortName: e.target.value } })} />
                     </div>
                   </div>
@@ -157,23 +155,23 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'profile' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Building2 className="text-indigo-600" size={32} /> Organizational Dossier</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Building2 className="text-indigo-600" size={32} /> Company Profile</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Legal Corporate Name</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Official Company Name</label>
                       <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.profile.legalName} onChange={e => setFormData({ ...formData, profile: { ...formData.profile, legalName: e.target.value } })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Head Office Location</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Office Address</label>
                       <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.profile.headOffice} onChange={e => setFormData({ ...formData, profile: { ...formData.profile, headOffice: e.target.value } })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">NTN / Registration Number</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Tax / Registration ID</label>
                       <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.profile.registrationNumber} onChange={e => setFormData({ ...formData, profile: { ...formData.profile, registrationNumber: e.target.value } })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">System Timezone</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Timezone</label>
                       <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.profile.timezone} onChange={e => setFormData({ ...formData, profile: { ...formData.profile, timezone: e.target.value } })}>
                         <option value="Asia/Karachi">Asia/Karachi (GMT+5)</option>
                         <option value="UTC">Universal Time (UTC)</option>
@@ -209,8 +207,8 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="p-8 bg-slate-950 rounded-[2.5rem] space-y-6">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-xs font-black uppercase text-indigo-400 italic">Support Handshake Hours</h4>
-                      <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${formData.support.emergencySupport ? 'bg-emerald-50 text-white' : 'bg-slate-700 text-slate-400'}`}>Emergency Link: {formData.support.emergencySupport ? 'Active' : 'Standby'}</div>
+                      <h4 className="text-xs font-black uppercase text-indigo-400 italic">Support Operating Hours</h4>
+                      <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${formData.support.emergencySupport ? 'bg-emerald-50 text-white' : 'bg-slate-700 text-slate-400'}`}>Emergency Support: {formData.support.emergencySupport ? 'Active' : 'Standby'}</div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -234,11 +232,11 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Main Domain Name</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Website URL</label>
                       <input type="url" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.digitalPresence.website} onChange={e => setFormData({ ...formData, digitalPresence: { ...formData.digitalPresence, website: e.target.value } })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Client Portal URL</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">User Portal URL</label>
                       <input type="url" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.digitalPresence.portal} onChange={e => setFormData({ ...formData, digitalPresence: { ...formData.digitalPresence, portal: e.target.value } })} />
                     </div>
                   </div>
@@ -257,7 +255,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'invoices' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><FileText className="text-indigo-600" size={32} /> Fiscal Branding</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><FileText className="text-indigo-600" size={32} /> Invoice Branding</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
@@ -277,7 +275,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                   {/* Tax Configuration */}
                   <div className="p-8 bg-slate-50 border border-slate-200 rounded-[2.5rem] space-y-6">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-sm font-black uppercase text-slate-800 italic">Taxation Protocol</h4>
+                      <h4 className="text-sm font-black uppercase text-slate-800 italic">Tax Settings</h4>
                       <button
                         onClick={() => setFormData({ ...formData, enableTax: !formData.enableTax })}
                         className={`w-12 h-6 rounded-full relative transition-all ${formData.enableTax ? 'bg-emerald-600' : 'bg-slate-300'}`}
@@ -288,11 +286,11 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                     {formData.enableTax && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in slide-in-from-top-2">
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-500 uppercase">Calculation Logic (%)</label>
+                          <label className="text-[10px] font-black text-slate-500 uppercase">Tax Rate (%)</label>
                           <input type="number" className="w-full p-4 bg-white border border-slate-200 rounded-xl font-bold text-sm" value={formData.autoTaxPercentage} onChange={e => setFormData({ ...formData, autoTaxPercentage: Number(e.target.value) })} />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-slate-500 uppercase">Display Nomenclature</label>
+                          <label className="text-[10px] font-black text-slate-500 uppercase">Tax Label (e.g. GST)</label>
                           <input type="text" className="w-full p-4 bg-white border border-slate-200 rounded-xl font-bold text-sm" value={formData.taxLabel} onChange={e => setFormData({ ...formData, taxLabel: e.target.value })} />
                         </div>
                       </div>
@@ -300,12 +298,12 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Authorized Header Logic</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Invoice Header Text</label>
                     <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-sm" value={formData.invoiceBranding.headerText} onChange={e => setFormData({ ...formData, invoiceBranding: { ...formData.invoiceBranding, headerText: e.target.value } })} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Authorized Signature</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Digital Signature</label>
                       <div onClick={() => triggerUpload('authorizedSignature', 'invoiceBranding')} className="h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] flex items-center justify-center cursor-pointer hover:bg-slate-100 transition-all group overflow-hidden">
                         {formData.invoiceBranding.authorizedSignature ? (
                           <img src={formData.invoiceBranding.authorizedSignature} className="h-full object-contain p-4 grayscale group-hover:grayscale-0 transition-all" />
@@ -315,18 +313,18 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Footer Compliance disclaimer</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Invoice Footer Text</label>
                       <textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs h-32 resize-none" value={formData.invoiceBranding.footerDisclaimer} onChange={e => setFormData({ ...formData, invoiceBranding: { ...formData.invoiceBranding, footerDisclaimer: e.target.value } })} />
                     </div>
                   </div>
 
-                  {/* INVOICE TEXT SYSTEM (NEW SECTION) */}
+                  {/* INVOICE TEXT SYSTEM */}
                   <div className="p-8 bg-slate-50 border border-slate-200 rounded-[2.5rem] space-y-6 mt-8">
                     <h4 className="text-sm font-black uppercase text-slate-800 italic flex items-center gap-3">
                       <Type size={18} className="text-indigo-600" /> 
-                      Invoice Text & Link Configuration
+                      Invoice Links & Messages
                     </h4>
-                    <p className="text-[11px] font-bold text-slate-500 uppercase">Manage the global text blocks and links embedded within all generated invoices.</p>
+                    <p className="text-[11px] font-bold text-slate-500 uppercase">Manage the links and messages shown at the bottom of all generated invoices.</p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
                       <div className="space-y-4">
@@ -345,7 +343,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       </div>
                       
                       <div className="space-y-2 h-full flex flex-col">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Standard Invoice Notes / Message</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Standard Invoice Message</label>
                         <textarea 
                           placeholder="Thank you for your business!"
                           className="w-full p-6 bg-white border border-slate-200 rounded-xl font-bold text-sm flex-1 resize-none" 
@@ -358,23 +356,23 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                 </div>
               )}
 
-              {/* MESSAGE IDENTITY TAB */}
+              {/* NOTIFICATION BRANDING TAB */}
               {activeTab === 'notifications' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Bell className="text-indigo-600" size={32} /> Message Identity</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Bell className="text-indigo-600" size={32} /> Notification Branding</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">App Notification Sender</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Notification Name</label>
                       <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-sm uppercase" value={formData.notificationBranding.appSenderName} onChange={e => setFormData({ ...formData, notificationBranding: { ...formData.notificationBranding, appSenderName: e.target.value } })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Email Sender Hub Name</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Email Sender Name</label>
                       <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-sm uppercase" value={formData.notificationBranding.emailSenderName} onChange={e => setFormData({ ...formData, notificationBranding: { ...formData.notificationBranding, emailSenderName: e.target.value } })} />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">SMS Alpha Sender ID</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">SMS Sender ID</label>
                       <input type="text" maxLength={11} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-sm uppercase" value={formData.notificationBranding.smsSenderId} onChange={e => setFormData({ ...formData, notificationBranding: { ...formData.notificationBranding, smsSenderId: e.target.value } })} />
                     </div>
                   </div>
@@ -385,17 +383,17 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'appearance' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Smartphone className="text-indigo-600" size={32} /> UI Parameters</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Smartphone className="text-indigo-600" size={32} /> App Features</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[
-                      { key: 'showWallet', label: 'Fiscal Wallet Center', icon: Wallet },
-                      { key: 'showEmergencyLoad', label: 'Rescue Credit Protocol', icon: Zap },
-                      { key: 'showAIChat', label: 'AI Intelligent Chat', icon: MessageSquare },
-                      { key: 'showAICalling', label: 'Autonomous Voice Link', icon: Mic },
-                      { key: 'showNews', label: 'Global Broadcast System', icon: Megaphone },
-                      { key: 'maintenanceMode', label: 'Global Maintenance Lockdown', icon: Power, dangerous: true },
-                      { key: 'show5GLaunchAnimation', label: '5G Launch Engine', icon: Sparkles },
+                      { key: 'showWallet', label: 'Show Wallet', icon: Wallet },
+                      { key: 'showEmergencyLoad', label: 'Emergency Credit', icon: Zap },
+                      { key: 'showAIChat', label: 'AI Chat Support', icon: MessageSquare },
+                      { key: 'showAICalling', label: 'AI Phone Calling', icon: Mic },
+                      { key: 'showNews', label: 'Announcements', icon: Megaphone },
+                      { key: 'maintenanceMode', label: 'Maintenance Mode', icon: Power, dangerous: true },
+                      { key: 'show5GLaunchAnimation', label: '5G Launch Animation', icon: Sparkles },
                     ].map(param => (
                       <div key={param.key} className={`p-6 rounded-3xl border-2 flex items-center justify-between transition-all group ${(formData.appearance as any)[param.key] ? 'border-indigo-100 bg-indigo-50/10' : 'border-slate-100 bg-slate-50 opacity-60'}`}>
                         <div className="flex items-center gap-4">
@@ -420,35 +418,35 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'ai-agent' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Bot className="text-indigo-600" size={32} /> Global AI Orchestrator</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Bot className="text-indigo-600" size={32} /> AI System Settings</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Voice Agent Gender</label>
                       <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm uppercase" value={formData.aiCallConfig.voiceName} onChange={e => setFormData({ ...formData, aiCallConfig: { ...formData.aiCallConfig, voiceName: e.target.value as any } })}>
-                        <option value="Zephyr">Zephyr (Deep Male)</option>
-                        <option value="Kore">Kore (Soft Female)</option>
+                        <option value="Zephyr">Zephyr (Male)</option>
+                        <option value="Kore">Kore (Female)</option>
                         <option value="Charon">Charon (Neutral)</option>
                       </select>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Vocal Persona</label>
                       <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm uppercase" value={formData.aiCallConfig.persona} onChange={e => setFormData({ ...formData, aiCallConfig: { ...formData.aiCallConfig, persona: e.target.value as any } })}>
-                        <option value="Professional">Professional (Registry Standard)</option>
-                        <option value="Friendly">Friendly (Casual)</option>
-                        <option value="Strict">Strict (Protocol Driven)</option>
+                        <option value="Professional">Professional</option>
+                        <option value="Friendly">Friendly</option>
+                        <option value="Strict">Strict</option>
                       </select>
                     </div>
                   </div>
                   <div className="p-8 bg-slate-950 rounded-[2.5rem] space-y-6">
-                    <h4 className="text-xs font-black uppercase text-indigo-400 italic">Heuristic Office Hours</h4>
+                    <h4 className="text-xs font-black uppercase text-indigo-400 italic">AI Working Hours</h4>
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black text-slate-500 uppercase">Commencement</label>
+                        <label className="text-[9px] font-black text-slate-500 uppercase">Start Time</label>
                         <input type="time" className="w-full p-3 bg-white/5 border border-white/10 rounded-xl font-bold text-white text-sm" value={formData.aiCallConfig.officeHours.start} onChange={e => setFormData({ ...formData, aiCallConfig: { ...formData.aiCallConfig, officeHours: { ...formData.aiCallConfig.officeHours, start: e.target.value } } })} />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black text-slate-500 uppercase">Cease</label>
+                        <label className="text-[9px] font-black text-slate-500 uppercase">End Time</label>
                         <input type="time" className="w-full p-3 bg-white/5 border border-white/10 rounded-xl font-bold text-white text-sm" value={formData.aiCallConfig.officeHours.end} onChange={e => setFormData({ ...formData, aiCallConfig: { ...formData.aiCallConfig, officeHours: { ...formData.aiCallConfig.officeHours, end: e.target.value } } })} />
                       </div>
                     </div>
@@ -460,13 +458,13 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'legal' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Scale className="text-indigo-600" size={32} /> Legal Policy Control</h3>
-                    <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">Update terms, agreements, and policies used in signup and checkout handshakes.</p>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Scale className="text-indigo-600" size={32} /> Legal Policies</h3>
+                    <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">Update terms, agreements, and policies used across the system.</p>
                   </div>
 
                   <div className="grid grid-cols-1 gap-8">
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Master Terms & Conditions</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Terms & Conditions</label>
                       <textarea
                         className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-48 outline-none focus:border-indigo-600 resize-none"
                         value={formData.legal.termsAndConditions}
@@ -474,7 +472,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Signup / Service Agreement</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">User Service Agreement</label>
                       <textarea
                         className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-48 outline-none focus:border-indigo-600 resize-none"
                         value={formData.legal.serviceAgreement}
@@ -491,7 +489,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Refund & Cancellation Policy</label>
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Refund Policy</label>
                         <textarea
                           className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-32 outline-none focus:border-indigo-600 resize-none"
                           value={formData.legal.refundPolicy}
@@ -508,7 +506,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="p-10 bg-slate-50 border-t flex gap-4 shrink-0">
               <button onClick={handleSave} disabled={isSaving} className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50">
                 {isSaving ? <Mini5GMicroLoader size={24} /> : <ShieldCheck size={24} />}
-                {isSaving ? 'Synchronizing Cluster...' : 'Publish Global State'}
+                {isSaving ? 'Saving...' : 'Save and Apply Settings'}
               </button>
             </div>
           </div>

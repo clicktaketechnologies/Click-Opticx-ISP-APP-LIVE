@@ -2679,16 +2679,17 @@ class DB {
 
     let duplicateFound = false;
     if (settings.duplicateControl.enabled) {
-      const exists = this.state.users.some(existing =>
-        (data.email && existing.email === data.email) ||
-        (data.phone && existing.phone === data.phone) ||
-        (data.cnic && existing.cnic === data.cnic) ||
-        (data.username && existing.username === data.username)
-      );
+      const exists = this.state.users.some(existing => {
+        const checkEmail = data.email && (existing.email || '').toLowerCase().trim() === data.email.toLowerCase().trim();
+        const checkPhone = data.phone && (existing.phone || '').trim() === data.phone.trim();
+        const checkCnic = data.cnic && (existing.cnic || '').trim() === data.cnic.trim();
+        const checkUsername = data.username && (existing.username || '').toLowerCase().trim() === data.username.toLowerCase().trim();
+        return checkEmail || checkPhone || checkCnic || checkUsername;
+      });
 
       if (exists) {
         if (settings.duplicateControl.blockDuplicate) {
-          return { success: false, message: 'IDENTITY_CONFLICT: A subscriber with this Email, Phone, CNIC, or Username already exists.' };
+          return { success: false, message: 'IDENTITY_CONFLICT: A subscriber with this Email, Phone, National Identity, or Username already exists. Please verify your details or use the recovery tool.' };
         } else if (settings.duplicateControl.allowWithWarning) {
           duplicateFound = true;
         }
@@ -2749,14 +2750,24 @@ class DB {
       return { success: false, message: 'Password recovery is disabled.' };
     }
 
-    const user = this.state.users.find(u => !u.deleted && (
-      (u.username || '').toLowerCase() === input ||
-      (u.email || '').toLowerCase() === input ||
-      u.phone === input ||
-      u.cnic === input ||
-      (u.pppoeId || '').toLowerCase() === input ||
-      u.connectionId === input
-    ));
+    const user = this.state.users.find(u => {
+      if (u.deleted) return false;
+      const uUsername = (u.username || '').toLowerCase().trim();
+      const uEmail = (u.email || '').toLowerCase().trim();
+      const uPhone = (u.phone || '').replace(/\D/g, '');
+      const uCnic = (u.cnic || '').replace(/\D/g, '');
+      const uPppoe = (u.pppoeId || '').toLowerCase().trim();
+      const uConnId = (u.connectionId || '').toLowerCase().trim();
+      
+      const searchDigits = input.replace(/\D/g, '');
+
+      return uUsername === input ||
+             uEmail === input ||
+             (uPhone !== '' && uPhone === searchDigits) ||
+             (uCnic !== '' && uCnic === searchDigits) ||
+             uPppoe === input ||
+             uConnId === input;
+    });
 
     if (!user) return { success: false, message: 'IDENTITY_NOT_FOUND' };
 
@@ -3906,8 +3917,15 @@ class DB {
           user.packageId = 'PKG-3M';
           user.status = UserStatus.EXPIRED; // Force new activation
           user.expiryDate = undefined;
+          user.lastPaymentDate = new Date().toISOString();
       } else {
           user.status = UserStatus.ACTIVE;
+          user.lastPaymentDate = new Date().toISOString();
+          // Extend expiry by 30 days if it was expired or near expiry
+          const now = new Date();
+          const currentExpiry = user.expiryDate ? new Date(user.expiryDate) : now;
+          const newExpiry = new Date(Math.max(now.getTime(), currentExpiry.getTime()) + 30 * 24 * 60 * 60 * 1000);
+          user.expiryDate = newExpiry.toISOString();
       }
 
       // Add recovery log

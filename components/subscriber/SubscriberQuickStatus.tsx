@@ -17,7 +17,10 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 mt-6">
       <div className="px-4 flex justify-between items-end">
-        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Profile Summary</h3>
+        <div>
+           <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Welcome</h3>
+           <p className="text-[10px] text-slate-500 font-bold">Here’s a quick overview of your internet account and services.</p>
+        </div>
         {isNewUser && (
           <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 uppercase animate-pulse">
             <Sparkles size={10} /> New Account
@@ -39,22 +42,22 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
           <div className="space-y-3 flex-1">
             <div className="flex flex-col">
               <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1 italic">
-                {isNewUser ? 'Ready to Start' : 'Online'}
+                Your Plan & Connection
               </span>
               <h4 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none italic">
-                Welcome, {firstName}
+                Hello, {firstName}! 👋
               </h4>
             </div>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-1">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
                 <PackageIcon size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest">
-                  Plan: {currentPkg?.name || 'Awaiting Plan'}
+                  Plan: {currentPkg?.name || 'Active'}
                 </span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-100">
                 <Wifi size={14} className={isNewUser ? '' : 'animate-pulse'} />
-                <span className="text-[9px] font-black uppercase tracking-widest">Connection: Active</span>
+                <span className="text-[9px] font-black uppercase tracking-widest">Connection Status: Online</span>
               </div>
             </div>
           </div>
@@ -65,7 +68,7 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
           className="w-full md:w-auto px-8 py-5 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center gap-3 shrink-0"
         >
           <Activity size={16} fill="none" />
-          Initialize Infrastructure Audit
+          Check Speed
           <ChevronRight size={14} className="opacity-50" />
         </button>
       </div>

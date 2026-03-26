@@ -45,7 +45,7 @@ const SubscriberLegalCenter: React.FC<Props> = ({ state, onBack }) => {
                <div className="p-6 bg-slate-900 rounded-[2.5rem] flex items-center justify-between text-white relative overflow-hidden">
                   <div className="relative z-10">
                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Verified Content</p>
-                     <h4 className="text-xl font-black text-indigo-400 uppercase italic">v8.5 Approved</h4>
+                     <h4 className="text-xl font-black text-indigo-400 uppercase italic">Current Version</h4>
                   </div>
                   <ShieldCheck className="text-white/10 absolute -right-4 -bottom-4" size={100} />
                </div>
@@ -105,7 +105,7 @@ const SubscriberLegalCenter: React.FC<Props> = ({ state, onBack }) => {
             <div className="flex-1">
                <p className="text-[11px] font-black text-amber-900 uppercase tracking-widest mb-1 italic">Compliance Notice</p>
                <p className="text-[9px] text-amber-700 font-bold leading-relaxed uppercase opacity-80">
-                  By using our services, you agree to the Master Service Agreement v8.5.
+                  By using our services, you agree to our Master Service Agreement.
                </p>
             </div>
          </div>

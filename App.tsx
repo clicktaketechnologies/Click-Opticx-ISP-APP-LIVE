@@ -100,7 +100,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
       return (
         <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 text-white text-center">
           <ShieldAlert className="text-rose-500 mb-6" size={64} />
-          <h1 className="text-3xl font-black uppercase italic tracking-tighter mb-4">Registry Fault Detected</h1>
+          <h1 className="text-3xl font-black uppercase italic tracking-tighter mb-4">System Fault Detected</h1>
           <p className="text-slate-400 max-w-md text-xs font-bold uppercase tracking-widest leading-relaxed mb-8">
             An unexpected runtime error has occurred. Our secondary containment has isolated the issue.
             Detailed trace logged to console.
@@ -112,7 +112,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
             onClick={() => window.location.reload()}
             className="px-8 py-4 bg-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-2"
           >
-            <RefreshCcw size={16} /> Re-Initialize Node
+            <RefreshCcw size={16} /> Re-Initialize System
           </button>
         </div>
       );
@@ -219,7 +219,7 @@ const App: React.FC = () => {
             </div>
             <div className="flex items-center justify-center gap-3">
               <Mini5GMicroLoader size={14} />
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Nodes Synchronizing</span>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">System Synchronizing</span>
             </div>
           </div>
         </div>
@@ -229,7 +229,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-4 text-[8px] font-black uppercase text-slate-600 tracking-widest">
             <span>CLOUD SECURE</span>
             <div className="w-1 h-1 rounded-full bg-emerald-500"></div>
-            <span>REGIONAL NODE</span>
+            <span>REGIONAL SYSTEM</span>
           </div>
         </div>
         {show5G && <FiveGLaunchAnimation state={dbState} onComplete={() => setShow5G(false)} />}

@@ -24,19 +24,19 @@ const SubscriberReferral: React.FC = () => {
   const handleCopyLink = () => {
     const link = `https://clickopticx.com/signup?ref=${user.referralCode}`;
     navigator.clipboard.writeText(link);
-    alert("Referral link cloned to clipboard protocol.");
+    alert("Referral link copied to clipboard.");
   };
 
   const handleConvert = async () => {
     if (currentPoints < 1000) {
-      alert("Protocol Error: Minimum 1000 points required for conversion handshake.");
+      alert("Error: Minimum 1000 points required to convert.");
       return;
     }
     setIsConverting(true);
     const res = await db.convertPointsToWallet(user.id);
     setIsConverting(false);
     if (res.success) {
-      alert(`Success: Rs. ${res.amount} provisioned to your Wallet Registry.`);
+      alert(`Success: Rs. ${res.amount} added to your Wallet.`);
     }
   };
 
@@ -44,8 +44,8 @@ const SubscriberReferral: React.FC = () => {
     return (
       <div className="p-10 text-center space-y-6 animate-in fade-in">
         <ShieldCheck size={64} className="mx-auto text-slate-200" />
-        <h3 className="text-xl font-black uppercase text-slate-400">Referral Protocol Offline</h3>
-        <p className="text-xs text-slate-500 font-bold uppercase">The administration has temporarily disabled the commission node.</p>
+        <h3 className="text-xl font-black uppercase text-slate-400">Referrals Unavailable</h3>
+        <p className="text-xs text-slate-500 font-bold uppercase">The referral program is currently turned off.</p>
       </div>
     );
   }
@@ -61,12 +61,12 @@ const SubscriberReferral: React.FC = () => {
                </div>
                <div className="text-right">
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ratio: 1000 Pts = Rs 10</p>
-                  <p className="text-xs font-black text-emerald-400 uppercase mt-1">Registry Verified</p>
+                  <p className="text-xs font-black text-emerald-400 uppercase mt-1">Verified</p>
                </div>
             </div>
             
             <div className="text-center">
-               <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2">Available for Conversion</p>
+               <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2">Available Points</p>
                <h2 className="text-7xl font-black italic tracking-tighter text-white drop-shadow-2xl">{currentPoints.toLocaleString()}</h2>
                <p className="text-sm font-bold text-indigo-400 mt-2 uppercase tracking-widest">Est. Value: Rs. {walletValue.toLocaleString()}</p>
             </div>
@@ -80,7 +80,7 @@ const SubscriberReferral: React.FC = () => {
                   <Wallet size={16} /> {isConverting ? 'Processing...' : 'Convert to Cash'}
                </button>
                <button onClick={handleCopyLink} className="px-8 py-5 bg-white text-slate-900 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95 shadow-lg flex items-center gap-2">
-                  <Copy size={16} /> Link
+                  <Copy size={16} /> Copy Link
                </button>
             </div>
          </div>
@@ -90,7 +90,7 @@ const SubscriberReferral: React.FC = () => {
       {/* 2. Rewards Roadmap */}
       <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 px-2 flex items-center gap-2">
-            <Zap size={14} className="text-amber-500" /> Multi-Stage Commission Model
+            <Zap size={14} className="text-amber-500" /> How You Earn Points
          </h3>
          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
@@ -110,7 +110,7 @@ const SubscriberReferral: React.FC = () => {
       {/* 3. History Feed */}
       <div className="space-y-4">
          <div className="flex justify-between items-end px-4">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Linked Node Registry</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Your Friends</h3>
             <span className="text-[9px] font-black text-slate-500">{referrals.length} Total Friends</span>
          </div>
          
@@ -118,8 +118,8 @@ const SubscriberReferral: React.FC = () => {
             {referrals.length === 0 ? (
               <div className="p-16 text-center bg-white rounded-[3rem] border-2 border-dashed border-slate-100 flex flex-col items-center">
                  <Users size={48} className="text-slate-100 mb-4" />
-                 <p className="text-xs text-slate-400 font-black uppercase tracking-widest">No friends linked yet.</p>
-                 <p className="text-[9px] text-slate-300 font-bold uppercase mt-2">Share your link to initialize nodes.</p>
+                 <p className="text-xs text-slate-400 font-black uppercase tracking-widest">No friends referred yet.</p>
+                 <p className="text-[9px] text-slate-300 font-bold uppercase mt-2">Share your link to get started.</p>
               </div>
             ) : (
               referrals.map(ref => (
@@ -155,13 +155,13 @@ const SubscriberReferral: React.FC = () => {
       </div>
 
       <button onClick={handleCopyLink} className="w-full py-6 bg-emerald-600 text-white font-black rounded-[2rem] shadow-2xl shadow-emerald-100 active:scale-95 transition-all flex items-center justify-center gap-4 uppercase tracking-[0.2em] text-[10px]">
-         <Share2 size={24} /> Broadcast Invite Link
+         <Share2 size={24} /> Share Invite Link
       </button>
 
       <div className="p-6 bg-blue-50 border border-blue-100 rounded-[2.5rem] flex items-start gap-4 mx-2">
          <AlertTriangle size={24} className="text-blue-500 mt-1 shrink-0" />
          <p className="text-[9px] text-blue-700 font-bold leading-relaxed uppercase opacity-80">
-            Node Sync Rule: Points for activations are provisioned only for commercial plans (Rs 1000+). Trial nodes do not trigger commission handshakes.
+            Note: Points are only awarded for paid plans (Rs 1000+).
          </p>
       </div>
     </div>

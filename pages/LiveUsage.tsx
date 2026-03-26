@@ -56,21 +56,21 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
 
         <div className="grid grid-cols-2 gap-4 opacity-40 grayscale pointer-events-none">
            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm animate-pulse">
-              <p className="text-[8px] font-black uppercase text-slate-400 mb-2">Downlink Node</p>
+              <p className="text-[8px] font-black uppercase text-slate-400 mb-2">Download</p>
               <h3 className="text-4xl font-black text-slate-200 tracking-tighter">0.00</h3>
            </div>
            <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm animate-pulse">
-              <p className="text-[8px] font-black uppercase text-slate-400 mb-2">Uplink Node</p>
+              <p className="text-[8px] font-black uppercase text-slate-400 mb-2">Upload</p>
               <h3 className="text-4xl font-black text-slate-200 tracking-tighter">0.00</h3>
            </div>
         </div>
 
         <div className="bg-white p-10 rounded-[3rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center gap-6">
            <p className="text-sm font-bold text-slate-500 leading-relaxed uppercase max-w-xs">
-              Your network device is not yet configured by admin in the global registry. Telemetry streams will activate once the hardware handshake is established.
+              Your network device isn’t fully set up yet. Status: Not configured. Please contact support to map your hardware.
            </p>
            <button disabled className="px-8 py-4 bg-slate-100 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-slate-200">
-              Hardware Link Pending
+              Setup Pending
            </button>
         </div>
       </div>
@@ -81,10 +81,10 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
     <div className="space-y-6 animate-in fade-in duration-500 pb-24">
       <div className="flex justify-between items-end px-2">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Live Telemetry</h2>
+          <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Live Network Status</h2>
           <div className="flex items-center gap-2 mt-1">
              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-             <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em]">Real-time Handshake: ACTIVE</p>
+             <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em]">Real-time Connection: ACTIVE</p>
           </div>
         </div>
         <button 
@@ -101,11 +101,11 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
           <div className="relative z-10 space-y-6">
             <div className="flex items-center gap-3 text-indigo-400">
               <Download size={18} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Downlink Path</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">Download Speed</span>
             </div>
             <div>
                <h3 className="text-6xl font-black italic tracking-tighter leading-none">{stats.down}</h3>
-               <p className="text-[10px] text-slate-500 font-bold uppercase mt-2">Mbps / 2.0s Refresh</p>
+               <p className="text-[10px] text-slate-500 font-bold uppercase mt-2">Mbps</p>
             </div>
           </div>
           <ArrowDownLeft className="absolute -right-4 -bottom-4 opacity-10 text-indigo-500 pointer-events-none" size={120} />
@@ -114,7 +114,7 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
           <div className="relative z-10 space-y-6">
             <div className="flex items-center gap-3 text-emerald-400">
               <Upload size={18} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Uplink Path</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">Upload Speed</span>
             </div>
             <div>
                <h3 className="text-6xl font-black italic tracking-tighter leading-none">{stats.up}</h3>
@@ -130,7 +130,7 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
         <div className="flex justify-between items-center mb-8 px-2">
            <div className="flex items-center gap-2">
               <Activity size={18} className="text-blue-500" />
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Traffic Node Pulse</h4>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Network Traffic</h4>
            </div>
            <div className="flex items-center gap-4">
               <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-600"></div><span className="text-[8px] font-black uppercase text-slate-400">DL</span></div>
@@ -164,7 +164,7 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
               <Activity size={24}/>
            </div>
            <div className="text-center">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Latency (Ping)</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Ping / Latency</p>
               <h4 className="text-2xl font-black text-slate-900 italic tracking-tighter">{stats.ping} ms</h4>
            </div>
         </div>
@@ -173,7 +173,7 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
               <Globe size={24}/>
            </div>
            <div className="text-center">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Consumption Today</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Traffic & Usage Today</p>
               <h4 className="text-2xl font-black text-slate-900 italic tracking-tighter">{stats.usageToday} GB</h4>
            </div>
         </div>
@@ -184,9 +184,9 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
             <Gauge size={28} />
          </div>
          <div>
-            <p className="text-[11px] font-black text-blue-900 uppercase tracking-widest mb-1 italic">Atmospheric Reliability Node</p>
+            <p className="text-[11px] font-black text-blue-900 uppercase tracking-widest mb-1 italic">Network Health</p>
             <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed opacity-80">
-               Optical power verified at <strong>-18.4 dBm</strong>. Infrastructure handshake is healthy. Your monthly consumption registry is logged at <strong>{stats.usageMonth} GB</strong>.
+               Infrastructure is healthy ✅. Network performance monitored continuously.
             </p>
          </div>
       </div>

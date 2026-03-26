@@ -103,17 +103,17 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none">
             <ShieldCheck className="text-emerald-600" size={32} />
-            FISCAL APPROVAL DESK
+            Approval Center
           </h2>
-          <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Manual Authorization Relay • Central Control</p>
+          <p className="text-slate-500 font-medium text-[10px] tracking-widest uppercase">Review and approve user requests for packages, top-ups, and more.</p>
         </div>
         <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto w-full md:w-auto">
           {[
-            { id: 'all', label: 'All Requests' },
-            { id: 'package', label: 'Packages' },
-            { id: 'topup', label: 'Top-Ups' },
-            { id: 'emergency', label: 'Emergency' },
-            { id: 'signup', label: 'Signups' },
+            { id: 'all', label: 'All' },
+            { id: 'package', label: 'Package Requests' },
+            { id: 'topup', label: 'Top-up Requests' },
+            { id: 'emergency', label: 'Emergency Credit' },
+            { id: 'signup', label: 'New User Requests' },
           ].map(tab => (
             <button 
               key={tab.id} 
@@ -131,14 +131,14 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input 
               className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-black text-slate-900"
-              placeholder="Search by User ID, Name, or Package..."
+              placeholder="Search for a user or request..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
          </div>
-         <button className="px-6 py-4 bg-slate-100 text-slate-400 rounded-2xl font-black text-[10px] uppercase hover:bg-slate-200 transition-all flex items-center gap-2">
-            <Filter size={14}/> Active Filters: Pending Only
-         </button>
+         <div className="px-6 py-4 bg-slate-100 text-slate-400 rounded-2xl font-black text-[10px] uppercase flex items-center gap-2">
+            <Filter size={14}/> Showing: Pending Requests
+         </div>
       </div>
 
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
@@ -146,9 +146,9 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
             <table className="w-full text-left min-w-[1000px]">
                <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
-                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Subscriber</th>
-                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol Type</th>
-                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Method</th>
+                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">User</th>
+                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Request Type</th>
+                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Method</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Amount</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Timestamp</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
@@ -199,8 +199,8 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
             {filteredRequests.length === 0 && (
               <div className="p-32 text-center flex flex-col items-center">
                  <ShieldCheck className="text-slate-100 mb-6" size={80} />
-                 <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">Queue Pristine</h3>
-                 <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">No pending manual handshakes detected in the registry.</p>
+                 <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">No Pending Requests</h3>
+                 <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Great! There are no requests waiting for your approval.</p>
               </div>
             )}
          </div>
@@ -216,8 +216,8 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                        {getIcon(selectedRequestData.unifiedType)}
                     </div>
                     <div>
-                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">Audit Request</h3>
-                       <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest">Protocol ID: {selectedRequestData.id}</p>
+                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">Review Request</h3>
+                       <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest">Request ID: {selectedRequestData.id}</p>
                     </div>
                  </div>
                  <button onClick={() => setSelectedRequestId(null)} className="p-3 hover:bg-white/10 rounded-xl text-slate-500 hover:text-white transition-all"><X size={32} /></button>
@@ -226,7 +226,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
               <div className="p-10 space-y-10 overflow-y-auto custom-scrollbar flex-1 bg-slate-50/50">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
-                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">Subscriber</h4>
+                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">User</h4>
                        <div className="flex items-center gap-4">
                           <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center border shadow-sm"><User size={28} className="text-slate-300"/></div>
                           <div>
@@ -236,10 +236,10 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                        </div>
                     </div>
                     <div className="space-y-4">
-                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">Fiscal Parameters</h4>
+                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">Payment Details</h4>
                        <div className="space-y-1">
                           <p className="text-3xl font-black text-slate-900 italic">{state.settings.currency} {selectedRequestData.amount.toLocaleString()}</p>
-                          <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest">Via {selectedRequestData.paymentMethod}</p>
+                          <p className="text-[10px] text-blue-600 font-black uppercase tracking-widest">Paid via {selectedRequestData.paymentMethod}</p>
                        </div>
                     </div>
                  </div>
@@ -247,11 +247,11 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                  {/* System Pre-check Panel */}
                  <div className="p-8 bg-white border border-slate-200 rounded-[2.5rem] space-y-6 shadow-sm">
                     <h4 className="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2">
-                       <Activity size={16} className="text-blue-600" /> Automated Risk Audit
+                       <Activity size={16} className="text-blue-600" /> Automatic System Check
                     </h4>
                     <div className="space-y-3">
                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase">Active Package Collision</span>
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">Existing Package Check</span>
                           {(() => {
                              const user = state.users.find(u => u.id === selectedRequestData.userId);
                              let isExpired = true;
@@ -263,21 +263,21 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                                isExpired = exp.getTime() < today.getTime();
                              }
                              return isExpired ? (
-                               <span className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-1"><CheckCircle size={12}/> NONE DETECTED</span>
+                               <span className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-1"><CheckCircle size={12}/> No Active Package</span>
                              ) : (
-                               <span className="text-[9px] font-black text-rose-600 uppercase flex items-center gap-1"><AlertCircle size={12}/> ACTIVE PLAN EXISTS</span>
+                               <span className="text-[9px] font-black text-rose-600 uppercase flex items-center gap-1"><AlertCircle size={12}/> User Already Has a Package</span>
                              );
                           })()}
                        </div>
                        <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase">Credit Rating Check</span>
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">Credit Score Check</span>
                           {(() => {
                              const user = state.users.find(u => u.id === selectedRequestData.userId);
                              const score = user?.creditScore || 0;
                              return score >= 600 ? (
-                               <span className="text-[9px] font-black text-emerald-600 uppercase">HEALTHY ({score})</span>
+                               <span className="text-[9px] font-black text-emerald-600 uppercase">Good ({score})</span>
                              ) : (
-                               <span className="text-[9px] font-black text-orange-600 uppercase">RISK WARNING ({score})</span>
+                               <span className="text-[9px] font-black text-orange-600 uppercase">Low Score ({score})</span>
                              );
                           })()}
                        </div>
@@ -285,10 +285,10 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                  </div>
 
                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Rejection Justification (Mandatory for Denials)</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Reason for Rejection (Mandatory for Denials)</label>
                     <textarea 
                       className="w-full p-6 bg-white border-2 border-slate-100 rounded-[2rem] font-bold text-xs h-32 resize-none outline-none focus:border-rose-500 transition-all uppercase"
-                      placeholder="Input rejection protocol reason..."
+                      placeholder="Explain why this request is being rejected..."
                       value={rejectionReason}
                       onChange={e => setRejectionReason(e.target.value)}
                     />
@@ -301,7 +301,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                   disabled={!rejectionReason || isProcessing}
                   className="flex-1 py-5 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2"
                  >
-                    <XCircle size={18}/> Reject Identity
+                    <XCircle size={18}/> Reject Request
                  </button>
                  <button 
                   onClick={handleApprove}
@@ -309,7 +309,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                   className="flex-[2] py-5 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-emerald-700 transition-all active:scale-95 flex items-center justify-center gap-3"
                  >
                     {isProcessing ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
-                    Authorize Provisioning
+                    Approve and Activate
                  </button>
               </div>
            </div>

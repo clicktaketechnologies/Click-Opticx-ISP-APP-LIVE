@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react';
 import { 
   X, Zap, Gauge, Headphones, RefreshCw, 
-  ShieldAlert, Globe, Activity, Smartphone, Signal, Wallet, MessageSquare, Cpu
+  ShieldAlert, Globe, Activity, Smartphone, Wifi, Wallet, MessageSquare, Cpu
 } from 'lucide-react';
 import { Role } from '../../types';
 import { db } from '../../db';
@@ -87,7 +87,7 @@ const SubscriberQuickActions: React.FC<Props> = ({ onClose, onAction }) => {
                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Public Node IP</p>
                <h4 className="text-xl font-black italic text-emerald-400">182.164.3.42</h4>
             </div>
-            <Signal className="text-white/10 absolute -right-4 -bottom-4" size={120} />
+            <Wifi className="text-white/10 absolute -right-4 -bottom-4" size={120} />
             <div className="relative z-10 px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-[10px] font-black uppercase">
                Secured
             </div>

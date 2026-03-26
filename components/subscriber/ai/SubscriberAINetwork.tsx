@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ISPUser, AppState } from '../../../types';
-import { ArrowLeft, Wifi, Activity, ShieldCheck, HardDrive, Cpu, Zap, Signal } from 'lucide-react';
+import { ArrowLeft, Wifi, Activity, ShieldCheck, HardDrive, Cpu, Zap, Wifi } from 'lucide-react';
 
 interface Props {
   user: ISPUser;
@@ -44,7 +44,7 @@ const SubscriberAINetwork: React.FC<Props> = ({ user, state, onBack }) => {
                </div>
             </div>
          </div>
-         <Signal className="absolute -right-20 -bottom-20 opacity-5 scale-[2.5]" size={300} />
+         <Wifi className="absolute -right-20 -bottom-20 opacity-5 scale-[2.5]" size={300} />
       </div>
 
       <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm space-y-8">

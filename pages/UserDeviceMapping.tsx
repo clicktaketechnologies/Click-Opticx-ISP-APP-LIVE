@@ -6,7 +6,7 @@ import { AppState, ISPUser, NetworkMapping } from '../types';
 import { 
   Map, Search, Filter, HardDrive, UserCircle, 
   ChevronRight, RefreshCw, X, Save, ShieldCheck,
-  Hash, Smartphone, Globe, Signal, Zap, AlertTriangle,
+  Hash, Smartphone, Globe, Wifi, Zap, AlertTriangle,
   Layers, Database, ArrowRight, CheckCircle, SmartphoneIcon, Activity
 } from 'lucide-react';
 
@@ -130,7 +130,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
                     <div className="flex items-center gap-6 flex-1">
                        <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl">
-                          {mapping.connectionType === 'Fiber' ? <Layers size={32} className="text-blue-400" /> : <Signal size={32} className="text-emerald-400" />}
+                          {mapping.connectionType === 'Fiber' ? <Layers size={32} className="text-blue-400" /> : <Wifi size={32} className="text-emerald-400" />}
                        </div>
                        <div>
                           <h3 className="text-3xl font-black uppercase tracking-tighter italic leading-none">{selectedUser.name}</h3>
@@ -212,7 +212,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                                <div className="space-y-1">
                                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Provisioned SSID</label>
                                   <div className="relative">
-                                     <Signal className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={14}/>
+                                     <Wifi className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={14}/>
                                      <input className="w-full pl-11 pr-4 py-4 bg-slate-50 border rounded-2xl font-black text-xs uppercase" placeholder="User Wi-Fi Name" value={mapping.ssidName || ''} onChange={e => setMapping({...mapping, ssidName: e.target.value})} />
                                   </div>
                                </div>

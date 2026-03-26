@@ -41,7 +41,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
   };
 
   const handleSend = async (id: string) => {
-    if (confirm("AUTHORIZE DISPATCH: This will send emails to the selected segment nodes. Proceed?")) {
+    if (confirm("SEND MESSAGE: This will send emails to the selected users. Proceed?")) {
       await db.sendCampaign(id);
     }
   };
@@ -62,15 +62,15 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
             <Send className="text-emerald-600" size={32} />
-            Email Campaigns
+            Email Messages
           </h2>
-          <p className="text-slate-500 font-medium">Create and distribute bulk communications to your subscriber base.</p>
+          <p className="text-slate-500 font-medium">Send bulk messages and announcements to your users.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-3 px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black text-xs hover:bg-emerald-700 shadow-xl active:scale-95 transition-all uppercase tracking-widest"
         >
-          <Plus size={18} /> New Campaign
+          <Plus size={18} /> + Create Message
         </button>
       </div>
 
@@ -79,7 +79,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input 
               className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 font-black text-slate-900"
-              placeholder="Search campaigns..."
+              placeholder="Search messages..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
@@ -88,65 +88,65 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
 
       <div className="grid grid-cols-1 gap-6">
          {filteredCampaigns.map(camp => (
-           <div key={camp.id} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8 hover:shadow-md transition-all group">
-              <div className="flex items-center gap-6 flex-1 min-w-0">
-                 <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border shadow-inner ${camp.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
-                    <Mail size={32}/>
-                 </div>
-                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                       <h3 className="text-xl font-black text-slate-900 uppercase italic truncate">{camp.name}</h3>
-                       <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${getStatusStyle(camp.status)}`}>{camp.status}</span>
-                    </div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4">Subject: {camp.subject}</p>
-                    
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                       <div className="space-y-1">
-                          <p className="text-[8px] font-black text-slate-400 uppercase">Target Segment</p>
-                          <p className="text-xs font-black text-slate-700 truncate">{state.audienceSegments.find(s => s.id === camp.segmentId)?.name || 'Unknown'}</p>
-                       </div>
-                       <div className="space-y-1">
-                          <p className="text-[8px] font-black text-slate-400 uppercase">Open Rate</p>
-                          <p className="text-xs font-black text-emerald-600 italic">
-                             {camp.stats.sent > 0 ? Math.round((camp.stats.opened / camp.stats.sent) * 100) : 0}%
-                          </p>
-                       </div>
-                       <div className="space-y-1">
-                          <p className="text-[8px] font-black text-slate-400 uppercase">Clicks</p>
-                          <p className="text-xs font-black text-blue-600 italic">{camp.stats.clicked}</p>
-                       </div>
-                       <div className="space-y-1">
-                          <p className="text-[8px] font-black text-slate-400 uppercase">Sent</p>
-                          <p className="text-xs font-black text-slate-900 italic">{camp.stats.sent}</p>
-                       </div>
-                    </div>
-                 </div>
-              </div>
-              <div className="flex gap-2 shrink-0">
-                 {camp.status === 'Draft' && (
-                   <button 
-                    onClick={() => handleSend(camp.id)}
-                    className="px-8 py-3.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95 shadow-lg"
-                   >
-                    Authorize Dispatch
-                   </button>
-                 )}
-                 <button className="p-3.5 bg-slate-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all border border-slate-100">
-                    <BarChart3 size={20}/>
-                 </button>
-                 <button className="p-3.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all border border-slate-100">
-                    <Trash2 size={20}/>
-                 </button>
-              </div>
-           </div>
+            <div key={camp.id} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8 hover:shadow-md transition-all group">
+               <div className="flex items-center gap-6 flex-1 min-w-0">
+                  <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border shadow-inner ${camp.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                     <Mail size={32}/>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                     <div className="flex items-center gap-3 mb-1">
+                        <h3 className="text-xl font-black text-slate-900 uppercase italic truncate">{camp.name}</h3>
+                        <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${getStatusStyle(camp.status)}`}>{camp.status}</span>
+                     </div>
+                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4">Subject: {camp.subject}</p>
+                     
+                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                        <div className="space-y-1">
+                           <p className="text-[8px] font-black text-slate-400 uppercase">Target Group</p>
+                           <p className="text-xs font-black text-slate-700 truncate">{state.audienceSegments.find(s => s.id === camp.segmentId)?.name || 'Unknown'}</p>
+                        </div>
+                        <div className="space-y-1">
+                           <p className="text-[8px] font-black text-slate-400 uppercase">Open Rate</p>
+                           <p className="text-xs font-black text-emerald-600 italic">
+                              {camp.stats.sent > 0 ? Math.round((camp.stats.opened / camp.stats.sent) * 100) : 0}%
+                           </p>
+                        </div>
+                        <div className="space-y-1">
+                           <p className="text-[8px] font-black text-slate-400 uppercase">Clicks</p>
+                           <p className="text-xs font-black text-blue-600 italic">{camp.stats.clicked}</p>
+                        </div>
+                        <div className="space-y-1">
+                           <p className="text-[8px] font-black text-slate-400 uppercase">Sent</p>
+                           <p className="text-xs font-black text-slate-900 italic">{camp.stats.sent}</p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div className="flex gap-2 shrink-0">
+                  {camp.status === 'Draft' && (
+                    <button 
+                     onClick={() => handleSend(camp.id)}
+                     className="px-8 py-3.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95 shadow-lg"
+                    >
+                     Send Now
+                    </button>
+                  )}
+                  <button className="p-3.5 bg-slate-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all border border-slate-100">
+                     <BarChart3 size={20}/>
+                  </button>
+                  <button className="p-3.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all border border-slate-100">
+                     <Trash2 size={20}/>
+                  </button>
+               </div>
+            </div>
          ))}
 
          {filteredCampaigns.length === 0 && (
-           <div className="p-32 text-center bg-white rounded-[3rem] border-4 border-dashed border-slate-50 flex flex-col items-center">
-              <Mail className="text-slate-100 mb-6" size={80} />
-              <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">No Campaigns Synchronized</h3>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">Click "New Campaign" to initialize a node.</p>
-           </div>
+            <div className="p-32 text-center bg-white rounded-[3rem] border-4 border-dashed border-slate-50 flex flex-col items-center">
+               <Mail className="text-slate-100 mb-6" size={80} />
+               <h3 className="text-2xl font-black text-slate-800 uppercase tracking-tighter mb-1 italic">No Messages Found</h3>
+               <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">Click "Create Message" to get started.</p>
+            </div>
          )}
       </div>
 
@@ -159,8 +159,8 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
                        <Plus size={28} />
                     </div>
                     <div>
-                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">New Campaign</h3>
-                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Email Node Initialization</p>
+                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">Create New Message</h3>
+                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Message Setup</p>
                     </div>
                  </div>
                  <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all rounded-xl">
@@ -171,24 +171,24 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
               <div className="p-10 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
                  <div className="space-y-4">
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Internal Name</label>
-                       <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all" placeholder="e.g. June Billing Cycle" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Message Name (for your records)</label>
+                       <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all" placeholder="e.g. Monthly Newsletter" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                     </div>
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Subject Line</label>
-                       <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all" placeholder="Action Required: Your Click Opticx Invoice" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} />
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Subject</label>
+                       <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all" placeholder="Action Required: Your Invoice" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} />
                     </div>
                  </div>
 
                  <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Audience Segment</label>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Who should receive this?</label>
                        <select className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-indigo-500" value={formData.segmentId} onChange={e => setFormData({...formData, segmentId: e.target.value})}>
                           {state.audienceSegments.map(s => <option key={s.id} value={s.id}>{s.name} ({s.subscriberCount})</option>)}
                        </select>
                     </div>
                     <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Visual Template</label>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Message Design/Template</label>
                        <select className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-indigo-500" value={formData.templateId} onChange={e => setFormData({...formData, templateId: e.target.value})}>
                           {state.emailTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                        </select>
@@ -198,20 +198,20 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem] flex items-start gap-4">
                     <Info className="text-blue-600 mt-1 shrink-0" size={24} />
                     <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed tracking-tighter">
-                       Campaign nodes are created in 'Draft' state. Dispatch requires secondary authorization to prevent accidental mass node broadcasting.
+                       Messages are saved as drafts first. You'll need to confirm before they are actually sent to users.
                     </p>
                  </div>
               </div>
 
               <div className="p-10 bg-slate-50 border-t flex gap-4 shrink-0">
-                 <button onClick={() => setIsModalOpen(false)} className="flex-1 py-5 font-black text-slate-400 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Abandon</button>
+                 <button onClick={() => setIsModalOpen(false)} className="flex-1 py-5 font-black text-slate-400 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Cancel</button>
                  <button 
                   onClick={handleCreate}
                   disabled={isProcessing}
                   className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
                     {isProcessing ? <Mini5GMicroLoader size={18} /> : <CheckCircle size={18}/>}
-                    Commit Campaign Node
+                    Save & Continue
                  </button>
               </div>
            </div>

@@ -17,7 +17,7 @@ const SubscriberNews: React.FC<Props> = ({ state }) => {
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col gap-6">
         <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] flex items-center gap-2">
-           <Megaphone size={14} className="text-blue-500" /> System Broadcast Registry
+           <Megaphone size={14} className="text-blue-500" /> News & Updates
         </h3>
         
         {activeEvents.length === 0 ? (
@@ -26,7 +26,7 @@ const SubscriberNews: React.FC<Props> = ({ state }) => {
                <BadgeCheck size={32} />
             </div>
             <div>
-               <h4 className="text-sm font-black text-slate-900 uppercase tracking-tighter">Systems Nominal</h4>
+               <h4 className="text-sm font-black text-slate-900 uppercase tracking-tighter">All Systems Normal</h4>
                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">No active maintenance or alerts in your zone.</p>
             </div>
           </div>
@@ -49,12 +49,12 @@ const SubscriberNews: React.FC<Props> = ({ state }) => {
                   
                   <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between">
                      <button className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 hover:text-blue-700 tracking-widest">
-                        Full Dispatch <ArrowRight size={14} />
+                        Read More <ArrowRight size={14} />
                      </button>
                      {item.severity === 'Critical' && (
                        <div className="flex items-center gap-2 text-rose-500 animate-pulse">
                           <ShieldAlert size={14} />
-                          <span className="text-[9px] font-black uppercase">Critical Relay</span>
+                          <span className="text-[9px] font-black uppercase">Critical Alert</span>
                        </div>
                      )}
                   </div>

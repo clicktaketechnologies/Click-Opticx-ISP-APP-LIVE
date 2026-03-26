@@ -1,7 +1,7 @@
 import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useState } from 'react';
 import {
-   ShieldCheck, Signal, CheckCircle, ArrowLeft, Loader2, Cpu, Zap,
+   ShieldCheck, Wifi, CheckCircle, ArrowLeft, Loader2, Cpu, Zap,
    User, Smartphone, AtSign, Contact, LayoutGrid, Clock, MapPin,
    AlertCircle, ShieldAlert, Key, Globe, Info, Package, Send, History, X, Scale
 } from 'lucide-react';
@@ -145,17 +145,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <form onSubmit={handleLogin} className="space-y-6 animate-in fade-in duration-500" autoComplete="off">
          <div className="space-y-1.5">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">
-               {(() => {
-                  const allowed = state.settings.authSettings?.allowedIdentifiers;
-                  if (!allowed) return 'Email or Username';
-                  let labels = [];
-                  if (allowed.email) labels.push('Email');
-                  if (allowed.phone) labels.push('Phone');
-                  if (allowed.cnic) labels.push('CNIC');
-                  if (allowed.username) labels.push('Username');
-                  if (allowed.pppoe) labels.push('PPPoE');
-                  return labels.length > 0 ? labels.join(' / ') : 'Email or Username';
-               })()}
+               ➡ Enter Email, Phone, CNIC or Username
             </label>
             <div className="relative group">
                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={18} />
@@ -165,7 +155,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   value={credential}
                   onChange={(e) => setCredential(e.target.value)}
                   className="w-full pl-12 pr-5 py-4 bg-white/50 backdrop-blur-sm border-2 border-slate-100/50 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-slate-800 shadow-sm placeholder:text-slate-300"
-                  placeholder="Enter Identity..."
+                  placeholder="Type your details here"
                   required
                />
             </div>
@@ -213,28 +203,28 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2 px-1">
                <div className="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
-               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] italic">01. Identity Registry</h4>
+               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] italic">01. Your Basic Information</h4>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Identity Name</label>
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Username (Choose a name for login)</label>
                   <input className="w-full px-4 py-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-xl font-bold text-xs focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" placeholder="Full Name" value={signupData.name} onChange={e => setSignupData({ ...signupData, name: e.target.value })} required autoComplete="off" />
                </div>
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-right-4 duration-500 delay-100">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Link</label>
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Contact Number</label>
                   <input className="w-full px-4 py-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-xl font-bold text-xs focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" placeholder="03XX-XXXXXXX" value={signupData.phone} onChange={e => setSignupData({ ...signupData, phone: e.target.value })} required={state.settings.authSettings?.requirePhoneOTP} autoComplete="off" />
                </div>
             </div>
 
             {state.settings.authSettings?.requireCNIC && (
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">National ID (CNIC)</label>
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">National Identity (CNIC)</label>
                   <input className="w-full px-4 py-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-xl font-bold text-xs focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" placeholder="XXXXX-XXXXXXX-X" value={signupData.cnic} onChange={e => setSignupData({ ...signupData, cnic: e.target.value })} required autoComplete="off" />
                </div>
             )}
 
             <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-               <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Digital Registry (Email)</label>
+               <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
                <input className="w-full px-4 py-4 bg-white/50 backdrop-blur-sm border border-slate-100 rounded-xl font-bold text-xs focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300" type="email" placeholder="name@domain.com" value={signupData.email} onChange={e => setSignupData({ ...signupData, email: e.target.value })} required={state.settings.authSettings?.requireEmailVerification} autoComplete="off" />
             </div>
          </div>
@@ -243,11 +233,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          <div className="space-y-4 pt-2">
             <div className="flex items-center gap-3 mb-2 px-1">
                <div className="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
-               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] italic">02. Access Protocol</h4>
+               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] italic">02. Signup Credentials</h4>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                <PasswordInput
-                  label="Access Key"
+                  label="Create Password"
                   value={signupData.password}
                   onChange={(v) => setSignupData({ ...signupData, password: v })}
                   showStrength
@@ -255,7 +245,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   autoComplete="new-password"
                />
                <PasswordInput
-                  label="Verify Key"
+                  label="Retype Password"
                   value={signupData.confirmPassword}
                   onChange={(v) => setSignupData({ ...signupData, confirmPassword: v })}
                   className="sm:col-span-1 animate-in fade-in slide-in-from-right-4 duration-500 delay-300"
@@ -268,7 +258,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          <div className="space-y-4 pt-2">
             <div className="flex items-center gap-3 mb-2 px-1">
                <div className="w-1.5 h-4 bg-amber-500 rounded-full"></div>
-               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] italic">03. Service Location</h4>
+               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.2em] italic">03. Installation Address</h4>
             </div>
             <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400">
                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Installation Address </label>
@@ -293,7 +283,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                className="w-full bg-slate-950 text-white font-black py-5 rounded-2xl shadow-xl hover:bg-black active:scale-[0.98] transition-all flex items-center justify-center gap-4 uppercase tracking-[0.2em] text-[10px]"
             >
                {isProcessing ? <Mini5GMicroLoader size={16} /> : <Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
-               Initialize Enrollment
+               Register Me Now
             </button>
 
             <button type="button" onClick={() => setView('login')} className="w-full text-slate-400 font-black uppercase text-[9px] tracking-[0.4em] py-2 hover:text-slate-600 transition-colors flex items-center justify-center gap-2 group">
@@ -354,7 +344,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
 
             <PasswordInput
-               label="New Access Key"
+               label="New Create Password"
                value={newPassword}
                onChange={setNewPassword}
                showStrength
@@ -430,7 +420,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                <div className="relative z-10">
                   <div className="flex items-center gap-4 mb-12">
                      <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-2xl">
-                        {displayLogo ? <img src={displayLogo} className="h-8 object-contain" /> : <Signal className="text-emerald-400" size={28} />}
+                        {displayLogo ? <img src={displayLogo} className="h-8 object-contain" /> : <Wifi className="text-emerald-400" size={28} />}
                      </div>
                      <div>
                         <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic leading-none">Click Optix</h2>
@@ -475,7 +465,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
                {/* Background Decorative Element */}
                <div className="absolute bottom-[-5%] right-[-5%] opacity-10 scale-150 rotate-12">
-                  <Signal size={300} strokeWidth={0.5} className="text-white" />
+                  <Wifi size={300} strokeWidth={0.5} className="text-white" />
                </div>
             </div>
 
@@ -485,7 +475,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                <div className="lg:hidden flex flex-col items-center mb-8">
                   <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center shadow-xl mb-4 relative overflow-hidden group">
                      <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                     {displayLogo ? <img src={displayLogo} className="h-8 object-contain relative z-10" /> : <Signal className="text-emerald-400 relative z-10" size={32} />}
+                     {displayLogo ? <img src={displayLogo} className="h-8 object-contain relative z-10" /> : <Wifi className="text-emerald-400 relative z-10" size={32} />}
                   </div>
                   <h1 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Click Optix</h1>
                </div>
@@ -493,13 +483,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                <div className="max-w-[400px] mx-auto w-full">
                   <div className="mb-10 text-center lg:text-left">
                      <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight">
-                        {view === 'login' ? 'Authenticate' :
-                           view === 'signup' ? 'Join Network' :
-                              'Recovery Mode'}
+                        {view === 'login' ? 'Login to Your Account' :
+                           view === 'signup' ? 'Get Connected' :
+                              'Forgot Password?'}
                      </h3>
                      <p className="text-slate-400 mt-2 font-black text-[10px] uppercase tracking-[0.3em] opacity-80">
-                        {view === 'login' ? 'Access your subscriber dash' :
-                           view === 'signup' ? 'Initialize your connection' :
+                        {view === 'login' ? 'Access your internet account easily' :
+                           view === 'signup' ? 'Start Your Internet Connection' :
                               'Secure Identity Reset'}
                      </p>
                   </div>

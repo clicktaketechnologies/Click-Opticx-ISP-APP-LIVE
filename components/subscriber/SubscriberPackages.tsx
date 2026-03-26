@@ -20,8 +20,8 @@ const SubscriberPackages: React.FC<Props> = ({ user, state }) => {
   return (
     <div className="space-y-6 pb-24 animate-in fade-in duration-500">
       <div className="px-2">
-        <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Node Registry Tiers</h3>
-        <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase">Authorize your preferred commercial handshake protocol</p>
+        <h3 className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Packages Available</h3>
+        <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase">Reliable internet for everyday use</p>
       </div>
       
       <div className="grid grid-cols-1 gap-8">

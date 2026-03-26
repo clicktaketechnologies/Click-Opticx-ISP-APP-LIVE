@@ -10,7 +10,7 @@ import {
    ShieldCheck, ArrowRight, UserCircle, History, Shield, AtSign, ArrowUpRight, Contact,
    User, SmartphoneIcon, Globe, MapPin, MoreVertical, AlertTriangle, AlertCircle, Lock, Info, Pencil, MessageSquare, ChevronRight, LogOut, Power, CheckSquare, Square, Layers, SearchCode,
    ShieldEllipsis, LayoutGrid, GripVertical, Eye, EyeOff, Settings, ChevronUp, ChevronDown, FileText, Image as ImageIcon,
-   Compass, Book, Trophy, Megaphone, Gauge, Monitor, Wallet, HeartPulse, Sparkles, Home, Signal, Bell, Headphones, Target, XCircle, Mic, Palette, Sliders, Sun
+   Compass, Book, Trophy, Megaphone, Gauge, Monitor, Wallet, HeartPulse, Sparkles, Home, Wifi, Bell, Headphones, Target, XCircle, Mic, Palette, Sliders, Sun
 } from 'lucide-react';
 
 const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
@@ -75,7 +75,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
    // Add Sun to the icon mapping to resolve shorthand property scope error
    const getIcon = (iconName: string) => {
-      const map: any = { Home, Monitor, Wallet, Signal, Bell, Headphones, FileText, Target, Smartphone, Gauge, Zap, Key, Fingerprint, Clock, Book, Compass, Globe, MessageSquare, Trophy, Megaphone, User, Mic, Sun };
+      const map: any = { Home, Monitor, Wallet, Wifi, Bell, Headphones, FileText, Target, Smartphone, Gauge, Zap, Key, Fingerprint, Clock, Book, Compass, Globe, MessageSquare, Trophy, Megaphone, User, Mic, Sun };
       const IconComp = map[iconName] || Smartphone;
       return <IconComp size={20} />;
    };
