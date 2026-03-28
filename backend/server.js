@@ -71,6 +71,39 @@ io.on('connection', (socket) => {
         telemetryController.streamBandwidth(socket, data.userId);
     });
 
+    socket.on('send-email', async (data) => {
+        const { config, payload } = data;
+        if (!nodemailer) {
+            socket.emit('email-error', { message: 'Email service unavailable' });
+            return;
+        }
+
+        try {
+            logger.info(`[SOCKET-EMAIL] Sending via ${config.host}:${config.port} to ${payload.to}`);
+            const transporter = nodemailer.createTransport({
+                host: config.host,
+                port: config.port,
+                secure: config.encryption === 'SSL',
+                auth: { user: config.username, pass: config.password },
+            });
+
+            await transporter.verify();
+            const info = await transporter.sendMail({
+                from: `"${payload.senderName || 'Click Opticx'}" <${payload.from}>`,
+                to: payload.to,
+                subject: payload.subject,
+                text: payload.text,
+                html: payload.html,
+            });
+
+            logger.info(`[SOCKET-EMAIL] Sent successfully. MessageId: ${info.messageId}`);
+            socket.emit('email-sent', { messageId: info.messageId });
+        } catch (error) {
+            logger.error(`[SOCKET-EMAIL] Delivery Error: ${error.message}`);
+            socket.emit('email-error', { message: error.message });
+        }
+    });
+
     socket.on('disconnect', () => {
         logger.info(`Client disconnected: ${socket.id}`);
     });

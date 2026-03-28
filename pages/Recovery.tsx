@@ -1519,22 +1519,27 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                 <p className="text-[10px] font-black text-red-800 uppercase tracking-widest leading-relaxed">
                                     ⚠ This will clear balance to zero, remove all invoices within the selected window, and reset recovery mode. The user's package will be KEPT. This action cannot be undone.
                                 </p>
-                            </div>
-
-                            <div className="space-y-3">
-                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Months of Data to Clear</label>
-                                <div className="flex items-center gap-4">
-                                    <input
-                                        type="range"
-                                        min={1}
-                                        max={12}
-                                        value={flashMonths}
-                                        onChange={(e) => setFlashMonths(parseInt(e.target.value))}
-                                        className="flex-1 accent-red-600"
-                                    />
-                                    <span className="w-16 text-center py-2 px-3 bg-red-50 text-red-700 font-black text-xl rounded-xl border-2 border-red-200">{flashMonths}</span>
+                                <div className="space-y-4">
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Months of Data to Clear</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {[-1, 1, 3, 6, 12].map(m => (
+                                            <button
+                                                key={m}
+                                                onClick={() => setFlashMonths(m)}
+                                                className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${flashMonths === m ? 'bg-red-600 text-white border-red-600 shadow-lg' : 'bg-slate-50 text-slate-500 border-slate-100'}`}
+                                            >
+                                                {m === -1 ? 'N/A (Full Reset)' : `${m} Month${m > 1 ? 's' : ''}`}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {flashMonths === -1 ? (
+                                        <p className="text-[10px] text-red-600 font-black uppercase tracking-widest italic animate-pulse">
+                                            ⚡ N/A MODE: ALL WORK LIKE A NEW REGISTER ACCOUNT SHOW JUST BEFORE HISTORY LAST FLASH n/a
+                                        </p>
+                                    ) : (
+                                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Clearing invoices from last {flashMonths} month(s)</p>
+                                    )}
                                 </div>
-                                <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Clearing invoices from last {flashMonths} month(s)</p>
                             </div>
 
                             <div className="space-y-2">

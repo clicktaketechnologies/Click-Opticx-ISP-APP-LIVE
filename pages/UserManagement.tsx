@@ -8,7 +8,7 @@ import {
   Square, CheckSquare, Layers, AlertTriangle, Key, Cpu, Zap, SignalHigh, Calendar, Banknote, Globe, Loader2, XCircle, RefreshCw, Lock, LogOut, Eye, UserCircle, Fingerprint, Map as MapIcon, Smartphone, Bell, ListChecks,
   User, Hash, MessageSquare, Package as PackageIcon, LockKeyhole, ArrowRight, MousePointer2, Settings2, Power,
   SearchCode, EyeOff, ExternalLink, ArrowUpRight, ArrowDownLeft,
-  Mail, Wifi, FileText
+  Mail, Wifi, FileText, MoreHorizontal, Play
 } from 'lucide-react';
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
@@ -365,10 +365,10 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
            </div>
            <div className="flex items-center gap-2 flex-wrap justify-center">
               <button onClick={() => setIsBulkGraceModal(true)} className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl transition-all border border-indigo-500/20">
-                 <Clock size={16}/><span className="text-[9px] font-black uppercase">Grace Node</span>
+                 <Clock size={16}/><span className="text-[9px] font-black uppercase">Extra Time</span>
               </button>
               <button onClick={() => { setSelectedPkgId(''); setIsBulkPackageModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl transition-all border border-indigo-500/20">
-                 <PackageIcon size={16}/><span className="text-[9px] font-black uppercase">Mass Prov.</span>
+                 <PackageIcon size={16}/><span className="text-[9px] font-black uppercase">Bulk Actions</span>
               </button>
                <button onClick={async () => { 
                 if(confirm(`Reset passwords for ${selectedIds.size} users?`)) {
@@ -379,7 +379,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                   setIsSuccessModal(true);
                 }
               }} className="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 rounded-xl transition-all border border-orange-500/20">
-                 <Key size={16}/><span className="text-[9px] font-black uppercase">Reset Passwords</span>
+                 <Key size={16}/><span className="text-[9px] font-black uppercase">Reset Password</span>
               </button>
               <button 
                   onClick={async () => {
@@ -409,11 +409,45 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                   }}
                   className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl transition-all border border-rose-500/20"
                >
-                  <Ban size={16}/><span className="text-[9px] font-black uppercase">Suspend</span>
+                  <Ban size={16}/><span className="text-[9px] font-black uppercase">Suspend User</span>
                </button>
                <button onClick={() => { if(confirm(`Are you sure you want to delete ${selectedIds.size} users?`)) executeBulkPurge(); }} className="flex items-center gap-2 px-4 py-2 bg-slate-500/10 hover:bg-slate-500/20 text-slate-400 rounded-xl transition-all border border-slate-500/20">
-                  <Trash2 size={16}/><span className="text-[9px] font-black uppercase">Delete Users</span>
+                  <Trash2 size={16}/><span className="text-[9px] font-black uppercase">Delete User</span>
                </button>
+
+               <div className="relative group/dropdown">
+                  <button className="flex items-center gap-2 px-4 py-2 bg-slate-500/10 hover:bg-slate-500/20 text-slate-300 rounded-xl transition-all border border-slate-500/20">
+                     <MoreHorizontal size={16}/><span className="text-[9px] font-black uppercase">More Actions</span>
+                  </button>
+                  <div className="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all z-50 py-2">
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-emerald-400 hover:bg-emerald-500/10" onClick={async () => { await db.bulkVerifyUsers(Array.from(selectedIds), true); setSelectedIds(new Set()); }}>Verify (KYC)</button>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-rose-400 hover:bg-rose-500/10" onClick={async () => { await db.bulkVerifyUsers(Array.from(selectedIds), false); setSelectedIds(new Set()); }}>Unverify (Remove KYC)</button>
+                     <div className="h-px bg-slate-800 my-1"></div>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-amber-500 hover:bg-amber-500/10" onClick={async () => {
+                         const m = prompt("Enter months back to flash (-1 for N/A Full Wipe):", "0");
+                         if (m !== null) {
+                             await db.bulkFlashUsers(Array.from(selectedIds), parseInt(m), state.currentUser.email, false);
+                             setSelectedIds(new Set());
+                         }
+                     }}>Flash Reset</button>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => { setSelectedPkgId(''); setIsBulkPackageModal(true); }}>Assign / Change Plan</button>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => setIsBulkGraceModal(true)}>Extend Plan</button>
+                     <div className="h-px bg-slate-800 my-1"></div>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10 flex justify-between items-center" onClick={() => alert('Feature coming soon')}>Pause Service <Clock size={12}/></button>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10 flex justify-between items-center" onClick={() => alert('Feature coming soon')}>Resume Service <Play size={12}/></button>
+                     <div className="h-px bg-slate-800 my-1"></div>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-emerald-400 hover:bg-emerald-500/10" onClick={() => alert('Feature coming soon')}>Add Balance</button>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-rose-400 hover:bg-rose-500/10" onClick={() => alert('Feature coming soon')}>Deduct Balance</button>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-indigo-400 hover:bg-indigo-500/10" onClick={() => alert('Feature coming soon')}>Apply Discount</button>
+                     <div className="h-px bg-slate-800 my-1"></div>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => alert('Feature coming soon')}>Add Tag (VIP, Late...)</button>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => alert('Feature coming soon')}>Remove Tag</button>
+                     <div className="h-px bg-slate-800 my-1"></div>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => alert('Feature coming soon')}>Export Users</button>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => alert('Feature coming soon')}>Import Users</button>
+                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => alert('Feature coming soon')}>Download List</button>
+                  </div>
+               </div>
            </div>
            <button onClick={() => setSelectedIds(new Set())} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-slate-500 hover:text-white transition-all"><X size={18} /></button>
         </div>
@@ -468,7 +502,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                              <UserCircle size={22}/>
                           </div>
                           <div className="min-w-0">
-                             <div className="font-black text-slate-900 uppercase italic text-sm group-hover:text-indigo-600 transition-colors leading-none mb-1 truncate">{user.name}</div>
+                             <div className="font-black text-slate-900 uppercase italic text-sm group-hover:text-indigo-600 transition-colors leading-none mb-1 truncate flex items-center gap-1">{user.name} {user.verifiedStatus?.identity && <ShieldCheck size={14} className="text-emerald-500" title="Verified User" />}</div>
                              <p className="text-[9px] text-slate-400 font-bold uppercase truncate">{user.phone}</p>
                           </div>
                        </div>
@@ -952,10 +986,19 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
               </div>
 
               <footer className="p-10 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
-                 <div className="flex items-center gap-4">
-                    <ShieldCheck size={24} className="text-emerald-500" />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Profile Verified</p>
-                 </div>
+                 <button 
+                    onClick={async () => {
+                        const isVerified = !!selectedUser.verifiedStatus?.identity;
+                        await db.bulkVerifyUsers([selectedUser.id], !isVerified);
+                        // Force refresh of selectedUser in UI if needed, or rely on db notify
+                    }}
+                    className="flex items-center gap-4 group cursor-pointer hover:bg-white/5 p-2 rounded-2xl transition-all"
+                 >
+                    <ShieldCheck size={24} className={selectedUser.verifiedStatus?.identity ? "text-emerald-500" : "text-slate-300 group-hover:text-emerald-400"} />
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-200">
+                        {selectedUser.verifiedStatus?.identity ? 'Profile Verified' : 'Submit KYC / Verify'}
+                    </p>
+                 </button>
                  <button onClick={() => setIsViewUserModal(false)} className="px-10 py-4 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl">Close</button>
               </footer>
            </div>

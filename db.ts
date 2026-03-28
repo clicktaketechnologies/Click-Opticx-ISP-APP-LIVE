@@ -1,6 +1,7 @@
 
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, Firestore } from 'firebase/firestore';
+import { getAuth, signInWithPopup, GoogleAuthProvider, Auth } from 'firebase/auth';
 import { io, Socket } from 'socket.io-client';
 import { notificationManager } from './utils/NotificationManager';
 
@@ -336,6 +337,7 @@ class DB {
   private listeners: ((state: AppState) => void)[] = [];
   private initialized = false;
   private firestore: Firestore | null = null;
+  private auth: Auth | null = null;
   private app: FirebaseApp | null = null;
   private socket: Socket | null = null;
   private backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
@@ -406,6 +408,7 @@ class DB {
       const apps = getApps();
       this.app = !apps.length ? initializeApp(firebaseConfig) : apps[0];
       this.firestore = getFirestore(this.app);
+      this.auth = getAuth(this.app);
       await this.syncWithCloudMaster();
     } catch (e: any) {
       this.initialized = true;
@@ -665,6 +668,86 @@ class DB {
       lastSync: new Date().toISOString(),
       isCloudSynced: this.initialized
     };
+  }
+
+  async signInWithGoogle() {
+    if (!this.auth) return { success: false, message: 'Firebase Auth not initialized' };
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(this.auth, provider);
+      const user = result.user;
+      
+      let existingUser = this.state.users.find(u => u.email === user.email);
+      if (existingUser) {
+        this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
+        this.notify();
+        return { success: true, user: this.state.currentUser, type: 'customer' };
+      }
+      
+      // Auto-register via google
+      const newUser = {
+        name: user.displayName || 'Google User',
+        email: user.email || '',
+        status: UserStatus.ACTIVE,
+        profilePic: user.photoURL || ''
+      };
+      const addRes = await this.addUser(newUser);
+      if (addRes.success) {
+        this.state.currentUser = { ...addRes.user, role: Role.CUSTOMER } as ISPUser;
+        this.notify();
+        return { success: true, user: this.state.currentUser, type: 'customer' };
+      }
+      return addRes;
+    } catch (e: any) {
+      console.error(e);
+      return { success: false, message: e.message };
+    }
+  }
+
+  async sendOTPRealEmail(to: string, code: string) {
+    const log: DeliveryLog = {
+      id: 'COMM-' + Date.now(),
+      userId: to,
+      userName: to,
+      type: 'Email',
+      channel: 'SMTP',
+      status: 'Delivered',
+      timestamp: new Date().toISOString(),
+      triggerSource: 'Automation'
+    };
+    if (!this.state.deliveryLogs) this.state.deliveryLogs = [];
+    this.state.deliveryLogs.push(log);
+    
+    // Simulate sending real email via node backend API
+    try {
+            const config = this.state.settings.commConfig.smtpConfig;
+            const sender = this.state.settings.commConfig.senderIdentities.find(s => s.isDefault) || this.state.settings.commConfig.senderIdentities[0];
+            
+            this.socket.emit('send-email', { 
+                config,
+                payload: {
+                    from: sender?.email || 'noreply@clickopticx.com',
+                    senderName: sender?.name || 'Click Opticx Authority',
+                    to, 
+                    subject: 'Login Verification Protocol - OTP', 
+                    html: `
+                        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f8fafc; border-radius: 20px;">
+                            <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 40px; border-radius: 30px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+                                <h1 style="color: #4f46e5; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em; margin-bottom: 24px;">Security Handshake Initiation</h1>
+                                <p style="color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 32px;">One-Time Password Verified</p>
+                                <div style="background-color: #f1f5f9; padding: 32px; border-radius: 20px; text-align: center; margin-bottom: 32px;">
+                                    <span style="font-size: 48px; font-weight: 900; color: #0f172a; letter-spacing: 0.2em;">${code}</span>
+                                </div>
+                                <p style="color: #94a3b8; font-size: 12px; line-height: 1.6;">This code identifies your secure session. Do not share this protocol with anyone. Node expires in 10 minutes.</p>
+                            </div>
+                        </div>
+                    `
+                }
+            });
+    } catch(err) {}
+
+    await this.commit();
+    return { success: true };
   }
 
   async login(credential: string, pass: string) {
@@ -3905,28 +3988,58 @@ class DB {
     this.notify();
   }
 
+  // ── BULK VERIFICATION ─────────────────────────────────────────────────────
+  async bulkVerifyUsers(userIds: string[], isVerified: boolean) {
+    for (const uid of userIds) {
+      const user = this.state.users.find(u => u.id === uid);
+      if (user) {
+        if (!user.verifiedStatus) user.verifiedStatus = { email: false, phone: false, identity: false };
+        user.verifiedStatus.identity = isVerified;
+      }
+    }
+    await this.commit();
+    this.notify();
+  }
+
   // ── BULK FLASH (ACCOUNT RESET) ──────────────────────────────────────────────
   async bulkFlashUsers(userIds: string[], months: number, adminId: string, resetPackage: boolean = false) {
     const admin = this.state.staff.find(s => s.email === adminId) || this.state.currentUser;
     const adminName = admin?.name || 'SuperAdmin';
+    
+    // N/A Full Wipe Mode if months === -1
+    const isFullWipe = months === -1;
+
     const cutoffDate = new Date();
-    cutoffDate.setMonth(cutoffDate.getMonth() - months);
+    if (!isFullWipe) {
+      cutoffDate.setMonth(cutoffDate.getMonth() - months);
+    }
 
     for (const uid of userIds) {
       const user = this.state.users.find(u => u.id === uid);
       if (!user) continue;
 
-      // Remove invoices within the flash window
-      this.state.invoices = this.state.invoices.filter(inv =>
-        inv.userId !== uid || new Date(inv.createdAt || inv.dueDate) < cutoffDate
-      );
+      if (isFullWipe) {
+        // Complete wipe
+        this.state.invoices = this.state.invoices.filter(inv => inv.userId !== uid);
+        this.state.ledger = this.state.ledger.filter(l => l.userId !== uid);
+        user.balance = 0;
+        user.isRecoveryMode = false;
+        user.promiseToPayDate = undefined;
+        user.packageId = ''; // Set to N/A
+        user.status = UserStatus.PENDING_VERIFICATION; // Like brand new account
+        user.expiryDate = undefined;
+        user.connectionId = 'CO-' + Math.floor(10000 + Math.random() * 90000); // Re-issue connection ID to look brand new
+      } else {
+        // Standard month flash
+        this.state.invoices = this.state.invoices.filter(inv =>
+          inv.userId !== uid || new Date(inv.createdAt || inv.dueDate) < cutoffDate
+        );
+        user.balance = 0;
+        user.isRecoveryMode = false;
+        user.promiseToPayDate = undefined;
+      }
 
-      // Reset user financial state
-      user.balance = 0;
-      user.isRecoveryMode = false;
-      user.promiseToPayDate = undefined;
-
-      if (resetPackage) {
+      if (resetPackage && !isFullWipe) {
           user.packageId = 'PKG-3M';
           user.status = UserStatus.EXPIRED; // Force new activation
           user.expiryDate = undefined;

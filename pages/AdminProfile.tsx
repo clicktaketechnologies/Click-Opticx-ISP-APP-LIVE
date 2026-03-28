@@ -21,6 +21,23 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        await db.updateStaff(user.email, { profileImage: base64String } as any);
+        if (state.currentUser) {
+           state.currentUser.profileImage = base64String;
+        }
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 3000);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
@@ -73,7 +90,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="relative z-10 flex flex-col items-center text-center space-y-6">
                <div className="relative group">
                   <div className="w-32 h-32 bg-white/10 rounded-[2.5rem] flex items-center justify-center border-4 border-white/5 shadow-2xl overflow-hidden backdrop-blur-md">
-                     <User size={64} className="text-indigo-400" />
+                     {(user as any).profileImage ? <img src={(user as any).profileImage} className="w-full h-full object-cover" /> : <User size={64} className="text-indigo-400" />}
                   </div>
                   <button 
                     onClick={() => fileInputRef.current?.click()}
@@ -81,7 +98,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                   >
                     <Camera size={18} />
                   </button>
-                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+                  <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
                </div>
                
                <div>
