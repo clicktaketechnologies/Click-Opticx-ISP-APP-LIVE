@@ -366,6 +366,8 @@ export interface ISPUser {
   cableType?: string;
   connectionType: 'Wireless' | 'Fiber';
   activityLog: any[];
+  tags?: string[];
+  graceDaysRemaining?: number;
   autoRenewal?: boolean;
   invoiceWithTax?: boolean;
   pppoeId?: string;
@@ -675,13 +677,15 @@ export interface CommunicationSettings {
     username: string;
     password?: string;
   };
-  senderIdentities: SenderIdentity[];
   pushEnabled: boolean;
   quietHours: {
     start: string;
     end: string;
     enabled: boolean;
   };
+  otpEmail?: string;
+  reminderEmail?: string;
+  senderIdentities: SenderIdentity[];
   smsProvider?: 'Twilio' | 'Infobip' | 'Vonage' | 'Clickatell' | 'Custom';
   smsConfig?: { apiKey: string; apiSecret?: string; from: string };
   whatsappProvider?: 'Twilio' | 'Meta_Graph' | 'MessageBird' | 'Custom';
@@ -703,6 +707,8 @@ export interface CommunicationSettings {
     latency: number;
     bounceRate: number;
   };
+  otpSenderId?: string;
+  reminderSenderId?: string;
 }
 
 export interface InfrastructureConfig {
@@ -977,6 +983,7 @@ export interface AppearanceConfig {
   showQuickActions: boolean;
   maintenanceMode: boolean;
   show5GLaunchAnimation: boolean;
+  loadingStyle?: '5G' | 'Pulse' | 'Orbit';
   appPages: AppPage[];
   homeCards: HomeCard[];
   sections: AppSection[];

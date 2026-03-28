@@ -93,7 +93,9 @@ const INITIAL_COMM_CONFIG: CommunicationSettings = {
   quietHours: { start: '22:00', end: '08:00', enabled: true },
   rateLimits: { emailsPerHour: 1000, emailsPerDay: 10000, burstLimit: 50, pushPerDayPerUser: 5 },
   warmup: { enabled: true, currentDay: 1, limit: 50 },
-  health: { status: 'Healthy', lastCheck: new Date().toISOString(), latency: 124, bounceRate: 0.2 }
+  health: { status: 'Healthy', lastCheck: new Date().toISOString(), latency: 124, bounceRate: 0.2 },
+  otpSenderId: 'SDR-1',
+  reminderSenderId: 'SDR-2'
 };
 
 const INITIAL_GATEWAYS: PaymentGateway[] = [
@@ -208,6 +210,7 @@ const INITIAL_STATE: AppState = {
     appearance: {
       showWallet: true, showEmergencyLoad: true, showAIChat: true, showAICalling: true,
       showNews: true, showQuickActions: true, maintenanceMode: false, show5GLaunchAnimation: true,
+      loadingStyle: '5G',
       appPages: INITIAL_APP_PAGES,
       homeCards: [],
       sections: INITIAL_APP_SECTIONS
@@ -660,7 +663,7 @@ class DB {
   }
 
   isConfigured() { return this.initialized; }
-
+  
   getHealth(): DBHealth {
     return {
       documentSize: JSON.stringify(this.state).length,
@@ -674,6 +677,7 @@ class DB {
     if (!this.auth) return { success: false, message: 'Firebase Auth not initialized' };
     try {
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
       const result = await signInWithPopup(this.auth, provider);
       const user = result.user;
       
@@ -721,12 +725,14 @@ class DB {
     // Simulate sending real email via node backend API
     try {
             const config = this.state.settings.commConfig.smtpConfig;
-            const sender = this.state.settings.commConfig.senderIdentities.find(s => s.isDefault) || this.state.settings.commConfig.senderIdentities[0];
+            const senderId = this.state.settings.commConfig.otpSenderId || 'SDR-1';
+            const sender = this.state.settings.commConfig.senderIdentities.find(s => s.id === senderId) || this.state.settings.commConfig.senderIdentities[0];
+            const senderEmail = this.state.settings.commConfig.otpEmail || sender?.email || 'noreply@clickopticx.com';
             
             this.socket.emit('send-email', { 
                 config,
                 payload: {
-                    from: sender?.email || 'noreply@clickopticx.com',
+                    from: senderEmail,
                     senderName: sender?.name || 'Click Opticx Authority',
                     to, 
                     subject: 'Login Verification Protocol - OTP', 
@@ -1121,6 +1127,20 @@ class DB {
     this.commit();
   }
 
+  logActivity(userId: string, type: string, message: string) {
+    const idx = this.state.users.findIndex(u => u.id === userId);
+    if (idx !== -1) {
+      if (!this.state.users[idx].activityLog) this.state.users[idx].activityLog = [];
+      this.state.users[idx].activityLog.push({
+        id: 'AL-' + Date.now(),
+        type,
+        message,
+        timestamp: new Date().toISOString()
+      });
+      this.commit();
+    }
+  }
+
   async markNotificationRead(id: string) {
     const n = this.state.notifications.find(x => x.id === id);
     if (n) { n.read = true; await this.commit(); }
@@ -1428,91 +1448,146 @@ class DB {
   async submitTicket(t: any) { this.state.tickets.push({ ...t, id: 'TCK_' + Date.now(), status: TicketStatus.OPEN, priority: TicketPriority.MEDIUM, comments: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); await this.commit(); }
   async updateTicketStatus(id: string, s: any) { const idx = this.state.tickets.findIndex(t => t.id === id); if (idx !== -1) { this.state.tickets[idx].status = s; await this.commit(); } }
   async addTicketComment(id: string, t: string, i: boolean) { const idx = this.state.tickets.findIndex(x => x.id === id); if (idx !== -1) { this.state.tickets[idx].comments.push({ id: 'CMT_' + Date.now(), authorName: 'Admin', authorEmail: 'admin@opticx.com', authorRole: Role.ADMIN, text: t, timestamp: new Date().toISOString(), isInternal: i }); await this.commit(); } }
-
+  
   async approveUnifiedRequest(id: string, type: string) {
-    if (type === 'package') {
-      const req = this.state.packageRequests.find(r => r.id === id);
-      if (req) {
-        req.status = 'Approved';
-        await this.activatePackage(req.userId, req.packageId);
-        await this.generateAdHocInvoice(req.userId, req.packageId, req.amount, [{ id: 'L1', description: `Package Activation: ${req.packageName}`, quantity: 1, unitPrice: req.amount, total: req.amount, category: 'Service' }]);
-        const inv = this.state.invoices[this.state.invoices.length - 1];
-        if (inv) {
-          inv.status = PaymentStatus.PAID;
-          inv.paidAt = new Date().toISOString();
-          inv.paidAmount = inv.totalAmount;
+    try {
+      if (type === 'package') {
+        const req = this.state.packageRequests.find(r => r.id === id);
+        if (req) {
+          req.status = 'Approved';
+          await this.activatePackage(req.userId, req.packageId);
+          await this.generateAdHocInvoice(req.userId, req.packageId, req.amount, [{ id: 'L1', description: `Package Activation: ${req.packageName}`, quantity: 1, unitPrice: req.amount, total: req.amount, category: 'Service' }]);
+          const inv = this.state.invoices[this.state.invoices.length - 1];
+          if (inv) {
+            inv.status = PaymentStatus.PAID;
+            inv.paidAt = new Date().toISOString();
+            inv.paidAmount = inv.totalAmount;
+          }
+          this.logNotification(req.userId, 'success', 'Request Approved', `Your ${req.packageName} request has been approved.`);
+          this.logActivity(req.userId, 'Approval', `Package ${req.packageName} approved.`);
+        }
+      } else if (type === 'topup') {
+        const req = this.state.topupRequests.find(r => r.id === id);
+        if (req) {
+          req.status = 'Approved';
+          await this.processTopup('Admin', req.userId, 'user', req.amount);
+          this.logNotification(req.userId, 'success', 'Top-up Approved', `Your top-up of ${req.amount} has been credited.`);
+          this.logActivity(req.userId, 'Approval', `Top-up of ${req.amount} approved.`);
+        }
+      } else if (type === 'emergency') {
+        const load = this.state.emergencyLoads.find(l => l.id === id);
+        if (load) {
+          load.status = 'Active';
+          this.logNotification(load.userId, 'success', 'Emergency Load Active', 'Your emergency load is now active.');
+          this.logActivity(load.userId, 'Approval', 'Emergency load activated.');
+        }
+      } else if (type === 'signup') {
+        const req = this.state.signupRequests.find(r => r.id === id);
+        if (req) {
+          req.status = 'Approved';
+          const settings = this.state.settings.authSettings || INITIAL_STATE.settings.authSettings;
+          const newUser: ISPUser = {
+            id: 'USR-' + Date.now(),
+            name: req.name,
+            email: req.email,
+            phone: req.phone,
+            cnic: req.cnic,
+            username: req.username,
+            password: req.password,
+            status: UserStatus.ACTIVE,
+            role: settings.defaultRole as any,
+            portalEnabled: true,
+            createdAt: new Date().toISOString(),
+            balance: 0,
+            activationCount: 0,
+            managementMode: 'Manual',
+            connectionType: 'Fiber',
+            nasConnectionType: 'Manual',
+            creditScore: 600,
+            address: req.address || '',
+            area: req.area || '',
+            packageId: req.packageId,
+            connectionId: 'CID-' + Math.floor(Math.random() * 100000),
+            referralCode: 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+            welcomeChecklistShown: false,
+            verificationStatus: VerificationStatus.UNVERIFIED,
+            verificationSuccessShown: false,
+            expiryDate: '',
+            graceDaysRemaining: 0,
+            notes: '',
+            activityLog: []
+          };
+          this.state.users.push(newUser);
+          await this.syncUserStatusWithBilling(newUser.id);
+          await this.commit();
+          
+          this.dispatchEmail(
+               req.email, 
+               'Protocol Verified: Welcome to Click Opticx', 
+               `<h2>Welcome ${req.name}!</h2><p>Your subscriber node has been provisioned. Access granted.</p>`,
+               'Automation',
+               newUser.id
+          );
+
+          const res = await this.resolvePlanActivationBilling(newUser.id, req.packageId, req.amount, 'Paid', 'System Approval', { notes: 'Signup connection activated via Approval Center.' });
+          
+          if (res.success) {
+            this.logNotification(newUser.id, 'success', 'Welcome!', `Your connection request has been approved. Welcome to ${this.state.settings.branding.businessName}!`);
+            this.logActivity(newUser.id, 'Activation', 'Connection request approved and account activated.');
+          }
         }
       }
-    } else if (type === 'topup') {
-      const req = this.state.topupRequests.find(r => r.id === id);
-      if (req) {
-        req.status = 'Approved';
-        await this.processTopup('Admin', req.userId, 'user', req.amount);
-      }
-    } else if (type === 'emergency') {
-      const load = this.state.emergencyLoads.find(l => l.id === id);
-      if (load) load.status = 'Active';
-    } else if (type === 'signup') {
-      const req = this.state.signupRequests.find(r => r.id === id);
-      if (req) {
-        req.status = 'Approved';
-        const settings = this.state.settings.authSettings || INITIAL_STATE.settings.authSettings;
-        const newUser: Partial<ISPUser> = {
-          id: 'USR-' + Date.now(),
-          name: req.name,
-          email: req.email,
-          phone: req.phone,
-          cnic: req.cnic,
-          username: req.username,
-          password: req.password,
-          status: UserStatus.ACTIVE,
-          role: settings.defaultRole as any,
-          portalEnabled: true,
-          activityLog: [],
-          createdAt: new Date().toISOString(),
-          balance: 0,
-          activationCount: 0,
-          managementMode: 'Manual',
-          connectionType: 'Fiber',
-          nasConnectionType: 'Manual',
-          creditScore: 600,
-          address: req.address || '',
-          area: req.area || '',
-          packageId: req.packageId,
-          connectionId: 'CID-' + Math.floor(Math.random() * 100000)
-        };
-        this.state.users.push(newUser as any);
-        await this.syncUserStatusWithBilling(newUser.id);
-        await this.commit();        // Dispatch Welcome Email
-        this.dispatchEmail(
-          req.email, 
-          'Protocol Verified: Welcome to Click Opticx', 
-          `<h2>Welcome ${req.name}!</h2><p>Your subscriber node has been provisioned. Access granted.</p>`,
-          'Automation',
-          newUser.id
-        );
-      }
+      await this.commit();
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, message: e.message };
     }
-    await this.commit();
-    return { success: true, message: 'Protocol connection authorized.' };
   }
 
   async rejectUnifiedRequest(id: string, type: string, r: string) {
-    if (type === 'package') {
-      const req = this.state.packageRequests.find(r => r.id === id);
-      if (req) req.status = 'Rejected';
-    } else if (type === 'topup') {
-      const req = this.state.topupRequests.find(r => r.id === id);
-      if (req) req.status = 'Rejected';
-    } else if (type === 'emergency') {
-      const load = this.state.emergencyLoads.find(l => l.id === id);
-      if (load) load.status = 'Cancelled';
-    } else if (type === 'signup') {
-      const req = this.state.signupRequests.find(r => r.id === id);
-      if (req) req.status = 'Rejected';
+    try {
+      let targetUserId = '';
+      let requestName = '';
+
+      if (type === 'package') {
+        const req = this.state.packageRequests.find(r => r.id === id);
+        if (req) {
+          req.status = 'Rejected';
+          targetUserId = req.userId;
+          requestName = (this.state.packages.find(p => p.id === req.packageId)?.name || 'Package') + ' Request';
+        }
+      } else if (type === 'topup') {
+        const req = this.state.topupRequests.find(r => r.id === id);
+        if (req) {
+          req.status = 'Rejected';
+          targetUserId = req.userId;
+          requestName = 'Top-up Request';
+        }
+      } else if (type === 'emergency') {
+        const load = this.state.emergencyLoads.find(l => l.id === id);
+        if (load) {
+          load.status = 'Cancelled';
+          targetUserId = load.userId;
+          requestName = 'Emergency Load';
+        }
+      } else if (type === 'signup') {
+        const req = this.state.signupRequests.find(r => r.id === id);
+        if (req) {
+          req.status = 'Rejected';
+          requestName = 'New Connection Request';
+        }
+      }
+
+      if (targetUserId) {
+        this.logNotification(targetUserId, 'error', 'Request Declined', `Your ${requestName} was declined. Reason: ${r}`);
+        this.logActivity(targetUserId, 'Rejection', `${requestName} declined by admin. Reason: ${r}`);
+      }
+
+      await this.commit();
+      return { success: true };
+    } catch (e: any) {
+      return { success: false, message: e.message };
     }
-    await this.commit();
-    return { success: true };
   }
 
   async cancelUniversalRequest(id: string) {
@@ -1654,6 +1729,32 @@ class DB {
   async addTask(t: string, p: any, a?: string, d?: string) { this.state.tasks.push({ id: 'TSK_' + Date.now(), text: t, completed: false, priority: p, assignedTo: a, dueDate: d, order: this.state.tasks.length }); await this.commit(); return { success: true }; }
   async toggleTask(id: string) { const idx = this.state.tasks.findIndex(t => t.id === id); if (idx !== -1) { this.state.tasks[idx].completed = !this.state.tasks[idx].completed; await this.commit(); } return { success: true }; }
   async deleteTask(id: string) { this.state.tasks = this.state.tasks.filter(t => t.id !== id); await this.commit(); return { success: true }; }
+  async bulkBalanceUpdate(userIds: string[], amount: number, isAddition: boolean) {
+    for (const id of userIds) {
+      const idx = this.state.users.findIndex(u => u.id === id);
+      if (idx !== -1) {
+        if (isAddition) this.state.users[idx].balance += amount;
+        else this.state.users[idx].balance -= amount;
+      }
+    }
+    await this.commit();
+    return { success: true };
+  }
+
+  async bulkAddTag(userIds: string[], tag: string) {
+    for (const id of userIds) {
+      const idx = this.state.users.findIndex(u => u.id === id);
+      if (idx !== -1) {
+        const currentNotes = this.state.users[idx].notes || '';
+        if (!currentNotes.includes(`#${tag}`)) {
+          this.state.users[idx].notes = currentNotes + ` #${tag}`;
+        }
+      }
+    }
+    await this.commit();
+    return { success: true };
+  }
+
   async reorderTasks(t: any[]) { this.state.tasks = t; await this.commit(); return { success: true }; }
   async addDealerLoad(email: string, amount: number, mode: 'paid' | 'credit' | 'pay_later', dueDate?: string) {
     const staff = this.state.staff.find(s => s.email === email);
@@ -2949,7 +3050,7 @@ class DB {
               to,
               subject,
               html: htmlOutput,
-              from: config.smtpConfig.username,
+              from: config.reminderEmail || config.smtpConfig.username,
               senderName: this.state.settings.branding.businessName
             }
           })
@@ -4019,7 +4120,7 @@ class DB {
       if (!user) continue;
 
       if (isFullWipe) {
-        // Complete wipe
+        // Complete hard wipe - empty database values effectively
         this.state.invoices = this.state.invoices.filter(inv => inv.userId !== uid);
         this.state.ledger = this.state.ledger.filter(l => l.userId !== uid);
         user.balance = 0;
@@ -4028,7 +4129,13 @@ class DB {
         user.packageId = ''; // Set to N/A
         user.status = UserStatus.PENDING_VERIFICATION; // Like brand new account
         user.expiryDate = undefined;
-        user.connectionId = 'CO-' + Math.floor(10000 + Math.random() * 90000); // Re-issue connection ID to look brand new
+        user.activationCount = 0;
+        user.activationDate = undefined;
+        user.lastPaymentDate = undefined;
+        user.collectionDate = undefined;
+        user.collectedBy = undefined;
+        user.collectorName = undefined;
+        user.notes = `[${new Date().toLocaleDateString()}] SYSTEM_HARD_WIPE executed by ${adminName}. All fiscal and service records purged.`;
       } else {
         // Standard month flash
         this.state.invoices = this.state.invoices.filter(inv =>
@@ -4095,14 +4202,42 @@ class DB {
 
   // ── BULK EMAIL REMINDER ──────────────────────────────────────────────────────
   async bulkSendEmailReminder(userIds: string[], adminId: string) {
-    const admin = this.state.staff.find(s => s.email === adminId) || this.state.currentUser;
-    const adminName = admin?.name || 'System';
     const timestamp = new Date().toISOString();
     let sent = 0;
+
+    const senderId = this.state.settings.commConfig.reminderSenderId || 'SDR-2';
+    const sender = this.state.settings.commConfig.senderIdentities.find(s => s.id === senderId) || this.state.settings.commConfig.senderIdentities[0];
 
     for (const uid of userIds) {
       const user = this.state.users.find(u => u.id === uid);
       if (!user || !user.email) continue;
+
+      try {
+        if (this.socket) {
+          this.socket.emit('send-email', {
+             config: this.state.settings.commConfig.smtpConfig,
+             payload: {
+                 from: sender?.email || 'noreply@clickopticx.com',
+                 senderName: sender?.name || 'Click Opticx Recovery',
+                 to: user.email, 
+                 subject: 'Payment Protocol Alert', 
+                 html: `
+                     <div style="font-family: sans-serif; padding: 20px;">
+                         <h2>Outstanding Balance Notice</h2>
+                         <p>Dear ${user.name},</p>
+                         <p>Our records indicate an outstanding balance of <b>Rs. ${user.balance}</b> for your internet services.</p>
+                         <p>Please settle your dues to avoid service suspension.</p>
+                         <hr />
+                         <p style="font-size: 10px; color: #666;">This is an automated reminder from Click Opticx Billing Engine.</p>
+                     </div>
+                 `
+             }
+          });
+        }
+      } catch(e) {}
+
+      const admin = this.state.staff.find(s => s.email === adminId) || this.state.currentUser;
+      const adminName = admin?.name || 'System';
 
       // Log the communication
       const commLog: CommunicationLog = {

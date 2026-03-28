@@ -6,7 +6,7 @@ import { db } from '../db';
 import {
     Mail, Settings, ShieldCheck, Server, Send, Plus, Trash2,
     CheckCircle, AlertCircle, Loader2, Globe, Lock, Info,
-    Zap, Heart, Activity, Sliders, Save, RefreshCw
+    Zap, Heart, Activity, Sliders, Save, RefreshCw, Bell, Key
 } from 'lucide-react';
 
 interface Props {
@@ -18,12 +18,12 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [isTesting, setIsTesting] = useState(false);
     const [testEmail, setTestEmail] = useState('');
-    const [activeTab, setActiveTab] = useState<'gateway' | 'sender' | 'advanced'>('gateway');
+    const [activeTab, setActiveTab] = useState<'gateway' | 'sender' | 'advanced' | 'automation'>('gateway');
 
     const handleSave = async () => {
         setIsSaving(true);
         try {
-            await db.updateSettings({ commConfig: config });
+            await db.updateSettings({ ...state.settings, commConfig: config });
             db.logNotification('all', 'success', 'Infrastructure Update', 'Global communication protocols synchronized.');
         } catch (err) {
             alert('Connection Failed: Server connection timed out.');
@@ -53,8 +53,8 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
     };
 
     const addSenderIdentity = () => {
-        const newDear SenderIdentity = {
-            id: Math.random().toString(36).substr(2, 9),
+        const newIdentity: SenderIdentity = {
+            id: 'SDR-' + Date.now(),
             name: 'Network Authority',
             email: 'noreply@yourdomain.com',
             isVerified: false,
@@ -109,6 +109,12 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                     className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'advanced' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
                 >
                     <Sliders size={14} /> Protocol Rules
+                </button>
+                <button
+                    onClick={() => setActiveTab('automation')}
+                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'automation' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+                >
+                    <Bell size={14} /> Automation Routing
                 </button>
             </div>
 
@@ -354,6 +360,82 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                                 WARMUP ENGAGED: THE SYSTEM WILL GRADUALLY INCREASE TRANSMISSION VOLUMES TO PRESERVE REPUTATION NODE SCORES.
                                             </p>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'automation' && (
+                        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
+                            <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border">
+                                        <Bell size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-black italic uppercase text-slate-900 tracking-tighter">Automation Routing</h3>
+                                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Assign specific sender identities to automated actions</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-8 space-y-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                                <Key size={14} className="text-amber-500" />
+                                            </div>
+                                            <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest italic">One-Time Passwords (OTP)</h4>
+                                        </div>
+                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                                            This identity will be used to dispatch verification codes and reset tokens.
+                                        </p>
+                                        <select
+                                            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs"
+                                            value={config.otpSenderId}
+                                            onChange={e => setConfig({ ...config, otpSenderId: e.target.value })}
+                                        >
+                                            <option value="">Select Primary Sender</option>
+                                            {config.senderIdentities.map(id => (
+                                                <option key={id.id} value={id.id}>{id.name} ({id.email})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] space-y-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                                                <Info size={14} className="text-indigo-500" />
+                                            </div>
+                                            <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest italic">System Reminders</h4>
+                                        </div>
+                                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                                            This identity will be used for billing alerts and fiscal reminders.
+                                        </p>
+                                        <select
+                                            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs"
+                                            value={config.reminderSenderId}
+                                            onChange={e => setConfig({ ...config, reminderSenderId: e.target.value })}
+                                        >
+                                            <option value="">Select Primary Sender</option>
+                                            {config.senderIdentities.map(id => (
+                                                <option key={id.id} value={id.id}>{id.name} ({id.email})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 bg-indigo-50 border border-indigo-200 rounded-[2rem] flex items-start gap-4">
+                                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
+                                        <Zap size={18} className="text-indigo-600" />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <h5 className="text-[10px] font-black text-indigo-900 uppercase tracking-widest italic">Routing Precision</h5>
+                                        <p className="text-[9px] text-indigo-600 font-bold leading-relaxed uppercase">
+                                            DEDICATED SENDER IDENTITIES IMPROVE DELIVERABILITY BY SEGREGATING TRANSACTIONAL TRAFFIC FROM SYSTEM ALERTS.
+                                        </p>
                                     </div>
                                 </div>
                             </div>

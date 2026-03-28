@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
-  const [activeTab, setActiveTab] = useState<'branding' | 'profile' | 'support' | 'digital' | 'invoices' | 'notifications' | 'appearance' | 'ai-agent' | 'legal'>('branding');
+  const [activeTab, setActiveTab] = useState<'branding' | 'profile' | 'support' | 'digital' | 'invoices' | 'notifications' | 'appearance' | 'ai-agent' | 'legal' | 'communications'>('branding');
   const [formData, setFormData] = useState<SystemSettings>(state.settings);
   const [isSaving, setIsSaving] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
@@ -67,6 +67,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
     { id: 'appearance', label: 'App Features', icon: Smartphone },
     { id: 'ai-agent', label: 'AI Settings', icon: Bot },
     { id: 'legal', label: 'Legal Policies', icon: Scale },
+    { id: 'communications', label: 'E-Communications', icon: Share2 },
   ];
 
   return (
@@ -411,6 +412,32 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       </div>
                     ))}
                   </div>
+
+                  <div className="p-8 bg-slate-900 rounded-[2.5rem] space-y-6">
+                    <div className="flex items-center gap-3">
+                      <RefreshCw className="text-indigo-400 animate-spin-slow" size={24} />
+                      <h4 className="text-xs font-black uppercase text-indigo-400 italic tracking-[0.2em]">System Loading Architecture</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {[
+                        { id: '5G', label: '5G Hyper-Node', desc: 'Modern data-rich spinner' },
+                        { id: 'Pulse', label: 'Quantum Pulse', desc: 'Minimalist ping wave' },
+                        { id: 'Orbit', label: 'Kinetic Orbit', desc: 'Satellite tracking paths' }
+                      ].map(style => (
+                        <div 
+                          key={style.id}
+                          onClick={() => setFormData({ ...formData, appearance: { ...formData.appearance, loadingStyle: style.id as any } })}
+                          className={`p-6 rounded-3xl border-2 cursor-pointer transition-all flex flex-col gap-4 ${formData.appearance.loadingStyle === style.id ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20' : 'border-white/5 bg-white/5 opacity-40 hover:opacity-100'}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${formData.appearance.loadingStyle === style.id ? 'text-white' : 'text-slate-500'}`}>{style.label}</span>
+                            <Mini5GMicroLoader size={24} style={style.id as any} />
+                          </div>
+                          <p className="text-[9px] font-bold text-slate-500 uppercase leading-relaxed">{style.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -496,6 +523,33 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                           onChange={e => setFormData({ ...formData, legal: { ...formData.legal, refundPolicy: e.target.value } })}
                         />
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* COMMUNICATIONS TAB */}
+              {activeTab === 'communications' && (
+                <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Share2 className="text-indigo-600" size={32} /> Communication Hub</h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">OTP & System Emails</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">OTP Sending Address</label>
+                      <input type="email" placeholder="otp@clickoptix.com" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.commConfig.otpEmail || ''} onChange={e => setFormData({ ...formData, commConfig: { ...formData.commConfig, otpEmail: e.target.value } })} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Billing Reminders Address</label>
+                      <input type="email" placeholder="billing@clickoptix.com" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.commConfig.reminderEmail || ''} onChange={e => setFormData({ ...formData, commConfig: { ...formData.commConfig, reminderEmail: e.target.value } })} />
+                    </div>
+                  </div>
+                  <div className="bg-amber-50 border border-amber-100 p-8 rounded-[2.5rem] flex gap-6 items-start">
+                    <div className="w-14 h-14 bg-amber-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-lg"><Info size={28}/></div>
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-black text-amber-900 uppercase italic">Anti-Spam Clearance</h4>
+                      <p className="text-[10px] text-amber-700 font-bold uppercase leading-relaxed tracking-widest max-w-xl">Make sure these addresses are verified in your SMTP/SendGrid portal and not BANNED by major providers (Gmail/Outlook). Using a dedicated sub-domain for OTPs is recommended.</p>
                     </div>
                   </div>
                 </div>

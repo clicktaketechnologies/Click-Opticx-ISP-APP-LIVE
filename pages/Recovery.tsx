@@ -1515,50 +1515,55 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                 </button>
                             </div>
 
-                            <div className="p-6 bg-red-50 border-2 border-dashed border-red-200 rounded-3xl">
-                                <p className="text-[10px] font-black text-red-800 uppercase tracking-widest leading-relaxed">
-                                    ⚠ This will clear balance to zero, remove all invoices within the selected window, and reset recovery mode. The user's package will be KEPT. This action cannot be undone.
+                            <div className="p-8 bg-rose-50 border border-rose-100 rounded-[2.5rem] space-y-4">
+                                <div className="flex items-center gap-3 text-rose-600">
+                                    <AlertTriangle size={24} />
+                                    <p className="text-[11px] font-black uppercase tracking-widest leading-relaxed">
+                                        Security Alert: Destructive Data Purge
+                                    </p>
+                                </div>
+                                <p className="text-[10px] font-bold text-rose-500 uppercase leading-relaxed">
+                                    This will clear balances to zero, purge invoice history for the selected window, and reset recovery status. ALL FISCAL RECORDS for the selected period will be erased.
                                 </p>
-                                <div className="space-y-4">
-                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Months of Data to Clear</label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {[-1, 1, 3, 6, 12].map(m => (
+                                
+                                <div className="space-y-4 pt-4 border-t border-rose-100">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Select Flash Scale (Purge Depth)</label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {[-1, 1, 3, 6, 12, 0].filter(m => m !== 0).map(m => (
                                             <button
                                                 key={m}
+                                                type="button"
                                                 onClick={() => setFlashMonths(m)}
-                                                className={`px-4 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${flashMonths === m ? 'bg-red-600 text-white border-red-600 shadow-lg' : 'bg-slate-50 text-slate-500 border-slate-100'}`}
+                                                className={`px-4 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${flashMonths === m ? 'bg-rose-600 text-white border-rose-600 shadow-lg' : 'bg-white text-slate-400 border-slate-100 h-full'}`}
                                             >
-                                                {m === -1 ? 'N/A (Full Reset)' : `${m} Month${m > 1 ? 's' : ''}`}
+                                                {m === -1 ? 'HARD WIPE' : `${m} MO`}
                                             </button>
                                         ))}
                                     </div>
-                                    {flashMonths === -1 ? (
-                                        <p className="text-[10px] text-red-600 font-black uppercase tracking-widest italic animate-pulse">
-                                            ⚡ N/A MODE: ALL WORK LIKE A NEW REGISTER ACCOUNT SHOW JUST BEFORE HISTORY LAST FLASH n/a
-                                        </p>
-                                    ) : (
-                                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Clearing invoices from last {flashMonths} month(s)</p>
-                                    )}
+                                    <p className="text-[9px] font-black text-rose-400 uppercase tracking-widest italic text-center animate-pulse">
+                                        {flashMonths === -1 ? '⚠ INITIALIZING SYSTEM HARD WIPE: ALL DATA WILL BE PURGED' : `Purging last ${flashMonths} month(s) of fiscal history`}
+                                    </p>
                                 </div>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Type <span className="text-red-600 font-black">CONFIRM</span> to proceed</label>
+                            <div className="space-y-3">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic text-center block">Type <span className="text-rose-600 font-black">FLASH RESET</span> to Authorize</label>
                                 <input
                                     type="text"
                                     value={flashConfirmText}
                                     onChange={(e) => setFlashConfirmText(e.target.value.toUpperCase())}
-                                    placeholder="CONFIRM"
-                                    className={`w-full px-6 py-4 border-2 rounded-2xl font-black text-lg tracking-widest outline-none transition-all ${flashConfirmText === 'CONFIRM' ? 'border-red-500 bg-red-50 text-red-700' : 'border-slate-100 bg-slate-50'}`}
+                                    placeholder="TYPE AUTHORIZATION CODE"
+                                    className={`w-full p-6 border-2 rounded-[2rem] font-black text-xl tracking-widest outline-none transition-all text-center ${flashConfirmText === 'FLASH RESET' ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-100 bg-slate-50'}`}
                                 />
                             </div>
 
                             <button
                                 onClick={handleBulkFlash}
-                                disabled={isProcessing || flashConfirmText !== 'CONFIRM'}
-                                className={`w-full py-6 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.3em] italic transition-all active:scale-95 flex items-center justify-center gap-3 ${flashConfirmText !== 'CONFIRM' ? 'bg-slate-200 cursor-not-allowed text-slate-400' : 'bg-red-600 hover:bg-red-700 shadow-2xl shadow-red-900/30'}`}
+                                disabled={isProcessing || flashConfirmText !== 'FLASH RESET'}
+                                className={`w-full py-6 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.3em] italic transition-all active:scale-95 flex items-center justify-center gap-3 ${flashConfirmText !== 'FLASH RESET' ? 'bg-slate-200 cursor-not-allowed text-slate-400' : 'bg-rose-600 hover:bg-rose-700 shadow-2xl shadow-rose-900/30'}`}
                             >
-                                <Zap size={20} /> {isProcessing ? 'FLASHING...' : flashConfirmText !== 'CONFIRM' ? 'Type CONFIRM First' : `FLASH ${selectedUsers.size} ACCOUNTS`}
+                                {isProcessing ? <Activity className="animate-spin" size={20} /> : <Zap size={20} />}
+                                {flashMonths === -1 ? 'AUTHORIZE SYSTEM WIPE' : 'EXECUTE FISCAL FLASH'}
                             </button>
                         </div>
                     </div>

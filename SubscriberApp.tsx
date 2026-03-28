@@ -1,9 +1,8 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { AppState, ISPUser, PaymentMethod, TopupRequest, Role, Invoice, AppPage, VerificationStatus, UserStatus } from './types';
 import { db } from './db';
 import {
-   Home, Wallet, Signal, User, Headphones, Zap, Menu, Bell, MessageSquare, Megaphone, Share2, BarChart3, ShieldAlert, Lock, RefreshCw, Eye, EyeOff, ShieldCheck, Smartphone, Network, Info, Globe, Monitor, Key, Gauge, AlertCircle, CheckCircle, X, ArrowRight, Clock, ChevronRight, LogOut, Cpu, Sparkles, History, Mic, Scale
+   Home, Wallet, Wifi, User, Headphones, Zap, Menu, Bell, MessageSquare, Megaphone, Share2, BarChart3, ShieldAlert, Lock, RefreshCw, Eye, EyeOff, ShieldCheck, Smartphone, Network, Info, Globe, Monitor, Key, Gauge, AlertCircle, CheckCircle, X, ArrowRight, Clock, ChevronRight, LogOut, Cpu, Sparkles, History, Mic, Scale
 } from 'lucide-react';
 
 import SubscriberHome from './components/subscriber/SubscriberHome';
@@ -149,7 +148,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
       { id: 'ai-home', icon: Sparkles, label: 'AI' },
       { id: 'live-usage', icon: Monitor, label: 'Live' },
       { id: 'wallet', icon: Wallet, label: 'Wallet' },
-      { id: 'packages', icon: Signal, label: 'Plans' },
+      { id: 'packages', icon: Wifi, label: 'Plans' },
    ].filter(item => item.id === 'home' || isPageEnabled(item.id));
 
    return (

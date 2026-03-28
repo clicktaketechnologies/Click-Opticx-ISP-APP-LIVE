@@ -1,14 +1,13 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { AppState, UserStatus, ISPUser, Role, PaymentStatus, Package, PaymentMethod, ConnectionStatus, VerificationStatus, LedgerType } from '../types';
 import { 
   Search, UserPlus, ShieldAlert, ChevronRight, X, Activity, Trash2, 
   ChevronLeft, Pencil, Save, Info, Network, MapPin, HardDrive, 
-  CheckCircle, AlertCircle, Clock, ShieldCheck, DollarSign, Wallet, CreditCard, Home, Ban,
-  Square, CheckSquare, Layers, AlertTriangle, Key, Cpu, Zap, SignalHigh, Calendar, Banknote, Globe, Loader2, XCircle, RefreshCw, Lock, LogOut, Eye, UserCircle, Fingerprint, Map as MapIcon, Smartphone, Bell, ListChecks,
+  CheckCircle, AlertCircle, Clock, ShieldCheck, DollarSign, Wallet, CreditCard, Home, Ban, Flame,
+  Square, CheckSquare, Layers, AlertTriangle, Key, Cpu, Zap, Calendar, Banknote, Globe, Loader2, XCircle, RefreshCw, Lock, LogOut, Eye, UserCircle, Fingerprint, Map as MapIcon, Smartphone, Bell, ListChecks,
   User, Hash, MessageSquare, Package as PackageIcon, LockKeyhole, ArrowRight, MousePointer2, Settings2, Power,
   SearchCode, EyeOff, ExternalLink, ArrowUpRight, ArrowDownLeft,
-  Mail, Wifi, FileText, MoreHorizontal, Play
+  Mail, Wifi, FileText, MoreHorizontal, Play, FileInput
 } from 'lucide-react';
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
@@ -41,6 +40,9 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   // Bulk States
   const [isBulkGraceModal, setIsBulkGraceModal] = useState(false);
   const [isBulkPackageModal, setIsBulkPackageModal] = useState(false);
+  const [isBulkFlashModal, setIsBulkFlashModal] = useState(false);
+  const [flashConfirmText, setFlashConfirmText] = useState('');
+  const [flashMonths, setFlashMonths] = useState(1);
   const [bulkGraceDate, setBulkGraceDate] = useState(new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0]);
 
   // Form States
@@ -49,11 +51,20 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('Cash');
   const [collectAmount, setCollectAmount] = useState<number>(0);
   const [shouldActivatePkg, setShouldActivatePkg] = useState(true);
-  const [isGraceActive, setIsGraceActive] = useState(true); 
-  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
   const [newAuthSecret, setNewAuthSecret] = useState('');
+  
+  const [isImportUsersModal, setIsImportUsersModal] = useState(false);
+  const [importCsvInput, setImportCsvInput] = useState('');
+  
+  const [isApplyDiscountModal, setIsApplyDiscountModal] = useState(false);
+  const [bulkDiscountAmount, setBulkDiscountAmount] = useState('0');
+  const [isBulkTagModal, setIsBulkTagModal] = useState(false);
+  const [bulkTagInput, setBulkTagInput] = useState('');
+  
+  const [isGraceActive, setIsGraceActive] = useState(true); 
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
 
   const initialUserForm: Partial<ISPUser> = {
     name: '', username: '', password: '', packageId: '', connectionType: 'Fiber',
@@ -423,29 +434,71 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-emerald-400 hover:bg-emerald-500/10" onClick={async () => { await db.bulkVerifyUsers(Array.from(selectedIds), true); setSelectedIds(new Set()); }}>Verify (KYC)</button>
                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-rose-400 hover:bg-rose-500/10" onClick={async () => { await db.bulkVerifyUsers(Array.from(selectedIds), false); setSelectedIds(new Set()); }}>Unverify (Remove KYC)</button>
                      <div className="h-px bg-slate-800 my-1"></div>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-amber-500 hover:bg-amber-500/10" onClick={async () => {
-                         const m = prompt("Enter months back to flash (-1 for N/A Full Wipe):", "0");
-                         if (m !== null) {
-                             await db.bulkFlashUsers(Array.from(selectedIds), parseInt(m), state.currentUser.email, false);
-                             setSelectedIds(new Set());
-                         }
-                     }}>Flash Reset</button>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-amber-500 hover:bg-amber-500/10" onClick={() => {
+                          setFlashConfirmText('');
+                          setFlashMonths(1);
+                          setIsBulkFlashModal(true);
+                      }}>Flash Reset</button>
                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => { setSelectedPkgId(''); setIsBulkPackageModal(true); }}>Assign / Change Plan</button>
                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => setIsBulkGraceModal(true)}>Extend Plan</button>
                      <div className="h-px bg-slate-800 my-1"></div>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10 flex justify-between items-center" onClick={() => alert('Feature coming soon')}>Pause Service <Clock size={12}/></button>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10 flex justify-between items-center" onClick={() => alert('Feature coming soon')}>Resume Service <Play size={12}/></button>
-                     <div className="h-px bg-slate-800 my-1"></div>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-emerald-400 hover:bg-emerald-500/10" onClick={() => alert('Feature coming soon')}>Add Balance</button>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-rose-400 hover:bg-rose-500/10" onClick={() => alert('Feature coming soon')}>Deduct Balance</button>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-indigo-400 hover:bg-indigo-500/10" onClick={() => alert('Feature coming soon')}>Apply Discount</button>
-                     <div className="h-px bg-slate-800 my-1"></div>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => alert('Feature coming soon')}>Add Tag (VIP, Late...)</button>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => alert('Feature coming soon')}>Remove Tag</button>
-                     <div className="h-px bg-slate-800 my-1"></div>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => alert('Feature coming soon')}>Export Users</button>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => alert('Feature coming soon')}>Import Users</button>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => alert('Feature coming soon')}>Download List</button>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10 flex justify-between items-center" onClick={async () => {
+                        setIsProcessing(true);
+                        await db.bulkSetAccountStatus(Array.from(selectedIds), UserStatus.SUSPENDED, "Bulk Pause by Admin");
+                        db.logNotification('all', 'success', 'Bulk Action', `Suspended ${selectedIds.size} accounts.`);
+                        setIsProcessing(false);
+                        setSelectedIds(new Set());
+                      }}>Pause Service <Clock size={12}/></button>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10 flex justify-between items-center" onClick={async () => {
+                        setIsProcessing(true);
+                        await db.bulkSetAccountStatus(Array.from(selectedIds), UserStatus.ACTIVE, "Bulk Resume by Admin");
+                        db.logNotification('all', 'success', 'Bulk Action', `Activated ${selectedIds.size} accounts.`);
+                        setIsProcessing(false);
+                        setSelectedIds(new Set());
+                      }}>Resume Service <Play size={12}/></button>
+                      <div className="h-px bg-slate-800 my-1"></div>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-emerald-400 hover:bg-emerald-500/10" onClick={async () => {
+                        const amt = prompt("Enter amount to ADD to each selected user balance:", "0");
+                        if (!amt) return;
+                        setIsProcessing(true);
+                        await db.bulkBalanceUpdate(Array.from(selectedIds), parseFloat(amt), true);
+                        db.logNotification('all', 'success', 'Bulk Balance', `Added ${amt} to ${selectedIds.size} accounts.`);
+                        setIsProcessing(false);
+                        setSelectedIds(new Set());
+                      }}>Add Balance</button>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-rose-400 hover:bg-rose-500/10" onClick={async () => {
+                        const amt = prompt("Enter amount to DEDUCT from each selected user balance:", "0");
+                        if (!amt) return;
+                        setIsProcessing(true);
+                        await db.bulkBalanceUpdate(Array.from(selectedIds), parseFloat(amt), false);
+                        db.logNotification('all', 'success', 'Bulk Balance', `Deducted ${amt} from ${selectedIds.size} accounts.`);
+                        setIsProcessing(false);
+                        setSelectedIds(new Set());
+                      }}>Deduct Balance</button>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-indigo-400 hover:bg-indigo-500/10" onClick={() => setIsApplyDiscountModal(true)}>Apply Discount</button>
+                      <div className="h-px bg-slate-800 my-1"></div>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => {
+                        setBulkTagInput('');
+                        setIsBulkTagModal(true);
+                      }}>Add Tag (VIP, Late...)</button>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => {
+                        setBulkTagInput('');
+                        setIsBulkTagModal(true);
+                      }}>Remove Tag</button>
+                      <div className="h-px bg-slate-800 my-1"></div>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => {
+                        const data = state.users.filter(u => selectedIds.has(u.id));
+                        const csv = "ID,Name,Phone,Package,Balance\n" + data.map(u => `${u.id},${u.name},${u.phone},${u.packageId},${u.balance}`).join("\n");
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `ClickOptix_BulkExport_${new Date().toISOString().split('T')[0]}.csv`;
+                        a.click();
+                        setSelectedIds(new Set());
+                      }}>Export Users</button>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => setIsImportUsersModal(true)}>Import Users</button>
+                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => window.print()}>Download List</button>
                   </div>
                </div>
            </div>
@@ -1077,10 +1130,213 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
         </div>
       )}
 
+      {/* BULK FLASH MODAL */}
+      {isBulkFlashModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
+            <div className="bg-white rounded-[3rem] w-full max-lg shadow-2xl border-[8px] border-rose-50 overflow-hidden animate-in zoom-in">
+               <header className="p-8 sm:p-10 border-b bg-rose-600 text-white flex justify-between items-center shrink-0">
+                  <div className="flex items-center gap-5">
+                     <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg animate-pulse"><Flame size={28}/></div>
+                     <div><h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter leading-none">Security Override: Flash Reset</h3><p className="text-rose-100 text-[10px] font-black uppercase tracking-widest mt-1">Bulk Fiscal Data Purge</p></div>
+                  </div>
+                  <button onClick={() => setIsBulkFlashModal(false)} className="p-3 hover:bg-white/10 rounded-2xl"><X size={32}/></button>
+               </header>
+               <div className="p-8 sm:p-10 space-y-8">
+                  <div className="bg-rose-50 border border-rose-100 p-6 rounded-[2rem] space-y-2 text-center">
+                     <AlertTriangle className="text-rose-600 mx-auto mb-2" size={32} />
+                     <p className="text-[11px] font-black text-rose-600 uppercase tracking-widest leading-relaxed">CRITICAL WARNING: DESTRUCTIVE ACTION</p>
+                     <p className="text-[10px] font-bold text-rose-500 uppercase leading-relaxed max-w-sm mx-auto">This will clear specific months of dues or perform a FULL WIPE for {selectedIds.size} users. This action CANNOT be undone.</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Flash Scale (Months)</label>
+                        <select 
+                          className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-xl outline-none focus:border-rose-500 transition-all text-center appearance-none" 
+                          value={flashMonths} 
+                          onChange={e => setFlashMonths(Number(e.target.value))}
+                        >
+                           <option value={1}>1 MONTH (Standard)</option>
+                           <option value={2}>2 MONTHS</option>
+                           <option value={3}>3 MONTHS</option>
+                           <option value={6}>6 MONTHS (Deep Purge)</option>
+                           <option value={12}>1 YEAR (Fiscal Flush)</option>
+                           <option value={-1}>N/A: HARD FULL WIPE</option>
+                        </select>
+                     </div>
+                     <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Type "FLASH RESET" to Authorize</label>
+                        <input 
+                           type="text" 
+                           placeholder="Type code here..."
+                           className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-xl outline-none focus:border-rose-500 transition-all text-center uppercase" 
+                           value={flashConfirmText} 
+                           onChange={e => setFlashConfirmText(e.target.value)} 
+                        />
+                     </div>
+                  </div>
+
+                  <button 
+                    onClick={async () => {
+                       if (flashConfirmText.toUpperCase() !== 'FLASH RESET') {
+                           db.logNotification('all', 'error', 'Authorization Failed', 'Incorrect confirmation text entered.');
+                           return;
+                       }
+                       setIsProcessing(true);
+                       const res = await db.bulkFlashUsers(Array.from(selectedIds), flashMonths, state.currentUser?.email || 'admin@clickoptix.com');
+                       if (res.success) {
+                           db.logNotification('all', 'success', 'Flash Authorized', `Successfully purged data for ${res.count} users.`);
+                           setIsBulkFlashModal(false);
+                           setSelectedIds(new Set());
+                           setFlashConfirmText('');
+                           setIsSuccessModal(true);
+                       }
+                       setIsProcessing(false);
+                    }} 
+                    disabled={isProcessing || flashConfirmText.toUpperCase() !== 'FLASH RESET'} 
+                    className="w-full py-6 bg-rose-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale"
+                  >
+                     {isProcessing ? <RefreshCw className="animate-spin" size={20}/> : <Flame size={20}/>} {flashMonths === -1 ? 'INITIALIZE HARD FULL WIPE' : 'EXECUTE SELECTIVE FLASH'}
+                  </button>
+               </div>
+            </div>
+        </div>
+      )}
+
+      {/* BULK DISCOUNT MODAL */}
+      {isApplyDiscountModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
+           <div className="bg-white rounded-[3rem] w-full max-sm shadow-2xl border-[8px] border-slate-50 overflow-hidden animate-in zoom-in">
+              <header className="p-8 border-b bg-emerald-600 text-white flex justify-between items-center">
+                 <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Zap size={20}/></div>
+                    <h3 className="text-xl font-black uppercase italic tracking-tighter">Bulk Discount</h3>
+                 </div>
+                 <button onClick={() => setIsApplyDiscountModal(false)}><X size={24}/></button>
+              </header>
+              <div className="p-8 space-y-6">
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Discount Amount (Rs.)</label>
+                    <input type="number" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xl outline-none focus:border-emerald-500 transition-all text-center" value={bulkDiscountAmount} onChange={e => setBulkDiscountAmount(e.target.value)} />
+                 </div>
+                 <button 
+                  onClick={async () => {
+                    setIsProcessing(true);
+                    await db.bulkBalanceUpdate(Array.from(selectedIds), parseFloat(bulkDiscountAmount), false);
+                    db.logNotification('all', 'success', 'Bulk Action', `Applied Rs.${bulkDiscountAmount} discount to ${selectedIds.size} users.`);
+                    setIsProcessing(false);
+                    setIsApplyDiscountModal(false);
+                    setSelectedIds(new Set());
+                    setIsSuccessModal(true);
+                  }}
+                  className="w-full py-5 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+                 >
+                    Apply Discount to {selectedIds.size} Users
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* BULK TAG MODAL */}
+      {isBulkTagModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
+           <div className="bg-white rounded-[3rem] w-full max-sm shadow-2xl border-[8px] border-slate-50 overflow-hidden animate-in zoom-in">
+              <header className="p-8 border-b bg-indigo-600 text-white flex justify-between items-center">
+                 <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><ShieldCheck size={20}/></div>
+                    <h3 className="text-xl font-black uppercase italic tracking-tighter">Batch Tagging</h3>
+                 </div>
+                 <button onClick={() => setIsBulkTagModal(false)}><X size={24}/></button>
+              </header>
+              <div className="p-8 space-y-6">
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tag Identifier (e.g. VIP)</label>
+                    <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xl outline-none focus:border-indigo-500 transition-all text-center uppercase" value={bulkTagInput} onChange={e => setBulkTagInput(e.target.value)} placeholder="Tag Name..." />
+                 </div>
+                 <button 
+                  onClick={async () => {
+                    setIsProcessing(true);
+                    await db.bulkAddTag(Array.from(selectedIds), bulkTagInput);
+                    db.logNotification('all', 'success', 'Bulk Action', `Added tag ${bulkTagInput} to ${selectedIds.size} users.`);
+                    setIsProcessing(false);
+                    setIsBulkTagModal(false);
+                    setSelectedIds(new Set());
+                    setIsSuccessModal(true);
+                  }}
+                  className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all"
+                 >
+                    Apply Tag to {selectedIds.size} Users
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* IMPORT USERS MODAL */}
+      {isImportUsersModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
+           <div className="bg-white rounded-[3rem] w-full max-lg shadow-2xl border-[8px] border-slate-50 overflow-hidden animate-in zoom-in flex flex-col max-h-[90vh]">
+              <header className="p-8 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
+                 <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center"><FileInput size={20}/></div>
+                    <h3 className="text-xl font-black uppercase italic tracking-tighter">Smart Import Engine</h3>
+                 </div>
+                 <button onClick={() => setIsImportUsersModal(false)}><X size={24}/></button>
+              </header>
+              <div className="p-8 flex-1 overflow-y-auto space-y-8">
+                 <div className="bg-indigo-50 border border-indigo-100 p-6 rounded-2xl">
+                    <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-2 flex items-center gap-2"><Info size={14}/> CSV Format Guideline</h4>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase leading-relaxed">Format: <code className="bg-white px-2 py-0.5 rounded text-indigo-600">Name, Phone, Package_ID, Connection_ID</code></p>
+                 </div>
+                 <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Paste CSV Data or List</label>
+                    <textarea 
+                      className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-mono text-sm outline-none focus:border-indigo-600 transition-all custom-scrollbar resize-none" 
+                      placeholder="John Doe, 03001234567, fiber-basic, CO-8822..."
+                      value={importCsvInput}
+                      onChange={e => setImportCsvInput(e.target.value)}
+                    />
+                 </div>
+                 <button 
+                  onClick={async () => {
+                    setIsProcessing(true);
+                    // Mock parser for demo - in real app would parse CSV properly
+                    const lines = importCsvInput.split('\n').filter(l => l.trim());
+                    for(const line of lines) {
+                        const parts = line.split(',').map(p => p.trim());
+                        if (parts.length >= 2) {
+                            await db.addUser({
+                                name: parts[0],
+                                phone: parts[1],
+                                packageId: parts[2] || '',
+                                connectionId: parts[3] || `TMP-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+                                status: UserStatus.PENDING_VERIFICATION
+                            } as any);
+                        }
+                    }
+                    db.logNotification('all', 'success', 'Import Complete', `Successfully imported ${lines.length} potential users.`);
+                    setIsProcessing(false);
+                    setIsImportUsersModal(false);
+                    setImportCsvInput('');
+                    setIsSuccessModal(true);
+                  }}
+                  className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
+                 >
+                    <RefreshCw className={isProcessing ? 'animate-spin' : ''} size={20}/> Initialize Bulk Ingestion
+                 </button>
+              </div>
+           </div>
+        </div>
+      )}
+
       {/* SUCCESS MODAL */}
       {isSuccessModal && (
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[2000] flex items-center justify-center p-6 animate-in fade-in duration-500">
            <div className="bg-white rounded-[3.5rem] w-full max-sm shadow-2xl p-10 sm:p-12 text-center space-y-8 animate-in zoom-in border-[8px] border-emerald-50">
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.
               <div className="w-20 h-20 sm:w-24 sm:h-24 bg-emerald-500 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce"><CheckCircle size={56} strokeWidth={3}/></div>
               <h3 className="text-2xl sm:text-3xl font-black uppercase italic tracking-tighter text-slate-900">Success!</h3>
               <button onClick={() => setIsSuccessModal(false)} className="w-full py-4 sm:py-5 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-widest">Back to Users</button>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Zap, Activity, SignalHigh, Globe, CheckCircle } from 'lucide-react';
+import { Zap, Activity, WifiHigh, Globe, CheckCircle } from 'lucide-react';
 import { AppState } from '../types';
 
 export const FiveGLaunchAnimation: React.FC<{
@@ -48,7 +48,7 @@ export const FiveGLaunchAnimation: React.FC<{
                     <div className="absolute inset-8 rounded-full border-b-2 border-l-2 border-emerald-400 animate-[spin_2s_linear_infinite]"></div>
 
                     <div className={`transition-all duration-500 ${stage >= 1 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}>
-                        <SignalHigh size={80} className="text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]" />
+                        <WifiHigh size={80} className="text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]" />
                     </div>
                 </div>
 

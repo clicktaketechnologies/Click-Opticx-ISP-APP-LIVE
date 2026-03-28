@@ -4,7 +4,7 @@ import { Role } from './types';
 import {
   LayoutDashboard, Users, Package,
   Receipt, Wallet, ShieldCheck, LogOut,
-  Signal, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap
+  Wifi, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -35,7 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout }
   return (
     <aside className="w-64 bg-slate-950 text-white flex flex-col h-screen shrink-0 border-r border-slate-800 transition-all">
       <div className="p-6 flex items-center gap-3 border-b border-slate-800">
-        <Signal className="text-indigo-500" size={28} />
+        <Wifi className="text-indigo-500" size={28} />
         <h1 className="text-xl font-black tracking-tighter uppercase italic">Click Optix</h1>
       </div>
 

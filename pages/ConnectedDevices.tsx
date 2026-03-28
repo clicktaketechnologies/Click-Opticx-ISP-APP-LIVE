@@ -4,7 +4,7 @@ import { db } from '../db';
 import { ISPUser, ConnectedDevice } from '../types';
 import { 
   Smartphone, Monitor, Tablet, Wifi, Shield, 
-  Trash2, Edit3, CheckCircle, Ban, X, Globe, SignalHigh
+  Trash2, Edit3, CheckCircle, Ban, X, Globe
 } from 'lucide-react';
 
 const ConnectedDevices: React.FC<{ user: ISPUser }> = ({ user }) => {
@@ -64,7 +64,7 @@ const ConnectedDevices: React.FC<{ user: ISPUser }> = ({ user }) => {
               </div>
               <div className="text-right">
                 <div className="flex items-center gap-1.5 text-emerald-500 font-black text-[9px] uppercase tracking-widest">
-                  <SignalHigh size={12} />
+                  <Wifi size={12} />
                   {dev.signal} dBm
                 </div>
                 <p className="text-[9px] text-slate-400 font-bold uppercase mt-1">Uptime: {dev.duration}</p>

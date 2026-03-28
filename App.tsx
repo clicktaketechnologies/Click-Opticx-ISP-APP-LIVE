@@ -3,7 +3,7 @@ import { db } from './db';
 import { Role, AppState, SystemNotification } from './types';
 import {
   Receipt, Wallet, ShieldCheck, LogOut,
-  Signal, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap, Loader2, Cloud, X, Zap, RefreshCcw
+  Wifi, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap, Loader2, Cloud, X, Zap, RefreshCcw
 } from 'lucide-react';
 
 // Lazy load pages for performance
@@ -196,7 +196,7 @@ const App: React.FC = () => {
               {branding.logoDark ? (
                 <img src={branding.logoDark} className="w-full h-full object-contain p-4 animate-in zoom-in-50 duration-700" alt="Logo" />
               ) : (
-                <Signal className="text-indigo-400 animate-pulse" size={48} />
+                <Wifi className="text-indigo-400 animate-pulse" size={48} />
               )}
             </div>
             <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg border-2 border-slate-950 animate-bounce">
@@ -218,7 +218,7 @@ const App: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-emerald-500 to-indigo-600 w-full animate-loading-bar shadow-[0_0_15px_rgba(79,70,229,0.5)]"></div>
             </div>
             <div className="flex items-center justify-center gap-3">
-              <Mini5GMicroLoader size={14} />
+              <Mini5GMicroLoader size={24} />
               <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">System Synchronizing</span>
             </div>
           </div>
@@ -245,7 +245,7 @@ const App: React.FC = () => {
       return (
         <>
           {show5G && <FiveGLaunchAnimation state={dbState} onComplete={() => setShow5G(false)} />}
-          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center"><div className="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div><p className="mt-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Security Handshake...</p></div>}>
+          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center"><Mini5GMicroLoader size={48} /><p className="mt-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Security Handshake...</p></div>}>
             <Login onLogin={handleLogin} />
           </Suspense>
         </>
@@ -255,7 +255,7 @@ const App: React.FC = () => {
     if (authState.role === Role.CUSTOMER) {
       console.log('Rendering Customer Portal');
       return (
-        <Suspense fallback={<div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center"><div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin shadow-2xl"></div><p className="mt-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Loading Portal...</p></div>}>
+        <Suspense fallback={<div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center"><Mini5GMicroLoader size={48} /><p className="mt-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Loading Portal...</p></div>}>
           {dbState.isImpersonating && (
             <div className="fixed top-0 inset-x-0 bg-rose-600 text-white p-3 z-[1000] flex items-center justify-between shadow-2xl animate-in slide-in-from-top duration-500">
               <div className="flex items-center gap-3"><ShieldAlert size={20} className="animate-pulse" /><p className="text-[10px] font-black uppercase tracking-widest">Admin View Active: Viewing as {authState.name}</p></div>
