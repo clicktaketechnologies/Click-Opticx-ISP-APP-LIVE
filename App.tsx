@@ -209,7 +209,7 @@ const App: React.FC = () => {
   };
 
   const renderConfiguring = () => {
-    const branding = dbState.settings?.branding || { businessName: 'Click Optix', shortName: 'CO ISP', logoLight: '', logoDark: '', logoSquare: '', favicon: '', primaryColor: '#1570ef', secondaryColor: '#32d583', accentColor: '#f59e0b', textColorLight: '#ffffff', textColorDark: '#0f172a', primaryFont: 'Inter', secondaryFont: 'Inter' };
+    const branding = dbState.settings?.branding || { businessName: 'Click Opticx', shortName: 'CO ISP', logoLight: '', logoDark: '', logoSquare: '', favicon: '', primaryColor: '#1570ef', secondaryColor: '#32d583', accentColor: '#f59e0b', textColorLight: '#ffffff', textColorDark: '#0f172a', primaryFont: 'Inter', secondaryFont: 'Inter' };
     const profile = dbState.settings?.profile || { tagline: 'Connecting to Cloud Securely' };
 
     return (
@@ -256,7 +256,7 @@ const App: React.FC = () => {
           <div className="flex justify-between items-center px-6 pb-6 pt-4 border-t border-slate-100 bg-slate-50/50">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">{dbState.settings?.branding?.appTitle || "Click Optix ISP"}</p>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">{dbState.settings?.branding?.appTitle || "Click Opticx ISP"}</p>
             </div>
             <p className="text-[8px] text-slate-500 font-mono tracking-tighter uppercase italic">{dbState.settings?.branding?.appSubtitle || "SYSTEM v1.2.6-LIVE"}</p>
           </div>

@@ -19,7 +19,7 @@ const DEFAULT_AUTH_SETTINGS: AuthSettings = {
   duplicateControl: { enabled: true, blockDuplicate: true, allowWithWarning: false },
   securitySettings: { maxLoginAttempts: 5, blockDurationMin: 10, enableCaptcha: false, enable2FA: false },
   forgotPasswordSettings: { resetViaEmail: true, resetViaOTP: true, resetViaUsername: false },
-  postSignup: { welcomePopup: true, customMessage: 'Welcome to Click Optix!', redirectUrl: '/dashboard' }
+  postSignup: { welcomePopup: true, customMessage: 'Welcome to Click Opticx!', redirectUrl: '/dashboard' }
 };
 
 interface Props {

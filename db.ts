@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, Firestore } from 'firebase/firestore';
-import { getAuth, signInWithRedirect, signInWithPopup, getRedirectResult, GoogleAuthProvider, Auth } from 'firebase/auth';
+import { getAuth, signInWithRedirect, signInWithPopup, getRedirectResult, GoogleAuthProvider, Auth, sendPasswordResetEmail, signInWithPhoneNumber, RecaptchaVerifier } from 'firebase/auth';
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 import { io, Socket } from 'socket.io-client';
 import { notificationManager } from './utils/NotificationManager';
@@ -95,7 +95,11 @@ const INITIAL_COMM_CONFIG: CommunicationSettings = {
   warmup: { enabled: true, currentDay: 1, limit: 50 },
   health: { status: 'Healthy', lastCheck: new Date().toISOString(), latency: 124, bounceRate: 0.2 },
   otpSenderId: 'SDR-1',
-  reminderSenderId: 'SDR-2'
+  reminderSenderId: 'SDR-2',
+  enableActivationEmail: true,
+  enableActivationSMS: true,
+  activationSMSTemplate: "Dear {{name}}, your package {{package}} is now active until {{expiry}}. Thank you for choosing Click Opticx!",
+  activationEmailTemplateId: "PKG_ACTIVATION"
 };
 
 const INITIAL_GATEWAYS: PaymentGateway[] = [
@@ -177,8 +181,8 @@ const INITIAL_STATE: AppState = {
   emailCampaigns: [],
   emailTemplates: [
     { id: 'TMP-1', name: 'Payment Reminder', content: 'Dear {{user.name}}, your balance is {{user.balance}}. Please clear it.', category: 'Billing', lastUpdated: new Date().toISOString() },
-    { id: 'TMP-2', name: 'Welcome Aboard', content: 'Welcome to Click Optix, {{user.name}}!', category: 'System', lastUpdated: new Date().toISOString() },
-    { id: 'PKG_EXPIRY_REMINDER', name: 'Package Expiry Reminder (7 Day)', content: 'Dear {{user.name}},\n\nYour internet package is set to expire in less than 7 days. To ensure uninterrupted service, please renew your plan via the Subscriber Portal.\n\nCurrent Expiry: {{user.expiryDate}}\n\nThank you for choosing Click Optix.', category: 'Billing', lastUpdated: new Date().toISOString() }
+    { id: 'TMP-2', name: 'Welcome Aboard', content: 'Welcome to Click Opticx, {{user.name}}!', category: 'System', lastUpdated: new Date().toISOString() },
+    { id: 'PKG_EXPIRY_REMINDER', name: 'Package Expiry Reminder (7 Day)', content: 'Dear {{user.name}},\n\nYour internet package is set to expire in less than 7 days. To ensure uninterrupted service, please renew your plan via the Subscriber Portal.\n\nCurrent Expiry: {{user.expiryDate}}\n\nThank you for choosing Click Opticx.', category: 'Billing', lastUpdated: new Date().toISOString() }
   ],
   audienceSegments: [
     { id: 'SEG-1', name: 'All Active Users', description: 'Currently active subscribers', filters: { status: 'Active' }, subscriberCount: 0 },
@@ -204,9 +208,9 @@ const INITIAL_STATE: AppState = {
   approvalRequests: [],
   settings: {
     branding: { 
-      businessName: 'Click Optix', 
+      businessName: 'Click Opticx', 
       shortName: 'CO ISP', 
-      appTitle: 'Click Optix ISP', 
+      appTitle: 'Click Opticx ISP', 
       appSubtitle: 'Automation Engine v1.2.6',
       logoLight: '', 
       logoDark: '', 
@@ -220,17 +224,17 @@ const INITIAL_STATE: AppState = {
       primaryFont: 'Inter', 
       secondaryFont: 'Inter' 
     },
-    profile: { legalName: 'Click Optix ISP', tradingName: 'Click Optix', tagline: 'Connecting to Cloud Securely', establishedYear: '2026', registrationNumber: 'REG-2026-ISP', taxNumber: 'TAX-001-CO', headOffice: 'Karachi, Pakistan', country: 'Pakistan', timezone: 'UTC+5' },
-    support: { email: 'support@clickoptix.com', phone: '03001234567', whatsapp: '03120000000', emergencyPhone: '03337777777', address: 'Plot 42, KDA Scheme', workingHoursWeekdays: '09:00-18:00', workingHoursWeekends: '10:00-14:00', emergencySupport: true, afterHoursMessage: 'Our NOC is monitoring your link. Please wait for the next available agent.', phoneEnabled: true, whatsappEnabled: true, emailEnabled: true, greeting: 'Welcome to Click Optix Support', autoReplyFooter: 'This is an automated response.' },
+    profile: { legalName: 'Click Opticx ISP', tradingName: 'Click Opticx', tagline: 'Connecting to Cloud Securely', establishedYear: '2026', registrationNumber: 'REG-2026-ISP', taxNumber: 'TAX-001-CO', headOffice: 'Karachi, Pakistan', country: 'Pakistan', timezone: 'UTC+5' },
+    support: { email: 'support@clickopticx.com', phone: '03001234567', whatsapp: '03120000000', emergencyPhone: '03337777777', address: 'Plot 42, KDA Scheme', workingHoursWeekdays: '09:00-18:00', workingHoursWeekends: '10:00-14:00', emergencySupport: true, afterHoursMessage: 'Our NOC is monitoring your link. Please wait for the next available agent.', phoneEnabled: true, whatsappEnabled: true, emailEnabled: true, greeting: 'Welcome to Click Opticx Support', autoReplyFooter: 'This is an automated response.' },
     digitalPresence: { website: 'https://clickoptix.com', portal: 'https://isp-click-opticx.web.app', facebook: '', instagram: '', twitter: '', linkedin: '', youtube: '' },
-    invoiceBranding: { logoPreference: 'primary', headerText: 'OFFICIAL TAX INVOICE', footerDisclaimer: 'Subject to terms and conditions of Click Optix.', authorizedSignature: 'Account Manager', prefix: 'INV-CO', nextNumber: 5001, terms: 'Due in 7 days.', privacy: '', refundPolicyUrl: '', customNotes: '' },
-    notificationBranding: { appSenderName: 'Click Optix', emailSenderName: 'Click Optix Billing', smsSenderId: 'CLICK-OPTIX' },
+    invoiceBranding: { logoPreference: 'primary', headerText: 'OFFICIAL TAX INVOICE', footerDisclaimer: 'Subject to terms and conditions of Click Opticx.', authorizedSignature: 'Account Manager', prefix: 'INV-CO', nextNumber: 5001, terms: 'Due in 7 days.', privacy: '', refundPolicyUrl: '', customNotes: '' },
+    notificationBranding: { appSenderName: 'Click Opticx', emailSenderName: 'Click Opticx Billing', smsSenderId: 'CLICK-OPTICX' },
     appearance: { showWallet: true, showEmergencyLoad: true, showAIChat: true, showAICalling: true, showNews: true, showQuickActions: true, maintenanceMode: false, show5GLaunchAnimation: true, loadingStyle: '5G', appPages: INITIAL_APP_PAGES, homeCards: [], sections: INITIAL_APP_SECTIONS },
     referral: { enabled: true, signupPoints: 50, pkg1Points: 100, pkg2Points: 200, pkg3Points: 0, minPkgPrice: 1000, conversionRatio: 1 },
     aboutUs: { vision: 'Seamless connectivity for everyone.', mission: 'Innovating the ISP edge via AI.', companyStory: 'Founded in 2026 to bring fiber-speed to the masses.', features: [], values: [], version: '1.2.5', lastUpdated: new Date().toISOString() },
     notificationTemplates: [],
-    footerText: 'Powered by Click Optix Infrastructure',
-    copyrightLine: '© 2026 Click Optix. All Rights Reserved.',
+    footerText: 'Powered by Click Opticx Infrastructure',
+    copyrightLine: '© 2026 Click Opticx. All Rights Reserved.',
     socialLinks: [],
     appVersion: 'v1.2.5',
     autoTaxPercentage: 15,
@@ -815,50 +819,141 @@ class DB {
       isCloudSynced: this.initialized
     };
   }
-
   async signInWithGoogle() {
-    if (!this.auth) return { success: false, message: 'Firebase Auth not initialized' };
+    if (!this.auth) return { success: false, message: 'Auth Layer Offline' };
+    const provider = new GoogleAuthProvider();
     try {
-      const provider = new GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
       const result = await signInWithPopup(this.auth, provider);
+      const user = result.user;
       
-      if (result.user) {
-          const user = result.user;
-          
-          // Check staff first
-          const staffMember = this.state.staff.find(s => s.email.toLowerCase() === user.email?.toLowerCase());
-          if (staffMember) {
-              this.state.currentUser = staffMember;
-              this.notify();
-              return { success: true };
-          }
-
-          // Then check users/customers
-          let existingUser = this.state.users.find(u => u.email === user.email);
-          if (existingUser) {
-              this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
-              this.notify();
-          } else {
-              const newUser = {
-                  name: user.displayName || 'Google User',
-                  email: user.email || '',
-                  status: UserStatus.ACTIVE,
-                  profilePic: user.photoURL || ''
-              };
-              const addRes = await this.addUser(newUser);
-              if (addRes.success) {
-                  this.state.currentUser = { ...addRes.user, role: Role.CUSTOMER } as ISPUser;
-                  this.notify();
-              }
-          }
+      let existingStaff = this.state.staff.find(s => s.email === user.email);
+      if (existingStaff) {
+          this.state.currentUser = { ...existingStaff };
+          this.notify();
+          return { success: true, user: this.state.currentUser };
       }
-      return { success: true };
+
+      let existingUser = this.state.users.find(u => u.email === user.email);
+      if (existingUser) {
+          this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
+          this.notify();
+          return { success: true, user: this.state.currentUser };
+      }
+
+      return { success: false, message: 'Account not found. Please register first.' };
     } catch (e: any) {
-      console.error('[AUTH] Sign-in error:', e);
       return { success: false, message: e.message };
     }
   }
+
+  // --- NEW AUTH METHODS ---
+  async sendPasswordReset(email: string) {
+    if (!this.auth) return { success: false, message: 'Auth Layer Offline' };
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+      return { success: true, message: 'Standard recovery transmission initiated via Cloud Nodes.' };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  private recaptchaVerifier: any = null;
+
+  async signInWithPhone(phoneNumber: string, containerId: string) {
+    if (!this.auth) return { success: false, message: 'Auth Layer Offline' };
+    try {
+      if (!this.recaptchaVerifier) {
+        this.recaptchaVerifier = new RecaptchaVerifier(this.auth, containerId, {
+          'size': 'invisible',
+          'callback': () => { console.log('reCAPTCHA solved'); }
+        });
+      }
+      const confirmationResult = await signInWithPhoneNumber(this.auth, phoneNumber, this.recaptchaVerifier);
+      return { success: true, confirmationResult };
+    } catch (e: any) {
+      if (this.recaptchaVerifier) {
+          this.recaptchaVerifier.clear();
+          this.recaptchaVerifier = null;
+      }
+      return { success: false, message: e.message };
+    }
+  }
+
+  async verifyPhoneCode(confirmationResult: any, code: string) {
+    try {
+      const result = await confirmationResult.confirm(code);
+      const user = result.user;
+      const phone = user.phoneNumber;
+
+      // Lookup user by phone
+      let existingUser = this.state.users.find(u => {
+        if (!u.phone || !phone) return false;
+        const normalizedU = u.phone.replace(/\D/g, '');
+        const normalizedF = phone.replace(/\D/g, '');
+        return normalizedU === normalizedF;
+      });
+
+      if (existingUser) {
+          this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
+          this.notify();
+          return { success: true, user: this.state.currentUser };
+      }
+
+      return { success: false, message: 'Terminal Node not found for this mobile registry.' };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  // --- NOTIFICATION DISPATCHER ---
+  async dispatchActivationNotification(userId: string, pkgId: string) {
+    const user = this.state.users.find(u => u.id === userId);
+    const pkg = this.state.packages.find(p => p.id === pkgId);
+    const conf = this.state.settings.commConfig;
+
+    if (!user || !pkg) return { success: false };
+
+    const template = conf.activationSMSTemplate || "Your package {{package}} is active until {{expiry}}.";
+    const msg = template
+      .replace('{{name}}', user.name)
+      .replace('{{package}}', pkg.name)
+      .replace('{{expiry}}', user.expiryDate ? new Date(user.expiryDate).toLocaleDateString() : 'N/A');
+
+    let smsStatus = false;
+    let emailStatus = false;
+
+    // 1. Attempt Email if enabled
+    if (conf.enableActivationEmail && user.email) {
+      const res = await this.dispatchDirectEmail(user.id, 'Service Activation Protocol - Click Opticx', msg);
+      emailStatus = res.success;
+    }
+
+    // 2. Attempt SMS if enabled
+    if (conf.enableActivationSMS && user.phone) {
+      const res = await this.dispatchSMS(user.phone, msg, 'Automation', userId);
+      smsStatus = res.success;
+    }
+
+    // Always log local notification
+    this.logNotification(userId, 'success', 'Package Activated', msg);
+
+    return { success: true, smsStatus, emailStatus };
+  }
+
+  private async dispatchDirectEmail(userId: string, subject: string, body: string) {
+    const user = this.state.users.find(u => u.id === userId);
+    if (!user || !user.email) return { success: false };
+    
+    this.logCommunication({
+      userId,
+      email: user.email,
+      subject,
+      sentBy: 'System',
+      status: 'Sent'
+    });
+    return { success: true };
+  }
+
 
 
   async sendOTPRealEmail(to: string, code: string) {
@@ -2447,6 +2542,9 @@ class DB {
       newState: finalStatus
     } as RecoveryLog);
 
+    // Dispatch Activation alerts (async background node)
+    this.dispatchActivationNotification(userId, pkgId).catch(console.error);
+
     await this.commit();
     this.notify();
     return { success: true, invoiceId: bill.id, status: finalStatus };
@@ -2793,17 +2891,16 @@ class DB {
     const user = this.state.users.find(u => u.id === userId);
     if (!user) return { success: false, message: 'Node not found' };
 
-    const msg = `Urgent Reminder: Your ClickOptix account ${user.connectionId} has outstanding dues of Rs. ${user.balance}. Please clear to avoid suspension.`;
-    
+    const msg = `Urgent Reminder: Your ClickOpticx account ${user.connectionId} has outstanding dues of Rs. ${user.balance}. Please clear to avoid suspension.`;
     let res = { success: false, message: 'Invalid Route' };
     if (type === 'Email' && user.email) {
-      const d = await this.dispatchEmail(user.email, 'Security Notification: Outstanding Balance', msg, 'Manual', userId);
+      const d = await this.dispatchEmail(user.email, 'Security Notification: Outstanding Balance', msg, 'Automation', userId);
       res = { success: d.success, message: d.error || 'Email Dispatched' };
     } else if (type === 'SMS' && user.phone) {
-      const d = await this.dispatchSMS(user.phone, msg, 'Manual', userId);
+      const d = await this.dispatchSMS(user.phone, msg, 'Automation', userId);
       res = { success: d.success, message: d.error || 'SMS Relay Success' };
     } else if (type === 'WhatsApp' && user.phone) {
-      const d = await this.dispatchWhatsApp(user.phone, msg, 'Manual', userId);
+      const d = await this.dispatchWhatsApp(user.phone, msg, 'Automation', userId);
       res = { success: d.success, message: d.error || 'WhatsApp Push Status: Delivered' };
     }
 
@@ -3157,7 +3254,7 @@ class DB {
     });
 
     const isEmail = input.includes('@');
-    let dispatchRes = { success: false, logId: '' };
+    let dispatchRes: { success: boolean, logId: string, error?: string } = { success: false, logId: '' };
 
     if (isEmail) {
       dispatchRes = await this.dispatchEmail(
@@ -3172,8 +3269,12 @@ class DB {
       );
     }
     
-    await this.commit();
-    return { success: dispatchRes.success, message: 'OTP Dispatched', otpCode, logUniqueId: dispatchRes.logId };
+    return { 
+      success: dispatchRes.success, 
+      message: dispatchRes.success ? 'OTP Dispatched' : (dispatchRes.error || 'Identity Dispatch Failure'), 
+      otpCode: dispatchRes.success ? otpCode : undefined, 
+      logUniqueId: dispatchRes.logId 
+    };
   }
 
   generateProfessionalHTML(content: string, subject: string) {
@@ -3268,7 +3369,7 @@ class DB {
       error: errorMsg,
       userId: userId || (isOTP ? 'ID-AUTH-GATEWAY' : 'ID-SYSTEM'),
       sentBy: config.simulationMode ? 'SIMULATOR' : (config.emailProvider || 'SMTP'),
-      triggerSource,
+      triggerSource: isOTP ? 'Automation' : triggerSource,
       latency: realLatency
     });
 
@@ -3779,7 +3880,7 @@ class DB {
         if (channel === 'Email' && user.email) {
             await this.dispatchEmail(user.email, 'Payment Reminder', `Dear ${user.name}, you have an outstanding balance of Rs. ${user.balance}.`);
         } else if (channel === 'WhatsApp' && user.phone) {
-            await this.dispatchSMS(user.phone, `[CLICK OPTIX] Reminder: Outstanding balance Rs. ${user.balance}. Please clear to avoid suspension.`);
+            await this.dispatchSMS(user.phone, `[CLICK OPTICX] Reminder: Outstanding balance Rs. ${user.balance}. Please clear to avoid suspension.`);
         }
 
         // Log Communication

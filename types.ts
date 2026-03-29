@@ -725,6 +725,10 @@ export interface CommunicationSettings {
   };
   otpSenderId?: string;
   reminderSenderId?: string;
+  enableActivationEmail?: boolean;
+  enableActivationSMS?: boolean;
+  activationSMSTemplate?: string;
+  activationEmailTemplateId?: string;
 }
 
 export interface InfrastructureConfig {

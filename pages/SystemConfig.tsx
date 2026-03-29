@@ -111,7 +111,7 @@ const SystemConfig: React.FC = () => {
                 icon={Settings} 
                 value={branding.appTitle} 
                 onChange={(val: string) => setBranding({...branding, appTitle: val})} 
-                placeholder="e.g. Click Optix ISP"
+                placeholder="e.g. Click Opticx ISP"
               />
               <InputField 
                 label="Build / Subtitle Tag" 

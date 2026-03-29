@@ -204,7 +204,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
           </div>
           <div className="flex flex-col">
             <h4 className="text-[10px] text-white font-black uppercase italic tracking-tighter">
-                {state.settings?.branding?.appTitle || "Click Optix ISP"}
+                {state.settings?.branding?.appTitle || "Click Opticx ISP"}
             </h4>
             <p className="text-[7px] text-slate-500 font-black uppercase tracking-[0.3em] mt-1">
                 {state.settings?.branding?.appSubtitle || "SYSTEM v1.2.6-LIVE"}

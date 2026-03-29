@@ -17,10 +17,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const branding = state.settings.branding;
    const legal = state.settings.legal;
 
-   const [view, setView] = useState<'login' | 'signup' | 'pending' | 'reset_request' | 'reset_finalize'>('login');
+   const [view, setView] = useState<'login' | 'signup' | 'pending' | 'reset_request' | 'reset_finalize' | 'phone_login' | 'otp_verify'>('login');
    const [credential, setCredential] = useState('');
    const [password, setPassword] = useState('');
    const [rememberMe, setRememberMe] = useState(true);
+
+   const [phone, setPhone] = useState('');
+   const [otp, setOtp] = useState('');
+   const [confirmationResult, setConfirmationResult] = useState<any>(null);
 
    const [resetIdentifier, setResetIdentifier] = useState('');
    const [resetToken, setResetToken] = useState('');
@@ -66,6 +70,43 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       }
    };
 
+   const handlePhoneSignIn = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
+      setIsProcessing(true);
+      
+      // Normalize phone: if it doesn't start with +, assume +92 (Pakistan) or similar
+      let formattedPhone = phone.trim();
+      if (!formattedPhone.startsWith('+')) {
+         formattedPhone = '+92' + formattedPhone.replace(/^0/, '');
+      }
+
+      const res = await db.signInWithPhone(formattedPhone, 'recaptcha-container');
+      setIsProcessing(false);
+      
+      if (res.success) {
+         setConfirmationResult(res.confirmationResult);
+         setView('otp_verify');
+      } else {
+         setError(res.message);
+      }
+   };
+
+   const handleVerifyOTP = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
+      setIsProcessing(true);
+      
+      const res = await db.verifyPhoneCode(confirmationResult, otp);
+      setIsProcessing(false);
+      
+      if (res.success) {
+         // Logged in
+      } else {
+         setError(res.message);
+      }
+   };
+
    const handleSignup = async (e: React.FormEvent) => {
       e.preventDefault();
       if (signupData.password !== signupData.confirmPassword) {
@@ -98,35 +139,18 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       }
    };
 
-
-   const handleResetRequest = async (e: React.FormEvent) => {
+    const handleResetRequest = async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
       setIsProcessing(true);
 
-      const res = await db.initiatePasswordReset(resetIdentifier);
+      // Attempt Native Firebase Reset first (High reliability)
+      const res = await db.sendPasswordReset(resetIdentifier);
+      setIsProcessing(false);
 
       if (res.success) {
-         const isEmail = resetIdentifier.includes('@');
-         const targetMask = isEmail 
-            ? resetIdentifier.replace(/(.{2})(.*)(@.*)/, "$1***$3") 
-            : resetIdentifier.replace(/(.{4})(.*)(.{3})/, "$1****$3");
-
-         if (res.otpCode) {
-            // Actual email dispatch
-            if (isEmail) {
-                await db.sendOTPRealEmail(resetIdentifier, res.otpCode);
-            }
-            alert(`🔐 Verification Code Sent to ${targetMask}\n\n[DISPATCH DONE]\nCheck your inbox for ${isEmail ? 'Email' : 'SMS'}.`);
-         }
-         setIsProcessing(false);
-         setView('reset_finalize');
-      } else {
-         setIsProcessing(false);
-         setError(res.message === 'IDENTITY_NOT_FOUND'
-            ? "IDENTITY_NOT_FOUND: No Subscriber matches this identifier."
-            : `DISPATCH_ERROR: ${res.message}`
-         );
+         alert(`🔐 Recovery protocol initiated.\n\n[CLOUD DISPATCH]\nPlease check your registered email for the reset link. If not found, check your spam folder.`);
+         setView('login');
       }
    };
 
@@ -209,20 +233,32 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div className="flex-grow border-t border-slate-100"></div>
          </div>
 
-         <button
-            type="button"
-            onClick={handleGoogleLogin}
-            disabled={isProcessing}
-            className="w-full bg-white border-2 border-slate-100 text-slate-700 font-bold py-4 rounded-2xl hover:bg-slate-50 hover:border-slate-200 active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-sm disabled:opacity-50"
-         >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-               <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.8 15.71 17.58V20.34H19.27C21.35 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4"/>
-               <path d="M12 23C14.97 23 17.46 22.02 19.27 20.34L15.71 17.58C14.73 18.24 13.48 18.64 12 18.64C9.13 18.64 6.7 16.7 5.86 14.07H2.18V16.92C3.99 20.53 7.71 23 12 23Z" fill="#34A853"/>
-               <path d="M5.86 14.07C5.64 13.43 5.52 12.73 5.52 12C5.52 11.27 5.64 10.57 5.86 9.93V7.08H2.18C1.43 8.55 1 10.22 1 12C1 13.78 1.43 15.45 2.18 16.92L5.86 14.07Z" fill="#FBBC05"/>
-               <path d="M12 5.36C13.62 5.36 15.06 5.92 16.21 7.02L19.34 3.89C17.45 2.13 14.97 1 12 1C7.71 1 3.99 3.47 2.18 7.08L5.86 9.93C6.7 7.3 9.13 5.36 12 5.36Z" fill="#EA4335"/>
-            </svg>
-            Google
-         </button>
+         <div className="grid grid-cols-2 gap-4">
+            <button
+               type="button"
+               onClick={handleGoogleLogin}
+               disabled={isProcessing}
+               className="w-full bg-white border-2 border-slate-100 text-slate-700 font-bold py-4 rounded-2xl hover:bg-slate-50 hover:border-slate-200 active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-sm disabled:opacity-50"
+            >
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.8 15.71 17.58V20.34H19.27C21.35 18.42 22.56 15.6 22.56 12.25Z" fill="#4285F4"/>
+                  <path d="M12 23C14.97 23 17.46 22.02 19.27 20.34L15.71 17.58C14.73 18.24 13.48 18.64 12 18.64C9.13 18.64 6.7 16.7 5.86 14.07H2.18V16.92C3.99 20.53 7.71 23 12 23Z" fill="#34A853"/>
+                  <path d="M5.86 14.07C5.64 13.43 5.52 12.73 5.52 12C5.52 11.27 5.64 10.57 5.86 9.93V7.08H2.18C1.43 8.55 1 10.22 1 12C1 13.78 1.43 15.45 2.18 16.92L5.86 14.07Z" fill="#FBBC05"/>
+                  <path d="M12 5.36C13.62 5.36 15.06 5.92 16.21 7.02L19.34 3.89C17.45 2.13 14.97 1 12 1C7.71 1 3.99 3.47 2.18 7.08L5.86 9.93C6.7 7.3 9.13 5.36 12 5.36Z" fill="#EA4335"/>
+               </svg>
+               Google
+            </button>
+
+            <button
+               type="button"
+               onClick={() => setView('phone_login')}
+               disabled={isProcessing}
+               className="w-full bg-white border-2 border-slate-100 text-slate-700 font-bold py-4 rounded-2xl hover:bg-slate-50 hover:border-slate-200 active:scale-[0.98] transition-all flex items-center justify-center gap-3 text-sm disabled:opacity-50"
+            >
+               <Smartphone size={18} className="text-blue-600" />
+               Phone
+            </button>
+         </div>
 
          <div className="text-center pt-2">
             <p className="text-sm font-medium text-slate-500">
@@ -389,7 +425,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          </div>
       </form>
    );
-
    const renderResetFinalize = () => (
       <form onSubmit={handleResetFinalize} className="space-y-8 animate-in slide-in-from-right duration-500" autoComplete="off">
          <div className="p-6 bg-green-50 border border-green-100 rounded-2xl flex items-start gap-4">
@@ -421,6 +456,76 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             {isProcessing ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18} />}
             Re-Encrypt Identity
          </button>
+      </form>
+   );
+
+   const renderOTPVerify = () => (
+      <form onSubmit={handleVerifyOTP} className="space-y-8 animate-in slide-in-from-right duration-500" autoComplete="off">
+         <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-4">
+            <CheckCircle size={20} className="text-blue-500 shrink-0" />
+            <p className="text-[9px] text-blue-800 font-black uppercase tracking-widest leading-relaxed">Verification code dispatched to your mobile device. Enter it to finalize access.</p>
+         </div>
+
+         <div className="space-y-6">
+            <div className="space-y-2">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">OTP Code</label>
+               <input className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-center text-2xl tracking-[0.8em] focus:border-blue-600 focus:bg-white outline-none transition-all" placeholder="XXXXXX" value={otp} onChange={e => setOtp(e.target.value)} maxLength={6} required autoComplete="off" />
+            </div>
+         </div>
+
+         <button
+            type="submit"
+            disabled={isProcessing || otp.length < 6}
+            className="w-full py-5 bg-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3"
+         >
+            {isProcessing ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18} />}
+            Confirm & Access Node
+         </button>
+      </form>
+   );
+
+   const renderPhoneLogin = () => (
+      <form onSubmit={handlePhoneSignIn} className="space-y-8 animate-in zoom-in duration-300" autoComplete="off">
+         <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto border-2 border-blue-100/50 shadow-xl shadow-blue-500/5">
+               <Smartphone size={28} />
+            </div>
+            <div className="space-y-2">
+               <h3 className="text-2xl font-bold text-slate-900">Phone Authentication</h3>
+               <p className="text-sm text-slate-500">Sign in using your mobile number.</p>
+            </div>
+         </div>
+
+         <div className="space-y-2">
+            <label className="text-sm font-semibold text-slate-700 ml-1">Mobile Number</label>
+            <div className="relative">
+               <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">+92</span>
+               <input
+                  type="tel"
+                  className="w-full py-4 pl-14 pr-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all text-slate-800 placeholder:text-slate-400"
+                  placeholder="3001234567"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  required
+                  autoComplete="off"
+               />
+            </div>
+         </div>
+
+         <div className="space-y-3">
+            <button
+               type="submit"
+               disabled={isProcessing || phone.length < 7}
+               className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-blue-500/10 hover:bg-blue-700 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            >
+               {isProcessing ? <Mini5GMicroLoader size={18} /> : null}
+               Send Verification Code &rarr;
+            </button>
+            <button type="button" onClick={() => setView('login')} className="w-full py-3 text-slate-500 font-semibold text-sm hover:text-slate-700 transition-colors flex items-center justify-center">
+               Back to Login
+            </button>
+         </div>
+         <div id="recaptcha-container"></div>
       </form>
    );
 
@@ -483,7 +588,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         {displayLogo ? <img src={displayLogo} className="h-8 object-contain" /> : <Wifi className="text-green-400" size={28} />}
                      </div>
                      <div>
-                        <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic leading-none">Click Optix</h2>
+                        <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic leading-none">Click Opticx</h2>
                         <p className="text-green-400/60 text-[8px] font-black uppercase tracking-[0.3em] mt-1">Fiber Infrastructure</p>
                      </div>
                   </div>
@@ -500,7 +605,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                            System initializing...
                         </p>
                         <p className="text-white/80 font-bold">
-                           Click Optix – Your 5G Ultra Node
+                           Click Opticx – Your 5G Ultra Node
                         </p>
                         <p>
                            Ready to connect you.
@@ -550,7 +655,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         <Wifi className="text-green-400 relative z-10" size={32} />
                      </div>
                   )}
-                  {!displayLogo && <h1 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Click Optix</h1>}
+               {!displayLogo && <h1 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Click Opticx</h1>}
                </div>
 
                <div className="max-w-[400px] mx-auto w-full">
@@ -559,12 +664,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight">
                            {view === 'login' ? 'Login to Your Account' :
                               view === 'signup' ? 'Get Connected' :
+                              view === 'phone_login' ? 'Mobile Access' :
+                              view === 'otp_verify' ? 'Confirm Identity' :
                                  'Reset Password'}
                         </h3>
                         <p className="text-slate-400 mt-2 font-black text-[10px] uppercase tracking-[0.3em] opacity-80">
                            {view === 'login' ? 'Access your internet account easily' :
                               view === 'signup' ? 'Start Your Internet Connection' :
-                                 'Enter verification code and new password'}
+                              view === 'phone_login' ? 'Enter your mobile registry number' :
+                              view === 'otp_verify' ? 'Verification token required' :
+                                 'Standard Recovery Protocol'}
                         </p>
                      </div>
                   )}
@@ -581,6 +690,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                      {view === 'signup' && renderSignup()}
                      {view === 'reset_request' && renderResetRequest()}
                      {view === 'reset_finalize' && renderResetFinalize()}
+                     {view === 'phone_login' && renderPhoneLogin()}
+                     {view === 'otp_verify' && renderOTPVerify()}
                   </div>
 
                   <div className="mt-12 pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">

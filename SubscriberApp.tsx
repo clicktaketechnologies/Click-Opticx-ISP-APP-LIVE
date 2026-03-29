@@ -227,6 +227,32 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                }}
             />
          )}
+
+         {/* Verification Interceptor Overlay - Blocks interaction for unapproved users */}
+         {(user.status === UserStatus.PENDING_VERIFICATION || user.verificationStatus === VerificationStatus.PENDING) && (
+            <div 
+               className="fixed inset-0 z-[6000] cursor-default bg-transparent"
+               onClick={() => {
+                  const toast = document.createElement('div');
+                  toast.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-900 border-2 border-blue-500/30 text-white px-10 py-8 rounded-[2.5rem] shadow-2xl z-[7000] text-center space-y-4 backdrop-blur-3xl animate-in zoom-in duration-300 max-w-[80vw]';
+                  toast.innerHTML = `
+                     <div class="w-20 h-20 bg-blue-600/20 text-blue-400 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-blue-500/20 shadow-inner">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-check"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                     </div>
+                     <h4 class="text-xl font-black uppercase italic tracking-tighter">Identity Verification</h4>
+                     <p class="text-[10px] font-black uppercase tracking-widest leading-loose text-slate-400">
+                        We are currently verifying your credentials node.<br/>
+                        Administrative approval is required to unlock interaction.
+                     </p>
+                  `;
+                  document.body.appendChild(toast);
+                  setTimeout(() => {
+                     toast.classList.add('animate-out', 'fade-out', 'zoom-out');
+                     setTimeout(() => toast.remove(), 300);
+                  }, 3000);
+               }}
+            />
+         )}
       </div>
    );
 };

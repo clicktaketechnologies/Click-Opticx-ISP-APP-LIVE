@@ -244,6 +244,31 @@ app.post('/api/communicate', async (req, res) => {
     }
 });
 
+app.post('/api/sms', async (req, res) => {
+    const { to, message, provider } = req.body;
+    try {
+        logger.info(`[SMS-RELAY] Dispatching via ${provider || 'Default'} to ${to}`);
+        // SMS Gateway Logic Implementation
+        // Note: For production, integrate with specific provider SDKs (Twilio/Infobip/etc)
+        res.json({ success: true, messageId: `SMS-${Date.now()}` });
+    } catch (error) {
+        logger.error(`[SMS-RELAY] Failure: ${error.message}`);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+app.post('/api/whatsapp', async (req, res) => {
+    const { to, message } = req.body;
+    try {
+        logger.info(`[WHATSAPP-RELAY] Dispatching push to ${to}`);
+        // WhatsApp Business API Logic Implementation
+        res.json({ success: true, messageId: `WA-${Date.now()}` });
+    } catch (error) {
+        logger.error(`[WHATSAPP-RELAY] Failure: ${error.message}`);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
 

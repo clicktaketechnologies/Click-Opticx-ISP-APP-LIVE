@@ -36,7 +36,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout }
     <aside className="w-64 bg-slate-950 text-white flex flex-col h-screen shrink-0 border-r border-slate-800 transition-all">
       <div className="p-6 flex items-center gap-3 border-b border-slate-800">
         <Wifi className="text-blue-500" size={28} />
-        <h1 className="text-xl font-black tracking-tighter uppercase italic">Click Optix</h1>
+        <h1 className="text-xl font-black tracking-tighter uppercase italic">Click Opticx</h1>
       </div>
 
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto custom-scrollbar">
