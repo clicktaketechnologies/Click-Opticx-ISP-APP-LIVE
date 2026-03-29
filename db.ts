@@ -151,6 +151,7 @@ const INITIAL_STATE: AppState = {
   staff: [
     { email: 'admin@clickoptix.com', name: 'System Administrator', role: Role.SUPER_ADMIN, status: 'Active', password: 'Click@Opticx2026', balance: 1000000 },
   ],
+  nas: [],
   packages: [
     { id: 'PKG-1', name: 'Home Basic 15M', subtitle: 'Standard Tier', speed: '15 Mbps', uploadSpeed: '10 Mbps', dataLimit: 'Unlimited', price: 1500, taxRate: 15, duration: 30, color: '#3b82f6', isRecommended: true },
     { id: 'PKG-2', name: 'Extreme 50M', subtitle: 'Pro Gamer Pack', speed: '50 Mbps', uploadSpeed: '50 Mbps', dataLimit: 'Unlimited', price: 2500, taxRate: 15, duration: 30, color: '#1570ef' },
@@ -203,7 +204,23 @@ const INITIAL_STATE: AppState = {
   duplicateLogs: [],
   approvalRequests: [],
   settings: {
-    branding: { businessName: 'Click Optix', shortName: 'CO ISP', logoLight: '', logoDark: '', logoSquare: '', favicon: '', primaryColor: '#1570ef', secondaryColor: '#32d583', accentColor: '#32d583', textColorLight: '#ffffff', textColorDark: '#0f172a', primaryFont: 'Inter', secondaryFont: 'Inter' },
+    branding: { 
+      businessName: 'Click Optix', 
+      shortName: 'CO ISP', 
+      appTitle: 'Click Optix ISP', 
+      appSubtitle: 'Automation Engine v1.2.6',
+      logoLight: '', 
+      logoDark: '', 
+      logoSquare: '', 
+      favicon: '', 
+      primaryColor: '#1570ef', 
+      secondaryColor: '#32d583', 
+      accentColor: '#32d583', 
+      textColorLight: '#ffffff', 
+      textColorDark: '#0f172a', 
+      primaryFont: 'Inter', 
+      secondaryFont: 'Inter' 
+    },
     profile: { legalName: 'Click Optix ISP', tradingName: 'Click Optix', tagline: 'Connecting to Cloud Securely', establishedYear: '2026', registrationNumber: 'REG-2026-ISP', taxNumber: 'TAX-001-CO', headOffice: 'Karachi, Pakistan', country: 'Pakistan', timezone: 'UTC+5' },
     support: { email: 'support@clickoptix.com', phone: '03001234567', whatsapp: '03120000000', emergencyPhone: '03337777777', address: 'Plot 42, KDA Scheme', workingHoursWeekdays: '09:00-18:00', workingHoursWeekends: '10:00-14:00', emergencySupport: true, afterHoursMessage: 'Our NOC is monitoring your link. Please wait for the next available agent.', phoneEnabled: true, whatsappEnabled: true, emailEnabled: true, greeting: 'Welcome to Click Optix Support', autoReplyFooter: 'This is an automated response.' },
     digitalPresence: { website: 'https://clickoptix.com', portal: 'https://isp-click-opticx.web.app', facebook: '', instagram: '', twitter: '', linkedin: '', youtube: '' },
@@ -660,6 +677,7 @@ class DB {
     // Robustify arrays
     if (!Array.isArray(this.state.staff)) this.state.staff = INITIAL_STATE.staff;
     if (!Array.isArray(this.state.users)) this.state.users = INITIAL_STATE.users;
+    if (!Array.isArray(this.state.nas)) this.state.nas = [];
     if (!Array.isArray(this.state.packages)) this.state.packages = INITIAL_STATE.packages;
     if (!Array.isArray(this.state.invoices)) this.state.invoices = [];
     if (!Array.isArray(this.state.payments)) this.state.payments = [];
@@ -4453,7 +4471,6 @@ class DB {
         sentAt: timestamp,
         status: 'Sent'
       } as any;
-
       if (!this.state.commLogs) this.state.commLogs = [];
       this.state.commLogs.push(commLog);
 
@@ -4466,7 +4483,7 @@ class DB {
         adminName,
         adminIp: '0.0.0.0',
         action: 'REMINDER_SENT' as RecoveryActionType,
-        details: `Email reminder sent to ${user.email}`,
+        details: `Email reminder sent to `,
         timestamp,
         amount: 0,
         oldState: 'pending',
@@ -4483,6 +4500,72 @@ class DB {
     return { success: true, count: sent };
   }
 
+  // --- NAS / MIKROTIK HARDWARE ENGINE ---
+  async addNAS(node: Partial<NASConfig>) {
+    const newNode: NASConfig = {
+      id: 'NAS-' + Date.now(),
+      name: node.name || 'New Router',
+      ip: node.ip || '0.0.0.0',
+      dealerAssigned: node.dealerAssigned || null,
+      radiusSecret: node.radiusSecret || 'click_radius_admin',
+      authPort: node.authPort || 1812,
+      accountingPort: node.accountingPort || 1813,
+      apiUsername: node.apiUsername || 'admin',
+      apiPassword: node.apiPassword,
+      apiPort: node.apiPort || 8728,
+      coaEnabled: node.coaEnabled ?? true,
+      coaPort: node.coaPort || 3799,
+      nasEnabled: node.nasEnabled ?? false,
+      location: node.location || 'Unknown',
+      status: 'Offline',
+      lastCheck: new Date().toISOString(),
+      ...node
+    };
+    this.state.nas.push(newNode);
+    await this.commit();
+    this.notify();
+    return { success: true, id: newNode.id };
+  }
+
+  async updateNAS(id: string, updates: Partial<NASConfig>) {
+    const idx = this.state.nas.findIndex(n => n.id === id);
+    if (idx !== -1) {
+      this.state.nas[idx] = { ...this.state.nas[idx], ...updates };
+      await this.commit();
+      this.notify();
+    }
+  }
+
+  async deleteNAS(id: string) {
+    this.state.nas = this.state.nas.filter(n => n.id !== id);
+    await this.commit();
+    this.notify();
+  }
+
+  async checkRouterHealth(id: string) {
+    const nas = this.state.nas.find(n => n.id === id);
+    if (!nas) return { success: false, message: 'NAS not found' };
+    
+    try {
+      const res = await fetch(${this.backendUrl}/api/nas/health, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nas })
+      });
+      const data = await res.json();
+      nas.status = data.status === 'Online' ? 'Online' : 'Offline';
+      nas.lastCheck = new Date().toISOString();
+      await this.commit();
+      this.notify();
+      return { success: true, status: nas.status, radius: data.radius, api: data.api, coa: data.coa };
+    } catch (e: any) {
+      nas.status = 'Offline';
+      nas.lastCheck = new Date().toISOString();
+      await this.commit();
+      this.notify();
+      return { success: false, status: 'Offline', radius: 'Failed', api: 'Failed', coa: nas.coaEnabled ? 'Enabled' : 'Disabled' };
+    }
+  }
   // ── ISP AUTOMATION ENGINE ──────────────────────────────────────────────────
   async bulkProvisionUsers(oltId: string, onus: any[]) {
     const olt = this.state.oltNodes.find(n => n.id === oltId);

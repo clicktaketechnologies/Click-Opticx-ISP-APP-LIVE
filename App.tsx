@@ -71,6 +71,7 @@ const NOCDashboard = lazy(() => import('./pages/NOCDashboard'));
 const AuthControlCenter = lazy(() => import('./pages/AuthControlCenter'));
 const SystemFlash = lazy(() => import('./pages/SystemFlash'));
 const SystemConfig = lazy(() => import('./pages/SystemConfig'));
+const SystemReadiness = lazy(() => import('./pages/SystemReadiness'));
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 import { FiveGLaunchAnimation } from './components/FiveGLaunchAnimation';
 
@@ -228,7 +229,13 @@ const App: React.FC = () => {
         </div>
 
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30 hover:opacity-100 transition-opacity duration-300">
-          <p className="text-[8px] text-slate-500 font-mono tracking-tighter">BUILD {dbState.settings?.appVersion || "v1.2.5"}-LIVE-PATCH</p>
+          <div className="flex justify-between items-center px-6 pb-6 pt-4 border-t border-slate-100 bg-slate-50/50">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">{dbState.settings?.branding?.appTitle || "Click Optix ISP"}</p>
+            </div>
+            <p className="text-[8px] text-slate-500 font-mono tracking-tighter uppercase italic">{dbState.settings?.branding?.appSubtitle || "SYSTEM v1.2.6-LIVE"}</p>
+          </div>
           <div className="flex items-center gap-4 text-[8px] font-black uppercase text-slate-600 tracking-widest">
             <span>CLOUD SECURE</span>
             <div className="w-1 h-1 rounded-full bg-green-500"></div>
@@ -317,7 +324,8 @@ const App: React.FC = () => {
                     case 'archive': return <ArchivePage state={dbState} />;
                     case 'staff': return <AccessControlPage state={dbState} />;
                     case 'system-flash': return <SystemFlash state={dbState} />;
-                    case 'system-config': return <SystemConfig state={dbState} />;
+                    case 'system-config': return <SystemConfig />;
+                    case 'system-readiness': return <SystemReadiness />;
                     case 'permissions': return <PermissionsPage state={dbState} />;
                     case 'import': return <DataImportPage state={dbState} />;
                     case 'monitor': return <DatabaseMonitor state={dbState} />;

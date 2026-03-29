@@ -8,6 +8,7 @@ import {
 
 const SystemConfig: React.FC = () => {
   const [dbState, setDbState] = useState(db.getState());
+  const [branding, setBranding] = useState(dbState.settings.branding);
   const [techKeys, setTechKeys] = useState<TechnicalKeys>(dbState.settings.technicalKeys);
   const [pushConfig, setPushConfig] = useState<PushConfig>(dbState.settings.pushConfig);
   const [showSecrets, setShowSecrets] = useState(false);
@@ -20,6 +21,7 @@ const SystemConfig: React.FC = () => {
     try {
       const updatedSettings = {
         ...dbState.settings,
+        branding: branding,
         technicalKeys: techKeys,
         pushConfig: pushConfig
       };
@@ -104,6 +106,20 @@ const SystemConfig: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InputField 
+                label="Application Display Title" 
+                icon={Settings} 
+                value={branding.appTitle} 
+                onChange={(val: string) => setBranding({...branding, appTitle: val})} 
+                placeholder="e.g. Click Optix ISP"
+              />
+              <InputField 
+                label="Build / Subtitle Tag" 
+                icon={Zap} 
+                value={branding.appSubtitle} 
+                onChange={(val: string) => setBranding({...branding, appSubtitle: val})} 
+                placeholder="e.g. v1.2.6-LIVE"
+              />
               <InputField label="API Key" value={techKeys.firebaseApiKey} onChange={(v:any) => setTechKeys({...techKeys, firebaseApiKey: v})} icon={Key} type="password" />
               <InputField label="Project ID" value={techKeys.firebaseProjectId} onChange={(v:any) => setTechKeys({...techKeys, firebaseProjectId: v})} icon={Database} />
               <InputField label="Auth Domain" value={techKeys.firebaseAuthDomain} onChange={(v:any) => setTechKeys({...techKeys, firebaseAuthDomain: v})} icon={Lock} />

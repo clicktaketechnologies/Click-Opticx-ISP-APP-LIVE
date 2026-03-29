@@ -22,7 +22,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
       apiPort: 8728, coaEnabled: true, coaPort: 3799, location: ''
    });
 
-   const filteredNodes = state.nasNodes.filter(n => 
+   const filteredNodes = state.nas.filter(n => 
       n.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       n.ip.includes(searchTerm) || 
       n.location.toLowerCase().includes(searchTerm.toLowerCase())
@@ -100,7 +100,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
          {/* STATS OVERVIEW */}
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-               { label: 'Total Nodes', value: state.nasNodes.length, icon: Server, color: 'indigo' },
+               { label: 'Total Nodes', value: state.nas.length, icon: Server, color: 'indigo' },
                { label: 'Active Sessions', value: '1,242', icon: Activity, color: 'emerald' },
                { label: 'Cloud Gateway', value: 'Online', icon: Globe, color: 'blue' },
                { label: 'Radius Load', value: '14%', icon: Cpu, color: 'amber' }
@@ -339,4 +339,5 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default NASManagement;
+
 

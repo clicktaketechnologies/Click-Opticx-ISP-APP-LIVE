@@ -742,8 +742,9 @@ export interface LegalConfig {
 }
 
 export interface AppState {
-  users: ISPUser[];
   staff: StaffUser[];
+  users: ISPUser[];
+  nas: NASConfig[];
   packages: Package[];
   invoices: Invoice[];
   payments: PaymentRecord[];
@@ -962,6 +963,8 @@ export interface NotificationBranding {
 export interface BrandingConfig {
   businessName: string;
   shortName: string;
+  appTitle?: string;
+  appSubtitle?: string;
   logoLight: string;
   logoDark: string;
   logoSquare: string;
@@ -1166,12 +1169,14 @@ export interface NASConfig {
   apiUsername: string;
   apiPassword?: string;
   apiPort: number;
+  sshPort?: number;
   coaEnabled: boolean;
   coaPort: number;
   nasEnabled: boolean;
   location: string;
-  status: 'Online' | 'Offline' | 'Error';
+  status: 'Online' | 'Offline' | 'Warning' | 'Error';
   lastCheck?: string;
+  activeUsers?: number;
 }
 
 export interface OLTConfig {

@@ -113,9 +113,17 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       items: [
         { id: 'staff', label: 'Staff Management', icon: ShieldAlert },
         { id: 'permissions', label: 'Roles & Permissions', icon: ShieldCheck },
-        { id: 'auth-control', label: 'Login & Security Settings', icon: Key },
+        { id: 'nas-management', label: 'MikroTik / NAS', icon: Server },
+        { id: 'olt-management', label: 'OLT Infrastructure', icon: Cpu },
+        { id: 'network-monitor', label: 'Network Monitor', icon: Monitor },
+      ]
+    },
+    {
+      title: 'System Diagnostics',
+      items: [
+        { id: 'system-readiness', label: 'Setup Readiness', icon: Activity },
+        { id: 'system-config', label: 'System Gateway', icon: Settings },
         { id: 'system-flash', label: 'System Flash', icon: Zap },
-        { id: 'system-config', label: 'System Config', icon: Settings },
       ]
     },
     {
@@ -194,9 +202,13 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
               <Wifi className="text-blue-500" size={24} />
             )}
           </div>
-          <div>
-            <h1 className="text-xl font-black tracking-tighter truncate w-32 uppercase italic leading-none">{branding.shortName || businessName}</h1>
-            <p className="text-[7px] text-slate-500 font-black uppercase tracking-[0.3em] mt-1">v1.2.5-LIVE-PATCH</p>
+          <div className="flex flex-col">
+            <h4 className="text-[10px] text-white font-black uppercase italic tracking-tighter">
+                {state.settings?.branding?.appTitle || "Click Optix ISP"}
+            </h4>
+            <p className="text-[7px] text-slate-500 font-black uppercase tracking-[0.3em] mt-1">
+                {state.settings?.branding?.appSubtitle || "SYSTEM v1.2.6-LIVE"}
+            </p>
           </div>
         </div>
       </div>
