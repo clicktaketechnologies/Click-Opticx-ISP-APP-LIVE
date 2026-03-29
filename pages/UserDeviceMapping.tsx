@@ -35,7 +35,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
       setMapping({
         userId: user.id,
         connectionType: user.connectionType,
-        deviceId: user.connectionType === 'Fiber' ? state.oltNodes[0]?.id || '' : state.nasNodes[0]?.id || '',
+        deviceId: user.connectionType === 'Fiber' ? state.oltNodes[0]?.id || '' : state.nas[0]?.id || '',
         configured: false,
         ssidName: user.username ? user.username + "_WIFI" : "CLICKOPTICX_NODE"
       });
@@ -170,7 +170,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                                 <option value="">Select Reg Node...</option>
                                 {mapping.connectionType === 'Fiber' 
                                   ? state.oltNodes.map(d => <option key={d.id} value={d.id}>{d.name} ({d.ip})</option>)
-                                  : state.nasNodes.map(d => <option key={d.id} value={d.id}>{d.name} ({d.ip})</option>)
+                                  : state.nas.map(d => <option key={d.id} value={d.id}>{d.name} ({d.ip})</option>)
                                 }
                              </select>
                           </div>
@@ -229,7 +229,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="flex-1">
                        <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1">Mapping Authorization</p>
                        <p className="text-[9px] text-blue-700 font-bold uppercase leading-relaxed opacity-80">
-                          Binding this identity to the <strong className="text-blue-900">{mapping.connectionType === 'Fiber' ? state.oltNodes.find(d => d.id === mapping.deviceId)?.name : state.nasNodes.find(d => d.id === mapping.deviceId)?.name || 'unselected'}</strong> node will enable real-time telemetry and self-service password management in the user portal.
+                          Binding this identity to the <strong className="text-blue-900">{mapping.connectionType === 'Fiber' ? state.oltNodes.find(d => d.id === mapping.deviceId)?.name : state.nas.find(d => d.id === mapping.deviceId)?.name || 'unselected'}</strong> node will enable real-time telemetry and self-service password management in the user portal.
                        </p>
                     </div>
                  </div>

@@ -8,7 +8,7 @@ import {
    Camera, CheckCircle, Mail, Smartphone, MapPin,
    CreditCard, Info, Save, X, Edit3, Lock, Eye, EyeOff,
    Activity, ArrowRight, Zap, Layers, Globe, Fingerprint, LockIcon,
-   ShieldAlert, Cpu, Hash, Monitor, SmartphoneIcon, Clock, RefreshCw, Server, Wifi,
+   ShieldAlert, Cpu, Hash, Monitor, SmartphoneIcon, Clock, RefreshCw, Server,
    ShieldCheck
 } from 'lucide-react';
 import PasswordInput from '../shared/PasswordInput';

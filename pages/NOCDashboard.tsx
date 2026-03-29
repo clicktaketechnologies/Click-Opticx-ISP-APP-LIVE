@@ -102,7 +102,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
          onlineUsers,
          offlineUsers: state.users.length - onlineUsers,
          suspendedUsers: state.users.filter(u => u.status === 'Suspended').length,
-         routersOnline: state.nasNodes.filter(n => n.status === 'Online').length,
+         routersOnline: state.nas.filter(n => n.status === 'Online').length,
          oltDevices: state.oltNodes.length,
          onusOnline: state.onus.filter(o => o.status === 'Online').length,
          weakSignals
@@ -302,10 +302,10 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            <Server className="text-blue-400" size={24} />
                            <h2 className="text-lg font-black uppercase tracking-tighter">MikroTik Routers</h2>
                         </div>
-                        <span className="text-2xl font-black text-blue-400/20 italic">{state.nasNodes.length}</span>
+                        <span className="text-2xl font-black text-blue-400/20 italic">{state.nas.length}</span>
                      </div>
                      <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                        {state.nasNodes.map(nas => (
+                        {state.nas.map(nas => (
                            <div key={nas.id} className={`p-5 rounded-3xl border transition-all ${isNocMode ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-slate-100 shadow-sm hover:shadow-md'}`}>
                               <div className="flex items-center justify-between mb-4">
                                  <div className="flex items-center gap-3">

@@ -6,7 +6,7 @@ import {
    Info, Landmark, Globe, Activity, FileText, CheckCircle, Wallet, Loader2,
    History, ArrowRightLeft, User, ShieldAlert, BadgeCheck, Calendar, TrendingUp,
    Wifi, Zap, ShoppingBag, Receipt, AlertTriangle, Phone, MapPin,
-   Package, Hash, Clock, Wifi, Building2
+   Package, Hash, Clock, Building2
 } from 'lucide-react';
 import { db } from '../../db';
 import jsPDF from 'jspdf';

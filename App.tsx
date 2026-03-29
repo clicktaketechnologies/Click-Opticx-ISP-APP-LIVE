@@ -97,17 +97,40 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
+    
+    // Auto-recovery for dynamic import failures (ChunkLoadError)
+    const isChunkError = error.message.includes('ChunkLoadError') || 
+                        error.message.includes('Loading chunk') ||
+                        error.message.includes('Failed to fetch dynamically imported module');
+                        
+    if (isChunkError) {
+      const lastReload = sessionStorage.getItem('last-chunk-reload');
+      const now = Date.now();
+      
+      // Only auto-reload if we haven't tried in the last 10 seconds (prevent loops)
+      if (!lastReload || now - parseInt(lastReload) > 10000) {
+        sessionStorage.setItem('last-chunk-reload', now.toString());
+        console.warn('[RECOVERY] Chunk load failure detected. Forcing manifest sync...');
+        window.location.reload();
+      }
+    }
   }
 
   render() {
     if (this.state.hasError) {
+      const isChunkError = this.state.error?.message.includes('ChunkLoadError') || 
+                          this.state.error?.message.includes('Failed to fetch dynamically imported module');
+
       return (
         <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 text-white text-center">
           <ShieldAlert className="text-rose-500 mb-6" size={64} />
-          <h1 className="text-3xl font-black uppercase italic tracking-tighter mb-4">System Fault Detected</h1>
+          <h1 className="text-3xl font-black uppercase italic tracking-tighter mb-4">
+            {isChunkError ? 'Asset Synchronization' : 'System Fault Detected'}
+          </h1>
           <p className="text-slate-400 max-w-md text-xs font-bold uppercase tracking-widest leading-relaxed mb-8">
-            An unexpected runtime error has occurred. Our secondary containment has isolated the issue.
-            Detailed trace logged to console.
+            {isChunkError 
+              ? 'A critical system update or network fluctuation has occurred. We are synchronizing your local cache with the latest server assets.'
+              : 'An unexpected runtime error has occurred. Our secondary containment has isolated the issue. Detailed trace logged to console.'}
           </p>
           <div className="bg-white/5 p-4 rounded-2xl border border-white/10 mb-8 max-w-lg overflow-auto">
             <code className="text-rose-400 text-[10px] break-all">{this.state.error?.message}</code>
@@ -116,7 +139,8 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
             onClick={() => window.location.reload()}
             className="px-8 py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-2"
           >
-            <RefreshCcw size={16} /> Re-Initialize System
+            <RefreshCcw size={16} className={isChunkError ? 'animate-spin' : ''} /> 
+            {isChunkError ? 'Synchronizing Manifest...' : 'Re-Initialize System'}
           </button>
         </div>
       );

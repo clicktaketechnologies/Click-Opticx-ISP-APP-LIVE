@@ -789,7 +789,6 @@ export interface AppState {
   commLogs: CommunicationLog[];
   testLogs: TestLog[];
   adminReminders: AdminReminder[];
-  nasNodes: NASConfig[];
   liveUsage: LiveUsage[];
   oltNodes: OLTConfig[];
   onus: ONU[];

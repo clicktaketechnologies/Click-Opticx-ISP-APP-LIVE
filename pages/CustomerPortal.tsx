@@ -7,7 +7,7 @@ import {
    CreditCard, Wifi, Fingerprint, Smartphone, Globe,
    Activity, Calendar, Receipt, Info, UserCircle,
    Zap, Power, RefreshCcw, Bell, AlertTriangle, Cpu,
-   Database, HardDrive, Wifi, Lock
+   Database, HardDrive, Lock
 } from 'lucide-react';
 import { db } from '../db';
 import { notificationManager } from '../utils/NotificationManager';

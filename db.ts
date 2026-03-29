@@ -1,7 +1,6 @@
-
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, Firestore } from 'firebase/firestore';
-import { getAuth, signInWithPopup, GoogleAuthProvider, Auth } from 'firebase/auth';
+import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, Auth } from 'firebase/auth';
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 import { io, Socket } from 'socket.io-client';
 import { notificationManager } from './utils/NotificationManager';
@@ -325,9 +324,6 @@ const INITIAL_STATE: AppState = {
     { id: 'USR-REC-3', name: 'Asif Ali', status: UserStatus.ACTIVE, packageId: 'PKG-1', balance: 750, isRecoveryMode: true, phone: '03149876543', address: 'North Karachi', area: 'North', portalEnabled: true, connectionId: 'CID-003', creditScore: 640, referralPoints: 10, referralCode: 'AA444', activationCount: 3, connectionType: 'Wireless', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
     { id: 'USR-REC-4', name: 'Noman Siddiqui', status: UserStatus.EXPIRED, packageId: 'PKG-1', balance: 1500, phone: '03331112233', address: 'Johar Block 15', area: 'Johar', portalEnabled: true, connectionId: 'CID-004', creditScore: 710, referralPoints: 50, referralCode: 'NS111', activationCount: 8, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
   ],
-  nasNodes: [
-    { id: 'NAS-1', name: 'Tower A', ip: '103.14.55.10', dealerAssigned: null, radiusSecret: 'click_radius_2026', authPort: 1812, accountingPort: 1813, apiUsername: 'api_admin', apiPort: 8728, coaEnabled: true, coaPort: 3799, nasEnabled: true, location: 'North Sector Tower', status: 'Online', lastCheck: new Date().toISOString() }
-  ],
   liveUsage: [],
   oltNodes: [
     { id: 'OLT-1', name: 'Main Core OLT', ip: '10.0.0.50', brand: 'Huawei', accessType: 'SSH', username: 'admin', port: 22, location: 'Central Office', dealerAssigned: null, status: 'Online', connectionStatus: 'Connected', lastCheck: new Date().toISOString(), ponPorts: 16 }
@@ -425,6 +421,30 @@ class DB {
       this.firestore = getFirestore(this.app);
       this.auth = getAuth(this.app);
       
+      // Handle Redirect Result
+      getRedirectResult(this.auth).then(async (result) => {
+        if (result?.user) {
+            const user = result.user;
+            let existingUser = this.state.users.find(u => u.email === user.email);
+            if (existingUser) {
+                this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
+                this.notify();
+            } else {
+                const newUser = {
+                    name: user.displayName || 'Google User',
+                    email: user.email || '',
+                    status: UserStatus.ACTIVE,
+                    profilePic: user.photoURL || ''
+                };
+                const addRes = await this.addUser(newUser);
+                if (addRes.success) {
+                    this.state.currentUser = { ...addRes.user, role: Role.CUSTOMER } as ISPUser;
+                    this.notify();
+                }
+            }
+        }
+      });
+
       // Initialize Messaging
       try {
         this.messaging = getMessaging(this.app);
@@ -677,7 +697,7 @@ class DB {
     // Robustify arrays
     if (!Array.isArray(this.state.staff)) this.state.staff = INITIAL_STATE.staff;
     if (!Array.isArray(this.state.users)) this.state.users = INITIAL_STATE.users;
-    if (!Array.isArray(this.state.nas)) this.state.nas = [];
+    if (!Array.isArray(this.state.nas)) this.state.nas = INITIAL_STATE.nas;
     if (!Array.isArray(this.state.packages)) this.state.packages = INITIAL_STATE.packages;
     if (!Array.isArray(this.state.invoices)) this.state.invoices = [];
     if (!Array.isArray(this.state.payments)) this.state.payments = [];
@@ -719,7 +739,6 @@ class DB {
     if (!Array.isArray(this.state.recoveryLogs)) this.state.recoveryLogs = [];
     if (!Array.isArray(this.state.commLogs)) this.state.commLogs = [];
     if (!Array.isArray(this.state.adminReminders)) this.state.adminReminders = [];
-    if (!Array.isArray(this.state.nasNodes)) this.state.nasNodes = INITIAL_STATE.nasNodes;
     if (!Array.isArray(this.state.liveUsage)) this.state.liveUsage = [];
     if (!Array.isArray(this.state.roles)) this.state.roles = INITIAL_STATE.roles;
     if (!Array.isArray(this.state.permissions)) this.state.permissions = INITIAL_STATE.permissions;
@@ -802,35 +821,14 @@ class DB {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      const result = await signInWithPopup(this.auth, provider);
-      const user = result.user;
-      
-      let existingUser = this.state.users.find(u => u.email === user.email);
-      if (existingUser) {
-        this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
-        this.notify();
-        return { success: true, user: this.state.currentUser, type: 'customer' };
-      }
-      
-      // Auto-register via google
-      const newUser = {
-        name: user.displayName || 'Google User',
-        email: user.email || '',
-        status: UserStatus.ACTIVE,
-        profilePic: user.photoURL || ''
-      };
-      const addRes = await this.addUser(newUser);
-      if (addRes.success) {
-        this.state.currentUser = { ...addRes.user, role: Role.CUSTOMER } as ISPUser;
-        this.notify();
-        return { success: true, user: this.state.currentUser, type: 'customer' };
-      }
-      return addRes;
+      await signInWithRedirect(this.auth, provider);
+      return { success: true };
     } catch (e: any) {
-      console.error(e);
+      console.error('[AUTH] Sign-in error:', e);
       return { success: false, message: e.message };
     }
   }
+
 
   async sendOTPRealEmail(to: string, code: string) {
     const log: DeliveryLog = {
@@ -2978,9 +2976,37 @@ class DB {
       this.state.adminReminders[idx].resolvedBy = admin?.name || 'System';
       if (reason) this.state.adminReminders[idx].ignoreReason = reason;
       await this.commit();
+      this.notify();
       return { success: true };
     }
     return { success: false, message: 'Reminder identity not found.' };
+  }
+
+  async bulkResolveReminders(ids: string[], status: ReminderStatus, reason?: string) {
+    const admin = this.state.currentUser;
+    const now = new Date().toISOString();
+    let count = 0;
+
+    this.state.adminReminders = this.state.adminReminders.map(r => {
+      if (ids.includes(r.id)) {
+        count++;
+        return {
+          ...r,
+          status,
+          resolvedAt: now,
+          resolvedBy: admin?.name || 'System',
+          ignoreReason: reason || r.ignoreReason
+        };
+      }
+      return r;
+    });
+
+    if (count > 0) {
+      await this.commit();
+      this.notify();
+      return { success: true, count };
+    }
+    return { success: false, message: 'No matching reminders found.' };
   }
 
   async submitSignupRequest(data: any) {
@@ -3942,109 +3968,15 @@ class DB {
     }
   }
 
-  async bulkResolveReminders(reminderIds: string[]) {
-    const ids = new Set(reminderIds);
-    this.state.adminReminders.forEach(r => {
-      if (ids.has(r.id)) {
-        r.status = ReminderStatus.RESOLVED;
-        r.resolvedAt = new Date().toISOString();
-        r.resolvedBy = this.state.currentUser?.name || 'System';
-      }
-    });
-    await this.commit();
-    this.notify();
-    return { success: true, count: reminderIds.length };
-  }
-
-  async bulkIgnoreReminders(reminderIds: string[]) {
-    const ids = new Set(reminderIds);
-    this.state.adminReminders.forEach(r => {
-      if (ids.has(r.id)) {
-        r.status = ReminderStatus.IGNORED;
-      }
-    });
-    await this.commit();
-    this.notify();
-    return { success: true, count: reminderIds.length };
-  }
-
   getSyncStatus() {
     return false;
-  }
-
-  // ── NAS MANAGEMENT ────────────────────────────────────────────────────────
-  async addNAS(node: Partial<NASConfig>) {
-    const newNode: NASConfig = {
-      id: 'NAS-' + Date.now(),
-      name: node.name || 'New Router',
-      ip: node.ip || '0.0.0.0',
-      dealerAssigned: node.dealerAssigned || null,
-      radiusSecret: node.radiusSecret || 'click_radius_admin',
-      authPort: node.authPort || 1812,
-      accountingPort: node.accountingPort || 1813,
-      apiUsername: node.apiUsername || 'admin',
-      apiPassword: node.apiPassword,
-      apiPort: node.apiPort || 8728,
-      coaEnabled: node.coaEnabled ?? true,
-      coaPort: node.coaPort || 3799,
-      nasEnabled: node.nasEnabled ?? false,
-      location: node.location || 'Unknown',
-      status: 'Offline',
-      lastCheck: new Date().toISOString(),
-      ...node
-    };
-    this.state.nasNodes.push(newNode);
-    await this.commit();
-    this.notify();
-    return { success: true, id: newNode.id };
-  }
-
-  async updateNAS(id: string, updates: Partial<NASConfig>) {
-    const idx = this.state.nasNodes.findIndex(n => n.id === id);
-    if (idx !== -1) {
-      this.state.nasNodes[idx] = { ...this.state.nasNodes[idx], ...updates };
-      await this.commit();
-      this.notify();
-    }
-  }
-
-  async deleteNAS(id: string) {
-    this.state.nasNodes = this.state.nasNodes.filter(n => n.id !== id);
-    await this.commit();
-    this.notify();
-  }
-
-  async checkRouterHealth(id: string) {
-    const nas = this.state.nasNodes.find(n => n.id === id);
-    if (!nas) return { success: false, message: 'NAS not found' };
-    
-    try {
-      const res = await fetch(`${this.backendUrl}/api/nas/health`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nas })
-      });
-      const data = await res.json();
-      nas.status = data.status === 'Online' ? 'Online' : 'Offline';
-      nas.lastCheck = new Date().toISOString();
-      await this.commit();
-      this.notify();
-      return { success: true, status: nas.status, radius: data.radius, api: data.api, coa: data.coa };
-    } catch (e: any) {
-      // Backend unreachable — fallback to offline
-      nas.status = 'Offline';
-      nas.lastCheck = new Date().toISOString();
-      await this.commit();
-      this.notify();
-      return { success: false, status: 'Offline', radius: 'Failed', api: 'Failed', coa: nas.coaEnabled ? 'Enabled' : 'Disabled' };
-    }
   }
 
   async sendCoACommand(userId: string, action: 'Disconnect' | 'SpeedChange' | 'ACTIVATE_PACKAGE') {
     const user = this.state.users.find(u => u.id === userId);
     if (!user) return { success: false, message: 'User not found' };
 
-    const nas = this.state.nasNodes.find(n => n.id === user.routerId);
+    const nas = this.state.nas.find(n => n.id === user.routerId);
 
     // Log the command regardless
     this.state.securityLogs.push({
@@ -4085,7 +4017,7 @@ class DB {
     if (!user || user.managementMode !== 'NAS_Controlled' || !user.routerId) return;
     if (!this.state.settings.nasSystemEnabled) return;
 
-    const nas = this.state.nasNodes.find(n => n.id === user.routerId);
+    const nas = this.state.nas.find(n => n.id === user.routerId);
     if (!nas) return;
 
     // Build package name for router profile
@@ -4547,7 +4479,7 @@ class DB {
     if (!nas) return { success: false, message: 'NAS not found' };
     
     try {
-      const res = await fetch(${this.backendUrl}/api/nas/health, {
+      const res = await fetch(`${this.backendUrl}/api/nas/health`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nas })
@@ -4566,6 +4498,7 @@ class DB {
       return { success: false, status: 'Offline', radius: 'Failed', api: 'Failed', coa: nas.coaEnabled ? 'Enabled' : 'Disabled' };
     }
   }
+
   // ── ISP AUTOMATION ENGINE ──────────────────────────────────────────────────
   async bulkProvisionUsers(oltId: string, onus: any[]) {
     const olt = this.state.oltNodes.find(n => n.id === oltId);
@@ -4598,6 +4531,18 @@ class DB {
       return { success: false, message: 'Billing enforcer unreachable.' };
     }
   }
+
+  async updateAppSection(section: AppSection) {
+    const idx = this.state.settings.appearance.sections.findIndex(s => s.id === section.id);
+    if (idx !== -1) {
+      this.state.settings.appearance.sections[idx] = section;
+      await this.commit();
+      this.notify();
+      return { success: true };
+    }
+    return { success: false, message: 'Section not found.' };
+  }
+
 
   async vsolWifiChange(onuId: string, ssid: string, pass: string) {
     const onu = this.state.onus.find(o => o.id === onuId);

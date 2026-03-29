@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { ISPUser, AppState } from '../../../types';
-import { ArrowLeft, Wifi, Activity, ShieldCheck, HardDrive, Cpu, Zap, Wifi } from 'lucide-react';
+import { ArrowLeft, Wifi, Activity, ShieldCheck, HardDrive, Cpu, Zap } from 'lucide-react';
 
 interface Props {
   user: ISPUser;

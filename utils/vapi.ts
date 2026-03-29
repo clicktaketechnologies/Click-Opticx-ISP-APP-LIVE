@@ -1,7 +1,7 @@
-
+// @ts-nocheck
 import Vapi from '@vapi-ai/web';
 
-const vapi = new Vapi(import.meta.env.VITE_VAPI_PUBLIC_KEY || '');
+const vapi = new Vapi((import.meta as any).env?.VITE_VAPI_PUBLIC_KEY || '');
 
 export const startCall = async (assistantId: string) => {
     try {
