@@ -5,6 +5,12 @@ const oltController = require('../controllers/oltController');
 // Test OLT presence
 router.post('/olt/health', oltController.checkHealth);
 
+// Test Connection (detailed feedback with latency)
+router.post('/olt/test-connection', oltController.testConnection);
+
+// Alias for frontend compatibility
+router.post('/olt/check-health', oltController.checkHealth);
+
 // Control ONU (Reboot, Reset, Signal)
 router.post('/onu/action', oltController.executeOnuAction);
 

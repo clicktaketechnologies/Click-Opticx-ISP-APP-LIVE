@@ -12,6 +12,10 @@ const paymentRoutes = require('./routes/payments');
 const healthRoutes = require('./routes/health');
 const telemetryController = require('./controllers/telemetryController');
 const logger = require('./utils/logger');
+const oltRealRoutes = require('./routes/oltRealRoutes');
+const mikrotikRoutes = require('./routes/mikrotikRoutes');
+const automationRoutes = require('./routes/automationRoutes');
+const livePoller = require('./jobs/livePoller');
 
 const app = express();
 const server = http.createServer(app);
@@ -59,8 +63,14 @@ app.get('/api/health', (req, res) => {
 // Routes
 app.use('/api', nasRoutes);
 app.use('/api', oltRoutes);
+app.use('/api/real-olt', oltRealRoutes);
+app.use('/api/mikrotik', mikrotikRoutes);
+app.use('/api/automation', automationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/health-monitor', healthRoutes);
+
+// Initialize WebSocket Live Connections
+require('./socket/liveSocket')(io);
 
 // WebSocket connection handling
 io.on('connection', (socket) => {
@@ -197,6 +207,11 @@ server.listen(PORT, HOST, () => {
     logger.info(`📡 WebSocket server ready for real-time telemetry`);
     logger.info(`🔒 Environment: ${process.env.NODE_ENV || 'production'}`);
     logger.info(`📧 Email Service: ${nodemailer ? 'Active' : 'Disabled'}`);
+
+    // Start Real-Time Live Poller for Mikrotik
+    livePoller.startPolling();
+
+    logger.info(`✨ ISP Automation Engine: Active`);
 });
 
 

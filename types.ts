@@ -30,6 +30,17 @@ export type RecoveryActionType = 'Suspend' | 'Activate' | 'Recover' | 'Mark Paid
 export type BillingPaymentType = 'Full Paid' | 'Half Paid' | 'Advance Paid' | 'Unpaid';
 export type BillingCycle = '15 days' | '30 days' | 'Custom' | 'Manual';
 
+export interface FlashLog {
+  id: string;
+  action: 'FLASH_SYSTEM';
+  month: string; // e.g., "2026-03"
+  performedBy: string;
+  resetUsage: boolean;
+  removeInvoices: boolean;
+  reason?: string;
+  timestamp: string;
+}
+
 export interface RecoveryLog {
   id: string;
   adminId: string;
@@ -397,6 +408,10 @@ export interface ISPUser {
   collectedBy?: string;
   collectorName?: string;
   collectionDate?: string;
+  package_status?: string; // e.g. "N/A"
+  isActive?: boolean;
+  daily_usage?: number;
+  monthly_usage?: number;
 }
 
 
@@ -776,11 +791,13 @@ export interface AppState {
   liveUsage: LiveUsage[];
   oltNodes: OLTConfig[];
   onus: ONU[];
+  discoveredOnus: any[];
   upstreamLinks: UpstreamLink[];
   nocAlerts: NOCAlert[];
   otps: OTP[];
   duplicateLogs: DuplicateActionLog[];
   approvalRequests: ApprovalRequest[];
+  flashLogs: FlashLog[];
 }
 
 export interface StaffUser {
@@ -1143,6 +1160,8 @@ export interface OLTConfig {
   location: string;
   dealerAssigned: string | null;
   status: 'Online' | 'Offline' | 'Error';
+  connectionStatus: 'Connected' | 'Pending' | 'Failed' | 'Not Configured';
+  lastError?: string;
   lastCheck?: string;
   ponPorts: number;
 }
@@ -1153,7 +1172,7 @@ export interface ONU {
   oltId: string;
   ponPort: string;
   subscriberId: string | null;
-  status: 'Online' | 'Offline' | 'DyingGasp' | 'LOS';
+  status: 'Online' | 'Offline' | 'DyingGasp' | 'LOS' | 'Warning' | 'Configuring';
   signalStrength: number; // in dBm
   opticalPower?: number; // Real-time optical level
   onlineTime?: string; // Uptime/Online duration
@@ -1182,6 +1201,7 @@ export interface NOCAlert {
   timestamp: string;
   category: 'Network' | 'Power' | 'Security';
   actionTaken?: boolean;
+  metadata?: any;
 }
 
 export interface LiveUsage {

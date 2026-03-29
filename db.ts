@@ -18,7 +18,7 @@ import {
   EmailCampaign, EmailTemplate, AudienceSegment, CommunicationAutomationRule, DeliveryLog, CommunicationSettings, SenderIdentity, PaymentGateway, AppSection, InfrastructureConfig, LegalConfig,
   RecoveryLog, RecoveryActionType, BillingPaymentType, BillingCycle, CommunicationLog,
   AdminReminder, ReminderStatus, ReminderIssueType, NASConfig, LiveUsage, OLTConfig, ONU,
-  AuthSettings, OTP, DuplicateActionLog, TestLog
+  AuthSettings, OTP, DuplicateActionLog, TestLog, FlashLog
 } from './types';
 
 // Monitoring interface nodes
@@ -172,6 +172,7 @@ const INITIAL_STATE: AppState = {
   aiSuggestions: [],
   aiCallLogs: [],
   aiCallRules: [],
+  flashLogs: [],
   emailCampaigns: [],
   emailTemplates: [
     { id: 'TMP-1', name: 'Payment Reminder', content: 'Dear {{user.name}}, your balance is {{user.balance}}. Please clear it.', category: 'Billing', lastUpdated: new Date().toISOString() },
@@ -320,11 +321,12 @@ const INITIAL_STATE: AppState = {
   ],
   liveUsage: [],
   oltNodes: [
-    { id: 'OLT-1', name: 'Main Core OLT', ip: '10.0.0.50', brand: 'Huawei', accessType: 'SSH', username: 'admin', port: 22, location: 'Central Office', dealerAssigned: null, status: 'Online', lastCheck: new Date().toISOString(), ponPorts: 16 }
+    { id: 'OLT-1', name: 'Main Core OLT', ip: '10.0.0.50', brand: 'Huawei', accessType: 'SSH', username: 'admin', port: 22, location: 'Central Office', dealerAssigned: null, status: 'Online', connectionStatus: 'Connected', lastCheck: new Date().toISOString(), ponPorts: 16 }
   ],
   onus: [
     { id: 'ONU-1', serialNumber: 'HWTC12345678', oltId: 'OLT-1', ponPort: '0/1/1', subscriberId: 'USR-REC-1', status: 'Online', signalStrength: -18.5, lastActive: new Date().toISOString(), model: 'HG8245H', alias: 'Zohaib Home' }
   ],
+  discoveredOnus: [],
   upstreamLinks: [
     { id: 'LNK-1', name: 'Primary Fiber Link (ISP-X)', status: 'Online', latency: 6, usageMbps: 320, capacityMbps: 1000, type: 'Primary' },
     { id: 'LNK-2', name: 'Backup Radio Link (Tower-Z)', status: 'Standby', latency: 15, usageMbps: 0, capacityMbps: 200, type: 'Backup' }
@@ -429,6 +431,7 @@ class DB {
       this.socket.on('connect', () => {
         console.log('[REALTIME] Node Linked via WebSocket');
         this.state.connectionStatus = 'online';
+        this.authenticateSocket();
         this.notify();
       });
 
@@ -473,9 +476,76 @@ class DB {
         this.notify();
       });
 
+      this.socket.on('discovery', (data: any) => {
+        console.log('[AUTOMATION] New ONU Detected:', data);
+        
+        // Add to dedicated discovery array
+        if (!this.state.discoveredOnus) this.state.discoveredOnus = [];
+        const exists = this.state.discoveredOnus.some(o => o.serial === data.serial);
+        if (!exists) {
+            this.state.discoveredOnus.unshift({ ...data, detectedAt: new Date().toISOString() });
+        }
+
+        if (!this.state.nocAlerts) this.state.nocAlerts = [];
+        this.state.nocAlerts.unshift({
+          id: `DSC-${Date.now()}`,
+          title: 'Plug & Play: New ONU',
+          message: `UNCONFIGURED ONU detected on ${data.oltName} (Port ${data.port}). Serial: ${data.serial}`,
+          severity: 'Info',
+          timestamp: new Date().toISOString(),
+          category: 'Network',
+          metadata: data
+        });
+        this.notify();
+      });
+
+      this.socket.on('fault-alert', (data: any) => {
+        console.warn('[AUTOMATION] Network Fault:', data);
+        if (!this.state.nocAlerts) this.state.nocAlerts = [];
+        this.state.nocAlerts.unshift({
+          id: `FLT-${Date.now()}`,
+          title: data.type === 'LOS' ? 'Fiber Cut Detected' : 'Signal Fluctuation',
+          message: data.message,
+          severity: data.severity === 'Critical' ? 'Critical' : 'Warning',
+          timestamp: new Date().toISOString(),
+          category: 'Network',
+          metadata: data
+        });
+        this.notify();
+      });
+
+      this.socket.on('signal-update', (data: any) => {
+        const onu = this.state.onus.find(o => o.serialNumber === data.serial);
+        if (onu) {
+          onu.signalStrength = data.signal;
+          onu.status = data.signal < -35 ? 'LOS' : (data.signal < -30 ? 'Warning' : 'Online');
+          this.notify();
+        }
+      });
+
     } catch (e) {
       console.error('Socket init failed:', e);
     }
+  }
+
+  private authenticateSocket() {
+    if (!this.socket || !this.state.currentUser) return;
+    
+    // Admins join the global dashboard room, Users join their specific ONU room
+    const role = this.state.currentUser.role;
+    const isAdmin = [Role.SUPER_ADMIN, Role.ADMIN, Role.NETWORK_ADMIN].includes(role);
+    
+    const payload: any = {
+      role: isAdmin ? 'admin' : 'user'
+    };
+
+    if (!isAdmin) {
+      const userOnu = this.state.onus.find(o => o.subscriberId === this.state.currentUser?.id);
+      if (userOnu) payload.onuId = userOnu.id;
+    }
+
+    console.log('[REALTIME] Authenticating Socket:', payload);
+    this.socket.emit('authenticate', payload);
   }
 
   async forceSync() {
@@ -601,6 +671,7 @@ class DB {
     if (!Array.isArray(this.state.aiCallLogs)) this.state.aiCallLogs = [];
     if (!Array.isArray(this.state.aiCallRules)) this.state.aiCallRules = [];
     if (!Array.isArray(this.state.notifications)) this.state.notifications = [];
+    if (!Array.isArray(this.state.flashLogs)) this.state.flashLogs = [];
     if (!Array.isArray(this.state.archives)) this.state.archives = [];
     if (!Array.isArray(this.state.signupRequests)) this.state.signupRequests = [];
     if (!Array.isArray(this.state.securityLogs)) this.state.securityLogs = [];
@@ -608,6 +679,7 @@ class DB {
     if (!Array.isArray(this.state.networkNodes)) this.state.networkNodes = [];
     if (!Array.isArray(this.state.oltNodes)) this.state.oltNodes = INITIAL_STATE.oltNodes;
     if (!Array.isArray(this.state.onus)) this.state.onus = INITIAL_STATE.onus;
+    if (!Array.isArray(this.state.discoveredOnus)) this.state.discoveredOnus = [];
     if (!Array.isArray(this.state.nocAlerts)) this.state.nocAlerts = INITIAL_STATE.nocAlerts;
     if (!Array.isArray(this.state.upstreamLinks)) this.state.upstreamLinks = INITIAL_STATE.upstreamLinks;
 
@@ -655,6 +727,31 @@ class DB {
   }
 
   getState(): AppState { return { ...this.state }; }
+
+  get onus() { return this.state.onus; }
+  get discoveredOnus() { return this.state.discoveredOnus || []; }
+  set discoveredOnus(val: any[]) { 
+    this.state.discoveredOnus = val;
+    this.notify();
+  }
+  get upstreamLinks() { return this.state.upstreamLinks; }
+
+  async logSecurity(action: string, targetId: string, details: string, riskLevel: 'Low' | 'Medium' | 'High' | 'Critical' = 'Low') {
+    const log: SecurityLog = {
+      id: 'LOG-' + Date.now(),
+      action,
+      targetId,
+      targetName: 'System',
+      adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com',
+      adminIp: '127.0.0.1',
+      details,
+      timestamp: new Date().toISOString(),
+      riskLevel
+    };
+    if (!this.state.securityLogs) this.state.securityLogs = [];
+    this.state.securityLogs.push(log);
+    await this.commit();
+  }
 
   onStateChange(cb: (state: AppState) => void) {
     this.listeners.push(cb);
@@ -767,6 +864,7 @@ class DB {
     const staff = this.state.staff.find(s => s.email.toLowerCase() === input && s.password === pass);
     if (staff) {
       this.state.currentUser = staff;
+      this.authenticateSocket();
       this.notify();
       return { success: true, user: staff, type: 'staff' };
     }
@@ -803,11 +901,15 @@ class DB {
     }
 
     this.state.currentUser = { ...user, role: Role.CUSTOMER };
+    this.authenticateSocket();
     this.notify();
     return { success: true, user: this.state.currentUser, type: 'customer' };
   }
 
   async logout() {
+    if (this.socket) {
+        this.socket.emit('logout');
+    }
     this.state.currentUser = undefined;
     this.state.isImpersonating = false;
     this.notify();
@@ -3987,7 +4089,8 @@ class DB {
       snmpCommunity: node.snmpCommunity || 'public',
       location: node.location || 'Unknown',
       dealerAssigned: node.dealerAssigned || null,
-      status: 'Offline',
+      status: node.status || 'Offline',
+      connectionStatus: 'Not Configured',
       lastCheck: new Date().toISOString(),
       ponPorts: node.ponPorts || 8,
       ...node
@@ -4103,6 +4206,96 @@ class DB {
   }
 
   // ── BULK FLASH (ACCOUNT RESET) ──────────────────────────────────────────────
+  async flashSystem(month: string, options: { resetUsage: boolean, removeInvoices: boolean, reason?: string }, adminId: string) {
+    const admin = this.state.staff.find(s => s.email === adminId) || this.state.currentUser;
+    const adminName = admin?.name || 'SuperAdmin';
+    
+    // 1. Process Users
+    this.state.users.forEach(user => {
+      user.package_status = 'N/A';
+      user.isActive = false;
+      user.status = UserStatus.SUSPENDED; // Reflect inactive status in the primary state
+
+      if (options.resetUsage) {
+        user.daily_usage = 0;
+        user.monthly_usage = 0;
+      }
+    });
+
+    // 2. Handle Invoices
+    if (options.removeInvoices) {
+      // Remove UNPAID/PENDING invoices for this month
+      // month is "YYYY-MM"
+      this.state.invoices = this.state.invoices.filter(inv => {
+        const invMonth = (inv.createdAt || inv.dueDate).substring(0, 7);
+        if (invMonth === month) {
+          return inv.status === PaymentStatus.PAID; // Keep paid, remove others
+        }
+        return true;
+      });
+    }
+
+    // Mark current billing cycle as "Skipped" (This could be part of a Billing cycle status)
+    // For now we'll just log it clearly.
+
+    // 3. Log
+    const log: FlashLog = {
+      id: `FLASH-${Date.now()}`,
+      action: 'FLASH_SYSTEM',
+      month,
+      performedBy: adminId,
+      resetUsage: options.resetUsage,
+      removeInvoices: options.removeInvoices,
+      reason: options.reason,
+      timestamp: new Date().toISOString()
+    };
+    
+    if (!this.state.flashLogs) this.state.flashLogs = [];
+    this.state.flashLogs.push(log);
+
+    await this.logSecurity(`FLASH_SYSTEM_${month}`, 'all', `System Flash executed by ${adminName} for month ${month}.`, 'Critical');
+    
+    this.notify();
+    await this.commit();
+    return { success: true, count: this.state.users.length };
+  }
+
+  async getFlashStatus(month: string) {
+    return this.state.flashLogs.find(f => f.month === month);
+  }
+
+  async testOLTConnection(oltId: string) {
+    const olt = this.state.oltNodes.find(o => o.id === oltId);
+    if (!olt) return { success: false, message: 'OLT not found' };
+
+    olt.connectionStatus = 'Pending';
+    this.notify();
+
+    try {
+      const response = await fetch(`${this.backendUrl}/api/olt/check-health`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ olt })
+      });
+      const data = await response.json();
+      
+      olt.connectionStatus = data.success ? 'Connected' : 'Failed';
+      olt.lastError = data.error || (data.success ? undefined : 'Connection Timeout');
+      olt.status = data.success ? 'Online' : 'Offline';
+      
+      this.notify();
+      await this.commit();
+      return data;
+    } catch (error: any) {
+      olt.connectionStatus = 'Failed';
+      olt.lastError = error.message;
+      olt.status = 'Offline';
+      this.notify();
+      await this.commit();
+      return { success: false, error: error.message };
+    }
+  }
+
   async bulkFlashUsers(userIds: string[], months: number, adminId: string, resetPackage: boolean = false) {
     const admin = this.state.staff.find(s => s.email === adminId) || this.state.currentUser;
     const adminName = admin?.name || 'SuperAdmin';
@@ -4279,6 +4472,62 @@ class DB {
     await this.commit();
     this.notify();
     return { success: true, count: sent };
+  }
+
+  // ── ISP AUTOMATION ENGINE ──────────────────────────────────────────────────
+  async bulkProvisionUsers(oltId: string, onus: any[]) {
+    const olt = this.state.oltNodes.find(n => n.id === oltId);
+    if (!olt) return { success: false, message: 'OLT not found' };
+
+    try {
+      const res = await fetch(`${this.backendUrl}/api/automation/bulk-provision`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ olt, onus })
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: 'Automation server unreachable.' };
+    }
+  }
+
+  async runBillingEnforcement(oltId: string) {
+    const olt = this.state.oltNodes.find(n => n.id === oltId);
+    if (!olt) return { success: false, message: 'OLT not found' };
+
+    try {
+      const res = await fetch(`${this.backendUrl}/api/automation/run-billing-check`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oltId })
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: 'Billing enforcer unreachable.' };
+    }
+  }
+
+  async vsolWifiChange(onuId: string, ssid: string, pass: string) {
+    const onu = this.state.onus.find(o => o.id === onuId);
+    if (!onu) return { success: false, message: 'ONU not found' };
+    const olt = this.state.oltNodes.find(n => n.id === onu.oltId);
+    if (!olt) return { success: false, message: 'OLT parent missing' };
+
+    try {
+      const res = await fetch(`${this.backendUrl}/api/automation/onu-wifi-reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          device: olt,
+          onuId: onu.serialNumber, 
+          ssid,
+          newPassword: pass
+        })
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: 'Communication bridge down.' };
+    }
   }
 }
 

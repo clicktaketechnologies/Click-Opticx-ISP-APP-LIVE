@@ -33,9 +33,19 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
     }
 
     setIsSubmitting(true);
-    await db.submitWifiPasswordRequest(user.id, newPass);
+    const userOnu = db.onus.find(o => o.subscriberId === user.id);
+    if (!userOnu) {
+        alert("ONU hardware not found for your account.");
+        setIsSubmitting(false);
+        return;
+    }
+    const res = await db.vsolWifiChange(userOnu.id, mapping?.ssidName || 'MyWiFi', newPass);
     setIsSubmitting(false);
-    setSuccess(true);
+    if (res.success) {
+        setSuccess(true);
+    } else {
+        alert("Error: " + res.message);
+    }
   };
 
   if (success) {

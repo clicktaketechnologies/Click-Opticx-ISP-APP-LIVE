@@ -5,6 +5,7 @@ import {
   Receipt, Wallet, ShieldCheck, LogOut,
   Wifi, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap, Loader2, Cloud, X, Zap, RefreshCcw
 } from 'lucide-react';
+import { PWAPrompt } from './components/PWAPrompt';
 
 // Lazy load pages for performance
 const Login = lazy(() => import('./pages/Login'));
@@ -68,6 +69,7 @@ const NASManagement = lazy(() => import('./pages/NASManagement'));
 const OLTManagement = lazy(() => import('./pages/OLTManagement'));
 const NOCDashboard = lazy(() => import('./pages/NOCDashboard'));
 const AuthControlCenter = lazy(() => import('./pages/AuthControlCenter'));
+const SystemFlash = lazy(() => import('./pages/SystemFlash'));
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 import { FiveGLaunchAnimation } from './components/FiveGLaunchAnimation';
 
@@ -355,6 +357,7 @@ const App: React.FC = () => {
                     case 'nas-management': return <NASManagement state={dbState} />;
                     case 'olt-management': return <OLTManagement state={dbState} />;
                     case 'noc-dashboard': return <NOCDashboard state={dbState} />;
+                    case 'system-flash': return <SystemFlash state={dbState} />;
                     default: return <Dashboard state={dbState} onNavigate={navigateTo} />;
                   }
                 })()}
@@ -364,6 +367,7 @@ const App: React.FC = () => {
           <Suspense fallback={null}>
             <AIAgentWidget state={dbState} />
           </Suspense>
+          <PWAPrompt />
         </Suspense>
       </div>
     );

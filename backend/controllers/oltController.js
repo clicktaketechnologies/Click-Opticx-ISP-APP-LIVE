@@ -69,6 +69,27 @@ async function executeSsh(olt, commands) {
     });
 }
 
+// ─── Helper: Classify SSH Errors ──────────────────────────────────────────────
+function classifyError(error) {
+    const msg = (error.message || '').toLowerCase();
+    if (msg.includes('authentication') || msg.includes('auth') || msg.includes('password') || msg.includes('publickey')) {
+        return { errorType: 'Auth Failed', message: 'Wrong username or password. Check OLT credentials.' };
+    }
+    if (msg.includes('etimedout') || msg.includes('timeout') || msg.includes('timed out')) {
+        return { errorType: 'Timeout', message: 'OLT not reachable on the network. Check IP and connectivity.' };
+    }
+    if (msg.includes('econnrefused') || msg.includes('connection refused')) {
+        return { errorType: 'Port Blocked', message: 'SSH port refused. Firewall may be blocking or service is down.' };
+    }
+    if (msg.includes('enotfound') || msg.includes('getaddrinfo')) {
+        return { errorType: 'DNS Error', message: 'Hostname/IP could not be resolved.' };
+    }
+    if (msg.includes('handshake') || msg.includes('protocol')) {
+        return { errorType: 'Protocol Error', message: 'SSH handshake failed. Check port and access type.' };
+    }
+    return { errorType: 'Unknown', message: error.message || 'An unexpected error occurred. Retry or check logs.' };
+}
+
 // ─── OLT Health / Presence ────────────────────────────────────────────────────
 exports.checkHealth = async (req, res) => {
     const { olt } = req.body;
@@ -79,18 +100,55 @@ exports.checkHealth = async (req, res) => {
         logger.info(`[OLT HEALTH] ${olt.name} (${olt.ip}) - Online`);
         return res.json({ 
             success: true, 
-            status: 'Online', 
+            status: 'Online',
+            connectionStatus: 'Connected',
             details: output.substring(0, 200) 
         });
     } catch (error) {
-        logger.warn(`[OLT HEALTH FAILED] ${olt.name}: ${error.message}`);
+        const classified = classifyError(error);
+        logger.warn(`[OLT HEALTH FAILED] ${olt.name}: ${classified.errorType} - ${classified.message}`);
         return res.status(500).json({ 
             success: false, 
-            status: 'Offline', 
-            error: error.message 
+            status: 'Offline',
+            connectionStatus: 'Failed',
+            errorType: classified.errorType,
+            error: classified.message
         });
     }
 };
+
+// ─── Test Connection (Quick check with detailed feedback) ──────────────────────
+exports.testConnection = async (req, res) => {
+    const { olt } = req.body;
+    if (!olt || !olt.ip) return res.status(400).json({ success: false, message: 'OLT data required' });
+
+    const startTime = Date.now();
+    try {
+        const output = await executeSsh(olt, ['display version']);
+        const latency = Date.now() - startTime;
+        logger.info(`[OLT TEST] ${olt.name} (${olt.ip}) - Connected in ${latency}ms`);
+        return res.json({
+            success: true,
+            status: 'Online',
+            connectionStatus: 'Connected',
+            latency: `${latency}ms`,
+            details: output.substring(0, 300)
+        });
+    } catch (error) {
+        const latency = Date.now() - startTime;
+        const classified = classifyError(error);
+        logger.warn(`[OLT TEST FAILED] ${olt.name}: ${classified.errorType} (${latency}ms)`);
+        return res.status(500).json({
+            success: false,
+            status: 'Offline',
+            connectionStatus: 'Failed',
+            errorType: classified.errorType,
+            error: classified.message,
+            latency: `${latency}ms`
+        });
+    }
+};
+
 
 // ─── ONU Actions (Reboot, Reset, Signal) ──────────────────────────────────────
 exports.executeOnuAction = async (req, res) => {

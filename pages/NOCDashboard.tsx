@@ -26,6 +26,19 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
       }
    }, [toast.message]);
 
+   // Audible Alerts for Critical Faults
+   useEffect(() => {
+      const latest = state.nocAlerts[0];
+      if (latest && latest.severity === 'Critical') {
+         const now = new Date().getTime();
+         const alertTime = new Date(latest.timestamp).getTime();
+         if (now - alertTime < 5000) { // Only if it just happened in the last 5s
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.play().catch(e => console.warn('Audio blocked by browser policy'));
+         }
+      }
+   }, [state.nocAlerts]);
+
    const handleOperation = async (label: string) => {
       setToast({ message: `Initiating ${label}...`, type: 'info' });
       
