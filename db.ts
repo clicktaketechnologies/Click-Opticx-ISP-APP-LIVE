@@ -643,6 +643,14 @@ class DB {
         }
       });
     }
+
+    if (!this.state.settings.technicalKeys) {
+      this.state.settings.technicalKeys = INITIAL_STATE.settings.technicalKeys;
+    }
+    if (!this.state.settings.pushConfig) {
+      this.state.settings.pushConfig = INITIAL_STATE.settings.pushConfig;
+    }
+
     this.ensureArrays();
   }
 
