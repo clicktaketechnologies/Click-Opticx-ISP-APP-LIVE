@@ -14,7 +14,7 @@ const SubscriberCreditScore: React.FC<{ user: ISPUser, state: AppState }> = ({ u
   }, [state.creditLogs, user.id]);
 
   const getScoreRange = (score: number) => {
-    if (score >= 750) return { label: 'Excellent', color: 'text-emerald-500', bar: 'bg-emerald-500', risk: '🟢 Low Risk', desc: 'Authorized for all advanced system operations.' };
+    if (score >= 750) return { label: 'Excellent', color: 'text-green-500', bar: 'bg-green-500', risk: '🟢 Low Risk', desc: 'Authorized for all advanced system operations.' };
     if (score >= 600) return { label: 'Good', color: 'text-blue-500', bar: 'bg-blue-500', risk: '🟡 Medium', desc: 'Standard system authority handshakes active.' };
     if (score >= 450) return { label: 'Fair', color: 'text-orange-500', bar: 'bg-orange-500', risk: '🟠 Warning', desc: 'Limited emergency load eligibility detected.' };
     return { label: 'Poor', color: 'text-red-500', bar: 'bg-red-500', risk: '🔴 High Risk', desc: 'Emergency protocols disabled. Immediate settlement required.' };
@@ -55,7 +55,7 @@ const SubscriberCreditScore: React.FC<{ user: ISPUser, state: AppState }> = ({ u
       <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-8">
          <div className="space-y-2">
             <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-               <ShieldCheck size={18} className="text-indigo-600"/> Audit Parameters
+               <ShieldCheck size={18} className="text-blue-600"/> Audit Parameters
             </h3>
             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{range.desc}</p>
          </div>
@@ -63,7 +63,7 @@ const SubscriberCreditScore: React.FC<{ user: ISPUser, state: AppState }> = ({ u
          <div className="grid grid-cols-2 gap-4">
             <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
                <p className="text-[8px] font-black text-slate-400 uppercase mb-3">Positive Gains</p>
-               <div className="flex items-center gap-3 text-emerald-600">
+               <div className="flex items-center gap-3 text-green-600">
                   <TrendingUp size={24}/>
                   <span className="text-2xl font-black italic">+{logs.filter(l => l.delta > 0).reduce((a,b) => a + b.delta, 0)}</span>
                </div>
@@ -79,7 +79,7 @@ const SubscriberCreditScore: React.FC<{ user: ISPUser, state: AppState }> = ({ u
       </div>
 
       {/* 3. Logic Tips */}
-      <div className="bg-indigo-600 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-xl">
+      <div className="bg-blue-600 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-xl">
          <div className="relative z-10 space-y-6">
             <div className="flex items-center gap-3">
                <Sparkles size={24} className="text-amber-400" />
@@ -108,7 +108,7 @@ const SubscriberCreditScore: React.FC<{ user: ISPUser, state: AppState }> = ({ u
             {logs.slice(0, 10).map(log => (
               <div key={log.id} className="bg-white p-6 rounded-[2rem] border border-slate-100 flex items-center justify-between group shadow-sm">
                  <div className="flex items-center gap-5">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shadow-inner ${log.delta >= 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shadow-inner ${log.delta >= 0 ? 'bg-green-50 text-green-600 border-green-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
                        {log.delta >= 0 ? <TrendingUp size={18}/> : <TrendingDown size={18}/>}
                     </div>
                     <div>
@@ -116,7 +116,7 @@ const SubscriberCreditScore: React.FC<{ user: ISPUser, state: AppState }> = ({ u
                        <p className="text-[8px] text-slate-400 font-bold uppercase">{new Date(log.timestamp).toLocaleDateString()}</p>
                     </div>
                  </div>
-                 <p className={`text-sm font-black italic tracking-tighter ${log.delta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                 <p className={`text-sm font-black italic tracking-tighter ${log.delta >= 0 ? 'text-green-600' : 'text-rose-600'}`}>
                     {log.delta >= 0 ? '+' : ''}{log.delta}
                  </p>
               </div>
@@ -133,3 +133,4 @@ const SubscriberCreditScore: React.FC<{ user: ISPUser, state: AppState }> = ({ u
 };
 
 export default SubscriberCreditScore;
+

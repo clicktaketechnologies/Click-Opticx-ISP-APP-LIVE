@@ -51,11 +51,11 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
    const StatusBadge = ({ status }: { status: string }) => (
       <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 ${
-         status === 'Online' ? 'bg-emerald-100 text-emerald-600' : 
+         status === 'Online' ? 'bg-green-100 text-green-600' : 
          status === 'Offline' ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600'
       }`}>
          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-            status === 'Online' ? 'bg-emerald-500' : status === 'Offline' ? 'bg-rose-500' : 'bg-slate-400'
+            status === 'Online' ? 'bg-green-500' : status === 'Offline' ? 'bg-rose-500' : 'bg-slate-400'
          }`}></div>
          {status}
       </span>
@@ -66,26 +66,26 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
          {/* HEADER SECTION */}
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
             <div className="flex items-center gap-5">
-               <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-3xl flex items-center justify-center shadow-lg shadow-indigo-200 text-white">
+               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl flex items-center justify-center shadow-lg shadow-blue-200 text-white">
                   <Server size={32} />
                </div>
                <div>
                   <h1 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none">Cloud NAS Control</h1>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em] mt-2 flex items-center gap-2">
-                     <Globe size={12} className="text-indigo-500" /> Radius Gateway Integration Active
+                     <Globe size={12} className="text-blue-500" /> Radius Gateway Integration Active
                   </p>
                </div>
             </div>
             
             <div className="flex items-center gap-3">
                <div className="relative group">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
                   <input 
                      type="text" 
                      placeholder="Search Routers..." 
                      value={searchTerm}
                      onChange={(e) => setSearchTerm(e.target.value)}
-                     className="pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl w-full md:w-64 font-bold text-sm focus:ring-2 focus:ring-indigo-500/10 transition-all outline-none"
+                     className="pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl w-full md:w-64 font-bold text-sm focus:ring-2 focus:ring-blue-500/10 transition-all outline-none"
                   />
                </div>
                <button 
@@ -120,11 +120,11 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
          {/* Users GRID */}
          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {filteredNodes.map(nas => (
-               <div key={nas.id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden group hover:border-indigo-200 transition-all">
+               <div key={nas.id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden group hover:border-blue-200 transition-all">
                   <div className="p-8">
                      <div className="flex justify-between items-start mb-6">
                         <div className="flex items-center gap-4">
-                           <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-indigo-500 transition-colors">
+                           <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-blue-500 transition-colors">
                               <HardDrive size={28} />
                            </div>
                            <div>
@@ -154,7 +154,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      <div className="flex items-center gap-2">
                         <button 
                            onClick={() => startHealthCheck(nas)}
-                           className="flex-1 py-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                           className="flex-1 py-4 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2"
                         >
                            <ShieldCheck size={16} /> Check Integrity
                         </button>
@@ -185,7 +185,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            <span className="text-[9px] font-black uppercase text-slate-500">CoA: {nas.coaEnabled ? 'ENABLED' : 'DISABLED'}</span>
                         </div>
                         <div className="flex items-center gap-1.5 opacity-60">
-                           <DatabaseZap size={12} className="text-indigo-500" />
+                           <DatabaseZap size={12} className="text-blue-500" />
                            <span className="text-[9px] font-black uppercase text-slate-500">API: {nas.apiUsername}</span>
                         </div>
                      </div>
@@ -199,14 +199,14 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
          {(isAddModal || isEditModal) && (
             <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
                <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in flex flex-col max-h-[92vh]">
-                  <header className="p-8 border-b bg-indigo-600 text-white flex justify-between items-center shrink-0">
+                  <header className="p-8 border-b bg-blue-600 text-white flex justify-between items-center shrink-0">
                      <div className="flex items-center gap-4">
                         <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center"><Server size={30} /></div>
                         <div>
                            <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">
                               {isEditModal ? 'Update Router Node' : 'Register New NAS'}
                            </h3>
-                           <p className="text-indigo-100 text-[10px] font-black uppercase tracking-widest mt-2 opacity-80">Final Architecture Cloud Node</p>
+                           <p className="text-blue-100 text-[10px] font-black uppercase tracking-widest mt-2 opacity-80">Final Architecture Cloud Node</p>
                         </div>
                      </div>
                      <button onClick={() => {setIsAddModal(false); setIsEditModal(false);}} className="p-2 hover:bg-white/10 rounded-xl transition-colors"><X size={24} /></button>
@@ -216,31 +216,31 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-1.5">
                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Router Name</label>
-                           <input type="text" placeholder="e.g. Tower A" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 placeholder:text-slate-300" />
+                           <input type="text" placeholder="e.g. Tower A" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-slate-300" />
                         </div>
                         <div className="space-y-1.5">
                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">IP Address</label>
-                           <input type="text" placeholder="0.0.0.0" value={formData.ip} onChange={e => setFormData({...formData, ip: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 placeholder:text-slate-300" />
+                           <input type="text" placeholder="0.0.0.0" value={formData.ip} onChange={e => setFormData({...formData, ip: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-slate-300" />
                         </div>
                         <div className="space-y-1.5">
                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Radius Secret</label>
-                           <input type="password" value={formData.secret} onChange={e => setFormData({...formData, secret: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 placeholder:text-slate-300" />
+                           <input type="password" value={formData.secret} onChange={e => setFormData({...formData, secret: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-slate-300" />
                         </div>
                         <div className="space-y-1.5">
                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Radius CoA Port</label>
-                           <input type="number" value={formData.coaPort} onChange={e => setFormData({...formData, coaPort: parseInt(e.target.value)})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-500/10" />
+                           <input type="number" value={formData.coaPort} onChange={e => setFormData({...formData, coaPort: parseInt(e.target.value)})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10" />
                         </div>
                         <div className="space-y-1.5">
                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">API Admin Username</label>
-                           <input type="text" value={formData.apiUsername} onChange={e => setFormData({...formData, apiUsername: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-500/10" />
+                           <input type="text" value={formData.apiUsername} onChange={e => setFormData({...formData, apiUsername: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10" />
                         </div>
                         <div className="space-y-1.5">
                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">API Admin Password</label>
-                           <input type="password" value={formData.apiPassword} onChange={e => setFormData({...formData, apiPassword: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-500/10" />
+                           <input type="password" value={formData.apiPassword} onChange={e => setFormData({...formData, apiPassword: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10" />
                         </div>
                         <div className="space-y-1.5">
                            <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Location</label>
-                           <input type="text" placeholder="e.g. North Sector" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-indigo-500/10" />
+                           <input type="text" placeholder="e.g. North Sector" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10" />
                         </div>
                         <div className="space-y-1.5 flex items-center gap-4 h-full pt-6">
                            <label className="flex items-center gap-3 cursor-pointer group">
@@ -251,7 +251,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                     onChange={e => setFormData({...formData, coaEnabled: e.target.checked})} 
                                     className="sr-only"
                                  />
-                                 <div className={`w-12 h-6 rounded-full transition-colors ${formData.coaEnabled ? 'bg-indigo-600' : 'bg-slate-200'}`}></div>
+                                 <div className={`w-12 h-6 rounded-full transition-colors ${formData.coaEnabled ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
                                  <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.coaEnabled ? 'translate-x-6' : ''}`}></div>
                               </div>
                               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-900 transition-colors">Enable CoA Disconnect</span>
@@ -269,7 +269,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      </button>
                      <button 
                         onClick={isEditModal ? handleUpdate : handleAdd}
-                        className="flex-1 py-5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:shadow-indigo-200/50 hover:bg-indigo-700 transition-all active:scale-95 flex items-center justify-center gap-2"
+                        className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:shadow-blue-200/50 hover:bg-blue-700 transition-all active:scale-95 flex items-center justify-center gap-2"
                      >
                         {isEditModal ? <CheckCircle size={18} /> : <Plus size={18} />} 
                         {isEditModal ? 'Update Node' : 'Register NAS'}
@@ -283,14 +283,14 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
          {isHealthCheckModal && (
             <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[3000] flex items-center justify-center p-6 animate-in fade-in duration-500">
                <div className="bg-white rounded-[3.5rem] w-full max-w-md shadow-2xl p-10 sm:p-12 text-center space-y-10 animate-in zoom-in border border-slate-100 relative overflow-hidden">
-                  <div className={`absolute top-0 left-0 w-full h-2 ${isChecking ? 'bg-slate-100 overflow-hidden' : healthCheckResult?.status === 'Online' ? 'bg-gradient-to-r from-emerald-400 to-teal-500' : 'bg-rose-500'}`}>
-                     {isChecking && <div className="h-full bg-indigo-600 animate-loading-bar w-1/2"></div>}
+                  <div className={`absolute top-0 left-0 w-full h-2 ${isChecking ? 'bg-slate-100 overflow-hidden' : healthCheckResult?.status === 'Online' ? 'bg-gradient-to-r from-green-400 to-teal-500' : 'bg-rose-500'}`}>
+                     {isChecking && <div className="h-full bg-blue-600 animate-loading-bar w-1/2"></div>}
                   </div>
                   
                   <div className="space-y-6">
                      <div className={`w-28 h-28 mx-auto rounded-[2.5rem] flex items-center justify-center shadow-inner border-4 border-white ${
-                        isChecking ? 'bg-indigo-50 text-indigo-500' : 
-                        healthCheckResult?.status === 'Online' ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'
+                        isChecking ? 'bg-blue-50 text-blue-500' : 
+                        healthCheckResult?.status === 'Online' ? 'bg-green-50 text-green-500' : 'bg-rose-50 text-rose-500'
                      }`}>
                         {isChecking ? <Mini5GMicroLoader size={48} /> : 
                          healthCheckResult?.status === 'Online' ? <CheckCircle size={48} className="animate-bounce-slow" /> : <AlertTriangle size={48} />}
@@ -315,7 +315,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         ].map((node, i) => (
                            <div key={i} className="bg-slate-50 p-4 rounded-3xl border border-slate-100">
                               <p className="text-[8px] font-black text-slate-400 uppercase mb-2">{node.name}</p>
-                              <span className={`text-[9px] font-black italic uppercase ${node.s === 'Connected' || node.s === 'Enabled' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                              <span className={`text-[9px] font-black italic uppercase ${node.s === 'Connected' || node.s === 'Enabled' ? 'text-green-500' : 'text-rose-500'}`}>
                                  {node.s}
                               </span>
                            </div>
@@ -339,3 +339,4 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default NASManagement;
+

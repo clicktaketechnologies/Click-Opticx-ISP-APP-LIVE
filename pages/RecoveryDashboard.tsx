@@ -82,7 +82,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
               {pendingPayments.map(p => (
                 <div key={p.id} className="p-8 flex items-center justify-between hover:bg-slate-50 transition-all group">
                   <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-inner group-hover:scale-105 transition-transform">
+                    <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 border border-green-100 shadow-inner group-hover:scale-105 transition-transform">
                       <HandCoins size={28} />
                     </div>
                     <div>
@@ -98,7 +98,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                     {canApprove ? (
                       <button
                         onClick={() => db.approvePayment(p.id)}
-                        className="p-4 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 active:scale-90"
+                        className="p-4 bg-green-600 text-white rounded-2xl hover:bg-green-700 transition-all shadow-xl shadow-green-100 active:scale-90"
                       >
                         <CheckCircle size={24} />
                       </button>
@@ -118,7 +118,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="space-y-4">
         <div className="flex justify-between items-center px-2">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <Wallet className="text-emerald-500" size={14} />
+            <Wallet className="text-green-500" size={14} />
             Outstanding Receivables
           </h3>
           <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase">{filteredUnpaidInvoices.length} Dues</span>
@@ -171,7 +171,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => { setPaymentModal(inv.id); setAmount(inv.totalAmount - inv.paidAmount); }}
-                      className="flex items-center justify-center gap-2 px-6 py-3.5 bg-emerald-600 text-white text-[11px] font-black rounded-2xl hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 active:scale-95 uppercase tracking-widest whitespace-nowrap"
+                      className="flex items-center justify-center gap-2 px-6 py-3.5 bg-green-600 text-white text-[11px] font-black rounded-2xl hover:bg-green-700 transition-all shadow-xl shadow-green-100 active:scale-95 uppercase tracking-widest whitespace-nowrap"
                     >
                       <HandCoins size={16} />
                       Collect
@@ -214,8 +214,8 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                 <div className="p-8 flex justify-between items-start">
                   <div className="flex items-center gap-5">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${
-                      req.type === 'Plan_Activation' ? 'bg-indigo-50 text-indigo-600' :
-                      req.type === 'Payment_Collection' ? 'bg-emerald-50 text-emerald-600' :
+                      req.type === 'Plan_Activation' ? 'bg-blue-50 text-blue-600' :
+                      req.type === 'Payment_Collection' ? 'bg-green-50 text-green-600' :
                       'bg-rose-50 text-rose-600'
                     }`}>
                       {req.type === 'Plan_Activation' ? <Zap size={28} /> : 
@@ -226,8 +226,8 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                       <div className="flex items-center gap-2 mb-1">
                         <span className="px-2 py-0.5 bg-slate-100 text-slate-500 text-[8px] font-black uppercase tracking-widest rounded-lg">ID: {req.id.slice(0,8)}</span>
                         <span className={`px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-lg ${
-                          req.type === 'Plan_Activation' ? 'bg-indigo-600 text-white' :
-                          req.type === 'Payment_Collection' ? 'bg-emerald-600 text-white' :
+                          req.type === 'Plan_Activation' ? 'bg-blue-600 text-white' :
+                          req.type === 'Payment_Collection' ? 'bg-green-600 text-white' :
                           'bg-rose-600 text-white'
                         }`}>{req.type.replace('_', ' ')}</span>
                       </div>
@@ -257,7 +257,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                     {req.payload.pkgId && (
                       <div className="flex justify-between items-center text-[10px]">
                         <span className="text-slate-400 font-black uppercase tracking-widest">Target Package</span>
-                        <span className="text-indigo-600 font-black uppercase">{state.packages.find(p => p.id === req.payload.pkgId)?.name || 'Unknown'}</span>
+                        <span className="text-blue-600 font-black uppercase">{state.packages.find(p => p.id === req.payload.pkgId)?.name || 'Unknown'}</span>
                       </div>
                     )}
                   </div>
@@ -273,7 +273,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   </button>
                   <button 
                     onClick={() => db.approveRequest(req.id)}
-                    className="flex-[2] py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-100 flex items-center justify-center gap-2 active:scale-95"
+                    className="flex-[2] py-4 bg-green-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-green-700 transition-all shadow-xl shadow-green-100 flex items-center justify-center gap-2 active:scale-95"
                   >
                     <ShieldCheck size={16} />
                     Verify & Commit
@@ -291,10 +291,10 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Today\'s Cash', value: db.getFiscalSummary(new Date(new Date().setHours(0, 0, 0, 0)), new Date()).todayCollection, icon: HandCoins, color: 'bg-emerald-600' },
+          { label: 'Today\'s Cash', value: db.getFiscalSummary(new Date(new Date().setHours(0, 0, 0, 0)), new Date()).todayCollection, icon: HandCoins, color: 'bg-green-600' },
           { label: 'Period Pool', value: db.getFiscalSummary(new Date(Date.now() - 30 * 86400000), new Date()).periodCollection, icon: Wallet, color: 'bg-blue-600' },
           { label: 'Total O/S', value: db.getFiscalSummary(new Date(0), new Date()).totalUnpaidBalance, icon: ShieldAlert, color: 'bg-rose-600' },
-          { label: 'Active Plans', value: state.users.filter(u => u.status === UserStatus.ACTIVE).length, icon: Zap, color: 'bg-indigo-600' }
+          { label: 'Active Plans', value: state.users.filter(u => u.status === UserStatus.ACTIVE).length, icon: Zap, color: 'bg-blue-600' }
         ].map((s, idx) => (
           <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
             <div>
@@ -339,7 +339,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="space-y-6">
            <div className="flex items-center justify-between">
               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                 <History size={14} className="text-indigo-600" />
+                 <History size={14} className="text-blue-600" />
                  Validated Operation Ledger
               </h3>
               <div className="relative">
@@ -380,8 +380,8 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            </td>
                            <td className="px-8 py-5 text-center">
                               <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${
-                                 req.type === 'Plan_Activation' ? 'bg-indigo-50 text-indigo-600 border border-indigo-100' :
-                                 req.type === 'Payment_Collection' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                                 req.type === 'Plan_Activation' ? 'bg-blue-50 text-blue-600 border border-blue-100' :
+                                 req.type === 'Payment_Collection' ? 'bg-green-50 text-green-600 border border-green-100' :
                                  'bg-rose-50 text-rose-600 border border-rose-100'
                               }`}>{req.type.replace('_', ' ')}</span>
                            </td>
@@ -391,7 +391,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            </td>
                            <td className="px-8 py-5 text-right">
                               <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${
-                                 req.status === 'Approved' ? 'bg-emerald-600 text-white shadow-lg' : 'bg-rose-600 text-white shadow-lg'
+                                 req.status === 'Approved' ? 'bg-green-600 text-white shadow-lg' : 'bg-rose-600 text-white shadow-lg'
                               }`}>
                                  {req.status === 'Approved' ? <ShieldCheck size={12}/> : <XCircle size={12}/>}
                                  {req.status === 'Approved' ? 'VERIFIED' : 'REJECTED'}
@@ -424,7 +424,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                 </div>
                 <div className="text-right">
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Team Balance</p>
-                  <p className={`text-3xl font-black ${member.stats.pending > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                  <p className={`text-3xl font-black ${member.stats.pending > 0 ? 'text-red-600' : 'text-green-600'}`}>
                     Rs. {member.stats.pending.toLocaleString()}
                   </p>
                 </div>
@@ -491,7 +491,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                 </div>
                 <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm group">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Attributed</p>
-                  <p className="text-3xl font-black text-emerald-600 tracking-tighter">Rs. {settlementStats[selectedStaff.email]?.total.toLocaleString() || 0}</p>
+                  <p className="text-3xl font-black text-green-600 tracking-tighter">Rs. {settlementStats[selectedStaff.email]?.total.toLocaleString() || 0}</p>
                 </div>
               </div>
 
@@ -519,7 +519,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                         <div className="flex items-center gap-6">
                           <div className="text-right">
                             <p className="font-black text-slate-900 text-lg tracking-tighter">Rs. {p.amount.toLocaleString()}</p>
-                            <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${p.isCleared ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600 shadow-sm'}`}>
+                            <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${p.isCleared ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600 shadow-sm'}`}>
                               {p.isCleared ? 'Registry Settled' : 'In Team Hand'}
                             </span>
                           </div>
@@ -541,7 +541,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
               <div className="p-10 border-t bg-white shrink-0">
                 <button
                   onClick={() => handleSettleStaff(selectedStaff.email)}
-                  className="w-full py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-emerald-100 hover:bg-emerald-700 transition-all active:scale-95 flex items-center justify-center gap-4"
+                  className="w-full py-6 bg-green-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-green-100 hover:bg-green-700 transition-all active:scale-95 flex items-center justify-center gap-4"
                 >
                   <ShieldCheck size={24} />
                   Authorize Settlement
@@ -566,7 +566,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-black text-2xl">{state.settings.currency}</span>
                   <input
                     type="number"
-                    className="w-full pl-16 pr-6 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-4xl outline-none focus:border-emerald-500 transition-all text-slate-900 shadow-inner"
+                    className="w-full pl-16 pr-6 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-4xl outline-none focus:border-green-500 transition-all text-slate-900 shadow-inner"
                     value={amount}
                     onChange={(e) => setAmount(Number(e.target.value))}
                   />
@@ -584,7 +584,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                     <button
                       key={m.id}
                       onClick={() => setMethod(m.id as any)}
-                      className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all font-black text-[10px] uppercase tracking-widest ${method === m.id ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
+                      className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all font-black text-[10px] uppercase tracking-widest ${method === m.id ? 'bg-green-50 border-green-500 text-green-700 shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
                     >
                       <m.icon size={18} />
                       {m.label}
@@ -596,7 +596,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="p-10 bg-slate-50 border-t shrink-0">
               <button
                 onClick={handleManualPayment}
-                className="w-full py-6 bg-emerald-600 text-white font-black rounded-[2rem] hover:bg-emerald-700 transition-all shadow-2xl shadow-emerald-200 uppercase tracking-[0.3em] text-xs active:scale-95 flex items-center justify-center gap-3"
+                className="w-full py-6 bg-green-600 text-white font-black rounded-[2rem] hover:bg-green-700 transition-all shadow-2xl shadow-green-200 uppercase tracking-[0.3em] text-xs active:scale-95 flex items-center justify-center gap-3"
               >
                 <ShieldCheck size={20} />
                 Validate & Record
@@ -610,3 +610,4 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default RecoveryDashboard;
+

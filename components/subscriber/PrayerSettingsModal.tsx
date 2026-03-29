@@ -21,7 +21,7 @@ const PrayerSettingsModal: React.FC<Props> = ({ onClose, settings, onUpdate }) =
       <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden border-[8px] border-slate-50 flex flex-col max-h-[90vh]">
         <div className="p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
               <Settings2 size={20} />
             </div>
             <div>
@@ -43,13 +43,13 @@ const PrayerSettingsModal: React.FC<Props> = ({ onClose, settings, onUpdate }) =
             <div className="flex bg-slate-100 p-1.5 rounded-2xl">
               <button 
                 onClick={() => onUpdate({ ...settings, autoLocation: true })}
-                className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${settings.autoLocation ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+                className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${settings.autoLocation ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'}`}
               >
                 Auto (GPS)
               </button>
               <button 
                 onClick={() => onUpdate({ ...settings, autoLocation: false })}
-                className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${!settings.autoLocation ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+                className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${!settings.autoLocation ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'}`}
               >
                 Manual City
               </button>
@@ -60,14 +60,14 @@ const PrayerSettingsModal: React.FC<Props> = ({ onClose, settings, onUpdate }) =
                 <input 
                   type="text" 
                   placeholder="City" 
-                  className="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs uppercase outline-none focus:border-indigo-500"
+                  className="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs uppercase outline-none focus:border-blue-500"
                   value={settings.city}
                   onChange={(e) => onUpdate({ ...settings, city: e.target.value })}
                 />
                 <input 
                   type="text" 
                   placeholder="Country" 
-                  className="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs uppercase outline-none focus:border-indigo-500"
+                  className="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs uppercase outline-none focus:border-blue-500"
                   value={settings.country}
                   onChange={(e) => onUpdate({ ...settings, country: e.target.value })}
                 />
@@ -78,20 +78,20 @@ const PrayerSettingsModal: React.FC<Props> = ({ onClose, settings, onUpdate }) =
           {/* Juristic Section */}
           <div className="space-y-4">
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <ShieldCheck size={14} className="text-emerald-500" /> Calculation Juristic
+              <ShieldCheck size={14} className="text-green-500" /> Calculation Juristic
             </h4>
             <div className="space-y-2">
               <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Asr Method</label>
               <div className="flex bg-slate-100 p-1.5 rounded-2xl">
                 <button 
                   onClick={() => onUpdate({ ...settings, asrMethod: 0 })}
-                  className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${settings.asrMethod === 0 ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+                  className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${settings.asrMethod === 0 ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'}`}
                 >
                   Standard (Shafi+)
                 </button>
                 <button 
                   onClick={() => onUpdate({ ...settings, asrMethod: 1 })}
-                  className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${settings.asrMethod === 1 ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400'}`}
+                  className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${settings.asrMethod === 1 ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400'}`}
                 >
                   Hanafi
                 </button>
@@ -100,7 +100,7 @@ const PrayerSettingsModal: React.FC<Props> = ({ onClose, settings, onUpdate }) =
             <div className="space-y-2">
               <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Calculation Method</label>
               <select 
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs uppercase outline-none focus:ring-2 focus:ring-indigo-500/10"
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs uppercase outline-none focus:ring-2 focus:ring-blue-500/10"
                 value={settings.method}
                 onChange={(e) => onUpdate({ ...settings, method: Number(e.target.value) })}
               >
@@ -124,7 +124,7 @@ const PrayerSettingsModal: React.FC<Props> = ({ onClose, settings, onUpdate }) =
                 <span className="text-[10px] font-black uppercase text-slate-700">Master Alert</span>
                 <button 
                   onClick={() => onUpdate({ ...settings, alerts: { ...settings.alerts, enabled: !settings.alerts.enabled } })}
-                  className={`w-12 h-6 rounded-full relative transition-all duration-300 ${settings.alerts.enabled ? 'bg-indigo-600' : 'bg-slate-300'}`}
+                  className={`w-12 h-6 rounded-full relative transition-all duration-300 ${settings.alerts.enabled ? 'bg-blue-600' : 'bg-slate-300'}`}
                 >
                   <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${settings.alerts.enabled ? 'left-7' : 'left-1'}`}></div>
                 </button>
@@ -137,7 +137,7 @@ const PrayerSettingsModal: React.FC<Props> = ({ onClose, settings, onUpdate }) =
                     <button 
                       key={s}
                       onClick={() => onUpdate({ ...settings, alerts: { ...settings.alerts, sound: s } })}
-                      className={`py-3 rounded-xl text-[9px] font-black uppercase border-2 transition-all ${settings.alerts.sound === s ? 'bg-indigo-50 border-indigo-600 text-indigo-600 shadow-sm' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
+                      className={`py-3 rounded-xl text-[9px] font-black uppercase border-2 transition-all ${settings.alerts.sound === s ? 'bg-blue-50 border-blue-600 text-blue-600 shadow-sm' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
                     >
                       {s}
                     </button>

@@ -22,7 +22,7 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
            <p className="text-[10px] text-slate-500 font-bold">Here’s a quick overview of your internet account and services.</p>
         </div>
         {isNewUser && (
-          <div className="flex items-center gap-1.5 text-[9px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100 uppercase animate-pulse">
+          <div className="flex items-center gap-1.5 text-[9px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-lg border border-green-100 uppercase animate-pulse">
             <Sparkles size={10} /> New Account
           </div>
         )}
@@ -34,14 +34,14 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
             {user.profileImage ? (
               <img src={user.profileImage} className="w-full h-full object-cover" alt="User Profile" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-indigo-600">
+              <div className="w-full h-full flex items-center justify-center bg-blue-600">
                 <UserIcon size={32} className="text-white" />
               </div>
             )}
           </div>
           <div className="space-y-3 flex-1">
             <div className="flex flex-col">
-              <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1 italic">
+              <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1 italic">
                 Your Plan & Connection
               </span>
               <h4 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none italic">
@@ -49,7 +49,7 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
               </h4>
             </div>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-1">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 rounded-xl border border-green-100">
                 <PackageIcon size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest">
                   Plan: {currentPkg?.name || 'Active'}
@@ -65,7 +65,7 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
 
         <button
           onClick={() => setShowSpeedTest(true)}
-          className="w-full md:w-auto px-8 py-5 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center gap-3 shrink-0"
+          className="w-full md:w-auto px-8 py-5 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-3 shrink-0"
         >
           <Activity size={16} fill="none" />
           Check Speed
@@ -79,3 +79,4 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
 };
 
 export default SubscriberQuickStatus;
+

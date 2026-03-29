@@ -86,7 +86,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
             <div>
                <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
-                  <Wallet className="text-emerald-600" size={32} />
+                  <Wallet className="text-green-600" size={32} />
                   Wallet Management
                </h2>
                <p className="text-slate-500 font-medium">Manage operational wallet balance and add credits across the network.</p>
@@ -121,11 +121,11 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         <div className="space-y-1">
                            <p className="text-[13px] font-black text-blue-400 uppercase tracking-[0.4em] italic">My Wallet Balance</p>
                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                               <span className="text-[9px] font-black uppercase text-slate-500">Balance Updated</span>
                            </div>
                         </div>
-                        <ShieldCheck className="text-emerald-400" size={40} />
+                        <ShieldCheck className="text-green-400" size={40} />
                      </div>
                      <h3 className="text-8xl font-black tracking-tighter italic">
                         {state.settings.currency} {(currentUser.balance || 0).toLocaleString()}
@@ -136,7 +136,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      <button
                         onClick={handleAutoRefill}
                         disabled={isRefilling}
-                        className="flex-1 py-6 bg-emerald-600 hover:bg-emerald-500 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                        className="flex-1 py-6 bg-green-600 hover:bg-green-500 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl shadow-green-500/20 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                      >
                         {isRefilling ? <Mini5GMicroLoader size={20} /> : <Zap size={20} fill="currentColor" />}
                         {isRefilling ? 'Updating Balance...' : 'Auto-Refill (10M)'}
@@ -161,7 +161,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                  <p className="text-[10px] font-black text-slate-900 uppercase truncate max-w-[120px]">{log.description}</p>
                                  <p className="text-[8px] text-slate-400 font-bold uppercase">{new Date(log.timestamp).toLocaleDateString()}</p>
                               </div>
-                              <p className={`text-sm font-black italic ${log.type === LedgerType.CREDIT ? 'text-emerald-600' : 'text-rose-600'}`}>
+                              <p className={`text-sm font-black italic ${log.type === LedgerType.CREDIT ? 'text-green-600' : 'text-rose-600'}`}>
                                  {log.type === LedgerType.CREDIT ? '+' : '-'}{log.amount.toLocaleString()}
                               </p>
                            </div>
@@ -207,7 +207,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            <button
                               onClick={() => handleApproveRequest(req.id)}
                               disabled={isProcessing === req.id}
-                              className="px-8 py-3 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase hover:bg-emerald-700 active:scale-95 transition-all shadow-lg shadow-emerald-100 flex items-center gap-2"
+                              className="px-8 py-3 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase hover:bg-green-700 active:scale-95 transition-all shadow-lg shadow-green-100 flex items-center gap-2"
                            >
                               {isProcessing === req.id ? <Mini5GMicroLoader size={14} /> : <CheckCircle size={14} />}
                               Approve Topup
@@ -257,7 +257,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">{s.role}</p>
                                  <button
                                     onClick={() => { setSelectedTarget({ id: s.email, name: s.name, type: 'staff' }); setIsTopupModalOpen(true); }}
-                                    className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all active:scale-95 shadow-xl shadow-emerald-100"
+                                    className="w-full py-4 bg-green-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-green-700 transition-all active:scale-95 shadow-xl shadow-green-100"
                                  >
                                     Load Staff Wallet
                                  </button>
@@ -270,12 +270,12 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         <div key={u.id} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm hover:shadow-xl transition-all group overflow-hidden relative">
                            <div className="relative z-10 flex flex-col h-full justify-between">
                               <div className="flex justify-between items-start mb-6">
-                                 <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center border border-emerald-100 group-hover:rotate-6 transition-transform">
+                                 <div className="w-14 h-14 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center border border-green-100 group-hover:rotate-6 transition-transform">
                                     <HandCoins size={32} />
                                  </div>
                                  <div className="text-right">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Balance</p>
-                                    <p className={`text-xl font-black ${u.balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>{state.settings.currency} {u.balance.toLocaleString()}</p>
+                                    <p className={`text-xl font-black ${u.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>{state.settings.currency} {u.balance.toLocaleString()}</p>
                                  </div>
                               </div>
                               <div>
@@ -283,7 +283,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">{u.connectionId}</p>
                                  <button
                                     onClick={() => { setSelectedTarget({ id: u.id, name: u.name, type: 'user' }); setIsTopupModalOpen(true); }}
-                                    className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-700 transition-all active:scale-95 shadow-xl shadow-emerald-100"
+                                    className="w-full py-4 bg-green-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-green-700 transition-all active:scale-95 shadow-xl shadow-green-100"
                                  >
                                     Apply User Credit
                                  </button>
@@ -300,21 +300,21 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
          {isTopupModalOpen && selectedTarget && (
             <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[500] flex items-center justify-center p-4">
                <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl animate-in zoom-in duration-300 overflow-hidden border border-white/20 flex flex-col">
-                  <div className="px-10 py-8 bg-emerald-600 text-white flex justify-between items-center">
+                  <div className="px-10 py-8 bg-green-600 text-white flex justify-between items-center">
                      <div>
                         <h3 className="text-2xl font-black uppercase tracking-tighter italic">Add Credits</h3>
-                        <p className="text-emerald-100 text-[10px] font-bold uppercase mt-1 tracking-widest">Target: {selectedTarget.name}</p>
+                        <p className="text-green-100 text-[10px] font-bold uppercase mt-1 tracking-widest">Target: {selectedTarget.name}</p>
                      </div>
-                     <button onClick={() => setIsTopupModalOpen(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-emerald-100 hover:text-white"><X size={28} /></button>
+                     <button onClick={() => setIsTopupModalOpen(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-green-100 hover:text-white"><X size={28} /></button>
                   </div>
                   <div className="p-10 space-y-10">
                      <div>
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">Credits to Add (Rs.)</label>
                         <div className="relative">
-                           <DollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-emerald-50 font-black text-2xl" />
+                           <DollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-green-50 font-black text-2xl" />
                            <input
                               type="number"
-                              className="w-full pl-16 pr-6 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-5xl outline-none focus:border-emerald-500 transition-all text-slate-900 shadow-inner"
+                              className="w-full pl-16 pr-6 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-5xl outline-none focus:border-green-500 transition-all text-slate-900 shadow-inner"
                               value={amount}
                               onChange={e => setAmount(Number(e.target.value))}
                               autoFocus
@@ -324,7 +324,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      <button
                         onClick={handleProcessTopup}
                         disabled={amount <= 0 || (!isSuperAdmin && (currentUser.balance || 0) < amount)}
-                        className="w-full py-6 bg-emerald-600 text-white font-black rounded-[2rem] hover:bg-emerald-700 transition-all shadow-2xl shadow-emerald-200 uppercase tracking-[0.3em] text-xs active:scale-95 disabled:grayscale disabled:opacity-50"
+                        className="w-full py-6 bg-green-600 text-white font-black rounded-[2rem] hover:bg-green-700 transition-all shadow-2xl shadow-green-200 uppercase tracking-[0.3em] text-xs active:scale-95 disabled:grayscale disabled:opacity-50"
                      >
                         Confirm Transfer
                      </button>
@@ -337,3 +337,4 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default WalletManagement;
+

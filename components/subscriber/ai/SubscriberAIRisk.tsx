@@ -12,7 +12,7 @@ interface Props {
 const SubscriberAIRisk: React.FC<Props> = ({ user, state, onBack }) => {
   const range = useMemo(() => {
     const score = user.creditScore;
-    if (score >= 750) return { label: 'Excellent', color: 'text-emerald-500', bar: 'bg-emerald-500', icon: ShieldCheck, desc: 'Highest trust node level active.' };
+    if (score >= 750) return { label: 'Excellent', color: 'text-green-500', bar: 'bg-green-500', icon: ShieldCheck, desc: 'Highest trust node level active.' };
     if (score >= 600) return { label: 'Good', color: 'text-blue-500', bar: 'bg-blue-500', icon: ShieldCheck, desc: 'Stable system handshake maintained.' };
     return { label: 'Fair', color: 'text-amber-500', bar: 'bg-amber-500', icon: ShieldAlert, desc: 'Node requires behavioral optimization.' };
   }, [user.creditScore]);
@@ -20,7 +20,7 @@ const SubscriberAIRisk: React.FC<Props> = ({ user, state, onBack }) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-right duration-500 pb-24">
       <div className="flex items-center gap-4 px-2">
-         <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 active:scale-90 transition-all shadow-sm">
+         <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-blue-600 active:scale-90 transition-all shadow-sm">
             <ArrowLeft size={20} />
          </button>
          <div>
@@ -56,18 +56,18 @@ const SubscriberAIRisk: React.FC<Props> = ({ user, state, onBack }) => {
 
       <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm space-y-8">
          <div className="flex items-center gap-3">
-            <History size={24} className="text-indigo-600" />
+            <History size={24} className="text-blue-600" />
             <h4 className="text-sm font-black uppercase italic tracking-widest text-slate-900">Behavioral Synthesis</h4>
          </div>
          <div className="space-y-4">
             {[
-              { label: 'Payment Consistency', impact: '+12', color: 'text-emerald-600', icon: TrendingUp },
+              { label: 'Payment Consistency', impact: '+12', color: 'text-green-600', icon: TrendingUp },
               { label: 'Emergency Load Usage', impact: '-5', color: 'text-rose-600', icon: Activity },
-              { label: 'Registry Loyalty', impact: '+8', color: 'text-emerald-600', icon: Sparkles }
+              { label: 'Registry Loyalty', impact: '+8', color: 'text-green-600', icon: Sparkles }
             ].map(log => (
               <div key={log.label} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:bg-white transition-all">
                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-300 group-hover:text-indigo-600 border shadow-sm">
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-slate-300 group-hover:text-blue-600 border shadow-sm">
                        <log.icon size={20} />
                     </div>
                     <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{log.label}</span>
@@ -92,3 +92,4 @@ const SubscriberAIRisk: React.FC<Props> = ({ user, state, onBack }) => {
 };
 
 export default SubscriberAIRisk;
+

@@ -12,16 +12,16 @@ const SubscriberSpiritualRegistry: React.FC<Props> = ({ onAction }) => {
       id: 'namaz', 
       label: 'Prayer Times', 
       icon: Clock, 
-      color: 'text-indigo-600', 
-      bg: 'bg-indigo-50', 
+      color: 'text-blue-600', 
+      bg: 'bg-blue-50', 
       desc: 'Local Schedule' 
     },
     { 
       id: 'quran', 
       label: 'Noble Quran', 
       icon: BookOpen, 
-      color: 'text-emerald-600', 
-      bg: 'bg-emerald-50', 
+      color: 'text-green-600', 
+      bg: 'bg-green-50', 
       desc: 'Holy Text' 
     },
     { 
@@ -56,13 +56,13 @@ const SubscriberSpiritualRegistry: React.FC<Props> = ({ onAction }) => {
           <button 
             key={tool.id}
             onClick={() => onAction(tool.id)}
-            className="p-6 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all duration-300 active:scale-95 group text-left flex items-start gap-4"
+            className="p-6 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 active:scale-95 group text-left flex items-start gap-4"
           >
             <div className={`w-12 h-12 ${tool.bg} ${tool.color} rounded-2xl flex items-center justify-center shadow-inner group-hover:rotate-6 transition-transform shrink-0`}>
               <tool.icon size={24} />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-black text-slate-900 uppercase tracking-tight leading-none mb-1 group-hover:text-indigo-600 transition-colors">
+              <h4 className="text-xs font-black text-slate-900 uppercase tracking-tight leading-none mb-1 group-hover:text-blue-600 transition-colors">
                 {tool.label}
               </h4>
               <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">{tool.desc}</p>
@@ -75,3 +75,4 @@ const SubscriberSpiritualRegistry: React.FC<Props> = ({ onAction }) => {
 };
 
 export default SubscriberSpiritualRegistry;
+

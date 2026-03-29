@@ -90,7 +90,7 @@ const SpeedTestPage: React.FC = () => {
              <circle
                cx="50%" cy="50%" r="44%" fill="none" stroke="currentColor" strokeWidth="15"
                strokeDasharray="276" strokeDashoffset={`${276 - (276 * progress) / 100}`}
-               className={`transition-all duration-300 ${phase === 'upload' ? 'text-emerald-500' : 'text-indigo-600'}`}
+               className={`transition-all duration-300 ${phase === 'upload' ? 'text-green-500' : 'text-blue-600'}`}
              />
            </svg>
            <div className="flex flex-col items-center z-10">
@@ -110,12 +110,12 @@ const SpeedTestPage: React.FC = () => {
            {isTesting ? 'Testing...' : (phase === 'completed' ? 'Test Again' : 'Start Speed Test')}
         </button>
 
-        <Activity className="absolute -right-12 -bottom-12 opacity-[0.03] scale-[4] pointer-events-none text-indigo-900" size={200} />
+        <Activity className="absolute -right-12 -bottom-12 opacity-[0.03] scale-[4] pointer-events-none text-blue-900" size={200} />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-         <div className={`p-8 rounded-[2rem] border shadow-sm flex flex-col items-center gap-4 transition-all ${phase === 'upload' ? 'bg-white border-emerald-400 scale-105 z-10' : 'bg-white border-slate-100 hover:bg-emerald-50'}`}>
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform ${phase === 'upload' ? 'bg-emerald-100 text-emerald-600 animate-bounce' : 'bg-slate-50 text-emerald-600'}`}>
+         <div className={`p-8 rounded-[2rem] border shadow-sm flex flex-col items-center gap-4 transition-all ${phase === 'upload' ? 'bg-white border-green-400 scale-105 z-10' : 'bg-white border-slate-100 hover:bg-green-50'}`}>
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform ${phase === 'upload' ? 'bg-green-100 text-green-600 animate-bounce' : 'bg-slate-50 text-green-600'}`}>
                <ArrowUpCircle size={28} />
             </div>
             <div className="text-center">
@@ -137,14 +137,14 @@ const SpeedTestPage: React.FC = () => {
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
          <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-               <History size={14} className="text-indigo-600"/> Test History
+               <History size={14} className="text-blue-600"/> Test History
             </h3>
          </div>
          <div className="divide-y divide-slate-50">
             {testHistory.map((test, i) => (
               <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-all group">
                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-indigo-600"><Wifi size={18}/></div>
+                    <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-blue-600"><Wifi size={18}/></div>
                     <div>
                        <p className="text-xs font-black text-slate-900 uppercase">Speed Test</p>
                        <p className="text-[8px] text-slate-400 font-bold uppercase">{test.timestamp}</p>
@@ -166,3 +166,4 @@ const SpeedTestPage: React.FC = () => {
 };
 
 export default SpeedTestPage;
+

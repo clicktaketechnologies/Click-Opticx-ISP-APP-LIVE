@@ -26,13 +26,13 @@ const WeatherForecastCard: React.FC<Props> = ({ date, maxTemp, minTemp, weatherC
 
   return (
     <div className={`flex-none w-24 p-5 rounded-3xl border transition-all flex flex-col items-center gap-3 group ${
-      isToday ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-900 hover:border-indigo-200'
+      isToday ? 'bg-blue-600 border-blue-500 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-900 hover:border-blue-200'
     }`}>
-      <p className={`text-[10px] font-black uppercase tracking-widest ${isToday ? 'text-indigo-100' : 'text-slate-400'}`}>
+      <p className={`text-[10px] font-black uppercase tracking-widest ${isToday ? 'text-blue-100' : 'text-slate-400'}`}>
         {isToday ? 'Today' : dayName}
       </p>
-      <div className={`p-2 rounded-xl ${isToday ? 'bg-white/10' : 'bg-slate-50 group-hover:bg-indigo-50'} transition-colors`}>
-        <Icon size={20} className={isToday ? 'text-white' : 'text-indigo-500'} />
+      <div className={`p-2 rounded-xl ${isToday ? 'bg-white/10' : 'bg-slate-50 group-hover:bg-blue-50'} transition-colors`}>
+        <Icon size={20} className={isToday ? 'text-white' : 'text-blue-500'} />
       </div>
       <div className="text-center">
         <p className="text-sm font-black tracking-tighter">{Math.round(maxTemp)}°</p>

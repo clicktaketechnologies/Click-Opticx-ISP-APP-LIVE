@@ -85,14 +85,14 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none uppercase">
-            <ListTodo className="text-indigo-600" size={32} />
+            <ListTodo className="text-blue-600" size={32} />
             Internal Operations
           </h2>
           <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Manage tasks and team assignments</p>
         </div>
         <button 
           onClick={() => setIsAdding(true)}
-          className="flex items-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs hover:bg-indigo-700 shadow-xl shadow-indigo-100 active:scale-95 transition-all uppercase tracking-widest"
+          className="flex items-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs hover:bg-blue-700 shadow-xl shadow-blue-100 active:scale-95 transition-all uppercase tracking-widest"
         >
           <Plus size={18} />
           Add New Task
@@ -105,12 +105,12 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
           <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
             <div className="p-8 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Clock size={20} className="text-indigo-600" />
+                <Clock size={20} className="text-blue-600" />
                 <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest italic">
                   Task Board
                 </h3>
               </div>
-              <span className="text-[10px] font-black text-indigo-600 bg-white border border-indigo-100 px-4 py-1.5 rounded-full uppercase tracking-tighter">
+              <span className="text-[10px] font-black text-blue-600 bg-white border border-blue-100 px-4 py-1.5 rounded-full uppercase tracking-tighter">
                 {sortedTasks.filter(t => !t.completed).length} Pending Tasks
               </span>
             </div>
@@ -133,11 +133,11 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         onDragOver={handleDragOver}
                         onDrop={() => handleDrop(task.id)}
                         className={`group p-8 bg-white border-2 rounded-[2.5rem] flex flex-col md:flex-row items-center gap-8 transition-all duration-500 ease-out ${
-                          draggedTaskId === task.id ? 'opacity-40 scale-95 border-dashed' : 'border-slate-50 hover:border-indigo-100 hover:shadow-2xl'
-                        } ${task.completed ? 'bg-emerald-50/10 border-emerald-100/50 grayscale' : ''}`}
+                          draggedTaskId === task.id ? 'opacity-40 scale-95 border-dashed' : 'border-slate-50 hover:border-blue-100 hover:shadow-2xl'
+                        } ${task.completed ? 'bg-green-50/10 border-green-100/50 grayscale' : ''}`}
                       >
                         <div className="flex items-center gap-6 w-full md:w-auto">
-                           <div className="cursor-grab active:cursor-grabbing text-slate-200 group-hover:text-indigo-400 transition-colors hidden md:block">
+                           <div className="cursor-grab active:cursor-grabbing text-slate-200 group-hover:text-blue-400 transition-colors hidden md:block">
                               <GripVertical size={20} />
                            </div>
                            <button 
@@ -146,10 +146,10 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            >
                               {task.completed ? (
                                 <div className="animate-in zoom-in spin-in-180 duration-500">
-                                   <CheckCircle2 size={40} className="text-emerald-500" />
+                                   <CheckCircle2 size={40} className="text-green-500" />
                                 </div>
                               ) : (
-                                <Circle size={40} className="text-slate-200 group-hover:text-indigo-400 transition-all duration-300 group-hover:scale-110" />
+                                <Circle size={40} className="text-slate-200 group-hover:text-blue-400 transition-all duration-300 group-hover:scale-110" />
                               )}
                            </button>
                         </div>
@@ -160,7 +160,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                               {task.text}
                             </p>
                             {task.completed && (
-                              <div className="absolute top-1/2 left-0 w-full h-[2px] bg-emerald-500/30 -translate-y-1/2 animate-in slide-in-from-left duration-700"></div>
+                              <div className="absolute top-1/2 left-0 w-full h-[2px] bg-green-500/30 -translate-y-1/2 animate-in slide-in-from-left duration-700"></div>
                             )}
                           </div>
                           
@@ -170,7 +170,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                             </div>
                             {task.dueDate && (
                               <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                <Calendar size={12} className={task.completed ? 'text-slate-300' : 'text-indigo-500'} />
+                                <Calendar size={12} className={task.completed ? 'text-slate-300' : 'text-blue-500'} />
                                 Due: {new Date(task.dueDate).toLocaleDateString()}
                               </div>
                             )}
@@ -181,9 +181,9 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            <div className="flex items-center gap-3">
                               <div className="text-right">
                                  <p className="text-[10px] font-black text-slate-900 uppercase italic leading-none">{assignee.name}</p>
-                                 <p className="text-[7px] text-indigo-500 font-black uppercase tracking-widest mt-1">{assignee.role}</p>
+                                 <p className="text-[7px] text-blue-500 font-black uppercase tracking-widest mt-1">{assignee.role}</p>
                               </div>
-                              <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 border border-indigo-100 shadow-inner">
+                              <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 border border-blue-100 shadow-inner">
                                  <UserCircle size={24}/>
                               </div>
                            </div>
@@ -210,7 +210,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="relative z-10 space-y-10">
                <div className="flex items-center gap-4">
                   <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md border border-white/5">
-                     <Activity className="text-emerald-400" size={28} />
+                     <Activity className="text-green-400" size={28} />
                   </div>
                   <div>
                     <h4 className="text-lg font-black uppercase italic tracking-tighter">Team Progress</h4>
@@ -220,7 +220,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                <div className="space-y-4">
                   <div className="p-6 bg-white/5 border border-white/10 rounded-3xl group hover:bg-white/10 transition-all">
                     <p className="text-[10px] font-black text-slate-500 uppercase mb-2 italic">Completion Rate</p>
-                    <p className="text-2xl font-black text-emerald-400 tracking-tighter italic">92% COMPLETED</p>
+                    <p className="text-2xl font-black text-green-400 tracking-tighter italic">92% COMPLETED</p>
                   </div>
                   <div className="p-6 bg-white/5 border border-white/10 rounded-3xl group hover:bg-white/10 transition-all">
                     <p className="text-[10px] font-black text-slate-500 uppercase mb-2 italic">Unassigned Tasks</p>
@@ -233,7 +233,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm space-y-6">
              <div className="flex items-center gap-3">
-                <ShieldCheck size={20} className="text-indigo-600" />
+                <ShieldCheck size={20} className="text-blue-600" />
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-900">Task Details</h4>
              </div>
              <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed">
@@ -249,7 +249,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
           <div className="bg-white rounded-[3.5rem] w-full max-w-xl shadow-[0_50px_100px_rgba(0,0,0,0.3)] overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300">
              <div className="p-10 border-b bg-slate-50 flex justify-between items-center">
                 <div className="flex items-center gap-5">
-                   <div className="w-16 h-16 bg-indigo-600 rounded-3xl flex items-center justify-center text-white shadow-xl">
+                   <div className="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center text-white shadow-xl">
                       <Plus size={32} />
                    </div>
                    <div>
@@ -266,7 +266,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                 <div className="space-y-3">
                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Task Description</label>
                    <input 
-                    className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-xl outline-none focus:border-indigo-600 transition-all text-slate-900 shadow-inner placeholder:text-slate-200"
+                    className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-xl outline-none focus:border-blue-600 transition-all text-slate-900 shadow-inner placeholder:text-slate-200"
                     placeholder="Enter task name or description..."
                     value={newTaskText}
                     onChange={e => setNewTaskText(e.target.value)}
@@ -281,7 +281,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                       <div className="relative">
                          <UserCircle className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
                          <select 
-                           className="w-full pl-14 pr-6 py-5 bg-white border-2 border-slate-100 rounded-[1.5rem] font-black text-xs uppercase outline-none focus:border-indigo-500 appearance-none shadow-sm cursor-pointer"
+                           className="w-full pl-14 pr-6 py-5 bg-white border-2 border-slate-100 rounded-[1.5rem] font-black text-xs uppercase outline-none focus:border-blue-500 appearance-none shadow-sm cursor-pointer"
                            value={assignedTo}
                            onChange={e => setAssignedTo(e.target.value)}
                          >
@@ -303,7 +303,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                 type="button"
                                 key={p}
                                 onClick={() => setPriority(p)}
-                                className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${priority === p ? 'bg-white text-indigo-600 shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
+                                className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${priority === p ? 'bg-white text-blue-600 shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
                               >
                                 {p}
                               </button>
@@ -314,7 +314,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Due Date</label>
                          <input 
                            type="date"
-                           className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-indigo-500 shadow-sm"
+                           className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-blue-500 shadow-sm"
                            value={dueDate}
                            onChange={e => setDueDate(e.target.value)}
                          />
@@ -331,7 +331,7 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
                 <button 
                   type="submit"
-                  className="w-full py-7 bg-slate-950 text-white font-black rounded-3xl shadow-2xl shadow-indigo-900/20 hover:bg-black transition-all active:scale-95 uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-4"
+                  className="w-full py-7 bg-slate-950 text-white font-black rounded-3xl shadow-2xl shadow-blue-900/20 hover:bg-black transition-all active:scale-95 uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-4"
                 >
                    <CheckCircle size={24} strokeWidth={3} />
                    Create Task
@@ -345,3 +345,4 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default TaskManagement;
+

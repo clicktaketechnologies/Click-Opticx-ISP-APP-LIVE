@@ -57,13 +57,13 @@ const SubscriberCashPayment: React.FC<Props> = ({ user, state, onSuccess }) => {
         </button>
       </div>
 
-      <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-[2rem] flex items-start gap-4 shadow-sm">
-        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm shrink-0">
+      <div className="bg-green-50 border border-green-100 p-6 rounded-[2rem] flex items-start gap-4 shadow-sm">
+        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-green-600 shadow-sm shrink-0">
           <Banknote size={24} />
         </div>
         <div>
-          <h4 className="text-xs font-black text-emerald-900 uppercase tracking-widest mb-1">{method === 'Cash' ? 'Retail Cash Protocol' : 'Bank Wire Protocol'}</h4>
-          <p className="text-[10px] text-emerald-700 font-bold leading-relaxed uppercase">
+          <h4 className="text-xs font-black text-green-900 uppercase tracking-widest mb-1">{method === 'Cash' ? 'Retail Cash Protocol' : 'Bank Wire Protocol'}</h4>
+          <p className="text-[10px] text-green-700 font-bold leading-relaxed uppercase">
             {method === 'Cash'
               ? 'Pay at any authorized regional shop. Show your transaction ID for node verification.'
               : `Transfer exactly Rs. ${total.toLocaleString()} to ${bankDetails.bankName || 'Awaiting Bank'}. Account: ${bankDetails.accountTitle || 'N/A'}. IBAN: ${bankDetails.iban || 'N/A'}.`}
@@ -75,7 +75,7 @@ const SubscriberCashPayment: React.FC<Props> = ({ user, state, onSuccess }) => {
         <div className="space-y-2">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Choose Service Tier</label>
           <select
-            className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm outline-none focus:border-emerald-500 transition-all"
+            className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm outline-none focus:border-green-500 transition-all"
             value={selectedPkgId}
             onChange={e => setSelectedPkgId(e.target.value)}
           >
@@ -86,9 +86,9 @@ const SubscriberCashPayment: React.FC<Props> = ({ user, state, onSuccess }) => {
         </div>
 
         {selectedPkg && (
-          <div className="p-6 bg-slate-900 rounded-3xl text-center shadow-xl border-t-4 border-emerald-500">
+          <div className="p-6 bg-slate-900 rounded-3xl text-center shadow-xl border-t-4 border-green-500">
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Payable</p>
-            <p className="text-3xl font-black text-emerald-400 italic">Rs. {total.toLocaleString()}</p>
+            <p className="text-3xl font-black text-green-400 italic">Rs. {total.toLocaleString()}</p>
             {state.settings.enableTax && (
               <p className="text-[8px] text-slate-500 uppercase mt-2 font-black">Includes {state.settings.autoTaxPercentage}% {state.settings.taxLabel || 'Tax'}</p>
             )}
@@ -98,7 +98,7 @@ const SubscriberCashPayment: React.FC<Props> = ({ user, state, onSuccess }) => {
         <div className="space-y-2">
           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Note (Optional)</label>
           <textarea
-            className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xs h-24 outline-none focus:border-emerald-500"
+            className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xs h-24 outline-none focus:border-green-500"
             placeholder="e.g. Paid at Gulshan Branch..."
             value={note}
             onChange={e => setNote(e.target.value)}
@@ -119,3 +119,4 @@ const SubscriberCashPayment: React.FC<Props> = ({ user, state, onSuccess }) => {
 };
 
 export default SubscriberCashPayment;
+

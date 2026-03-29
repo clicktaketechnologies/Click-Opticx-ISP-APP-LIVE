@@ -161,18 +161,18 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
                 key={item.id}
                 onClick={() => onNavigate(item.id)}
                 className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all duration-200 group ${isActive
-                  ? isAI ? 'bg-slate-900 text-indigo-400 shadow-2xl border-l-4 border-indigo-500' : isComm ? 'bg-indigo-900 text-white border-l-4 border-emerald-400' : 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/40 border-l-4 border-white'
+                  ? isAI ? 'bg-slate-900 text-blue-400 shadow-2xl border-l-4 border-blue-500' : isComm ? 'bg-blue-900 text-white border-l-4 border-green-400' : 'bg-blue-600 text-white shadow-xl shadow-blue-900/40 border-l-4 border-white'
                   : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <item.icon size={16} className={isActive ? (isAI ? 'text-indigo-400' : 'text-white') : 'text-slate-500 group-hover:text-indigo-400'} />
+                  <item.icon size={16} className={isActive ? (isAI ? 'text-blue-400' : 'text-white') : 'text-slate-500 group-hover:text-blue-400'} />
                   <span className={`font-black text-[11px] uppercase tracking-widest ${isActive ? 'text-white' : ''}`}>
                     {item.label}
                   </span>
                 </div>
                 {isActive && !isAI && !isComm && <div className="w-1 h-1 rounded-full bg-white animate-pulse"></div>}
-                {isAI && <Sparkles size={12} className="text-indigo-400 animate-pulse" />}
+                {isAI && <Sparkles size={12} className="text-blue-400 animate-pulse" />}
               </button>
             );
           })}
@@ -191,7 +191,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
             ) : branding.logoSquare ? (
               <img src={branding.logoSquare} className="w-full h-full object-contain p-1" />
             ) : (
-              <Wifi className="text-indigo-500" size={24} />
+              <Wifi className="text-blue-500" size={24} />
             )}
           </div>
           <div>
@@ -207,9 +207,9 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
         <div className="px-4 py-3 bg-white/5 rounded-2xl border border-white/5">
           <div className="flex justify-between items-center mb-1">
             <span className="text-[7px] font-black text-slate-500 uppercase tracking-widest">Active Role</span>
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
           </div>
-          <p className="text-[10px] font-black text-indigo-400 uppercase truncate">{role}</p>
+          <p className="text-[10px] font-black text-blue-400 uppercase truncate">{role}</p>
         </div>
         <button onClick={onLogout} className="w-full flex items-center justify-center gap-3 px-4 py-3 text-slate-500 hover:text-rose-400 hover:bg-rose-400/10 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest">
           <LogOut size={18} />
@@ -221,3 +221,4 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
 };
 
 export default Sidebar;
+

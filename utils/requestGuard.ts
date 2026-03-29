@@ -25,3 +25,4 @@ export const RequestGuard = {
     return { allowed: true };
   }
 };
+

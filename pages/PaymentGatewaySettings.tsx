@@ -46,9 +46,9 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
    const getGatewayIcon = (id: string) => {
       switch (id) {
          case 'stripe': return <Globe className="text-blue-500" size={24} />;
-         case 'paypal': return <CreditCard className="text-indigo-500" size={24} />;
+         case 'paypal': return <CreditCard className="text-blue-500" size={24} />;
          case 'payfast': return <Zap className="text-amber-500" size={24} />;
-         case 'easypaisa': return <Smartphone className="text-emerald-500" size={24} />;
+         case 'easypaisa': return <Smartphone className="text-green-500" size={24} />;
          case 'jazzcash': return <Smartphone className="text-rose-500" size={24} />;
          case 'cash': return <Banknote className="text-slate-600" size={24} />;
          case 'bank': return <Landmark className="text-blue-600" size={24} />;
@@ -77,7 +77,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                   <button
                      key={tab.id}
                      onClick={() => setActiveTab(tab.id as any)}
-                     className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                     className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                   >
                      {tab.label}
                   </button>
@@ -87,19 +87,19 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
 
          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredGateways.map(gateway => (
-               <div key={gateway.id} className={`bg-white rounded-[2.5rem] border-2 p-8 transition-all hover:shadow-xl group relative overflow-hidden flex flex-col ${gateway.enabled ? 'border-emerald-100 shadow-emerald-50' : 'border-slate-50 opacity-60 grayscale'}`}>
+               <div key={gateway.id} className={`bg-white rounded-[2.5rem] border-2 p-8 transition-all hover:shadow-xl group relative overflow-hidden flex flex-col ${gateway.enabled ? 'border-green-100 shadow-green-50' : 'border-slate-50 opacity-60 grayscale'}`}>
                   <div className="flex justify-between items-start mb-8 relative z-10">
                      <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center border shadow-sm group-hover:scale-105 transition-transform">
                         {getGatewayIcon(gateway.id)}
                      </div>
                      <div className="flex items-center gap-3">
-                        <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${gateway.enabled ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-200 text-slate-500'}`}>
+                        <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${gateway.enabled ? 'bg-green-50 text-green-600' : 'bg-slate-200 text-slate-500'}`}>
                            {gateway.enabled ? 'Operational' : 'Disabled'}
                         </div>
                         {canEdit && (
                            <button
                               onClick={() => handleToggleGateway(gateway)}
-                              className={`w-12 h-6 rounded-full relative transition-all duration-300 ${gateway.enabled ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                              className={`w-12 h-6 rounded-full relative transition-all duration-300 ${gateway.enabled ? 'bg-green-500' : 'bg-slate-300'}`}
                            >
                               <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${gateway.enabled ? 'left-7' : 'left-1'}`}></div>
                            </button>
@@ -115,13 +115,13 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="mt-auto space-y-4 relative z-10">
                      {gateway.type !== 'offline' && (
                         <div className="flex items-center gap-2">
-                           <div className={`w-2 h-2 rounded-full ${gateway.sandbox ? 'bg-amber-500' : 'bg-indigo-500'} animate-pulse`}></div>
+                           <div className={`w-2 h-2 rounded-full ${gateway.sandbox ? 'bg-amber-500' : 'bg-blue-500'} animate-pulse`}></div>
                            <span className="text-[9px] font-black uppercase text-slate-500">{gateway.sandbox ? 'Sandbox Mode' : 'Production Node'}</span>
                         </div>
                      )}
                      <button
                         onClick={() => { setSelectedGateway({ ...gateway }); setIsConfigOpen(true); }}
-                        className="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest group-hover:bg-indigo-600 group-hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2"
+                        className="w-full py-4 bg-slate-50 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest group-hover:bg-blue-600 group-hover:text-white transition-all active:scale-95 flex items-center justify-center gap-2"
                      >
                         <Settings2 size={16} /> Configuration
                      </button>
@@ -135,7 +135,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
          {/* Production Health Banner */}
          <div className="bg-slate-900 rounded-[3rem] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-10 relative overflow-hidden shadow-2xl border border-white/5">
             <div className="relative z-10 max-w-xl space-y-4">
-               <div className="flex items-center gap-3 text-indigo-400">
+               <div className="flex items-center gap-3 text-blue-400">
                   <ShieldAlert size={28} />
                   <h3 className="text-xl font-black uppercase tracking-tight italic">Registry Node Monitor</h3>
                </div>
@@ -147,15 +147,15 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                <div className="p-6 bg-white/5 border border-white/10 rounded-3xl text-center backdrop-blur-md">
                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Active Listeners</p>
                   <div className="flex items-center justify-center gap-2">
-                     <Activity size={14} className="text-emerald-500 animate-pulse" />
-                     <p className="text-2xl font-black text-indigo-400">{gateways.filter(g => g.enabled).length}</p>
+                     <Activity size={14} className="text-green-500 animate-pulse" />
+                     <p className="text-2xl font-black text-blue-400">{gateways.filter(g => g.enabled).length}</p>
                   </div>
                </div>
                <div className="p-6 bg-white/5 border border-white/10 rounded-3xl text-center backdrop-blur-md">
                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Latency Tier</p>
                   <div className="flex items-center justify-center gap-2">
                      <Server size={14} className="text-blue-500" />
-                     <p className="text-2xl font-black text-emerald-400">ULTRA</p>
+                     <p className="text-2xl font-black text-green-400">ULTRA</p>
                   </div>
                </div>
             </div>
@@ -195,7 +195,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                               </button>
                               <button
                                  onClick={() => setSelectedGateway({ ...selectedGateway, sandbox: false })}
-                                 className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${!selectedGateway.sandbox ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
+                                 className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${!selectedGateway.sandbox ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400'}`}
                               >
                                  Live Node
                               </button>
@@ -206,7 +206,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                      <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Info size={14} /> Subscriber Guidance</label>
                         <textarea
-                           className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xs h-24 outline-none focus:border-indigo-500 uppercase"
+                           className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xs h-24 outline-none focus:border-blue-500 uppercase"
                            placeholder="Instructions displayed to the user during payment..."
                            value={selectedGateway.instructions || ''}
                            onChange={e => setSelectedGateway({ ...selectedGateway, instructions: e.target.value })}
@@ -218,7 +218,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Connection Parameters</h4>
                            <button
                               onClick={() => setShowSecrets(!showSecrets)}
-                              className="flex items-center gap-2 text-[9px] font-black uppercase text-indigo-600"
+                              className="flex items-center gap-2 text-[9px] font-black uppercase text-blue-600"
                            >
                               {showSecrets ? <EyeOff size={14} /> : <Eye size={14} />} {showSecrets ? 'Mask Tokens' : 'Reveal Secrets'}
                            </button>
@@ -230,7 +230,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">{key.replace(/([A-Z])/g, ' $1')}</label>
                                  <input
                                     type={!showSecrets && (key.toLowerCase().includes('secret') || key.toLowerCase().includes('key') || key.toLowerCase().includes('password')) ? 'password' : 'text'}
-                                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs outline-none focus:border-indigo-500"
+                                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs outline-none focus:border-blue-500"
                                     value={selectedGateway.config[key]}
                                     onChange={e => {
                                        const newConfig = { ...selectedGateway.config };
@@ -264,7 +264,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                      <button
                         onClick={handleSaveConfig}
                         disabled={isSaving}
-                        className="flex-[2] py-5 bg-emerald-600 text-white font-black rounded-2xl hover:bg-emerald-700 shadow-xl shadow-emerald-100 transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 active:scale-95"
+                        className="flex-[2] py-5 bg-green-600 text-white font-black rounded-2xl hover:bg-green-700 shadow-xl shadow-green-100 transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 active:scale-95"
                      >
                         {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20} />}
                         Authorize & Publish
@@ -278,3 +278,4 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default PaymentGatewaySettings;
+

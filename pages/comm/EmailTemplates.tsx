@@ -69,7 +69,7 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
         </div>
         <button 
           onClick={() => handleOpenEdit()}
-          className="flex items-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs hover:bg-indigo-700 shadow-xl active:scale-95 transition-all uppercase tracking-widest"
+          className="flex items-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs hover:bg-blue-700 shadow-xl active:scale-95 transition-all uppercase tracking-widest"
         >
           <Plus size={18} /> + Create Template
         </button>
@@ -79,7 +79,7 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="relative flex-1 w-full">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input 
-              className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-black text-slate-900"
+              className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-black text-slate-900"
               placeholder="Search templates..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
@@ -125,10 +125,10 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="bg-white rounded-[3.5rem] w-full max-6xl h-[90vh] shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col">
               <header className="p-8 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg"><Code2 size={28}/></div>
+                    <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg"><Code2 size={28}/></div>
                     <div>
                        <h3 className="text-2xl font-black uppercase italic tracking-tighter">Template Editor</h3>
-                       <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest">Tip: Use tags to personalize your messages</p>
+                       <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest">Tip: Use tags to personalize your messages</p>
                     </div>
                  </div>
                  <div className="flex gap-4">
@@ -146,11 +146,11 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="grid grid-cols-2 gap-6">
                        <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Template Name</label>
-                          <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all" value={editingTemplate.name} onChange={e => setEditingTemplate({...editingTemplate, name: e.target.value})} />
+                          <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-blue-600 transition-all" value={editingTemplate.name} onChange={e => setEditingTemplate({...editingTemplate, name: e.target.value})} />
                        </div>
                        <div className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Category</label>
-                          <select className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-indigo-500" value={editingTemplate.category} onChange={e => setEditingTemplate({...editingTemplate, category: e.target.value as any})}>
+                          <select className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-blue-500" value={editingTemplate.category} onChange={e => setEditingTemplate({...editingTemplate, category: e.target.value as any})}>
                              <option value="Billing">Billing</option>
                              <option value="Technical">Technical</option>
                              <option value="Marketing">Marketing</option>
@@ -167,7 +167,7 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
                                <button 
                                 key={v.key} 
                                 onClick={() => setEditingTemplate({...editingTemplate, content: (editingTemplate.content || '') + ' ' + v.key})}
-                                className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[8px] font-black border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-all"
+                                className="px-2 py-1 bg-blue-50 text-blue-600 rounded-lg text-[8px] font-black border border-blue-100 hover:bg-blue-600 hover:text-white transition-all"
                                 title={v.desc}
                                >
                                   {v.key}
@@ -176,7 +176,7 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
                           </div>
                        </div>
                        <textarea 
-                        className="w-full h-80 p-6 bg-slate-950 text-emerald-400 font-mono text-xs rounded-3xl resize-none outline-none border-4 border-slate-900 shadow-inner"
+                        className="w-full h-80 p-6 bg-slate-950 text-green-400 font-mono text-xs rounded-3xl resize-none outline-none border-4 border-slate-900 shadow-inner"
                         value={editingTemplate.content}
                         onChange={e => setEditingTemplate({...editingTemplate, content: e.target.value})}
                        />
@@ -224,7 +224,7 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
                  <button 
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
                     {isSaving ? <Mini5GMicroLoader size={18} /> : <Save size={18}/>}
                     Save Template
@@ -238,3 +238,4 @@ const EmailTemplates: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default EmailTemplates;
+

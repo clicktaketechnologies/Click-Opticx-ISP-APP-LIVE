@@ -41,17 +41,17 @@ const SubscriberBilling: React.FC<Props> = ({ user, state, onViewInvoice }) => {
                <button 
                 key={inv.id}
                 onClick={() => onViewInvoice(inv)}
-                className="bg-white p-6 rounded-[2rem] border border-slate-100 flex items-center justify-between hover:border-indigo-500 hover:shadow-xl transition-all group active:scale-95 text-left"
+                className="bg-white p-6 rounded-[2rem] border border-slate-100 flex items-center justify-between hover:border-blue-500 hover:shadow-xl transition-all group active:scale-95 text-left"
                >
                   <div className="flex items-center gap-5">
-                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${inv.status === 'Paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100 animate-pulse'}`}>
+                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${inv.status === 'Paid' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-rose-50 text-rose-600 border-rose-100 animate-pulse'}`}>
                         <FileText size={24} />
                      </div>
                      <div>
                         <p className="text-xs font-black text-slate-900 uppercase tracking-widest">Ref: {inv.id}</p>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{inv.packageName} • {new Date(inv.createdAt).toLocaleDateString()}</p>
                         <div className="flex items-center gap-2 mt-2">
-                           <span className={`text-[8px] font-black px-2 py-0.5 rounded-lg border uppercase ${inv.status === 'Paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-rose-50 text-rose-600 border-rose-200'}`}>{inv.status}</span>
+                           <span className={`text-[8px] font-black px-2 py-0.5 rounded-lg border uppercase ${inv.status === 'Paid' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-rose-50 text-rose-600 border-rose-200'}`}>{inv.status}</span>
                            <span className="text-[8px] font-bold text-slate-400 uppercase">Items: {inv.items?.length || 0}</span>
                         </div>
                      </div>
@@ -61,7 +61,7 @@ const SubscriberBilling: React.FC<Props> = ({ user, state, onViewInvoice }) => {
                         <p className="text-lg font-black italic text-slate-900 tracking-tighter">Rs. {inv.totalAmount.toLocaleString()}</p>
                         <p className="text-[8px] font-bold text-slate-400 uppercase">Grand Total</p>
                      </div>
-                     <ChevronRight size={18} className="text-slate-200 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                     <ChevronRight size={18} className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                   </div>
                </button>
              ))
@@ -80,7 +80,7 @@ const SubscriberBilling: React.FC<Props> = ({ user, state, onViewInvoice }) => {
           {ledger.map(l => (
             <div key={l.id} className="bg-white p-6 rounded-[2rem] border border-slate-100 flex items-center justify-between group shadow-sm hover:shadow-md transition-all">
                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${l.type === LedgerType.DEBIT ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${l.type === LedgerType.DEBIT ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
                      <ArrowRight className={l.type === LedgerType.DEBIT ? 'rotate-45' : '-rotate-[135deg]'} size={20} />
                   </div>
                   <div>
@@ -88,7 +88,7 @@ const SubscriberBilling: React.FC<Props> = ({ user, state, onViewInvoice }) => {
                      <p className="text-[9px] text-slate-400 font-bold uppercase">{new Date(l.timestamp).toLocaleDateString()} • {l.method || 'Internal'}</p>
                   </div>
                </div>
-               <p className={`text-lg font-black italic tracking-tighter ${l.type === LedgerType.DEBIT ? 'text-red-600' : 'text-emerald-600'}`}>
+               <p className={`text-lg font-black italic tracking-tighter ${l.type === LedgerType.DEBIT ? 'text-red-600' : 'text-green-600'}`}>
                   {l.type === LedgerType.DEBIT ? '-' : '+'} {l.amount}
                </p>
             </div>
@@ -107,3 +107,4 @@ const SubscriberBilling: React.FC<Props> = ({ user, state, onViewInvoice }) => {
 };
 
 export default SubscriberBilling;
+

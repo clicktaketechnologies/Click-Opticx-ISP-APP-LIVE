@@ -50,7 +50,7 @@ const EmergencyLoadDashboard: React.FC<Props> = ({ user, state, onAction }) => {
                 <div className="w-16 h-16 bg-amber-500 rounded-3xl flex items-center justify-center shadow-[0_0_30px_rgba(245,158,11,0.3)]">
                    <Zap size={32} fill="currentColor"/>
                 </div>
-                <div className="px-4 py-1.5 bg-white/10 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-widest text-indigo-300">Rescue Node Available</div>
+                <div className="px-4 py-1.5 bg-white/10 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-widest text-blue-300">Rescue Node Available</div>
              </div>
              <div>
                 <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Emergency Rescue</h2>
@@ -65,7 +65,7 @@ const EmergencyLoadDashboard: React.FC<Props> = ({ user, state, onAction }) => {
           <AlertTriangle className="absolute -right-20 -bottom-20 opacity-5 scale-[2.5]" size={300} />
         </div>
       ) : (
-        <div className={`rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl transition-all duration-700 ${activeEL.status === 'Overdue' ? 'bg-rose-600' : activeEL.status === 'Pending_Activation' ? 'bg-indigo-600' : 'bg-amber-600'}`}>
+        <div className={`rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl transition-all duration-700 ${activeEL.status === 'Overdue' ? 'bg-rose-600' : activeEL.status === 'Pending_Activation' ? 'bg-blue-600' : 'bg-amber-600'}`}>
            <div className="relative z-10 space-y-8">
               <div className="flex justify-between items-start">
                  <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-md border border-white/10">
@@ -107,7 +107,7 @@ const EmergencyLoadDashboard: React.FC<Props> = ({ user, state, onAction }) => {
       {/* Quick Info Grid */}
       <div className="grid grid-cols-2 gap-4">
          <button onClick={() => onAction('emergency-history')} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all text-left flex items-center gap-4 group">
-            <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-indigo-600 transition-colors">
+            <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-blue-600 transition-colors">
                <History size={24} />
             </div>
             <div>
@@ -116,7 +116,7 @@ const EmergencyLoadDashboard: React.FC<Props> = ({ user, state, onAction }) => {
             </div>
          </button>
          <button onClick={() => onAction('ai-risk')} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all text-left flex items-center gap-4 group">
-            <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-emerald-600 transition-colors">
+            <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                <BarChart3 size={24} />
             </div>
             <div>
@@ -153,3 +153,4 @@ const EmergencyLoadDashboard: React.FC<Props> = ({ user, state, onAction }) => {
 };
 
 export default EmergencyLoadDashboard;
+

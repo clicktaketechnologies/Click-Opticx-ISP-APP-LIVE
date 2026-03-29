@@ -28,8 +28,8 @@ const SubscriberDailyTools: React.FC<Props> = ({ onAction }) => {
     { 
       title: "History", 
       icon: History, 
-      color: "text-emerald-600", 
-      bgColor: "bg-emerald-50", 
+      color: "text-green-600", 
+      bgColor: "bg-green-50", 
       description: "Fiscal Log",
       route: "billing" 
     },
@@ -70,3 +70,4 @@ const SubscriberDailyTools: React.FC<Props> = ({ onAction }) => {
 };
 
 export default SubscriberDailyTools;
+

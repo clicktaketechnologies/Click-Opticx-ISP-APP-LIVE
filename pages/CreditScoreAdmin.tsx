@@ -31,7 +31,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
   }, [state.creditLogs, selectedUser]);
 
   const getScoreRange = (score: number) => {
-    if (score >= 750) return { label: 'Excellent', color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-200' };
+    if (score >= 750) return { label: 'Excellent', color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200' };
     if (score >= 600) return { label: 'Good', color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-200' };
     if (score >= 450) return { label: 'Fair', color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-200' };
     return { label: 'Poor', color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200' };
@@ -61,7 +61,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
-            <BarChart3 className="text-indigo-600" size={32} />
+            <BarChart3 className="text-blue-600" size={32} />
             Fiscal Risk Audit
           </h2>
           <p className="text-slate-500 font-medium">Monitoring subscriber behavior, automated credit scoring, and emergency load eligibility.</p>
@@ -75,7 +75,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                <div className="relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input 
-                    className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 font-black text-slate-900"
+                    className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 font-black text-slate-900"
                     placeholder="Audit identity scores..."
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
@@ -96,7 +96,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                       <button 
                         key={u.id}
                         onClick={() => setSelectedUser(u)}
-                        className={`w-full p-6 flex items-center justify-between transition-all group ${isActive ? 'bg-indigo-600 text-white' : 'hover:bg-slate-50'}`}
+                        className={`w-full p-6 flex items-center justify-between transition-all group ${isActive ? 'bg-blue-600 text-white' : 'hover:bg-slate-50'}`}
                       >
                          <div className="flex items-center gap-4">
                             <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shadow-inner ${isActive ? 'bg-white/10 border-white/20' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
@@ -104,12 +104,12 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                             </div>
                             <div className="text-left">
                                <p className="font-black uppercase tracking-tight text-sm truncate w-32">{u.name}</p>
-                               <p className={`text-[10px] font-bold uppercase ${isActive ? 'text-indigo-200' : 'text-slate-400'}`}>{u.connectionId}</p>
+                               <p className={`text-[10px] font-bold uppercase ${isActive ? 'text-blue-200' : 'text-slate-400'}`}>{u.connectionId}</p>
                             </div>
                          </div>
                          <div className="text-right">
                             <p className={`text-xl font-black italic tracking-tighter ${isActive ? 'text-white' : range.color}`}>{u.creditScore}</p>
-                            <p className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-indigo-300' : 'text-slate-400'}`}>{range.label}</p>
+                            <p className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-blue-300' : 'text-slate-400'}`}>{range.label}</p>
                          </div>
                       </button>
                     );
@@ -134,24 +134,24 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
                        <div className="space-y-6 flex-1">
                           <div className="flex items-center gap-4">
-                             <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5"><ShieldCheck size={32} className="text-indigo-400" /></div>
+                             <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5"><ShieldCheck size={32} className="text-blue-400" /></div>
                              <div>
                                 <h3 className="text-3xl font-black uppercase tracking-tighter italic">{selectedUser.name}</h3>
-                                <p className="text-xs font-bold text-indigo-400 uppercase tracking-[0.4em]">{selectedUser.connectionId}</p>
+                                <p className="text-xs font-bold text-blue-400 uppercase tracking-[0.4em]">{selectedUser.connectionId}</p>
                              </div>
                           </div>
                           <div className="grid grid-cols-2 gap-6">
                              <div className="p-6 bg-white/5 border border-white/5 rounded-3xl">
                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Current Registry Score</p>
                                 <div className="flex items-end gap-3">
-                                   <span className="text-5xl font-black italic tracking-tighter text-emerald-400">{selectedUser.creditScore}</span>
+                                   <span className="text-5xl font-black italic tracking-tighter text-green-400">{selectedUser.creditScore}</span>
                                    <span className={`text-[10px] font-black uppercase tracking-widest mb-2 ${getScoreRange(selectedUser.creditScore).color}`}>{getScoreRange(selectedUser.creditScore).label}</span>
                                 </div>
                              </div>
                              <div className="p-6 bg-white/5 border border-white/5 rounded-3xl flex flex-col justify-center items-center">
                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">EL Protocol Access</p>
                                 {selectedUser.creditScore >= 600 ? (
-                                  <div className="flex items-center gap-2 text-emerald-400 bg-emerald-400/10 px-4 py-2 rounded-full border border-emerald-400/20">
+                                  <div className="flex items-center gap-2 text-green-400 bg-green-400/10 px-4 py-2 rounded-full border border-green-400/20">
                                      <Shield size={14} /> <span className="text-[10px] font-black uppercase">AUTHORIZED</span>
                                   </div>
                                 ) : (
@@ -165,7 +165,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                        <div className="flex flex-col gap-3 shrink-0">
                           <button 
                             onClick={() => setIsAdjustModalOpen(true)}
-                            className="px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20"
+                            className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20"
                           >
                              Manual Adjustment
                           </button>
@@ -186,7 +186,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
                     <div className="p-8 border-b bg-slate-50 flex items-center justify-between">
                        <div className="flex items-center gap-3">
-                          <History size={20} className="text-indigo-600" />
+                          <History size={20} className="text-blue-600" />
                           <h3 className="text-sm font-black uppercase tracking-widest italic">Fiscal Behavior Log</h3>
                        </div>
                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{selectedUserLogs.length} Events Logged</span>
@@ -195,12 +195,12 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                        {selectedUserLogs.map(log => (
                          <div key={log.id} className="p-8 flex items-start justify-between gap-6 hover:bg-slate-50 transition-colors">
                             <div className="flex items-start gap-6">
-                               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner border ${log.delta >= 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner border ${log.delta >= 0 ? 'bg-green-50 text-green-600 border-green-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
                                   {log.delta >= 0 ? <TrendingUp size={24}/> : <TrendingDown size={24}/>}
                                </div>
                                <div>
                                   <div className="flex items-center gap-3 mb-1">
-                                     <span className={`text-[10px] font-black uppercase tracking-widest ${log.delta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                     <span className={`text-[10px] font-black uppercase tracking-widest ${log.delta >= 0 ? 'text-green-600' : 'text-rose-600'}`}>
                                         {log.delta >= 0 ? 'Positive Impact' : 'Negative Impact'}
                                      </span>
                                      <span className="text-[10px] text-slate-300">•</span>
@@ -211,7 +211,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                                </div>
                             </div>
                             <div className="text-right">
-                               <p className={`text-2xl font-black italic tracking-tighter ${log.delta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                               <p className={`text-2xl font-black italic tracking-tighter ${log.delta >= 0 ? 'text-green-600' : 'text-rose-600'}`}>
                                   {log.delta >= 0 ? '+' : ''}{log.delta}
                                </p>
                                <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Score: {log.newScore}</p>
@@ -232,12 +232,12 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
       {isAdjustModalOpen && selectedUser && (
         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[500] flex items-center justify-center p-4">
            <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl animate-in zoom-in duration-300 overflow-hidden border border-white/20 flex flex-col">
-              <div className="px-10 py-8 bg-indigo-600 text-white flex justify-between items-center">
+              <div className="px-10 py-8 bg-blue-600 text-white flex justify-between items-center">
                  <div>
                     <h3 className="text-2xl font-black uppercase tracking-tighter italic">Risk Adjustment</h3>
-                    <p className="text-indigo-100 text-[10px] font-bold uppercase mt-1 tracking-widest">Target: {selectedUser.name}</p>
+                    <p className="text-blue-100 text-[10px] font-bold uppercase mt-1 tracking-widest">Target: {selectedUser.name}</p>
                  </div>
-                 <button onClick={() => setIsAdjustModalOpen(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-indigo-100 hover:text-white"><X size={28} /></button>
+                 <button onClick={() => setIsAdjustModalOpen(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-blue-100 hover:text-white"><X size={28} /></button>
               </div>
               <div className="p-10 space-y-8">
                  <div className="space-y-4">
@@ -245,7 +245,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="flex items-center gap-6">
                        <input 
                         type="number" 
-                        className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-5xl outline-none focus:border-indigo-500 transition-all text-slate-900 shadow-inner text-center"
+                        className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-5xl outline-none focus:border-blue-500 transition-all text-slate-900 shadow-inner text-center"
                         value={delta}
                         onChange={e => setDelta(Number(e.target.value))}
                       />
@@ -255,7 +255,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mandatory Override Reason</label>
                     <textarea 
-                      className="w-full p-5 bg-slate-50 border border-slate-100 rounded-3xl font-bold text-sm outline-none focus:ring-4 focus:ring-indigo-500/10 h-32 resize-none uppercase"
+                      className="w-full p-5 bg-slate-50 border border-slate-100 rounded-3xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 h-32 resize-none uppercase"
                       placeholder="Audit justification protocol..."
                       value={reason}
                       onChange={e => setReason(e.target.value)}
@@ -272,7 +272,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                  <button 
                   onClick={handleAdjust}
                   disabled={!reason || delta === 0 || isSaving}
-                  className="w-full py-6 bg-indigo-600 text-white font-black rounded-[2rem] hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-200 uppercase tracking-[0.3em] text-xs active:scale-95 disabled:grayscale disabled:opacity-50"
+                  className="w-full py-6 bg-blue-600 text-white font-black rounded-[2rem] hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 uppercase tracking-[0.3em] text-xs active:scale-95 disabled:grayscale disabled:opacity-50"
                  >
                     {isSaving ? 'Synchronizing...' : 'Authorize Adjustment'}
                  </button>
@@ -285,3 +285,4 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default CreditScoreAdmin;
+

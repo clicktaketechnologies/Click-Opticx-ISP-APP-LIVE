@@ -90,9 +90,9 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
   const getIcon = (type: string) => {
     switch(type) {
       case 'package': return <FileText className="text-blue-500" size={18} />;
-      case 'topup': return <Wallet className="text-emerald-500" size={18} />;
+      case 'topup': return <Wallet className="text-green-500" size={18} />;
       case 'emergency': return <Zap className="text-orange-500" size={18} />;
-      case 'signup': return <User className="text-indigo-500" size={18} />;
+      case 'signup': return <User className="text-blue-500" size={18} />;
       default: return <FileText className="text-slate-400" size={18} />;
     }
   };
@@ -102,7 +102,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none">
-            <ShieldCheck className="text-emerald-600" size={32} />
+            <ShieldCheck className="text-green-600" size={32} />
             Approval Center
           </h2>
           <p className="text-slate-500 font-medium text-[10px] tracking-widest uppercase">Review and approve user requests for packages, top-ups, and more.</p>
@@ -263,7 +263,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                                isExpired = exp.getTime() < today.getTime();
                              }
                              return isExpired ? (
-                               <span className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-1"><CheckCircle size={12}/> No Active Package</span>
+                               <span className="text-[9px] font-black text-green-600 uppercase flex items-center gap-1"><CheckCircle size={12}/> No Active Package</span>
                              ) : (
                                <span className="text-[9px] font-black text-rose-600 uppercase flex items-center gap-1"><AlertCircle size={12}/> User Already Has a Package</span>
                              );
@@ -275,7 +275,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                              const user = state.users.find(u => u.id === selectedRequestData.userId);
                              const score = user?.creditScore || 0;
                              return score >= 600 ? (
-                               <span className="text-[9px] font-black text-emerald-600 uppercase">Good ({score})</span>
+                               <span className="text-[9px] font-black text-green-600 uppercase">Good ({score})</span>
                              ) : (
                                <span className="text-[9px] font-black text-orange-600 uppercase">Low Score ({score})</span>
                              );
@@ -306,7 +306,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                  <button 
                   onClick={handleApprove}
                   disabled={isProcessing}
-                  className="flex-[2] py-5 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-emerald-700 transition-all active:scale-95 flex items-center justify-center gap-3"
+                  className="flex-[2] py-5 bg-green-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-green-700 transition-all active:scale-95 flex items-center justify-center gap-3"
                  >
                     {isProcessing ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
                     Approve and Activate
@@ -320,3 +320,4 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
 };
 
 export default MasterApprovalDashboard;
+

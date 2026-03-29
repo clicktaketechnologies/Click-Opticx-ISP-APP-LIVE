@@ -27,7 +27,7 @@ const SubscriberLegalCenter: React.FC<Props> = ({ state, onBack }) => {
       return (
          <div className="space-y-8 animate-in slide-in-from-right duration-500 pb-24">
             <div className="flex items-center gap-4 px-2">
-               <button onClick={() => setActiveDoc(null)} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 active:scale-90 transition-all shadow-sm">
+               <button onClick={() => setActiveDoc(null)} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-blue-600 active:scale-90 transition-all shadow-sm">
                   <ArrowLeft size={20} />
                </button>
                <div>
@@ -45,7 +45,7 @@ const SubscriberLegalCenter: React.FC<Props> = ({ state, onBack }) => {
                <div className="p-6 bg-slate-900 rounded-[2.5rem] flex items-center justify-between text-white relative overflow-hidden">
                   <div className="relative z-10">
                      <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Verified Content</p>
-                     <h4 className="text-xl font-black text-indigo-400 uppercase italic">Current Version</h4>
+                     <h4 className="text-xl font-black text-blue-400 uppercase italic">Current Version</h4>
                   </div>
                   <ShieldCheck className="text-white/10 absolute -right-4 -bottom-4" size={100} />
                </div>
@@ -57,7 +57,7 @@ const SubscriberLegalCenter: React.FC<Props> = ({ state, onBack }) => {
    return (
       <div className="space-y-8 animate-in fade-in duration-500 pb-24">
          <div className="flex items-center gap-4 px-2">
-            <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 active:scale-90 transition-all shadow-sm">
+            <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-blue-600 active:scale-90 transition-all shadow-sm">
                <ArrowLeft size={20} />
             </button>
             <div>
@@ -68,7 +68,7 @@ const SubscriberLegalCenter: React.FC<Props> = ({ state, onBack }) => {
 
          <div className="bg-slate-900 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl">
             <div className="relative z-10 space-y-6">
-               <div className="flex items-center gap-3 text-indigo-400">
+               <div className="flex items-center gap-3 text-blue-400">
                   <ShieldCheck size={28} />
                   <h3 className="text-xl font-black uppercase tracking-tight italic">Service Agreements</h3>
                </div>
@@ -84,10 +84,10 @@ const SubscriberLegalCenter: React.FC<Props> = ({ state, onBack }) => {
                <button
                   key={doc.id}
                   onClick={() => setActiveDoc(doc.id as any)}
-                  className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:border-indigo-500 hover:shadow-xl transition-all text-left flex items-center justify-between group active:scale-[0.98]"
+                  className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:border-blue-500 hover:shadow-xl transition-all text-left flex items-center justify-between group active:scale-[0.98]"
                >
                   <div className="flex items-center gap-6">
-                     <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center border shadow-inner group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                     <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center border shadow-inner group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                         <doc.icon size={28} />
                      </div>
                      <div>
@@ -95,7 +95,7 @@ const SubscriberLegalCenter: React.FC<Props> = ({ state, onBack }) => {
                         <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Official Policy</p>
                      </div>
                   </div>
-                  <ChevronRight className="text-slate-200 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" size={24} />
+                  <ChevronRight className="text-slate-200 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" size={24} />
                </button>
             ))}
          </div>
@@ -114,3 +114,4 @@ const SubscriberLegalCenter: React.FC<Props> = ({ state, onBack }) => {
 };
 
 export default SubscriberLegalCenter;
+

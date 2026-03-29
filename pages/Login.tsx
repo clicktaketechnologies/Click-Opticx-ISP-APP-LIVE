@@ -162,13 +162,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                Mobile Number, Email or Username
             </label>
             <div className="relative group">
-               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+               <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
                <input
                   type="text"
                   autoComplete="off"
                   value={credential}
                   onChange={(e) => setCredential(e.target.value)}
-                  className="w-full pl-12 pr-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+                  className="w-full pl-12 pr-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-slate-800 placeholder:text-slate-400"
                   placeholder="Enter your details"
                   required
                />
@@ -185,13 +185,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
          <div className="flex flex-wrap items-center justify-between px-1 pt-2 gap-4">
             <label className="flex items-center gap-2 cursor-pointer group">
-               <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberMe ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-200'}`}>
+               <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberMe ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'}`}>
                   {rememberMe && <CheckCircle size={12} className="text-white" />}
                </div>
                <input type="checkbox" className="hidden" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
                <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Remember me</span>
             </label>
-            <button type="button" onClick={() => setView('reset_request')} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">Forgot Password?</button>
+            <button type="button" onClick={() => setView('reset_request')} className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">Forgot Password?</button>
          </div>
 
          <button
@@ -226,7 +226,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
          <div className="text-center pt-2">
             <p className="text-sm font-medium text-slate-500">
-               Don't have an account? <button type="button" onClick={() => setView('signup')} className="text-indigo-600 font-bold hover:text-indigo-700 ml-1">Sign Up</button>
+               Don't have an account? <button type="button" onClick={() => setView('signup')} className="text-blue-600 font-bold hover:text-blue-700 ml-1">Sign Up</button>
             </p>
          </div>
       </form>
@@ -237,37 +237,37 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          {/* Section 1: Identity Profile */}
          <div className="space-y-4">
             <div className="flex items-center gap-3 mb-4 px-1">
-               <div className="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
+               <div className="w-1.5 h-4 bg-blue-500 rounded-full"></div>
                <h4 className="text-sm font-bold text-slate-900">Basic Information</h4>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
                   <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Username</label>
-                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="Choose a username" value={signupData.name} onChange={e => setSignupData({ ...signupData, name: e.target.value })} required autoComplete="off" />
+                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="Choose a username" value={signupData.name} onChange={e => setSignupData({ ...signupData, name: e.target.value })} required autoComplete="off" />
                </div>
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-right-4 duration-500 delay-100">
                   <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Contact Number</label>
-                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="03XX-XXXXXXX" value={signupData.phone} onChange={e => setSignupData({ ...signupData, phone: e.target.value })} required={state.settings.authSettings?.requirePhoneOTP} autoComplete="off" />
+                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="03XX-XXXXXXX" value={signupData.phone} onChange={e => setSignupData({ ...signupData, phone: e.target.value })} required={state.settings.authSettings?.requirePhoneOTP} autoComplete="off" />
                </div>
             </div>
 
             {state.settings.authSettings?.requireCNIC && (
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
                   <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">National Identity (CNIC)</label>
-                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="XXXXX-XXXXXXX-X" value={signupData.cnic} onChange={e => setSignupData({ ...signupData, cnic: e.target.value })} required autoComplete="off" />
+                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="XXXXX-XXXXXXX-X" value={signupData.cnic} onChange={e => setSignupData({ ...signupData, cnic: e.target.value })} required autoComplete="off" />
                </div>
             )}
 
             <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
                <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Email Address</label>
-               <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-slate-800 placeholder:text-slate-400" type="email" placeholder="name@domain.com" value={signupData.email} onChange={e => setSignupData({ ...signupData, email: e.target.value })} required={state.settings.authSettings?.requireEmailVerification} autoComplete="off" />
+               <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all text-slate-800 placeholder:text-slate-400" type="email" placeholder="name@domain.com" value={signupData.email} onChange={e => setSignupData({ ...signupData, email: e.target.value })} required={state.settings.authSettings?.requireEmailVerification} autoComplete="off" />
             </div>
          </div>
 
          {/* Section 2: Access Credentials */}
          <div className="space-y-4 pt-2">
             <div className="flex items-center gap-3 mb-4 px-1">
-               <div className="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
+               <div className="w-1.5 h-4 bg-green-500 rounded-full"></div>
                <h4 className="text-sm font-bold text-slate-900">Account Credentials</h4>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -297,17 +297,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
             <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400">
                <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Installation Address</label>
-               <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="Complete Physical Address" value={signupData.area} onChange={e => setSignupData({ ...signupData, area: e.target.value })} required autoComplete="off" />
+               <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="Complete Physical Address" value={signupData.area} onChange={e => setSignupData({ ...signupData, area: e.target.value })} required autoComplete="off" />
             </div>
          </div>
 
          <div className="flex items-start gap-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl group transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-200/50 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-500">
-            <input type="checkbox" required className="mt-1 w-5 h-5 accent-indigo-600 rounded-md border-slate-300 cursor-pointer" />
+            <input type="checkbox" required className="mt-1 w-5 h-5 accent-blue-600 rounded-md border-slate-300 cursor-pointer" />
             <div className="text-sm font-medium text-slate-600 leading-relaxed">
                I have read and agree to the 
-               <button type="button" onClick={() => setShowLegalModal('agreement')} className="mx-1 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors">Service Agreement</button>
+               <button type="button" onClick={() => setShowLegalModal('agreement')} className="mx-1 text-blue-600 hover:text-blue-800 font-semibold transition-colors">Service Agreement</button>
                &
-               <button type="button" onClick={() => setShowLegalModal('terms')} className="ml-1 text-indigo-600 hover:text-indigo-800 font-semibold transition-colors">Terms of Use</button>.
+               <button type="button" onClick={() => setShowLegalModal('terms')} className="ml-1 text-blue-600 hover:text-blue-800 font-semibold transition-colors">Terms of Use</button>.
             </div>
          </div>
 
@@ -392,15 +392,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
    const renderResetFinalize = () => (
       <form onSubmit={handleResetFinalize} className="space-y-8 animate-in slide-in-from-right duration-500" autoComplete="off">
-         <div className="p-6 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-start gap-4">
-            <CheckCircle size={20} className="text-emerald-500 shrink-0" />
-            <p className="text-[9px] text-emerald-800 font-black uppercase tracking-widest leading-relaxed">Verification token dispatched. Enter code to unlock identity reset.</p>
+         <div className="p-6 bg-green-50 border border-green-100 rounded-2xl flex items-start gap-4">
+            <CheckCircle size={20} className="text-green-500 shrink-0" />
+            <p className="text-[9px] text-green-800 font-black uppercase tracking-widest leading-relaxed">Verification token dispatched. Enter code to unlock identity reset.</p>
          </div>
 
          <div className="space-y-6">
             <div className="space-y-2">
                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Verification Code</label>
-               <input className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-center text-2xl tracking-[0.8em] focus:border-indigo-600 focus:bg-white outline-none transition-all" placeholder="XXXXXX" value={resetToken} onChange={e => setResetToken(e.target.value)} maxLength={6} required autoComplete="off" />
+               <input className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-center text-2xl tracking-[0.8em] focus:border-blue-600 focus:bg-white outline-none transition-all" placeholder="XXXXXX" value={resetToken} onChange={e => setResetToken(e.target.value)} maxLength={6} required autoComplete="off" />
             </div>
 
             <PasswordInput
@@ -416,7 +416,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          <button
             type="submit"
             disabled={isProcessing || resetToken.length < 4}
-            className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-500/10 hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center gap-3"
+            className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/10 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-3"
          >
             {isProcessing ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18} />}
             Re-Encrypt Identity
@@ -428,7 +428,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       return (
          <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md bg-white rounded-[2.5rem] md:rounded-[4rem] shadow-2xl p-8 md:p-12 text-center space-y-10 animate-in zoom-in duration-500 border border-slate-100 mx-auto">
-               <div className="w-28 h-28 bg-emerald-50 text-emerald-600 rounded-[3rem] flex items-center justify-center mx-auto shadow-inner border-4 border-emerald-100 relative">
+               <div className="w-28 h-28 bg-green-50 text-green-600 rounded-[3rem] flex items-center justify-center mx-auto shadow-inner border-4 border-green-100 relative">
                   <Clock size={56} className="animate-spin-slow" />
                   <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-lg">
                      <MapPin size={24} className="text-rose-500" />
@@ -443,7 +443,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                <div className="grid grid-cols-1 gap-2 pt-4">
                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                      <span className="text-[9px] font-black text-slate-400 uppercase">Current Status</span>
-                     <span className="text-[9px] font-black text-indigo-600 uppercase italic">PENDING VERIFICATION</span>
+                     <span className="text-[9px] font-black text-blue-600 uppercase italic">PENDING VERIFICATION</span>
                   </div>
                </div>
                <button
@@ -461,8 +461,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden font-sans">
          {/* Animated Multi-Layer Mesh Gradient Background */}
          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-indigo-500/10 blur-[120px] rounded-full animate-float"></div>
-            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-400/10 blur-[100px] rounded-full animate-float-delayed"></div>
+            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-500/10 blur-[120px] rounded-full animate-float"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-green-400/10 blur-[100px] rounded-full animate-float-delayed"></div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] h-[100%] bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.03)_0%,transparent_70%)]"></div>
 
             {/* Grid Pattern Overlay */}
@@ -474,29 +474,29 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
             {/* Left Side: Visual/Branding (Desktop Only) */}
             <div className="hidden lg:flex flex-col justify-between p-16 bg-slate-950 relative overflow-hidden group">
-               <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 via-transparent to-emerald-900/30"></div>
-               <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
+               <div className="absolute inset-0 bg-gradient-to-br from-blue-900/40 via-transparent to-green-900/30"></div>
+               <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
 
                <div className="relative z-10">
                   <div className="flex items-center gap-4 mb-12">
                      <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-2xl">
-                        {displayLogo ? <img src={displayLogo} className="h-8 object-contain" /> : <Wifi className="text-emerald-400" size={28} />}
+                        {displayLogo ? <img src={displayLogo} className="h-8 object-contain" /> : <Wifi className="text-green-400" size={28} />}
                      </div>
                      <div>
                         <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic leading-none">Click Optix</h2>
-                        <p className="text-emerald-400/60 text-[8px] font-black uppercase tracking-[0.3em] mt-1">Fiber Infrastructure</p>
+                        <p className="text-green-400/60 text-[8px] font-black uppercase tracking-[0.3em] mt-1">Fiber Infrastructure</p>
                      </div>
                   </div>
 
                   <div className="space-y-6 mt-20">
                      <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-[0.9] max-w-[350px]">
                         Fast, <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400">Reliable</span> <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">Reliable</span> <br />
                         Connection
                      </h1>
                      <div className="text-slate-400 text-sm font-medium leading-relaxed max-w-[350px] space-y-2 mt-4">
                         <p className="flex items-center gap-2">
-                           <Loader2 size={16} className="animate-spin text-emerald-400" />
+                           <Loader2 size={16} className="animate-spin text-green-400" />
                            System initializing...
                         </p>
                         <p className="text-white/80 font-bold">
@@ -513,7 +513,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   <div className="grid grid-cols-2 gap-6">
                      <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center border border-white/10">
-                           <Zap className="text-indigo-400" size={18} />
+                           <Zap className="text-blue-400" size={18} />
                         </div>
                         <div>
                            <p className="text-white text-[10px] font-black uppercase italic">Giga-Speed</p>
@@ -522,7 +522,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                      </div>
                      <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center border border-white/10">
-                           <ShieldCheck className="text-emerald-400" size={18} />
+                           <ShieldCheck className="text-green-400" size={18} />
                         </div>
                         <div>
                            <p className="text-white text-[10px] font-black uppercase italic">Ultra Secure</p>
@@ -546,8 +546,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                      <img src={displayLogo} className="w-full max-w-[200px] h-auto object-contain mb-4" alt="5G Logo" />
                   ) : (
                      <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center shadow-xl mb-4 relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <Wifi className="text-emerald-400 relative z-10" size={32} />
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-green-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <Wifi className="text-green-400 relative z-10" size={32} />
                      </div>
                   )}
                   {!displayLogo && <h1 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Click Optix</h1>}
@@ -589,8 +589,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         <span className="text-[7px] font-black uppercase tracking-widest">Core v8.6.0-Live</span>
                      </div>
                      <div className="flex items-center gap-4">
-                        <Globe size={14} className="text-slate-300 hover:text-indigo-500 transition-colors cursor-pointer" />
-                        <Info size={14} className="text-slate-300 hover:text-indigo-500 transition-colors cursor-pointer" />
+                        <Globe size={14} className="text-slate-300 hover:text-blue-500 transition-colors cursor-pointer" />
+                        <Info size={14} className="text-slate-300 hover:text-blue-500 transition-colors cursor-pointer" />
                      </div>
                   </div>
                </div>
@@ -603,7 +603,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white animate-in zoom-in duration-300 flex flex-col max-h-[85vh]">
                   <div className="p-8 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
                            <Scale size={24} />
                         </div>
                         <h3 className="text-xl font-black uppercase italic tracking-tighter">
@@ -618,7 +618,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                      </p>
                   </div>
                   <div className="p-8 bg-slate-50 border-t flex justify-center shrink-0">
-                     <button onClick={() => setShowLegalModal(null)} className="px-12 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-indigo-700 active:scale-95 transition-all">I Accept All Terms</button>
+                     <button onClick={() => setShowLegalModal(null)} className="px-12 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-blue-700 active:scale-95 transition-all">I Accept All Terms</button>
                   </div>
                </div>
             </div>
@@ -628,3 +628,4 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 };
 
 export default Login;
+

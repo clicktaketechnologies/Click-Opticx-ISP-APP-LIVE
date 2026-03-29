@@ -31,7 +31,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
 
   const getIcon = (type: string) => {
     switch(type) {
-      case 'success': return <CheckCircle size={14} className="text-emerald-500" />;
+      case 'success': return <CheckCircle size={14} className="text-green-500" />;
       case 'warning': return <AlertTriangle size={14} className="text-orange-500" />;
       case 'error': return <X size={14} className="text-rose-500" />;
       default: return <Info size={14} className="text-blue-500" />;
@@ -61,11 +61,11 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
           <button 
             onClick={() => db.forceSync()}
             title="Manual Registry Sync"
-            className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg border border-emerald-100 whitespace-nowrap group hover:bg-emerald-100 transition-all active:scale-95"
+            className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 text-green-600 rounded-lg border border-green-100 whitespace-nowrap group hover:bg-green-100 transition-all active:scale-95"
           >
              <div className="relative">
                 <Cloud size={10} />
-                <div className="absolute -top-0.5 -right-0.5 w-1 h-1 bg-emerald-500 rounded-full animate-ping"></div>
+                <div className="absolute -top-0.5 -right-0.5 w-1 h-1 bg-green-500 rounded-full animate-ping"></div>
              </div>
              <span className="text-[8px] font-black uppercase tracking-widest leading-none">Synced</span>
           </button>
@@ -99,7 +99,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
               {branding.logoSquare ? (
                  <img src={branding.logoSquare} className="w-full h-full object-contain p-1" alt="Logo" />
               ) : (
-                 <Globe size={14} className="text-indigo-600" />
+                 <Globe size={14} className="text-blue-600" />
               )}
            </div>
            <div className="hidden lg:block">
@@ -108,13 +108,13 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
         </div>
 
         <div className="relative hidden md:block w-36 lg:w-48 group">
-          <Search className={`absolute left-2 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-indigo-500' : 'text-slate-400'}`} size={12} />
+          <Search className={`absolute left-2 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-blue-500' : 'text-slate-400'}`} size={12} />
           <input 
             type="text" 
             value={searchTerm}
             onChange={(e) => onSearch(e.target.value)}
             placeholder="Registry search..." 
-            className="w-full pl-7 pr-7 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-[9px] font-bold transition-all placeholder:text-slate-300"
+            className="w-full pl-7 pr-7 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-[9px] font-bold transition-all placeholder:text-slate-300"
           />
           {searchTerm && (
             <button 
@@ -132,7 +132,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
         <div className="relative">
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
-            className={`relative p-1 rounded-lg transition-all ${showNotifications ? 'bg-slate-100 text-emerald-600' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+            className={`relative p-1 rounded-lg transition-all ${showNotifications ? 'bg-slate-100 text-green-600' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
           >
             <Bell size={16} />
             {unreadCount > 0 && (
@@ -150,7 +150,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
                    {unreadCount > 0 && (
                      <button 
                         onClick={handleMarkAllRead}
-                        className="text-[7px] font-black uppercase text-indigo-600 hover:underline flex items-center gap-1"
+                        className="text-[7px] font-black uppercase text-blue-600 hover:underline flex items-center gap-1"
                      >
                         <ListChecks size={10} /> Mark All
                      </button>
@@ -165,10 +165,10 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
                   userNotifications.sort((a,b) => b.createdAt - a.createdAt).map(n => (
                     <div 
                       key={n.id} 
-                      className={`p-3 border-b border-slate-50 hover:bg-slate-50 transition-colors flex gap-2 cursor-pointer relative ${!n.read ? 'bg-emerald-50/20' : ''}`}
+                      className={`p-3 border-b border-slate-50 hover:bg-slate-50 transition-colors flex gap-2 cursor-pointer relative ${!n.read ? 'bg-green-50/20' : ''}`}
                       onClick={() => db.markNotificationRead(n.id)}
                     >
-                      {!n.read && <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 bg-indigo-500 rounded-full"></div>}
+                      {!n.read && <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 bg-blue-500 rounded-full"></div>}
                       <div className="mt-0.5">{getIcon(n.type)}</div>
                       <div className="flex-1">
                         <div className="flex justify-between items-start">
@@ -200,10 +200,10 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
         >
           <div className="text-right hidden sm:block">
             <p className="text-[10px] font-black text-slate-800 tracking-tight leading-none">{user.name.split(' ')[0]}</p>
-            <p className="text-[7px] text-emerald-600 font-black uppercase tracking-widest mt-0.5 leading-none">{user.role}</p>
+            <p className="text-[7px] text-green-600 font-black uppercase tracking-widest mt-0.5 leading-none">{user.role}</p>
           </div>
-          <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200 shadow-inner overflow-hidden shrink-0 group-hover:border-indigo-200 group-hover:bg-indigo-50 transition-all">
-             <UserCircle size={20} className="text-slate-400 group-hover:text-indigo-400" />
+          <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200 shadow-inner overflow-hidden shrink-0 group-hover:border-blue-200 group-hover:bg-blue-50 transition-all">
+             <UserCircle size={20} className="text-slate-400 group-hover:text-blue-400" />
           </div>
         </button>
       </div>
@@ -212,3 +212,4 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
 };
 
 export default Header;
+

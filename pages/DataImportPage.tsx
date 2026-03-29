@@ -74,7 +74,7 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
           onClick={() => fileInputRef.current?.click()}
           className="w-full md:w-auto flex items-center justify-center gap-3 px-6 py-3.5 bg-white border border-slate-200 rounded-2xl font-black text-xs hover:bg-slate-50 shadow-sm transition-all active:scale-95 uppercase tracking-widest"
         >
-          <FileSpreadsheet size={18} className="text-indigo-500" />
+          <FileSpreadsheet size={18} className="text-blue-500" />
           Choose File
           <input type="file" accept=".csv,.xlsx,.xls,.txt" className="hidden" ref={fileInputRef} onChange={(e) => {
             const file = e.target.files?.[0];
@@ -90,28 +90,28 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
 
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-6 md:p-10 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="p-5 bg-indigo-50 border border-indigo-100 rounded-2xl text-center">
-              <FileSpreadsheet className="text-indigo-500 mb-3 mx-auto" size={24} />
-              <p className="text-xs font-bold text-indigo-900">Spreadsheets Supported</p>
+           <div className="p-5 bg-blue-50 border border-blue-100 rounded-2xl text-center">
+              <FileSpreadsheet className="text-blue-500 mb-3 mx-auto" size={24} />
+              <p className="text-xs font-bold text-blue-900">Spreadsheets Supported</p>
            </div>
            <div className="p-5 bg-purple-50 border border-purple-100 rounded-2xl text-center">
               <FileText className="text-purple-500 mb-3 mx-auto" size={24} />
               <p className="text-xs font-bold text-purple-900">Auto-Detects Columns</p>
            </div>
-           <div className="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl text-center">
-              <CheckCircle className="text-emerald-500 mb-3 mx-auto" size={24} />
-              <p className="text-xs font-bold text-emerald-900">Safety Verification</p>
+           <div className="p-5 bg-green-50 border border-green-100 rounded-2xl text-center">
+              <CheckCircle className="text-green-500 mb-3 mx-auto" size={24} />
+              <p className="text-xs font-bold text-green-900">Safety Verification</p>
            </div>
         </div>
 
         <div className="relative">
           <textarea 
-            className="w-full h-64 md:h-80 px-6 py-8 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none font-mono text-xs focus:ring-4 focus:ring-indigo-500/10 transition-all resize-none shadow-inner"
+            className="w-full h-64 md:h-80 px-6 py-8 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none font-mono text-xs focus:ring-4 focus:ring-blue-500/10 transition-all resize-none shadow-inner"
             placeholder="Paste your customer list here (make sure the first row has column titles)..."
             value={csvData}
             onChange={(e) => setCsvData(e.target.value)}
           />
-          {fileName && <div className="absolute top-4 right-4 bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase">{fileName}</div>}
+          {fileName && <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase">{fileName}</div>}
         </div>
 
         <button 
@@ -125,9 +125,9 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
 
       {importStatus && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in slide-in-from-top-8">
-          <div className="bg-emerald-50 p-8 rounded-[2rem] border border-emerald-100 flex items-center gap-6">
-            <CheckCircle className="text-emerald-500" size={40} />
-            <div><p className="text-[10px] font-black uppercase text-emerald-600">Successfully Added</p><h4 className="text-3xl font-black">{importStatus.success} Customers</h4></div>
+          <div className="bg-green-50 p-8 rounded-[2rem] border border-green-100 flex items-center gap-6">
+            <CheckCircle className="text-green-500" size={40} />
+            <div><p className="text-[10px] font-black uppercase text-green-600">Successfully Added</p><h4 className="text-3xl font-black">{importStatus.success} Customers</h4></div>
           </div>
           <div className="bg-red-50 p-8 rounded-[2rem] border border-red-100 flex items-center gap-6">
             <AlertTriangle className="text-red-500" size={40} />
@@ -140,3 +140,4 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default DataImportPage;
+

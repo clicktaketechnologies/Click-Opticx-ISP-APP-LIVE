@@ -123,3 +123,4 @@ export const ALL_SURAHS: SurahMetadata[] = [
   { id: 113, name: "الفلق", transliteration: "Al-Falaq", translation: "The Daybreak", type: "Meccan", total_verses: 5 },
   { id: 114, name: "الناس", transliteration: "An-Nas", translation: "The Mankind", type: "Meccan", total_verses: 6 }
 ];
+

@@ -90,7 +90,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex-1 md:flex-none flex items-center justify-center gap-3 px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl active:scale-95 disabled:opacity-50"
+            className="flex-1 md:flex-none flex items-center justify-center gap-3 px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl active:scale-95 disabled:opacity-50"
           >
             {isSaving ? <Mini5GMicroLoader size={18} /> : <Save size={18} />}
             Save Changes
@@ -105,7 +105,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center justify-between px-6 py-5 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest ${activeTab === tab.id ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200 translate-x-1' : 'text-slate-400 hover:bg-slate-50'}`}
+                className={`flex items-center justify-between px-6 py-5 rounded-2xl transition-all font-black text-[10px] uppercase tracking-widest ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-xl shadow-blue-200 translate-x-1' : 'text-slate-400 hover:bg-slate-50'}`}
               >
                 <div className="flex items-center gap-4"><tab.icon size={18} /> {tab.label}</div>
                 <ArrowRight size={14} className={activeTab === tab.id ? 'opacity-100' : 'opacity-0'} />
@@ -122,17 +122,17 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'branding' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Palette className="text-indigo-600" size={32} /> Branding</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Palette className="text-blue-600" size={32} /> Branding</h3>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Logo & Icons</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Business Name</label>
-                      <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-indigo-500 transition-all outline-none" value={formData.branding.businessName} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, businessName: e.target.value } })} />
+                      <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-blue-500 transition-all outline-none" value={formData.branding.businessName} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, businessName: e.target.value } })} />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Short Name (Display)</label>
-                      <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-indigo-600 outline-none transition-all" value={formData.branding.shortName} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, shortName: e.target.value } })} />
+                      <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-blue-600 outline-none transition-all" value={formData.branding.shortName} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, shortName: e.target.value } })} />
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -156,7 +156,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'profile' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Building2 className="text-indigo-600" size={32} /> Company Profile</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Building2 className="text-blue-600" size={32} /> Company Profile</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
@@ -186,7 +186,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'support' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Headphones className="text-indigo-600" size={32} /> Contact & Support</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Headphones className="text-blue-600" size={32} /> Contact & Support</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
@@ -208,8 +208,8 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="p-8 bg-slate-950 rounded-[2.5rem] space-y-6">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-xs font-black uppercase text-indigo-400 italic">Support Operating Hours</h4>
-                      <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${formData.support.emergencySupport ? 'bg-emerald-50 text-white' : 'bg-slate-700 text-slate-400'}`}>Emergency Support: {formData.support.emergencySupport ? 'Active' : 'Standby'}</div>
+                      <h4 className="text-xs font-black uppercase text-blue-400 italic">Support Operating Hours</h4>
+                      <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${formData.support.emergencySupport ? 'bg-green-50 text-white' : 'bg-slate-700 text-slate-400'}`}>Emergency Support: {formData.support.emergencySupport ? 'Active' : 'Standby'}</div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -229,7 +229,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'digital' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Globe className="text-indigo-600" size={32} /> Digital Presence</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Globe className="text-blue-600" size={32} /> Digital Presence</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
@@ -256,7 +256,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'invoices' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><FileText className="text-indigo-600" size={32} /> Invoice Branding</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><FileText className="text-blue-600" size={32} /> Invoice Branding</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
@@ -279,7 +279,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       <h4 className="text-sm font-black uppercase text-slate-800 italic">Tax Settings</h4>
                       <button
                         onClick={() => setFormData({ ...formData, enableTax: !formData.enableTax })}
-                        className={`w-12 h-6 rounded-full relative transition-all ${formData.enableTax ? 'bg-emerald-600' : 'bg-slate-300'}`}
+                        className={`w-12 h-6 rounded-full relative transition-all ${formData.enableTax ? 'bg-green-600' : 'bg-slate-300'}`}
                       >
                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.enableTax ? 'left-7' : 'left-1'}`}></div>
                       </button>
@@ -322,7 +322,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                   {/* INVOICE TEXT SYSTEM */}
                   <div className="p-8 bg-slate-50 border border-slate-200 rounded-[2.5rem] space-y-6 mt-8">
                     <h4 className="text-sm font-black uppercase text-slate-800 italic flex items-center gap-3">
-                      <Type size={18} className="text-indigo-600" /> 
+                      <Type size={18} className="text-blue-600" /> 
                       Invoice Links & Messages
                     </h4>
                     <p className="text-[11px] font-bold text-slate-500 uppercase">Manage the links and messages shown at the bottom of all generated invoices.</p>
@@ -361,7 +361,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'notifications' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Bell className="text-indigo-600" size={32} /> Notification Branding</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Bell className="text-blue-600" size={32} /> Notification Branding</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div className="space-y-2">
@@ -384,7 +384,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'appearance' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Smartphone className="text-indigo-600" size={32} /> App Features</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Smartphone className="text-blue-600" size={32} /> App Features</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {[
@@ -396,16 +396,16 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       { key: 'maintenanceMode', label: 'Maintenance Mode', icon: Power, dangerous: true },
                       { key: 'show5GLaunchAnimation', label: '5G Launch Animation', icon: Sparkles },
                     ].map(param => (
-                      <div key={param.key} className={`p-6 rounded-3xl border-2 flex items-center justify-between transition-all group ${(formData.appearance as any)[param.key] ? 'border-indigo-100 bg-indigo-50/10' : 'border-slate-100 bg-slate-50 opacity-60'}`}>
+                      <div key={param.key} className={`p-6 rounded-3xl border-2 flex items-center justify-between transition-all group ${(formData.appearance as any)[param.key] ? 'border-blue-100 bg-blue-50/10' : 'border-slate-100 bg-slate-50 opacity-60'}`}>
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${(formData.appearance as any)[param.key] ? 'bg-indigo-600 text-white' : 'bg-white text-slate-400'}`}>
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${(formData.appearance as any)[param.key] ? 'bg-blue-600 text-white' : 'bg-white text-slate-400'}`}>
                             <param.icon size={20} />
                           </div>
                           <span className="text-xs font-black uppercase text-slate-900">{param.label}</span>
                         </div>
                         <button
                           onClick={() => setFormData({ ...formData, appearance: { ...formData.appearance, [param.key]: !(formData.appearance as any)[param.key] } })}
-                          className={`w-12 h-6 rounded-full relative transition-all ${(formData.appearance as any)[param.key] ? (param.dangerous ? 'bg-rose-600' : 'bg-emerald-600') : 'bg-slate-300'}`}
+                          className={`w-12 h-6 rounded-full relative transition-all ${(formData.appearance as any)[param.key] ? (param.dangerous ? 'bg-rose-600' : 'bg-green-600') : 'bg-slate-300'}`}
                         >
                           <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${(formData.appearance as any)[param.key] ? 'left-7' : 'left-1'}`}></div>
                         </button>
@@ -415,8 +415,8 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
 
                   <div className="p-8 bg-slate-900 rounded-[2.5rem] space-y-6">
                     <div className="flex items-center gap-3">
-                      <RefreshCw className="text-indigo-400 animate-spin-slow" size={24} />
-                      <h4 className="text-xs font-black uppercase text-indigo-400 italic tracking-[0.2em]">System Loading Architecture</h4>
+                      <RefreshCw className="text-blue-400 animate-spin-slow" size={24} />
+                      <h4 className="text-xs font-black uppercase text-blue-400 italic tracking-[0.2em]">System Loading Architecture</h4>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {[
@@ -427,7 +427,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                         <div 
                           key={style.id}
                           onClick={() => setFormData({ ...formData, appearance: { ...formData.appearance, loadingStyle: style.id as any } })}
-                          className={`p-6 rounded-3xl border-2 cursor-pointer transition-all flex flex-col gap-4 ${formData.appearance.loadingStyle === style.id ? 'border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20' : 'border-white/5 bg-white/5 opacity-40 hover:opacity-100'}`}
+                          className={`p-6 rounded-3xl border-2 cursor-pointer transition-all flex flex-col gap-4 ${formData.appearance.loadingStyle === style.id ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20' : 'border-white/5 bg-white/5 opacity-40 hover:opacity-100'}`}
                         >
                           <div className="flex items-center justify-between">
                             <span className={`text-[10px] font-black uppercase tracking-widest ${formData.appearance.loadingStyle === style.id ? 'text-white' : 'text-slate-500'}`}>{style.label}</span>
@@ -445,7 +445,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'ai-agent' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Bot className="text-indigo-600" size={32} /> AI System Settings</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Bot className="text-blue-600" size={32} /> AI System Settings</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2">
@@ -466,7 +466,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                   </div>
                   <div className="p-8 bg-slate-950 rounded-[2.5rem] space-y-6">
-                    <h4 className="text-xs font-black uppercase text-indigo-400 italic">AI Working Hours</h4>
+                    <h4 className="text-xs font-black uppercase text-blue-400 italic">AI Working Hours</h4>
                     <div className="grid grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <label className="text-[9px] font-black text-slate-500 uppercase">Start Time</label>
@@ -485,7 +485,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'legal' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Scale className="text-indigo-600" size={32} /> Legal Policies</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Scale className="text-blue-600" size={32} /> Legal Policies</h3>
                     <p className="text-slate-400 text-[11px] font-bold uppercase tracking-widest">Update terms, agreements, and policies used across the system.</p>
                   </div>
 
@@ -493,7 +493,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Terms & Conditions</label>
                       <textarea
-                        className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-48 outline-none focus:border-indigo-600 resize-none"
+                        className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-48 outline-none focus:border-blue-600 resize-none"
                         value={formData.legal.termsAndConditions}
                         onChange={e => setFormData({ ...formData, legal: { ...formData.legal, termsAndConditions: e.target.value } })}
                       />
@@ -501,7 +501,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">User Service Agreement</label>
                       <textarea
-                        className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-48 outline-none focus:border-indigo-600 resize-none"
+                        className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-48 outline-none focus:border-blue-600 resize-none"
                         value={formData.legal.serviceAgreement}
                         onChange={e => setFormData({ ...formData, legal: { ...formData.legal, serviceAgreement: e.target.value } })}
                       />
@@ -510,7 +510,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Privacy Policy</label>
                         <textarea
-                          className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-32 outline-none focus:border-indigo-600 resize-none"
+                          className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-32 outline-none focus:border-blue-600 resize-none"
                           value={formData.legal.privacyPolicy}
                           onChange={e => setFormData({ ...formData, legal: { ...formData.legal, privacyPolicy: e.target.value } })}
                         />
@@ -518,7 +518,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Refund Policy</label>
                         <textarea
-                          className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-32 outline-none focus:border-indigo-600 resize-none"
+                          className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-32 outline-none focus:border-blue-600 resize-none"
                           value={formData.legal.refundPolicy}
                           onChange={e => setFormData({ ...formData, legal: { ...formData.legal, refundPolicy: e.target.value } })}
                         />
@@ -532,7 +532,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
               {activeTab === 'communications' && (
                 <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
                   <div className="space-y-2">
-                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Share2 className="text-indigo-600" size={32} /> Communication Hub</h3>
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Share2 className="text-blue-600" size={32} /> Communication Hub</h3>
                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">OTP & System Emails</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -558,7 +558,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
             </div>
 
             <div className="p-10 bg-slate-50 border-t flex gap-4 shrink-0">
-              <button onClick={handleSave} disabled={isSaving} className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50">
+              <button onClick={handleSave} disabled={isSaving} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50">
                 {isSaving ? <Mini5GMicroLoader size={24} /> : <ShieldCheck size={24} />}
                 {isSaving ? 'Saving...' : 'Save and Apply Settings'}
               </button>
@@ -571,3 +571,4 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default BusinessSettings;
+

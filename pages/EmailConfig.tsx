@@ -76,7 +76,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div className="space-y-1">
                     <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none">
-                        <Mail className="text-indigo-600" size={32} />
+                        <Mail className="text-blue-600" size={32} />
                         Comm-Hub Configuration
                     </h2>
                     <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Authority Control • SMTP & API Protocols v2.1</p>
@@ -84,7 +84,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                 <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
+                    className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
                 >
                     {isSaving ? <Mini5GMicroLoader size={16} /> : <Save size={16} />}
                     Synchronize Configuration
@@ -94,25 +94,25 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
             <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm w-fit">
                 <button
                     onClick={() => setActiveTab('gateway')}
-                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'gateway' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'gateway' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
                 >
                     <Server size={14} /> Gateway Setup
                 </button>
                 <button
                     onClick={() => setActiveTab('sender')}
-                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'sender' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'sender' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
                 >
                     <ShieldCheck size={14} /> Sender ID
                 </button>
                 <button
                     onClick={() => setActiveTab('advanced')}
-                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'advanced' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'advanced' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
                 >
                     <Sliders size={14} /> Protocol Rules
                 </button>
                 <button
                     onClick={() => setActiveTab('automation')}
-                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'automation' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'automation' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
                 >
                     <Bell size={14} /> Automation Routing
                 </button>
@@ -124,7 +124,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                         <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
                             <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border">
+                                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border">
                                         <Zap size={24} />
                                     </div>
                                     <div>
@@ -139,7 +139,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Gateway Mode</label>
                                         <select
-                                            className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs"
+                                            className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-xs"
                                             value={config.emailMode}
                                             onChange={e => setConfig({ ...config, emailMode: e.target.value as EmailGatewayMode })}
                                         >
@@ -151,7 +151,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Service Node</label>
                                         <select
-                                            className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs"
+                                            className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-xs"
                                             value={config.emailProvider}
                                             onChange={e => setConfig({ ...config, emailProvider: e.target.value as any })}
                                         >
@@ -167,7 +167,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                 <div className="p-8 bg-slate-900 rounded-[2rem] text-white space-y-8 border border-white/5 shadow-2xl relative overflow-hidden">
                                     <Globe className="absolute -right-12 -bottom-12 opacity-5" size={200} />
                                     <div className="flex items-center gap-3 border-b border-white/10 pb-4">
-                                        <Server size={20} className="text-indigo-400" />
+                                        <Server size={20} className="text-blue-400" />
                                         <h4 className="text-sm font-black italic uppercase tracking-tighter">Connection Parameters</h4>
                                     </div>
 
@@ -175,7 +175,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic text-white/50">Host / IP Node</label>
                                             <input
-                                                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl font-black text-white outline-none focus:border-indigo-500 transition-all text-xs"
+                                                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl font-black text-white outline-none focus:border-blue-500 transition-all text-xs"
                                                 placeholder="smtp.example.com"
                                                 value={config.smtpConfig.host}
                                                 onChange={e => setConfig({ ...config, smtpConfig: { ...config.smtpConfig, host: e.target.value } })}
@@ -185,7 +185,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                             <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic text-white/50">Port Mapping</label>
                                             <input
                                                 type="number"
-                                                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl font-black text-white outline-none focus:border-indigo-500 transition-all text-xs"
+                                                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl font-black text-white outline-none focus:border-blue-500 transition-all text-xs"
                                                 placeholder="587"
                                                 value={config.smtpConfig.port}
                                                 onChange={e => setConfig({ ...config, smtpConfig: { ...config.smtpConfig, port: parseInt(e.target.value) } })}
@@ -194,7 +194,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic text-white/50">Encryption</label>
                                             <select
-                                                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl font-black text-white outline-none focus:border-indigo-500 transition-all text-xs appearance-none"
+                                                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl font-black text-white outline-none focus:border-blue-500 transition-all text-xs appearance-none"
                                                 value={config.smtpConfig.encryption}
                                                 onChange={e => setConfig({ ...config, smtpConfig: { ...config.smtpConfig, encryption: e.target.value as any } })}
                                             >
@@ -206,7 +206,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic text-white/50">Credential ID</label>
                                             <input
-                                                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl font-black text-white outline-none focus:border-indigo-500 transition-all text-xs"
+                                                className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl font-black text-white outline-none focus:border-blue-500 transition-all text-xs"
                                                 placeholder="postmaster@domain.com"
                                                 value={config.smtpConfig.username}
                                                 onChange={e => setConfig({ ...config, smtpConfig: { ...config.smtpConfig, username: e.target.value } })}
@@ -217,7 +217,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                             <div className="relative">
                                                 <input
                                                     type="password"
-                                                    className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl font-black text-white outline-none focus:border-indigo-500 transition-all text-xs"
+                                                    className="w-full px-5 py-4 bg-white/5 border border-white/10 rounded-xl font-black text-white outline-none focus:border-blue-500 transition-all text-xs"
                                                     placeholder="••••••••••••"
                                                     value={config.smtpConfig.password || ''}
                                                     onChange={e => setConfig({ ...config, smtpConfig: { ...config.smtpConfig, password: e.target.value } })}
@@ -235,7 +235,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                         <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
                             <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border">
+                                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border">
                                         <ShieldCheck size={24} />
                                     </div>
                                     <div>
@@ -245,7 +245,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                 </div>
                                 <button
                                     onClick={addSenderIdentity}
-                                    className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2"
+                                    className="px-6 py-3 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2"
                                 >
                                     <Plus size={14} /> Add Identity
                                 </button>
@@ -256,13 +256,13 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                     {config.senderIdentities.map(identity => (
                                         <div key={identity.id} className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:shadow-xl transition-all">
                                             <div className="flex items-center gap-5">
-                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 ${identity.isVerified ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 ${identity.isVerified ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
                                                     {identity.isVerified ? <CheckCircle size={24} /> : <AlertCircle size={24} />}
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-black text-slate-900 uppercase italic tracking-tighter flex items-center gap-3">
                                                         {identity.name}
-                                                        {identity.isDefault && <span className="px-2 py-0.5 bg-indigo-600 text-white text-[7px] font-black uppercase rounded-full">Primary</span>}
+                                                        {identity.isDefault && <span className="px-2 py-0.5 bg-blue-600 text-white text-[7px] font-black uppercase rounded-full">Primary</span>}
                                                     </p>
                                                     <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{identity.email}</p>
                                                 </div>
@@ -274,7 +274,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                                             const next = config.senderIdentities.map(s => ({ ...s, isDefault: s.id === identity.id }));
                                                             setConfig({ ...config, senderIdentities: next });
                                                         }}
-                                                        className="bg-white p-3 border border-slate-200 text-slate-400 hover:text-indigo-600 rounded-xl transition-all"
+                                                        className="bg-white p-3 border border-slate-200 text-slate-400 hover:text-blue-600 rounded-xl transition-all"
                                                         title="Set as Registry Primary"
                                                     >
                                                         <Zap size={16} />
@@ -304,7 +304,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                         <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
                             <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border">
+                                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border">
                                         <Sliders size={24} />
                                     </div>
                                     <div>
@@ -317,7 +317,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                             <div className="p-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-6">
-                                        <h4 className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.3em] flex items-center gap-2 italic">
+                                        <h4 className="text-[11px] font-black text-blue-600 uppercase tracking-[0.3em] flex items-center gap-2 italic">
                                             Throttling Policy
                                         </h4>
                                         <div className="space-y-4">
@@ -325,7 +325,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                                 <span className="text-[10px] font-black text-slate-500 uppercase">Emails Per Hour</span>
                                                 <input
                                                     type="number"
-                                                    className="w-24 bg-white border border-slate-200 rounded-xl px-4 py-2 font-black text-xs text-right focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                                    className="w-24 bg-white border border-slate-200 rounded-xl px-4 py-2 font-black text-xs text-right focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                                                     value={config.rateLimits.emailsPerHour}
                                                     onChange={e => setConfig({ ...config, rateLimits: { ...config.rateLimits, emailsPerHour: parseInt(e.target.value) } })}
                                                 />
@@ -334,7 +334,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                                 <span className="text-[10px] font-black text-slate-500 uppercase">Daily Burst Limit</span>
                                                 <input
                                                     type="number"
-                                                    className="w-24 bg-white border border-slate-200 rounded-xl px-4 py-2 font-black text-xs text-right focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
+                                                    className="w-24 bg-white border border-slate-200 rounded-xl px-4 py-2 font-black text-xs text-right focus:ring-2 focus:ring-blue-500 transition-all outline-none"
                                                     value={config.rateLimits.emailsPerDay}
                                                     onChange={e => setConfig({ ...config, rateLimits: { ...config.rateLimits, emailsPerDay: parseInt(e.target.value) } })}
                                                 />
@@ -343,20 +343,20 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                     </div>
 
                                     <div className="space-y-6">
-                                        <h4 className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.3em] flex items-center gap-2 italic">
+                                        <h4 className="text-[11px] font-black text-green-600 uppercase tracking-[0.3em] flex items-center gap-2 italic">
                                             IP Warmup Protocol
                                         </h4>
-                                        <div className="p-6 bg-emerald-50 border border-emerald-100 rounded-[2rem] space-y-4">
+                                        <div className="p-6 bg-green-50 border border-green-100 rounded-[2rem] space-y-4">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-[10px] font-black text-emerald-700 uppercase">Process Active</span>
+                                                <span className="text-[10px] font-black text-green-700 uppercase">Process Active</span>
                                                 <button
                                                     onClick={() => setConfig({ ...config, warmup: { ...config.warmup, enabled: !config.warmup.enabled } })}
-                                                    className={`w-12 h-6 rounded-full transition-all relative ${config.warmup.enabled ? 'bg-emerald-600' : 'bg-slate-300'}`}
+                                                    className={`w-12 h-6 rounded-full transition-all relative ${config.warmup.enabled ? 'bg-green-600' : 'bg-slate-300'}`}
                                                 >
                                                     <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${config.warmup.enabled ? 'right-1' : 'left-1'}`}></div>
                                                 </button>
                                             </div>
-                                            <p className="text-[9px] text-emerald-600/80 font-bold leading-relaxed uppercase">
+                                            <p className="text-[9px] text-green-600/80 font-bold leading-relaxed uppercase">
                                                 WARMUP ENGAGED: THE SYSTEM WILL GRADUALLY INCREASE TRANSMISSION VOLUMES TO PRESERVE REPUTATION NODE SCORES.
                                             </p>
                                         </div>
@@ -370,7 +370,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                         <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
                             <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border">
+                                    <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border">
                                         <Bell size={24} />
                                     </div>
                                     <div>
@@ -393,7 +393,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                             This identity will be used to dispatch verification codes and reset tokens.
                                         </p>
                                         <select
-                                            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs"
+                                            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-xs"
                                             value={config.otpSenderId}
                                             onChange={e => setConfig({ ...config, otpSenderId: e.target.value })}
                                         >
@@ -407,7 +407,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                     <div className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] space-y-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                                <Info size={14} className="text-indigo-500" />
+                                                <Info size={14} className="text-blue-500" />
                                             </div>
                                             <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest italic">System Reminders</h4>
                                         </div>
@@ -415,7 +415,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                             This identity will be used for billing alerts and fiscal reminders.
                                         </p>
                                         <select
-                                            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs"
+                                            className="w-full px-5 py-4 bg-white border border-slate-200 rounded-xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-xs"
                                             value={config.reminderSenderId}
                                             onChange={e => setConfig({ ...config, reminderSenderId: e.target.value })}
                                         >
@@ -427,13 +427,13 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                     </div>
                                 </div>
 
-                                <div className="p-6 bg-indigo-50 border border-indigo-200 rounded-[2rem] flex items-start gap-4">
+                                <div className="p-6 bg-blue-50 border border-blue-200 rounded-[2rem] flex items-start gap-4">
                                     <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm shrink-0">
-                                        <Zap size={18} className="text-indigo-600" />
+                                        <Zap size={18} className="text-blue-600" />
                                     </div>
                                     <div className="space-y-1">
-                                        <h5 className="text-[10px] font-black text-indigo-900 uppercase tracking-widest italic">Routing Precision</h5>
-                                        <p className="text-[9px] text-indigo-600 font-bold leading-relaxed uppercase">
+                                        <h5 className="text-[10px] font-black text-blue-900 uppercase tracking-widest italic">Routing Precision</h5>
+                                        <p className="text-[9px] text-blue-600 font-bold leading-relaxed uppercase">
                                             DEDICATED SENDER IDENTITIES IMPROVE DELIVERABILITY BY SEGREGATING TRANSACTIONAL TRAFFIC FROM SYSTEM ALERTS.
                                         </p>
                                     </div>
@@ -453,8 +453,8 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                         <div className="space-y-6 relative z-10">
                             <div className="flex justify-between items-center">
                                 <p className="text-[10px] font-black text-white/50 uppercase tracking-widest">Protocol Status</p>
-                                <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg">
-                                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                                <div className="flex items-center gap-2 px-3 py-1 bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg">
+                                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
                                     <span className="text-[8px] font-black uppercase">{config.health.status}</span>
                                 </div>
                             </div>
@@ -474,13 +474,13 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
 
                     <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm space-y-6">
                         <h4 className="text-sm font-black italic uppercase tracking-tighter flex items-center gap-3 text-slate-900">
-                            <Send size={18} className="text-indigo-600" /> - Payment Due Test
+                            <Send size={18} className="text-blue-600" /> - Payment Due Test
                         </h4>
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Target Email Node</label>
                                 <input
-                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-xs"
                                     placeholder="admin@domain.com"
                                     value={testEmail}
                                     onChange={e => setTestEmail(e.target.value)}
@@ -509,3 +509,4 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
 };
 
 export default EmailConfig;
+

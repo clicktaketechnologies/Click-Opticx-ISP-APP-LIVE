@@ -65,7 +65,7 @@ const PayPalSettings: React.FC<Props> = ({ state, onBack }) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 pb-20 max-w-4xl mx-auto">
       <div className="flex items-center gap-6">
-         <button onClick={onBack} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-indigo-600 transition-all active:scale-90">
+         <button onClick={onBack} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-blue-600 transition-all active:scale-90">
             <ArrowLeft size={24} />
          </button>
          <div>
@@ -98,19 +98,19 @@ const PayPalSettings: React.FC<Props> = ({ state, onBack }) => {
                <div className="space-y-6">
                   <div className="flex items-center justify-between">
                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic ml-1">API Credentials</h4>
-                     <button onClick={() => setShowSecrets(!showSecrets)} className="text-[9px] font-black uppercase text-indigo-600 flex items-center gap-2">
+                     <button onClick={() => setShowSecrets(!showSecrets)} className="text-[9px] font-black uppercase text-blue-600 flex items-center gap-2">
                         {showSecrets ? <EyeOff size={14}/> : <Eye size={14}/>} {showSecrets ? 'Mask' : 'Reveal'} Tokens
                      </button>
                   </div>
                   <div className="grid grid-cols-1 gap-6">
                      <div className="space-y-2">
                         <label className="text-[9px] font-black text-slate-500 uppercase ml-1 italic">Client ID</label>
-                        <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-indigo-500 transition-all" value={formData.config.clientId} onChange={e => updateConfig('clientId', e.target.value)} />
+                        <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-blue-500 transition-all" value={formData.config.clientId} onChange={e => updateConfig('clientId', e.target.value)} />
                      </div>
                      <div className="space-y-2">
                         <label className="text-[9px] font-black text-slate-500 uppercase ml-1 italic">Secret Key</label>
                         {/* Removed duplicate value and onChange attributes below */}
-                        <input type={showSecrets ? 'text' : 'password'} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-indigo-500 transition-all" value={formData.config.secret} onChange={e => updateConfig('secret', e.target.value)} />
+                        <input type={showSecrets ? 'text' : 'password'} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-blue-500 transition-all" value={formData.config.secret} onChange={e => updateConfig('secret', e.target.value)} />
                      </div>
                   </div>
                </div>
@@ -118,7 +118,7 @@ const PayPalSettings: React.FC<Props> = ({ state, onBack }) => {
                <button 
                  onClick={handleSave}
                  disabled={isSaving}
-                 className="w-full py-6 bg-indigo-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
+                 className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
                >
                   {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20}/>}
                   Commit Protocol Changes
@@ -130,7 +130,7 @@ const PayPalSettings: React.FC<Props> = ({ state, onBack }) => {
             <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
                <div className="relative z-10 space-y-6">
                   <div className="flex items-center gap-3">
-                     <Zap size={20} className="text-indigo-400" />
+                     <Zap size={20} className="text-blue-400" />
                      <h3 className="text-xs font-black uppercase tracking-widest italic">Node Scope</h3>
                   </div>
                   <div className="grid grid-cols-1 gap-2">
@@ -143,10 +143,10 @@ const PayPalSettings: React.FC<Props> = ({ state, onBack }) => {
                             const next = active ? formData.allowedFor.filter(u => u !== usage) : [...formData.allowedFor, usage];
                             setFormData({...formData, allowedFor: next});
                           }}
-                          className={`p-4 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${active ? 'bg-white/10 border-indigo-500 text-white' : 'bg-white/5 border-white/5 text-slate-500'}`}
+                          className={`p-4 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${active ? 'bg-white/10 border-blue-500 text-white' : 'bg-white/5 border-white/5 text-slate-500'}`}
                          >
                             <span className="text-[10px] font-black uppercase tracking-widest">{usage}</span>
-                            {active ? <ShieldCheck size={14} className="text-indigo-400"/> : <div className="w-1.5 h-1.5 rounded-full bg-white/10"></div>}
+                            {active ? <ShieldCheck size={14} className="text-blue-400"/> : <div className="w-1.5 h-1.5 rounded-full bg-white/10"></div>}
                          </button>
                        );
                      })}
@@ -168,3 +168,4 @@ const PayPalSettings: React.FC<Props> = ({ state, onBack }) => {
 };
 
 export default PayPalSettings;
+

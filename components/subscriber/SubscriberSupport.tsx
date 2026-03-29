@@ -45,8 +45,8 @@ const SubscriberSupport: React.FC = () => {
 
   const getStatusColor = (s: TicketStatus) => {
     switch(s) {
-      case TicketStatus.OPEN: return 'bg-indigo-600 text-white';
-      case TicketStatus.RESOLVED: return 'bg-emerald-600 text-white';
+      case TicketStatus.OPEN: return 'bg-blue-600 text-white';
+      case TicketStatus.RESOLVED: return 'bg-green-600 text-white';
       case TicketStatus.CLOSED: return 'bg-slate-200 text-slate-500';
       default: return 'bg-blue-500 text-white';
     }
@@ -59,14 +59,14 @@ const SubscriberSupport: React.FC = () => {
            <div className="space-y-4 max-w-md">
               <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">Help & Support</h2>
               <p className="text-sm text-slate-400 font-bold leading-relaxed uppercase pt-2">Our support team is available during {cfg.workingHoursWeekdays} (Weekdays) and {cfg.workingHoursWeekends} (Weekends). Connect with a human agent for any internet related queries.</p>
-              <div className="flex items-center gap-3 text-emerald-400">
-                 <div className={`w-2.5 h-2.5 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)] ${cfg.emergencySupport ? 'bg-emerald-400' : 'bg-rose-50'}`}></div>
+              <div className="flex items-center gap-3 text-green-400">
+                 <div className={`w-2.5 h-2.5 rounded-full animate-pulse shadow-[0_0_10px_rgba(52,211,153,0.5)] ${cfg.emergencySupport ? 'bg-green-400' : 'bg-rose-50'}`}></div>
                  <span className="text-[10px] font-black uppercase tracking-widest">Support Status: {cfg.emergencySupport ? 'Available' : 'Offline'}</span>
               </div>
            </div>
-           <div className="w-48 h-48 bg-white/5 rounded-full flex items-center justify-center text-indigo-400 shadow-2xl relative border border-white/10 backdrop-blur-md">
+           <div className="w-48 h-48 bg-white/5 rounded-full flex items-center justify-center text-blue-400 shadow-2xl relative border border-white/10 backdrop-blur-md">
               <Headphones size={80} className="group-hover:scale-110 transition-transform" />
-              <div className="absolute inset-0 rounded-full border-4 border-dashed border-indigo-500/20 animate-spin-slow"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-dashed border-blue-500/20 animate-spin-slow"></div>
            </div>
         </div>
         <Activity className="absolute -right-8 -bottom-8 opacity-5 scale-150 pointer-events-none" size={240} />
@@ -75,15 +75,15 @@ const SubscriberSupport: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-8">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-               <MessageSquare size={16} className="text-indigo-600"/> Contact Options
+               <MessageSquare size={16} className="text-blue-600"/> Contact Options
             </h3>
             <div className="space-y-4">
                {[
-                 { label: 'WhatsApp', icon: MessageSquare, sub: cfg.whatsapp, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                 { label: 'WhatsApp', icon: MessageSquare, sub: cfg.whatsapp, color: 'text-green-500', bg: 'bg-green-50' },
                  { label: 'Phone', icon: Phone, sub: cfg.phone, color: 'text-blue-500', bg: 'bg-blue-50' },
                  { label: 'Email', icon: Mail, sub: cfg.email, color: 'text-rose-500', bg: 'bg-rose-50' }
                ].map(chan => (
-                 <button key={chan.label} className="w-full p-6 bg-slate-100 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all border-2 border-transparent hover:border-indigo-600">
+                 <button key={chan.label} className="w-full p-6 bg-slate-100 rounded-2xl flex items-center justify-between group hover:bg-white hover:shadow-lg transition-all border-2 border-transparent hover:border-blue-600">
                     <div className="flex items-center gap-5">
                        <div className={`w-12 h-12 ${chan.bg} ${chan.color} rounded-xl flex items-center justify-center group-hover:rotate-6 transition-transform`}><chan.icon size={24}/></div>
                        <div className="text-left">
@@ -91,7 +91,7 @@ const SubscriberSupport: React.FC = () => {
                           <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{chan.sub}</p>
                        </div>
                     </div>
-                    <ChevronRight className="text-slate-300 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" size={18} />
+                    <ChevronRight className="text-slate-300 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" size={18} />
                  </button>
                ))}
             </div>
@@ -99,12 +99,12 @@ const SubscriberSupport: React.FC = () => {
 
          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-8 flex flex-col">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-               <LifeBuoy size={16} className="text-indigo-600"/> Support Tickets
+               <LifeBuoy size={16} className="text-blue-600"/> Support Tickets
             </h3>
             
             <div className="flex-1 space-y-4 overflow-y-auto custom-scrollbar max-h-[300px] pr-2">
                {userTickets.map(t => (
-                 <div key={t.id} className="p-5 bg-slate-50 border border-slate-200 rounded-2xl hover:border-indigo-600 transition-all group">
+                 <div key={t.id} className="p-5 bg-slate-50 border border-slate-200 rounded-2xl hover:border-blue-600 transition-all group">
                     <div className="flex justify-between items-start mb-2">
                        <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{t.id}</span>
                        <span className={`px-2 py-0.5 rounded-full text-[7px] font-black uppercase ${getStatusColor(t.status)}`}>{t.status}</span>
@@ -135,12 +135,12 @@ const SubscriberSupport: React.FC = () => {
            <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col max-h-[90vh]">
               <div className="p-10 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
                        <Plus size={28} />
                     </div>
                      <div>
                        <h3 className="text-2xl font-black uppercase italic tracking-tighter">Open Ticket</h3>
-                       <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest">New Support Request</p>
+                       <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest">New Support Request</p>
                     </div>
                  </div>
                  <button onClick={() => setShowTicketForm(false)} className="p-3 hover:bg-white/10 rounded-2xl text-slate-500 hover:text-white transition-all"><X size={32} /></button>
@@ -156,7 +156,7 @@ const SubscriberSupport: React.FC = () => {
                               key={cat} 
                               type="button"
                               onClick={() => setFormData({...formData, category: cat as any})}
-                              className={`py-4 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${formData.category === cat ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-indigo-100'}`}
+                              className={`py-4 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${formData.category === cat ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-blue-100'}`}
                             >
                                {cat}
                             </button>
@@ -167,7 +167,7 @@ const SubscriberSupport: React.FC = () => {
                     <div className="space-y-2">
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Subject</label>
                        <input 
-                         className="w-full p-5 bg-slate-100 border-none rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 uppercase placeholder:lowercase"
+                         className="w-full p-5 bg-slate-100 border-none rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/10 uppercase placeholder:lowercase"
                          placeholder="Brief summary of your issue..."
                          value={formData.subject}
                          onChange={e => setFormData({...formData, subject: e.target.value})}
@@ -189,7 +189,7 @@ const SubscriberSupport: React.FC = () => {
                     <div className="space-y-2">
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
                        <textarea 
-                         className="w-full p-5 bg-slate-100 border-none rounded-2xl font-bold text-xs h-32 resize-none outline-none focus:ring-4 focus:ring-indigo-500/10 uppercase"
+                         className="w-full p-5 bg-slate-100 border-none rounded-2xl font-bold text-xs h-32 resize-none outline-none focus:ring-4 focus:ring-blue-500/10 uppercase"
                          placeholder="Please describe your issue in detail..."
                          value={formData.description}
                          onChange={e => setFormData({...formData, description: e.target.value})}
@@ -211,7 +211,7 @@ const SubscriberSupport: React.FC = () => {
                  <button 
                    onClick={handleSubmit}
                    disabled={isSubmitting || !formData.subject || !formData.description}
-                   className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                   className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
                     {isSubmitting ? <Mini5GMicroLoader size={18} /> : <Send size={18}/>}
                     Send Ticket
@@ -225,3 +225,4 @@ const SubscriberSupport: React.FC = () => {
 };
 
 export default SubscriberSupport;
+

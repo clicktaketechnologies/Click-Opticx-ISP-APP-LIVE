@@ -81,7 +81,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
    };
 
    const industrialSwatches = [
-      '#4f46e5', '#10b981', '#f59e0b', '#ef4444',
+      '#1570ef', '#32d583', '#f59e0b', '#ef4444',
       '#8b5cf6', '#ec4899', '#06b6d4', '#2dd4bf',
       '#6366f1', '#0f172a', '#334155', '#64748b'
    ];
@@ -107,7 +107,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                   <button
                      key={tab.id}
                      onClick={() => setActiveTab(tab.id as any)}
-                     className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap relative ${activeTab === tab.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+                     className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap relative ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
                   >
                      <tab.icon size={16} />
                      {tab.label}
@@ -125,7 +125,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="relative">
                      <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                      <input
-                        className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 font-black text-slate-900"
+                        className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 font-black text-slate-900"
                         placeholder="Lookup subscriber connection..."
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
@@ -159,13 +159,13 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                     </div>
                                  </td>
                                  <td className="px-8 py-5">
-                                    <span className="text-xs font-black text-indigo-600 bg-indigo-50 px-2 py-1 rounded border border-indigo-100">{user.connectionId}</span>
+                                    <span className="text-xs font-black text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100">{user.connectionId}</span>
                                  </td>
                                  <td className="px-8 py-5">
                                     <button
                                        onClick={() => handleTogglePortal(user.id, !!user.portalEnabled)}
                                        disabled={isProcessing === user.id}
-                                       className={`w-12 h-6 rounded-full relative transition-all ${user.portalEnabled ? 'bg-emerald-500' : 'bg-slate-300'}`}
+                                       className={`w-12 h-6 rounded-full relative transition-all ${user.portalEnabled ? 'bg-green-500' : 'bg-slate-300'}`}
                                     >
                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${user.portalEnabled ? 'left-7' : 'left-1'}`}></div>
                                     </button>
@@ -173,7 +173,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                  <td className="px-8 py-5 text-right">
                                     <button
                                        onClick={() => db.impersonateUser(user.id)}
-                                       className="px-4 py-2 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-indigo-600 transition-all flex items-center justify-center gap-2 ml-auto"
+                                       className="px-4 py-2 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2 ml-auto"
                                     >
                                        <Eye size={14} /> Login As User
                                     </button>
@@ -209,7 +209,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            <button
                               onClick={() => handleApproveSignup(req.id)}
                               disabled={isProcessing === req.id}
-                              className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg hover:bg-emerald-700 active:scale-95 transition-all flex items-center justify-center gap-2"
+                              className="flex-1 py-3 bg-green-600 text-white rounded-xl font-black text-[9px] uppercase tracking-widest shadow-lg hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center gap-2"
                            >
                               {isProcessing === req.id ? <Mini5GMicroLoader size={12} /> : <CheckCircle size={12} />} Approve
                            </button>
@@ -234,9 +234,9 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      <h3 className="text-lg font-black text-slate-900 uppercase italic tracking-tighter border-b pb-4">Section Orchestrator</h3>
                      <div className="space-y-4 overflow-y-auto max-h-[600px] pr-2 custom-scrollbar">
                         {sections.map(section => (
-                           <div key={section.id} className={`p-6 rounded-[2.5rem] border-2 transition-all flex items-center justify-between group ${section.enabled ? 'border-indigo-100 bg-white' : 'border-slate-50 bg-slate-50 opacity-60 grayscale'}`}>
+                           <div key={section.id} className={`p-6 rounded-[2.5rem] border-2 transition-all flex items-center justify-between group ${section.enabled ? 'border-blue-100 bg-white' : 'border-slate-50 bg-slate-50 opacity-60 grayscale'}`}>
                               <div className="flex items-center gap-4">
-                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${section.enabled ? 'bg-indigo-50 text-indigo-600' : 'bg-white text-slate-300'}`}>
+                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${section.enabled ? 'bg-blue-50 text-blue-600' : 'bg-white text-slate-300'}`}>
                                     <Layers size={24} />
                                  </div>
                                  <div>
@@ -247,13 +247,13 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                               <div className="flex items-center gap-4">
                                  <button
                                     onClick={() => setEditingSection(section)}
-                                    className={`p-3 rounded-xl transition-all ${editingSection?.id === section.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'bg-slate-50 text-slate-400 hover:text-indigo-600'}`}
+                                    className={`p-3 rounded-xl transition-all ${editingSection?.id === section.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-100' : 'bg-slate-50 text-slate-400 hover:text-blue-600'}`}
                                  >
                                     <Settings size={20} />
                                  </button>
                                  <button
                                     onClick={() => handleUpdateSection({ ...section, enabled: !section.enabled })}
-                                    className={`w-14 h-8 rounded-full relative transition-all duration-300 ${section.enabled ? 'bg-emerald-500 shadow-lg shadow-emerald-100' : 'bg-slate-300'}`}
+                                    className={`w-14 h-8 rounded-full relative transition-all duration-300 ${section.enabled ? 'bg-green-500 shadow-lg shadow-green-100' : 'bg-slate-300'}`}
                                  >
                                     <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 ${section.enabled ? 'left-7' : 'left-1'}`}></div>
                                  </button>
@@ -268,7 +268,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         <div className="flex justify-between items-start">
                            <div>
                               <h3 className="text-2xl font-black uppercase italic tracking-tighter text-white leading-none">Area Inspector</h3>
-                              <p className="text-[9px] text-indigo-400 font-black uppercase mt-2 tracking-widest">{editingSection.label}</p>
+                              <p className="text-[9px] text-blue-400 font-black uppercase mt-2 tracking-widest">{editingSection.label}</p>
                            </div>
                            <button onClick={() => setEditingSection(null)} className="p-2 hover:bg-white/10 rounded-lg transition-all"><X size={24} /></button>
                         </div>
@@ -281,7 +281,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                     <button
                                        key={cols}
                                        onClick={() => handleUpdateSection({ ...editingSection, gridCols: cols as any })}
-                                       className={`py-4 rounded-2xl border-2 font-black text-sm transition-all ${editingSection.gridCols === cols ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-500/20' : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10'}`}
+                                       className={`py-4 rounded-2xl border-2 font-black text-sm transition-all ${editingSection.gridCols === cols ? 'bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-500/20' : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10'}`}
                                     >
                                        {cols} Col
                                     </button>
@@ -306,7 +306,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
                            <div className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] space-y-6">
                               <div className="flex justify-between items-center">
-                                 <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-2"><Zap size={14} /> Service Feature Mapping</h4>
+                                 <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2"><Zap size={14} /> Service Feature Mapping</h4>
                                  <span className="text-[9px] font-black text-slate-500">{editingSection.itemIds.length} Linked Nodes</span>
                               </div>
                               <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
@@ -318,7 +318,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                           </div>
                                           <span className="text-[10px] font-black uppercase text-slate-300">{p.label}</span>
                                        </div>
-                                       <CheckCircle size={12} className="text-emerald-500" />
+                                       <CheckCircle size={12} className="text-green-500" />
                                     </div>
                                  ))}
                                  {editingSection.itemIds.length === 0 && (
@@ -356,9 +356,9 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
                   <div className="relative z-10 space-y-4">
                      {[
-                        { label: 'AI Voice Support (Relay)', key: 'showAICalling', icon: Mic, color: 'text-indigo-400', bg: 'bg-indigo-400/10', desc: 'Real-time bidirectional calling.' },
+                        { label: 'AI Voice Support (Relay)', key: 'showAICalling', icon: Mic, color: 'text-blue-400', bg: 'bg-blue-400/10', desc: 'Real-time bidirectional calling.' },
                         { label: 'AI Chat (Text Agent)', key: 'showAIChat', icon: MessageSquare, color: 'text-blue-400', bg: 'bg-blue-400/10', desc: 'LLM-powered text support.' },
-                        { label: 'Fiscal Wallet Center', key: 'showWallet', icon: Wallet, color: 'text-emerald-400', bg: 'bg-emerald-500/10', desc: 'User-managed balance station.' },
+                        { label: 'Fiscal Wallet Center', key: 'showWallet', icon: Wallet, color: 'text-green-400', bg: 'bg-green-500/10', desc: 'User-managed balance station.' },
                         { label: 'Emergency Rescue (EL)', key: 'showEmergencyLoad', icon: Zap, keyOverride: 'showEmergencyLoad', color: 'text-amber-400', bg: 'bg-amber-400/10', desc: 'Rs. 2500 credit advance.' },
                         { label: '5G Launch Engine', key: 'show5GLaunchAnimation', icon: Sparkles, color: 'text-fuchsia-400', bg: 'bg-fuchsia-500/10', desc: 'Startup screen high-tech visualization.' }
                      ].map(item => (
@@ -374,7 +374,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            </div>
                            <button
                               onClick={() => handleToggleGlobalFeature(item.key, (appearance as any)[item.key])}
-                              className={`w-14 h-8 rounded-full relative transition-all duration-300 ${(appearance as any)[item.key] ? 'bg-indigo-600 shadow-xl shadow-indigo-100' : 'bg-slate-700'}`}
+                              className={`w-14 h-8 rounded-full relative transition-all duration-300 ${(appearance as any)[item.key] ? 'bg-blue-600 shadow-xl shadow-blue-100' : 'bg-slate-700'}`}
                            >
                               <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 ${(appearance as any)[item.key] ? 'left-7' : 'left-1'}`}></div>
                            </button>
@@ -391,7 +391,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         <h3 className="text-lg font-black text-slate-900 uppercase tracking-tighter italic leading-none">Feature Management</h3>
                         <p className="text-[9px] text-slate-400 font-black uppercase mt-1 tracking-widest">Directory & Permissions Layer</p>
                      </div>
-                     <div className="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100 flex items-center gap-2">
+                     <div className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 flex items-center gap-2">
                         <Layers size={14} />
                         <span className="text-[10px] font-black">{appPages.length} Registered</span>
                      </div>
@@ -399,10 +399,10 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
                   <div className="space-y-10 overflow-y-auto max-h-[500px] custom-scrollbar pr-4">
                      {appPages.map(page => (
-                        <div key={page.id} className={`p-6 rounded-[2.5rem] border-2 transition-all flex flex-col gap-6 group ${page.enabled ? 'border-indigo-50 bg-white' : 'border-slate-50 bg-slate-50 opacity-60 grayscale'}`}>
+                        <div key={page.id} className={`p-6 rounded-[2.5rem] border-2 transition-all flex flex-col gap-6 group ${page.enabled ? 'border-blue-50 bg-white' : 'border-slate-50 bg-slate-50 opacity-60 grayscale'}`}>
                            <div className="flex items-center justify-between">
                               <div className="flex items-center gap-4">
-                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner transition-all ${page.enabled ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-white text-slate-300'}`}>
+                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner transition-all ${page.enabled ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-white text-slate-300'}`}>
                                     {getIcon(page.icon)}
                                  </div>
                                  <div>
@@ -413,13 +413,13 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                               <div className="flex items-center gap-4">
                                  <button
                                     onClick={() => db.toggleDirectoryView(page.id, !page.showInDirectory)}
-                                    className={`p-2 rounded-xl transition-all ${page.showInDirectory ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}
+                                    className={`p-2 rounded-xl transition-all ${page.showInDirectory ? 'bg-green-50 text-green-600' : 'bg-slate-100 text-slate-400'}`}
                                  >
                                     {page.showInDirectory ? <Eye size={18} /> : <EyeOff size={18} />}
                                  </button>
                                  <button
                                     onClick={() => db.toggleAppPage(page.id, !page.enabled)}
-                                    className={`w-12 h-6 rounded-full relative transition-all duration-300 ${page.enabled ? 'bg-indigo-600' : 'bg-slate-300'}`}
+                                    className={`w-12 h-6 rounded-full relative transition-all duration-300 ${page.enabled ? 'bg-blue-600' : 'bg-slate-300'}`}
                                  >
                                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-300 ${page.enabled ? 'left-7' : 'left-1'}`}></div>
                                  </button>
@@ -437,7 +437,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                           db.updateSettings({ ...state.settings, appearance: { ...appearance, appPages: next } });
                                        }}
                                        style={{ backgroundColor: color }}
-                                       className={`w-6 h-6 rounded-lg transition-all ${page.swatch === color ? 'ring-4 ring-indigo-500/30 scale-110' : 'opacity-60 hover:opacity-100'}`}
+                                       className={`w-6 h-6 rounded-lg transition-all ${page.swatch === color ? 'ring-4 ring-blue-500/30 scale-110' : 'opacity-60 hover:opacity-100'}`}
                                     />
                                  ))}
                                  <div className="flex items-center gap-2 ml-auto">
@@ -467,10 +467,10 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      <div className="w-12 h-12 bg-rose-600 rounded-2xl flex items-center justify-center shadow-lg"><ShieldAlert size={28} /></div>
                      <div>
                         <h3 className="text-xl font-black uppercase italic tracking-tighter">Security Settings</h3>
-                        <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em]">Service Audit Trail</p>
+                        <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.4em]">Service Audit Trail</p>
                      </div>
                   </div>
-                  <span className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase text-indigo-300 tracking-widest">{state.securityLogs.length} Events Logged</span>
+                  <span className="px-4 py-1.5 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase text-blue-300 tracking-widest">{state.securityLogs.length} Events Logged</span>
                </div>
 
                <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-50/50">
@@ -515,3 +515,4 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default UserAppManagement;
+

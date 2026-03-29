@@ -113,7 +113,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
           </div>
           <button
             onClick={() => window.location.reload()}
-            className="px-8 py-4 bg-indigo-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-2"
+            className="px-8 py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-2"
           >
             <RefreshCcw size={16} /> Re-Initialize System
           </button>
@@ -184,31 +184,31 @@ const App: React.FC = () => {
   };
 
   const renderConfiguring = () => {
-    const branding = dbState.settings?.branding || { businessName: 'Click Optix', shortName: 'CO ISP', logoLight: '', logoDark: '', logoSquare: '', favicon: '', primaryColor: '#4f46e5', secondaryColor: '#10b981', accentColor: '#f59e0b', textColorLight: '#ffffff', textColorDark: '#0f172a', primaryFont: 'Inter', secondaryFont: 'Inter' };
+    const branding = dbState.settings?.branding || { businessName: 'Click Optix', shortName: 'CO ISP', logoLight: '', logoDark: '', logoSquare: '', favicon: '', primaryColor: '#1570ef', secondaryColor: '#32d583', accentColor: '#f59e0b', textColorLight: '#ffffff', textColorDark: '#0f172a', primaryFont: 'Inter', secondaryFont: 'Inter' };
     const profile = dbState.settings?.profile || { tagline: 'Connecting to Cloud Securely' };
 
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center selection:bg-indigo-500/30 overflow-hidden relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full animate-pulse"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center selection:bg-blue-500/30 overflow-hidden relative">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-green-600/10 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
 
         <div className="relative z-10 flex flex-col items-center max-w-sm w-full">
           <div className="mb-12 relative group">
-            <div className="absolute -inset-4 bg-gradient-to-tr from-indigo-600 to-emerald-500 rounded-[2.5rem] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-1000"></div>
+            <div className="absolute -inset-4 bg-gradient-to-tr from-blue-600 to-green-500 rounded-[2.5rem] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-1000"></div>
             <div className="w-28 h-28 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] flex items-center justify-center shadow-2xl border border-white/10 relative overflow-hidden">
               {branding.logoDark ? (
                 <img src={branding.logoDark} className="w-full h-full object-contain p-4 animate-in zoom-in-50 duration-700" alt="Logo" />
               ) : (
-                <Wifi className="text-indigo-400 animate-pulse" size={48} />
+                <Wifi className="text-blue-400 animate-pulse" size={48} />
               )}
             </div>
-            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg border-2 border-slate-950 animate-bounce">
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg border-2 border-slate-950 animate-bounce">
               <Zap size={14} className="text-white" />
             </div>
           </div>
 
           <div className="space-y-4">
-            <h1 className="text-4xl font-black tracking-tighter uppercase italic bg-gradient-to-r from-white via-indigo-100 to-slate-400 bg-clip-text text-transparent transform hover:scale-105 transition-transform duration-500">
+            <h1 className="text-4xl font-black tracking-tighter uppercase italic bg-gradient-to-r from-white via-blue-100 to-slate-400 bg-clip-text text-transparent transform hover:scale-105 transition-transform duration-500">
               {branding.shortName || branding.businessName}
             </h1>
             <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em] leading-relaxed opacity-80 max-w-[200px]">
@@ -218,7 +218,7 @@ const App: React.FC = () => {
 
           <div className="mt-16 w-full max-w-[180px] space-y-6">
             <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-emerald-500 to-indigo-600 w-full animate-loading-bar shadow-[0_0_15px_rgba(79,70,229,0.5)]"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-green-500 to-blue-600 w-full animate-loading-bar shadow-[0_0_15px_rgba(79,70,229,0.5)]"></div>
             </div>
             <div className="flex items-center justify-center gap-3">
               <Mini5GMicroLoader size={24} />
@@ -231,7 +231,7 @@ const App: React.FC = () => {
           <p className="text-[8px] text-slate-500 font-mono tracking-tighter">BUILD {dbState.settings?.appVersion || "v1.2.5"}-LIVE-PATCH</p>
           <div className="flex items-center gap-4 text-[8px] font-black uppercase text-slate-600 tracking-widest">
             <span>CLOUD SECURE</span>
-            <div className="w-1 h-1 rounded-full bg-emerald-500"></div>
+            <div className="w-1 h-1 rounded-full bg-green-500"></div>
             <span>REGIONAL SYSTEM</span>
           </div>
         </div>
@@ -301,7 +301,7 @@ const App: React.FC = () => {
               onSearch={setGlobalSearchTerm}
             />
             <main className="p-4 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
-              <Suspense fallback={<div className="h-full w-full flex flex-col items-center justify-center animate-premium"><div className="w-10 h-10 border-4 border-slate-100 border-t-indigo-500 rounded-full animate-spin"></div></div>}>
+              <Suspense fallback={<div className="h-full w-full flex flex-col items-center justify-center animate-premium"><div className="w-10 h-10 border-4 border-slate-100 border-t-blue-500 rounded-full animate-spin"></div></div>}>
                 {(() => {
                   switch (currentPage) {
                     case 'dashboard': return <Dashboard state={dbState} onNavigate={navigateTo} searchTerm={globalSearchTerm} />;
@@ -383,3 +383,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

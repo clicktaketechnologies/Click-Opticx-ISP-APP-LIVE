@@ -51,7 +51,7 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
   if (success) {
     return (
       <div className="h-full flex flex-col items-center justify-center p-10 text-center space-y-8 animate-in zoom-in duration-500">
-         <div className="w-28 h-28 bg-emerald-50 text-emerald-600 rounded-[3rem] flex items-center justify-center shadow-inner animate-bounce border-4 border-emerald-100">
+         <div className="w-28 h-28 bg-green-50 text-green-600 rounded-[3rem] flex items-center justify-center shadow-inner animate-bounce border-4 border-green-100">
             <CheckCircle size={64} />
          </div>
           <div className="space-y-4">
@@ -87,7 +87,7 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
                      {isConfigured ? mapping?.ssidName : 'Not Set'}
                   </p>
                </div>
-               <div className={`px-4 py-2 rounded-full text-[9px] font-black uppercase border ${isConfigured ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-white/10 border-white/20 text-white opacity-50'}`}>
+               <div className={`px-4 py-2 rounded-full text-[9px] font-black uppercase border ${isConfigured ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-white/10 border-white/20 text-white opacity-50'}`}>
                   {isConfigured ? 'Link Ready' : 'Sync Required'}
                </div>
             </div>
@@ -111,7 +111,7 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
       ) : (
         <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm space-y-10">
            <div className="flex items-center gap-3 border-b border-slate-50 pb-6">
-              <ShieldCheck size={24} className="text-indigo-600"/>
+              <ShieldCheck size={24} className="text-blue-600"/>
               <div>
                  <h4 className="text-sm font-black uppercase tracking-widest text-slate-900">Change Wi-Fi Password</h4>
                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Keep your network secure</p>
@@ -125,13 +125,13 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
                     <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
                     <input 
                       type={showPass ? 'text' : 'password'} 
-                      className="w-full pl-14 pr-16 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] outline-none focus:border-indigo-600 font-black text-2xl transition-all shadow-inner"
+                      className="w-full pl-14 pr-16 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] outline-none focus:border-blue-600 font-black text-2xl transition-all shadow-inner"
                       placeholder="Min 8 chars, 1 number"
                       value={newPass}
                       onChange={e => setNewPass(e.target.value)}
                       required
                     />
-                    <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors">
+                    <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-600 transition-colors">
                        {showPass ? <EyeOff size={24} /> : <Eye size={24} />}
                     </button>
                  </div>
@@ -143,7 +143,7 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
                     <ShieldCheck className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
                     <input 
                       type={showPass ? 'text' : 'password'} 
-                      className="w-full pl-14 pr-4 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] outline-none focus:border-indigo-600 font-black text-2xl transition-all shadow-inner"
+                      className="w-full pl-14 pr-4 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] outline-none focus:border-blue-600 font-black text-2xl transition-all shadow-inner"
                       placeholder="Confirm secret"
                       value={confirmPass}
                       onChange={e => setConfirmPass(e.target.value)}
@@ -152,11 +152,11 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
                  </div>
               </div>
 
-              <div className="p-8 bg-indigo-50 border border-indigo-100 rounded-[2.5rem] flex items-start gap-6 shadow-sm">
-                 <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shrink-0 text-indigo-600 shadow-sm border border-indigo-50">
+              <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem] flex items-start gap-6 shadow-sm">
+                 <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shrink-0 text-blue-600 shadow-sm border border-blue-50">
                     <Info size={24} />
                  </div>
-                 <p className="text-[10px] text-indigo-700 font-bold uppercase leading-relaxed">
+                 <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed">
                     Submitting this will temporarily disconnect your devices. You will need to reconnect with the new password.
                  </p>
               </div>
@@ -164,7 +164,7 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
               <button 
                 type="submit"
                 disabled={isSubmitting || !newPass || !confirmPass}
-                className="w-full py-6 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale"
+                className="w-full py-6 bg-blue-600 text-white font-black rounded-3xl shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale"
               >
                  {isSubmitting ? <Mini5GMicroLoader size={20} /> : <Zap size={20} fill="currentColor"/>}
                  Set New Password
@@ -186,3 +186,4 @@ const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
 };
 
 export default ResetDevicePassword;
+

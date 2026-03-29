@@ -54,26 +54,26 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="flex items-center gap-6">
-           <div className="w-16 h-16 bg-slate-900 rounded-[2rem] flex items-center justify-center border-4 border-indigo-600 shadow-[0_0_40px_rgba(79,70,229,0.3)] group relative">
-              <Mic className="text-indigo-400 group-hover:scale-110 transition-transform" size={32} />
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-950 animate-pulse"></div>
+           <div className="w-16 h-16 bg-slate-900 rounded-[2rem] flex items-center justify-center border-4 border-blue-600 shadow-[0_0_40px_rgba(79,70,229,0.3)] group relative">
+              <Mic className="text-blue-400 group-hover:scale-110 transition-transform" size={32} />
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-950 animate-pulse"></div>
            </div>
            <div>
               <h2 className="text-3xl font-black text-slate-800 tracking-tighter uppercase italic leading-none">Voice AI Control Plane</h2>
               <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] mt-3">Autonomous Call Orchestration v9.0</p>
            </div>
         </div>
-        <div className={`p-4 rounded-[2rem] border-2 flex items-center gap-6 transition-all ${!callConfig.enabled ? 'border-rose-200 bg-rose-50' : 'border-emerald-200 bg-emerald-50'}`}>
+        <div className={`p-4 rounded-[2rem] border-2 flex items-center gap-6 transition-all ${!callConfig.enabled ? 'border-rose-200 bg-rose-50' : 'border-green-200 bg-green-50'}`}>
             <div className="space-y-1">
                <p className="text-[9px] font-black uppercase text-slate-500">AI Status</p>
-               <p className={`text-xs font-black uppercase italic ${!callConfig.enabled ? 'text-rose-600' : 'text-emerald-600'}`}>
+               <p className={`text-xs font-black uppercase italic ${!callConfig.enabled ? 'text-rose-600' : 'text-green-600'}`}>
                   {callConfig.enabled ? 'OPERATIONAL' : 'LOCKED'}
                </p>
             </div>
             <button 
              onClick={toggleMaster}
              disabled={isProcessing}
-             className={`w-14 h-7 rounded-full relative transition-all duration-500 ${callConfig.enabled ? 'bg-emerald-600 shadow-lg shadow-emerald-100' : 'bg-rose-600 shadow-lg shadow-rose-100'}`}
+             className={`w-14 h-7 rounded-full relative transition-all duration-500 ${callConfig.enabled ? 'bg-green-600 shadow-lg shadow-green-100' : 'bg-rose-600 shadow-lg shadow-rose-100'}`}
             >
                <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow transition-all duration-500 ${callConfig.enabled ? 'left-8' : 'left-1'}`}></div>
             </button>
@@ -91,7 +91,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
           <button 
             key={tab.id} 
             onClick={() => setActiveTab(tab.id as any)} 
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
           >
             <tab.icon size={16} />
             {tab.label}
@@ -104,9 +104,9 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { label: 'Active Sessions', value: 12, icon: PhoneCall, color: 'text-blue-600', bg: 'bg-blue-50' },
-                { label: 'Avg Confidence', value: '91%', icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                { label: 'Avg Confidence', value: '91%', icon: ShieldCheck, color: 'text-green-600', bg: 'bg-green-50' },
                 { label: 'Escalation Rate', value: '18%', icon: AlertCircle, color: 'text-rose-600', bg: 'bg-rose-50' },
-                { label: 'Total Volume', value: totalCallsToday, icon: History, color: 'text-indigo-600', bg: 'bg-indigo-50' }
+                { label: 'Total Volume', value: totalCallsToday, icon: History, color: 'text-blue-600', bg: 'bg-blue-50' }
               ].map((kpi, i) => (
                 <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm group hover:shadow-md transition-all relative overflow-hidden">
                    <div className={`${kpi.bg} ${kpi.color} p-4 rounded-2xl w-fit mb-4`}><kpi.icon size={20}/></div>
@@ -136,7 +136,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
               <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
                  <div className="relative z-10 space-y-6">
-                    <h3 className="text-sm font-black uppercase tracking-widest text-indigo-400">Live AI Monitor</h3>
+                    <h3 className="text-sm font-black uppercase tracking-widest text-blue-400">Live AI Monitor</h3>
                     <div className="space-y-4">
                        {[
                          { user: 'Ahmed', issue: 'Internet Down', conf: 52 },
@@ -148,10 +148,10 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                                <p className="text-[8px] text-slate-500 font-bold uppercase">{call.issue}</p>
                             </div>
                             <div className="flex items-center gap-4">
-                               <span className={`text-[10px] font-black italic ${call.conf < 60 ? 'text-rose-400' : 'text-emerald-400'}`}>{call.conf}%</span>
+                               <span className={`text-[10px] font-black italic ${call.conf < 60 ? 'text-rose-400' : 'text-green-400'}`}>{call.conf}%</span>
                                <button 
                                 onClick={() => handleTakeover(call)}
-                                className="p-2 bg-indigo-600 rounded-lg hover:bg-indigo-500 transition-all"
+                                className="p-2 bg-blue-600 rounded-lg hover:bg-blue-500 transition-all"
                                >
                                   <HeadphonesIcon size={14}/>
                                </button>
@@ -182,7 +182,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                     <button 
                       onClick={() => handleUpdateConfig({...callConfig, enabled: !callConfig.enabled})}
-                      className={`w-14 h-8 rounded-full relative transition-all duration-300 ${callConfig.enabled ? 'bg-indigo-600' : 'bg-slate-300'}`}
+                      className={`w-14 h-8 rounded-full relative transition-all duration-300 ${callConfig.enabled ? 'bg-blue-600' : 'bg-slate-300'}`}
                     >
                        <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${callConfig.enabled ? 'left-7' : 'left-1'}`}></div>
                     </button>
@@ -207,7 +207,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Max Pulse Width (Duration Sec)</label>
                     <div className="flex items-center gap-6">
-                       <input type="range" min="60" max="1800" step="60" className="flex-1 h-2 bg-slate-100 rounded-full appearance-none accent-indigo-600" value={callConfig.maxCallDuration} />
+                       <input type="range" min="60" max="1800" step="60" className="flex-1 h-2 bg-slate-100 rounded-full appearance-none accent-blue-600" value={callConfig.maxCallDuration} />
                        <span className="w-20 text-center py-2 bg-slate-950 text-white rounded-xl font-black text-xs italic">{Math.floor(callConfig.maxCallDuration / 60)}m</span>
                     </div>
                  </div>
@@ -239,7 +239,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                          <button 
                           key={p}
                           onClick={() => setCallConfig({ ...callConfig, persona: p })}
-                          className={`p-6 rounded-[2rem] border-2 font-black text-[10px] uppercase tracking-widest transition-all ${callConfig.persona === p ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-indigo-100'}`}
+                          className={`p-6 rounded-[2rem] border-2 font-black text-[10px] uppercase tracking-widest transition-all ${callConfig.persona === p ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-blue-100'}`}
                          >
                             {p} Tone
                          </button>
@@ -261,15 +261,15 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="flex flex-col gap-6">
               <div className="bg-slate-950 rounded-[3rem] p-10 text-white space-y-10 shadow-2xl relative overflow-hidden flex flex-col justify-center text-center flex-1">
                  <div className="relative z-10 space-y-6">
-                    <div className="w-24 h-24 bg-indigo-600 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl border-4 border-white/5 group active:scale-95 transition-all cursor-pointer">
+                    <div className="w-24 h-24 bg-blue-600 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl border-4 border-white/5 group active:scale-95 transition-all cursor-pointer">
                        <Volume2 size={48} className="text-white animate-pulse" />
                     </div>
                     <h4 className="text-2xl font-black italic tracking-tighter uppercase leading-none">Diagnostic Test</h4>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest max-w-xs mx-auto leading-relaxed">Publish a diagnostic vocal broadcast to verify persona and language handshake.</p>
                  </div>
-                 <Activity className="absolute -right-20 -bottom-20 opacity-5 scale-[3] text-indigo-400" size={300} />
+                 <Activity className="absolute -right-20 -bottom-20 opacity-5 scale-[3] text-blue-400" size={300} />
               </div>
-              <button className="w-full py-8 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl hover:bg-indigo-700 active:scale-95 transition-all">Publish Vocal Transformation</button>
+              <button className="w-full py-8 bg-blue-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl hover:bg-blue-700 active:scale-95 transition-all">Publish Vocal Transformation</button>
            </div>
         </div>
       )}
@@ -290,17 +290,17 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                    { rule: 'Emotion Detection', condition: 'Sentiment == "FRUSTRATED" (3 cycles)', action: 'Auto-Handover to Senior Support', active: true },
                    { rule: 'Complexity Limit', condition: '4+ failed troubleshooting steps', action: 'Human Escalation Handshake', active: true }
                  ].map((rule, i) => (
-                   <div key={i} className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6 group hover:bg-white hover:border-indigo-500 transition-all">
+                   <div key={i} className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6 group hover:bg-white hover:border-blue-500 transition-all">
                       <div className="flex items-center gap-6">
-                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-indigo-600 border shadow-inner transition-colors"><Shield size={28}/></div>
+                         <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-slate-400 group-hover:text-blue-600 border shadow-inner transition-colors"><Shield size={28}/></div>
                          <div>
                             <h4 className="text-lg font-black text-slate-900 uppercase italic leading-none mb-1">{rule.rule}</h4>
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Logic: {rule.condition}</p>
                          </div>
                       </div>
                       <div className="flex items-center gap-4">
-                         <span className="text-[9px] font-black text-indigo-600 uppercase italic bg-indigo-50 px-3 py-1 rounded-full">{rule.action}</span>
-                         <button className={`w-12 h-6 rounded-full relative transition-all ${rule.active ? 'bg-emerald-500' : 'bg-slate-300'}`}>
+                         <span className="text-[9px] font-black text-blue-600 uppercase italic bg-blue-50 px-3 py-1 rounded-full">{rule.action}</span>
+                         <button className={`w-12 h-6 rounded-full relative transition-all ${rule.active ? 'bg-green-500' : 'bg-slate-300'}`}>
                             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${rule.active ? 'left-7' : 'left-1'}`}></div>
                          </button>
                       </div>
@@ -308,12 +308,12 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                  ))}
               </div>
 
-              <div className="p-10 bg-emerald-600 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-xl shadow-emerald-100">
+              <div className="p-10 bg-green-600 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-10 shadow-xl shadow-green-100">
                  <div className="space-y-2 text-center md:text-left">
                     <h4 className="text-2xl font-black italic tracking-tighter uppercase">Master Human Override</h4>
-                    <p className="text-[10px] text-emerald-100 font-bold uppercase tracking-widest">Allows admins to physically sever AI link and speak directly.</p>
+                    <p className="text-[10px] text-green-100 font-bold uppercase tracking-widest">Allows admins to physically sever AI link and speak directly.</p>
                  </div>
-                 <button className="px-10 py-5 bg-white text-emerald-600 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3">
+                 <button className="px-10 py-5 bg-white text-green-600 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3">
                     <CheckCircle size={18}/> Authorize Takeover Layer
                  </button>
               </div>
@@ -325,7 +325,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[750px] animate-in slide-in-from-right-4">
            <div className="p-8 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-20">
               <div className="flex items-center gap-4">
-                 <History size={24} className="text-indigo-600" />
+                 <History size={24} className="text-blue-600" />
                  <h3 className="text-lg font-black uppercase italic tracking-tighter">Call Registry</h3>
               </div>
               <div className="relative">
@@ -364,12 +364,12 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                             </div>
                          </td>
                          <td className="px-8 py-5">
-                            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest ${log.resolutionType === 'Self-Fix' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[8px] font-black uppercase tracking-widest ${log.resolutionType === 'Self-Fix' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
                                {log.resolutionType.replace('_', ' ')}
                             </div>
                          </td>
                          <td className="px-8 py-5 text-right">
-                            <button className="p-2 text-slate-300 hover:text-indigo-600 transition-colors"><ChevronRight size={18}/></button>
+                            <button className="p-2 text-slate-300 hover:text-blue-600 transition-colors"><ChevronRight size={18}/></button>
                          </td>
                       </tr>
                     ))}
@@ -381,15 +381,15 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
       {takeoverSession && (
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[1500] flex items-center justify-center p-4 animate-in fade-in duration-300">
-           <div className="bg-white rounded-[4rem] w-full max-w-xl shadow-2xl overflow-hidden border-[10px] border-indigo-600 flex flex-col">
+           <div className="bg-white rounded-[4rem] w-full max-w-xl shadow-2xl overflow-hidden border-[10px] border-blue-600 flex flex-col">
               <div className="p-10 bg-slate-900 text-white flex justify-between items-center shrink-0">
                  <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-indigo-600 rounded-3xl flex items-center justify-center border shadow-xl animate-pulse">
+                    <div className="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center border shadow-xl animate-pulse">
                        <Headphones size={32} />
                     </div>
                     <div>
                        <h3 className="text-2xl font-black uppercase italic tracking-tighter">Live Intervention</h3>
-                       <p className="text-indigo-400 text-[10px] font-black uppercase tracking-widest">Agent Link: STANDBY</p>
+                       <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest">Agent Link: STANDBY</p>
                     </div>
                  </div>
                  <button onClick={() => setTakeoverSession(null)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-slate-500 hover:text-white"><X size={32}/></button>
@@ -412,7 +412,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     <button className="flex-1 py-6 bg-slate-100 text-slate-500 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">Send Suggestion</button>
                     <button 
                       onClick={() => alert("COMM_CHANNEL_ESTABLISHED: AI Voice Muted. Human agent is live.")}
-                      className="flex-1 py-6 bg-emerald-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-100 active:scale-95 transition-all flex items-center justify-center gap-3"
+                      className="flex-1 py-6 bg-green-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl shadow-green-100 active:scale-95 transition-all flex items-center justify-center gap-3"
                     >
                        <Play size={20} fill="currentColor"/> Join Live Call
                     </button>
@@ -426,3 +426,4 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AICallingAdmin;
+

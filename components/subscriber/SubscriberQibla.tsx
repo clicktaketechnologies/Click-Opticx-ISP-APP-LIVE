@@ -158,7 +158,7 @@ const SubscriberQibla: React.FC = () => {
             onClick={() => setShowSelector(true)}
             className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm"
           >
-            <Settings2 size={18} className="text-indigo-600" />
+            <Settings2 size={18} className="text-blue-600" />
           </button>
         </div>
       </div>
@@ -183,7 +183,7 @@ const SubscriberQibla: React.FC = () => {
            <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-4">
                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5 backdrop-blur-md">
-                    {location.source === 'GPS' ? <ShieldCheck size={24} className="text-emerald-400" /> : <Globe size={24} className="text-blue-400" />}
+                    {location.source === 'GPS' ? <ShieldCheck size={24} className="text-green-400" /> : <Globe size={24} className="text-blue-400" />}
                  </div>
                  <div className="flex-1 min-w-0">
                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">

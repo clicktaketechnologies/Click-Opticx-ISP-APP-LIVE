@@ -128,7 +128,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
         {canManagePackages ? (
           <button 
             onClick={() => handleOpenModal()}
-            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-[1.25rem] text-[11px] font-black hover:bg-indigo-700 shadow-xl shadow-indigo-100 active:scale-95 uppercase tracking-[0.2em]"
+            className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-[1.25rem] text-[11px] font-black hover:bg-blue-700 shadow-xl shadow-blue-100 active:scale-95 uppercase tracking-[0.2em]"
           >
             <Plus size={20} />
             Provision Package
@@ -159,7 +159,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
               <div>
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase italic">Package Architect</h3>
                 <p className="text-slate-400 text-[10px] font-bold uppercase mt-1 tracking-[0.3em] flex items-center gap-2">
-                  <Calculator size={12} className="text-indigo-500" /> Defining Distribution Node
+                  <Calculator size={12} className="text-blue-500" /> Defining Distribution Node
                 </p>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-red-50 rounded-2xl transition-all text-slate-400 hover:text-red-600"><X size={28} /></button>
@@ -169,17 +169,17 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
               {/* Section 1: Basic Identity */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-2">
-                  <Activity size={18} className="text-indigo-600" />
+                  <Activity size={18} className="text-blue-600" />
                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">1. Identity</h4>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Plan Identifier (Name)</label>
-                    <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-black text-slate-800 focus:border-indigo-500 focus:bg-white transition-all" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Home Ultra 100" />
+                    <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-black text-slate-800 focus:border-blue-500 focus:bg-white transition-all" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Home Ultra 100" />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Marketing Subtitle</label>
-                    <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-black text-slate-800 focus:border-indigo-500 focus:bg-white transition-all" value={formData.subtitle} onChange={e => setFormData({...formData, subtitle: e.target.value})} placeholder="e.g. Best for 4K Streaming" />
+                    <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-black text-slate-800 focus:border-blue-500 focus:bg-white transition-all" value={formData.subtitle} onChange={e => setFormData({...formData, subtitle: e.target.value})} placeholder="e.g. Best for 4K Streaming" />
                   </div>
                 </div>
               </div>
@@ -243,7 +243,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
               {/* Section 3: Commercial Policy */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-2">
-                  <Calculator size={18} className="text-emerald-600" />
+                  <Calculator size={18} className="text-green-600" />
                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-800">3. Commercial Framework</h4>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -278,7 +278,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Core Value Points</label>
-                      <button onClick={() => addToList('descriptionBullets')} className="p-1 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"><PlusCircle size={18} /></button>
+                      <button onClick={() => addToList('descriptionBullets')} className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><PlusCircle size={18} /></button>
                     </div>
                     <div className="space-y-2">
                       {formData.descriptionBullets?.map((bullet, idx) => (
@@ -293,7 +293,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Trust Tags</label>
-                      <button onClick={() => addToList('trustTags')} className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"><PlusCircle size={18} /></button>
+                      <button onClick={() => addToList('trustTags')} className="p-1 text-green-600 hover:bg-green-50 rounded-lg transition-all"><PlusCircle size={18} /></button>
                     </div>
                     <div className="space-y-2">
                       {formData.trustTags?.map((tag, idx) => (
@@ -316,7 +316,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
                      <button 
                        key={feat.id}
                        onClick={() => updateNested('networkFeatures', feat.id, !(formData.networkFeatures as any)[feat.id])}
-                       className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${ (formData.networkFeatures as any)[feat.id] ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400' }`}
+                       className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${ (formData.networkFeatures as any)[feat.id] ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400' }`}
                      >
                         <feat.icon size={20} />
                         <span className="text-[9px] font-black uppercase">{feat.label}</span>
@@ -346,7 +346,7 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
 
             <div className="p-10 bg-slate-50 border-t flex gap-4 shrink-0">
               <button onClick={() => setIsModalOpen(false)} className="flex-1 py-5 font-black text-slate-400 hover:bg-white hover:text-red-500 rounded-2xl transition-all uppercase tracking-[0.2em] text-[10px]">Abort Process</button>
-              <button onClick={handleSave} className="flex-[2] py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-2xl transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 active:scale-95"><Save size={20} /> Authorize Deployment</button>
+              <button onClick={handleSave} className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 shadow-2xl transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 active:scale-95"><Save size={20} /> Authorize Deployment</button>
             </div>
           </div>
         </div>
@@ -356,3 +356,4 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default PackagesPage;
+

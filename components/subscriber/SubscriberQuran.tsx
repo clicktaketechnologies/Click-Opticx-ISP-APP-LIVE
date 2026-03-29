@@ -23,3 +23,4 @@ const SubscriberQuran: React.FC = () => {
 };
 
 export default SubscriberQuran;
+

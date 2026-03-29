@@ -37,7 +37,7 @@ const HomeCollectionSettings: React.FC<Props> = ({ state, onBack }) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 pb-20 max-w-4xl mx-auto">
       <div className="flex items-center gap-6">
-         <button onClick={onBack} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-indigo-600 transition-all active:scale-90">
+         <button onClick={onBack} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-blue-600 transition-all active:scale-90">
             <ArrowLeft size={24} />
          </button>
          <div>
@@ -56,7 +56,7 @@ const HomeCollectionSettings: React.FC<Props> = ({ state, onBack }) => {
                        <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
                        <input 
                         type="number"
-                        className="w-full pl-10 p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-indigo-500 outline-none transition-all" 
+                        className="w-full pl-10 p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-blue-500 outline-none transition-all" 
                         value={formData.config.fee} 
                         onChange={e => updateConfig('fee', e.target.value)} 
                        />
@@ -67,7 +67,7 @@ const HomeCollectionSettings: React.FC<Props> = ({ state, onBack }) => {
                <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Agent Instructions</label>
                   <textarea 
-                    className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-32 resize-none outline-none focus:border-indigo-600 uppercase"
+                    className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-3xl font-bold text-xs h-32 resize-none outline-none focus:border-blue-600 uppercase"
                     placeholder="Instructions for subscribers requesting home pickup..."
                     value={formData.instructions || ''}
                     onChange={e => setFormData({...formData, instructions: e.target.value})}
@@ -86,10 +86,10 @@ const HomeCollectionSettings: React.FC<Props> = ({ state, onBack }) => {
                             const next = active ? formData.allowedFor.filter(u => u !== usage) : [...formData.allowedFor, usage];
                             setFormData({...formData, allowedFor: next});
                           }}
-                          className={`p-6 rounded-[2rem] border-2 text-left flex items-center justify-between transition-all ${active ? 'bg-indigo-50 border-indigo-600 shadow-xl scale-[1.02]' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                          className={`p-6 rounded-[2rem] border-2 text-left flex items-center justify-between transition-all ${active ? 'bg-blue-50 border-blue-600 shadow-xl scale-[1.02]' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                          >
                             <span className="text-[11px] font-black uppercase tracking-widest">{usage}</span>
-                            <div className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center ${active ? 'bg-indigo-600 border-indigo-600' : 'border-slate-200'}`}>
+                            <div className={`w-6 h-6 rounded-full border-2 transition-all flex items-center justify-center ${active ? 'bg-blue-600 border-blue-600' : 'border-slate-200'}`}>
                                {active && <ShieldCheck size={14} className="text-white"/>}
                             </div>
                          </button>
@@ -112,7 +112,7 @@ const HomeCollectionSettings: React.FC<Props> = ({ state, onBack }) => {
          <div className="space-y-6">
             <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
                <div className="relative z-10 space-y-6">
-                  <h3 className="text-sm font-black uppercase tracking-tight italic text-emerald-400">Logistics Control</h3>
+                  <h3 className="text-sm font-black uppercase tracking-tight italic text-green-400">Logistics Control</h3>
                   <ul className="space-y-4">
                      {[
                        { label: 'Area Specific Fee', icon: MapPin },
@@ -135,3 +135,4 @@ const HomeCollectionSettings: React.FC<Props> = ({ state, onBack }) => {
 };
 
 export default HomeCollectionSettings;
+

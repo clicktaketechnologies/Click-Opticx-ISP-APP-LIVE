@@ -130,7 +130,7 @@ const SubscriberNamaz: React.FC = () => {
       { name: 'Fajr', time: prayerTimes.Fajr, icon: Sun, color: 'text-blue-500', bg: 'bg-blue-50' },
       { name: 'Dhuhr', time: prayerTimes.Dhuhr, icon: CloudSun, color: 'text-orange-500', bg: 'bg-orange-50' },
       { name: 'Asr', time: prayerTimes.Asr, icon: Sunset, color: 'text-rose-500', bg: 'bg-rose-50' },
-      { name: 'Maghrib', time: prayerTimes.Maghrib, icon: CloudMoon, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+      { name: 'Maghrib', time: prayerTimes.Maghrib, icon: CloudMoon, color: 'text-blue-500', bg: 'bg-blue-50' },
       { name: 'Isha', time: prayerTimes.Isha, icon: Moon, color: 'text-slate-500', bg: 'bg-slate-50' },
     ];
   }, [prayerTimes]);
@@ -177,7 +177,7 @@ const SubscriberNamaz: React.FC = () => {
                      </h3>
                   </div>
                   <div className="flex gap-2">
-                     <button onClick={() => setShowSettings(true)} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/5"><Settings2 size={20} className="text-indigo-400" /></button>
+                     <button onClick={() => setShowSettings(true)} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/5"><Settings2 size={20} className="text-blue-400" /></button>
                      <button onClick={() => fetchTimes(true)} disabled={refreshing} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/5">
                         <Mini5GMicroLoader size={20} />
                      </button>
@@ -191,12 +191,12 @@ const SubscriberNamaz: React.FC = () => {
 
                <div className="flex justify-between items-center pt-4 border-t border-white/5">
                   <div className="flex items-center gap-3">
-                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${settings.alerts.enabled ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${settings.alerts.enabled ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}`}>
                         {settings.alerts.enabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
                      </div>
                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Azan {settings.alerts.enabled ? 'Enabled' : 'Disabled'}</p>
                   </div>
-                  <p className="text-xs font-black text-indigo-400 uppercase italic">School: {settings.asrMethod === 1 ? 'Hanafi' : 'Shafi'}</p>
+                  <p className="text-xs font-black text-blue-400 uppercase italic">School: {settings.asrMethod === 1 ? 'Hanafi' : 'Shafi'}</p>
                </div>
             </div>
             <Timer className="absolute -right-20 -bottom-20 opacity-5 pointer-events-none" size={360} />
@@ -211,7 +211,7 @@ const SubscriberNamaz: React.FC = () => {
               const alertActive = settings.alerts.enabled && settings.alerts.individual[p.name];
               
               return (
-                <div key={p.name} className={`bg-white p-6 rounded-[2.5rem] border transition-all flex items-center justify-between group shadow-sm ${isNext ? 'ring-4 ring-indigo-600/10 border-indigo-600 shadow-indigo-100 scale-[1.02]' : 'border-slate-100'}`}>
+                <div key={p.name} className={`bg-white p-6 rounded-[2.5rem] border transition-all flex items-center justify-between group shadow-sm ${isNext ? 'ring-4 ring-blue-600/10 border-blue-600 shadow-blue-100 scale-[1.02]' : 'border-slate-100'}`}>
                   <div className="flex items-center gap-6">
                     <div className={`w-14 h-14 ${p.bg} ${p.color} rounded-[1.5rem] flex items-center justify-center border-2 border-current/10 shadow-inner group-hover:rotate-6 transition-transform`}>
                       <p.icon size={28} />
@@ -223,7 +223,7 @@ const SubscriberNamaz: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-6">
                      <p className={`text-2xl font-black tracking-tighter italic tabular-nums ${passed ? 'text-slate-300' : 'text-slate-900'}`}>{p.time}</p>
-                     <button className={`p-4 rounded-2xl transition-all active:scale-90 ${alertActive ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-50 text-slate-300'}`}><Bell size={20} fill={alertActive ? "currentColor" : "none"} /></button>
+                     <button className={`p-4 rounded-2xl transition-all active:scale-90 ${alertActive ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-50 text-slate-300'}`}><Bell size={20} fill={alertActive ? "currentColor" : "none"} /></button>
                   </div>
                 </div>
               );
@@ -238,3 +238,4 @@ const SubscriberNamaz: React.FC = () => {
 };
 
 export default SubscriberNamaz;
+

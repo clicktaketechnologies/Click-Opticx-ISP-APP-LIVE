@@ -82,13 +82,13 @@ const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {
                  <button 
                    disabled={!!isProcessing}
                    onClick={() => handleAction(req.id, 'approve')}
-                   className="flex-[2] py-5 bg-indigo-600 text-white hover:bg-indigo-700 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-indigo-100 transition-all active:scale-95 flex items-center justify-center gap-3"
+                   className="flex-[2] py-5 bg-blue-600 text-white hover:bg-blue-700 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-blue-100 transition-all active:scale-95 flex items-center justify-center gap-3"
                  >
                     {isProcessing === req.id ? <Mini5GMicroLoader /> : <ShieldCheck size={20} />}
                     Approve & Update Router
                  </button>
               </div>
-              <Activity className="absolute -right-12 -bottom-12 opacity-[0.03] scale-[3] text-indigo-900 pointer-events-none" size={200} />
+              <Activity className="absolute -right-12 -bottom-12 opacity-[0.03] scale-[3] text-blue-900 pointer-events-none" size={200} />
            </div>
          ))}
          
@@ -104,14 +104,14 @@ const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
          <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
             <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-               <History size={14} className="text-indigo-600"/> Recent History
+               <History size={14} className="text-blue-600"/> Recent History
             </h3>
          </div>
          <div className="divide-y divide-slate-50">
             {state.passwordRequests.filter(r => r.status !== 'Pending').slice(0, 10).map(req => (
                <div key={req.id} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-4">
-                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${req.status === 'Applied' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${req.status === 'Applied' ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'}`}>
                         {req.status === 'Applied' ? <CheckCircle size={20}/> : <XCircle size={20}/>}
                      </div>
                      <div>
@@ -121,7 +121,7 @@ const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="text-right">
                      <p className="text-[9px] font-black uppercase text-slate-500">SSID: {req.ssid}</p>
-                     <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${req.status === 'Applied' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>{req.status}</span>
+                     <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded ${req.status === 'Applied' ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'}`}>{req.status}</span>
                   </div>
                </div>
             ))}
@@ -132,3 +132,4 @@ const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AdminPasswordRequests;
+

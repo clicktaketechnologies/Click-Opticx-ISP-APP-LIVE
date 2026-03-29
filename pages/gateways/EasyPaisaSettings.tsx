@@ -51,7 +51,7 @@ const EasyPaisaSettings: React.FC<Props> = ({ state, onBack }) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 pb-20 max-w-4xl mx-auto">
       <div className="flex items-center gap-6">
-         <button onClick={onBack} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-emerald-600 transition-all active:scale-90">
+         <button onClick={onBack} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-green-600 transition-all active:scale-90">
             <ArrowLeft size={24} />
          </button>
          <div>
@@ -71,7 +71,7 @@ const EasyPaisaSettings: React.FC<Props> = ({ state, onBack }) => {
                   <div className="space-y-2">
                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Production Hash Key</label>
                      <div className="relative">
-                        <input type={showSecrets ? 'text' : 'password'} className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-lg focus:border-emerald-500 transition-all outline-none" value={formData.config.hashKey} onChange={e => updateConfig('hashKey', e.target.value)} />
+                        <input type={showSecrets ? 'text' : 'password'} className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-lg focus:border-green-500 transition-all outline-none" value={formData.config.hashKey} onChange={e => updateConfig('hashKey', e.target.value)} />
                         <button onClick={() => setShowSecrets(!showSecrets)} className="absolute right-6 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-slate-600 transition-all">
                            {showSecrets ? <EyeOff size={20}/> : <Eye size={20}/>}
                         </button>
@@ -82,7 +82,7 @@ const EasyPaisaSettings: React.FC<Props> = ({ state, onBack }) => {
                <button 
                  onClick={handleSave}
                  disabled={isSaving}
-                 className="w-full py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
+                 className="w-full py-6 bg-green-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
                >
                   {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20}/>}
                   Authorize EasyPaisa Node
@@ -93,7 +93,7 @@ const EasyPaisaSettings: React.FC<Props> = ({ state, onBack }) => {
          <div className="space-y-6">
             <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
                <div className="relative z-10 space-y-6">
-                  <h3 className="text-xs font-black uppercase tracking-[0.4em] italic text-emerald-400">Node Configuration</h3>
+                  <h3 className="text-xs font-black uppercase tracking-[0.4em] italic text-green-400">Node Configuration</h3>
                   <div className="space-y-2">
                      {['packages', 'wallet', 'emergency', 'invoices'].map((usage: any) => {
                        const active = formData.allowedFor.includes(usage);
@@ -101,9 +101,9 @@ const EasyPaisaSettings: React.FC<Props> = ({ state, onBack }) => {
                          <button key={usage} onClick={() => {
                             const next = active ? formData.allowedFor.filter(u => u !== usage) : [...formData.allowedFor, usage];
                             setFormData({...formData, allowedFor: next});
-                         }} className={`w-full p-4 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${active ? 'bg-white/10 border-emerald-500 text-white' : 'bg-white/5 border-white/5 text-slate-500'}`}>
+                         }} className={`w-full p-4 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${active ? 'bg-white/10 border-green-500 text-white' : 'bg-white/5 border-white/5 text-slate-500'}`}>
                             <span className="text-[10px] font-black uppercase tracking-widest">{usage}</span>
-                            {active && <ShieldCheck size={14} className="text-emerald-500"/>}
+                            {active && <ShieldCheck size={14} className="text-green-500"/>}
                          </button>
                        );
                      })}
@@ -118,3 +118,4 @@ const EasyPaisaSettings: React.FC<Props> = ({ state, onBack }) => {
 };
 
 export default EasyPaisaSettings;
+

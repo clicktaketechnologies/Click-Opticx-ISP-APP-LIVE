@@ -37,7 +37,7 @@ const QuranSurahList: React.FC<Props> = ({ onSelectSurah }) => {
           <input 
             type="text" 
             placeholder="Search Surah (e.g. Fatihah, Baqarah, 36)..." 
-            className="w-full pl-14 pr-4 py-5 bg-white border border-slate-200 rounded-[2rem] outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all font-black text-slate-900 shadow-sm"
+            className="w-full pl-14 pr-4 py-5 bg-white border border-slate-200 rounded-[2rem] outline-none focus:ring-4 focus:ring-green-500/10 transition-all font-black text-slate-900 shadow-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -50,8 +50,8 @@ const QuranSurahList: React.FC<Props> = ({ onSelectSurah }) => {
               onClick={() => setFilterType(type as any)}
               className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
                 filterType === type 
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' 
-                  : 'bg-white text-slate-400 border-slate-100 hover:border-emerald-200'
+                  ? 'bg-green-600 text-white border-green-600 shadow-lg' 
+                  : 'bg-white text-slate-400 border-slate-100 hover:border-green-200'
               }`}
             >
               {type}
@@ -63,7 +63,7 @@ const QuranSurahList: React.FC<Props> = ({ onSelectSurah }) => {
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex-1 flex flex-col min-h-0 mx-4">
         <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between shrink-0">
            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-             <BookOpen size={14} className="text-emerald-500"/> Noble Quran
+             <BookOpen size={14} className="text-green-500"/> Noble Quran
            </h3>
            <span className="text-[10px] font-black text-slate-500 bg-white border px-3 py-1 rounded-full uppercase">
              {filteredSurahs.length} Surahs
@@ -74,14 +74,14 @@ const QuranSurahList: React.FC<Props> = ({ onSelectSurah }) => {
             <button 
               key={surah.id} 
               onClick={() => onSelectSurah(surah)}
-              className="w-full p-6 flex items-center justify-between hover:bg-emerald-50/50 transition-all group text-left active:scale-[0.99] origin-center"
+              className="w-full p-6 flex items-center justify-between hover:bg-green-50/50 transition-all group text-left active:scale-[0.99] origin-center"
             >
               <div className="flex items-center gap-5 overflow-hidden">
-                <div className="w-12 h-12 bg-slate-900 text-emerald-400 rounded-xl flex items-center justify-center font-black text-sm shadow-xl group-hover:scale-110 transition-transform italic shrink-0">
+                <div className="w-12 h-12 bg-slate-900 text-green-400 rounded-xl flex items-center justify-center font-black text-sm shadow-xl group-hover:scale-110 transition-transform italic shrink-0">
                   {surah.id}
                 </div>
                 <div className="overflow-hidden">
-                  <h4 className="text-lg font-black text-slate-900 uppercase tracking-tight leading-none mb-1 group-hover:text-emerald-600 transition-colors flex items-center gap-2 flex-wrap">
+                  <h4 className="text-lg font-black text-slate-900 uppercase tracking-tight leading-none mb-1 group-hover:text-green-600 transition-colors flex items-center gap-2 flex-wrap">
                     {surah.transliteration} <span className="font-arabic text-xl opacity-40">{surah.name}</span>
                   </h4>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate">
@@ -95,7 +95,7 @@ const QuranSurahList: React.FC<Props> = ({ onSelectSurah }) => {
                  }`}>
                    {surah.type}
                  </span>
-                 <ChevronRight className="text-slate-200 group-hover:text-emerald-500 transition-transform group-hover:translate-x-1" size={20} />
+                 <ChevronRight className="text-slate-200 group-hover:text-green-500 transition-transform group-hover:translate-x-1" size={20} />
               </div>
             </button>
           ))}
@@ -105,7 +105,7 @@ const QuranSurahList: React.FC<Props> = ({ onSelectSurah }) => {
                <p className="text-slate-400 font-black uppercase tracking-widest text-[10px]">No matches found for your search.</p>
                <button 
                  onClick={() => { setSearchTerm(''); setFilterType('All'); }}
-                 className="mt-2 text-emerald-600 font-black uppercase text-[10px] tracking-widest underline"
+                 className="mt-2 text-green-600 font-black uppercase text-[10px] tracking-widest underline"
                >
                  Clear Search
                </button>
@@ -118,3 +118,4 @@ const QuranSurahList: React.FC<Props> = ({ onSelectSurah }) => {
 };
 
 export default QuranSurahList;
+

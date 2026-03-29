@@ -48,7 +48,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
 
   const getStatusStyle = (status: EmailCampaign['status']) => {
     switch(status) {
-      case 'Completed': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+      case 'Completed': return 'bg-green-50 text-green-600 border-green-100';
       case 'Sending': return 'bg-blue-50 text-blue-600 border-blue-100 animate-pulse';
       case 'Failed': return 'bg-rose-50 text-rose-600 border-rose-100';
       case 'Scheduled': return 'bg-amber-50 text-amber-600 border-amber-100';
@@ -61,14 +61,14 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
-            <Send className="text-emerald-600" size={32} />
+            <Send className="text-green-600" size={32} />
             Email Messages
           </h2>
           <p className="text-slate-500 font-medium">Send bulk messages and announcements to your users.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-3 px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black text-xs hover:bg-emerald-700 shadow-xl active:scale-95 transition-all uppercase tracking-widest"
+          className="flex items-center gap-3 px-8 py-4 bg-green-600 text-white rounded-2xl font-black text-xs hover:bg-green-700 shadow-xl active:scale-95 transition-all uppercase tracking-widest"
         >
           <Plus size={18} /> + Create Message
         </button>
@@ -78,7 +78,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="relative">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input 
-              className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 font-black text-slate-900"
+              className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 font-black text-slate-900"
               placeholder="Search messages..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
@@ -90,7 +90,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
          {filteredCampaigns.map(camp => (
             <div key={camp.id} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8 hover:shadow-md transition-all group">
                <div className="flex items-center gap-6 flex-1 min-w-0">
-                  <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border shadow-inner ${camp.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                  <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border shadow-inner ${camp.status === 'Completed' ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
                      <Mail size={32}/>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -107,7 +107,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
                         </div>
                         <div className="space-y-1">
                            <p className="text-[8px] font-black text-slate-400 uppercase">Open Rate</p>
-                           <p className="text-xs font-black text-emerald-600 italic">
+                           <p className="text-xs font-black text-green-600 italic">
                               {camp.stats.sent > 0 ? Math.round((camp.stats.opened / camp.stats.sent) * 100) : 0}%
                            </p>
                         </div>
@@ -126,7 +126,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
                   {camp.status === 'Draft' && (
                     <button 
                      onClick={() => handleSend(camp.id)}
-                     className="px-8 py-3.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95 shadow-lg"
+                     className="px-8 py-3.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all active:scale-95 shadow-lg"
                     >
                      Send Now
                     </button>
@@ -155,7 +155,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col max-h-[90vh]">
               <div className="p-10 border-b bg-slate-50 flex justify-between items-center shrink-0">
                  <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
                        <Plus size={28} />
                     </div>
                     <div>
@@ -172,24 +172,24 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="space-y-4">
                     <div className="space-y-2">
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Message Name (for your records)</label>
-                       <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all" placeholder="e.g. Monthly Newsletter" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                       <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-blue-600 transition-all" placeholder="e.g. Monthly Newsletter" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                     </div>
                     <div className="space-y-2">
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Subject</label>
-                       <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all" placeholder="Action Required: Your Invoice" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} />
+                       <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-blue-600 transition-all" placeholder="Action Required: Your Invoice" value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} />
                     </div>
                  </div>
 
                  <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Who should receive this?</label>
-                       <select className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-indigo-500" value={formData.segmentId} onChange={e => setFormData({...formData, segmentId: e.target.value})}>
+                       <select className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-blue-500" value={formData.segmentId} onChange={e => setFormData({...formData, segmentId: e.target.value})}>
                           {state.audienceSegments.map(s => <option key={s.id} value={s.id}>{s.name} ({s.subscriberCount})</option>)}
                        </select>
                     </div>
                     <div className="space-y-2">
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Message Design/Template</label>
-                       <select className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-indigo-500" value={formData.templateId} onChange={e => setFormData({...formData, templateId: e.target.value})}>
+                       <select className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-blue-500" value={formData.templateId} onChange={e => setFormData({...formData, templateId: e.target.value})}>
                           {state.emailTemplates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                        </select>
                     </div>
@@ -208,7 +208,7 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
                  <button 
                   onClick={handleCreate}
                   disabled={isProcessing}
-                  className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
                     {isProcessing ? <Mini5GMicroLoader size={18} /> : <CheckCircle size={18}/>}
                     Save & Continue
@@ -222,3 +222,4 @@ const EmailCampaigns: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default EmailCampaigns;
+

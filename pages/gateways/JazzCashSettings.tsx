@@ -123,3 +123,4 @@ const JazzCashSettings: React.FC<Props> = ({ state, onBack }) => {
 };
 
 export default JazzCashSettings;
+

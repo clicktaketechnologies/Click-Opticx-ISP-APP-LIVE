@@ -69,8 +69,8 @@ const SubscriberNetwork: React.FC = () => {
               <p className="text-2xl font-black text-slate-900 italic tracking-tighter">{results.ul} Mbps</p>
             </div>
           </div>
-          <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center gap-4 group hover:bg-emerald-50 transition-all">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center gap-4 group hover:bg-green-50 transition-all">
+            <div className="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
               <Activity size={28} />
             </div>
             <div className="text-center">
@@ -106,3 +106,4 @@ const SubscriberNetwork: React.FC = () => {
 };
 
 export default SubscriberNetwork;
+

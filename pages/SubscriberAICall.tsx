@@ -195,7 +195,7 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
       {phase === 'landing' && (
         <div className="space-y-8">
           <header className="flex items-center gap-4 px-2 pt-4">
-            <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 shadow-sm transition-all">
+            <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-blue-600 shadow-sm transition-all">
               <ArrowLeft size={20} />
             </button>
             <div>
@@ -212,7 +212,7 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
           )}
 
           <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm space-y-8 text-center">
-            <div className="w-24 h-24 bg-indigo-50 text-indigo-600 rounded-[2.5rem] flex items-center justify-center mx-auto border-2 border-indigo-100 shadow-inner">
+            <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-[2.5rem] flex items-center justify-center mx-auto border-2 border-blue-100 shadow-inner">
               <Headphones size={48} />
             </div>
             <h3 className="text-xl font-black text-slate-900 uppercase">Start a conversation</h3>
@@ -249,24 +249,24 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
               </div>
             </div>
             <div className="text-right relative z-10">
-              <p className="text-xl font-black text-emerald-400 italic tabular-nums">{formatTime(duration)}</p>
+              <p className="text-xl font-black text-green-400 italic tabular-nums">{formatTime(duration)}</p>
             </div>
             <Activity className="absolute -right-8 -bottom-8 opacity-5 scale-150" size={140} />
           </div>
 
           <div className="flex-1 bg-white rounded-[3.5rem] border border-slate-100 shadow-sm p-10 flex flex-col items-center justify-center text-center space-y-10 relative overflow-hidden">
             <div className="relative z-10">
-              <div className={`w-32 h-32 rounded-[3rem] flex items-center justify-center mx-auto transition-all duration-500 ${aiIsSpeaking ? 'bg-indigo-600 text-white scale-110 shadow-2xl shadow-indigo-100' : 'bg-slate-50 text-slate-300'}`}>
+              <div className={`w-32 h-32 rounded-[3rem] flex items-center justify-center mx-auto transition-all duration-500 ${aiIsSpeaking ? 'bg-blue-600 text-white scale-110 shadow-2xl shadow-blue-100' : 'bg-slate-50 text-slate-300'}`}>
                 {aiIsSpeaking ? <Volume2 size={56} className="animate-pulse" /> : <Bot size={56} />}
               </div>
-              <p className={`text-[10px] font-black uppercase tracking-[0.3em] mt-6 transition-colors ${aiIsSpeaking ? 'text-indigo-600' : 'text-slate-400'}`}>
+              <p className={`text-[10px] font-black uppercase tracking-[0.3em] mt-6 transition-colors ${aiIsSpeaking ? 'text-blue-600' : 'text-slate-400'}`}>
                 {aiIsSpeaking ? 'AI Responding' : 'Listening...'}
               </p>
             </div>
 
             <div className="flex items-end gap-2 h-32">
               {visualizerBars.map((h, i) => (
-                <div key={i} className={`w-2 rounded-full transition-all duration-150 ${aiIsSpeaking ? 'bg-indigo-500/20' : 'bg-indigo-600 shadow-[0_0_8px_rgba(79,70,229,0.5)]'}`} style={{ height: `${h}%` }}></div>
+                <div key={i} className={`w-2 rounded-full transition-all duration-150 ${aiIsSpeaking ? 'bg-blue-500/20' : 'bg-blue-600 shadow-[0_0_8px_rgba(79,70,229,0.5)]'}`} style={{ height: `${h}%` }}></div>
               ))}
             </div>
           </div>
@@ -287,7 +287,7 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
       {phase === 'summary' && (
         <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[2000] flex items-center justify-center p-6">
           <div className="bg-white rounded-[3.5rem] w-full max-sm shadow-2xl p-12 text-center space-y-10 animate-in zoom-in border-[8px] border-slate-50">
-            <div className="w-24 h-24 bg-emerald-500 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce border-4 border-white">
+            <div className="w-24 h-24 bg-green-500 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce border-4 border-white">
               <CheckCircle size={56} strokeWidth={3} />
             </div>
             <div className="space-y-2">
@@ -303,3 +303,4 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
 };
 
 export default SubscriberAICall;
+

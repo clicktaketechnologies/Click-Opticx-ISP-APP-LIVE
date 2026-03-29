@@ -125,7 +125,7 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
         
         <div className="text-center">
           <h2 className="text-xl font-black uppercase tracking-tight italic text-slate-900 leading-none">
-            {surah.transliteration} <span className="font-arabic text-2xl ml-2 text-emerald-600">{surah.name}</span>
+            {surah.transliteration} <span className="font-arabic text-2xl ml-2 text-green-600">{surah.name}</span>
           </h2>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
             {surah.translation} • {surah.total_verses} Verses
@@ -134,7 +134,7 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
 
         <button 
           onClick={() => setShowTranslation(!showTranslation)}
-          className={`p-3 rounded-2xl transition-all active:scale-95 border ${showTranslation ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-400 border-slate-200'}`}
+          className={`p-3 rounded-2xl transition-all active:scale-95 border ${showTranslation ? 'bg-green-600 text-white border-green-600' : 'bg-white text-slate-400 border-slate-200'}`}
         >
           <Languages size={20} />
         </button>
@@ -144,7 +144,7 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
       <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar space-y-12 pb-48">
         {isLoading ? (
           <div className="h-full flex flex-col items-center justify-center gap-6">
-            <div className="w-16 h-16 bg-emerald-50 rounded-3xl flex items-center justify-center border border-emerald-100 shadow-inner">
+            <div className="w-16 h-16 bg-green-50 rounded-3xl flex items-center justify-center border border-green-100 shadow-inner">
                <Mini5GMicroLoader size={32} />
             </div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Downloading Holy Text...</p>
@@ -169,10 +169,10 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
                 <div key={verse.id} className="group pb-12 border-b border-slate-50 last:border-0">
                   <div className="flex flex-col items-end gap-6 mb-6">
                     <div className="w-full flex items-center justify-between border-b border-slate-50 pb-4">
-                       <div className="w-10 h-10 bg-slate-900 text-emerald-400 rounded-xl flex items-center justify-center text-[10px] font-black italic shadow-lg shrink-0">
+                       <div className="w-10 h-10 bg-slate-900 text-green-400 rounded-xl flex items-center justify-center text-[10px] font-black italic shadow-lg shrink-0">
                           {verse.verse_key.split(':')[1]}
                        </div>
-                       <Volume2 size={16} className="text-slate-200 group-hover:text-emerald-500 transition-colors" />
+                       <Volume2 size={16} className="text-slate-200 group-hover:text-green-500 transition-colors" />
                     </div>
                     <p className="font-arabic text-3xl md:text-5xl text-slate-900 leading-[2.8] md:leading-[3] tracking-wide text-right direction-rtl w-full">
                       {verse.text_uthmani}
@@ -180,7 +180,7 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
                   </div>
                   
                   {showTranslation && (
-                    <div className="pl-6 md:pl-12 border-l-4 border-emerald-50 py-2">
+                    <div className="pl-6 md:pl-12 border-l-4 border-green-50 py-2">
                       <p className="text-slate-600 font-medium leading-relaxed italic text-sm md:text-base uppercase tracking-tight">
                         {verse.translation}
                       </p>
@@ -191,7 +191,7 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
             </div>
 
             <div className="p-20 text-center flex flex-col items-center gap-6">
-               <div className="w-16 h-16 bg-slate-900 text-emerald-400 rounded-3xl flex items-center justify-center shadow-2xl rotate-45">
+               <div className="w-16 h-16 bg-slate-900 text-green-400 rounded-3xl flex items-center justify-center shadow-2xl rotate-45">
                   <BookOpen size={32} className="-rotate-45" />
                </div>
                <div className="space-y-2">
@@ -224,7 +224,7 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
                 onClick={toggleAudio}
                 disabled={isAudioLoading}
                 className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-xl transition-all active:scale-90 relative ${
-                  isPlaying ? 'bg-rose-600 text-white shadow-rose-200' : 'bg-emerald-600 text-white shadow-emerald-200'
+                  isPlaying ? 'bg-rose-600 text-white shadow-rose-200' : 'bg-green-600 text-white shadow-green-200'
                 } ${isAudioLoading ? 'opacity-80 grayscale' : ''}`}
               >
                 {isAudioLoading ? (
@@ -240,8 +240,8 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
                  <div className="flex justify-between items-center mb-2">
                     <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Global Reciter Node</p>
                     <div className="flex items-center gap-1">
-                       <div className={`w-1 h-1 rounded-full ${isPlaying ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}></div>
-                       <span className={`text-[8px] font-black uppercase ${isPlaying ? 'text-emerald-600' : 'text-slate-400'}`}>
+                       <div className={`w-1 h-1 rounded-full ${isPlaying ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`}></div>
+                       <span className={`text-[8px] font-black uppercase ${isPlaying ? 'text-green-600' : 'text-slate-400'}`}>
                          {isAudioLoading ? 'Buffering' : isPlaying ? 'Streaming' : 'Standby'}
                        </span>
                     </div>
@@ -265,3 +265,4 @@ const QuranReader: React.FC<Props> = ({ surah, onBack }) => {
 };
 
 export default QuranReader;
+

@@ -96,7 +96,7 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-            <ShieldCheck className="text-indigo-600" size={32} />
+            <ShieldCheck className="text-blue-600" size={32} />
             Authority Command
           </h2>
           <p className="text-slate-500 font-medium">Manage personnel credentials and defined system scope.</p>
@@ -118,7 +118,7 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
           </div>
           <button
             onClick={() => handleOpenModal()}
-            className="flex items-center justify-center gap-3 px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] hover:bg-emerald-700 transition-all active:scale-95 shadow-xl shadow-emerald-100 uppercase tracking-widest"
+            className="flex items-center justify-center gap-3 px-8 py-4 bg-green-600 text-white rounded-2xl font-black text-[10px] hover:bg-green-700 transition-all active:scale-95 shadow-xl shadow-green-100 uppercase tracking-widest"
           >
             <UserPlus size={18} /> Provision Account
           </button>
@@ -133,7 +133,7 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
               <input
                 type="text"
                 placeholder="Find colleague by name or email..."
-                className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-slate-800"
+                className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-bold text-slate-800"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -141,7 +141,7 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="relative flex-1">
               <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <select
-                className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs font-black text-slate-700 appearance-none uppercase tracking-widest"
+                className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-xs font-black text-slate-700 appearance-none uppercase tracking-widest"
                 value={roleFilter}
                 onChange={e => setRoleFilter(e.target.value)}
               >
@@ -156,11 +156,11 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
               <div key={member.email} className={`bg-white rounded-[2.5rem] border shadow-sm hover:shadow-2xl transition-all duration-300 relative overflow-hidden group ${member.status === 'Suspended' ? 'border-red-100 bg-red-50/10 opacity-80' : 'border-slate-100'}`}>
                 <div className="p-8 space-y-6">
                   <div className="flex justify-between items-start">
-                    <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center font-black text-xl shadow-inner border-2 ${member.status === 'Suspended' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-indigo-50 border-indigo-100 text-indigo-600'}`}>
+                    <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center font-black text-xl shadow-inner border-2 ${member.status === 'Suspended' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
                       {member.name.charAt(0)}
                     </div>
                     <div className="text-right">
-                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-1 ${member.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest mb-1 ${member.status === 'Active' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                         <Circle size={8} fill="currentColor" className={member.status === 'Active' ? 'animate-pulse' : ''} />
                         {member.status}
                       </div>
@@ -173,7 +173,7 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between group-hover:bg-white transition-colors">
                     <div className="flex items-center gap-2">
-                      <Shield size={14} className="text-indigo-500" />
+                      <Shield size={14} className="text-blue-500" />
                       <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">{member.role}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-slate-400 text-[9px] font-bold uppercase">
@@ -183,7 +183,7 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="flex gap-2 pt-2">
                     <button onClick={() => handleOpenModal(member)} className="flex-1 py-3.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-xl shadow-slate-200">Edit Access</button>
-                    <button onClick={() => toggleStatus(member.email, member.status)} className={`px-5 py-3.5 rounded-xl border-2 transition-all active:scale-95 ${member.status === 'Active' ? 'border-red-50 text-red-500 hover:bg-red-50' : 'border-emerald-50 text-emerald-600 hover:bg-emerald-50'}`}>{member.status === 'Active' ? <Lock size={18} /> : <Unlock size={18} />}</button>
+                    <button onClick={() => toggleStatus(member.email, member.status)} className={`px-5 py-3.5 rounded-xl border-2 transition-all active:scale-95 ${member.status === 'Active' ? 'border-red-50 text-red-500 hover:bg-red-50' : 'border-green-50 text-green-600 hover:bg-green-50'}`}>{member.status === 'Active' ? <Lock size={18} /> : <Unlock size={18} />}</button>
                   </div>
                 </div>
                 <Fingerprint className="absolute -right-8 -bottom-8 opacity-[0.03] scale-150 pointer-events-none group-hover:scale-[1.7] transition-transform duration-500" size={180} />
@@ -196,12 +196,12 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
           <div className="bg-white rounded-[3rem] border border-slate-100 shadow-xl overflow-hidden flex flex-col h-[750px]">
             <div className="p-8 bg-slate-900 text-white flex justify-between items-center sticky top-0 z-20">
               <div className="flex items-center gap-3">
-                <Settings size={20} className="text-indigo-400" />
+                <Settings size={20} className="text-blue-400" />
                 <h3 className="text-lg font-black tracking-tight uppercase">Governance Authority Infrastructure</h3>
               </div>
               <div className="hidden md:flex items-center gap-8">
-                <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div><span className="text-[10px] font-black uppercase text-slate-400">Read</span></div>
-                <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(79,70,229,0.5)]"></div><span className="text-[10px] font-black uppercase text-slate-400">Write</span></div>
+                <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div><span className="text-[10px] font-black uppercase text-slate-400">Read</span></div>
+                <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(79,70,229,0.5)]"></div><span className="text-[10px] font-black uppercase text-slate-400">Write</span></div>
                 <div className="flex items-center gap-2"><div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div><span className="text-[10px] font-black uppercase text-slate-400">Drop</span></div>
               </div>
             </div>
@@ -220,7 +220,7 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
                     <tr key={perm.id} className="hover:bg-slate-50 transition-colors group">
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-3">
-                          <Activity size={16} className="text-indigo-500" />
+                          <Activity size={16} className="text-blue-500" />
                           <span className="font-black text-slate-900 uppercase tracking-tight text-xs">{perm.id}</span>
                         </div>
                       </td>
@@ -232,11 +232,11 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
                         return (
                           <td key={role} className="px-4 py-6 border-l border-slate-50">
                             <div className="flex flex-col gap-2 items-center">
-                              <button onClick={() => handleTogglePermission(perm.id, 'view', role)} disabled={isSuperAdmin} className={`flex items-center justify-between px-3 py-2 rounded-xl w-full transition-all border ${canView ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg' : 'bg-slate-50 text-slate-300 border-slate-100'} ${isSuperAdmin ? 'opacity-100' : 'hover:scale-[1.03] active:scale-95'}`}>
+                              <button onClick={() => handleTogglePermission(perm.id, 'view', role)} disabled={isSuperAdmin} className={`flex items-center justify-between px-3 py-2 rounded-xl w-full transition-all border ${canView ? 'bg-green-600 text-white border-green-600 shadow-lg' : 'bg-slate-50 text-slate-300 border-slate-100'} ${isSuperAdmin ? 'opacity-100' : 'hover:scale-[1.03] active:scale-95'}`}>
                                 <span className="text-[9px] font-black uppercase tracking-widest">Access</span>
                                 {canView ? <Check size={12} strokeWidth={4} /> : <Ban size={12} />}
                               </button>
-                              <button onClick={() => handleTogglePermission(perm.id, 'edit', role)} disabled={isSuperAdmin || !canView} className={`flex items-center justify-between px-3 py-2 rounded-xl w-full transition-all border ${canEdit ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg' : 'bg-slate-50 text-slate-300 border-slate-100'} ${!canView && !isSuperAdmin ? 'opacity-30' : ''}`}>
+                              <button onClick={() => handleTogglePermission(perm.id, 'edit', role)} disabled={isSuperAdmin || !canView} className={`flex items-center justify-between px-3 py-2 rounded-xl w-full transition-all border ${canEdit ? 'bg-blue-600 text-white border-blue-600 shadow-lg' : 'bg-slate-50 text-slate-300 border-slate-100'} ${!canView && !isSuperAdmin ? 'opacity-30' : ''}`}>
                                 <span className="text-[9px] font-black uppercase tracking-widest">Modify</span>
                                 {canEdit ? <Pencil size={12} strokeWidth={3} /> : <Ban size={12} />}
                               </button>
@@ -263,26 +263,26 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="px-10 py-10 bg-slate-950 text-white flex justify-between items-center shrink-0">
               <div>
                 <h3 className="text-3xl font-black italic tracking-tighter uppercase">{editingStaff ? 'Update Creds' : 'Provision Identity'}</h3>
-                <p className="text-indigo-400 text-[10px] font-black uppercase mt-1 tracking-[0.4em]">Protocol: Security Handshake</p>
+                <p className="text-blue-400 text-[10px] font-black uppercase mt-1 tracking-[0.4em]">Protocol: Security Handshake</p>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-slate-500 hover:text-white"><X size={32} /></button>
             </div>
             <div className="p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1">
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Personnel Full Name</label>
-                <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-800 focus:border-indigo-500 transition-all text-lg shadow-sm" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. John Wick" />
+                <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-800 focus:border-blue-500 transition-all text-lg shadow-sm" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. John Wick" />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Scope</label>
-                  <select className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-700 focus:border-indigo-500 transition-all uppercase tracking-tighter" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
+                  <select className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-700 focus:border-blue-500 transition-all uppercase tracking-tighter" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
                     {state.roles.map(role => <option key={role} value={role}>{role}</option>)}
                   </select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Access Secret</label>
                   <div className="relative">
-                    <input type={showPass ? 'text' : 'password'} className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-700 focus:border-indigo-500 transition-all pr-14 shadow-sm" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
+                    <input type={showPass ? 'text' : 'password'} className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-700 focus:border-blue-500 transition-all pr-14 shadow-sm" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
                     <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">{showPass ? <EyeOff size={22} /> : <Eye size={22} />}</button>
                   </div>
                 </div>
@@ -294,14 +294,14 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
                   <input type="email" className="w-full pl-14 pr-5 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-800 disabled:opacity-50" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="id@clickopticx.com" disabled={!!editingStaff} />
                 </div>
               </div>
-              <div className="p-6 bg-indigo-50 border border-indigo-100 rounded-3xl flex items-start gap-4 shadow-inner">
-                <Key className="text-indigo-500 mt-1 shrink-0" size={24} />
-                <p className="text-[10px] text-indigo-700 font-bold uppercase leading-relaxed">Set unique access secrets. Users will be required to verify their corporate identity upon next login. Governance matrix overrides will apply immediately.</p>
+              <div className="p-6 bg-blue-50 border border-blue-100 rounded-3xl flex items-start gap-4 shadow-inner">
+                <Key className="text-blue-500 mt-1 shrink-0" size={24} />
+                <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed">Set unique access secrets. Users will be required to verify their corporate identity upon next login. Governance matrix overrides will apply immediately.</p>
               </div>
             </div>
             <div className="p-10 bg-slate-50 border-t border-slate-100 flex gap-4 shrink-0">
               <button onClick={() => setIsModalOpen(false)} className="flex-1 py-5 font-black text-slate-400 hover:bg-white hover:text-red-500 rounded-2xl transition-all uppercase tracking-widest text-[11px]">Abort Mission</button>
-              <button onClick={handleSave} className="flex-[2] py-5 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-2xl shadow-indigo-100 active:scale-95 transition-all uppercase tracking-[0.2em] text-xs">{editingStaff ? 'Save Changes' : 'Commit to Team'}</button>
+              <button onClick={handleSave} className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 shadow-2xl shadow-blue-100 active:scale-95 transition-all uppercase tracking-[0.2em] text-xs">{editingStaff ? 'Save Changes' : 'Commit to Team'}</button>
             </div>
           </div>
         </div>
@@ -311,3 +311,4 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AccessControlPage;
+

@@ -38,7 +38,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
     { label: 'Weak Node', color: 'bg-rose-500', text: 'text-rose-500', icon: ShieldAlert },
     { label: 'Normal', color: 'bg-amber-500', text: 'text-amber-500', icon: Shield },
     { label: 'Robust', color: 'bg-blue-500', text: 'text-blue-500', icon: ShieldCheck },
-    { label: 'Encrypted-Grade', color: 'bg-emerald-500', text: 'text-emerald-500', icon: ShieldCheck },
+    { label: 'Encrypted-Grade', color: 'bg-green-500', text: 'text-green-500', icon: ShieldCheck },
   ][strength];
 
   return (
@@ -53,7 +53,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
         )}
       </div>
       <div className="relative group">
-        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
         <input
           type={show ? "text" : "password"}
           value={value}
@@ -61,12 +61,12 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           placeholder={placeholder}
           required={required}
           autoComplete={autoComplete}
-          className="w-full pl-12 pr-12 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium text-slate-800 placeholder:text-slate-400"
+          className="w-full pl-12 pr-12 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-slate-800 placeholder:text-slate-400"
         />
         <button
           type="button"
           onClick={() => setShow(!show)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-xl transition-all"
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50/50 rounded-xl transition-all"
         >
           {show ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
@@ -88,7 +88,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
             { label: '0-9', pass: /[0-9]/.test(value) },
             { label: '@#$', pass: /[^A-Za-z0-9]/.test(value) }
           ].map((rule, i) => (
-            <div key={i} className={`flex items-center gap-1 text-[7px] font-black uppercase tracking-tighter ${rule.pass ? 'text-emerald-500' : 'text-slate-300'}`}>
+            <div key={i} className={`flex items-center gap-1 text-[7px] font-black uppercase tracking-tighter ${rule.pass ? 'text-green-500' : 'text-slate-300'}`}>
               {rule.pass ? <CheckCircle size={8} /> : <X size={8} />} {rule.label}
             </div>
           ))}
@@ -99,3 +99,4 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
 };
 
 export default PasswordInput;
+

@@ -77,7 +77,7 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tighter ${staff.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                  <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tighter ${staff.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {staff.status}
                   </span>
                 </td>
@@ -91,7 +91,7 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
                     </button>
                     <button 
                       onClick={() => db.updateStaff(staff.email, { status: staff.status === 'Active' ? 'Suspended' : 'Active' })}
-                      className={`p-2 rounded-lg transition-all ${staff.status === 'Active' ? 'text-red-400 hover:bg-red-50 hover:text-red-600' : 'text-emerald-400 hover:bg-emerald-50 hover:text-emerald-600'}`}
+                      className={`p-2 rounded-lg transition-all ${staff.status === 'Active' ? 'text-red-400 hover:bg-red-50 hover:text-red-600' : 'text-green-400 hover:bg-green-50 hover:text-green-600'}`}
                       title={staff.status === 'Active' ? 'Disable Account' : 'Enable Account'}
                     >
                       <Power size={16} />
@@ -165,3 +165,4 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default StaffManagement;
+

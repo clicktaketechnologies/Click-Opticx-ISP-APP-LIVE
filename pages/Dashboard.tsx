@@ -189,10 +189,10 @@ const Dashboard: React.FC<{
           <div className="bg-slate-900 p-10 rounded-[3rem] text-white relative overflow-hidden shadow-2xl col-span-1">
             <div className="relative z-10 space-y-6">
               <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] flex items-center gap-2">
-                <Wallet size={16} className="text-emerald-400" />
+                <Wallet size={16} className="text-green-400" />
                 Available Balance
               </p>
-              <h3 className="text-5xl font-black text-emerald-400 tracking-tighter">
+              <h3 className="text-5xl font-black text-green-400 tracking-tighter">
                 {state.settings.currency} {(dealerUser.balance || 0).toLocaleString()}
               </h3>
               <div className="pt-6 border-t border-white/5 flex justify-between items-center">
@@ -201,7 +201,7 @@ const Dashboard: React.FC<{
                   <p className="text-sm font-bold text-slate-300">{state.settings.currency} {personalInvoices.reduce((a, b) => a + b.totalAmount, 0).toLocaleString()}</p>
                 </div>
                 <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center">
-                  <TrendingUp className="text-emerald-400" size={24} />
+                  <TrendingUp className="text-green-400" size={24} />
                 </div>
               </div>
             </div>
@@ -218,7 +218,7 @@ const Dashboard: React.FC<{
                 {personalInvoices.slice(0, 4).map(inv => (
                   <div key={inv.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
                     <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${inv.status === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${inv.status === PaymentStatus.PAID ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                         <Zap size={20} />
                       </div>
                       <div>
@@ -228,7 +228,7 @@ const Dashboard: React.FC<{
                     </div>
                     <div className="text-right">
                       <p className="text-lg font-black text-slate-900">Rs. {inv.totalAmount.toLocaleString()}</p>
-                      <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${inv.status === PaymentStatus.PAID ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>{inv.status}</span>
+                      <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${inv.status === PaymentStatus.PAID ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{inv.status}</span>
                     </div>
                   </div>
                 ))}
@@ -263,7 +263,7 @@ const Dashboard: React.FC<{
               <img src={logo} className="w-full h-full object-contain" alt="Brand" />
             </div>
           ) : (
-            <Archive className="text-indigo-600 shrink-0" size={36} />
+            <Archive className="text-blue-600 shrink-0" size={36} />
           )}
           <div className="space-y-1">
             <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-4 uppercase italic leading-none">
@@ -291,15 +291,15 @@ const Dashboard: React.FC<{
       </div>
 
       {/* Premium Quick Actions Bar */}
-      <div className="flex flex-wrap items-center gap-3 mb-8 bg-indigo-900/5 p-3 rounded-3xl border border-indigo-500/10 backdrop-blur-sm shadow-inner">
-        <div className="flex items-center gap-2 px-3 border-r border-indigo-500/10 mr-1">
-          <Zap size={16} className="text-indigo-500 animate-pulse" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-800">Quick Actions</span>
+      <div className="flex flex-wrap items-center gap-3 mb-8 bg-blue-900/5 p-3 rounded-3xl border border-blue-500/10 backdrop-blur-sm shadow-inner">
+        <div className="flex items-center gap-2 px-3 border-r border-blue-500/10 mr-1">
+          <Zap size={16} className="text-blue-500 animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-800">Quick Actions</span>
         </div>
-        <button onClick={() => onNavigate && onNavigate('users', { action: 'add-user' })} className="flex items-center gap-2 px-5 py-2.5 bg-white text-indigo-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-indigo-200">
+        <button onClick={() => onNavigate && onNavigate('users', { action: 'add-user' })} className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-blue-200">
           <UserPlus size={16} /> + Add User
         </button>
-        <button onClick={() => onNavigate && onNavigate('users', { action: 'receive-funds' })} className="flex items-center gap-2 px-5 py-2.5 bg-white text-emerald-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-emerald-200">
+        <button onClick={() => onNavigate && onNavigate('users', { action: 'receive-funds' })} className="flex items-center gap-2 px-5 py-2.5 bg-white text-green-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-green-200">
           <Banknote size={16} /> Receive Payment
         </button>
         <button onClick={() => onNavigate && onNavigate('invoice-engine')} className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-blue-200">
@@ -314,9 +314,9 @@ const Dashboard: React.FC<{
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 border-b border-slate-100 pb-8 mb-8">
         {[
           { label: 'Total Users', value: globalStats.totalUsers.toLocaleString(), icon: Users, color: 'text-slate-600', bg: 'bg-slate-50' },
-          { label: 'Active Users', value: globalStats.activeSubs.toLocaleString(), icon: Activity, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Active Users', value: globalStats.activeSubs.toLocaleString(), icon: Activity, color: 'text-green-600', bg: 'bg-green-50' },
           { label: 'Server Online', value: globalStats.onlineUsers.toLocaleString(), icon: Globe, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'New Users', value: globalStats.newUsers.toLocaleString(), icon: UserPlus, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+          { label: 'New Users', value: globalStats.newUsers.toLocaleString(), icon: UserPlus, color: 'text-blue-600', bg: 'bg-blue-50' },
           { label: 'Suspended Users', value: globalStats.expiredUsers.toLocaleString(), icon: Archive, color: 'text-rose-600', bg: 'bg-rose-50' },
           { label: 'Disabled Users', value: globalStats.disabledUsers.toLocaleString(), icon: ShieldCheck, color: 'text-slate-400', bg: 'bg-slate-50' },
         ].map((kpi, idx) => (
@@ -362,7 +362,7 @@ const Dashboard: React.FC<{
 
         <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col justify-between group">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:rotate-12 transition-transform"><DollarSign size={24} /></div>
+            <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 group-hover:rotate-12 transition-transform"><DollarSign size={24} /></div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">➡ Payments Overview</p>
               <p className="text-xs font-bold text-slate-700">Payment Status</p>
@@ -370,7 +370,7 @@ const Dashboard: React.FC<{
           </div>
           <div className="flex gap-4">
             <div className="flex-1">
-              <p className="text-2xl font-black text-emerald-600 tracking-tighter">{globalStats.paidUsers}</p>
+              <p className="text-2xl font-black text-green-600 tracking-tighter">{globalStats.paidUsers}</p>
               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Paid Users</p>
             </div>
             <div className="w-px h-8 bg-slate-100 self-center"></div>
@@ -381,24 +381,24 @@ const Dashboard: React.FC<{
           </div>
         </div>
 
-        <div className="bg-slate-900 p-8 rounded-[3rem] text-white shadow-2xl shadow-indigo-200 relative overflow-hidden group">
+        <div className="bg-slate-900 p-8 rounded-[3rem] text-white shadow-2xl shadow-blue-200 relative overflow-hidden group">
           <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-4">Total Due</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 mb-4">Total Due</p>
             <h4 className="text-4xl font-black italic tracking-tighter mb-2">{state.settings.currency} {globalStats.totalUnpaidAmount.toLocaleString()}</h4>
-            <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-400">
+            <div className="flex items-center gap-2 text-[11px] font-bold text-green-400">
               <ArrowUpRight size={14} /> 12% vs last month
             </div>
           </div>
-          <TrendingUp size={100} className="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700 text-indigo-400" />
+          <TrendingUp size={100} className="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700 text-blue-400" />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col h-[400px] md:h-[450px] relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-500/5 transition-colors duration-700"></div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/5 transition-colors duration-700"></div>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 relative z-10">
             <div>
-              <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-3 uppercase italic leading-none"><TrendingUp size={24} className="text-indigo-600" /> Income Overview</h3>
+              <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-3 uppercase italic leading-none"><TrendingUp size={24} className="text-blue-600" /> Income Overview</h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">{dateFilter === 'all' ? 'Historical' : 'Recent'} Total vs Received Analysis</p>
             </div>
             <div className="flex items-center gap-4 px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100">
@@ -407,7 +407,7 @@ const Dashboard: React.FC<{
                 <span className="text-[9px] font-black uppercase text-slate-500">Total</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
                 <span className="text-[9px] font-black uppercase text-slate-500">Received</span>
               </div>
             </div>
@@ -417,14 +417,14 @@ const Dashboard: React.FC<{
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} /><stop offset="95%" stopColor="#3b82f6" stopOpacity={0} /></linearGradient>
-                  <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.2} /><stop offset="95%" stopColor="#10b981" stopOpacity={0} /></linearGradient>
+                  <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#32d583" stopOpacity={0.2} /><stop offset="95%" stopColor="#32d583" stopOpacity={0} /></linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                 <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} dy={10} />
                 <YAxis stroke="#94a3b8" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} tickFormatter={(val) => `Rs.${val / 1000}k`} />
                 <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '1.5rem', border: '1px solid #f1f5f9', boxShadow: '0 20px 40px rgba(0,0,0,0.08)', padding: '16px', fontWeight: 'bold' }} />
                 <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#colorRev)" strokeWidth={4} activeDot={{ r: 6, strokeWidth: 0 }} />
-                <Area type="monotone" dataKey="recovery" stroke="#10b981" fillOpacity={1} fill="url(#colorRec)" strokeWidth={4} activeDot={{ r: 6, strokeWidth: 0 }} />
+                <Area type="monotone" dataKey="recovery" stroke="#32d583" fillOpacity={1} fill="url(#colorRec)" strokeWidth={4} activeDot={{ r: 6, strokeWidth: 0 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -432,21 +432,21 @@ const Dashboard: React.FC<{
 
         <div className="space-y-6">
           <div className="bg-slate-950 p-8 rounded-[3rem] text-white flex flex-col shadow-[0_20px_40px_-15px_rgba(30,41,59,0.5)] relative overflow-hidden h-[215px] group">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-emerald-500/10 opacity-50 group-hover:opacity-100 transition-opacity duration-700"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-green-500/10 opacity-50 group-hover:opacity-100 transition-opacity duration-700"></div>
             <div className="relative z-10 flex-1 flex flex-col justify-between">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black flex items-center gap-3 text-white uppercase italic tracking-tighter"><ShieldCheck size={24} className="text-emerald-400" /> Collection Health</h3>
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md"><Activity size={18} className="text-emerald-400" /></div>
+                <h3 className="text-xl font-black flex items-center gap-3 text-white uppercase italic tracking-tighter"><ShieldCheck size={24} className="text-green-400" /> Collection Health</h3>
+                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md"><Activity size={18} className="text-green-400" /></div>
               </div>
               <div>
                 <div className="flex items-end gap-3 mb-4">
-                  <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200 tracking-tighter leading-none">
+                  <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-200 tracking-tighter leading-none">
                     {globalStats.periodRevenue > 0 ? Math.round((globalStats.periodRecovery / globalStats.periodRevenue) * 100) : 0}%
                   </span>
                   <span className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-1.5 leading-none">Collection Rate</span>
                 </div>
                 <div className="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden border border-white/5 backdrop-blur-sm">
-                  <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{ width: `${globalStats.periodRevenue > 0 ? (globalStats.periodRecovery / globalStats.periodRevenue) * 100 : 0}%` }}></div>
+                  <div className="bg-gradient-to-r from-green-500 to-teal-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{ width: `${globalStats.periodRevenue > 0 ? (globalStats.periodRecovery / globalStats.periodRevenue) * 100 : 0}%` }}></div>
                 </div>
               </div>
             </div>
@@ -456,18 +456,18 @@ const Dashboard: React.FC<{
           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm flex-1 h-[215px] flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-black text-slate-800 uppercase italic tracking-tight flex items-center gap-2">
-                <Bot size={18} className="text-indigo-600" /> AI Assistant
+                <Bot size={18} className="text-blue-600" /> AI Assistant
               </h3>
-              <span className="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-xl text-[8px] font-black uppercase tracking-widest">➡ Smart system to help automate tasks and detect issues</span>
+              <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-xl text-[8px] font-black uppercase tracking-widest">➡ Smart system to help automate tasks and detect issues</span>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-6">
-              <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center text-center group hover:bg-white hover:shadow-md hover:border-indigo-100 transition-all">
-                <span className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1 group-hover:text-indigo-500 transition-colors">Queries</span>
+              <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center text-center group hover:bg-white hover:shadow-md hover:border-blue-100 transition-all">
+                <span className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1 group-hover:text-blue-500 transition-colors">Queries</span>
                 <span className="text-3xl font-black text-slate-800 tracking-tighter leading-none">{aiStats.totalCalls}</span>
               </div>
-              <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center text-center group hover:bg-white hover:shadow-md hover:border-emerald-100 transition-all">
-                <span className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1 group-hover:text-emerald-500 transition-colors">Resolved</span>
-                <span className="text-3xl font-black text-emerald-600 tracking-tighter leading-none">{Math.round(aiStats.totalCalls * 0.85)}</span>
+              <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center text-center group hover:bg-white hover:shadow-md hover:border-green-100 transition-all">
+                <span className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1 group-hover:text-green-500 transition-colors">Resolved</span>
+                <span className="text-3xl font-black text-green-600 tracking-tighter leading-none">{Math.round(aiStats.totalCalls * 0.85)}</span>
               </div>
             </div>
           </div>
@@ -483,7 +483,7 @@ const Dashboard: React.FC<{
                 <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Global System Records</h3>
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Searching for: "{searchTerm}"</p>
               </div>
-              <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
                 <Search size={24} />
               </div>
             </div>
@@ -491,7 +491,7 @@ const Dashboard: React.FC<{
             <div className="flex-1 overflow-y-auto p-10 space-y-12 no-scrollbar">
               {/* Subscribers Section */}
               <section className="space-y-6">
-                <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.4em] flex items-center gap-2 italic">
+                <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] flex items-center gap-2 italic">
                   Matched Users
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -510,10 +510,10 @@ const Dashboard: React.FC<{
                       <div 
                         key={u.id} 
                         onClick={() => onNavigate?.('profile', { userId: u.id })}
-                        className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-indigo-300 hover:shadow-xl transition-all cursor-pointer"
+                        className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-blue-300 hover:shadow-xl transition-all cursor-pointer"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all">
                             <UserCircle size={20} />
                           </div>
                           <div>
@@ -521,7 +521,7 @@ const Dashboard: React.FC<{
                             <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">{u.connectionId || 'NEW_USER'}</p>
                           </div>
                         </div>
-                        <ChevronRight size={16} className="text-slate-300 group-hover:text-indigo-600 transition-colors" />
+                        <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
                       </div>
                     ))
                   ) : (
@@ -532,7 +532,7 @@ const Dashboard: React.FC<{
 
               {/* Transactions Section */}
               <section className="space-y-6">
-                <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.4em] flex items-center gap-2 italic">
+                <h4 className="text-[10px] font-black text-green-600 uppercase tracking-[0.4em] flex items-center gap-2 italic">
                   Payment Records
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -544,9 +544,9 @@ const Dashboard: React.FC<{
                       i.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
                       i.userName.toLowerCase().includes(searchTerm.toLowerCase())
                     ).map(inv => (
-                      <div key={inv.id} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-emerald-300 hover:shadow-xl transition-all">
+                      <div key={inv.id} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-green-300 hover:shadow-xl transition-all">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-emerald-600 group-hover:text-white transition-all">
+                          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-green-600 group-hover:text-white transition-all">
                             <Banknote size={20} />
                           </div>
                           <div>
@@ -556,7 +556,7 @@ const Dashboard: React.FC<{
                         </div>
                         <div className="text-right">
                           <p className="text-[10px] font-black text-slate-900">Rs. {inv.totalAmount}</p>
-                          <p className={`text-[7px] font-black uppercase ${inv.status === PaymentStatus.PAID ? 'text-emerald-500' : 'text-rose-500'}`}>{inv.status}</p>
+                          <p className={`text-[7px] font-black uppercase ${inv.status === PaymentStatus.PAID ? 'text-green-500' : 'text-rose-500'}`}>{inv.status}</p>
                         </div>
                       </div>
                     ))
@@ -578,3 +578,4 @@ const Dashboard: React.FC<{
 };
 
 export default Dashboard;
+

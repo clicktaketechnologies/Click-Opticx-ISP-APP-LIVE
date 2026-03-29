@@ -61,7 +61,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="xl:col-span-1 space-y-6">
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
-            <Map className="text-indigo-600" size={32} />
+            <Map className="text-blue-600" size={32} />
             Node Mapping
           </h2>
           <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Device Binding</p>
@@ -71,7 +71,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input 
-                className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-black text-slate-900"
+                className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-black text-slate-900"
                 placeholder="Find identity by Name or ID..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
@@ -92,7 +92,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                   <button 
                     key={user.id}
                     onClick={() => handleSelectUser(user)}
-                    className={`w-full p-6 text-left transition-all flex items-center justify-between group ${isActive ? 'bg-indigo-600 text-white' : 'hover:bg-slate-50'}`}
+                    className={`w-full p-6 text-left transition-all flex items-center justify-between group ${isActive ? 'bg-blue-600 text-white' : 'hover:bg-slate-50'}`}
                   >
                     <div className="flex items-center gap-4">
                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shadow-inner ${isActive ? 'bg-white/10 border-white/20' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
@@ -101,8 +101,8 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                        <div>
                           <p className="font-black uppercase tracking-tight text-sm leading-none mb-1">{user.name}</p>
                           <div className="flex items-center gap-2">
-                             <p className={`text-[10px] font-bold uppercase ${isActive ? 'text-indigo-200' : 'text-slate-400'}`}>{user.connectionId}</p>
-                             {isMapped && <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${isActive ? 'bg-white/20 text-white' : 'bg-emerald-50 text-emerald-600'}`}>Mapped</span>}
+                             <p className={`text-[10px] font-bold uppercase ${isActive ? 'text-blue-200' : 'text-slate-400'}`}>{user.connectionId}</p>
+                             {isMapped && <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${isActive ? 'bg-white/20 text-white' : 'bg-green-50 text-green-600'}`}>Mapped</span>}
                           </div>
                        </div>
                     </div>
@@ -130,12 +130,12 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
                     <div className="flex items-center gap-6 flex-1">
                        <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl">
-                          {mapping.connectionType === 'Fiber' ? <Layers size={32} className="text-blue-400" /> : <Wifi size={32} className="text-emerald-400" />}
+                          {mapping.connectionType === 'Fiber' ? <Layers size={32} className="text-blue-400" /> : <Wifi size={32} className="text-green-400" />}
                        </div>
                        <div>
                           <h3 className="text-3xl font-black uppercase tracking-tighter italic leading-none">{selectedUser.name}</h3>
                           <div className="flex items-center gap-3 mt-2">
-                             <p className="text-xs font-bold text-indigo-400 uppercase tracking-[0.4em]">{mapping.connectionType} LINK LAYER</p>
+                             <p className="text-xs font-bold text-blue-400 uppercase tracking-[0.4em]">{mapping.connectionType} LINK LAYER</p>
                              <div className="px-2 py-0.5 bg-white/10 rounded-md text-[8px] font-black uppercase tracking-widest text-slate-400 border border-white/5">Ref: {selectedUser.connectionId}</div>
                           </div>
                        </div>
@@ -143,7 +143,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                     <button 
                       onClick={handleSave}
                       disabled={isSaving}
-                      className="px-10 py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                      className="px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                     >
                        {isSaving ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
                        Commit Mapping
@@ -156,14 +156,14 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-8">
                        <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                          <HardDrive size={18} className="text-indigo-600"/>
+                          <HardDrive size={18} className="text-blue-600"/>
                           <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-900">Infrastructure Node</h4>
                        </div>
                        <div className="space-y-4">
                           <div className="space-y-1">
                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Target Physical Device</label>
                              <select 
-                               className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xs outline-none focus:border-indigo-600 uppercase"
+                               className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xs outline-none focus:border-blue-600 uppercase"
                                value={mapping.deviceId}
                                onChange={e => setMapping({...mapping, deviceId: e.target.value})}
                              >
@@ -179,7 +179,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
 
                     <div className="space-y-8">
                        <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                          <Zap size={18} className="text-emerald-600"/>
+                          <Zap size={18} className="text-green-600"/>
                           <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-900">Connection Setup</h4>
                        </div>
                        <div className="space-y-4">
@@ -250,3 +250,4 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default UserDeviceMapping;
+

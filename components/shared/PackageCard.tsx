@@ -70,7 +70,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
   const getStatusBadge = () => {
     if (pkg.deleted) return { label: 'Disabled', color: 'bg-rose-100 text-rose-700 border-rose-200' };
     if (isThisPackageRequested) return { label: 'Verifying...', color: 'bg-orange-100 text-orange-700 border-orange-200' };
-    if (isActive) return { label: 'Active', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' };
+    if (isActive) return { label: 'Active', color: 'bg-green-100 text-green-700 border-green-200' };
     return { label: 'Available', color: 'bg-blue-100 text-blue-700 border-blue-200' };
   };
 
@@ -79,7 +79,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
   return (
     <div className={`group relative bg-white rounded-[2.5rem] border-2 transition-all duration-500 overflow-hidden flex flex-col ${
       isActive 
-        ? 'border-emerald-500 shadow-2xl shadow-emerald-100 scale-[1.02] z-10' 
+        ? 'border-green-500 shadow-2xl shadow-green-100 scale-[1.02] z-10' 
         : isThisPackageRequested
         ? 'border-orange-400 shadow-xl shadow-orange-50'
         : 'border-slate-100 shadow-sm hover:border-blue-200 hover:shadow-xl'
@@ -127,7 +127,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
             </div>
          </div>
          <div className="flex flex-col items-center p-4 bg-slate-50 rounded-3xl border border-slate-100 group-hover:bg-white transition-colors">
-            <div className="flex items-center gap-2 text-indigo-600 mb-1">
+            <div className="flex items-center gap-2 text-blue-600 mb-1">
                <ArrowUp size={14} strokeWidth={3} />
                <span className="text-[9px] font-black uppercase tracking-widest">Up</span>
             </div>
@@ -150,7 +150,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
                     </span>
                   )}
                   <div className="flex items-baseline gap-1">
-                     <span className={`text-4xl font-black tracking-tighter ${isActive ? 'text-emerald-600' : 'text-slate-900'}`}>{currency} {finalPrice.toLocaleString()}</span>
+                     <span className={`text-4xl font-black tracking-tighter ${isActive ? 'text-green-600' : 'text-slate-900'}`}>{currency} {finalPrice.toLocaleString()}</span>
                      <span className="text-[10px] font-black text-slate-400 uppercase">/ cycle</span>
                   </div>
                </div>
@@ -163,7 +163,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
               <>
                 {isActive ? (
                   /* 🟢 STATE 3: PACKAGE ACTIVATED (SUCCESS) */
-                  <div className="w-full py-5 bg-emerald-600 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-200 flex items-center justify-center gap-3 border-b-4 border-emerald-700 animate-in fade-in duration-500">
+                  <div className="w-full py-5 bg-green-600 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-green-200 flex items-center justify-center gap-3 border-b-4 border-green-700 animate-in fade-in duration-500">
                     <CheckCircle size={18} strokeWidth={3} />
                     CURRENT PACKAGE
                   </div>
@@ -203,7 +203,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
                  <button onClick={() => onEdit && onEdit(pkg)} className="flex-1 py-4 bg-blue-50 text-blue-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all active:scale-95 border border-blue-100 flex items-center justify-center gap-2">
                     <Edit2 size={14} /> Edit
                  </button>
-                 <button onClick={() => onToggleStatus && onToggleStatus(pkg.id)} className={`flex-1 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 border ${pkg.deleted ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-600 hover:text-white' : 'bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-600 hover:text-white'}`}>
+                 <button onClick={() => onToggleStatus && onToggleStatus(pkg.id)} className={`flex-1 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 border ${pkg.deleted ? 'bg-green-50 text-green-600 border-green-100 hover:bg-green-600 hover:text-white' : 'bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-600 hover:text-white'}`}>
                     {pkg.deleted ? <CheckCircle size={14} /> : <Ban size={14} />}
                     {pkg.deleted ? 'Restore' : 'Retire'}
                  </button>
@@ -216,3 +216,4 @@ const PackageCard: React.FC<PackageCardProps> = ({
 };
 
 export default PackageCard;
+

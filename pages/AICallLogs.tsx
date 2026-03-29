@@ -44,7 +44,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none uppercase">
-            <History className="text-indigo-600" size={32} />
+            <History className="text-blue-600" size={32} />
             Call Transparency Registry
           </h2>
           <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Heuristic Voice Handshake Audit Trail • v8.5</p>
@@ -57,10 +57,10 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
       {/* KPI Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
          {[
-           { label: 'Total Connected Calls', value: stats.total, icon: PhoneCall, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+           { label: 'Total Connected Calls', value: stats.total, icon: PhoneCall, color: 'text-blue-600', bg: 'bg-blue-50' },
            { label: 'Escalations', value: stats.escalated, icon: ShieldAlert, color: 'text-rose-600', bg: 'bg-rose-50' },
            { label: 'Avg Pulse Width', value: formatDuration(stats.avgDuration), icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50' },
-           { label: 'Decision Accuracy', value: `${stats.avgConf}%`, icon: Sparkles, color: 'text-emerald-600', bg: 'bg-emerald-50' }
+           { label: 'Decision Accuracy', value: `${stats.avgConf}%`, icon: Sparkles, color: 'text-green-600', bg: 'bg-green-50' }
          ].map((kpi, idx) => (
            <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
               <div className={`${kpi.bg} ${kpi.color} p-3 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform`}>
@@ -77,7 +77,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="relative flex-1 w-full">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input 
-              className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-black text-slate-900"
+              className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-black text-slate-900"
               placeholder="Audit by Identity or Name..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
@@ -91,7 +91,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
               <button 
                 key={f.id}
                 onClick={() => setEscalationFilter(f.id as any)}
-                className={`px-6 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${escalationFilter === f.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`px-6 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${escalationFilter === f.id ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 {f.label}
               </button>
@@ -118,11 +118,11 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
                     <tr key={log.id} className="hover:bg-slate-50 transition-colors group">
                        <td className="px-8 py-5">
                           <div className="flex items-center gap-4">
-                             <div className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-indigo-600 transition-colors shadow-inner">
+                             <div className="w-12 h-12 bg-white rounded-2xl border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-blue-600 transition-colors shadow-inner">
                                 <UserCircle size={28}/>
                              </div>
                              <div>
-                                <p className="font-black text-slate-900 uppercase text-sm leading-none mb-1 group-hover:text-indigo-600 transition-colors cursor-pointer" onClick={() => setSelectedCall(log)}>{log.userName}</p>
+                                <p className="font-black text-slate-900 uppercase text-sm leading-none mb-1 group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => setSelectedCall(log)}>{log.userName}</p>
                                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{log.userId}</p>
                              </div>
                           </div>
@@ -142,14 +142,14 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
                        <td className="px-8 py-5">
                           <div className="flex flex-wrap gap-1.5 max-w-[200px]">
                              {log.topics.map(t => (
-                               <span key={t} className="px-2 py-0.5 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded text-[7px] font-black uppercase tracking-tighter">{t}</span>
+                               <span key={t} className="px-2 py-0.5 bg-blue-50 text-blue-600 border border-blue-100 rounded text-[7px] font-black uppercase tracking-tighter">{t}</span>
                              ))}
                           </div>
                        </td>
                        <td className="px-8 py-5">
                           <div className="flex items-center gap-3">
                              <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                <div className={`h-full transition-all duration-1000 ${log.confidence > 0.8 ? 'bg-emerald-500' : 'bg-orange-500'}`} style={{ width: `${log.confidence * 100}%` }}></div>
+                                <div className={`h-full transition-all duration-1000 ${log.confidence > 0.8 ? 'bg-green-500' : 'bg-orange-500'}`} style={{ width: `${log.confidence * 100}%` }}></div>
                              </div>
                              <span className="text-[10px] font-black italic">{Math.round(log.confidence * 100)}%</span>
                           </div>
@@ -161,7 +161,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
                                   <ShieldAlert size={16}/>
                                </div>
                              )}
-                             <button onClick={() => setSelectedCall(log)} className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 rounded-xl shadow-sm transition-all active:scale-90">
+                             <button onClick={() => setSelectedCall(log)} className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 rounded-xl shadow-sm transition-all active:scale-90">
                                 <ChevronRight size={18}/>
                              </button>
                           </div>
@@ -187,12 +187,12 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="bg-white rounded-[3.5rem] w-full max-w-4xl h-[85vh] shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col">
               <header className="p-8 md:p-10 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
                  <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-indigo-600 rounded-3xl flex items-center justify-center border-4 border-white/5 shadow-2xl">
+                    <div className="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center border-4 border-white/5 shadow-2xl">
                        <History size={32}/>
                     </div>
                     <div>
                        <h3 className="text-2xl font-black uppercase italic tracking-tighter">Call Audit: #{selectedCall.id.split('-').pop()}</h3>
-                       <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em]">Protocol Transparency v4.2</p>
+                       <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.4em]">Protocol Transparency v4.2</p>
                     </div>
                  </div>
                  <div className="flex gap-2">
@@ -218,7 +218,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic border-b border-slate-50 pb-2">Fiscal Risk Audit</p>
                        <div className="flex justify-between items-end">
                           <p className="text-3xl font-black italic tracking-tighter text-slate-900">{Math.round(selectedCall.confidence * 100)}%</p>
-                          <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${selectedCall.confidence > 0.8 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100'}`}>
+                          <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${selectedCall.confidence > 0.8 ? 'bg-green-50 text-green-600 border-green-100' : 'bg-orange-50 text-orange-600 border-orange-100'}`}>
                              {selectedCall.confidence > 0.8 ? 'Optimized' : 'Verification Required'}
                           </span>
                        </div>
@@ -242,25 +242,25 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
                           <h4 className="text-[10px] font-black text-slate-950 uppercase tracking-widest flex items-center gap-2 border-b border-slate-100 pb-4 italic"><Sparkles size={14} className="text-amber-500"/> Heuristic Labels</h4>
                           <div className="space-y-2">
                              {selectedCall.topics.map(t => (
-                               <div key={t} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-indigo-200 transition-all">
+                               <div key={t} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:border-blue-200 transition-all">
                                   <span className="text-[10px] font-black uppercase text-slate-700">{t}</span>
-                                  <ChevronRight size={14} className="text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                                  <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                                </div>
                              ))}
                           </div>
                        </div>
 
-                       <div className={`p-8 rounded-[2.5rem] border-2 space-y-4 shadow-xl ${selectedCall.escalationNeeded ? 'bg-rose-50 border-rose-200' : 'bg-emerald-50 border-emerald-200'}`}>
+                       <div className={`p-8 rounded-[2.5rem] border-2 space-y-4 shadow-xl ${selectedCall.escalationNeeded ? 'bg-rose-50 border-rose-200' : 'bg-green-50 border-green-200'}`}>
                           <div className="flex items-center gap-4">
-                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${selectedCall.escalationNeeded ? 'bg-rose-600' : 'bg-emerald-600'} text-white`}>
+                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${selectedCall.escalationNeeded ? 'bg-rose-600' : 'bg-green-600'} text-white`}>
                                 {selectedCall.escalationNeeded ? <ShieldAlert size={28}/> : <ShieldCheck size={28}/>}
                              </div>
                              <div>
                                 <p className="text-sm font-black uppercase italic tracking-tight">{selectedCall.escalationNeeded ? 'Escalations Active' : 'Autonomous Resolution'}</p>
-                                <p className={`text-[8px] font-black uppercase tracking-widest ${selectedCall.escalationNeeded ? 'text-rose-400' : 'text-emerald-400'}`}>Integrity Handshake</p>
+                                <p className={`text-[8px] font-black uppercase tracking-widest ${selectedCall.escalationNeeded ? 'text-rose-400' : 'text-green-400'}`}>Integrity Handshake</p>
                              </div>
                           </div>
-                          <p className={`text-[10px] font-bold uppercase leading-relaxed ${selectedCall.escalationNeeded ? 'text-rose-800' : 'text-emerald-800'}`}>
+                          <p className={`text-[10px] font-bold uppercase leading-relaxed ${selectedCall.escalationNeeded ? 'text-rose-800' : 'text-green-800'}`}>
                              {selectedCall.escalationNeeded 
                                ? 'AI core flagged this session for human audit due to sentiment mismatch or technical complexity.'
                                : 'AI autonomous engine completed the registry handshake without intervention.'}
@@ -271,7 +271,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="lg:col-span-2 space-y-6">
                        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col h-full">
                           <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><FileText size={16} className="text-indigo-600"/> Heuristic Transcription Output</h4>
+                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><FileText size={16} className="text-blue-600"/> Heuristic Transcription Output</h4>
                              <span className="text-[8px] font-black uppercase bg-white px-2 py-1 rounded border border-slate-200 text-slate-400">Node_v4.2_Logs</span>
                           </div>
                           <div className="p-8 flex-1 bg-white font-bold text-slate-700 leading-relaxed uppercase italic text-sm">
@@ -279,7 +279,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
                           </div>
                           <div className="p-4 bg-slate-900 border-t border-white/5 flex items-center justify-between text-white">
                              <div className="flex items-center gap-2">
-                                <Activity size={12} className="text-emerald-400 animate-pulse"/>
+                                <Activity size={12} className="text-green-400 animate-pulse"/>
                                 <span className="text-[8px] font-black uppercase text-slate-500">Heuristic air-gap active</span>
                              </div>
                              <p className="text-[8px] font-black uppercase text-slate-600">Encrypted Pulse Stream</p>
@@ -289,16 +289,16 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
                  </div>
 
                  {/* Safety Footer / Actions */}
-                 <div className="p-10 bg-indigo-50 border border-indigo-100 rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-10">
+                 <div className="p-10 bg-blue-50 border border-blue-100 rounded-[3rem] flex flex-col md:flex-row items-center justify-between gap-10">
                     <div className="flex-1 space-y-2 text-center md:text-left">
-                       <h4 className="text-xl font-black uppercase italic tracking-tighter text-indigo-900 flex items-center justify-center md:justify-start gap-3"><ShieldCheck size={24}/> Integrity Verification</h4>
-                       <p className="text-[10px] text-indigo-700 font-bold uppercase leading-relaxed">
+                       <h4 className="text-xl font-black uppercase italic tracking-tighter text-blue-900 flex items-center justify-center md:justify-start gap-3"><ShieldCheck size={24}/> Integrity Verification</h4>
+                       <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed">
                           All call artifacts are persistent and auditable. Reversing autonomous decisions (like credit adjustments) requires individual node rollback via the AI Control Plane.
                        </p>
                     </div>
                     <div className="flex gap-4 w-full md:w-auto">
-                       <button className="flex-1 py-4 px-8 bg-slate-950 text-indigo-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black active:scale-95 transition-all shadow-xl">Flag for Audit</button>
-                       <button className="flex-1 py-4 px-8 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 active:scale-95 transition-all shadow-xl">Acknowledge Link</button>
+                       <button className="flex-1 py-4 px-8 bg-slate-950 text-blue-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black active:scale-95 transition-all shadow-xl">Flag for Audit</button>
+                       <button className="flex-1 py-4 px-8 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 active:scale-95 transition-all shadow-xl">Acknowledge Link</button>
                     </div>
                  </div>
               </div>
@@ -310,3 +310,4 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AICallLogs;
+

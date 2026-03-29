@@ -130,7 +130,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
    };
 
    const statusColor = invoice.status === PaymentStatus.PAID
-      ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+      ? 'bg-green-50 border-green-200 text-green-700'
       : invoice.status === PaymentStatus.OVERDUE
          ? 'bg-rose-50 border-rose-200 text-rose-700'
          : 'bg-amber-50 border-amber-200 text-amber-700';
@@ -144,13 +144,13 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                <div className="flex bg-white/10 p-1 rounded-xl border border-white/10">
                   <button
                      onClick={() => setActiveView('invoice')}
-                     className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeView === 'invoice' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                     className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeView === 'invoice' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
                   >
                      <FileText size={14} /> Invoice
                   </button>
                   <button
                      onClick={() => setActiveView('history')}
-                     className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeView === 'history' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                     className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeView === 'history' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`}
                   >
                      <History size={14} /> Payment History
                   </button>
@@ -162,7 +162,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                   <button
                      onClick={handleDownloadPDF}
                      disabled={isGeneratingPDF}
-                     className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 shadow-xl transition-all flex items-center gap-2 font-black text-[9px] uppercase tracking-widest disabled:opacity-50"
+                     className="px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-xl transition-all flex items-center gap-2 font-black text-[9px] uppercase tracking-widest disabled:opacity-50"
                   >
                      {isGeneratingPDF ? <Mini5GMicroLoader size={14} /> : <Download size={14} />}
                      {isGeneratingPDF ? 'Generating...' : 'PDF'}
@@ -185,7 +185,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                      <div ref={invoiceRef} className="bg-white shadow-2xl border border-slate-200 print:shadow-none print:border-none min-h-[1100px] flex flex-col overflow-hidden">
 
                         {/* Invoice Color Band */}
-                        <div className="h-2 bg-gradient-to-r from-indigo-600 via-fuchsia-500 to-emerald-500"></div>
+                        <div className="h-2 bg-gradient-to-r from-blue-600 via-fuchsia-500 to-green-500"></div>
 
                         {/* Header */}
                         <div className="p-10 md:p-12">
@@ -195,16 +195,16 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                     {displayLogo ? (
                                        <img src={displayLogo} alt="Logo" className="w-full h-full object-contain p-2" />
                                     ) : (
-                                       <Wifi className="text-indigo-400" size={40} />
+                                       <Wifi className="text-blue-400" size={40} />
                                     )}
                                  </div>
                                  <div className="space-y-1">
                                     <h1 className="text-3xl font-black italic tracking-tighter uppercase leading-none text-slate-900">{branding.businessName}</h1>
                                     <p className="text-[11px] text-slate-400 font-black uppercase tracking-[0.3em]">{state.settings.profile.tagline}</p>
                                     <div className="flex flex-col gap-1 pt-2 text-[10px] text-slate-500 font-bold uppercase tracking-wide">
-                                       <span className="flex items-center gap-2"><Globe size={11} className="text-indigo-500" /> {state.settings.digitalPresence.website || 'N/A'}</span>
-                                       <span className="flex items-center gap-2"><MapPin size={11} className="text-indigo-500" /> {state.settings.profile.headOffice}</span>
-                                       <span className="flex items-center gap-2"><Info size={11} className="text-indigo-500" /> NTN: {state.settings.profile.registrationNumber || 'N/A'}</span>
+                                       <span className="flex items-center gap-2"><Globe size={11} className="text-blue-500" /> {state.settings.digitalPresence.website || 'N/A'}</span>
+                                       <span className="flex items-center gap-2"><MapPin size={11} className="text-blue-500" /> {state.settings.profile.headOffice}</span>
+                                       <span className="flex items-center gap-2"><Info size={11} className="text-blue-500" /> NTN: {state.settings.profile.registrationNumber || 'N/A'}</span>
                                     </div>
                                  </div>
                               </div>
@@ -212,7 +212,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                               <div className="md:text-right space-y-3 shrink-0">
                                  <div className="bg-slate-950 text-white px-6 py-3 rounded-2xl inline-block">
                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">INVOICE</p>
-                                    <p className="text-xl font-black italic tracking-tighter text-indigo-400">#{invoice.id}</p>
+                                    <p className="text-xl font-black italic tracking-tighter text-blue-400">#{invoice.id}</p>
                                  </div>
                                  <div className="space-y-1 text-[10px] font-black uppercase tracking-widest">
                                     <div className="flex md:justify-end items-center gap-2">
@@ -227,22 +227,22 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                     </div>
                                  </div>
                                  {invoice.status === PaymentStatus.PAID && (
-                                    <div className="flex md:justify-end items-center gap-2 px-3 py-1.5 bg-emerald-50 border border-emerald-100 rounded-xl">
-                                       <CheckCircle size={13} className="text-emerald-600" />
-                                       <span className="text-[9px] font-black text-emerald-700 uppercase tracking-widest">PAID on {invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString() : 'N/A'}</span>
+                                    <div className="flex md:justify-end items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-100 rounded-xl">
+                                       <CheckCircle size={13} className="text-green-600" />
+                                       <span className="text-[9px] font-black text-green-700 uppercase tracking-widest">PAID on {invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString() : 'N/A'}</span>
                                     </div>
                                  )}
                               </div>
                            </div>
 
                            {/* Divider */}
-                           <div className="h-px bg-gradient-to-r from-indigo-100 via-slate-100 to-transparent mb-10"></div>
+                           <div className="h-px bg-gradient-to-r from-blue-100 via-slate-100 to-transparent mb-10"></div>
 
                            {/* Subscriber + Package Info */}
                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
                               {/* Customer Details */}
                               <div className="bg-slate-50 rounded-[2rem] p-7 border border-slate-100 space-y-4">
-                                 <h3 className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] flex items-center gap-2 italic">
+                                 <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] flex items-center gap-2 italic">
                                     <User size={13} /> Customer Details
                                  </h3>
                                  <div>
@@ -277,8 +277,8 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                           </div>
                                        )}
                                        <div className="flex items-center gap-2">
-                                          <Activity size={11} className={`${user?.status === 'Active' ? 'text-emerald-500' : 'text-rose-500'}`} />
-                                          <span>Status: <span className={`font-black ${user?.status === 'Active' ? 'text-emerald-700' : 'text-rose-700'}`}>{user?.status || 'N/A'}</span></span>
+                                          <Activity size={11} className={`${user?.status === 'Active' ? 'text-green-500' : 'text-rose-500'}`} />
+                                          <span>Status: <span className={`font-black ${user?.status === 'Active' ? 'text-green-700' : 'text-rose-700'}`}>{user?.status || 'N/A'}</span></span>
                                        </div>
                                     </div>
                                  </div>
@@ -288,34 +288,34 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                               <div className="space-y-4">
                                  {/* Package Details */}
                                  {userPackage && (
-                                    <div className="bg-indigo-950 rounded-[2rem] p-7 text-white space-y-3">
-                                       <h3 className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.3em] flex items-center gap-2 italic">
+                                    <div className="bg-blue-950 rounded-[2rem] p-7 text-white space-y-3">
+                                       <h3 className="text-[10px] font-black text-blue-300 uppercase tracking-[0.3em] flex items-center gap-2 italic">
                                           <Package size={13} /> Active Package
                                        </h3>
                                        <p className="text-xl font-black uppercase italic tracking-tighter leading-none">{userPackage.name}</p>
                                        <div className="grid grid-cols-2 gap-2 pt-1">
                                           {userPackage.speed && (
                                              <div className="bg-white/10 rounded-xl px-3 py-2 text-center">
-                                                <p className="text-[8px] text-indigo-300 font-black uppercase tracking-widest">Speed</p>
+                                                <p className="text-[8px] text-blue-300 font-black uppercase tracking-widest">Speed</p>
                                                 <p className="text-sm font-black text-white">{userPackage.speed}</p>
                                              </div>
                                           )}
                                           <div className="bg-white/10 rounded-xl px-3 py-2 text-center">
-                                             <p className="text-[8px] text-indigo-300 font-black uppercase tracking-widest">Monthly Rate</p>
+                                             <p className="text-[8px] text-blue-300 font-black uppercase tracking-widest">Monthly Rate</p>
                                              <p className="text-sm font-black text-white">{curr} {userPackage.price?.toLocaleString()}</p>
                                           </div>
                                           {(userPackage as any).billingCycle && (
                                              <div className="bg-white/10 rounded-xl px-3 py-2 text-center">
-                                                <p className="text-[8px] text-indigo-300 font-black uppercase tracking-widest">Billing</p>
+                                                <p className="text-[8px] text-blue-300 font-black uppercase tracking-widest">Billing</p>
                                                 <p className="text-sm font-black text-white capitalize">{(userPackage as any).billingCycle}</p>
                                              </div>
                                           )}
                                           <div className="bg-white/10 rounded-xl px-3 py-2 text-center">
-                                             <p className="text-[8px] text-indigo-300 font-black uppercase tracking-widest">Type</p>
+                                             <p className="text-[8px] text-blue-300 font-black uppercase tracking-widest">Type</p>
                                              <p className="text-sm font-black text-white">{user?.connectionType || 'Fiber'}</p>
                                           </div>
                                        </div>
-                                       <div className="pt-1 border-t border-white/10 text-[9px] text-indigo-300 font-bold uppercase tracking-widest space-y-1">
+                                       <div className="pt-1 border-t border-white/10 text-[9px] text-blue-300 font-bold uppercase tracking-widest space-y-1">
                                           {(user as any)?.activatedAt && <p>Activated: {new Date((user as any).activatedAt).toLocaleDateString()}</p>}
                                           {(user as any)?.expiryDate && <p className={new Date((user as any).expiryDate).setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0) ? 'text-rose-400' : ''}>Expires: {new Date((user as any).expiryDate).toLocaleDateString()}</p>}
                                        </div>
@@ -323,7 +323,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                  )}
 
                                  {/* Balance Summary */}
-                                 <div className={`rounded-[2rem] p-6 text-white relative overflow-hidden shadow-lg ${invoice.status === PaymentStatus.PAID ? 'bg-emerald-600' : 'bg-rose-600'}`}>
+                                 <div className={`rounded-[2rem] p-6 text-white relative overflow-hidden shadow-lg ${invoice.status === PaymentStatus.PAID ? 'bg-green-600' : 'bg-rose-600'}`}>
                                     <p className="text-[9px] font-black text-white/60 uppercase tracking-widest mb-1">Invoice Total</p>
                                     <p className="text-4xl font-black italic tracking-tighter">{curr} {invoice.totalAmount.toLocaleString()}</p>
                                     {invoice.dueAmount > 0 && (
@@ -336,7 +336,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
 
                            {/* Items Table */}
                            <div className="mb-10">
-                              <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] italic flex items-center gap-2 mb-4">
+                              <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic flex items-center gap-2 mb-4">
                                  <Zap size={13} /> Service Charges
                               </h4>
                               <div className="rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm">
@@ -354,7 +354,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                           <tr key={item.id} className="hover:bg-slate-50 transition-all">
                                              <td className="px-8 py-6">
                                                 <div className="flex items-center gap-3">
-                                                   <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 shrink-0">
+                                                   <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500 shrink-0">
                                                       <ShoppingBag size={16} />
                                                    </div>
                                                    <div>
@@ -377,7 +377,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
                               {/* Recent Payments */}
                               <div className="space-y-3">
-                                 <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] italic flex items-center gap-2">
+                                 <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic flex items-center gap-2">
                                     <Calendar size={13} /> Payment History (Last 6 Months)
                                  </h4>
                                  <div className="bg-slate-50 rounded-[2rem] p-5 border border-slate-100 space-y-3">
@@ -389,7 +389,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                           </div>
                                           <div className="text-right">
                                              <p className="text-xs font-black text-slate-900 italic tracking-tighter">{curr} {inv.totalAmount.toLocaleString()}</p>
-                                             <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full border ${inv.status === PaymentStatus.PAID ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                                             <span className={`text-[8px] font-black uppercase px-2 py-0.5 rounded-full border ${inv.status === PaymentStatus.PAID ? 'bg-green-50 text-green-600 border-green-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
                                                 {inv.status}
                                              </span>
                                           </div>
@@ -412,7 +412,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
 
                               {/* Calculation Summary */}
                               <div className="space-y-4">
-                                 <h4 className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em] italic flex items-center gap-2">
+                                 <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] italic flex items-center gap-2">
                                     <Receipt size={13} /> Billing Summary
                                  </h4>
                                  <div className="bg-white rounded-[2rem] p-8 border-2 border-slate-100 shadow-sm space-y-4">
@@ -427,24 +427,24 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                        </div>
                                     )}
                                     {invoice.discountAmount > 0 && (
-                                       <div className="flex justify-between items-center text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                                       <div className="flex justify-between items-center text-[10px] font-black text-green-600 uppercase tracking-widest">
                                           <span>Discount</span>
                                           <span>- {curr} {invoice.discountAmount.toLocaleString()}</span>
                                        </div>
                                     )}
                                     <div className="h-px bg-slate-100"></div>
                                     <div className="flex justify-between items-center pt-1">
-                                       <p className="text-[11px] font-black text-indigo-600 uppercase tracking-widest italic">Grand Total</p>
+                                       <p className="text-[11px] font-black text-blue-600 uppercase tracking-widest italic">Grand Total</p>
                                        <span className="text-3xl font-black text-slate-950 italic tracking-tighter">{curr} {invoice.totalAmount.toLocaleString()}</span>
                                     </div>
                                     <div className="pt-3 border-t border-slate-100 space-y-2">
-                                       <div className="flex justify-between items-center text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                                       <div className="flex justify-between items-center text-[10px] font-black text-green-600 uppercase tracking-widest">
                                           <span>Amount Paid</span>
                                           <span>{curr} {invoice.paidAmount.toLocaleString()}</span>
                                        </div>
                                        <div className="flex justify-between items-center p-4 bg-slate-950 rounded-2xl">
                                           <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">Remaining Due</span>
-                                          <span className={`text-xl font-black italic tracking-tighter ${invoice.dueAmount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                                          <span className={`text-xl font-black italic tracking-tighter ${invoice.dueAmount > 0 ? 'text-rose-400' : 'text-green-400'}`}>
                                              {curr} {invoice.dueAmount.toLocaleString()}
                                           </span>
                                        </div>
@@ -457,7 +457,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                            <div className="pt-8 border-t-2 border-slate-100 flex flex-col md:flex-row justify-between items-end gap-10">
                               <div className="space-y-3 max-w-sm">
                                  <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.3em] flex items-center gap-2 italic">
-                                    <ShieldCheck size={14} className="text-indigo-600" /> Terms & Conditions
+                                    <ShieldCheck size={14} className="text-blue-600" /> Terms & Conditions
                                  </h4>
                                  <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed tracking-tight whitespace-pre-wrap italic">
                                     {b.terms || 'All payments are final. Service termination occurs if settlement exceeds the 48-hour window. Equipment remains the property of the ISP.'}
@@ -485,13 +485,13 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                         </div>
 
                         {/* Bottom band */}
-                        <div className="mt-auto h-2 bg-gradient-to-r from-emerald-500 via-fuchsia-500 to-indigo-600"></div>
+                        <div className="mt-auto h-2 bg-gradient-to-r from-green-500 via-fuchsia-500 to-blue-600"></div>
                      </div>
                   </div>
                ) : (
                   <div className="p-10 space-y-6 animate-in fade-in duration-500 max-w-4xl mx-auto">
                      <div className="flex items-center gap-6">
-                        <div className="w-14 h-14 bg-indigo-950 text-white rounded-3xl flex items-center justify-center shadow-2xl border-4 border-white">
+                        <div className="w-14 h-14 bg-blue-950 text-white rounded-3xl flex items-center justify-center shadow-2xl border-4 border-white">
                            <History size={28} />
                         </div>
                         <div>
@@ -507,7 +507,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                            {userPayments.map(p => (
                               <div key={p.id} className="p-6 bg-white border border-slate-100 rounded-[2rem] flex items-center justify-between hover:shadow-lg transition-all">
                                  <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center">
+                                    <div className="w-12 h-12 rounded-2xl bg-green-50 border border-green-100 text-green-600 flex items-center justify-center">
                                        <CheckCircle size={22} />
                                     </div>
                                     <div>
@@ -515,7 +515,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{new Date(p.timestamp).toLocaleString()} • {p.method}</p>
                                     </div>
                                  </div>
-                                 <p className="text-xl font-black text-emerald-600 italic">+ {curr} {p.amount.toLocaleString()}</p>
+                                 <p className="text-xl font-black text-green-600 italic">+ {curr} {p.amount.toLocaleString()}</p>
                               </div>
                            ))}
                         </div>
@@ -531,9 +531,9 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                            </div>
                         ) : (
                            relatedHistory.map(l => (
-                              <div key={l.id} className="p-6 bg-white border border-slate-100 rounded-[2rem] flex items-center justify-between group hover:shadow-lg hover:border-indigo-100 transition-all">
+                              <div key={l.id} className="p-6 bg-white border border-slate-100 rounded-[2rem] flex items-center justify-between group hover:shadow-lg hover:border-blue-100 transition-all">
                                  <div className="flex items-center gap-5">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 ${l.type === LedgerType.DEBIT ? 'bg-red-50 text-red-600 border-red-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 ${l.type === LedgerType.DEBIT ? 'bg-red-50 text-red-600 border-red-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
                                        <Activity size={22} />
                                     </div>
                                     <div>
@@ -541,7 +541,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{new Date(l.timestamp).toLocaleString()} • {l.method || 'System'}</p>
                                     </div>
                                  </div>
-                                 <p className={`text-xl font-black italic tracking-tighter ${l.type === LedgerType.DEBIT ? 'text-red-600' : 'text-emerald-600'}`}>
+                                 <p className={`text-xl font-black italic tracking-tighter ${l.type === LedgerType.DEBIT ? 'text-red-600' : 'text-green-600'}`}>
                                     {l.type === LedgerType.DEBIT ? '-' : '+'} {curr} {l.amount.toLocaleString()}
                                  </p>
                               </div>
@@ -549,9 +549,9 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                         )}
                      </div>
 
-                     <div className="p-8 bg-indigo-950 border border-slate-800 rounded-[2.5rem] flex items-start gap-6 relative overflow-hidden">
-                        <ShieldAlert size={32} className="text-indigo-400 shrink-0 relative z-10" />
-                        <p className="text-[11px] text-indigo-100 font-bold leading-relaxed uppercase tracking-tight relative z-10">
+                     <div className="p-8 bg-blue-950 border border-slate-800 rounded-[2.5rem] flex items-start gap-6 relative overflow-hidden">
+                        <ShieldAlert size={32} className="text-blue-400 shrink-0 relative z-10" />
+                        <p className="text-[11px] text-blue-100 font-bold leading-relaxed uppercase tracking-tight relative z-10">
                            This view shows all financial events linked to this invoice. All entries are permanently recorded in the system ledger.
                         </p>
                      </div>
@@ -564,7 +564,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                <div className="p-8 bg-white border-t border-slate-100 flex flex-col md:flex-row gap-6 items-center justify-between print:hidden shrink-0 shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.05)]">
                   <div>
                      <p className="text-base font-black text-slate-950 uppercase italic tracking-tighter flex items-center gap-2">
-                        <Wallet size={18} className="text-indigo-600" /> Payment Required
+                        <Wallet size={18} className="text-blue-600" /> Payment Required
                      </p>
                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">
                         Amount Due: <span className="text-rose-600">{curr} {invoice.dueAmount.toLocaleString()}</span>
@@ -574,7 +574,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                      <button
                         onClick={handleWalletPay}
                         disabled={isProcessing}
-                        className="flex-1 md:flex-none py-4 px-8 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                        className="flex-1 md:flex-none py-4 px-8 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-blue-200 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                      >
                         {isProcessing ? <Mini5GMicroLoader size={18} /> : <CreditCard size={18} />}
                         Pay via Wallet
@@ -592,7 +592,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
             )}
 
             {invoice.status === PaymentStatus.PAID && activeView === 'invoice' && (
-               <div className="p-8 bg-emerald-500 text-white border-t border-emerald-400 flex items-center justify-center gap-4 print:hidden animate-in slide-in-from-bottom duration-500 shrink-0">
+               <div className="p-8 bg-green-500 text-white border-t border-green-400 flex items-center justify-center gap-4 print:hidden animate-in slide-in-from-bottom duration-500 shrink-0">
                   <BadgeCheck size={28} />
                   <p className="text-sm font-black uppercase tracking-[0.3em] italic">Invoice Fully Paid & Cleared</p>
                </div>
@@ -603,3 +603,4 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
 };
 
 export default SubscriberInvoiceViewer;
+

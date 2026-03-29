@@ -140,13 +140,13 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                                {load.packageId ? state.packages.find(p => p.id === load.packageId)?.name : 'Balance Only'}
                             </p>
                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                               <Layers size={10} className="text-indigo-400"/> Handshake: {new Date(load.timestamp).toLocaleDateString()}
+                               <Layers size={10} className="text-blue-400"/> Handshake: {new Date(load.timestamp).toLocaleDateString()}
                             </p>
                          </div>
                       </td>
                       <td className="px-8 py-5">
                          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest ${
-                           load.status === 'Settled' || load.status === 'Paid' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 
+                           load.status === 'Settled' || load.status === 'Paid' ? 'bg-green-50 border-green-100 text-green-600' : 
                            load.status === 'Overdue' ? 'bg-rose-50 border-rose-200 text-rose-600 animate-pulse' : 
                            load.status === 'Pending_Activation' ? 'bg-blue-50 border-blue-100 text-blue-600' :
                            'bg-orange-50 border-orange-100 text-orange-600'
@@ -167,7 +167,7 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                             <button 
                               onClick={() => setShowExtensionModal(load.id)}
                               title="Push Expiry Registry"
-                              className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shadow-sm"
+                              className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all shadow-sm"
                             >
                                <Calendar size={16}/>
                             </button>
@@ -198,7 +198,7 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
       {showExtensionModal && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1100] flex items-center justify-center p-6 animate-in zoom-in duration-300">
            <div className="bg-white rounded-[3.5rem] w-full max-w-md shadow-2xl overflow-hidden border-[8px] border-slate-50">
-              <div className="p-8 bg-indigo-600 text-white flex justify-between items-center">
+              <div className="p-8 bg-blue-600 text-white flex justify-between items-center">
                  <div className="flex items-center gap-4">
                     <Clock size={28} />
                     <h3 className="text-xl font-black uppercase italic tracking-tighter leading-none">Push Expiry</h3>
@@ -213,7 +213,7 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                          <button 
                            key={d} 
                            onClick={() => setExtensionDays(d)}
-                           className={`py-3 rounded-xl border-2 font-black text-sm transition-all ${extensionDays === d ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                           className={`py-3 rounded-xl border-2 font-black text-sm transition-all ${extensionDays === d ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                          >
                             {d}d
                          </button>
@@ -223,14 +223,14 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Authorized Logic Reason</label>
                     <textarea 
-                      className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xs h-24 resize-none outline-none focus:border-indigo-600 transition-all uppercase"
+                      className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xs h-24 resize-none outline-none focus:border-blue-600 transition-all uppercase"
                       value={extensionReason}
                       onChange={e => setExtensionReason(e.target.value)}
                     />
                  </div>
                  <button 
                   onClick={handleApplyExtension}
-                  className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-100 active:scale-95 transition-all flex items-center justify-center gap-3"
+                  className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-100 active:scale-95 transition-all flex items-center justify-center gap-3"
                  >
                     <RefreshCw size={18}/> Authorize Registry Push
                  </button>
@@ -245,10 +245,10 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50">
               <div className="p-8 bg-slate-950 text-white flex justify-between items-center">
                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg"><Settings2 size={24}/></div>
+                    <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg"><Settings2 size={24}/></div>
                     <div>
                        <h3 className="text-xl font-black uppercase italic tracking-tighter leading-none">Modify Rescue Node</h3>
-                       <p className="text-[9px] text-indigo-400 font-black uppercase tracking-widest mt-1">{editingLoad.userName}</p>
+                       <p className="text-[9px] text-blue-400 font-black uppercase tracking-widest mt-1">{editingLoad.userName}</p>
                     </div>
                  </div>
                  <button onClick={() => setEditingLoad(null)} className="p-2 hover:bg-white/10 rounded-xl"><X size={28}/></button>
@@ -267,7 +267,7 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                        <option value="Settled">SETTLED LEDGER</option>
                     </select>
                  </div>
-                 <button onClick={handleUpdateLoad} className="w-full py-5 bg-indigo-600 text-white rounded-2xl shadow-xl hover:bg-indigo-700 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-3">
+                 <button onClick={handleUpdateLoad} className="w-full py-5 bg-blue-600 text-white rounded-2xl shadow-xl hover:bg-blue-700 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-3">
                     <Save size={18}/> Save Changes
                  </button>
               </div>
@@ -279,3 +279,4 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default EmergencyLoadAdmin;
+

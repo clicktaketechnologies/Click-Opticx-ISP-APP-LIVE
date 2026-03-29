@@ -83,13 +83,13 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
         <div>
           <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Live Network Status</h2>
           <div className="flex items-center gap-2 mt-1">
-             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
              <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.4em]">Real-time Connection: ACTIVE</p>
           </div>
         </div>
         <button 
           onClick={() => setIsPaused(!isPaused)}
-          className={`p-4 rounded-2xl transition-all shadow-sm active:scale-95 border flex items-center gap-2 font-black text-[10px] uppercase tracking-widest ${isPaused ? 'bg-indigo-600 text-white border-indigo-500' : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'}`}
+          className={`p-4 rounded-2xl transition-all shadow-sm active:scale-95 border flex items-center gap-2 font-black text-[10px] uppercase tracking-widest ${isPaused ? 'bg-blue-600 text-white border-blue-500' : 'bg-white text-slate-600 border-slate-100 hover:bg-slate-50'}`}
         >
           {isPaused ? <><Play size={14} fill="currentColor"/> Resume</> : <><Pause size={14} fill="currentColor"/> Pause Pulse</>}
         </button>
@@ -99,7 +99,7 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-slate-950 p-8 rounded-[3rem] text-white relative overflow-hidden shadow-2xl">
           <div className="relative z-10 space-y-6">
-            <div className="flex items-center gap-3 text-indigo-400">
+            <div className="flex items-center gap-3 text-blue-400">
               <Download size={18} />
               <span className="text-[10px] font-black uppercase tracking-widest">Download Speed</span>
             </div>
@@ -108,11 +108,11 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
                <p className="text-[10px] text-slate-500 font-bold uppercase mt-2">Mbps</p>
             </div>
           </div>
-          <ArrowDownLeft className="absolute -right-4 -bottom-4 opacity-10 text-indigo-500 pointer-events-none" size={120} />
+          <ArrowDownLeft className="absolute -right-4 -bottom-4 opacity-10 text-blue-500 pointer-events-none" size={120} />
         </div>
         <div className="bg-slate-900 p-8 rounded-[3rem] text-white relative overflow-hidden shadow-2xl">
           <div className="relative z-10 space-y-6">
-            <div className="flex items-center gap-3 text-emerald-400">
+            <div className="flex items-center gap-3 text-green-400">
               <Upload size={18} />
               <span className="text-[10px] font-black uppercase tracking-widest">Upload Speed</span>
             </div>
@@ -121,7 +121,7 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
                <p className="text-[10px] text-slate-500 font-bold uppercase mt-2">Mbps / 2.0s Refresh</p>
             </div>
           </div>
-          <ArrowUpRight className="absolute -right-4 -bottom-4 opacity-10 text-emerald-500 pointer-events-none" size={120} />
+          <ArrowUpRight className="absolute -right-4 -bottom-4 opacity-10 text-green-500 pointer-events-none" size={120} />
         </div>
       </div>
 
@@ -133,16 +133,16 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Network Traffic</h4>
            </div>
            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-indigo-600"></div><span className="text-[8px] font-black uppercase text-slate-400">DL</span></div>
-              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500"></div><span className="text-[8px] font-black uppercase text-slate-400">UL</span></div>
+              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-600"></div><span className="text-[8px] font-black uppercase text-slate-400">DL</span></div>
+              <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-green-500"></div><span className="text-[8px] font-black uppercase text-slate-400">UL</span></div>
            </div>
         </div>
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={history}>
               <defs>
-                <linearGradient id="colorDown" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#4f46e5" stopOpacity={0.1}/><stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/></linearGradient>
-                <linearGradient id="colorUp" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/><stop offset="95%" stopColor="#10b981" stopOpacity={0}/></linearGradient>
+                <linearGradient id="colorDown" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#1570ef" stopOpacity={0.1}/><stop offset="95%" stopColor="#1570ef" stopOpacity={0}/></linearGradient>
+                <linearGradient id="colorUp" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#32d583" stopOpacity={0.1}/><stop offset="95%" stopColor="#32d583" stopOpacity={0}/></linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="time" hide />
@@ -150,8 +150,8 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
               <Tooltip 
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} 
               />
-              <Area type="monotone" dataKey="down" stroke="#4f46e5" fillOpacity={1} fill="url(#colorDown)" strokeWidth={4} isAnimationActive={false} />
-              <Area type="monotone" dataKey="up" stroke="#10b981" fillOpacity={1} fill="url(#colorUp)" strokeWidth={4} isAnimationActive={false} />
+              <Area type="monotone" dataKey="down" stroke="#1570ef" fillOpacity={1} fill="url(#colorDown)" strokeWidth={4} isAnimationActive={false} />
+              <Area type="monotone" dataKey="up" stroke="#32d583" fillOpacity={1} fill="url(#colorUp)" strokeWidth={4} isAnimationActive={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -160,7 +160,7 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
       {/* Latency & Monthly Stats */}
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm group hover:shadow-lg transition-all flex flex-col items-center gap-3">
-           <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border border-indigo-100 shadow-inner group-hover:scale-110 transition-transform">
+           <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100 shadow-inner group-hover:scale-110 transition-transform">
               <Activity size={24}/>
            </div>
            <div className="text-center">
@@ -169,7 +169,7 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
            </div>
         </div>
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm group hover:shadow-lg transition-all flex flex-col items-center gap-3">
-           <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center border border-emerald-100 shadow-inner group-hover:scale-110 transition-transform">
+           <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center border border-green-100 shadow-inner group-hover:scale-110 transition-transform">
               <Globe size={24}/>
            </div>
            <div className="text-center">
@@ -195,3 +195,4 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
 };
 
 export default LiveUsage;
+

@@ -57,7 +57,7 @@ const RequestEmergencyLoad: React.FC<Props> = ({ user, state, onBack, onFinish }
       {step === 'check' && (
         <div className="space-y-8">
            <div className="flex items-center gap-4 px-2">
-              <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 shadow-sm active:scale-90 transition-all">
+              <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-blue-600 shadow-sm active:scale-90 transition-all">
                  <ArrowLeft size={20} />
               </button>
               <div>
@@ -76,12 +76,12 @@ const RequestEmergencyLoad: React.FC<Props> = ({ user, state, onBack, onFinish }
            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm p-10 space-y-10">
               <div className="flex items-center justify-between">
                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600 border border-indigo-100 shadow-inner">
+                    <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 border border-blue-100 shadow-inner">
                        <Smartphone size={28} />
                     </div>
                     <div>
                        <h4 className="text-sm font-black uppercase tracking-widest text-slate-900">Handshake Status</h4>
-                       <p className={`text-[10px] font-bold uppercase ${eligibility.overall ? 'text-emerald-600' : 'text-rose-600'}`}>{eligibility.overall ? 'Node Authorized' : 'Protocol Denied'}</p>
+                       <p className={`text-[10px] font-bold uppercase ${eligibility.overall ? 'text-green-600' : 'text-rose-600'}`}>{eligibility.overall ? 'Node Authorized' : 'Protocol Denied'}</p>
                     </div>
                  </div>
                  <Sparkles className={eligibility.overall ? 'text-amber-400 animate-pulse' : 'text-slate-200'} size={24} />
@@ -91,7 +91,7 @@ const RequestEmergencyLoad: React.FC<Props> = ({ user, state, onBack, onFinish }
                  {eligibility.checks.map((check, i) => (
                    <div key={i} className={`p-5 rounded-2xl border-2 flex items-center justify-between transition-all ${check.passed ? 'bg-slate-50 border-slate-50' : 'bg-rose-50 border-rose-100 text-rose-600'}`}>
                       <div className="flex items-center gap-4">
-                         {check.passed ? <CheckCircle className="text-emerald-500" size={18} /> : <AlertTriangle className="text-rose-500" size={18} />}
+                         {check.passed ? <CheckCircle className="text-green-500" size={18} /> : <AlertTriangle className="text-rose-500" size={18} />}
                          <span className="text-[10px] font-black uppercase tracking-tight opacity-70">{check.name}</span>
                       </div>
                       <span className="text-[11px] font-black italic">{check.val}</span>
@@ -103,7 +103,7 @@ const RequestEmergencyLoad: React.FC<Props> = ({ user, state, onBack, onFinish }
               <button 
                 onClick={handleInitialize}
                 disabled={!eligibility.overall}
-                className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 ${eligibility.overall ? 'bg-indigo-600 text-white shadow-indigo-100' : 'bg-slate-100 text-slate-300 cursor-not-allowed grayscale'}`}
+                className={`w-full py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 ${eligibility.overall ? 'bg-blue-600 text-white shadow-blue-100' : 'bg-slate-100 text-slate-300 cursor-not-allowed grayscale'}`}
               >
                  Authorize Protocol <ChevronRight size={18} />
               </button>
@@ -150,16 +150,16 @@ const RequestEmergencyLoad: React.FC<Props> = ({ user, state, onBack, onFinish }
       )}
 
       {step === 'processing' && (
-        <div className="h-[500px] flex flex-col items-center justify-center text-center p-10 space-y-8 bg-white rounded-[3rem] shadow-xl border-4 border-indigo-50">
+        <div className="h-[500px] flex flex-col items-center justify-center text-center p-10 space-y-8 bg-white rounded-[3rem] shadow-xl border-4 border-blue-50">
            <div className="relative w-32 h-32 flex items-center justify-center">
-              <div className="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
-              <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+              <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
               {/* RefreshCw icon fixed */}
-              <RefreshCw size={48} className="text-indigo-600 animate-pulse" />
+              <RefreshCw size={48} className="text-blue-600 animate-pulse" />
            </div>
            <div className="space-y-2">
               <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900">Synchronizing Node</h3>
-              <p className="text-[10px] text-indigo-600 font-black uppercase tracking-[0.4em] animate-pulse">OLT Hardware Handshake in progress</p>
+              <p className="text-[10px] text-blue-600 font-black uppercase tracking-[0.4em] animate-pulse">OLT Hardware Handshake in progress</p>
            </div>
            <p className="text-xs text-slate-400 font-bold uppercase leading-relaxed max-w-xs">
               Direct physical path established. Updating behavioral registry and provisioning link layer.
@@ -168,8 +168,8 @@ const RequestEmergencyLoad: React.FC<Props> = ({ user, state, onBack, onFinish }
       )}
 
       {step === 'success' && (
-        <div className="p-16 text-center bg-white rounded-[4rem] border-[12px] border-emerald-50 shadow-2xl space-y-10 animate-in zoom-in duration-500">
-           <div className="w-24 h-24 bg-emerald-500 text-white rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce">
+        <div className="p-16 text-center bg-white rounded-[4rem] border-[12px] border-green-50 shadow-2xl space-y-10 animate-in zoom-in duration-500">
+           <div className="w-24 h-24 bg-green-500 text-white rounded-[2rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce">
               <CheckCircle size={56} strokeWidth={3}/>
            </div>
            <div className="space-y-3">
@@ -182,7 +182,7 @@ const RequestEmergencyLoad: React.FC<Props> = ({ user, state, onBack, onFinish }
            <div className="p-6 bg-slate-900 rounded-[2.5rem] flex items-center justify-between text-white">
               <div className="text-left">
                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Sync Ready In</p>
-                 <p className="text-xl font-black italic text-emerald-400">14:59s</p>
+                 <p className="text-xl font-black italic text-green-400">14:59s</p>
               </div>
               <div className="w-px h-10 bg-white/10"></div>
               <div className="text-right">
@@ -201,3 +201,4 @@ const RequestEmergencyLoad: React.FC<Props> = ({ user, state, onBack, onFinish }
 };
 
 export default RequestEmergencyLoad;
+

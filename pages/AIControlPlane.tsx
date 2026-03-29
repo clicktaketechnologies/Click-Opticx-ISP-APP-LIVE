@@ -55,11 +55,11 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
 
   const renderDashboard = () => (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-700">
-      <div className={`p-10 rounded-[3rem] border-4 transition-all duration-700 relative overflow-hidden shadow-2xl ${config.killSwitchActive ? 'bg-rose-950 border-rose-500' : 'bg-slate-950 border-indigo-600'}`}>
+      <div className={`p-10 rounded-[3rem] border-4 transition-all duration-700 relative overflow-hidden shadow-2xl ${config.killSwitchActive ? 'bg-rose-950 border-rose-500' : 'bg-slate-950 border-blue-600'}`}>
          <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-10">
             <div className="space-y-4">
                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${config.killSwitchActive ? 'bg-rose-500' : 'bg-emerald-500 animate-pulse'}`}></div>
+                  <div className={`w-3 h-3 rounded-full ${config.killSwitchActive ? 'bg-rose-500' : 'bg-green-500 animate-pulse'}`}></div>
                   <h3 className="text-xl font-black uppercase tracking-widest text-white">System Status: {config.killSwitchActive ? 'OFFLINE (SUSPEND ACTIVE)' : 'OPERATIONAL'}</h3>
                </div>
                <p className="text-sm font-bold text-slate-400 uppercase leading-relaxed max-w-xl italic">
@@ -68,18 +68,18 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
             </div>
             <button 
               onClick={handleToggleKillSwitch}
-              className={`px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-3 ${config.killSwitchActive ? 'bg-emerald-600 text-white shadow-[0_0_40px_rgba(16,185,129,0.3)]' : 'bg-rose-600 text-white shadow-[0_0_40px_rgba(225,29,72,0.3)]'}`}
+              className={`px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-3 ${config.killSwitchActive ? 'bg-green-600 text-white shadow-[0_0_40px_rgba(16,185,129,0.3)]' : 'bg-rose-600 text-white shadow-[0_0_40px_rgba(225,29,72,0.3)]'}`}
             >
                <Power size={18} />
                {config.killSwitchActive ? 'Re-Initialize Core' : 'Global Kill-Switch'}
             </button>
          </div>
-         <Cpu className="absolute -right-20 -bottom-20 opacity-5 scale-[3] text-indigo-400" size={300} />
+         <Cpu className="absolute -right-20 -bottom-20 opacity-5 scale-[3] text-blue-400" size={300} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'System Health', value: `${healthScore}%`, icon: HeartPulse, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+          { label: 'System Health', value: `${healthScore}%`, icon: HeartPulse, color: 'text-green-500', bg: 'bg-green-500/10' },
           { label: 'UX Friction', value: `${frictionScore}%`, icon: Zap, color: 'text-amber-500', bg: 'bg-amber-500/10' },
           { label: 'Bug Alerts', value: state.aiEvents.filter(e => e.isError).length, icon: ShieldAlert, color: 'text-rose-500', bg: 'bg-rose-500/10' },
           { label: 'Active Rules', value: state.commAutomationRules.length.toString(), icon: Code2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
@@ -120,20 +120,20 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
 
          <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm space-y-6">
             <div className="flex justify-between items-center">
-               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Sparkles size={14} className="text-indigo-500" /> Heuristic Insight Queue</h3>
-               <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[9px] font-black uppercase">{state.aiSuggestions.length} Operations</span>
+               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Sparkles size={14} className="text-blue-500" /> Heuristic Insight Queue</h3>
+               <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[9px] font-black uppercase">{state.aiSuggestions.length} Operations</span>
             </div>
             <div className="space-y-3">
                {state.aiSuggestions.slice(0, 3).map((sug, i) => (
-                 <div key={i} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-indigo-200 transition-all">
+                 <div key={i} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-blue-200 transition-all">
                     <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-indigo-500 group-hover:text-white transition-all"><Zap size={16}/></div>
+                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-blue-500 group-hover:text-white transition-all"><Zap size={16}/></div>
                        <div>
-                          <span className="text-[8px] font-black text-indigo-600 uppercase">{sug.category}</span>
+                          <span className="text-[8px] font-black text-blue-600 uppercase">{sug.category}</span>
                           <p className="text-[10px] text-slate-900 font-bold uppercase line-clamp-1">{sug.title}</p>
                        </div>
                     </div>
-                    <button className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-black text-[8px] uppercase tracking-widest active:scale-95 transition-all">View</button>
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-xl font-black text-[8px] uppercase tracking-widest active:scale-95 transition-all">View</button>
                  </div>
                ))}
             </div>
@@ -190,9 +190,9 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
                    <span className="text-[10px] font-black text-slate-800 uppercase">Score {config.thresholds.suggest} - {config.thresholds.confirm}</span>
                    <span className="text-[9px] font-black text-blue-600 uppercase border border-blue-200 px-3 py-1 rounded-full">ADMIN_CONFIRMATION</span>
                 </div>
-                <div className="p-5 bg-white rounded-2xl border-2 border-emerald-100 flex justify-between items-center">
+                <div className="p-5 bg-white rounded-2xl border-2 border-green-100 flex justify-between items-center">
                    <span className="text-[10px] font-black text-slate-800 uppercase">Score &gt; {config.thresholds.confirm}</span>
-                   <span className="text-[9px] font-black text-emerald-600 uppercase border border-emerald-200 px-3 py-1 rounded-full">AUTONOMOUS_EXECUTION</span>
+                   <span className="text-[9px] font-black text-green-600 uppercase border border-green-200 px-3 py-1 rounded-full">AUTONOMOUS_EXECUTION</span>
                 </div>
              </div>
           </div>
@@ -207,7 +207,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
             <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Heuristic Rulebook (DSL)</h3>
             <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Protocol: Behavioral Guardrails</p>
           </div>
-          <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95"><Plus size={16}/> New Rule</button>
+          <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95"><Plus size={16}/> New Rule</button>
        </div>
 
        <div className="grid grid-cols-1 gap-4">
@@ -216,14 +216,14 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
             { name: 'FraudScoreAutoDeduct', code: 'WHEN payment_decline_streak >= 3\nAND risk_rank > HIGH\nTHEN\n  SUGGEST credit_adjustment -50\n  WARN admin "Potential fraud node detected"', status: 'ACTIVE' },
             { name: 'PeakHourThrottle', code: 'WHEN node_load > 90%\nTHEN\n  NOTIFY admin "Port saturation alert"\n  SUGGEST dynamic_bandwidth_limit', status: 'STANDBY' }
           ].map((rule, i) => (
-            <div key={i} className={`p-8 rounded-[2.5rem] border-2 transition-all flex flex-col md:flex-row gap-8 ${rule.status === 'ACTIVE' ? 'border-emerald-100 bg-emerald-50/10' : 'border-slate-50 bg-slate-50 grayscale opacity-60'}`}>
+            <div key={i} className={`p-8 rounded-[2.5rem] border-2 transition-all flex flex-col md:flex-row gap-8 ${rule.status === 'ACTIVE' ? 'border-green-100 bg-green-50/10' : 'border-slate-50 bg-slate-50 grayscale opacity-60'}`}>
                <div className="flex-1 space-y-4">
                   <div className="flex items-center gap-3">
-                     <Code2 size={20} className="text-indigo-500" />
+                     <Code2 size={20} className="text-blue-500" />
                      <h4 className="text-lg font-black uppercase italic text-slate-900">{rule.name}</h4>
-                     <span className={`px-2 py-0.5 rounded text-[7px] font-black uppercase ${rule.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200 text-slate-500'}`}>{rule.status}</span>
+                     <span className={`px-2 py-0.5 rounded text-[7px] font-black uppercase ${rule.status === 'ACTIVE' ? 'bg-green-100 text-green-600' : 'bg-slate-200 text-slate-500'}`}>{rule.status}</span>
                   </div>
-                  <pre className="p-6 bg-slate-950 text-indigo-400 rounded-3xl font-mono text-[11px] leading-relaxed shadow-inner">
+                  <pre className="p-6 bg-slate-950 text-blue-400 rounded-3xl font-mono text-[11px] leading-relaxed shadow-inner">
                     {rule.code}
                   </pre>
                </div>
@@ -252,8 +252,8 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
 
        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { level: 'READ', icon: Eye, status: 'AUTHORIZED', desc: 'Full telemetry access to invoices, ledger, and payment nodes.', color: 'text-emerald-500' },
-            { level: 'SUGGEST', icon: Sparkles, status: 'AUTHORIZED', desc: 'Identify inconsistencies and flag potential manual adjustments.', color: 'text-emerald-500' },
+            { level: 'READ', icon: Eye, status: 'AUTHORIZED', desc: 'Full telemetry access to invoices, ledger, and payment nodes.', color: 'text-green-500' },
+            { level: 'SUGGEST', icon: Sparkles, status: 'AUTHORIZED', desc: 'Identify inconsistencies and flag potential manual adjustments.', color: 'text-green-500' },
             { level: 'EXECUTE', icon: Zap, status: 'HARD_LOCKED', desc: 'Creating double-entry items or modifying wallet balances.', color: 'text-rose-600' }
           ].map(l => (
             <div key={l.level} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex flex-col justify-between group hover:bg-white hover:shadow-xl transition-all h-64">
@@ -262,23 +262,23 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
                      <div className={`w-12 h-12 bg-white rounded-2xl flex items-center justify-center border shadow-sm group-hover:scale-105 transition-transform ${l.color}`}>
                         <l.icon size={24}/>
                      </div>
-                     <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${l.status === 'AUTHORIZED' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                     <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${l.status === 'AUTHORIZED' ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'}`}>
                         {l.status}
                      </span>
                   </div>
                   <h4 className="text-xl font-black uppercase italic tracking-tighter text-slate-900 mb-2">LVL_{l.level}</h4>
                   <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">{l.desc}</p>
                </div>
-               <div className={`h-1.5 w-full rounded-full ${l.status === 'AUTHORIZED' ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+               <div className={`h-1.5 w-full rounded-full ${l.status === 'AUTHORIZED' ? 'bg-green-500' : 'bg-rose-500'}`}></div>
             </div>
           ))}
        </div>
 
-       <div className="p-8 bg-indigo-50 border border-indigo-100 rounded-[2.5rem] flex items-start gap-6">
-          <Info size={24} className="text-indigo-600 shrink-0 mt-1" />
+       <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem] flex items-start gap-6">
+          <Info size={24} className="text-blue-600 shrink-0 mt-1" />
           <div>
-            <p className="text-[11px] font-black text-indigo-900 uppercase tracking-widest mb-1">Safety Scenario 42-A</p>
-            <p className="text-[10px] text-indigo-700 font-bold leading-relaxed uppercase opacity-80">
+            <p className="text-[11px] font-black text-blue-900 uppercase tracking-widest mb-1">Safety Scenario 42-A</p>
+            <p className="text-[10px] text-blue-700 font-bold leading-relaxed uppercase opacity-80">
                If AI detects an Invoice (2000) vs Wallet Deduction (1800) mismatch, it will trigger an **Administrative Alert** but is physically blocked from creating the Rs 200 balancing entry.
             </p>
           </div>
@@ -289,7 +289,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
   const renderKillSwitch = () => (
     <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm p-10 space-y-12 animate-in slide-in-from-right-4 duration-500">
        <div className="text-center max-w-2xl mx-auto space-y-8">
-          <div className={`w-32 h-32 rounded-[3.5rem] flex items-center justify-center mx-auto transition-all duration-700 border-[10px] ${config.killSwitchActive ? 'bg-emerald-500 text-white border-emerald-100 shadow-[0_0_60px_rgba(16,185,129,0.4)]' : 'bg-rose-600 text-white border-rose-100 shadow-[0_0_60px_rgba(225,29,72,0.4)] animate-pulse'}`}>
+          <div className={`w-32 h-32 rounded-[3.5rem] flex items-center justify-center mx-auto transition-all duration-700 border-[10px] ${config.killSwitchActive ? 'bg-green-500 text-white border-green-100 shadow-[0_0_60px_rgba(16,185,129,0.4)]' : 'bg-rose-600 text-white border-rose-100 shadow-[0_0_60px_rgba(225,29,72,0.4)] animate-pulse'}`}>
              <Power size={64} />
           </div>
           <div className="space-y-4">
@@ -300,7 +300,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
           </div>
           <button 
             onClick={handleToggleKillSwitch}
-            className={`w-full py-8 rounded-[2.5rem] font-black text-lg uppercase tracking-[0.3em] transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-6 ${config.killSwitchActive ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}`}
+            className={`w-full py-8 rounded-[2.5rem] font-black text-lg uppercase tracking-[0.3em] transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-6 ${config.killSwitchActive ? 'bg-green-600 text-white' : 'bg-rose-600 text-white'}`}
           >
              {config.killSwitchActive ? <Mini5GMicroLoader size={32} /> : <ShieldAlert size={32} />}
              {config.killSwitchActive ? 'RE-INITIALIZE AUTONOMY' : 'ENGAGE TOTAL SUSPEND'}
@@ -310,7 +310,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Object.entries(config.modules).map(([name, mod]: [string, any]) => (
             <div key={name} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex flex-col items-center gap-4 group">
-               <div className={`p-4 rounded-2xl transition-all ${mod.enabled ? 'bg-white text-indigo-600 shadow-sm group-hover:scale-110' : 'bg-slate-200 text-slate-400'}`}>
+               <div className={`p-4 rounded-2xl transition-all ${mod.enabled ? 'bg-white text-blue-600 shadow-sm group-hover:scale-110' : 'bg-slate-200 text-slate-400'}`}>
                   {name === 'payments' ? <CreditCard size={24}/> : name === 'emergency' ? <Zap size={24}/> : name === 'network' ? <Globe size={24}/> : <ShieldAlert size={24}/>}
                </div>
                <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest">{name} AI Node</span>
@@ -319,7 +319,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
                    const next = { ...config, modules: { ...config.modules, [name]: { ...mod, enabled: !mod.enabled } } };
                    handleSaveConfig(next);
                 }}
-                className={`w-14 h-8 rounded-full relative transition-all duration-300 ${mod.enabled && !config.killSwitchActive ? 'bg-indigo-600' : 'bg-slate-300'}`}
+                className={`w-14 h-8 rounded-full relative transition-all duration-300 ${mod.enabled && !config.killSwitchActive ? 'bg-blue-600' : 'bg-slate-300'}`}
                >
                   <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 ${mod.enabled && !config.killSwitchActive ? 'left-7' : 'left-1'}`}></div>
                </button>
@@ -329,7 +329,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
 
        <div className="p-10 bg-slate-950 rounded-[3rem] text-white flex flex-col md:flex-row items-center justify-between gap-10">
           <div className="space-y-2">
-             <h4 className="text-xl font-black italic uppercase text-indigo-400">Registry Rollback</h4>
+             <h4 className="text-xl font-black italic uppercase text-blue-400">Registry Rollback</h4>
              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Revert AI state nodes to a known clean timestamp.</p>
           </div>
           <button className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all flex items-center gap-3">
@@ -343,7 +343,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
     <div className="bg-slate-950 rounded-[3rem] border border-white/5 shadow-2xl flex flex-col h-[750px] overflow-hidden animate-in slide-in-from-right-4 duration-500">
        <div className="p-8 bg-slate-900/50 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 sticky top-0 z-20 backdrop-blur-md">
           <div className="flex items-center gap-4">
-             <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
+             <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
                 <Terminal size={28} />
              </div>
              <div>
@@ -354,7 +354,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
           <div className="flex gap-3">
              <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
-                <input className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase text-white outline-none focus:border-indigo-500 transition-all" placeholder="Audit logs..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+                <input className="pl-9 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase text-white outline-none focus:border-blue-500 transition-all" placeholder="Audit logs..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
              </div>
              <button className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/5 transition-all">Export JSON</button>
           </div>
@@ -365,10 +365,10 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
              {state.aiLogs.filter(log => log.action.includes(searchTerm.toUpperCase()) || log.reason.includes(searchTerm)).map(log => (
                <div key={log.id} className="group p-5 hover:bg-white/[0.03] border border-white/5 rounded-2xl transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-6">
                   <div className="flex items-center gap-5 flex-1">
-                     <div className="w-1.5 h-10 bg-indigo-500 rounded-full group-hover:scale-y-125 transition-transform shrink-0"></div>
+                     <div className="w-1.5 h-10 bg-blue-500 rounded-full group-hover:scale-y-125 transition-transform shrink-0"></div>
                      <div className="flex-1">
                         <div className="flex items-center gap-3 mb-1">
-                           <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{log.action}</span>
+                           <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{log.action}</span>
                            <span className="text-[8px] text-slate-600 font-bold uppercase">{new Date(log.timestamp).toLocaleString()}</span>
                         </div>
                         <p className="text-xs font-bold text-slate-300 uppercase leading-relaxed">{log.reason}</p>
@@ -377,8 +377,8 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="flex items-center gap-8 shrink-0">
                      <div className="text-right">
                         <div className="flex items-center gap-2 justify-end mb-1">
-                           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                           <span className="text-[8px] font-black uppercase text-emerald-500">Conf: {Math.round(log.confidence * 100)}%</span>
+                           <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                           <span className="text-[8px] font-black uppercase text-green-500">Conf: {Math.round(log.confidence * 100)}%</span>
                         </div>
                         <p className="text-[8px] font-bold text-slate-500 uppercase">Node: {log.targetId}</p>
                      </div>
@@ -402,9 +402,9 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
 
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Object.entries(config.trainingSources).map(([source, active]: [string, any]) => (
-            <div key={source} className={`p-8 rounded-[2.5rem] border-2 transition-all flex flex-col gap-6 ${active ? 'border-emerald-100 bg-white shadow-lg' : 'border-slate-50 bg-slate-50 grayscale opacity-60'}`}>
+            <div key={source} className={`p-8 rounded-[2.5rem] border-2 transition-all flex flex-col gap-6 ${active ? 'border-green-100 bg-white shadow-lg' : 'border-slate-50 bg-slate-50 grayscale opacity-60'}`}>
                <div className="flex justify-between items-start">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-sm ${active ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-white text-slate-300'}`}>
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-sm ${active ? 'bg-green-50 text-green-600 border-green-100' : 'bg-white text-slate-300'}`}>
                      {source === 'invoices' ? <FileText size={20}/> : source === 'ledger' ? <Database size={20}/> : source === 'emergency' ? <Zap size={20}/> : <Activity size={20}/>}
                   </div>
                   <button 
@@ -412,7 +412,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
                        const next = { ...config, trainingSources: { ...config.trainingSources, [source]: !active } };
                        handleSaveConfig(next);
                     }}
-                    className={`w-12 h-6 rounded-full relative transition-all duration-300 ${active ? 'bg-emerald-600 shadow-xl' : 'bg-slate-300'}`}
+                    className={`w-12 h-6 rounded-full relative transition-all duration-300 ${active ? 'bg-green-600 shadow-xl' : 'bg-slate-300'}`}
                   >
                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${active ? 'left-7' : 'left-1'}`}></div>
                   </button>
@@ -428,7 +428,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
        <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white space-y-6 relative overflow-hidden shadow-2xl">
           <div className="relative z-10 space-y-6">
              <div className="flex items-center gap-3">
-                <Scale className="text-indigo-400" size={24}/>
+                <Scale className="text-blue-400" size={24}/>
                 <h4 className="text-xl font-black uppercase italic tracking-tighter">AI Knowledge Sanitization</h4>
              </div>
              <p className="text-sm font-bold text-slate-400 leading-relaxed uppercase italic">AI distillation uses anonymized subscriber IDs. Individual node privacy is preserved at the cryptographic handshake layer.</p>
@@ -446,11 +446,11 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
             <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Emergency Load Eligibility Core</h3>
             <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Protocol: ELGuardian v2.1 (Behavioral Lock)</p>
           </div>
-          <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-3xl flex items-center gap-4">
-             <ShieldCheck className="text-emerald-600" size={32}/>
+          <div className="p-4 bg-green-50 border border-green-100 rounded-3xl flex items-center gap-4">
+             <ShieldCheck className="text-green-600" size={32}/>
              <div>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Active Suppression</p>
-                <p className="text-lg font-black text-emerald-700 italic leading-none">HIGH EFFICACY</p>
+                <p className="text-lg font-black text-green-700 italic leading-none">HIGH EFFICACY</p>
              </div>
           </div>
        </div>
@@ -484,13 +484,13 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic border-b border-slate-100 pb-2">Eligibility Formula Synthesis</h4>
              <div className="bg-slate-950 p-8 rounded-[2.5rem] space-y-6 shadow-2xl relative overflow-hidden">
                 <div className="relative z-10 flex flex-col gap-4 text-center">
-                   <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-mono text-indigo-300 uppercase">Base System Rule (600+)</div>
+                   <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-mono text-blue-300 uppercase">Base System Rule (600+)</div>
                    <div className="text-slate-500 text-xl font-black">+</div>
-                   <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-mono text-emerald-400 uppercase">AI Confidence Score (&gt;0.65)</div>
+                   <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-mono text-green-400 uppercase">AI Confidence Score (&gt;0.65)</div>
                    <div className="text-slate-500 text-xl font-black">+</div>
                    <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-xs font-mono text-rose-400 uppercase">Risk Behavior Audit</div>
-                   <div className="text-indigo-600 text-3xl font-black">=</div>
-                   <div className="p-6 bg-indigo-600 rounded-2xl text-lg font-black uppercase italic tracking-tighter">FINAL SUGGESTION</div>
+                   <div className="text-blue-600 text-3xl font-black">=</div>
+                   <div className="p-6 bg-blue-600 rounded-2xl text-lg font-black uppercase italic tracking-tighter">FINAL SUGGESTION</div>
                 </div>
                 <Activity className="absolute -right-12 -bottom-12 opacity-5 scale-[2]" size={200} />
              </div>
@@ -516,7 +516,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
             <button 
               key={view.id}
               onClick={() => setActiveView(view.id as SubView)}
-              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeView === view.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+              className={`flex items-center gap-2 px-5 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeView === view.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
             >
                <view.icon size={14} />
                {view.label}
@@ -540,3 +540,4 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AIControlPlane;
+

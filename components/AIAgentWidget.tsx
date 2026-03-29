@@ -63,7 +63,7 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="relative">
             <Bot size={28} className="text-white relative z-10" />
             {!killSwitch && <Sparkles size={14} className="absolute -top-1 -right-1 text-amber-400 animate-pulse z-10" />}
-            <div className={`absolute inset-0 rounded-full animate-ping opacity-20 ${killSwitch ? 'bg-rose-400' : 'bg-indigo-400'}`}></div>
+            <div className={`absolute inset-0 rounded-full animate-ping opacity-20 ${killSwitch ? 'bg-rose-400' : 'bg-blue-400'}`}></div>
          </div>
          <span className="text-[10px] font-black text-white uppercase tracking-widest pr-2 hidden md:block">
             {killSwitch ? 'AI OFFLINE' : 'AI Assistant'}
@@ -82,12 +82,12 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
               
               <header className={`p-8 text-white flex justify-between items-center shrink-0 relative overflow-hidden transition-colors duration-500 ${killSwitch ? 'bg-rose-600' : 'bg-slate-900'}`}>
                  <div className="relative z-10 flex items-center gap-5">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-colors duration-500 ${killSwitch ? 'bg-rose-950' : 'bg-indigo-600 animate-pulse'}`}>
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-colors duration-500 ${killSwitch ? 'bg-rose-950' : 'bg-blue-600 animate-pulse'}`}>
                        {killSwitch ? <Power size={28} /> : <Bot size={28} />}
                     </div>
                     <div>
                        <h3 className="text-xl font-black uppercase italic tracking-tighter">AI Agent v8.5</h3>
-                       <p className={`text-[9px] font-black uppercase tracking-[0.4em] ${killSwitch ? 'text-rose-200' : 'text-indigo-400'}`}>
+                       <p className={`text-[9px] font-black uppercase tracking-[0.4em] ${killSwitch ? 'text-rose-200' : 'text-blue-400'}`}>
                           {killSwitch ? 'SYSTEM_HALTED' : 'Autonomous Support Protocol'}
                        </p>
                     </div>
@@ -99,7 +99,7 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
                       <button 
                         onClick={handleToggleUserVisibility}
                         disabled={isUpdating}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all border group/btn ${showToUsers ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/20 border-rose-500/30 text-rose-400'}`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all border group/btn ${showToUsers ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-rose-500/20 border-rose-500/30 text-rose-400'}`}
                         title={showToUsers ? 'Disable for Subscribers' : 'Enable for Subscribers'}
                       >
                          {isUpdating ? <Mini5GMicroLoader size={14} /> : showToUsers ? <Eye size={14} /> : <EyeOff size={14} />}
@@ -120,7 +120,7 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
                    <button 
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex-1 py-3 flex items-center justify-center gap-2 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                    className={`flex-1 py-3 flex items-center justify-center gap-2 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                    >
                       <tab.icon size={14} />
                       <span className="hidden sm:inline">{tab.label}</span>
@@ -147,10 +147,10 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
                       <div className="space-y-4 animate-in fade-in duration-500">
                          <div className="flex justify-between items-end px-2 mb-6">
                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Recommendations</h4>
-                            <span className="text-[8px] font-black text-emerald-600 uppercase italic">Real-time analysis active</span>
+                            <span className="text-[8px] font-black text-green-600 uppercase italic">Real-time analysis active</span>
                          </div>
                          {suggestions.map(sug => (
-                           <div key={sug.id} className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] flex flex-col gap-4 group hover:bg-white hover:shadow-xl hover:border-indigo-100 transition-all">
+                           <div key={sug.id} className="p-6 bg-slate-50 border border-slate-100 rounded-[2rem] flex flex-col gap-4 group hover:bg-white hover:shadow-xl hover:border-blue-100 transition-all">
                               <div className="flex justify-between items-start">
                                  <div className="flex items-center gap-3">
                                     <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${sug.priority === 'Critical' ? 'bg-rose-100 text-rose-600 border-rose-200' : 'bg-blue-50 text-blue-600'}`}>
@@ -190,7 +190,7 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
                              {state.aiLogs.slice(0, 5).map(log => (
                                <div key={log.id} className="p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between group">
                                   <div className="flex items-center gap-4">
-                                     <div className={`w-2 h-2 rounded-full ${log.confidence > 0.8 ? 'bg-emerald-500' : 'bg-blue-500'}`}></div>
+                                     <div className={`w-2 h-2 rounded-full ${log.confidence > 0.8 ? 'bg-green-500' : 'bg-blue-500'}`}></div>
                                      <p className="text-[10px] font-black text-slate-700 uppercase">{log.action}</p>
                                   </div>
                                   <span className="text-[8px] text-slate-400 font-bold uppercase">{new Date(log.timestamp).toLocaleTimeString()}</span>
@@ -204,14 +204,14 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
                         <div className="space-y-8 animate-in slide-in-from-right-4">
                            <div className="grid grid-cols-2 gap-4">
                               <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white flex flex-col items-center gap-3 text-center">
-                                 <HeartPulse size={32} className={`text-emerald-400 ${killSwitch ? 'opacity-20 grayscale' : 'animate-pulse'}`} />
+                                 <HeartPulse size={32} className={`text-green-400 ${killSwitch ? 'opacity-20 grayscale' : 'animate-pulse'}`} />
                                  <div>
                                     <p className="text-[9px] font-black text-slate-500 uppercase mb-1">Health Score</p>
                                     <h4 className="text-3xl font-black italic">{healthScore}%</h4>
                                  </div>
                               </div>
                               <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white flex flex-col items-center gap-3 text-center">
-                                 <Settings size={32} className={`text-indigo-400 ${killSwitch ? 'opacity-20 grayscale' : ''}`} />
+                                 <Settings size={32} className={`text-blue-400 ${killSwitch ? 'opacity-20 grayscale' : ''}`} />
                                  <div>
                                     <p className="text-[9px] font-black text-slate-500 uppercase mb-1">UX Friction</p>
                                     <h4 className="text-3xl font-black italic">{frictionScore}%</h4>
@@ -222,14 +222,14 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
                            <div className="p-6 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4">
                               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Protocol Distribution</h4>
                               <div className="flex h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
-                                 <div className="h-full bg-indigo-500 w-1/2"></div>
+                                 <div className="h-full bg-blue-500 w-1/2"></div>
                                  <div className="h-full bg-blue-500 w-1/4"></div>
-                                 <div className="h-full bg-emerald-500 w-1/4"></div>
+                                 <div className="h-full bg-green-500 w-1/4"></div>
                               </div>
                               <div className="flex justify-between px-2">
-                                 <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500"></div><span className="text-[7px] font-black text-slate-400 uppercase">FISCAL</span></div>
+                                 <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div><span className="text-[7px] font-black text-slate-400 uppercase">FISCAL</span></div>
                                  <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div><span className="text-[7px] font-black text-slate-400 uppercase">INFRA</span></div>
-                                 <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div><span className="text-[7px] font-black text-slate-400 uppercase">AUTH</span></div>
+                                 <div className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-green-500"></div><span className="text-[7px] font-black text-slate-400 uppercase">AUTH</span></div>
                               </div>
                            </div>
                         </div>
@@ -240,7 +240,7 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
 
               <footer className="p-8 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
                  <div className="flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${killSwitch ? 'bg-rose-50 animate-pulse' : 'bg-emerald-500'}`}></div>
+                    <div className={`w-2 h-2 rounded-full ${killSwitch ? 'bg-rose-50 animate-pulse' : 'bg-green-500'}`}></div>
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{killSwitch ? 'Core Restricted' : 'Core Synchronized'}</span>
                  </div>
                  <button onClick={() => setIsOpen(false)} className="px-8 py-3 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-black transition-all shadow-lg active:scale-95">Acknowledge</button>
@@ -253,3 +253,4 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AIAgentWidget;
+

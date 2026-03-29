@@ -146,7 +146,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
                   <button
                     key={t}
                     onClick={() => setKycDocType(t)}
-                    className={`py-3 rounded-xl border-2 text-[8px] font-black uppercase tracking-tight transition-all ${kycDocType === t ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                    className={`py-3 rounded-xl border-2 text-[8px] font-black uppercase tracking-tight transition-all ${kycDocType === t ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                   >
                     {t}
                   </button>
@@ -156,7 +156,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
 
             <div
               onClick={() => kycInputRef.current?.click()}
-              className={`h-48 rounded-[2.5rem] border-2 border-dashed transition-all flex flex-col items-center justify-center p-4 relative overflow-hidden ${kycFile ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}`}
+              className={`h-48 rounded-[2.5rem] border-2 border-dashed transition-all flex flex-col items-center justify-center p-4 relative overflow-hidden ${kycFile ? 'border-green-200 bg-green-50/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100'}`}
             >
               {kycFile ? (
                 <img src={kycFile} className="h-full object-contain" alt="KYC Preview" />
@@ -173,7 +173,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
               <button
                 onClick={submitKYCProtocol}
                 disabled={!kycFile || isProcessing}
-                className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isProcessing ? <Mini5GMicroLoader size={16} /> : <ShieldCheck size={16} />}
                 Submit for Verification
@@ -202,11 +202,11 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
               <div className="space-y-6">
                 <div className="p-8 bg-slate-900 rounded-[2.5rem] text-center border-4 border-slate-800 shadow-inner">
                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4">Current Password</p>
-                  <h2 className="text-2xl font-black text-indigo-400 italic tracking-tighter">{(user.password || '******').toUpperCase()}</h2>
+                  <h2 className="text-2xl font-black text-blue-400 italic tracking-tighter">{(user.password || '******').toUpperCase()}</h2>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <button onClick={() => setPassView('change')} className="py-5 bg-slate-100 text-slate-500 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200">Change Password</button>
-                  <button onClick={handlePasswordConfirm} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg active:scale-95">Confirm Current</button>
+                  <button onClick={handlePasswordConfirm} className="py-5 bg-green-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg active:scale-95">Confirm Current</button>
                 </div>
                 <button
                   onClick={() => setActiveSubStep(null)}
@@ -222,7 +222,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
                   <div className="relative">
                     <input
                       type={showPass ? 'text' : 'password'}
-                      className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg outline-none focus:border-indigo-500 transition-all text-slate-900 shadow-inner"
+                      className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg outline-none focus:border-blue-500 transition-all text-slate-900 shadow-inner"
                       placeholder="••••••••"
                       value={newPass}
                       onChange={e => setNewPass(e.target.value)}
@@ -237,7 +237,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
                   <button
                     onClick={handlePasswordChange}
                     disabled={isProcessing || newPass.length < 6}
-                    className="w-full py-6 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+                    className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
                   >
                     {isProcessing ? <Mini5GMicroLoader size={16} /> : <RefreshCw size={16} />}
                     Update Password
@@ -267,11 +267,11 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
             <div className="space-y-3">
               <div className="p-6 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-between shadow-inner">
                 <div><p className="text-[8px] font-black text-slate-400 uppercase">App Account</p><p className="text-sm font-black text-slate-900 uppercase italic">{user.username || user.connectionId}</p></div>
-                <UserCheck className="text-emerald-500" size={20} />
+                <UserCheck className="text-green-500" size={20} />
               </div>
               <div className="p-6 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-between shadow-inner">
                 <div><p className="text-[8px] font-black text-slate-400 uppercase">Connection ID</p><p className="text-sm font-black text-slate-900 uppercase italic">{user.pppoeId || 'P-CLICK-OPTICX'}</p></div>
-                <Hash className="text-indigo-500" size={20} />
+                <Hash className="text-blue-500" size={20} />
               </div>
             </div>
 
@@ -296,7 +296,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
         return (
           <div className="space-y-8">
             <div className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex items-start gap-4 shadow-inner">
-              <Zap className="text-indigo-600 mt-1 shrink-0" size={24} />
+              <Zap className="text-blue-600 mt-1 shrink-0" size={24} />
               <p className="text-[10px] text-slate-600 font-bold leading-relaxed uppercase">
                 Your account details have been received. Complete these steps to fully activate your dashboard.
               </p>
@@ -308,26 +308,26 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
                   key={idx}
                   disabled={completedSteps.has(step)}
                   onClick={() => setActiveSubStep(step)}
-                  className={`w-full p-6 rounded-3xl border-2 transition-all flex items-center justify-between group shadow-sm ${completedSteps.has(step) ? 'bg-emerald-50 border-emerald-500 opacity-60 grayscale' : 'bg-white border-slate-100 hover:border-indigo-200 hover:shadow-lg active:scale-[0.98]'}`}
+                  className={`w-full p-6 rounded-3xl border-2 transition-all flex items-center justify-between group shadow-sm ${completedSteps.has(step) ? 'bg-green-50 border-green-500 opacity-60 grayscale' : 'bg-white border-slate-100 hover:border-blue-200 hover:shadow-lg active:scale-[0.98]'}`}
                 >
                   <div className="flex items-center gap-5">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${completedSteps.has(step) ? 'bg-emerald-600 text-white' : 'bg-slate-50 text-slate-300'}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${completedSteps.has(step) ? 'bg-green-600 text-white' : 'bg-slate-50 text-slate-300'}`}>
                       {completedSteps.has(step) ? <CheckCircle size={20} /> : <div className="font-black text-xs">{idx + 1}</div>}
                     </div>
-                    <span className={`text-xs font-black uppercase tracking-tight ${completedSteps.has(step) ? 'text-emerald-900' : 'text-slate-600'}`}>{step}</span>
+                    <span className={`text-xs font-black uppercase tracking-tight ${completedSteps.has(step) ? 'text-green-900' : 'text-slate-600'}`}>{step}</span>
                   </div>
-                  {!completedSteps.has(step) && <ArrowRight size={18} className="text-slate-200 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all" />}
+                  {!completedSteps.has(step) && <ArrowRight size={18} className="text-slate-200 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />}
                 </button>
               ))}
             </div>
 
             <div className="flex gap-4">
               <div className="flex-1 p-5 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center gap-2 text-center opacity-60">
-                <Fingerprint size={20} className="text-indigo-400" />
+                <Fingerprint size={20} className="text-blue-400" />
                 <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Biometric Ready</p>
               </div>
               <div className="flex-1 p-5 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center gap-2 text-center opacity-60">
-                <Bell size={20} className="text-indigo-400" />
+                <Bell size={20} className="text-blue-400" />
                 <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Notifications Active</p>
               </div>
             </div>
@@ -343,7 +343,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
           <div className="relative z-10 flex justify-between items-center pr-10">
             <div className="space-y-2">
               <h3 className="text-3xl font-black italic tracking-tighter uppercase leading-none">WELCOME</h3>
-              <p className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.4em]">Initial Account Setup</p>
+              <p className="text-green-400 text-[10px] font-black uppercase tracking-[0.4em]">Initial Account Setup</p>
             </div>
           </div>
           <ShieldCheck size={140} className="absolute -right-8 -bottom-8 opacity-10 rotate-12" fill="currentColor" />
@@ -358,7 +358,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
             <button
               onClick={handleFinish}
               disabled={isProcessing}
-              className="w-full py-6 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
+              className="w-full py-6 bg-green-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
             >
               {isProcessing ? <Mini5GMicroLoader size={20} /> : <>GET STARTED <ArrowRight size={20} /></>}
             </button>
@@ -386,3 +386,4 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
 };
 
 export default SubscriberWelcomeChecklist;
+

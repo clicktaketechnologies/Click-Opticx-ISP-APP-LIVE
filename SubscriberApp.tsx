@@ -156,8 +156,8 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
          {showWelcome && <SubscriberWelcomeChecklist user={user} onComplete={() => setShowWelcome(false)} />}
          {showVerificationSuccess && (
             <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[1000] flex items-center justify-center p-6 animate-in fade-in duration-500">
-               <div className="bg-white rounded-[3.5rem] w-full max-sm shadow-2xl p-10 text-center space-y-8 animate-in zoom-in border-[8px] border-emerald-50">
-                  <div className="w-24 h-24 bg-emerald-500 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce">
+               <div className="bg-white rounded-[3.5rem] w-full max-sm shadow-2xl p-10 text-center space-y-8 animate-in zoom-in border-[8px] border-green-50">
+                  <div className="w-24 h-24 bg-green-500 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce">
                      <CheckCircle size={56} strokeWidth={3} />
                   </div>
                   <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">Account Verified</h3>
@@ -168,15 +168,15 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
          <header className="h-14 bg-white border-b border-slate-100 px-6 flex items-center justify-between sticky top-0 z-[200] shrink-0 shadow-sm">
             <div className="flex items-center gap-3">
                <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center border shadow-inner">
-                  {branding.logoSquare ? <img src={branding.logoSquare} className="w-full h-full object-contain p-1" /> : <Globe size={16} className="text-indigo-600" />}
+                  {branding.logoSquare ? <img src={branding.logoSquare} className="w-full h-full object-contain p-1" /> : <Globe size={16} className="text-blue-600" />}
                </div>
                <h1 className="text-xs font-black uppercase italic tracking-tighter leading-none truncate max-w-[120px]">{branding.businessName}</h1>
             </div>
             <div className="flex items-center gap-2">
                {appearance.showAICalling && (
-                  <button onClick={() => handleTabChange('ai-voice-call')} className="p-2 bg-indigo-50 text-indigo-600 rounded-xl relative group">
+                  <button onClick={() => handleTabChange('ai-voice-call')} className="p-2 bg-blue-50 text-blue-600 rounded-xl relative group">
                      <Mic size={16} className="group-hover:scale-110 transition-transform" />
-                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full border border-white animate-pulse"></span>
+                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-white animate-pulse"></span>
                   </button>
                )}
                <button onClick={() => handleTabChange('notifs')} className="p-2 bg-slate-100 text-slate-400 rounded-xl relative">
@@ -198,7 +198,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id as SubTab)}
-                  className={`flex flex-col items-center gap-1 flex-1 transition-all py-1 ${activeTab === tab.id || (activeTab.startsWith('ai-') && tab.id === 'ai-home') ? 'text-indigo-600' : 'text-slate-400'}`}
+                  className={`flex flex-col items-center gap-1 flex-1 transition-all py-1 ${activeTab === tab.id || (activeTab.startsWith('ai-') && tab.id === 'ai-home') ? 'text-blue-600' : 'text-slate-400'}`}
                >
                   <tab.icon size={18} strokeWidth={activeTab === tab.id ? 3 : 2} />
                   <span className="text-[8px] font-black uppercase tracking-widest">{tab.label}</span>
@@ -213,7 +213,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
          {/* Quick Actions Floating Core */}
          <button
             onClick={() => setShowQuickActions(true)}
-            className="fixed bottom-20 right-6 w-14 h-14 bg-indigo-600 text-white rounded-2xl shadow-2xl z-[500] flex items-center justify-center hover:scale-110 active:scale-95 transition-all border-b-4 border-indigo-800"
+            className="fixed bottom-20 right-6 w-14 h-14 bg-blue-600 text-white rounded-2xl shadow-2xl z-[500] flex items-center justify-center hover:scale-110 active:scale-95 transition-all border-b-4 border-blue-800"
          >
             <Zap size={28} fill="currentColor" />
          </button>
@@ -232,3 +232,4 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
 };
 
 export default SubscriberApp;
+

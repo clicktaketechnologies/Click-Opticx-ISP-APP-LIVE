@@ -101,7 +101,7 @@ const EmailComposer: React.FC<Props> = ({
         return (
             <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1100] flex items-center justify-center p-4">
                 <div className="bg-white rounded-[3rem] p-12 text-center space-y-6 max-w-sm animate-in zoom-in duration-300">
-                    <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-[2rem] flex items-center justify-center mx-auto border border-emerald-100 shadow-inner">
+                    <div className="w-24 h-24 bg-green-50 text-green-600 rounded-[2rem] flex items-center justify-center mx-auto border border-green-100 shadow-inner">
                         <CheckCircle size={48} className="animate-bounce" />
                     </div>
                     <h3 className="text-2xl font-black italic text-slate-900 uppercase tracking-tighter">- Payment Due Verified</h3>
@@ -118,10 +118,10 @@ const EmailComposer: React.FC<Props> = ({
             <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl animate-in zoom-in duration-300 border-[8px] border-slate-50 overflow-hidden flex flex-col relative">
                 <header className="p-8 bg-slate-900 text-white flex justify-between items-center shrink-0">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg"><Mail size={24} /></div>
+                        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg"><Mail size={24} /></div>
                         <div>
                             <h3 className="text-xl font-black italic tracking-tighter uppercase leading-none">Communication Service</h3>
-                            <p className="text-indigo-400 text-[9px] font-black uppercase tracking-[0.3em] mt-1">Direct Node Handshake v3.0</p>
+                            <p className="text-blue-400 text-[9px] font-black uppercase tracking-[0.3em] mt-1">Direct Node Handshake v3.0</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-slate-500 hover:text-white"><X size={24} /></button>
@@ -144,9 +144,9 @@ const EmailComposer: React.FC<Props> = ({
                         <div className="space-y-2">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Blueprint Selection</label>
                             <div className="relative">
-                                <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" size={16} />
+                                <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400" size={16} />
                                 <select
-                                    className="w-full pl-12 pr-10 py-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:border-indigo-600 transition-all appearance-none cursor-pointer"
+                                    className="w-full pl-12 pr-10 py-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:border-blue-600 transition-all appearance-none cursor-pointer"
                                     value={selectedTemplateId}
                                     onChange={(e) => setSelectedTemplateId(e.target.value)}
                                 >
@@ -167,7 +167,7 @@ const EmailComposer: React.FC<Props> = ({
                             <div className="relative">
                                 <Type className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                                 <input
-                                    className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-xs outline-none focus:border-indigo-600 transition-all placeholder:text-slate-200"
+                                    className="w-full pl-12 pr-4 py-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-xs outline-none focus:border-blue-600 transition-all placeholder:text-slate-200"
                                     placeholder="Enter transmission header..."
                                     value={subject}
                                     onChange={(e) => setSubject(e.target.value)}
@@ -178,13 +178,13 @@ const EmailComposer: React.FC<Props> = ({
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Message Payload</label>
                             <div className="relative bg-slate-900 rounded-[2rem] p-6 shadow-inner border-4 border-slate-800">
                                 <textarea
-                                    className="w-full h-48 bg-transparent text-emerald-400 font-mono text-xs resize-none outline-none custom-scrollbar placeholder:text-emerald-900/50"
+                                    className="w-full h-48 bg-transparent text-green-400 font-mono text-xs resize-none outline-none custom-scrollbar placeholder:text-green-900/50"
                                     placeholder="Decrypting protocol... Write message content here."
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                 />
                                 <div className="absolute right-6 bottom-6 opacity-20 pointer-events-none">
-                                    <FileText size={40} className="text-emerald-400" />
+                                    <FileText size={40} className="text-green-400" />
                                 </div>
                             </div>
                         </div>
@@ -202,7 +202,7 @@ const EmailComposer: React.FC<Props> = ({
                                 <button
                                     key={asset.key}
                                     onClick={() => setAttachments(prev => ({ ...prev, [asset.key]: !prev[asset.key as keyof typeof prev] }))}
-                                    className={`flex items-center gap-3 px-6 py-3 rounded-xl border-2 transition-all font-black text-[9px] uppercase tracking-widest ${attachments[asset.key as keyof typeof attachments] ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
+                                    className={`flex items-center gap-3 px-6 py-3 rounded-xl border-2 transition-all font-black text-[9px] uppercase tracking-widest ${attachments[asset.key as keyof typeof attachments] ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
                                 >
                                     <asset.icon size={14} />
                                     {asset.label}
@@ -224,7 +224,7 @@ const EmailComposer: React.FC<Props> = ({
                     <button
                         onClick={handleSend}
                         disabled={isSending || !user.email}
-                        className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                        className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                     >
                         {isSending ? <Mini5GMicroLoader size={18} /> : <Send size={18} />}
                         {user.email ? 'Authorize - Payment Due' : 'Email Node Missing'}
@@ -236,3 +236,4 @@ const EmailComposer: React.FC<Props> = ({
 };
 
 export default EmailComposer;
+

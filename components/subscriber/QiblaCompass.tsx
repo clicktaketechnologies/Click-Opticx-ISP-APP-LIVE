@@ -19,7 +19,7 @@ const QiblaCompass: React.FC<Props> = ({ heading, qiblaBearing, accuracy }) => {
       {/* Alignment Indicator Header */}
       <div className={`h-12 flex items-center justify-center px-8 rounded-full transition-all duration-500 border-2 ${
         isAligned 
-          ? 'bg-emerald-500 text-white border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-110' 
+          ? 'bg-green-500 text-white border-green-400 shadow-[0_0_20px_rgba(16,185,129,0.4)] scale-110' 
           : 'bg-white text-slate-400 border-slate-100'
       }`}>
         <span className="text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
@@ -47,12 +47,12 @@ const QiblaCompass: React.FC<Props> = ({ heading, qiblaBearing, accuracy }) => {
           style={{ transform: `rotate(${needleRotation}deg)` }}
         >
           {/* Alignment Path */}
-          <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-1/2 origin-bottom transition-all duration-700 ${isAligned ? 'bg-emerald-500 opacity-100' : 'bg-slate-200 opacity-20'}`}></div>
+          <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-0.5 h-1/2 origin-bottom transition-all duration-700 ${isAligned ? 'bg-green-500 opacity-100' : 'bg-slate-200 opacity-20'}`}></div>
           
           {/* Kaaba Target */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 flex flex-col items-center">
             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 ${
-              isAligned ? 'bg-emerald-500 text-white shadow-2xl scale-110' : 'bg-slate-900 text-emerald-400 opacity-60'
+              isAligned ? 'bg-green-500 text-white shadow-2xl scale-110' : 'bg-slate-900 text-green-400 opacity-60'
             }`}>
               <div className="relative">
                 <Target size={32} />
@@ -61,7 +61,7 @@ const QiblaCompass: React.FC<Props> = ({ heading, qiblaBearing, accuracy }) => {
                 )}
               </div>
             </div>
-            <div className={`mt-2 px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${isAligned ? 'bg-emerald-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
+            <div className={`mt-2 px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest ${isAligned ? 'bg-green-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
               Target
             </div>
           </div>
@@ -72,7 +72,7 @@ const QiblaCompass: React.FC<Props> = ({ heading, qiblaBearing, accuracy }) => {
         
         {/* Glow alignment */}
         {isAligned && (
-          <div className="absolute w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute w-48 h-48 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
         )}
       </div>
 
@@ -83,7 +83,7 @@ const QiblaCompass: React.FC<Props> = ({ heading, qiblaBearing, accuracy }) => {
         </div>
         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-center">
           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Accuracy Grade</p>
-          <p className={`text-2xl font-black italic tracking-tighter ${accuracy === 'High' ? 'text-emerald-600' : 'text-amber-600'}`}>{accuracy}</p>
+          <p className={`text-2xl font-black italic tracking-tighter ${accuracy === 'High' ? 'text-green-600' : 'text-amber-600'}`}>{accuracy}</p>
         </div>
       </div>
     </div>

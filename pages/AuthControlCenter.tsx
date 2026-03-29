@@ -92,7 +92,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
   const ToggleItem = ({ label, value, onChange }: { label: string, value: boolean, onChange: (v: boolean) => void }) => (
     <div className="flex items-center justify-between p-4 bg-white/50 backdrop-blur-sm border rounded-2xl cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => onChange(!value)}>
       <span className="text-[11px] font-black uppercase text-slate-700 tracking-widest">{label}</span>
-      {value ? <ToggleRight className="text-emerald-500" size={28} /> : <ToggleLeft className="text-slate-300" size={28} />}
+      {value ? <ToggleRight className="text-green-500" size={28} /> : <ToggleLeft className="text-slate-300" size={28} />}
     </div>
   );
 
@@ -100,10 +100,10 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
          <div>
-            <h1 className="text-2xl font-black uppercase italic tracking-tighter flex items-center gap-3"><ShieldCheck className="text-indigo-600" size={28}/> Auth Control Center (ACC)</h1>
+            <h1 className="text-2xl font-black uppercase italic tracking-tighter flex items-center gap-3"><ShieldCheck className="text-blue-600" size={28}/> Auth Control Center (ACC)</h1>
             <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Universal Login & Security Infrastructure Engine</p>
          </div>
-         <button onClick={handleSave} disabled={isSaving} className="px-6 py-3 bg-indigo-600 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-2">
+         <button onClick={handleSave} disabled={isSaving} className="px-6 py-3 bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2">
             {isSaving ? <LayoutGrid className="animate-spin" size={16} /> : <Save size={16} />} Save Settings
          </button>
       </div>
@@ -125,7 +125,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-100'}`}
+                  className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-100'}`}
                >
                   <tab.icon size={16} /> {tab.label}
                </button>
@@ -156,8 +156,8 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                       <h3 className="text-xs font-black uppercase tracking-widest text-slate-700">Allowed Login Identifiers</h3>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                          {['email', 'phone', 'cnic', 'username', 'pppoe'].map(id => (
-                            <label key={id} className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-indigo-300">
-                               <input type="checkbox" className="accent-indigo-600 w-4 h-4" checked={(settings.allowedIdentifiers as any)[id]} onChange={e => updateNestedSetting('allowedIdentifiers', id, e.target.checked)} />
+                            <label key={id} className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:border-blue-300">
+                               <input type="checkbox" className="accent-blue-600 w-4 h-4" checked={(settings.allowedIdentifiers as any)[id]} onChange={e => updateNestedSetting('allowedIdentifiers', id, e.target.checked)} />
                                <span className="text-[10px] font-black uppercase text-slate-600">{id}</span>
                             </label>
                          ))}
@@ -173,7 +173,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                    <div className="space-y-3">
                       <label className="text-[10px] font-black uppercase tracking-widest ml-1 text-slate-500">Approval Workflow Mode</label>
                       <select 
-                         className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 font-bold text-sm outline-none focus:border-indigo-500 transition-colors"
+                         className="w-full p-4 bg-slate-50 rounded-xl border border-slate-200 font-bold text-sm outline-none focus:border-blue-500 transition-colors"
                          value={settings.signupMode}
                          onChange={e => updateSetting('signupMode', e.target.value)}
                       >
@@ -287,7 +287,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-6">
                       <div className="flex items-center justify-between">
                          <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 flex items-center gap-2">
-                            <Settings2 size={16} className="text-indigo-500" /> SMTP Configuration
+                            <Settings2 size={16} className="text-blue-500" /> SMTP Configuration
                          </h3>
                           <div className="flex items-center gap-2">
                              <button 
@@ -297,7 +297,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                              >
                                 {isVerifying ? 'Verifying...' : 'Verify Connection'}
                              </button>
-                             <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-[8px] font-black uppercase rounded-md tracking-tighter border border-emerald-200">ACTIVE</span>
+                             <span className="px-2 py-1 bg-green-100 text-green-700 text-[8px] font-black uppercase rounded-md tracking-tighter border border-green-200">ACTIVE</span>
                           </div>
                       </div>
                       
@@ -337,16 +337,16 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                       </div>
                    </div>
 
-                   <div className="p-6 bg-indigo-50 border border-indigo-100 rounded-3xl space-y-4">
-                      <h3 className="text-xs font-black uppercase tracking-widest text-indigo-700">Diagnostic Toolbench</h3>
-                      <p className="text-[9px] text-indigo-500 uppercase font-black tracking-widest mb-2 opacity-70">Run live handshakes to verify outbound trajectories.</p>
+                   <div className="p-6 bg-blue-50 border border-blue-100 rounded-3xl space-y-4">
+                      <h3 className="text-xs font-black uppercase tracking-widest text-blue-700">Diagnostic Toolbench</h3>
+                      <p className="text-[9px] text-blue-500 uppercase font-black tracking-widest mb-2 opacity-70">Run live handshakes to verify outbound trajectories.</p>
                       <div className="flex flex-wrap gap-4">
                          <button 
                             onClick={async () => {
                                const res = await db.testCommunication('Email', state.currentUser?.email || 'admin@clickoptix.com');
                                if(res.success) alert('✅ Diagnostic Email - Payment Dueed! Check communication logs.');
                             }}
-                            className="px-6 py-4 bg-white text-indigo-600 border border-indigo-200 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm active:scale-95"
+                            className="px-6 py-4 bg-white text-blue-600 border border-blue-200 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95"
                          >
                             Send Test Email
                          </button>
@@ -355,7 +355,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                                const res = await db.testCommunication('SMS', '03456789012');
                                if(res.success) alert('✅ Diagnostic SMS Routed! Check gateway logs.');
                             }}
-                            className="px-6 py-4 bg-white text-indigo-600 border border-indigo-200 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm active:scale-95"
+                            className="px-6 py-4 bg-white text-blue-600 border border-blue-200 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95"
                          >
                             Send Test SMS
                          </button>
@@ -382,14 +382,14 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                                   <tr key={log.id} className="hover:bg-slate-50 transition-colors">
                                      <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{new Date(log.sentAt || log.timestamp).toLocaleTimeString()}</td>
                                      <td className="px-4 py-3">
-                                        <span className={`px-2 py-0.5 rounded-full ${log.type === 'Email' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                                        <span className={`px-2 py-0.5 rounded-full ${log.type === 'Email' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600'}`}>
                                            {log.type || 'Email'}
                                         </span>
                                      </td>
                                      <td className="px-4 py-3 text-slate-700">{log.email || log.target}</td>
                                      <td className="px-4 py-3 text-slate-400 italic">{log.sentBy || log.provider}</td>
                                      <td className="px-4 py-3">
-                                        <div className="flex items-center gap-1.5 text-emerald-600">
+                                        <div className="flex items-center gap-1.5 text-green-600">
                                            <CheckCircle size={10} /> {log.status}
                                         </div>
                                      </td>
@@ -416,7 +416,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                          <button 
                             onClick={runTester} 
                             disabled={isTesting}
-                            className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all ${isTesting ? 'bg-slate-100 text-slate-400' : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 active:scale-95'}`}
+                            className={`px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all ${isTesting ? 'bg-slate-100 text-slate-400' : 'bg-green-600 text-white hover:bg-green-700 shadow-lg shadow-green-500/20 active:scale-95'}`}
                          >
                             {isTesting ? <Activity className="animate-spin" size={16} /> : <Play size={16} />} 
                             {isTesting ? 'Bot Injected & Scanning...' : 'Start Integrity Scan'}
@@ -431,11 +431,11 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
 
                    <div className="grid grid-cols-1 gap-4">
                       {isTesting && (
-                         <div className="p-4 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center gap-4">
-                            <div className="h-2 flex-1 bg-indigo-200 rounded-full overflow-hidden">
-                               <div className="h-full bg-indigo-600 animate-pulse" style={{ width: '60%' }}></div>
+                         <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center gap-4">
+                            <div className="h-2 flex-1 bg-blue-200 rounded-full overflow-hidden">
+                               <div className="h-full bg-blue-600 animate-pulse" style={{ width: '60%' }}></div>
                             </div>
-                            <span className="text-[9px] font-black uppercase text-indigo-700 animate-pulse italic">Scanning System Nodes...</span>
+                            <span className="text-[9px] font-black uppercase text-blue-700 animate-pulse italic">Scanning System Nodes...</span>
                          </div>
                       )}
 
@@ -448,10 +448,10 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
 
                       <div className="space-y-3">
                          {testLog.map((log) => (
-                            <div key={log.id} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-indigo-200 transition-all animate-in slide-in-from-top-2 duration-300">
+                            <div key={log.id} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-blue-200 transition-all animate-in slide-in-from-top-2 duration-300">
                                <div className="flex items-center gap-4">
                                   <div className={`p-2 rounded-lg ${
-                                     log.status === 'Working' ? 'bg-emerald-100 text-emerald-600' : 
+                                     log.status === 'Working' ? 'bg-green-100 text-green-600' : 
                                      log.status === 'Warning' ? 'bg-amber-100 text-amber-600' : 'bg-rose-100 text-rose-600'
                                   }`}>
                                      {log.status === 'Working' ? <CheckCircle size={16} /> : log.status === 'Warning' ? <AlertCircle size={16} /> : <Activity size={16} />}
@@ -466,7 +466,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                                   </div>
                                </div>
                                <span className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
-                                  log.status === 'Working' ? 'bg-emerald-50 text-emerald-700' : 
+                                  log.status === 'Working' ? 'bg-green-50 text-green-700' : 
                                   log.status === 'Warning' ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-700'
                                }`}>{log.status}</span>
                             </div>
@@ -482,5 +482,6 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
 };
 
 export default AuthControlCenter;
+
 
 

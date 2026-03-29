@@ -46,7 +46,7 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
                <div className="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100 shadow-inner">
                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Payout Value</p>
                   <h2 className="text-5xl font-black text-slate-900 tracking-tighter italic">Rs. {(user.referralPoints * 0.01).toLocaleString()}</h2>
-                  <p className="text-[10px] text-indigo-600 font-black uppercase mt-3 tracking-widest">Points: {user.referralPoints.toLocaleString()}</p>
+                  <p className="text-[10px] text-blue-600 font-black uppercase mt-3 tracking-widest">Points: {user.referralPoints.toLocaleString()}</p>
                </div>
                
                <div className="grid grid-cols-1 gap-4">
@@ -67,7 +67,7 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
 
             <div className="flex gap-4">
                <button onClick={onClose} className="flex-1 py-4 font-black text-slate-400 uppercase text-[10px] hover:bg-slate-50 rounded-2xl transition-all">Cancel</button>
-               <button onClick={handleConfirm} className="flex-[2] py-5 bg-indigo-600 text-white font-black rounded-2xl shadow-2xl active:scale-95 transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-3">
+               <button onClick={handleConfirm} className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-2xl shadow-2xl active:scale-95 transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-3">
                   Authorize Conversion <ArrowRight size={16} />
                </button>
             </div>
@@ -86,7 +86,7 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
 
         {step === 'success' && (
           <div className="p-16 text-center space-y-10 animate-in zoom-in duration-500">
-             <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner animate-bounce">
+             <div className="w-24 h-24 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner animate-bounce">
                 <CheckCircle size={56} />
              </div>
              <div className="space-y-3">
@@ -106,3 +106,4 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
 };
 
 export default ReferralWithdrawalRequest;
+

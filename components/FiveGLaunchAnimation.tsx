@@ -43,9 +43,9 @@ export const FiveGLaunchAnimation: React.FC<{
             <div className="relative z-10 flex flex-col items-center">
                 {/* Spinning Rings */}
                 <div className="relative w-64 h-64 flex items-center justify-center mb-12">
-                    <div className="absolute inset-0 rounded-full border border-indigo-500/30 animate-[spin_5s_linear_infinite]"></div>
+                    <div className="absolute inset-0 rounded-full border border-blue-500/30 animate-[spin_5s_linear_infinite]"></div>
                     <div className="absolute inset-2 rounded-full border-t-2 border-r-2 border-fuchsia-500 animate-[spin_3s_linear_infinite_reverse]"></div>
-                    <div className="absolute inset-8 rounded-full border-b-2 border-l-2 border-emerald-400 animate-[spin_2s_linear_infinite]"></div>
+                    <div className="absolute inset-8 rounded-full border-b-2 border-l-2 border-green-400 animate-[spin_2s_linear_infinite]"></div>
 
                     <div className={`transition-all duration-500 ${stage >= 1 ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}`}>
                         <WifiHigh size={80} className="text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]" />
@@ -54,7 +54,7 @@ export const FiveGLaunchAnimation: React.FC<{
 
                 {/* Typography */}
                 <div className="space-y-4 text-center">
-                    <h1 className="text-6xl font-black italic tracking-tighter uppercase whitespace-nowrap bg-gradient-to-r from-fuchsia-400 via-indigo-300 to-emerald-300 bg-clip-text text-transparent transform">
+                    <h1 className="text-6xl font-black italic tracking-tighter uppercase whitespace-nowrap bg-gradient-to-r from-fuchsia-400 via-blue-300 to-green-300 bg-clip-text text-transparent transform">
                         5G ULTRA-NODE
                     </h1>
 
@@ -66,13 +66,13 @@ export const FiveGLaunchAnimation: React.FC<{
                             </div>
                         )}
                         {stage === 1 && (
-                            <div className="flex items-center gap-3 text-indigo-400 animate-pulse">
+                            <div className="flex items-center gap-3 text-blue-400 animate-pulse">
                                 <Globe size={18} />
                                 <span className="text-sm font-black tracking-[0.3em] uppercase">Syncing Regional Towers</span>
                             </div>
                         )}
                         {stage >= 2 && (
-                            <div className="flex items-center gap-3 text-emerald-400">
+                            <div className="flex items-center gap-3 text-green-400">
                                 <CheckCircle size={18} />
                                 <span className="text-sm font-black tracking-[0.3em] uppercase drop-shadow-[0_0_8px_rgba(52,211,153,0.8)]">Connection Verified</span>
                             </div>
@@ -93,3 +93,4 @@ export const FiveGLaunchAnimation: React.FC<{
         </div>
     );
 };
+

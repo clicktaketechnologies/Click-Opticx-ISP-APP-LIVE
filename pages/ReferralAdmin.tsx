@@ -49,12 +49,12 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
         </div>
         <div className="flex bg-white p-2 rounded-2xl border border-slate-200 shadow-sm items-center gap-4 px-6">
            <div className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${config.enabled ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`}></div>
+              <div className={`w-3 h-3 rounded-full ${config.enabled ? 'bg-green-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`}></div>
               <span className="text-[10px] font-black uppercase text-slate-600">{config.enabled ? 'Infrastructure Online' : 'System Disabled'}</span>
            </div>
            <button 
              onClick={() => setConfig({...config, enabled: !config.enabled})}
-             className={`w-12 h-6 rounded-full relative transition-all duration-300 ${config.enabled ? 'bg-emerald-600' : 'bg-slate-300'}`}
+             className={`w-12 h-6 rounded-full relative transition-all duration-300 ${config.enabled ? 'bg-green-600' : 'bg-slate-300'}`}
            >
               <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${config.enabled ? 'left-7' : 'left-1'}`}></div>
            </button>
@@ -65,8 +65,8 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
          {[
            { label: 'Circulating Points', value: stats.totalPoints.toLocaleString(), icon: Trophy, color: 'text-amber-600', bg: 'bg-amber-50' },
            { label: 'Linked Nodes', value: stats.activeNodes, icon: Users, color: 'text-blue-600', bg: 'bg-blue-50' },
-           { label: 'Pending Conversions', value: `${state.settings.currency} ${(stats.pendingConversions * config.conversionRatio).toLocaleString()}`, icon: HandCoins, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-           { label: 'Growth Tier', value: 'High', icon: Activity, color: 'text-indigo-600', bg: 'bg-indigo-50' }
+           { label: 'Pending Conversions', value: `${state.settings.currency} ${(stats.pendingConversions * config.conversionRatio).toLocaleString()}`, icon: HandCoins, color: 'text-green-600', bg: 'bg-green-50' },
+           { label: 'Growth Tier', value: 'High', icon: Activity, color: 'text-blue-600', bg: 'bg-blue-50' }
          ].map((stat, i) => (
            <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm group hover:shadow-md transition-all">
               <div className={`${stat.bg} ${stat.color} w-10 h-10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}><stat.icon size={20}/></div>
@@ -111,7 +111,7 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="p-6 bg-slate-900 rounded-[2rem] text-white space-y-4">
                      <div className="flex justify-between items-center border-b border-white/10 pb-4">
                         <span className="text-[9px] font-black text-slate-500 uppercase">Fiscal Multiplier</span>
-                        <span className="text-xl font-black italic text-emerald-400">{config.conversionRatio}</span>
+                        <span className="text-xl font-black italic text-green-400">{config.conversionRatio}</span>
                      </div>
                      <p className="text-[9px] text-slate-500 font-bold uppercase leading-relaxed">System assumes 1 point = Rs. {config.conversionRatio}. Conversion burns points instantly.</p>
                   </div>
@@ -119,7 +119,7 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                   <button 
                     onClick={handleSaveConfig}
                     disabled={isSaving}
-                    className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl active:scale-95 disabled:opacity-50"
+                    className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all shadow-xl active:scale-95 disabled:opacity-50"
                   >
                      {isSaving ? <Mini5GMicroLoader size={16} /> : 'Synchronize All Nodes'}
                   </button>
@@ -150,7 +150,7 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                <div className="relative flex-1">
                   <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                   <input 
-                    className="w-full pl-14 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 font-black text-slate-900"
+                    className="w-full pl-14 pr-4 py-4 bg-slate-50 border-none rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 font-black text-slate-900"
                     placeholder="Audit by referred name or ID..."
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
@@ -173,9 +173,9 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                       <div key={ref.id} className="p-8 hover:bg-slate-50 transition-colors group">
                          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                             <div className="flex items-center gap-6">
-                               <div className="w-14 h-14 bg-white border rounded-2xl flex items-center justify-center text-slate-400 shadow-sm group-hover:text-indigo-600 transition-colors relative">
+                               <div className="w-14 h-14 bg-white border rounded-2xl flex items-center justify-center text-slate-400 shadow-sm group-hover:text-blue-600 transition-colors relative">
                                   <UserCircle size={32} />
-                                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+                                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
                                </div>
                                <div>
                                   <div className="flex items-center gap-2 mb-1">
@@ -187,7 +187,7 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                             </div>
                             <div className="flex items-center gap-8">
                                <div className="text-right">
-                                  <p className="text-2xl font-black text-indigo-600 italic tracking-tighter">+{ref.totalPointsEarned}</p>
+                                  <p className="text-2xl font-black text-blue-600 italic tracking-tighter">+{ref.totalPointsEarned}</p>
                                   <p className="text-[8px] font-black text-slate-400 uppercase">Credited</p>
                                </div>
                                <button className="p-4 bg-slate-100 text-slate-400 hover:bg-slate-900 hover:text-white rounded-2xl transition-all">
@@ -198,12 +198,12 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
                          <div className="mt-8 grid grid-cols-4 gap-4">
                             {ref.stages.map((stg, si) => (
-                              <div key={si} className={`p-4 rounded-2xl border transition-all ${stg.completed ? 'bg-emerald-50 border-emerald-100' : 'bg-slate-50 border-slate-100 grayscale opacity-60'}`}>
+                              <div key={si} className={`p-4 rounded-2xl border transition-all ${stg.completed ? 'bg-green-50 border-green-100' : 'bg-slate-50 border-slate-100 grayscale opacity-60'}`}>
                                  <div className="flex justify-between items-start mb-2">
                                     <p className="text-[8px] font-black uppercase text-slate-500 tracking-widest">{stg.label}</p>
-                                    {stg.completed && <CheckCircle size={10} className="text-emerald-600" />}
+                                    {stg.completed && <CheckCircle size={10} className="text-green-600" />}
                                  </div>
-                                 <p className={`text-xs font-black italic ${stg.completed ? 'text-emerald-700' : 'text-slate-400'}`}>{stg.points} Pts</p>
+                                 <p className={`text-xs font-black italic ${stg.completed ? 'text-green-700' : 'text-slate-400'}`}>{stg.points} Pts</p>
                               </div>
                             ))}
                          </div>
@@ -226,3 +226,4 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default ReferralAdmin;
+

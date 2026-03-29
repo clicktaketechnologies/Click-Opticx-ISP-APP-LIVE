@@ -80,7 +80,7 @@ const SubscriberHome: React.FC<Props> = ({
     [state.invoices, user.id]);
 
   const scoreRange = useMemo(() => {
-    if (user.creditScore >= 750) return { label: 'Excellent', color: 'text-emerald-500', risk: '🟢 Low Risk' };
+    if (user.creditScore >= 750) return { label: 'Excellent', color: 'text-green-500', risk: '🟢 Low Risk' };
     if (user.creditScore >= 600) return { label: 'Good', color: 'text-blue-500', risk: '🟡 Medium' };
     return { label: 'Fair', color: 'text-orange-500', risk: '🟠 Warning' };
   }, [user.creditScore]);
@@ -129,28 +129,28 @@ const SubscriberHome: React.FC<Props> = ({
               {appearance.showAICalling && (
                 <button
                   onClick={() => onAction('ai-voice-call')}
-                  className="p-6 bg-slate-900 rounded-3xl border border-white/5 shadow-2xl text-left group overflow-hidden relative active:scale-95 transition-all md:col-span-1 border-b-8 border-indigo-900 hover:scale-[1.02] hover:-rotate-1"
+                  className="p-6 bg-slate-900 rounded-3xl border border-white/5 shadow-2xl text-left group overflow-hidden relative active:scale-95 transition-all md:col-span-1 border-b-8 border-blue-900 hover:scale-[1.02] hover:-rotate-1"
                 >
                   <div className="relative z-10">
-                    <div className="w-12 h-12 bg-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400 mb-4 border border-indigo-500/30 group-hover:scale-110 transition-transform shadow-lg">
+                    <div className="w-12 h-12 bg-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400 mb-4 border border-blue-500/30 group-hover:scale-110 transition-transform shadow-lg">
                       <PhoneCall size={24} />
                     </div>
                     <h4 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-1">Voice Support</h4>
                   </div>
-                  <Mic size={100} className="absolute -right-4 -bottom-4 opacity-10 text-indigo-400 pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+                  <Mic size={100} className="absolute -right-4 -bottom-4 opacity-10 text-blue-400 pointer-events-none group-hover:scale-125 transition-transform duration-700" />
                 </button>
               )}
 
               <div className={`grid grid-cols-2 gap-3 ${appearance.showAICalling ? 'md:col-span-2' : 'md:col-span-3'}`}>
                 <button onClick={() => onAction('ai-home')} className="p-5 bg-slate-900 rounded-2xl border border-white/5 shadow-xl text-left group overflow-hidden relative active:scale-95 transition-all border-b-8 border-slate-950 hover:scale-[1.02]">
-                  <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400 mb-2 border border-indigo-500/30 group-hover:scale-110 transition-transform shadow-md">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center text-blue-400 mb-2 border border-blue-500/30 group-hover:scale-110 transition-transform shadow-md">
                     <Cpu size={20} />
                   </div>
                   <h4 className="text-[10px] font-black text-white uppercase italic tracking-tighter">AI Analysis</h4>
-                  <Activity size={40} className="absolute -right-2 -bottom-2 opacity-10 text-indigo-400 pointer-events-none" />
+                  <Activity size={40} className="absolute -right-2 -bottom-2 opacity-10 text-blue-400 pointer-events-none" />
                 </button>
                 {appearance.showAIChat && (
-                  <button onClick={() => onAction('aichat')} className="p-5 bg-indigo-600 rounded-2xl border border-indigo-400 shadow-xl text-left group overflow-hidden relative active:scale-95 transition-all border-b-8 border-indigo-800 hover:scale-[1.02]">
+                  <button onClick={() => onAction('aichat')} className="p-5 bg-blue-600 rounded-2xl border border-blue-400 shadow-xl text-left group overflow-hidden relative active:scale-95 transition-all border-b-8 border-blue-800 hover:scale-[1.02]">
                     <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white mb-2 border border-white/30 group-hover:scale-110 transition-transform shadow-md">
                       <MessageSquare size={20} fill="currentColor" />
                     </div>
@@ -162,18 +162,18 @@ const SubscriberHome: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className={`mx-4 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl transition-all duration-700 border-b-8 hover:scale-[1.02] ${user.status === UserStatus.ACTIVE && !isExpired ? 'bg-indigo-600 border-indigo-800 shadow-indigo-200' : 'bg-rose-600 border-rose-800 shadow-rose-200'}`}>
+          <div className={`mx-4 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl transition-all duration-700 border-b-8 hover:scale-[1.02] ${user.status === UserStatus.ACTIVE && !isExpired ? 'bg-blue-600 border-blue-800 shadow-blue-200' : 'bg-rose-600 border-rose-800 shadow-rose-200'}`}>
             <div className="relative z-10 space-y-8">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <div className={`w-2.5 h-2.5 rounded-full ${!isExpired ? 'bg-emerald-400 animate-pulse' : 'bg-white shadow-[0_0_10px_white]'}`}></div>
+                    <div className={`w-2.5 h-2.5 rounded-full ${!isExpired ? 'bg-green-400 animate-pulse' : 'bg-white shadow-[0_0_10px_white]'}`}></div>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{isExpired ? 'Service Expired' : 'Active Account'}</span>
                   </div>
                   <h2 className="text-3xl font-black tracking-tighter uppercase italic">{currentPkg?.name || 'OFFLINE'}</h2>
                 </div>
                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-md overflow-hidden p-2 shrink-0 shadow-lg">
-                  <Wifi size={24} className={!isExpired ? 'text-emerald-300' : 'text-white'} />
+                  <Wifi size={24} className={!isExpired ? 'text-green-300' : 'text-white'} />
                 </div>
               </div>
 
@@ -183,7 +183,7 @@ const SubscriberHome: React.FC<Props> = ({
                     <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-white shadow-lg animate-pulse"><Clock size={18} /></div>
                     <div className="text-left">
                       <p className="text-[10px] font-black uppercase text-white leading-none mb-1">Verifying Request</p>
-                      <p className="text-[8px] font-bold uppercase text-indigo-200 tracking-widest truncate max-w-[180px]">Administrator approval in progress...</p>
+                      <p className="text-[8px] font-bold uppercase text-blue-200 tracking-widest truncate max-w-[180px]">Administrator approval in progress...</p>
                     </div>
                   </div>
                 </div>
@@ -207,7 +207,7 @@ const SubscriberHome: React.FC<Props> = ({
     if (section.id === 'rescue' && activeEL) {
       return (
         <div key="rescue" className="space-y-4 px-4">
-          <div className={`p-8 rounded-3xl border-4 shadow-xl flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500 border-b-8 hover:scale-[1.02] ${isELPastDue ? 'bg-rose-600 border-rose-400 text-white border-b-rose-800' : isELPending ? 'bg-indigo-600 border-indigo-400 text-white border-b-indigo-800' : 'bg-amber-600 border-amber-400 text-white border-b-amber-800'}`}>
+          <div className={`p-8 rounded-3xl border-4 shadow-xl flex flex-col gap-6 animate-in slide-in-from-bottom-4 duration-500 border-b-8 hover:scale-[1.02] ${isELPastDue ? 'bg-rose-600 border-rose-400 text-white border-b-rose-800' : isELPending ? 'bg-blue-600 border-blue-400 text-white border-b-blue-800' : 'bg-amber-600 border-amber-400 text-white border-b-amber-800'}`}>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-5 text-center sm:text-left">
                 <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center backdrop-blur-md border border-white/10 shrink-0 shadow-lg">
@@ -238,10 +238,10 @@ const SubscriberHome: React.FC<Props> = ({
         <button
           key="credit"
           onClick={() => onAction('ai-risk')}
-          className="bg-white rounded-3xl p-6 border-b-8 border-slate-100 shadow-xl flex items-center justify-between group active:scale-[0.98] transition-all mx-4 hover:shadow-2xl hover:-translate-y-2 hover:border-indigo-200"
+          className="bg-white rounded-3xl p-6 border-b-8 border-slate-100 shadow-xl flex items-center justify-between group active:scale-[0.98] transition-all mx-4 hover:shadow-2xl hover:-translate-y-2 hover:border-blue-200"
         >
           <div className="flex items-center gap-5">
-            <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border border-indigo-100 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-transform"><BarChart3 size={28} /></div>
+            <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-transform"><BarChart3 size={28} /></div>
             <div className="text-left space-y-1">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Trust Score</p>
               <div className="flex items-center gap-2">
@@ -250,7 +250,7 @@ const SubscriberHome: React.FC<Props> = ({
               </div>
             </div>
           </div>
-          <ChevronRight className="text-slate-200 group-hover:text-indigo-600 transition-transform group-hover:translate-x-1" size={24} />
+          <ChevronRight className="text-slate-200 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" size={24} />
         </button>
       );
     }
@@ -259,16 +259,16 @@ const SubscriberHome: React.FC<Props> = ({
       return (
         <div key="fiscal-summary" className="bg-white rounded-3xl border-b-8 border-slate-100 shadow-xl overflow-hidden flex flex-col mx-4 animate-in fade-in duration-700 hover:shadow-2xl transition-all hover:-translate-y-1">
           <div className="p-6 bg-slate-50/50 border-b border-slate-50 flex items-center justify-between">
-            <h3 className="text-[12px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2"><Wallet size={16} className="text-indigo-600" /> Account Balance</h3>
+            <h3 className="text-[12px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2"><Wallet size={16} className="text-blue-600" /> Account Balance</h3>
           </div>
           <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
               <div className="flex justify-between items-end"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Plan Expiry</p><p className={`text-xs font-black uppercase tracking-tight ${isExpired ? 'text-red-600' : 'text-slate-900'}`}>{user.expiryDate ? new Date(user.expiryDate).toLocaleDateString() : 'OFFLINE'}</p></div>
-              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden shadow-inner"><div className={`h-full transition-all duration-1000 ${isExpired ? 'bg-red-500' : 'bg-indigo-500'}`} style={{ width: isExpired ? '100%' : '65%' }}></div></div>
+              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden shadow-inner"><div className={`h-full transition-all duration-1000 ${isExpired ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: isExpired ? '100%' : '65%' }}></div></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Unpaid Dues</p><p className="text-lg font-black text-slate-900">{activeUnpaidCount}</p></div>
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Wallet Balance</p><p className={`text-lg font-black ${user.balance > 0 ? 'text-red-600' : 'text-emerald-600'}`}>Rs. {user.balance.toLocaleString()}</p></div>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Wallet Balance</p><p className={`text-lg font-black ${user.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>Rs. {user.balance.toLocaleString()}</p></div>
             </div>
           </div>
         </div>
@@ -299,7 +299,7 @@ const SubscriberHome: React.FC<Props> = ({
           {isDirectory && allItems.length > 4 && (
             <button
               onClick={() => setIsDirectoryExpanded(!isDirectoryExpanded)}
-              className="flex items-center gap-2 text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:underline"
+              className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline"
             >
               {isDirectoryExpanded ? <><ChevronUp size={14} /> Show Less</> : <><ChevronDown size={14} /> View {allItems.length} Nodes</>}
             </button>
@@ -336,7 +336,7 @@ const SubscriberHome: React.FC<Props> = ({
                   <Icon size={28} strokeWidth={3} />
                 </div>
                 <div className="z-10">
-                  <h4 className="text-[13px] font-black text-slate-900 uppercase tracking-tight leading-none mb-1 group-hover:text-indigo-600 transition-colors">{item.label}</h4>
+                  <h4 className="text-[13px] font-black text-slate-900 uppercase tracking-tight leading-none mb-1 group-hover:text-blue-600 transition-colors">{item.label}</h4>
                   <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest leading-tight">{item.category}</p>
                 </div>
                 <Icon
@@ -360,3 +360,4 @@ const SubscriberHome: React.FC<Props> = ({
 };
 
 export default SubscriberHome;
+

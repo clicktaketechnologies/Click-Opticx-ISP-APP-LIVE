@@ -74,7 +74,7 @@ class NotificationManager {
             html: `
         <div style="font-family: sans-serif; background: #f8fafc; padding: 40px; border-radius: 20px;">
           <div style="max-width: 500px; margin: 0 auto; background: white; padding: 40px; border-radius: 24px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
-            <h2 style="color: #4f46e5; margin-bottom: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -1px; font-style: italic;">Verify Your Identity</h2>
+            <h2 style="color: #1570ef; margin-bottom: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -1px; font-style: italic;">Verify Your Identity</h2>
             <p style="color: #64748b; font-size: 14px; margin-bottom: 30px; font-weight: 500;">A login attempt was made on your account. Use the following code to continue:</p>
             <div style="background: #f1f5f9; padding: 24px; border-radius: 16px; text-align: center; margin-bottom: 30px; border: 2px dashed #cbd5e1;">
               <span style="font-size: 32px; font-weight: 900; color: #1e293b; letter-spacing: 4px; font-family: monospace;">${code}</span>
@@ -97,7 +97,7 @@ class NotificationManager {
         <div style="font-family: sans-serif; background: #f8fafc; padding: 40px; border-radius: 20px;">
           <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 24px; border: 1px solid #e2e8f0;">
              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 30px;">
-                <h2 style="color: #4f46e5; margin: 0; font-weight: 900; font-style: italic;">Click Opticx Bill</h2>
+                <h2 style="color: #1570ef; margin: 0; font-weight: 900; font-style: italic;">Click Opticx Bill</h2>
                 <span style="font-size: 12px; font-weight: 900; color: #94a3b8; text-transform: uppercase; padding: 6px 12px; background: #f8fafc; border-radius: 8px;">DIGITAL INVOICE</span>
              </div>
              <p style="color: #64748b; line-height: 1.6;">A new billing cycle has been finalized. Your invoice <b>${invoiceId}</b> for <b>${amount}</b> is now ready for review.</p>
@@ -106,7 +106,7 @@ class NotificationManager {
                 <h3 style="margin: 5px 0 0 0; font-size: 24px; font-weight: 900; color: #1e293b;">${amount}</h3>
              </div>
              <div style="margin-top: 40px;">
-                <a href="http://localhost:3000/portal/invoices" style="display: block; width: 100%; padding: 16px; background: #4f46e5; color: white; text-decoration: none; border-radius: 12px; font-weight: 900; text-align: center; text-transform: uppercase; font-size: 12px;">Login to Portal & Pay</a>
+                <a href="http://localhost:3000/portal/invoices" style="display: block; width: 100%; padding: 16px; background: #1570ef; color: white; text-decoration: none; border-radius: 12px; font-weight: 900; text-align: center; text-transform: uppercase; font-size: 12px;">Login to Portal & Pay</a>
              </div>
           </div>
         </div>
@@ -169,3 +169,4 @@ class NotificationManager {
 }
 
 export const notificationManager = NotificationManager.getInstance();
+

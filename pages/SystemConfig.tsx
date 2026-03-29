@@ -44,12 +44,12 @@ const SystemConfig: React.FC = () => {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-all"
+          className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-xs font-bold text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all"
         />
         {type === 'password' && (
           <button 
             onClick={() => setShowSecrets(!showSecrets)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-indigo-400 transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-blue-400 transition-colors"
           >
             {showSecrets ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
@@ -64,7 +64,7 @@ const SystemConfig: React.FC = () => {
       <div className="flex justify-between items-end">
         <div>
           <h1 className="text-4xl font-black uppercase italic tracking-tighter text-slate-900 flex items-center gap-4">
-            <Settings className="text-indigo-600" size={40} />
+            <Settings className="text-blue-600" size={40} />
             System Control Plane
           </h1>
           <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-2 flex items-center gap-2">
@@ -75,7 +75,7 @@ const SystemConfig: React.FC = () => {
         <button
           onClick={handleSave}
           disabled={saving}
-          className={`px-8 py-4 ${saving ? 'bg-slate-400' : 'bg-indigo-600 hover:bg-indigo-700'} text-white rounded-2xl flex items-center gap-3 font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-indigo-600/20 transition-all active:scale-95`}
+          className={`px-8 py-4 ${saving ? 'bg-slate-400' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-2xl flex items-center gap-3 font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-blue-600/20 transition-all active:scale-95`}
         >
           {saving ? <Database className="animate-spin" size={16} /> : <Save size={16} />}
           {saving ? 'Synchronizing...' : 'Authorize & Save'}
@@ -83,7 +83,7 @@ const SystemConfig: React.FC = () => {
       </div>
 
       {status && (
-        <div className={`p-4 rounded-2xl border flex items-center gap-3 animate-in slide-in-from-top-4 duration-300 ${status.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
+        <div className={`p-4 rounded-2xl border flex items-center gap-3 animate-in slide-in-from-top-4 duration-300 ${status.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'}`}>
           {status.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
           <span className="text-xs font-black uppercase tracking-widest">{status.msg}</span>
         </div>
@@ -117,7 +117,7 @@ const SystemConfig: React.FC = () => {
 
           <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
             <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-600">
+              <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-600">
                 <Mail size={24} />
               </div>
               <div>
@@ -142,7 +142,7 @@ const SystemConfig: React.FC = () => {
         <div className="space-y-8">
           <div className="bg-slate-900 p-8 rounded-3xl border border-white/5 shadow-2xl space-y-8">
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-indigo-500/20 rounded-2xl text-indigo-400">
+              <div className="p-3 bg-blue-500/20 rounded-2xl text-blue-400">
                 <Bell size={24} />
               </div>
               <div>
@@ -162,18 +162,18 @@ const SystemConfig: React.FC = () => {
                 <button
                   key={item.key}
                   onClick={() => setPushConfig({ ...pushConfig, [item.key]: !item.value })}
-                  className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-indigo-500/50 transition-all group"
+                  className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-blue-500/50 transition-all group"
                 >
                   <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{item.label}</span>
-                  <div className={`w-12 h-6 rounded-full p-1 transition-all duration-300 ${item.value ? 'bg-indigo-600' : 'bg-slate-700'}`}>
+                  <div className={`w-12 h-6 rounded-full p-1 transition-all duration-300 ${item.value ? 'bg-blue-600' : 'bg-slate-700'}`}>
                     <div className={`w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-300 ${item.value ? 'translate-x-6' : 'translate-x-0'}`}></div>
                   </div>
                 </button>
               ))}
             </div>
 
-            <div className="p-6 bg-indigo-500/10 rounded-[2rem] border border-indigo-500/20">
-              <p className="text-[9px] font-black text-indigo-300 uppercase tracking-widest leading-loose text-center">
+            <div className="p-6 bg-blue-500/10 rounded-[2rem] border border-blue-500/20">
+              <p className="text-[9px] font-black text-blue-300 uppercase tracking-widest leading-loose text-center">
                 System will utilize the Service Worker background process to deliver these events even when the dashboard is closed.
               </p>
             </div>
@@ -200,3 +200,4 @@ const SystemConfig: React.FC = () => {
 };
 
 export default SystemConfig;
+

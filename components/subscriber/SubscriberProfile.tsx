@@ -133,8 +133,8 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
          case VerificationStatus.VERIFIED:
             return {
                label: 'Verified Profile', icon: ShieldCheck,
-               bg: 'bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600',
-               border: 'border-b-4 border-emerald-800'
+               bg: 'bg-gradient-to-br from-green-400 via-green-500 to-green-600',
+               border: 'border-b-4 border-green-800'
             };
          case VerificationStatus.PENDING:
             return {
@@ -155,7 +155,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
       <div className="space-y-6 pb-32 animate-in fade-in duration-500 max-w-2xl mx-auto">
          {successToast && (
             <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[1000] animate-in slide-in-from-top duration-500">
-               <div className="bg-emerald-600 text-white px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl flex items-center gap-3">
+               <div className="bg-green-600 text-white px-8 py-3 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl flex items-center gap-3">
                   <CheckCircle size={16} /> {successToast}
                </div>
             </div>
@@ -175,7 +175,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                   </div>
                   <button
                      onClick={() => imageInputRef.current?.click()}
-                     className="absolute -bottom-2 -right-2 p-3 bg-indigo-600 text-white rounded-2xl shadow-xl border-4 border-slate-900 hover:scale-110 hover:bg-indigo-500 transition-all z-20"
+                     className="absolute -bottom-2 -right-2 p-3 bg-blue-600 text-white rounded-2xl shadow-xl border-4 border-slate-900 hover:scale-110 hover:bg-blue-500 transition-all z-20"
                   >
                      <Camera size={20} />
                   </button>
@@ -194,10 +194,10 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                   <div className="pt-4 space-y-2 w-full max-w-[240px] mx-auto md:mx-0">
                      <div className="flex justify-between items-end">
                         <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Profile Completion</span>
-                        <span className="text-[10px] font-black text-indigo-400">{completion}%</span>
+                        <span className="text-[10px] font-black text-blue-400">{completion}%</span>
                      </div>
                      <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                        <div className="h-full bg-indigo-500 transition-all duration-1000 ease-out" style={{ width: `${completion}%` }}></div>
+                        <div className="h-full bg-blue-500 transition-all duration-1000 ease-out" style={{ width: `${completion}%` }}></div>
                      </div>
                   </div>
                </div>
@@ -216,7 +216,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
+                  className={`flex items-center gap-2 px-5 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                >
                   <tab.icon size={14} />
                   {tab.label}
@@ -230,13 +230,13 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                <div className="space-y-6">
                   <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8">
                      <div className="flex justify-between items-center mb-8">
-                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><User size={18} className="text-indigo-600" /> Identity Dossier</h3>
+                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><User size={18} className="text-blue-600" /> Identity Dossier</h3>
                         {!isEditing ? (
-                           <button onClick={() => setIsEditing(true)} className="p-3 bg-slate-50 text-indigo-600 rounded-xl hover:bg-indigo-50 transition-all"><Edit3 size={18} /></button>
+                           <button onClick={() => setIsEditing(true)} className="p-3 bg-slate-50 text-blue-600 rounded-xl hover:bg-blue-50 transition-all"><Edit3 size={18} /></button>
                         ) : (
                            <div className="flex gap-2">
                               <button onClick={() => setIsEditing(false)} className="p-3 bg-white border border-slate-200 text-slate-400 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all"><X size={18} /></button>
-                              <button onClick={handleSaveProfile} disabled={isSaving} className="p-3 bg-emerald-600 text-white rounded-xl shadow-lg active:scale-90 transition-all">
+                              <button onClick={handleSaveProfile} disabled={isSaving} className="p-3 bg-green-600 text-white rounded-xl shadow-lg active:scale-90 transition-all">
                                  {isSaving ? <Mini5GMicroLoader size={18} /> : <Save size={18} />}
                               </button>
                            </div>
@@ -260,7 +260,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                                  <field.icon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
                                  <input
                                     disabled={!isEditing || field.readOnly}
-                                    className={`w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold text-sm transition-all ${isEditing && !field.readOnly ? 'focus:border-indigo-500 bg-white shadow-inner' : 'cursor-not-allowed opacity-70'}`}
+                                    className={`w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold text-sm transition-all ${isEditing && !field.readOnly ? 'focus:border-blue-500 bg-white shadow-inner' : 'cursor-not-allowed opacity-70'}`}
                                     value={(formData as any)[field.key] || ''}
                                     onChange={e => setFormData({ ...formData, [field.key]: e.target.value })}
                                     autoComplete="off"
@@ -272,7 +272,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
 
                      <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all ${formData.biometricAllowed ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-slate-50 text-slate-300'}`}>
+                           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border transition-all ${formData.biometricAllowed ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-50 text-slate-300'}`}>
                               <Fingerprint size={24} />
                            </div>
                            <div>
@@ -282,7 +282,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                         </div>
                         <button
                            onClick={toggleBiometric}
-                           className={`w-14 h-8 rounded-full relative transition-all duration-300 ${formData.biometricAllowed ? 'bg-indigo-600 shadow-lg' : 'bg-slate-300'}`}
+                           className={`w-14 h-8 rounded-full relative transition-all duration-300 ${formData.biometricAllowed ? 'bg-blue-600 shadow-lg' : 'bg-slate-300'}`}
                         >
                            <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all ${formData.biometricAllowed ? 'left-7' : 'left-1'}`}></div>
                         </button>
@@ -343,7 +343,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                         <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><Wifi size={18} className="text-blue-600" /> Link Parameters</h3>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active infrastructure mapping</p>
                      </div>
-                     <div className="px-4 py-2 bg-slate-900 text-emerald-400 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">
+                     <div className="px-4 py-2 bg-slate-900 text-green-400 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">
                         {user.connectionType} LINK
                      </div>
                   </div>
@@ -355,7 +355,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                         { label: 'Renewal', value: user.autoRenewal ? 'Auto' : 'Manual' },
                         { label: 'MAC Node', value: user.pppoeId || 'PENDING' }
                      ].map(stat => (
-                        <div key={stat.label} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl group hover:border-indigo-100 transition-all">
+                        <div key={stat.label} className="p-4 bg-slate-50 border border-slate-100 rounded-2xl group hover:border-blue-100 transition-all">
                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</p>
                            <p className="text-xs font-black text-slate-800 uppercase italic">{stat.value}</p>
                         </div>
@@ -368,10 +368,10 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
                   <div className="p-8 border-b bg-slate-950 text-white flex items-center justify-between">
                      <div className="flex items-center gap-3">
-                        <History size={20} className="text-indigo-400" />
+                        <History size={20} className="text-blue-400" />
                         <h3 className="text-sm font-black uppercase tracking-widest italic">Security Pulse Log</h3>
                      </div>
-                     <span className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black uppercase text-indigo-300 border border-white/5">
+                     <span className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black uppercase text-blue-300 border border-white/5">
                         {securityLogs.length} Events
                      </span>
                   </div>
@@ -381,7 +381,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                         <div key={log.id} className="p-6 hover:bg-slate-50 transition-colors group">
                            <div className="flex justify-between items-start mb-2">
                               <div className="flex items-center gap-3">
-                                 <div className={`w-1.5 h-1.5 rounded-full ${log.riskLevel === 'Critical' ? 'bg-rose-500 shadow-[0_0_8px_rose]' : 'bg-indigo-400'}`}></div>
+                                 <div className={`w-1.5 h-1.5 rounded-full ${log.riskLevel === 'Critical' ? 'bg-rose-500 shadow-[0_0_8px_rose]' : 'bg-blue-400'}`}></div>
                                  <span className="text-[10px] font-black text-slate-900 uppercase tracking-tight">{log.action}</span>
                               </div>
                               <span className="text-[8px] font-bold text-slate-400 uppercase">{new Date(log.timestamp).toLocaleDateString()}</span>
@@ -404,3 +404,4 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
 };
 
 export default SubscriberProfile;
+

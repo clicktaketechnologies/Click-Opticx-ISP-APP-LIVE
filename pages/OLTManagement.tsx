@@ -77,7 +77,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
    const ConnectionStatusBadge = ({ olt }: { olt: OLTConfig }) => {
       const cs = olt.connectionStatus || 'Not Configured';
       const config: Record<string, { bg: string; text: string; dot: string; icon: any }> = {
-         'Connected': { bg: 'bg-emerald-100', text: 'text-emerald-600', dot: 'bg-emerald-500', icon: CheckCircle2 },
+         'Connected': { bg: 'bg-green-100', text: 'text-green-600', dot: 'bg-green-500', icon: CheckCircle2 },
          'Pending': { bg: 'bg-amber-100', text: 'text-amber-600', dot: 'bg-amber-500', icon: Loader2 },
          'Failed': { bg: 'bg-rose-100', text: 'text-rose-600', dot: 'bg-rose-500', icon: XCircle },
          'Not Configured': { bg: 'bg-slate-100', text: 'text-slate-500', dot: 'bg-slate-400', icon: WifiOff },
@@ -95,18 +95,18 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
    const StatusBadge = ({ status }: { status: string }) => (
       <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 ${
-         status === 'Online' ? 'bg-emerald-100 text-emerald-600' : 
+         status === 'Online' ? 'bg-green-100 text-green-600' : 
          status === 'Offline' ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-600'
       }`}>
          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
-            status === 'Online' ? 'bg-emerald-500' : status === 'Offline' ? 'bg-rose-500' : 'bg-slate-400'
+            status === 'Online' ? 'bg-green-500' : status === 'Offline' ? 'bg-rose-500' : 'bg-slate-400'
          }`}></div>
          {status}
       </span>
    );
 
    const SignalBadge = ({ dbm }: { dbm: number }) => {
-      const color = dbm > -25 ? 'text-emerald-500' : dbm > -28 ? 'text-amber-500' : 'text-rose-500';
+      const color = dbm > -25 ? 'text-green-500' : dbm > -28 ? 'text-amber-500' : 'text-rose-500';
       return (
          <span className={`font-black ${color}`}>
             {dbm} dBm
@@ -205,7 +205,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         <div className="flex items-start justify-between mb-6">
                            <div className="flex items-center gap-4">
                               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                                 olt.connectionStatus === 'Connected' ? 'bg-emerald-50 text-emerald-500' : 
+                                 olt.connectionStatus === 'Connected' ? 'bg-green-50 text-green-500' : 
                                  olt.connectionStatus === 'Failed' ? 'bg-rose-50 text-rose-500' :
                                  olt.connectionStatus === 'Pending' ? 'bg-amber-50 text-amber-500' :
                                  'bg-slate-50 text-slate-400'
@@ -248,7 +248,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            <button 
                               onClick={() => handleTestConnection(olt)}
                               disabled={isTestingId === olt.id}
-                              className="flex items-center justify-center gap-2 py-4 bg-emerald-50 text-emerald-600 rounded-2xl font-black text-[9px] uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all active:scale-95 disabled:opacity-50"
+                              className="flex items-center justify-center gap-2 py-4 bg-green-50 text-green-600 rounded-2xl font-black text-[9px] uppercase tracking-widest hover:bg-green-600 hover:text-white transition-all active:scale-95 disabled:opacity-50"
                            >
                               {isTestingId === olt.id ? <Loader2 size={14} className="animate-spin" /> : <Plug size={14} />}
                               Test
@@ -331,7 +331,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                               <td className="p-6">
                                  {user ? (
                                     <div className="flex items-center gap-2">
-                                       <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center font-black text-[10px] uppercase">
+                                       <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center font-black text-[10px] uppercase">
                                           {user.name.charAt(0)}
                                        </div>
                                        <div>
@@ -419,7 +419,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                     <div>
                         <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Plug & Play Discovery</h2>
                         <div className="flex items-center gap-2 mt-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></div>
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping"></div>
                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Continuous Background Scanning: ACTIVE</p>
                         </div>
                     </div>
@@ -619,15 +619,15 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         </div>
                      ) : testResult ? (
                         <div className="space-y-6">
-                           <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${testResult.success ? 'bg-emerald-50' : 'bg-rose-50'}`}>
-                              {testResult.success ? <CheckCircle2 size={40} className="text-emerald-500" /> : <XCircle size={40} className="text-rose-500" />}
+                           <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${testResult.success ? 'bg-green-50' : 'bg-rose-50'}`}>
+                              {testResult.success ? <CheckCircle2 size={40} className="text-green-500" /> : <XCircle size={40} className="text-rose-500" />}
                            </div>
                            <div>
                               <h3 className="text-xl font-black uppercase italic tracking-tighter text-slate-900">
                                  {testResult.success ? 'Connected Successfully' : 'Connection Failed'}
                               </h3>
                               {testResult.success && testResult.details && (
-                                 <p className="text-[10px] text-emerald-500 font-bold mt-2">Latency: OK • Status: {testResult.status || 'Online'}</p>
+                                 <p className="text-[10px] text-green-500 font-bold mt-2">Latency: OK • Status: {testResult.status || 'Online'}</p>
                               )}
                               {!testResult.success && testResult.error && (
                                  <div className="mt-4 p-4 bg-rose-50 rounded-2xl border border-rose-100 text-left">
@@ -657,7 +657,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
                   <div className="p-10 border-b border-slate-100 flex items-center justify-between bg-white/50">
                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${healthCheckResult?.success ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${healthCheckResult?.success ? 'bg-green-500 text-white' : 'bg-rose-500 text-white'}`}>
                            {healthCheckResult?.discovery ? <Search size={24} /> : (healthCheckResult?.success ? <CheckCircle size={24} /> : <AlertTriangle size={24} />)}
                         </div>
                         <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900">
@@ -706,7 +706,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                     </div>
                                     <div className="flex justify-between">
                                        <span className="text-xs text-slate-600 font-bold">Latency Check</span>
-                                       <span className="text-xs text-emerald-500 font-black">Success</span>
+                                       <span className="text-xs text-green-500 font-black">Success</span>
                                     </div>
                                  </div>
                                  {healthCheckResult?.error && (
@@ -736,3 +736,4 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default OLTManagement;
+

@@ -59,16 +59,16 @@ const AutomationRules: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="flex-1 min-w-0">
                      <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">{rule.name}</h3>
-                        <div className={`w-2 h-2 rounded-full ${rule.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`}></div>
+                        <div className={`w-2 h-2 rounded-full ${rule.enabled ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`}></div>
                      </div>
                      <div className="flex flex-wrap items-center gap-4">
                         <span className="px-2 py-1 bg-slate-900 text-white rounded text-[8px] font-black uppercase tracking-widest">WHEN: {rule.trigger.replace('_', ' ')}</span>
                         <span className="text-slate-300 font-black">»</span>
-                        <span className="px-2 py-1 bg-indigo-50 text-indigo-600 rounded text-[8px] font-black uppercase tracking-widest">CONDITION: {rule.condition}</span>
+                        <span className="px-2 py-1 bg-blue-50 text-blue-600 rounded text-[8px] font-black uppercase tracking-widest">CONDITION: {rule.condition}</span>
                         <span className="text-slate-300 font-black">»</span>
                         <div className="flex gap-1">
                            {rule.actions.map((a, i) => (
-                             <span key={i} className="px-2 py-1 bg-emerald-50 text-emerald-600 rounded text-[8px] font-black uppercase tracking-widest flex items-center gap-1">
+                             <span key={i} className="px-2 py-1 bg-green-50 text-green-600 rounded text-[8px] font-black uppercase tracking-widest flex items-center gap-1">
                                 {a.type === 'Email' ? <Mail size={10}/> : <Smartphone size={10}/>} {a.type}
                              </span>
                            ))}
@@ -79,11 +79,11 @@ const AutomationRules: React.FC<{ state: AppState }> = ({ state }) => {
                <div className="flex items-center gap-3 shrink-0">
                   <button 
                    onClick={() => db.saveCommRule({...rule, enabled: !rule.enabled})}
-                   className={`w-14 h-7 rounded-full relative transition-all duration-300 ${rule.enabled ? 'bg-emerald-50 shadow-emerald-200 shadow-lg' : 'bg-slate-300'}`}
+                   className={`w-14 h-7 rounded-full relative transition-all duration-300 ${rule.enabled ? 'bg-green-50 shadow-green-200 shadow-lg' : 'bg-slate-300'}`}
                   >
                      <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all duration-300 ${rule.enabled ? 'left-8' : 'left-1'}`}></div>
                   </button>
-                  <button className="p-3.5 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all border border-slate-100">
+                  <button className="p-3.5 bg-slate-50 text-slate-400 hover:text-blue-600 rounded-xl transition-all border border-slate-100">
                      <ChevronRight size={20}/>
                   </button>
                </div>
@@ -161,7 +161,7 @@ const AutomationRules: React.FC<{ state: AppState }> = ({ state }) => {
                        {formData.actions?.map((action, idx) => (
                          <div key={idx} className="p-6 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                               <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-inner text-indigo-600">
+                               <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-inner text-blue-600">
                                   {action.type === 'Email' ? <Mail size={18}/> : <Smartphone size={18}/>}
                                </div>
                                <div className="space-y-1">
@@ -208,3 +208,4 @@ const AutomationRules: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AutomationRules;
+

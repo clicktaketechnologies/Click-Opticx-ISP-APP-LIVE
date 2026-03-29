@@ -15,7 +15,7 @@ const TechnicalCard: React.FC<TechnicalCardProps> = ({
   icon: Icon, 
   onClick, 
   badge, 
-  badgeColor = "bg-indigo-600",
+  badgeColor = "bg-blue-600",
   sublabel
 }) => {
   return (

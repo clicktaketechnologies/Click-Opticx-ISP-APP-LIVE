@@ -85,7 +85,7 @@ const SpeedTestModal: React.FC<Props> = ({ onClose }) => {
         {/* Responsive Header */}
         <div className="p-5 sm:p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0">
               <Zap size={20} fill="currentColor" />
             </div>
             <div className="min-w-0">
@@ -114,7 +114,7 @@ const SpeedTestModal: React.FC<Props> = ({ onClose }) => {
                   strokeWidth={window.innerWidth < 640 ? "8" : "15"}
                   strokeDasharray="283"
                   strokeDashoffset={`${283 - (283 * progress) / 100}`}
-                  className={`transition-all duration-300 ${phase === 'upload' ? 'text-emerald-500' : 'text-indigo-600'}`}
+                  className={`transition-all duration-300 ${phase === 'upload' ? 'text-green-500' : 'text-blue-600'}`}
                 />
               </svg>
 
@@ -129,7 +129,7 @@ const SpeedTestModal: React.FC<Props> = ({ onClose }) => {
             </div>
 
             {phase === 'completed' && (
-              <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100 animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 px-4 py-1.5 rounded-full border border-green-100 animate-in fade-in slide-in-from-top-2">
                 <CheckCircle2 size={14} strokeWidth={3} />
                 <span className="text-[9px] font-black uppercase tracking-widest">Audit Registry Verified</span>
               </div>
@@ -139,12 +139,12 @@ const SpeedTestModal: React.FC<Props> = ({ onClose }) => {
           {/* Metrics Grid - Responsive Multi-column */}
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {[
-              { label: 'Download', value: metrics.download.toFixed(1), unit: 'Mbps', icon: ArrowDown, color: 'text-indigo-600', bg: 'bg-indigo-50', active: phase === 'download' },
-              { label: 'Upload', value: metrics.upload.toFixed(1), unit: 'Mbps', icon: ArrowUp, color: 'text-emerald-600', bg: 'bg-emerald-50', active: phase === 'upload' },
+              { label: 'Download', value: metrics.download.toFixed(1), unit: 'Mbps', icon: ArrowDown, color: 'text-blue-600', bg: 'bg-blue-50', active: phase === 'download' },
+              { label: 'Upload', value: metrics.upload.toFixed(1), unit: 'Mbps', icon: ArrowUp, color: 'text-green-600', bg: 'bg-green-50', active: phase === 'upload' },
               { label: 'Latency', value: metrics.ping, unit: 'ms', icon: Timer, color: 'text-blue-500', bg: 'bg-blue-50', active: phase === 'ping' },
               { label: 'Jitter', value: metrics.jitter, unit: 'ms', icon: Activity, color: 'text-rose-500', bg: 'bg-rose-50', active: phase === 'ping' }
             ].map((m) => (
-              <div key={m.label} className={`p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 transition-all group flex flex-col items-center gap-2 ${m.active ? 'border-indigo-500 bg-white shadow-xl scale-105 z-10' : 'bg-slate-50 border-slate-50 opacity-60 hover:opacity-100'}`}>
+              <div key={m.label} className={`p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 transition-all group flex flex-col items-center gap-2 ${m.active ? 'border-blue-500 bg-white shadow-xl scale-105 z-10' : 'bg-slate-50 border-slate-50 opacity-60 hover:opacity-100'}`}>
                 <div className={`w-8 h-8 sm:w-12 sm:h-12 ${m.bg} ${m.color} rounded-xl sm:rounded-2xl flex items-center justify-center shadow-inner group-hover:rotate-6 transition-transform`}>
                   <m.icon size={window.innerWidth < 640 ? 16 : 24} />
                 </div>
@@ -161,7 +161,7 @@ const SpeedTestModal: React.FC<Props> = ({ onClose }) => {
           {/* Technical Info Note */}
           <div className="p-5 sm:p-6 bg-slate-950 rounded-[1.5rem] sm:rounded-[2.5rem] text-white flex items-start gap-4 shadow-xl relative overflow-hidden shrink-0">
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0 border border-white/10">
-              <ShieldAlert size={20} className="text-indigo-400" />
+              <ShieldAlert size={20} className="text-blue-400" />
             </div>
             <div className="relative z-10">
               <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 italic">Node Trace Result</p>
@@ -195,3 +195,4 @@ const SpeedTestModal: React.FC<Props> = ({ onClose }) => {
 };
 
 export default SpeedTestModal;
+

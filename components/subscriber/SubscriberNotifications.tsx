@@ -27,19 +27,19 @@ const SubscriberNotifications: React.FC<{ user: ISPUser, state: AppState }> = ({
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[600px]">
          <div className="p-8 border-b bg-slate-950 text-white flex items-center justify-between">
             <div className="flex items-center gap-4">
-               <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+               <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
                   <Bell size={24} />
                </div>
                <div>
                   <h3 className="text-lg font-black uppercase tracking-tight italic">Your Notifications</h3>
-                  <p className="text-[9px] text-indigo-300 font-black uppercase tracking-widest">Recent Account Activity</p>
+                  <p className="text-[9px] text-blue-300 font-black uppercase tracking-widest">Recent Account Activity</p>
                </div>
             </div>
             <div className="flex gap-2">
                <button 
                   onClick={handleMarkAllRead}
                   title="Mark All as Read"
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl text-slate-400 hover:text-emerald-400 transition-all active:scale-90"
+                  className="p-3 bg-white/5 border border-white/10 rounded-xl text-slate-400 hover:text-green-400 transition-all active:scale-90"
                >
                   <ListChecks size={20}/>
                </button>
@@ -64,12 +64,12 @@ const SubscriberNotifications: React.FC<{ user: ISPUser, state: AppState }> = ({
                 <div 
                   key={n.id} 
                   onClick={() => !n.read && db.markNotificationRead(n.id)}
-                  className={`p-8 flex items-start gap-6 hover:bg-slate-50 transition-all group cursor-pointer relative ${!n.read ? 'bg-indigo-50/10' : 'bg-white'}`}
+                  className={`p-8 flex items-start gap-6 hover:bg-slate-50 transition-all group cursor-pointer relative ${!n.read ? 'bg-blue-50/10' : 'bg-white'}`}
                 >
                    {!n.read && (
-                     <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full shadow-[0_0_8px_rgba(79,70,229,0.5)]"></div>
+                     <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-[0_0_8px_rgba(79,70,229,0.5)]"></div>
                    )}
-                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner border transition-all ${n.type === 'success' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : n.type === 'error' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
+                   <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner border transition-all ${n.type === 'success' ? 'bg-green-50 text-green-600 border-green-100' : n.type === 'error' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
                       {n.type === 'success' ? <CheckCircle size={28} /> : <ShieldAlert size={28} />}
                    </div>
                    <div className="flex-1">
@@ -91,3 +91,4 @@ const SubscriberNotifications: React.FC<{ user: ISPUser, state: AppState }> = ({
 };
 
 export default SubscriberNotifications;
+

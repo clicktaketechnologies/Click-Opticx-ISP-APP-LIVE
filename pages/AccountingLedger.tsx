@@ -66,7 +66,7 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
             <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-              <UserCircle className="text-emerald-600" size={32} />
+              <UserCircle className="text-green-600" size={32} />
               {isDealer ? 'My Transaction Ledger' : 'Financial Transactions'}
             </h2>
             <p className="text-slate-500 font-medium">
@@ -75,7 +75,7 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
           </div>
           <button
             onClick={handleExportCSV}
-            className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black hover:bg-emerald-700 transition-all shadow-xl active:scale-95 uppercase tracking-widest"
+            className="w-full md:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-green-600 text-white rounded-2xl text-[10px] font-black hover:bg-green-700 transition-all shadow-xl active:scale-95 uppercase tracking-widest"
           >
             <Download size={18} />
             Download Records
@@ -152,7 +152,7 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
                         {entry.type === LedgerType.DEBIT ? <span className="text-red-600">{state.settings.currency} {entry.amount.toLocaleString()}</span> : '-'}
                       </td>
                       <td className="px-8 py-5 text-right font-black">
-                        {entry.type === LedgerType.CREDIT ? <span className="text-emerald-600">{state.settings.currency} {entry.amount.toLocaleString()}</span> : '-'}
+                        {entry.type === LedgerType.CREDIT ? <span className="text-green-600">{state.settings.currency} {entry.amount.toLocaleString()}</span> : '-'}
                       </td>
                       <td className="px-8 py-5 text-right font-black text-slate-900 bg-slate-50/50">
                         {state.settings.currency} {entry.balanceAfter.toLocaleString()}
@@ -170,3 +170,4 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AccountingLedger;
+

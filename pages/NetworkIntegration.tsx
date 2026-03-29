@@ -91,8 +91,8 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
       switch (status) {
          case 'Connected':
             return (
-               <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full border border-emerald-100 shadow-sm">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+               <div className="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-600 rounded-full border border-green-100 shadow-sm">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                   <span className="text-[10px] font-black uppercase tracking-widest">Connected</span>
                </div>
             );
@@ -155,7 +155,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
                         <Layers size={14} className="text-blue-600" /> Active OLT / Router Registry
                      </h3>
                      <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        <Activity size={12} className="text-emerald-500" />
+                        <Activity size={12} className="text-green-500" />
                         Pulse Monitoring: Active
                      </div>
                   </div>
@@ -163,7 +163,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
                      {nodes.map(node => (
                         <div key={node.id} className="p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:bg-slate-50/50 transition-colors group">
                            <div className="flex items-center gap-6 flex-1 min-w-0">
-                              <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border-2 shadow-inner transition-all ${node.status === 'Connected' ? 'bg-emerald-50 border-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white' : node.status === 'Error' ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-slate-100 border-slate-200 text-slate-400'}`}>
+                              <div className={`w-16 h-16 rounded-3xl flex items-center justify-center border-2 shadow-inner transition-all ${node.status === 'Connected' ? 'bg-green-50 border-green-100 text-green-600 group-hover:bg-green-600 group-hover:text-white' : node.status === 'Error' ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-slate-100 border-slate-200 text-slate-400'}`}>
                                  <Server size={32} />
                               </div>
                               <div className="flex-1 min-w-0">
@@ -172,7 +172,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
                                     {getStatusBadge(node.status)}
                                  </div>
                                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
-                                    <Shield size={12} className="text-indigo-400" /> {node.vendor.replace('_', ' ')} Registry • {node.ip}:{node.port} ({node.protocol})
+                                    <Shield size={12} className="text-blue-400" /> {node.vendor.replace('_', ' ')} Registry • {node.ip}:{node.port} ({node.protocol})
                                  </p>
                                  <div className="flex items-center gap-4 mt-3">
                                     <div className="flex items-center gap-2 text-[9px] font-black text-slate-500 uppercase tracking-widest">
@@ -181,7 +181,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
                                     </div>
                                  </div>
                                  {testResults[node.id] && (
-                                    <div className={`mt-3 p-3 rounded-xl text-[10px] font-bold uppercase flex flex-col gap-3 animate-in slide-in-from-top-2 ${testResults[node.id].success ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
+                                    <div className={`mt-3 p-3 rounded-xl text-[10px] font-bold uppercase flex flex-col gap-3 animate-in slide-in-from-top-2 ${testResults[node.id].success ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-rose-50 text-rose-700 border-rose-100'}`}>
                                        <div className="flex items-center gap-2">
                                           {testResults[node.id].success ? <CheckCircle size={14} /> : <XCircle size={14} />}
                                           {testResults[node.id].message}
@@ -221,17 +221,17 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
 
                <div className="bg-slate-900 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl">
                   <div className="relative z-10 space-y-6">
-                     <div className="flex items-center gap-3 text-indigo-400">
+                     <div className="flex items-center gap-3 text-blue-400">
                         <Terminal size={24} />
                         <h3 className="text-xl font-black uppercase tracking-tight italic">Global Command Console</h3>
                      </div>
                      <div className="p-6 bg-white/5 border border-white/10 rounded-[2rem] font-mono text-xs text-slate-400 space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-                        <p className="flex gap-4"><span className="text-emerald-500 shrink-0">12:00:01</span> [OLT-01] Polling Subscribers...</p>
-                        <p className="flex gap-4"><span className="text-emerald-500 shrink-0">12:00:02</span> [OLT-01] Authorized for 422 identities.</p>
+                        <p className="flex gap-4"><span className="text-green-500 shrink-0">12:00:01</span> [OLT-01] Polling Subscribers...</p>
+                        <p className="flex gap-4"><span className="text-green-500 shrink-0">12:00:02</span> [OLT-01] Authorized for 422 identities.</p>
                         <p className="flex gap-4"><span className="text-blue-500 shrink-0">12:00:05</span> [OLT-02] Syncing hardware registry v8.5...</p>
                         <p className="flex gap-4"><span className="text-amber-500 shrink-0">12:00:10</span> [SYSTEM] Pushing authorized WIFI rotation signals...</p>
-                        <p className="flex gap-4"><span className="text-indigo-400 shrink-0">12:04:22</span> [SNMP] Global health audit heartbeat recorded.</p>
-                        <p className="flex gap-4"><span className="text-emerald-500 shrink-0">12:05:00</span> [API] Connected successfully with 22 vendor devices.</p>
+                        <p className="flex gap-4"><span className="text-blue-400 shrink-0">12:04:22</span> [SNMP] Global health audit heartbeat recorded.</p>
+                        <p className="flex gap-4"><span className="text-green-500 shrink-0">12:05:00</span> [API] Connected successfully with 22 vendor devices.</p>
                      </div>
                   </div>
                   <Globe className="absolute -right-16 -bottom-16 opacity-5 scale-150 pointer-events-none" size={300} />
@@ -241,7 +241,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="space-y-6">
                <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 space-y-8">
                   <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-                     <Settings size={18} className="text-indigo-600" /> API Feature Control
+                     <Settings size={18} className="text-blue-600" /> API Feature Control
                   </h3>
 
                   <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 flex items-center justify-between group transition-all hover:bg-white">
@@ -253,7 +253,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
                      </div>
                      <button
                         onClick={handleToggleReset}
-                        className={`w-14 h-8 rounded-full relative transition-all duration-300 ${allowReset ? 'bg-emerald-600 shadow-emerald-200 shadow-lg' : 'bg-slate-300'}`}
+                        className={`w-14 h-8 rounded-full relative transition-all duration-300 ${allowReset ? 'bg-green-600 shadow-green-200 shadow-lg' : 'bg-slate-300'}`}
                      >
                         <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${allowReset ? 'left-7' : 'left-1'}`}></div>
                      </button>
@@ -270,14 +270,14 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
 
                <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 space-y-6">
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                     <Activity size={16} className="text-emerald-500" /> Connection Statistics
+                     <Activity size={16} className="text-green-500" /> Connection Statistics
                   </h3>
                   <div className="space-y-4">
                      {[
-                        { label: 'Uptime Rank', value: '99.99%', icon: Activity, color: 'text-emerald-500' },
+                        { label: 'Uptime Rank', value: '99.99%', icon: Activity, color: 'text-green-500' },
                         { label: 'Active Ports', value: '3,842', icon: Link2, color: 'text-blue-500' },
                         { label: 'CPU Load', value: '24%', icon: Cpu, color: 'text-amber-500' },
-                        { label: 'RAM Sync', value: '4.2 GB', icon: HardDrive, color: 'text-indigo-500' }
+                        { label: 'RAM Sync', value: '4.2 GB', icon: HardDrive, color: 'text-blue-500' }
                      ].map(stat => (
                         <div key={stat.label} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group hover:bg-white transition-all">
                            <div className="flex items-center gap-3">
@@ -363,7 +363,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
                         </div>
 
                         <div className="p-8 bg-slate-900 rounded-[2.5rem] space-y-6">
-                           <div className="flex items-center gap-3 text-indigo-400">
+                           <div className="flex items-center gap-3 text-blue-400">
                               <Key size={18} />
                               <h4 className="text-xs font-black uppercase tracking-widest italic">Communication Auth</h4>
                            </div>
@@ -427,3 +427,4 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default NetworkIntegration;
+

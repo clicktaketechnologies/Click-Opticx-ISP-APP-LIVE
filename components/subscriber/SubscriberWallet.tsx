@@ -123,7 +123,7 @@ const SubscriberWallet: React.FC<Props> = ({ user, state, pendingTopups }) => {
                {state.ledger.filter(l => l.userId === user.id).slice(0, 15).map(l => (
                   <div key={l.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex items-center justify-between group shadow-sm hover:shadow-md transition-all">
                      <div className="flex items-center gap-5">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${l.type === 'Credit' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${l.type === 'Credit' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-blue-50 text-blue-600 border-blue-100'}`}>
                            {l.type === 'Credit' ? <CheckCircle size={22} /> : <History size={22} />}
                         </div>
                         <div>
@@ -131,7 +131,7 @@ const SubscriberWallet: React.FC<Props> = ({ user, state, pendingTopups }) => {
                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{new Date(l.timestamp).toLocaleDateString()} • Method: {l.method || 'System'}</p>
                         </div>
                      </div>
-                     <p className={`text-lg font-black italic tracking-tighter ${l.type === 'Credit' ? 'text-emerald-600' : 'text-slate-900'}`}>
+                     <p className={`text-lg font-black italic tracking-tighter ${l.type === 'Credit' ? 'text-green-600' : 'text-slate-900'}`}>
                         {l.type === 'Credit' ? '+' : ''}{l.amount}
                      </p>
                   </div>
@@ -152,3 +152,4 @@ const SubscriberWallet: React.FC<Props> = ({ user, state, pendingTopups }) => {
 };
 
 export default SubscriberWallet;
+

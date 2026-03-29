@@ -77,11 +77,11 @@ const AudienceSegments: React.FC<{ state: AppState }> = ({ state }) => {
                      ))}
                   </div>
                   <div className="flex gap-2">
-                     <button onClick={() => { setFormData(seg); setIsModalOpen(true); }} className="flex-1 py-3 bg-slate-50 text-slate-500 rounded-xl font-black text-[9px] uppercase hover:bg-indigo-50 hover:text-indigo-600 transition-all border border-slate-100">Edit Group</button>
+                     <button onClick={() => { setFormData(seg); setIsModalOpen(true); }} className="flex-1 py-3 bg-slate-50 text-slate-500 rounded-xl font-black text-[9px] uppercase hover:bg-blue-50 hover:text-blue-600 transition-all border border-slate-100">Edit Group</button>
                      <button className="p-3 bg-slate-50 text-slate-300 hover:text-rose-600 rounded-xl transition-all"><Trash2 size={18}/></button>
                   </div>
                </div>
-               <Sparkles className="absolute -right-8 -bottom-8 opacity-[0.03] scale-150 text-indigo-900" size={140} />
+               <Sparkles className="absolute -right-8 -bottom-8 opacity-[0.03] scale-150 text-blue-900" size={140} />
             </div>
          ))}
          
@@ -186,3 +186,4 @@ const AudienceSegments: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AudienceSegments;
+

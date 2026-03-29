@@ -41,13 +41,13 @@ const PushNotifications: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
-            <BellRing className="text-indigo-600" size={32} />
+            <BellRing className="text-blue-600" size={32} />
             Push Notifications
           </h2>
           <p className="text-slate-500 font-medium">Send instant notifications to your users' phones or browsers.</p>
         </div>
         <div className="px-6 py-3 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
           <span className="text-[10px] font-black uppercase text-slate-700">System Ready</span>
         </div>
       </div>
@@ -65,7 +65,7 @@ const PushNotifications: React.FC<{ state: AppState }> = ({ state }) => {
                     <button
                       key={t.key}
                       onClick={() => { setTargetType(t.key); setTargetId(''); }}
-                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${targetType === t.key ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
+                      className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${targetType === t.key ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
                     >
                       {t.label}
                     </button>
@@ -76,7 +76,7 @@ const PushNotifications: React.FC<{ state: AppState }> = ({ state }) => {
                   {targetType === 'Individual' && (
                     <div className="space-y-2 animate-in slide-in-from-top-2">
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Select User</label>
-                       <select className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600" value={targetId} onChange={e => setTargetId(e.target.value)}>
+                       <select className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-blue-600" value={targetId} onChange={e => setTargetId(e.target.value)}>
                           <option value="">Search user...</option>
                           {state.users.filter(u => !u.deleted).map(u => <option key={u.id} value={u.id}>{u.name} ({u.connectionId})</option>)}
                        </select>
@@ -86,7 +86,7 @@ const PushNotifications: React.FC<{ state: AppState }> = ({ state }) => {
                   {targetType === 'Segment' && (
                     <div className="space-y-2 animate-in slide-in-from-top-2">
                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Select Group</label>
-                       <select className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600" value={targetId} onChange={e => setTargetId(e.target.value)}>
+                       <select className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-blue-600" value={targetId} onChange={e => setTargetId(e.target.value)}>
                           <option value="">Select a group...</option>
                           {state.audienceSegments.map(s => <option key={s.id} value={s.id}>{s.name} ({s.subscriberCount} Users)</option>)}
                        </select>
@@ -96,11 +96,11 @@ const PushNotifications: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="space-y-6">
                      <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Notification Title</label>
-                        <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 uppercase" placeholder="e.g. NETWORK ALERT" value={title} onChange={e => setTitle(e.target.value)} />
+                        <input className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-blue-600 uppercase" placeholder="e.g. NETWORK ALERT" value={title} onChange={e => setTitle(e.target.value)} />
                      </div>
                      <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Message Content</label>
-                        <textarea className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xs h-32 resize-none outline-none focus:border-indigo-600 uppercase" placeholder="Brief message..." value={message} onChange={e => setMessage(e.target.value)} />
+                        <textarea className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xs h-32 resize-none outline-none focus:border-blue-600 uppercase" placeholder="Brief message..." value={message} onChange={e => setMessage(e.target.value)} />
                      </div>
                   </div>
 
@@ -138,7 +138,7 @@ const PushNotifications: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="space-y-6">
             <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white space-y-8 shadow-2xl relative overflow-hidden flex flex-col justify-between h-[300px]">
                <div className="relative z-10 space-y-4">
-                  <h4 className="text-xs font-black uppercase tracking-widest text-indigo-400">System Health</h4>
+                  <h4 className="text-xs font-black uppercase tracking-widest text-blue-400">System Health</h4>
                   <div className="grid grid-cols-1 gap-4">
                      <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
                         <p className="text-[9px] font-black text-slate-500 uppercase mb-1 italic">Delivery Success Rate</p>
@@ -150,11 +150,11 @@ const PushNotifications: React.FC<{ state: AppState }> = ({ state }) => {
             </div>
 
             {success && (
-              <div className="p-8 bg-emerald-50 border-2 border-emerald-100 rounded-[2.5rem] flex items-center gap-6 animate-in zoom-in duration-300">
-                 <div className="w-14 h-14 bg-emerald-500 text-white rounded-2xl flex items-center justify-center shadow-lg shrink-0"><CheckCircle size={32}/></div>
+              <div className="p-8 bg-green-50 border-2 border-green-100 rounded-[2.5rem] flex items-center gap-6 animate-in zoom-in duration-300">
+                 <div className="w-14 h-14 bg-green-500 text-white rounded-2xl flex items-center justify-center shadow-lg shrink-0"><CheckCircle size={32}/></div>
                  <div>
-                    <h4 className="text-sm font-black text-emerald-900 uppercase italic">Notification Sent</h4>
-                    <p className="text-[9px] text-emerald-700 font-bold uppercase tracking-widest leading-tight">Your notification has been successfully delivered.</p>
+                    <h4 className="text-sm font-black text-green-900 uppercase italic">Notification Sent</h4>
+                    <p className="text-[9px] text-green-700 font-bold uppercase tracking-widest leading-tight">Your notification has been successfully delivered.</p>
                  </div>
               </div>
             )}
@@ -184,3 +184,4 @@ const PushNotifications: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default PushNotifications;
+

@@ -63,7 +63,7 @@ const ReferralPointsHistory: React.FC<Props> = ({ onClose }) => {
               logs.map(log => (
                 <div key={log.id} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-all group">
                    <div className="flex items-center gap-5">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${log.amount > 0 ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${log.amount > 0 ? 'bg-green-50 text-green-600 border-green-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
                          {log.amount > 0 ? <TrendingUp size={20}/> : <TrendingDown size={20}/>}
                       </div>
                       <div>
@@ -74,7 +74,7 @@ const ReferralPointsHistory: React.FC<Props> = ({ onClose }) => {
                          </div>
                       </div>
                    </div>
-                   <p className={`text-lg font-black italic tracking-tighter ${log.amount > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                   <p className={`text-lg font-black italic tracking-tighter ${log.amount > 0 ? 'text-green-600' : 'text-rose-600'}`}>
                       {log.amount > 0 ? '+' : ''}{log.amount.toLocaleString()}
                    </p>
                 </div>
@@ -87,3 +87,4 @@ const ReferralPointsHistory: React.FC<Props> = ({ onClose }) => {
 };
 
 export default ReferralPointsHistory;
+

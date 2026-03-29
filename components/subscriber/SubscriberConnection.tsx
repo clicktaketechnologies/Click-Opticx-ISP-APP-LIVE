@@ -12,7 +12,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
 
   const getStatusUI = (status: ConnectionStatus = ConnectionStatus.PENDING) => {
     switch(status) {
-      case ConnectionStatus.ACTIVE: return { label: 'Active', color: 'text-emerald-400', bg: 'bg-emerald-400/10', icon: CheckCircle };
+      case ConnectionStatus.ACTIVE: return { label: 'Active', color: 'text-green-400', bg: 'bg-green-400/10', icon: CheckCircle };
       case ConnectionStatus.INSTALLED: return { label: 'Installed', color: 'text-blue-400', bg: 'bg-blue-400/10', icon: ShieldCheck };
       default: return { label: 'Pending', color: 'text-amber-400', bg: 'bg-amber-400/10', icon: Clock };
     }
@@ -60,7 +60,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
                <div className="space-y-1">
                   <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em] italic">Connection Details</p>
                   <h2 className="text-4xl font-black tracking-tighter uppercase italic flex items-center gap-3">
-                     {user.connectionType === 'Fiber' ? <Flame className="text-blue-400" /> : <Wifi className="text-emerald-400" />}
+                     {user.connectionType === 'Fiber' ? <Flame className="text-blue-400" /> : <Wifi className="text-green-400" />}
                      {user.connectionType} Account
                   </h2>
                </div>
@@ -77,7 +77,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
                </div>
                <div className="text-right">
                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Type</p>
-                  <p className="text-lg font-black text-indigo-400 uppercase italic tracking-tighter">{user.connectionType === 'Fiber' ? 'FTTH / Fiber' : 'PTP / Wireless'}</p>
+                  <p className="text-lg font-black text-blue-400 uppercase italic tracking-tighter">{user.connectionType === 'Fiber' ? 'FTTH / Fiber' : 'PTP / Wireless'}</p>
                </div>
             </div>
          </div>
@@ -102,7 +102,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
                  breakdown.map((item, i) => (
                    <div key={i} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-all group">
                       <div className="flex items-center gap-5">
-                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors shadow-sm border border-slate-100`}>
+                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors shadow-sm border border-slate-100`}>
                             {item.label.includes('Cable') || item.label.includes('CAT6') ? <HardDrive size={22}/> : <Cpu size={22}/>}
                          </div>
                          <div>
@@ -119,11 +119,11 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
             <div className="p-8 bg-slate-900 text-white flex justify-between items-center relative overflow-hidden">
                <div className="relative z-10">
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic mb-1">Total Value</p>
-                  <h4 className="text-3xl font-black text-emerald-400 italic tracking-tighter">Rs. {grandTotal.toLocaleString()}</h4>
+                  <h4 className="text-3xl font-black text-green-400 italic tracking-tighter">Rs. {grandTotal.toLocaleString()}</h4>
                </div>
                <div className="relative z-10">
                   <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-2xl flex items-center gap-2">
-                     <ShieldCheck size={14} className="text-emerald-400" />
+                     <ShieldCheck size={14} className="text-green-400" />
                      <span className="text-[9px] font-black uppercase tracking-widest">System Verified</span>
                   </div>
                </div>
@@ -139,7 +139,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
          </p>
       </div>
 
-      <button className="w-full py-6 bg-white border-2 border-slate-100 text-slate-400 rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-indigo-600 hover:text-indigo-600 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-sm">
+      <button className="w-full py-6 bg-white border-2 border-slate-100 text-slate-400 rounded-3xl font-black text-[10px] uppercase tracking-[0.2em] hover:border-blue-600 hover:text-blue-600 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-sm">
          <Activity size={18} /> View Network Details
       </button>
     </div>
@@ -147,3 +147,4 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
 };
 
 export default SubscriberConnection;
+

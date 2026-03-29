@@ -45,7 +45,7 @@ const StripeSettings: React.FC<Props> = ({ state, onBack }) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 pb-20 max-w-4xl mx-auto">
       <div className="flex items-center gap-6">
-         <button onClick={onBack} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-indigo-600 transition-all active:scale-90">
+         <button onClick={onBack} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-blue-600 transition-all active:scale-90">
             <ArrowLeft size={24} />
          </button>
          <div>
@@ -85,15 +85,15 @@ const StripeSettings: React.FC<Props> = ({ state, onBack }) => {
                   <div className="grid grid-cols-1 gap-6">
                      <div className="space-y-2">
                         <label className="text-[9px] font-black text-slate-500 uppercase ml-1 italic">Publishable Key</label>
-                        <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-indigo-600 transition-all" value={formData.config.publishableKey} onChange={e => updateConfig('publishableKey', e.target.value)} />
+                        <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-blue-600 transition-all" value={formData.config.publishableKey} onChange={e => updateConfig('publishableKey', e.target.value)} />
                      </div>
                      <div className="space-y-2">
                         <label className="text-[9px] font-black text-slate-500 uppercase ml-1 italic">Secret Security Key</label>
-                        <input type={showSecrets ? 'text' : 'password'} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-indigo-600 transition-all" value={formData.config.secretKey} onChange={e => updateConfig('secretKey', e.target.value)} />
+                        <input type={showSecrets ? 'text' : 'password'} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-blue-600 transition-all" value={formData.config.secretKey} onChange={e => updateConfig('secretKey', e.target.value)} />
                      </div>
                      <div className="space-y-2">
                         <label className="text-[9px] font-black text-slate-500 uppercase ml-1 italic">Webhook Signing Secret</label>
-                        <input type={showSecrets ? 'text' : 'password'} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-indigo-600 transition-all" value={formData.config.webhookSecret} onChange={e => updateConfig('webhookSecret', e.target.value)} />
+                        <input type={showSecrets ? 'text' : 'password'} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-blue-600 transition-all" value={formData.config.webhookSecret} onChange={e => updateConfig('webhookSecret', e.target.value)} />
                      </div>
                   </div>
                </div>
@@ -151,3 +151,4 @@ const StripeSettings: React.FC<Props> = ({ state, onBack }) => {
 };
 
 export default StripeSettings;
+

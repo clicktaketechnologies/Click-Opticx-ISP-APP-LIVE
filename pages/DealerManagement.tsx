@@ -184,14 +184,14 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
             <div className="flex justify-between items-start mb-4 relative z-10">
-               <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center border border-emerald-100">
+               <div className="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center border border-green-100">
                   <ArrowDownLeft size={24} />
                </div>
-               <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full uppercase">Settled</span>
+               <span className="text-[10px] font-black text-green-500 bg-green-50 px-3 py-1 rounded-full uppercase">Settled</span>
             </div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest relative z-10">Paid Balance Received</p>
-            <h3 className="text-3xl font-black text-emerald-600 mt-2 tracking-tight relative z-10">Rs. {stats.paid.toLocaleString()}</h3>
-            <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform text-emerald-500">
+            <h3 className="text-3xl font-black text-green-600 mt-2 tracking-tight relative z-10">Rs. {stats.paid.toLocaleString()}</h3>
+            <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform text-green-500">
                <CheckCircle size={120} />
             </div>
          </div>
@@ -222,7 +222,7 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
               </h3>
               <div className="flex items-center gap-4">
                  <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-[9px] font-black uppercase text-slate-400">Distribution</span></div>
-                 <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"></div><span className="text-[9px] font-black uppercase text-slate-400">Recovery</span></div>
+                 <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-500"></div><span className="text-[9px] font-black uppercase text-slate-400">Recovery</span></div>
               </div>
             </div>
             <div className="flex-1">
@@ -230,14 +230,14 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorDist" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/></linearGradient>
-                    <linearGradient id="colorPaid" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/><stop offset="95%" stopColor="#10b981" stopOpacity={0}/></linearGradient>
+                    <linearGradient id="colorPaid" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#32d583" stopOpacity={0.1}/><stop offset="95%" stopColor="#32d583" stopOpacity={0}/></linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} fontWeight="black" axisLine={false} tickLine={false} dy={10} />
                   <YAxis stroke="#94a3b8" fontSize={9} fontWeight="black" axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '16px', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }} />
                   <Area type="monotone" dataKey="distributed" stroke="#3b82f6" fillOpacity={1} fill="url(#colorDist)" strokeWidth={3} />
-                  <Area type="monotone" dataKey="paid" stroke="#10b981" fillOpacity={1} fill="url(#colorPaid)" strokeWidth={3} />
+                  <Area type="monotone" dataKey="paid" stroke="#32d583" fillOpacity={1} fill="url(#colorPaid)" strokeWidth={3} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -263,7 +263,7 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                     <div className="text-right">
                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Available Wallet</p>
-                      <p className="text-2xl font-black text-emerald-600">Rs. {(dealer.balance || 0).toLocaleString()}</p>
+                      <p className="text-2xl font-black text-green-600">Rs. {(dealer.balance || 0).toLocaleString()}</p>
                     </div>
                 </div>
 
@@ -299,7 +299,7 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
                     {state.notifications.filter(n => n.message.toLowerCase().includes('dealer')).slice(0, 5).map(notif => (
                        <div key={notif.id} className="flex gap-3 items-start border-l-2 border-slate-700 pl-4 py-1">
                           <div>
-                             <p className="text-[10px] font-black uppercase text-emerald-400">{notif.title}</p>
+                             <p className="text-[10px] font-black uppercase text-green-400">{notif.title}</p>
                              <p className="text-[10px] text-slate-400 font-bold leading-relaxed">{notif.message}</p>
                           </div>
                        </div>
@@ -316,7 +316,7 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
               <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Partner Guidelines</h3>
               <ul className="space-y-4">
                  {[
-                   { label: 'Full Paid', text: 'Load is activated upon cash verification.', color: 'text-emerald-500' },
+                   { label: 'Full Paid', text: 'Load is activated upon cash verification.', color: 'text-green-500' },
                    { label: 'On Credit', text: 'Temporary load with immediate debt entry.', color: 'text-orange-500' },
                    { label: 'Pay Later', text: 'Formal commitment with defined promise date.', color: 'text-purple-500' }
                  ].map(item => (
@@ -396,7 +396,7 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="grid grid-cols-3 gap-3">
                     <button 
                        onClick={() => setLoadData({...loadData, mode: 'paid'})} 
-                       className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${loadData.mode === 'paid' ? 'bg-emerald-50 border-emerald-500 text-emerald-700 shadow-lg scale-105' : 'bg-white border-slate-100 text-slate-400 grayscale'}`}
+                       className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${loadData.mode === 'paid' ? 'bg-green-50 border-green-500 text-green-700 shadow-lg scale-105' : 'bg-white border-slate-100 text-slate-400 grayscale'}`}
                     >
                        <Banknote size={20} />
                        <span className="text-[8px] font-black uppercase tracking-tight">Full Paid</span>
@@ -431,7 +431,7 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
               )}
 
               <div className="p-6 bg-slate-50 border border-slate-100 rounded-3xl flex items-start gap-4 shadow-inner">
-                 {loadData.mode === 'paid' && <ShieldCheck className="text-emerald-500 mt-1 shrink-0" size={24} />}
+                 {loadData.mode === 'paid' && <ShieldCheck className="text-green-500 mt-1 shrink-0" size={24} />}
                  {loadData.mode === 'credit' && <ShieldAlert className="text-orange-500 mt-1 shrink-0" size={24} />}
                  {loadData.mode === 'pay_later' && <Clock className="text-purple-500 mt-1 shrink-0" size={24} />}
                  <div>
@@ -462,3 +462,4 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default DealerManagement;
+

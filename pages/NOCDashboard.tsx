@@ -115,7 +115,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 
    const StatusRing = ({ status }: { status: string }) => (
       <div className={`w-3 h-3 rounded-full ${
-         status === 'Online' || status === 'Normal' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 
+         status === 'Online' || status === 'Normal' ? 'bg-green-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 
          status === 'Warning' || status === 'Standby' ? 'bg-amber-500' : 'bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]'
       } animate-pulse`} />
    );
@@ -126,12 +126,12 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
          {/* TOP CONTROL BAR */}
          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-5">
-               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-colors ${isNocMode ? 'bg-indigo-500 text-white' : 'bg-indigo-600 text-white'}`}>
+               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-colors ${isNocMode ? 'bg-blue-500 text-white' : 'bg-blue-600 text-white'}`}>
                   <Activity size={32} />
                </div>
                <div>
                   <h1 className="text-3xl font-black uppercase italic tracking-tighter leading-none">NETWORK CONTROL PANEL</h1>
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] mt-2 opacity-50 flex items-center gap-2 text-indigo-400">
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] mt-2 opacity-50 flex items-center gap-2 text-blue-400">
                      <Shield size={12} /> ➡ Real-time system monitoring and health alerts
                   </p>
                </div>
@@ -139,18 +139,18 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 
             <div className="flex items-center gap-3">
                <div className={`flex items-center gap-2 px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest ${isNocMode ? 'bg-white/5' : 'bg-white shadow-sm'}`}>
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                  <span className="text-emerald-500">LIVE FEED</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping" />
+                  <span className="text-green-500">LIVE FEED</span>
                   <div className="w-px h-4 bg-white/10 mx-1" />
                   <Clock size={14} className="text-slate-400" />
                   <span className="opacity-50">Sync:</span>
-                  <span className="text-indigo-400">{lastUpdated.toLocaleTimeString()}</span>
+                  <span className="text-blue-400">{lastUpdated.toLocaleTimeString()}</span>
                </div>
                
                <select 
                   value={refreshRate} 
                   onChange={(e) => setRefreshRate(Number(e.target.value))}
-                  className={`px-4 py-3 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-2 focus:ring-indigo-500/50 ${isNocMode ? 'bg-white/5 text-slate-300' : 'bg-white text-slate-700 shadow-sm'}`}
+                  className={`px-4 py-3 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-2 focus:ring-blue-500/50 ${isNocMode ? 'bg-white/5 text-slate-300' : 'bg-white text-slate-700 shadow-sm'}`}
                >
                   <option value={5}>5s REFRESH</option>
                   <option value={10}>10s REFRESH</option>
@@ -159,7 +159,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 
                <button 
                   onClick={() => setIsNocMode(!isNocMode)}
-                  className={`px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${isNocMode ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'bg-slate-900 text-white hover:bg-black'}`}
+                  className={`px-4 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${isNocMode ? 'bg-blue-500 text-white hover:bg-blue-400' : 'bg-slate-900 text-white hover:bg-black'}`}
                >
                   {isNocMode ? 'Light UI' : 'Dark Mode'}
                </button>
@@ -168,7 +168,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 
          {/* SYSTEM HEALTH OVERVIEW */}
          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 mt-4">
-            <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden transition-all ${isNocMode ? 'bg-indigo-600 border-indigo-500 shadow-[0_20px_50px_rgba(79,70,229,0.3)]' : 'bg-indigo-600 text-white shadow-xl'}`}>
+            <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden transition-all ${isNocMode ? 'bg-blue-600 border-blue-500 shadow-[0_20px_50px_rgba(79,70,229,0.3)]' : 'bg-blue-600 text-white shadow-xl'}`}>
                <div className="flex items-center justify-between mb-4 relative z-10">
                   <div className="flex items-center gap-3">
                      <Zap size={24} className="text-white" />
@@ -191,7 +191,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mt-2 italic">Active ONUs on Cluster</div>
             </div>
 
-            <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden transition-all ${isNocMode ? 'bg-emerald-600 border-emerald-500 shadow-[0_20px_40px_rgba(5,150,105,0.3)]' : 'bg-emerald-600 text-white shadow-xl'}`}>
+            <div className={`p-8 rounded-[2.5rem] border relative overflow-hidden transition-all ${isNocMode ? 'bg-green-600 border-green-500 shadow-[0_20px_40px_rgba(5,150,105,0.3)]' : 'bg-green-600 text-white shadow-xl'}`}>
                <div className="flex items-center justify-between mb-4 relative z-10">
                   <div className="flex items-center gap-3">
                      <Database size={24} className="text-white" />
@@ -206,8 +206,8 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
          {/* 1. TOP NETWORK SUMMARY BAR */}
          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-4 mb-8">
             {[
-               { label: 'Users', val: stats.totalSubscribers, color: 'text-indigo-400', icon: Users, isLive: true },
-               { label: 'Online Users', val: stats.onlineUsers, color: 'text-emerald-400', icon: CheckCircle2, isLive: true },
+               { label: 'Users', val: stats.totalSubscribers, color: 'text-blue-400', icon: Users, isLive: true },
+               { label: 'Online Users', val: stats.onlineUsers, color: 'text-green-400', icon: CheckCircle2, isLive: true },
                { label: 'Offline Users', val: stats.offlineUsers, color: 'text-rose-400', icon: AlertCircle, isLive: true },
                { label: 'Suspended Users', val: stats.suspendedUsers, color: 'text-amber-400', icon: Info, isLive: true },
                { label: 'Routers', val: stats.routersOnline, color: 'text-blue-400', icon: Server, isLive: true },
@@ -221,8 +221,8 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                      <div className="flex items-center gap-1.5">
                         {stat.isLive && (
                            <div className="flex items-center gap-1">
-                              <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                              <span className="text-[6px] font-black uppercase text-emerald-500 tracking-tighter">LIVE</span>
+                              <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                              <span className="text-[6px] font-black uppercase text-green-500 tracking-tighter">LIVE</span>
                            </div>
                         )}
                         {stat.pulse && <div className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />}
@@ -243,10 +243,10 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                <div className={`p-8 rounded-[2.5rem] border ${isNocMode ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
                   <div className="flex items-center justify-between mb-8">
                      <div className="flex items-center gap-3">
-                        <Globe className="text-indigo-400" size={24} />
+                        <Globe className="text-blue-400" size={24} />
                         <h2 className="text-lg font-black uppercase tracking-tighter">Main Internet Links</h2>
                      </div>
-                     <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full italic">Main Connection Active</span>
+                     <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-blue-500/10 text-blue-400 rounded-full italic">Main Connection Active</span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -263,7 +263,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            <div className="grid grid-cols-3 gap-4 relative z-10">
                               <div>
                                  <p className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-1">Status</p>
-                                 <p className={`text-xs font-black ${link.status === 'Online' ? 'text-emerald-400' : 'text-amber-400'}`}>{link.status}</p>
+                                 <p className={`text-xs font-black ${link.status === 'Online' ? 'text-green-400' : 'text-amber-400'}`}>{link.status}</p>
                               </div>
                               <div>
                                  <p className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-1">Latency</p>
@@ -278,14 +278,14 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            {/* Visual usage bar */}
                            <div className="mt-4 h-1.5 bg-white/5 rounded-full overflow-hidden">
                               <div 
-                                 className={`h-full transition-all duration-1000 ${link.status === 'Online' ? 'bg-indigo-500' : 'bg-slate-500'}`}
+                                 className={`h-full transition-all duration-1000 ${link.status === 'Online' ? 'bg-blue-500' : 'bg-slate-500'}`}
                                  style={{ width: `${(link.usageMbps / link.capacityMbps) * 100}%` }}
                               />
                            </div>
                            
                            {/* Background pulse for primary */}
                            {link.status === 'Online' && (
-                              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[40px] rounded-full -m-16" />
+                              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[40px] rounded-full -m-16" />
                            )}
                         </div>
                      ))}
@@ -309,7 +309,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            <div key={nas.id} className={`p-5 rounded-3xl border transition-all ${isNocMode ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-slate-100 shadow-sm hover:shadow-md'}`}>
                               <div className="flex items-center justify-between mb-4">
                                  <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${nas.status === 'Online' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${nas.status === 'Online' ? 'bg-green-500/10 text-green-500' : 'bg-rose-500/10 text-rose-500'}`}>
                                        <Database size={16} />
                                     </div>
                                     <div>
@@ -319,7 +319,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                                  </div>
                                  <div className="flex items-center gap-2">
                                     <StatusRing status={nas.status} />
-                                    <span className={`text-[6px] font-black uppercase tracking-tighter ${nas.status === 'Online' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                    <span className={`text-[6px] font-black uppercase tracking-tighter ${nas.status === 'Online' ? 'text-green-500' : 'text-rose-500'}`}>
                                        {nas.status === 'Online' ? 'LIVE DATA' : 'NOT CONNECTED'}
                                     </span>
                                  </div>
@@ -367,7 +367,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                                  </div>
                                  <div className="flex items-center gap-2">
                                     <StatusRing status={olt.status} />
-                                    <span className={`text-[6px] font-black uppercase tracking-tighter ${olt.status === 'Online' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                    <span className={`text-[6px] font-black uppercase tracking-tighter ${olt.status === 'Online' ? 'text-green-500' : 'text-rose-500'}`}>
                                        {olt.status === 'Online' ? 'LIVE TELEMETRY' : 'DUMMY DATA'}
                                     </span>
                                  </div>
@@ -376,7 +376,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                                  <div>
                                     <p className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-1">Active ONUs</p>
                                     <div className="flex items-baseline gap-1">
-                                       <span className="text-lg font-black text-emerald-400">
+                                       <span className="text-lg font-black text-green-400">
                                           {state.onus.filter(o => o.oltNode === olt.id && o.status === 'Online').length}
                                        </span>
                                        <span className="text-[8px] font-black opacity-20">REGISTERED</span>
@@ -427,7 +427,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                                  <tr key={onu.id} className="hover:bg-white/5 transition-colors group">
                                     <td className="p-4">
                                        <div className="flex items-center gap-3">
-                                          <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center font-black text-[10px] group-hover:bg-indigo-600 transition-colors">
+                                          <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center font-black text-[10px] group-hover:bg-blue-600 transition-colors">
                                              {user?.name.charAt(0)}
                                           </div>
                                           <div className="text-xs font-black">{user?.name}</div>
@@ -443,7 +443,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                                        </span>
                                     </td>
                                     <td className="p-4 text-right">
-                                       <div className="flex items-center justify-end gap-2 text-[9px] font-black uppercase tracking-tighter text-indigo-400">
+                                       <div className="flex items-center justify-end gap-2 text-[9px] font-black uppercase tracking-tighter text-blue-400">
                                           <Zap size={12} /> Inspect Splice / Clean Port
                                        </div>
                                     </td>
@@ -459,13 +459,13 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                <div className={`p-8 rounded-[2.5rem] border ${isNocMode ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
                   <div className="flex items-center justify-between mb-10">
                      <div className="flex items-center gap-3">
-                        <PieChart className="text-indigo-400" size={24} />
+                        <PieChart className="text-blue-400" size={24} />
                         <h2 className="text-lg font-black uppercase tracking-tighter">Network Activity</h2>
-                        <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[7px] font-black uppercase tracking-tighter">LIVE DATA</span>
+                        <span className="px-2 py-0.5 bg-green-500/10 text-green-500 rounded text-[7px] font-black uppercase tracking-tighter">LIVE DATA</span>
                      </div>
                      <div className="flex items-center gap-2 bg-black/20 p-1 rounded-2xl">
                         {['5M', '1H', '24H'].map(r => (
-                           <button key={r} className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${r === '5M' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-white'}`}>{r}</button>
+                           <button key={r} className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${r === '5M' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-white'}`}>{r}</button>
                         ))}
                      </div>
                   </div>
@@ -475,11 +475,11 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                         state.liveUsage.slice(0, 60).map((u, i) => (
                            <div key={i} className="flex-1 flex flex-col gap-0.5 justify-end h-full">
                               <div 
-                                 className="w-full bg-indigo-500/40 hover:bg-indigo-500 transition-all rounded-t-sm" 
+                                 className="w-full bg-blue-500/40 hover:bg-blue-500 transition-all rounded-t-sm" 
                                  style={{ height: `${Math.min(100, (u.download / 100) * 100)}%` }} 
                               />
                               <div 
-                                 className="w-full bg-emerald-500/40 hover:bg-emerald-500 transition-all rounded-b-sm" 
+                                 className="w-full bg-green-500/40 hover:bg-green-500 transition-all rounded-b-sm" 
                                  style={{ height: `${Math.min(100, (u.upload / 20) * 100)}%` }} 
                               />
                            </div>
@@ -495,13 +495,13 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="mt-6 flex items-center justify-center gap-12">
                      <div className="flex items-center gap-3">
-                        <div className="w-4 h-4 rounded bg-indigo-500 shadow-[0_0_10px_rgba(79,70,229,0.3)]" />
+                        <div className="w-4 h-4 rounded bg-blue-500 shadow-[0_0_10px_rgba(79,70,229,0.3)]" />
                         <span className="text-[10px] font-black uppercase tracking-widest opacity-60">
                            Total Download ({state.liveUsage?.[0]?.download || 0} Mbps)
                         </span>
                      </div>
                      <div className="flex items-center gap-3">
-                        <div className="w-4 h-4 rounded bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" />
+                        <div className="w-4 h-4 rounded bg-green-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" />
                         <span className="text-[10px] font-black uppercase tracking-widest opacity-60">
                            Total Upload ({state.liveUsage?.[0]?.upload || 0} Mbps)
                         </span>
@@ -526,7 +526,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            <button 
                               key={f} 
                               onClick={() => setActiveFilter(f)}
-                              className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${activeFilter === f ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-white'}`}
+                              className={`px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${activeFilter === f ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-white'}`}
                            >
                               {f}
                            </button>
@@ -561,7 +561,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            <div className="grid grid-cols-2 gap-3 mt-4">
                               <button 
                                  onClick={() => setToast({ message: 'Alert Acknowledged', type: 'success' })}
-                                 className="py-3 bg-white/5 hover:bg-emerald-600 hover:text-white transition-all rounded-xl text-[9px] font-black uppercase tracking-widest"
+                                 className="py-3 bg-white/5 hover:bg-green-600 hover:text-white transition-all rounded-xl text-[9px] font-black uppercase tracking-widest"
                               >
                                  Acknowledge
                               </button>
@@ -586,16 +586,16 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   <div className="grid grid-cols-2 gap-4">
                      {[
                         { label: 'Diagnostic', icon: RefreshCw, color: 'bg-blue-500' },
-                        { label: 'Broadcast', icon: MessageSquare, color: 'bg-indigo-500' },
+                        { label: 'Broadcast', icon: MessageSquare, color: 'bg-blue-500' },
                         { label: 'Flush DNS', icon: Trash2, color: 'bg-slate-500' },
                         { label: 'Kick All', icon: Zap, color: 'bg-rose-500' },
-                        { label: 'Auto Fix', icon: Sparkles, icon2: Zap, color: 'bg-emerald-500' },
+                        { label: 'Auto Fix', icon: Sparkles, icon2: Zap, color: 'bg-green-500' },
                         { label: 'Force Sync', icon: HardDrive, color: 'bg-cyan-500' }
                      ].map((action, i) => (
                         <button 
                            key={i} 
                            onClick={() => handleOperation(action.label)}
-                           className={`flex flex-col items-center justify-center gap-3 p-6 rounded-[2rem] border transition-all active:scale-95 ${isNocMode ? 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-indigo-500/50' : 'bg-slate-50 border-slate-100 hover:bg-white hover:shadow-xl'}`}
+                           className={`flex flex-col items-center justify-center gap-3 p-6 rounded-[2rem] border transition-all active:scale-95 ${isNocMode ? 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-blue-500/50' : 'bg-slate-50 border-slate-100 hover:bg-white hover:shadow-xl'}`}
                         >
                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white ${action.color} shadow-lg shadow-${action.color}/20`}>
                               <action.icon size={20} />
@@ -609,7 +609,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                {/* 9. RECENT SYSTEM ACTIVITY */}
                <div className={`p-8 rounded-[2.5rem] border ${isNocMode ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
                   <h2 className="text-lg font-black uppercase tracking-tighter mb-8 flex items-center gap-3">
-                     <History size={24} className="text-emerald-400" />
+                     <History size={24} className="text-green-400" />
                      Activity Log
                   </h2>
                   <div className="space-y-6">
@@ -617,13 +617,13 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                         <div key={log.id} className="flex gap-4 relative">
                            <div className="flex flex-col items-center">
                               <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                                 <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                                 <div className="w-2 h-2 rounded-full bg-blue-500" />
                               </div>
                               <div className="w-px h-full bg-white/5 mt-2" />
                            </div>
                            <div className="pb-6">
                               <div className="flex items-center justify-between mb-1">
-                                 <p className="text-[10px] font-black text-indigo-400 truncate w-32 uppercase tracking-widest">{log.adminEmail}</p>
+                                 <p className="text-[10px] font-black text-blue-400 truncate w-32 uppercase tracking-widest">{log.adminEmail}</p>
                                  <span className="text-[8px] font-black opacity-20">{log.timestamp.slice(11, 16)}</span>
                               </div>
                               <p className="text-[11px] font-bold opacity-80">{log.action}</p>
@@ -647,7 +647,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="fixed bottom-10 right-10 flex flex-col items-end gap-2 pointer-events-none opacity-20">
             <p className="text-[10px] font-mono tracking-tighter italic">NOC CORE VERSION 1.2.0 (LIVE)</p>
             <div className="flex items-center gap-6 text-[8px] font-black tracking-[0.5em] uppercase">
-               <span className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,1)]" /> CLOUD SYNCED</span>
+               <span className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-green-500 shadow-[0_0_5px_rgba(16,185,129,1)]" /> CLOUD SYNCED</span>
                <span className="flex items-center gap-2"><div className="w-1 h-1 rounded-full bg-blue-500 shadow-[0_0_5px_rgba(59,130,246,1)]" /> MULTI-TENANT</span>
             </div>
          </div>
@@ -656,8 +656,8 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
          {toast.message && (
             <div className="fixed top-12 left-1/2 -translate-x-1/2 z-[2000] animate-in slide-in-from-top duration-500">
                <div className={`px-8 py-4 rounded-[2rem] shadow-2xl flex items-center gap-4 border ${
-                  toast.type === 'success' ? 'bg-emerald-600 border-emerald-400' : 
-                  toast.type === 'info' ? 'bg-indigo-600 border-indigo-400' : 'bg-rose-600 border-rose-400'
+                  toast.type === 'success' ? 'bg-green-600 border-green-400' : 
+                  toast.type === 'info' ? 'bg-blue-600 border-blue-400' : 'bg-rose-600 border-rose-400'
                } text-white`}>
                   {toast.type === 'success' ? <CheckCircle size={20} /> : <Zap size={20} className="animate-pulse" />}
                   <span className="text-xs font-black uppercase tracking-widest">{toast.message}</span>
@@ -670,3 +670,4 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default NOCDashboard;
+

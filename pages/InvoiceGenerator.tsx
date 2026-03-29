@@ -150,14 +150,14 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-            <Calculator className="text-emerald-600" size={32} />
+            <Calculator className="text-green-600" size={32} />
             Billing Engine
           </h2>
           <p className="text-slate-500 font-medium">Auto-calculate service dues and generate digital invoices.</p>
         </div>
         <div className="flex gap-2">
           {[1, 2, 3].map(s => (
-            <div key={s} className={`w-10 h-2 rounded-full transition-all duration-500 ${step >= s ? 'bg-emerald-600 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-200'}`}></div>
+            <div key={s} className={`w-10 h-2 rounded-full transition-all duration-500 ${step >= s ? 'bg-green-600 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-200'}`}></div>
           ))}
         </div>
       </div>
@@ -165,7 +165,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
       {step === 1 && (
         <div className="bg-white rounded-[2.5rem] p-10 shadow-sm border border-slate-100 space-y-8 animate-in slide-in-from-bottom-4">
           <div className="space-y-4 text-center max-w-md mx-auto">
-             <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto border border-emerald-100">
+             <div className="w-16 h-16 bg-green-50 text-green-600 rounded-3xl flex items-center justify-center mx-auto border border-green-100">
                 <Users size={32} />
              </div>
              <h3 className="text-xl font-black text-slate-800 uppercase tracking-tighter">Locate Subscriber</h3>
@@ -177,7 +177,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
             <input 
               type="text" 
               placeholder="Filter by Name, Connection ID, or Mobile..." 
-              className="w-full pl-12 pr-4 py-5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all font-black text-slate-900"
+              className="w-full pl-12 pr-4 py-5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-green-500/10 transition-all font-black text-slate-900"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               autoFocus
@@ -189,10 +189,10 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                <button 
                 key={user.id}
                 onClick={() => handleSelectUser(user)}
-                className="w-full p-6 flex items-center justify-between bg-white border border-slate-100 rounded-[1.5rem] hover:border-emerald-500 hover:shadow-xl transition-all text-left group"
+                className="w-full p-6 flex items-center justify-between bg-white border border-slate-100 rounded-[1.5rem] hover:border-green-500 hover:shadow-xl transition-all text-left group"
                >
                  <div className="flex items-center gap-5">
-                    <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors border shadow-inner">
+                    <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-green-50 group-hover:text-green-600 transition-colors border shadow-inner">
                        <UserCircle size={24} />
                     </div>
                     <div>
@@ -207,9 +207,9 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                  <div className="flex items-center gap-4">
                     <div className="text-right hidden sm:block">
                        <p className="text-[9px] font-black text-slate-400 uppercase">Balance</p>
-                       <p className={`text-xs font-black ${user.balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>Rs. {user.balance.toLocaleString()}</p>
+                       <p className={`text-xs font-black ${user.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>Rs. {user.balance.toLocaleString()}</p>
                     </div>
-                    <ChevronRight className="text-slate-200 group-hover:text-emerald-500 transition-transform group-hover:translate-x-1" />
+                    <ChevronRight className="text-slate-200 group-hover:text-green-500 transition-transform group-hover:translate-x-1" />
                  </div>
                </button>
              ))}
@@ -233,7 +233,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                       <button
                         key={mode.id}
                         onClick={() => setInvoiceMode(mode.id as any)}
-                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${invoiceMode === mode.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                        className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${invoiceMode === mode.id ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                       >
                         <mode.icon size={14} />
                         {mode.label}
@@ -247,7 +247,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                           <div className="space-y-2">
                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Target Service Tier</label>
                              <select 
-                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-emerald-500/10"
+                              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-800 outline-none focus:ring-2 focus:ring-green-500/10"
                               value={selectedPkg?.id || ''}
                               onChange={e => {
                                 const p = state.packages.find(pkg => pkg.id === e.target.value);
@@ -269,7 +269,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Calculated Gross Total (Override)</label>
                              <div className="relative group">
                                 <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xl">{state.settings.currency}</span>
-                                <input type="number" className="w-full pl-16 pr-6 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-4xl outline-none focus:border-emerald-500 transition-all text-slate-900" value={customAmount} onChange={e => setCustomAmount(Number(e.target.value))} />
+                                <input type="number" className="w-full pl-16 pr-6 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-4xl outline-none focus:border-green-500 transition-all text-slate-900" value={customAmount} onChange={e => setCustomAmount(Number(e.target.value))} />
                              </div>
                           </div>
                        </div>
@@ -322,7 +322,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                  <button 
                   onClick={handleGenerate}
                   disabled={isProcessing}
-                  className="w-full py-6 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                  className="w-full py-6 bg-blue-600 text-white font-black rounded-3xl shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
                  >
                     {isProcessing ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20} />}
                     {isProcessing ? 'Verifying Registry...' : 'Manufacture Official Invoice'}
@@ -335,7 +335,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                  <div className="relative z-10">
                     <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2"><User size={14} /> Active Target Node</h4>
                     <div className="flex items-center gap-4 mb-8">
-                       <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-indigo-400 border border-white/5">
+                       <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-blue-400 border border-white/5">
                           <UserCircle size={28} />
                        </div>
                        <div>
@@ -346,7 +346,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                     <div className="p-5 bg-white/5 border border-white/5 rounded-3xl space-y-3">
                        <div>
                           <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Active Balance</p>
-                          <p className={`text-2xl font-black ${selectedUser.balance > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                          <p className={`text-2xl font-black ${selectedUser.balance > 0 ? 'text-rose-400' : 'text-green-400'}`}>
                             {state.settings.currency} {selectedUser.balance.toLocaleString()}
                           </p>
                        </div>
@@ -368,8 +368,8 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
       )}
 
       {step === 3 && generatedInv && (
-        <div className="bg-white rounded-[3rem] p-12 shadow-2xl border-4 border-emerald-50 text-center space-y-10 animate-in zoom-in duration-500 max-w-2xl mx-auto">
-           <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner animate-bounce">
+        <div className="bg-white rounded-[3rem] p-12 shadow-2xl border-4 border-green-50 text-center space-y-10 animate-in zoom-in duration-500 max-w-2xl mx-auto">
+           <div className="w-24 h-24 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner animate-bounce">
               <CheckCircle size={56} />
            </div>
            
@@ -410,7 +410,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
               
               <button 
                 onClick={handleDuplicate}
-                className="w-full py-5 bg-emerald-50 text-emerald-600 border-2 border-emerald-100 font-black rounded-3xl shadow-sm hover:bg-emerald-600 hover:text-white transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
+                className="w-full py-5 bg-green-50 text-green-600 border-2 border-green-100 font-black rounded-3xl shadow-sm hover:bg-green-600 hover:text-white transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
               >
                 <Copy size={18} /> Duplicate This Transaction
               </button>
@@ -422,7 +422,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
               setSelectedUser(null);
               setStep(1);
             }}
-            className="text-slate-400 font-black uppercase text-[10px] tracking-widest hover:text-emerald-600 transition-all block w-full mt-4"
+            className="text-slate-400 font-black uppercase text-[10px] tracking-widest hover:text-green-600 transition-all block w-full mt-4"
            >
               Process Another Node
            </button>
@@ -433,3 +433,4 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
 };
 
 export default InvoiceGenerator;
+

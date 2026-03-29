@@ -158,14 +158,14 @@ const SubscriberWeather: React.FC = () => {
     if (code === 0) return { 
       label: 'Clear Sky', 
       icon: Sun, 
-      bg: isDay ? 'from-amber-400 to-orange-600' : 'from-slate-800 to-indigo-950',
+      bg: isDay ? 'from-amber-400 to-orange-600' : 'from-slate-800 to-blue-950',
       iconColor: 'text-amber-300',
       animation: 'animate-pulse'
     };
     if (code >= 1 && code <= 3) return { 
       label: 'Partly Cloudy', 
       icon: CloudSun, 
-      bg: isDay ? 'from-blue-400 to-indigo-600' : 'from-slate-700 to-slate-900',
+      bg: isDay ? 'from-blue-400 to-blue-600' : 'from-slate-700 to-slate-900',
       iconColor: 'text-blue-100',
       animation: ''
     };
@@ -179,14 +179,14 @@ const SubscriberWeather: React.FC = () => {
     if (code >= 51 && code <= 67) return { 
       label: 'Active Rain', 
       icon: CloudRain, 
-      bg: 'from-blue-600 to-indigo-900',
+      bg: 'from-blue-600 to-blue-900',
       iconColor: 'text-blue-300',
       animation: 'animate-bounce'
     };
     if (code >= 95) return { 
       label: 'Stormy', 
       icon: CloudLightning, 
-      bg: 'from-slate-900 via-indigo-950 to-slate-900',
+      bg: 'from-slate-900 via-blue-950 to-slate-900',
       iconColor: 'text-yellow-400',
       animation: 'animate-pulse'
     };
@@ -224,7 +224,7 @@ const SubscriberWeather: React.FC = () => {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-2 flex items-center gap-2">
-                   {location.source === 'GPS' ? <Navigation size={10} className="text-emerald-400 animate-pulse"/> : <Globe size={10} className="text-blue-400"/>}
+                   {location.source === 'GPS' ? <Navigation size={10} className="text-green-400 animate-pulse"/> : <Globe size={10} className="text-blue-400"/>}
                    {location.source === 'GPS' ? 'GPS Verified' : location.source === 'Timezone' ? 'Estimated Location' : 'Selected Location'}
                 </p>
                 <div className="flex items-center gap-3">
@@ -312,7 +312,7 @@ const SubscriberWeather: React.FC = () => {
         </div>
         <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center justify-between group hover:shadow-lg transition-all">
           <div className="flex items-center gap-4">
-             <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shadow-inner border border-indigo-100">
+             <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-inner border border-blue-100">
                 <Sunset size={24} />
              </div>
              <div>
@@ -329,7 +329,7 @@ const SubscriberWeather: React.FC = () => {
       <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 space-y-6">
         <div className="flex justify-between items-center">
           <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-            <Zap size={16} className="text-indigo-500" />
+            <Zap size={16} className="text-blue-500" />
             7-Day Forecast
           </h3>
           <span className="text-[8px] font-black text-slate-300 uppercase tracking-tighter">Updated</span>

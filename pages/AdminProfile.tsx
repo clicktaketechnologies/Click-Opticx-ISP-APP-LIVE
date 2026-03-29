@@ -70,13 +70,13 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
-            <UserCircle className="text-indigo-600" size={32} />
+            <UserCircle className="text-blue-600" size={32} />
             My Account Profile
           </h2>
           <p className="text-slate-500 font-medium">Manage your personal identity, login email, and security credentials.</p>
         </div>
         {success && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 animate-in slide-in-from-right">
+          <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-xl border border-green-100 animate-in slide-in-from-right">
             <CheckCircle size={16} />
             <span className="text-[10px] font-black uppercase tracking-widest">Changes Saved</span>
           </div>
@@ -90,11 +90,11 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="relative z-10 flex flex-col items-center text-center space-y-6">
                <div className="relative group">
                   <div className="w-32 h-32 bg-white/10 rounded-[2.5rem] flex items-center justify-center border-4 border-white/5 shadow-2xl overflow-hidden backdrop-blur-md">
-                     {(user as any).profileImage ? <img src={(user as any).profileImage} className="w-full h-full object-cover" /> : <User size={64} className="text-indigo-400" />}
+                     {(user as any).profileImage ? <img src={(user as any).profileImage} className="w-full h-full object-cover" /> : <User size={64} className="text-blue-400" />}
                   </div>
                   <button 
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute -bottom-2 -right-2 p-3 bg-indigo-600 text-white rounded-2xl shadow-xl hover:scale-110 transition-all border-4 border-slate-900"
+                    className="absolute -bottom-2 -right-2 p-3 bg-blue-600 text-white rounded-2xl shadow-xl hover:scale-110 transition-all border-4 border-slate-900"
                   >
                     <Camera size={18} />
                   </button>
@@ -103,16 +103,16 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                
                <div>
                   <h3 className="text-2xl font-black italic tracking-tighter uppercase leading-none">{user.name}</h3>
-                  <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mt-2">{user.role}</p>
+                  <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.4em] mt-2">{user.role}</p>
                </div>
 
                <div className="w-full pt-6 border-t border-white/5 space-y-3">
                   <div className="flex justify-between items-center text-[9px] font-black uppercase text-slate-500 tracking-widest">
                      <span>System Access</span>
-                     <span className="text-emerald-400">Authorized</span>
+                     <span className="text-green-400">Authorized</span>
                   </div>
                   <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                     <div className="bg-indigo-500 h-full w-full"></div>
+                     <div className="bg-blue-500 h-full w-full"></div>
                   </div>
                </div>
             </div>
@@ -121,7 +121,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
 
           <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <ShieldCheck size={14} className="text-emerald-500" /> Security Status
+                <ShieldCheck size={14} className="text-green-500" /> Security Status
              </h4>
              <div className="space-y-4">
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
@@ -147,7 +147,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                 {!isEditing ? (
                   <button 
                     onClick={() => setIsEditing(true)}
-                    className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95 shadow-lg"
+                    className="px-6 py-2.5 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all active:scale-95 shadow-lg"
                   >
                     Edit Profile
                   </button>
@@ -169,7 +169,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                          <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                          <input 
                            disabled={!isEditing}
-                           className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm outline-none transition-all ${isEditing ? 'focus:border-indigo-500 focus:bg-white' : 'opacity-60 cursor-not-allowed'}`}
+                           className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm outline-none transition-all ${isEditing ? 'focus:border-blue-500 focus:bg-white' : 'opacity-60 cursor-not-allowed'}`}
                            value={formData.name}
                            onChange={e => setFormData({...formData, name: e.target.value})}
                          />
@@ -181,7 +181,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                          <input 
                            disabled={!isEditing}
-                           className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm outline-none transition-all ${isEditing ? 'focus:border-indigo-500 focus:bg-white' : 'opacity-60 cursor-not-allowed'}`}
+                           className={`w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm outline-none transition-all ${isEditing ? 'focus:border-blue-500 focus:bg-white' : 'opacity-60 cursor-not-allowed'}`}
                            value={formData.email}
                            onChange={e => setFormData({...formData, email: e.target.value})}
                          />
@@ -196,7 +196,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                          <button 
                            type="button"
                            onClick={() => setShowPass(!showPass)}
-                           className="text-[9px] font-black text-indigo-600 uppercase tracking-widest"
+                           className="text-[9px] font-black text-blue-600 uppercase tracking-widest"
                          >
                             {showPass ? 'Hide Secret' : 'Reveal Secret'}
                          </button>
@@ -208,7 +208,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                         type={showPass ? 'text' : 'password'}
                         disabled={!isEditing}
                         placeholder="••••••••"
-                        className={`w-full pl-14 pr-16 py-5 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-xl outline-none transition-all ${isEditing ? 'focus:border-indigo-500 focus:bg-white' : 'opacity-60 cursor-not-allowed'}`}
+                        className={`w-full pl-14 pr-16 py-5 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-xl outline-none transition-all ${isEditing ? 'focus:border-blue-500 focus:bg-white' : 'opacity-60 cursor-not-allowed'}`}
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}
                       />
@@ -219,7 +219,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                   <button 
                     type="submit"
                     disabled={isSaving}
-                    className="w-full py-6 bg-indigo-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"
+                    className="w-full py-6 bg-blue-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3"
                   >
                     {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20}/>}
                     Authorize Account Updates
@@ -228,13 +228,13 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
              </form>
 
              {!isEditing && (
-               <div className="p-8 bg-indigo-50 border border-indigo-100 rounded-[2.5rem] flex items-start gap-6">
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shrink-0 text-indigo-600 shadow-sm border border-indigo-50">
+               <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem] flex items-start gap-6">
+                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shrink-0 text-blue-600 shadow-sm border border-blue-50">
                      <Info size={24} />
                   </div>
                   <div>
-                    <p className="text-[10px] text-indigo-900 font-black uppercase tracking-widest mb-1">Account Management</p>
-                    <p className="text-[9px] text-indigo-700 font-bold uppercase leading-relaxed opacity-80">
+                    <p className="text-[10px] text-blue-900 font-black uppercase tracking-widest mb-1">Account Management</p>
+                    <p className="text-[9px] text-blue-700 font-bold uppercase leading-relaxed opacity-80">
                       Your profile information is used for internal communication and logging across the system ledger. Always keep your access secret updated to maintain system integrity.
                     </p>
                   </div>
@@ -248,3 +248,4 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AdminProfile;
+

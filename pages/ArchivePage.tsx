@@ -50,7 +50,7 @@ const ArchivePage: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-6">
         <div>
           <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-            <Database className="text-emerald-600" size={32} />
+            <Database className="text-green-600" size={32} />
             Past Records
           </h2>
           <p className="text-slate-500 font-medium max-w-2xl mt-1">
@@ -62,7 +62,7 @@ const ArchivePage: React.FC<{ state: AppState }> = ({ state }) => {
           <div className="flex flex-col px-2 flex-1">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 text-center sm:text-left">Choose Month</label>
             <div className="flex items-center justify-center sm:justify-start gap-2">
-              <Calendar size={18} className="text-emerald-500" />
+              <Calendar size={18} className="text-green-500" />
               <input 
                 type="month" 
                 className="bg-transparent border-none outline-none font-black text-slate-900 text-lg cursor-pointer"
@@ -75,7 +75,7 @@ const ArchivePage: React.FC<{ state: AppState }> = ({ state }) => {
             onClick={handleArchive}
             className="px-8 py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 uppercase tracking-widest text-[10px]"
           >
-            <Lock size={18} className="text-emerald-400" />
+            <Lock size={18} className="text-green-400" />
             Store Month
           </button>
         </div>
@@ -104,15 +104,15 @@ const ArchivePage: React.FC<{ state: AppState }> = ({ state }) => {
                       onClick={() => { setViewingArchive(arc); setSelectedTab('summary'); }}
                       className={`w-full p-6 flex items-center justify-between transition-all duration-300 group border-l-4 ${
                         isActive 
-                          ? 'bg-emerald-600 text-white border-emerald-400 shadow-lg shadow-emerald-200 z-10' 
+                          ? 'bg-green-600 text-white border-green-400 shadow-lg shadow-green-200 z-10' 
                           : 'bg-white border-transparent hover:bg-slate-50 text-slate-900'
                       }`}
                     >
                       <div className="text-left">
-                        <p className={`font-black text-lg transition-colors ${isActive ? 'text-white' : 'text-slate-900 group-hover:text-emerald-600'}`}>
+                        <p className={`font-black text-lg transition-colors ${isActive ? 'text-white' : 'text-slate-900 group-hover:text-green-600'}`}>
                           {new Date(arc.month + '-01').toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
                         </p>
-                        <p className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${isActive ? 'text-emerald-100' : 'text-slate-400'}`}>
+                        <p className={`text-[9px] font-bold uppercase tracking-widest mt-1 ${isActive ? 'text-green-100' : 'text-slate-400'}`}>
                           Stored {new Date(arc.archivedAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -137,7 +137,7 @@ const ArchivePage: React.FC<{ state: AppState }> = ({ state }) => {
               <div className="flex flex-col h-full animate-in fade-in zoom-in duration-300 overflow-hidden">
                 <div className="p-6 md:p-8 bg-slate-900 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 shrink-0">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center shadow-lg">
                       <Calendar size={24} />
                     </div>
                     <div>
@@ -164,7 +164,7 @@ const ArchivePage: React.FC<{ state: AppState }> = ({ state }) => {
                       key={tab.id}
                       onClick={() => setSelectedTab(tab.id as any)}
                       className={`py-5 text-[10px] md:text-[11px] font-black uppercase tracking-widest whitespace-nowrap border-b-2 transition-all ${
-                        activeTab === tab.id ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-400 hover:text-slate-600'
+                        activeTab === tab.id ? 'border-green-600 text-green-600' : 'border-transparent text-slate-400 hover:text-slate-600'
                       }`}
                     >
                       {tab.label}
@@ -181,9 +181,9 @@ const ArchivePage: React.FC<{ state: AppState }> = ({ state }) => {
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Billed</p>
                             <h5 className="text-xl font-black">Rs. {archiveSummary?.totalBilled.toLocaleString()}</h5>
                           </div>
-                          <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
-                            <p className="text-[10px] font-black text-emerald-600/60 uppercase tracking-widest mb-1">Total Collected</p>
-                            <h5 className="text-xl font-black text-emerald-700">Rs. {archiveSummary?.totalRecovered.toLocaleString()}</h5>
+                          <div className="bg-green-50 p-6 rounded-2xl border border-green-100">
+                            <p className="text-[10px] font-black text-green-600/60 uppercase tracking-widest mb-1">Total Collected</p>
+                            <h5 className="text-xl font-black text-green-700">Rs. {archiveSummary?.totalRecovered.toLocaleString()}</h5>
                           </div>
                           <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100">
                             <p className="text-[10px] font-black text-orange-600/60 uppercase tracking-widest mb-1">Pending Approval</p>
@@ -205,7 +205,7 @@ const ArchivePage: React.FC<{ state: AppState }> = ({ state }) => {
                           {viewingArchive.data.invoices.map(inv => (
                             <div key={inv.id} className="p-4 flex items-center justify-between">
                               <div><p className="font-bold text-sm">{inv.userName}</p><p className="text-[9px] text-slate-400 uppercase">{inv.packageName}</p></div>
-                              <div className="text-right"><p className="font-bold text-sm">Rs. {inv.totalAmount}</p><span className="text-[8px] font-black uppercase text-emerald-600">{inv.status}</span></div>
+                              <div className="text-right"><p className="font-bold text-sm">Rs. {inv.totalAmount}</p><span className="text-[8px] font-black uppercase text-green-600">{inv.status}</span></div>
                             </div>
                           ))}
                         </div>
@@ -223,3 +223,4 @@ const ArchivePage: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default ArchivePage;
+

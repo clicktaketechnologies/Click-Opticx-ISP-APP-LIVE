@@ -48,7 +48,7 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
           </h2>
           <p className="text-slate-500 font-medium">Manage infrastructure costs, payment methods, and core system rules.</p>
         </div>
-        <button onClick={handleSave} disabled={isSaving} className="px-10 py-5 bg-emerald-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-2xl active:scale-95 disabled:opacity-50">
+        <button onClick={handleSave} disabled={isSaving} className="px-10 py-5 bg-green-600 text-white rounded-[1.5rem] font-black text-xs uppercase tracking-widest shadow-2xl active:scale-95 disabled:opacity-50">
           {isSaving ? 'Updating...' : 'Save Configuration'}
         </button>
       </div>
@@ -87,7 +87,7 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
             {activeTab === 'tech' && (
               <div className="space-y-12 animate-in slide-in-from-right-4">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Wifi className="text-indigo-600" size={32} /> Installation Pricing</h3>
+                  <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><Wifi className="text-blue-600" size={32} /> Installation Pricing</h3>
                 </div>
 
                 {/* Wireless Config */}
@@ -135,7 +135,7 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
             {/* Gateway Tab */}
             {activeTab === 'gateways' && (
               <div className="space-y-10 animate-in slide-in-from-right-4">
-                <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><CreditCard className="text-indigo-500" size={32} /> Payment Methods</h3>
+                <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><CreditCard className="text-blue-500" size={32} /> Payment Methods</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {(() => {
                     const cashGateway = formData.paymentGateways.find(g => g.id === 'cash');
@@ -144,7 +144,7 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-6 hover:bg-white hover:shadow-xl transition-all group">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${isCashEnabled ? 'bg-emerald-600' : 'bg-slate-400'}`}><Banknote size={24} /></div>
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg ${isCashEnabled ? 'bg-green-600' : 'bg-slate-400'}`}><Banknote size={24} /></div>
                             <span className="font-black text-slate-900 uppercase tracking-widest">Cash Payments</span>
                           </div>
                           <button
@@ -154,7 +154,7 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
                               );
                               setFormData({ ...formData, paymentGateways: nextGateways });
                             }}
-                            className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${isCashEnabled ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-400'}`}
+                            className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${isCashEnabled ? 'bg-green-600 text-white' : 'bg-slate-200 text-slate-400'}`}
                           >
                             {isCashEnabled ? 'Enabled' : 'Disabled'}
                           </button>
@@ -174,3 +174,4 @@ const GeneralSettings: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default GeneralSettings;
+

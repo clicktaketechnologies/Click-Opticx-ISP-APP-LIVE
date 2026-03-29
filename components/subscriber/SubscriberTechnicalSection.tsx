@@ -98,7 +98,7 @@ const SubscriberTechnicalSection: React.FC<Props> = ({ user, state, onAction }) 
           icon={Wallet}
           onClick={() => onAction('wallet')}
           badge={user.balance > 0 ? `Rs.${user.balance}` : "Current"}
-          badgeColor="bg-emerald-600"
+          badgeColor="bg-green-600"
           sublabel="Balance"
         />
 
@@ -127,3 +127,4 @@ const SubscriberTechnicalSection: React.FC<Props> = ({ user, state, onAction }) 
 };
 
 export default SubscriberTechnicalSection;
+

@@ -53,13 +53,13 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
     switch(id) {
       case 'stripe': return 'bg-blue-600';
       case 'jazzcash': return 'bg-rose-600';
-      case 'easypaisa': return 'bg-emerald-600';
+      case 'easypaisa': return 'bg-green-600';
       case 'cash': return 'bg-slate-900';
-      case 'paypal': return 'bg-indigo-700';
+      case 'paypal': return 'bg-blue-700';
       case 'bank': return 'bg-blue-800';
       case 'home': return 'bg-purple-600';
       case 'payfast': return 'bg-amber-500';
-      default: return 'bg-indigo-600';
+      default: return 'bg-blue-600';
     }
   };
 
@@ -68,13 +68,13 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
-            <CreditCard className="text-indigo-600" size={32} />
+            <CreditCard className="text-blue-600" size={32} />
             Fiscal Gateways
           </h2>
           <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Global Protocol Management • Tiered Architecture</p>
         </div>
         <div className="px-6 py-3 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center gap-3">
-           <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
            <span className="text-[10px] font-black uppercase text-slate-700">Listeners Active: {gateways.filter(g => g.enabled).length}</span>
         </div>
       </div>
@@ -87,14 +87,14 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
            </div>
          ) : (
            gateways.sort((a,b) => a.priority - b.priority).map(gateway => (
-             <div key={gateway.id} className={`bg-white rounded-[2.5rem] border-2 p-8 transition-all hover:shadow-2xl group relative overflow-hidden flex flex-col ${gateway.enabled ? 'border-indigo-100 shadow-indigo-50 shadow-lg' : 'border-slate-50 grayscale opacity-70'}`}>
+             <div key={gateway.id} className={`bg-white rounded-[2.5rem] border-2 p-8 transition-all hover:shadow-2xl group relative overflow-hidden flex flex-col ${gateway.enabled ? 'border-blue-100 shadow-blue-50 shadow-lg' : 'border-slate-50 grayscale opacity-70'}`}>
                 <div className="flex justify-between items-start mb-8 relative z-10">
                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-105 ${getGatewayColor(gateway.id)}`}>
                       {getGatewayIcon(gateway.id)}
                    </div>
                    <button 
                     onClick={() => handleToggle(gateway.id, gateway.enabled)}
-                    className={`w-12 h-6 rounded-full relative transition-all duration-300 ${gateway.enabled ? 'bg-emerald-50' : 'bg-slate-300'}`}
+                    className={`w-12 h-6 rounded-full relative transition-all duration-300 ${gateway.enabled ? 'bg-green-50' : 'bg-slate-300'}`}
                    >
                       <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-300 ${gateway.enabled ? 'left-7' : 'left-1'}`}></div>
                    </button>
@@ -113,7 +113,7 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
                    </div>
                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                         <div className={`w-1.5 h-1.5 rounded-full ${gateway.sandbox ? 'bg-amber-400' : 'bg-indigo-400'} animate-pulse`}></div>
+                         <div className={`w-1.5 h-1.5 rounded-full ${gateway.sandbox ? 'bg-amber-400' : 'bg-blue-400'} animate-pulse`}></div>
                          <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{gateway.sandbox ? 'Test-Node active' : 'Production Link'}</span>
                       </div>
                       <span className="text-[8px] font-black text-slate-300 uppercase">Rank: {gateway.priority}</span>
@@ -122,7 +122,7 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
 
                 <button 
                   onClick={() => onNavigate(`gateway-${gateway.id}`)}
-                  className="mt-auto w-full py-4 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95 flex items-center justify-center gap-2 relative z-10 shadow-xl"
+                  className="mt-auto w-full py-4 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all active:scale-95 flex items-center justify-center gap-2 relative z-10 shadow-xl"
                 >
                    <Settings2 size={14}/> Configure Node <ChevronRight size={14}/>
                 </button>
@@ -135,7 +135,7 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
 
       <div className="bg-slate-900 rounded-[3rem] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-10 relative overflow-hidden shadow-2xl border border-white/5">
          <div className="relative z-10 max-w-xl space-y-4">
-            <div className="flex items-center gap-3 text-indigo-400">
+            <div className="flex items-center gap-3 text-blue-400">
                <ShieldAlert size={28} />
                <h3 className="text-xl font-black uppercase tracking-tight italic leading-none">Password Updated Audit</h3>
             </div>
@@ -157,7 +157,7 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
            <div className="bg-white rounded-[3rem] w-full max-w-4xl h-[80vh] shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col">
               <div className="p-8 border-b bg-slate-50 flex justify-between items-center">
                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
                        <History size={28}/>
                     </div>
                     <div>
@@ -188,22 +188,22 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
                    </div>
                  ) : (
                    filteredLogs.map(log => (
-                     <div key={log.id} className="p-6 bg-white border border-slate-100 rounded-[2rem] flex items-center justify-between group hover:shadow-xl hover:border-indigo-100 transition-all">
+                     <div key={log.id} className="p-6 bg-white border border-slate-100 rounded-[2rem] flex items-center justify-between group hover:shadow-xl hover:border-blue-100 transition-all">
                         <div className="flex items-center gap-5">
-                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shadow-inner ${log.type === LedgerType.DEBIT ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shadow-inner ${log.type === LedgerType.DEBIT ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
                               <ArrowRightLeft size={20} />
                            </div>
                            <div>
                               <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{log.description}</p>
                               <div className="flex items-center gap-3 mt-1.5">
-                                 <span className="text-[9px] text-indigo-600 font-black uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded">{log.method}</span>
+                                 <span className="text-[9px] text-blue-600 font-black uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">{log.method}</span>
                                  <span className="text-[10px] text-slate-300">•</span>
                                  <span className="text-[9px] text-slate-400 font-bold uppercase flex items-center gap-1"><Clock size={10}/> {new Date(log.timestamp).toLocaleString()}</span>
                               </div>
                            </div>
                         </div>
                         <div className="text-right">
-                           <p className={`text-xl font-black italic tracking-tighter ${log.type === LedgerType.DEBIT ? 'text-red-600' : 'text-emerald-600'}`}>
+                           <p className={`text-xl font-black italic tracking-tighter ${log.type === LedgerType.DEBIT ? 'text-red-600' : 'text-green-600'}`}>
                               {log.type === LedgerType.DEBIT ? '-' : '+'} Rs. {log.amount.toLocaleString()}
                            </p>
                            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Registry ID: {log.id.split('_').pop()}</p>
@@ -216,7 +216,7 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
               <div className="p-6 bg-slate-950 border-t border-white/5 flex items-center justify-between text-white">
                  <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
-                       <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                       <div className="w-2 h-2 rounded-full bg-green-500"></div>
                        <span className="text-[9px] font-black uppercase text-slate-400">Ledger Verified</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -234,3 +234,4 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
 };
 
 export default PaymentMethodsIndex;
+

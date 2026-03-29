@@ -36,7 +36,7 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
-            <ListChecks className="text-indigo-600" size={32} />
+            <ListChecks className="text-blue-600" size={32} />
             Message Logs
           </h2>
           <p className="text-slate-500 font-medium">A complete history of all emails and notifications sent by the system.</p>
@@ -51,7 +51,7 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
          {[
            { label: 'Emails Sent', val: stats.emailCount, icon: Mail, color: 'text-blue-600', bg: 'bg-blue-50' },
-           { label: 'Notifications Sent', val: stats.pushCount, icon: Smartphone, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+           { label: 'Notifications Sent', val: stats.pushCount, icon: Smartphone, color: 'text-blue-600', bg: 'bg-blue-50' },
            { label: 'Failed Messages', val: `${stats.failRate}%`, icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-50' }
          ].map(stat => (
            <div key={stat.label} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-5 group hover:shadow-md transition-all">
@@ -68,7 +68,7 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="relative flex-1 w-full">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
             <input 
-              className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-black text-slate-900"
+              className="w-full pl-14 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-black text-slate-900"
               placeholder="Search logs..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
@@ -79,7 +79,7 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
               <button 
                 key={f} 
                 onClick={() => setTypeFilter(f)}
-                className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${typeFilter === f ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                className={`px-8 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${typeFilter === f ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
               >
                 {f === 'Push' ? 'Notification' : f}
               </button>
@@ -105,13 +105,13 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
                     <tr key={log.id} className="hover:bg-slate-50 transition-colors group">
                        <td className="px-8 py-5">
                           <div className="flex items-center gap-3">
-                             {log.type === 'Email' ? <Mail size={16} className="text-blue-500" /> : <Smartphone size={16} className="text-indigo-500" />}
+                             {log.type === 'Email' ? <Mail size={16} className="text-blue-500" /> : <Smartphone size={16} className="text-blue-500" />}
                              <span className="font-black text-slate-900 uppercase tracking-tight text-xs">{log.type === 'Push' ? 'Notification' : log.type}</span>
                           </div>
                        </td>
                        <td className="px-8 py-5">
                           <div className="flex items-center gap-3">
-                             <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-300 group-hover:text-indigo-600 transition-colors border shadow-inner"><UserCircle size={18}/></div>
+                             <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center text-slate-300 group-hover:text-blue-600 transition-colors border shadow-inner"><UserCircle size={18}/></div>
                              <div className="space-y-0.5">
                                 <p className="font-black text-slate-900 uppercase text-xs leading-none">{log.userName}</p>
                                 <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{log.userId}</p>
@@ -119,7 +119,7 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
                           </div>
                        </td>
                        <td className="px-8 py-5">
-                          <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${log.status === 'Delivered' || log.status === 'Opened' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                          <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border ${log.status === 'Delivered' || log.status === 'Opened' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
                              {log.status}
                           </span>
                        </td>
@@ -133,7 +133,7 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
                           </div>
                        </td>
                        <td className="px-8 py-5 text-right">
-                          <button className="p-2 text-slate-300 hover:text-indigo-600 transition-all active:scale-90"><ChevronRight size={18}/></button>
+                          <button className="p-2 text-slate-300 hover:text-blue-600 transition-all active:scale-90"><ChevronRight size={18}/></button>
                        </td>
                     </tr>
                   ))}
@@ -154,3 +154,4 @@ const DeliveryLogs: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default DeliveryLogs;
+

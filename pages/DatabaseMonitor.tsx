@@ -173,12 +173,12 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="relative z-10 space-y-10">
             <div className="flex justify-between items-center border-b border-white/5 pb-6">
                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg animate-pulse">
+                  <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg animate-pulse">
                      <Link2 size={32}/>
                   </div>
                   <div>
                      <h3 className="text-2xl font-black uppercase italic tracking-tighter">Integration Bridges</h3>
-                     <p className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em]">External Node Connectivity Registry</p>
+                     <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.4em]">External Node Connectivity Registry</p>
                   </div>
                </div>
                <button 
@@ -193,10 +193,10 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                {[
-                 { id: 'gemini', label: 'AI Core (Gemini)', icon: Cpu, color: 'text-indigo-400', desc: 'LLM & Heuristic Link' },
+                 { id: 'gemini', label: 'AI Core (Gemini)', icon: Cpu, color: 'text-blue-400', desc: 'LLM & Heuristic Link' },
                  { id: 'firebase', label: 'Cloud Node (DB)', icon: Database, color: 'text-orange-400', desc: 'Firestore Registry' },
                  { id: 'smtp', label: 'Comm Email Gateway', icon: Send, color: 'text-blue-400', desc: 'Outbound - Payment Due' },
-                 { id: 'payment', label: 'Fiscal Node (API)', icon: CreditCard, color: 'text-emerald-400', desc: 'Payment Gateway Link' }
+                 { id: 'payment', label: 'Fiscal Node (API)', icon: CreditCard, color: 'text-green-400', desc: 'Payment Gateway Link' }
                ].map(bridge => (
                  <div key={bridge.id} className="p-6 bg-white/5 border border-white/10 rounded-[2.5rem] group hover:bg-white/10 transition-all flex flex-col justify-between h-56">
                     <div className="flex justify-between items-start">
@@ -204,7 +204,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                           <bridge.icon size={24}/>
                        </div>
                        <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${bridgeStatus[bridge.id] === 'VERIFIED' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 animate-pulse'}`}></div>
+                          <div className={`w-2 h-2 rounded-full ${bridgeStatus[bridge.id] === 'VERIFIED' ? 'bg-green-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-amber-500 animate-pulse'}`}></div>
                           <span className="text-[8px] font-black uppercase text-slate-500">{bridgeStatus[bridge.id]}</span>
                        </div>
                     </div>
@@ -215,7 +215,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                     <button 
                       onClick={() => handleBridgePulse(bridge.id)}
                       disabled={bridgeStatus[bridge.id] === 'SYNCING'}
-                      className="w-full py-3 bg-white/5 border border-white/5 rounded-xl font-black text-[9px] uppercase tracking-widest group-hover:bg-indigo-600 transition-all active:scale-95 disabled:opacity-50"
+                      className="w-full py-3 bg-white/5 border border-white/5 rounded-xl font-black text-[9px] uppercase tracking-widest group-hover:bg-blue-600 transition-all active:scale-95 disabled:opacity-50"
                     >
                        {bridgeStatus[bridge.id] === 'SYNCING' ? 'Syncing...' : 'Initialize Pulse'}
                     </button>
@@ -233,8 +233,8 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                  <h3 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">Live Deployment Hub</h3>
                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">CI/CD Pipeline Status • Firebase Hosting</p>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100">
-                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-2xl border border-green-100">
+                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                  <span className="text-[10px] font-black uppercase tracking-widest">Auto-Update Ready</span>
               </div>
            </div>
@@ -254,7 +254,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                        <p className="text-sm font-black italic">{gitStatus === 'SYNCING' ? 'FETCHING...' : 'origin/main'}</p>
                     </div>
                  </div>
-                 {gitStatus === 'CLEAN' && <CheckCircle2 size={18} className="text-emerald-500" />}
+                 {gitStatus === 'CLEAN' && <CheckCircle2 size={18} className="text-green-500" />}
                  {gitStatus !== 'SYNCING' && <ChevronRight size={18} className="text-slate-300 group-hover:text-white" />}
               </button>
 
@@ -272,7 +272,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                        <p className="text-sm font-black italic">{hostingStatus === 'PINGING' ? 'PINGING...' : 'click-opticx.web.app'}</p>
                     </div>
                  </div>
-                 {hostingStatus === 'ONLINE' && <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>}
+                 {hostingStatus === 'ONLINE' && <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>}
                  {hostingStatus !== 'PINGING' && <ExternalLink size={18} className="text-slate-300 group-hover:text-white" />}
               </button>
            </div>
@@ -299,7 +299,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
 
            <div className="flex items-center justify-between pt-4 border-t border-slate-50 relative z-10">
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Last Integrity Check: {lastCheck}</p>
-              <span className="text-[9px] font-black text-emerald-500 uppercase">Production Layer Optimized</span>
+              <span className="text-[9px] font-black text-green-500 uppercase">Production Layer Optimized</span>
            </div>
         </div>
 
@@ -311,7 +311,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
               </h4>
               <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
                  <p className="text-[9px] text-slate-400 font-bold uppercase">Last Sync: {new Date(health.lastSync).toLocaleTimeString()}</p>
-                 <p className="text-lg font-black text-indigo-400 mt-1">{health.documentSize.toLocaleString()} BYTES</p>
+                 <p className="text-lg font-black text-blue-400 mt-1">{health.documentSize.toLocaleString()} BYTES</p>
               </div>
               <button onClick={() => db.exportVault()} className="w-full bg-blue-600 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest">Snapshot Export</button>
            </div>
@@ -327,8 +327,8 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
             <h3 className="text-white font-black uppercase tracking-widest text-[10px]">Real-Time Server Logs</h3>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Live Stream</span>
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span className="text-[10px] text-green-500 font-bold uppercase tracking-widest">Live Stream</span>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-2 font-mono text-[11px]" ref={scrollRef}>
@@ -379,8 +379,8 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
 
                  <div className="space-y-6">
                     {[
-                      { key: 'gemini', label: 'Google Gemini Core', icon: Cpu, color: 'text-indigo-500' },
-                      { key: 'openai', label: 'OpenAI GPT Link', icon: Sparkles, color: 'text-emerald-500' },
+                      { key: 'gemini', label: 'Google Gemini Core', icon: Cpu, color: 'text-blue-500' },
+                      { key: 'openai', label: 'OpenAI GPT Link', icon: Sparkles, color: 'text-green-500' },
                       { key: 'deepseek', label: 'DeepSeek AI Model', icon: Activity, color: 'text-blue-500' }
                     ].map(item => (
                       <div key={item.key} className="space-y-2">
@@ -389,7 +389,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                            <item.icon className={`absolute left-4 top-1/2 -translate-y-1/2 ${item.color}`} size={16} />
                            <input 
                             type={revealKeys ? 'text' : 'password'}
-                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600 transition-all shadow-inner"
+                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-blue-600 transition-all shadow-inner"
                             placeholder="Enter Key Node..."
                             value={(aiKeys as any)[item.key]}
                             onChange={e => setAiKeys({...aiKeys, [item.key]: e.target.value})}
@@ -412,7 +412,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                  <button 
                   onClick={handleSaveKeys}
                   disabled={isSavingKeys}
-                  className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+                  className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
                  >
                     {isSavingKeys ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
                     Authorize Provisioning
@@ -428,7 +428,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
            <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col max-h-[90vh]">
               <div className="p-10 border-b bg-slate-50 flex justify-between items-center shrink-0">
                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
                        <Layers size={28} />
                     </div>
                     <div>
@@ -445,7 +445,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                  {[
                    { id: 'local', label: 'Local Disk Storage', desc: 'Browser indexedDB • Zero latency.', icon: HardDrive, color: 'text-blue-500', bg: 'bg-blue-50' },
                    { id: 'firebase', label: 'Firebase Production', desc: 'Cloud Firestore • Global Sync.', icon: Globe, color: 'text-orange-500', bg: 'bg-orange-50', active: true },
-                   { id: 'mongodb', label: 'High Performance Node', desc: 'Atlas Cluster • Analytical Heavy.', icon: DatabaseZap, color: 'text-emerald-500', bg: 'bg-emerald-50' }
+                   { id: 'mongodb', label: 'High Performance Node', desc: 'Atlas Cluster • Analytical Heavy.', icon: DatabaseZap, color: 'text-green-500', bg: 'bg-green-50' }
                  ].map(provider => (
                    <button 
                     key={provider.id}
@@ -453,7 +453,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                        alert(`Handshaking with ${provider.label}...`);
                        setShowConfigModal(false);
                     }}
-                    className={`w-full p-6 rounded-[2rem] border-2 text-left flex items-center justify-between group transition-all ${provider.active ? 'border-indigo-600 bg-indigo-50/30 shadow-lg' : 'border-slate-100 hover:border-indigo-200'}`}
+                    className={`w-full p-6 rounded-[2rem] border-2 text-left flex items-center justify-between group transition-all ${provider.active ? 'border-blue-600 bg-blue-50/30 shadow-lg' : 'border-slate-100 hover:border-blue-200'}`}
                    >
                       <div className="flex items-center gap-5">
                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${provider.bg} ${provider.color}`}>
@@ -464,7 +464,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                             <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{provider.desc}</p>
                          </div>
                       </div>
-                      {provider.active && <CheckCircle2 size={20} className="text-indigo-600" />}
+                      {provider.active && <CheckCircle2 size={20} className="text-blue-600" />}
                    </button>
                  ))}
               </div>
@@ -485,3 +485,4 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default DatabaseMonitor;
+

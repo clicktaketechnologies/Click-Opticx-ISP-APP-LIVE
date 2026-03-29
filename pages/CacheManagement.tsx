@@ -66,7 +66,7 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div className="space-y-1">
                     <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 leading-none italic uppercase">
-                        <Cpu className="text-indigo-600" size={32} />
+                        <Cpu className="text-blue-600" size={32} />
                         Cache Control Plane
                     </h2>
                     <p className="text-slate-500 font-medium max-w-2xl mt-1 uppercase text-[10px] tracking-widest">
@@ -78,7 +78,7 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
                     onClick={checkSystemHealth}
                     className="flex items-center gap-3 px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-xs hover:bg-black transition-all shadow-xl shadow-slate-200 uppercase tracking-widest"
                 >
-                    {healthStatus === 'CHECKING' ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18} className="text-emerald-400" />}
+                    {healthStatus === 'CHECKING' ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18} className="text-green-400" />}
                     System Health Pulse
                 </button>
             </div>
@@ -133,7 +133,7 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
                             </div>
                             <button
                                 onClick={handleHardRefresh}
-                                className="px-8 py-5 bg-indigo-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all flex items-center gap-3 shadow-xl shadow-indigo-200 active:scale-95"
+                                className="px-8 py-5 bg-blue-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-3 shadow-xl shadow-blue-200 active:scale-95"
                             >
                                 <Zap size={18} fill="currentColor" />
                                 Force Hard Refresh
@@ -158,7 +158,7 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
                             </p>
                             <div className="space-y-3 pt-4">
                                 <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl">
-                                    <CheckCircle2 className="text-emerald-500" size={16} />
+                                    <CheckCircle2 className="text-green-500" size={16} />
                                     <span className="text-[9px] font-black uppercase">Live Node Version: v8.6.0</span>
                                 </div>
                                 <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl">
@@ -186,3 +186,4 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default CacheManagement;
+

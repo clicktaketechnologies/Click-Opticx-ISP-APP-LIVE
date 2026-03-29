@@ -538,7 +538,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
                     <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
-                        <Receipt className="text-indigo-600" size={32} />
+                        <Receipt className="text-blue-600" size={32} />
                         Collections & Recovery
                     </h2>
                     <p className="text-slate-500 font-medium mt-1 uppercase text-[10px] tracking-widest font-black">Central Operational Console for Suspended & Unpaid Registry</p>
@@ -564,8 +564,8 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                 {[
                     { label: 'Suspended', count: state.users.filter(u => u.status === UserStatus.SUSPENDED).length, color: 'text-rose-600', bg: 'bg-rose-50' },
                     { label: 'Unpaid Dues', count: state.users.filter(u => u.balance > 0).length, color: 'text-orange-600', bg: 'bg-orange-50' },
-                    { label: 'Recovery Mode', count: state.users.filter(u => u.status === UserStatus.RECOVERY_MODE).length, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                    { label: 'Total Collections', count: `Rs. ${state.payments.reduce((acc, p) => acc + p.amount, 0).toLocaleString()}`, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                    { label: 'Recovery Mode', count: state.users.filter(u => u.status === UserStatus.RECOVERY_MODE).length, color: 'text-blue-600', bg: 'bg-blue-50' },
+                    { label: 'Total Collections', count: `Rs. ${state.payments.reduce((acc, p) => acc + p.amount, 0).toLocaleString()}`, color: 'text-green-600', bg: 'bg-green-50' },
                 ].map((stat, i) => (
                     <div key={i} className={`${stat.bg} ${stat.color} p-8 rounded-[2.5rem] border border-white shadow-sm flex flex-col justify-center items-center text-center animate-in slide-in-from-bottom duration-300 delay-[${i * 100}ms]`}>
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-2">{stat.label}</p>
@@ -577,7 +577,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
             {/* SELECTION ACTION CONSOLE - TOP POSITIONED */}
             {selectedUsers.size > 0 && (
                 <div className="animate-in slide-in-from-top-4 duration-500 mb-8 px-4 py-8 bg-slate-900 rounded-[2.5rem] border border-white/10 shadow-2xl ring-1 ring-white/5 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] -mr-32 -mt-32" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 blur-[100px] -mr-32 -mt-32" />
                     <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 px-8">
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-4">
@@ -591,7 +591,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                     {selectionStats.suspended > 0 && <span className="text-[8px] font-black bg-slate-500/10 text-slate-400 px-2 py-0.5 rounded-full border border-slate-500/20">{selectionStats.suspended} LOCKED</span>}
                                 </div>
                             </div>
-                            <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.3em] italic">Operational Batch Command Console Active</p>
+                            <p className="text-[9px] font-black text-blue-400 uppercase tracking-[0.3em] italic">Operational Batch Command Console Active</p>
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3">
@@ -607,7 +607,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                 <button
                                     onClick={handleBatchActivate}
                                     disabled={isProcessing}
-                                    className="group px-6 py-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-[1rem] transition-all flex items-center gap-2 shadow-lg shadow-emerald-900/40 active:scale-95"
+                                    className="group px-6 py-4 bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white rounded-[1rem] transition-all flex items-center gap-2 shadow-lg shadow-green-900/40 active:scale-95"
                                 >
                                     <Zap size={16} className="group-hover:rotate-12 transition-transform" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Activate</span>
@@ -615,7 +615,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                 <button
                                     onClick={() => setIsBulkUnpaidModalOpen(true)}
                                     disabled={isProcessing}
-                                    className="group px-6 py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-[1rem] transition-all flex items-center gap-2 shadow-lg shadow-indigo-900/40 active:scale-95"
+                                    className="group px-6 py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-[1rem] transition-all flex items-center gap-2 shadow-lg shadow-blue-900/40 active:scale-95"
                                 >
                                     <BadgeDollarSign size={16} className="group-hover:rotate-12 transition-transform" />
                                     <span className="text-[10px] font-black uppercase tracking-widest">Mark Unpaid</span>
@@ -681,7 +681,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                 key={f}
                                 onClick={() => setDateFilter(f)}
                                 className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
-                                    dateFilter === f ? 'bg-white text-indigo-600 shadow-sm border border-indigo-100' : 'text-slate-400 hover:text-slate-600'
+                                    dateFilter === f ? 'bg-white text-blue-600 shadow-sm border border-blue-100' : 'text-slate-400 hover:text-slate-600'
                                 }`}
                             >
                                 {f === 'All' ? 'All Time' : f === 'Today' ? 'Expiring Today' : f === '3Days' ? 'Last 3 Days' : 'Last 7 Days'}
@@ -691,7 +691,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                     <select
                         value={collectorFilter}
                         onChange={(e) => setCollectorFilter(e.target.value)}
-                        className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-600 outline-none focus:border-indigo-300 transition-all"
+                        className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-600 outline-none focus:border-blue-300 transition-all"
                     >
                         <option value="All">All Collectors</option>
                         {state.staff.filter(s => s.status === 'Active').map(s => (
@@ -706,13 +706,13 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                             <X size={10} /> Clear Filters
                         </button>
                     )}
-                    <div className="ml-auto px-3 py-1 bg-indigo-100 text-indigo-600 rounded-lg text-[9px] font-black uppercase tracking-widest">{filteredUsers.length} Results</div>
+                    <div className="ml-auto px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest">{filteredUsers.length} Results</div>
                 </div>
                 <div className="p-8 border-b border-slate-50 flex flex-col lg:flex-row justify-between items-center gap-6">
                     <div className="flex flex-wrap items-center gap-3">
                         <button
                             onClick={toggleAllSelection}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${allFilteredSelected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${allFilteredSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
                         >
                              {allFilteredSelected ? 'Unselect All' : 'Select All Filtered'}
                         </button>
@@ -752,12 +752,12 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                         <input
                             type="text"
                             placeholder="Type Name or ID..."
-                            className="w-full pl-16 pr-24 py-5 bg-slate-50 border-none rounded-3xl text-sm font-black outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all uppercase tracking-widest placeholder:lowercase placeholder:font-medium"
+                            className="w-full pl-16 pr-24 py-5 bg-slate-50 border-none rounded-3xl text-sm font-black outline-none focus:ring-4 focus:ring-blue-500/10 transition-all uppercase tracking-widest placeholder:lowercase placeholder:font-medium"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                             <div className="px-3 py-1 bg-indigo-100 text-indigo-600 rounded-lg text-[9px] font-black uppercase tracking-widest">{filteredUsers.length} Results</div>
+                             <div className="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest">{filteredUsers.length} Results</div>
                         </div>
                     </div>
                     <div className="flex gap-4 w-full lg:w-auto">
@@ -789,7 +789,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                             <tr className="bg-slate-50/50 border-b border-slate-50">
                                 <th className="px-8 py-6">
                                     <button onClick={toggleAllSelection} className="w-5 h-5 flex items-center justify-center rounded-lg border-2 border-slate-300 transition-all">
-                                        {allFilteredSelected ? <CheckSquare className="text-indigo-600" size={16} /> : <Square className="text-slate-200" size={16} />}
+                                        {allFilteredSelected ? <CheckSquare className="text-blue-600" size={16} /> : <Square className="text-slate-200" size={16} />}
                                     </button>
                                 </th>
                                 <th className="px-6 py-6 text-[9px] font-black text-slate-400 uppercase tracking-widest italic">Identity</th>
@@ -811,10 +811,10 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                 const isFullPaid = hasPkg && balance <= 0;
 
                                 return (
-                                    <tr key={user.id} className={`hover:bg-slate-50/80 transition-all group ${selectedUsers.has(user.id) ? 'bg-indigo-50/30' : ''}`}>
+                                    <tr key={user.id} className={`hover:bg-slate-50/80 transition-all group ${selectedUsers.has(user.id) ? 'bg-blue-50/30' : ''}`}>
                                         <td className="px-8 py-6">
                                             <button onClick={() => toggleUserSelection(user.id)} className="w-5 h-5 flex items-center justify-center rounded-lg border-2 border-slate-300 transition-all">
-                                                {selectedUsers.has(user.id) ? <CheckSquare className="text-indigo-600" size={16} /> : <Square className="text-slate-200" size={16} />}
+                                                {selectedUsers.has(user.id) ? <CheckSquare className="text-blue-600" size={16} /> : <Square className="text-slate-200" size={16} />}
                                             </button>
                                         </td>
                                         <td className="px-6 py-6 font-black">
@@ -826,7 +826,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                                     {user.name.charAt(0)}
                                                 </div>
                                                 <div>
-                                                    <p className="font-black text-slate-900 uppercase tracking-tighter text-sm leading-none mb-1 group-hover:text-indigo-600 transition-colors">{user.name}</p>
+                                                    <p className="font-black text-slate-900 uppercase tracking-tighter text-sm leading-none mb-1 group-hover:text-blue-600 transition-colors">{user.name}</p>
                                                     <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest italic flex items-center gap-1.5">
                                                         ID: {user.id} {user.isRecoveryMode && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>}
                                                     </p>
@@ -844,9 +844,9 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         </td>
                                         <td className="px-6 py-6">
                                             <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center w-fit gap-2 border shadow-sm ${!hasPkg ? 'bg-slate-100 text-slate-400 border-slate-200' :
-                                                user.status === UserStatus.ACTIVE ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                                user.status === UserStatus.ACTIVE ? 'bg-green-50 text-green-600 border-green-100' :
                                                 user.status === UserStatus.SUSPENDED ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                                                    user.status === UserStatus.RECOVERY_MODE ? 'bg-indigo-50 text-indigo-600 border-indigo-100 animate-pulse' :
+                                                    user.status === UserStatus.RECOVERY_MODE ? 'bg-blue-50 text-blue-600 border-blue-100 animate-pulse' :
                                                         'bg-orange-50 text-orange-600 border-orange-100'
                                                 }`}>
                                                 {!hasPkg ? <Clock size={12} /> : user.status === UserStatus.ACTIVE ? <ShieldCheck size={12} /> :
@@ -855,7 +855,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                                 {!hasPkg ? 'N/A' : user.status}
                                             </span>
                                             {user.promiseToPayDate && (
-                                                <div className="mt-2 flex items-center gap-1.5 px-3 py-1 bg-indigo-600 text-white border border-indigo-500 rounded-lg w-fit shadow-sm animate-pulse">
+                                                <div className="mt-2 flex items-center gap-1.5 px-3 py-1 bg-blue-600 text-white border border-blue-500 rounded-lg w-fit shadow-sm animate-pulse">
                                                     <Clock size={10} />
                                                     <span className="text-[8px] font-black uppercase tracking-widest">Promise: {new Date(user.promiseToPayDate).toLocaleDateString()}</span>
                                                 </div>
@@ -863,7 +863,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         </td>
                                         <td className="px-6 py-6">
                                             <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center w-fit gap-2 border shadow-sm ${!hasPkg ? 'bg-slate-100 text-slate-400 border-slate-200' :
-                                                isFullPaid ? 'bg-emerald-600 text-white border-emerald-500' :
+                                                isFullPaid ? 'bg-green-600 text-white border-green-500' :
                                                 isHalfPaid ? 'bg-yellow-400 text-slate-900 border-yellow-300' :
                                                     'bg-rose-600 text-white border-rose-500'
                                                 }`}>
@@ -872,7 +872,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         </td>
                                         <td className="px-6 py-6">
                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Dues: <span className="text-slate-950 font-black">Rs. {remaining.toLocaleString()}</span></p>
-                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Paid: <span className="text-emerald-600 font-black">Rs. {hasPkg ? Math.max(0, (pkg?.price || 0) - balance).toLocaleString() : '0'}</span></p>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Paid: <span className="text-green-600 font-black">Rs. {hasPkg ? Math.max(0, (pkg?.price || 0) - balance).toLocaleString() : '0'}</span></p>
                                         </td>
                                         <td className="px-6 py-6">
                                             <div className="space-y-1.5">
@@ -891,7 +891,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                                 <button
                                                     onClick={() => openUserProfile(user.id)}
                                                     title="View User Profile"
-                                                    className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-indigo-600 hover:border-indigo-200 rounded-xl transition-all active:scale-90"
+                                                    className="p-3 bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 rounded-xl transition-all active:scale-90"
                                                 >
                                                     <FileText size={14} />
                                                 </button>
@@ -962,13 +962,13 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
             {/* ACTION PANEL POPUP */}
             {isPaymentModalOpen && activeUser && (
                 <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[6000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-4xl shadow-2xl overflow-hidden border-[8px] border-indigo-500 animate-in zoom-in duration-300 flex max-h-[95vh]">
+                    <div className="bg-white rounded-[3.5rem] w-full max-w-4xl shadow-2xl overflow-hidden border-[8px] border-blue-500 animate-in zoom-in duration-300 flex max-h-[95vh]">
 
                         {/* LEFT PANEL: ASSORTED ACTIONS & USER DETAILS */}
                         <div className="flex-1 p-10 flex flex-col overflow-y-auto custom-scrollbar bg-slate-50 relative">
                             <div className="flex justify-between items-start mb-8">
                                 <div className="flex items-center gap-6">
-                                    <div className="w-16 h-16 bg-indigo-600 text-white rounded-3xl flex items-center justify-center shadow-xl italic font-black text-2xl">{activeUser.name.charAt(0)}</div>
+                                    <div className="w-16 h-16 bg-blue-600 text-white rounded-3xl flex items-center justify-center shadow-xl italic font-black text-2xl">{activeUser.name.charAt(0)}</div>
                                     <div>
                                         <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900 leading-none mb-1">{activeUser.name}</h3>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{activeUser.id} • {state.packages.find(p => p.id === activeUser.packageId)?.name}</p>
@@ -999,7 +999,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                                 </div>
                                                 <div className="flex items-center gap-3">
                                                     <p className="text-[10px] font-black">Rs. {inv.totalAmount.toLocaleString()}</p>
-                                                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${inv.status === PaymentStatus.PAID ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>{inv.status}</span>
+                                                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${inv.status === PaymentStatus.PAID ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}`}>{inv.status}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -1013,11 +1013,11 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Follow Up Actions</p>
                                     <div className="flex gap-2">
                                         <input type="date" className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-black outline-none" value={promiseDate} onChange={(e) => setPromiseDate(e.target.value)} />
-                                        <button onClick={handleSetPromiseToPay} className="px-4 py-3 bg-indigo-100 text-indigo-700 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-200">Set Promise</button>
+                                        <button onClick={handleSetPromiseToPay} className="px-4 py-3 bg-blue-100 text-blue-700 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-200">Set Promise</button>
                                     </div>
                                     <div className="grid grid-cols-2 gap-2">
-                                         <button onClick={() => handleSendReminder('WhatsApp')} className="py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-100 hover:border-emerald-300">WhatsApp</button>
-                                         <button onClick={() => handleSendReminder('Email')} className="py-3 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:border-indigo-300">Email</button>
+                                         <button onClick={() => handleSendReminder('WhatsApp')} className="py-3 bg-green-50 text-green-700 border border-green-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-100 hover:border-green-300">WhatsApp</button>
+                                         <button onClick={() => handleSendReminder('Email')} className="py-3 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:border-blue-300">Email</button>
                                      </div>
                                 </div>
                             </div>
@@ -1033,18 +1033,18 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
 
                             <div className="grid grid-cols-2 gap-3 mb-6">
                                 {[
-                                    { id: 'Paid', label: 'Full Paid', desc: 'Activate with payment', icon: <ShieldCheck size={16} />, color: 'bg-emerald-600' },
-                                    { id: 'Half', label: 'Half Paid', desc: '50% collection', icon: <Activity size={16} />, color: 'bg-indigo-600' },
+                                    { id: 'Paid', label: 'Full Paid', desc: 'Activate with payment', icon: <ShieldCheck size={16} />, color: 'bg-green-600' },
+                                    { id: 'Half', label: 'Half Paid', desc: '50% collection', icon: <Activity size={16} />, color: 'bg-blue-600' },
                                     { id: 'Unpaid', label: 'Unpaid', desc: 'Activate on credit', icon: <Clock size={16} />, color: 'bg-orange-600' },
                                     { id: 'Emergency', label: 'Emergency', desc: '3-day grace access', icon: <Zap size={16} />, color: 'bg-rose-600' }
                                 ].map(m => (
                                     <button
                                         key={m.id}
                                         onClick={() => setPaymentStatus(m.id as any)}
-                                        className={`flex flex-col items-start p-5 rounded-[2rem] border-2 transition-all group ${paymentStatus === m.id ? 'border-indigo-600 bg-indigo-50 shadow-lg' : 'border-slate-100 bg-slate-50 hover:bg-white hover:border-slate-200'}`}
+                                        className={`flex flex-col items-start p-5 rounded-[2rem] border-2 transition-all group ${paymentStatus === m.id ? 'border-blue-600 bg-blue-50 shadow-lg' : 'border-slate-100 bg-slate-50 hover:bg-white hover:border-slate-200'}`}
                                     >
                                         <div className={`w-10 h-10 ${m.color} text-white rounded-2xl flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform`}>{m.icon}</div>
-                                        <p className={`font-black text-[10px] uppercase tracking-widest ${paymentStatus === m.id ? 'text-indigo-700' : 'text-slate-600'}`}>{m.label}</p>
+                                        <p className={`font-black text-[10px] uppercase tracking-widest ${paymentStatus === m.id ? 'text-blue-700' : 'text-slate-600'}`}>{m.label}</p>
                                         <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1">{m.desc}</p>
                                     </button>
                                 ))}
@@ -1056,7 +1056,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Collection Date</label>
                                         <input
                                             type="date"
-                                            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-indigo-500/10"
+                                            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/10"
                                             value={collectionDetails.collectionDate}
                                             onChange={(e) => setCollectionDetails({ ...collectionDetails, collectionDate: e.target.value })}
                                         />
@@ -1065,7 +1065,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Collected By</label>
                                         <input
                                             type="text"
-                                            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-indigo-500/10"
+                                            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/10"
                                             value={collectionDetails.collectorName}
                                             onChange={(e) => setCollectionDetails({ ...collectionDetails, collectorName: e.target.value })}
                                         />
@@ -1074,7 +1074,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Collector Notes</label>
                                     <textarea
-                                        className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-indigo-500/10 min-h-[80px]"
+                                        className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/10 min-h-[80px]"
                                         value={collectionDetails.notes}
                                         onChange={(e) => setCollectionDetails({ ...collectionDetails, notes: e.target.value })}
                                         placeholder="Enter collection notes or payment details..."
@@ -1095,11 +1095,11 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
             {/* ADVANCED BILLING MODAL */}
             {isAdvancedModalOpen && activeUser && (
                 <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[6000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border-[8px] border-emerald-500 animate-in zoom-in duration-300">
+                    <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border-[8px] border-green-500 animate-in zoom-in duration-300">
                         <div className="p-12 space-y-10">
                             <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-6">
-                                    <div className="w-20 h-20 bg-emerald-600 text-white rounded-[2rem] flex items-center justify-center shadow-xl italic font-black text-3xl"><Zap size={40} /></div>
+                                    <div className="w-20 h-20 bg-green-600 text-white rounded-[2rem] flex items-center justify-center shadow-xl italic font-black text-3xl"><Zap size={40} /></div>
                                     <div>
                                         <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none mb-1">Advanced Override</h3>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Strategic Billing Configuration for {activeUser.name}</p>
@@ -1117,7 +1117,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                                 <button
                                                     key={t}
                                                     onClick={() => setBillingConfig(prev => ({ ...prev, paymentType: t as any }))}
-                                                    className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${billingConfig.paymentType === t ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-slate-100 text-slate-400'}`}
+                                                    className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${billingConfig.paymentType === t ? 'bg-green-50 border-green-500 text-green-700' : 'bg-white border-slate-100 text-slate-400'}`}
                                                 >
                                                     {t} {billingConfig.paymentType === t && <ShieldCheck size={14} />}
                                                 </button>
@@ -1146,7 +1146,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Collected Cash (PKR)</label>
                                         <input
                                             type="number"
-                                            className="w-full px-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-2xl tracking-tighter outline-none focus:border-emerald-500 transition-all"
+                                            className="w-full px-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-2xl tracking-tighter outline-none focus:border-green-500 transition-all"
                                             value={paymentAmount}
                                             onChange={(e) => setPaymentAmount(Number(e.target.value))}
                                         />
@@ -1156,7 +1156,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Manual Expiry Override</label>
                                         <input
                                             type="date"
-                                            className="w-full px-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:border-emerald-500 transition-all"
+                                            className="w-full px-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:border-green-500 transition-all"
                                             onChange={(e) => setBillingConfig(prev => ({ ...prev, customExpiry: e.target.value }))}
                                         />
                                         <p className="text-[8px] text-slate-400 font-bold uppercase italic leading-tight px-2">Leave blank for automatic cycle calculation based on selection.</p>
@@ -1164,7 +1164,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                 </div>
                             </div>
 
-                            <button onClick={handleAdvancedBilling} className="w-full py-8 bg-slate-900 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-indigo-100 italic transition-all active:scale-95 flex items-center justify-center gap-4">
+                            <button onClick={handleAdvancedBilling} className="w-full py-8 bg-slate-900 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-blue-100 italic transition-all active:scale-95 flex items-center justify-center gap-4">
                                 <Activity size={28} /> Deploy Optimized Billing
                             </button>
                         </div>
@@ -1192,18 +1192,18 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                             </div>
                         </div>
 
-                        <div className="p-12 overflow-y-auto custom-scrollbar flex-1 space-y-12 bg-white selection:bg-indigo-100 italic">
+                        <div className="p-12 overflow-y-auto custom-scrollbar flex-1 space-y-12 bg-white selection:bg-blue-100 italic">
                             <div className="grid grid-cols-3 gap-8">
                                 <div className="p-8 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Identity Fingerprint</p>
                                     <div className="space-y-4 font-black">
                                         <p className="text-xs uppercase flex items-center justify-between">Node ID: <span className="text-slate-950">{auditData.identity.id}</span></p>
-                                        <p className="text-xs uppercase flex items-center justify-between">Status: <span className="text-indigo-600">{auditData.identity.status}</span></p>
+                                        <p className="text-xs uppercase flex items-center justify-between">Status: <span className="text-blue-600">{auditData.identity.status}</span></p>
                                         <p className="text-xs uppercase flex items-center justify-between">Region: <span className="text-slate-950">{auditData.identity.area}</span></p>
                                     </div>
                                 </div>
-                                <div className="p-8 bg-emerald-50 text-emerald-900 rounded-[2.5rem] border-2 border-emerald-100">
-                                    <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-4">Service Asset</p>
+                                <div className="p-8 bg-green-50 text-green-900 rounded-[2.5rem] border-2 border-green-100">
+                                    <p className="text-[9px] font-black text-green-500 uppercase tracking-widest mb-4">Service Asset</p>
                                     <div className="space-y-1">
                                         <p className="text-2xl font-black italic tracking-tighter leading-none">{auditData.package?.name || 'TERMINATED'}</p>
                                         <p className="text-[10px] uppercase font-black tracking-widest">Rate: Rs. {(auditData.package?.price || 0).toLocaleString()}/mo</p>
@@ -1217,7 +1217,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                             </div>
 
                             <div className="space-y-6">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 border-l-4 border-indigo-600 pl-4">System Transaction Ledger (Last 50 Events)</h4>
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 border-l-4 border-blue-600 pl-4">System Transaction Ledger (Last 50 Events)</h4>
                                 <div className="space-y-3">
                                     {auditData.systemLogs.length === 0 ? (
                                         <div className="py-12 text-center text-slate-300 font-black uppercase text-[10px] border-2 border-dashed rounded-[2rem]">No recovery actions recorded for this node.</div>
@@ -1225,7 +1225,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         auditData.systemLogs.sort((a, b) => b.timestamp.localeCompare(a.timestamp)).map((log: any) => (
                                             <div key={log.id} className="p-6 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-between group hover:bg-white hover:shadow-xl transition-all">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 font-black border border-slate-100 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-all"><Zap size={20} /></div>
+                                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 font-black border border-slate-100 group-hover:text-blue-600 group-hover:border-blue-100 transition-all"><Zap size={20} /></div>
                                                     <div>
                                                         <p className="font-black text-slate-900 uppercase tracking-tight text-sm leading-none mb-1">{log.action}</p>
                                                         <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{log.details}</p>
@@ -1242,18 +1242,18 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                             </div>
 
                             <div className="space-y-6">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 border-l-4 border-emerald-600 pl-4">Financial Receipt History</h4>
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 border-l-4 border-green-600 pl-4">Financial Receipt History</h4>
                                 <div className="grid grid-cols-2 gap-4">
                                     {auditData.paymentHistory.map((pay: any) => (
-                                        <div key={pay.id} className="p-6 bg-emerald-50/30 border border-emerald-100 rounded-3xl flex justify-between items-center group hover:bg-white hover:shadow-xl transition-all">
+                                        <div key={pay.id} className="p-6 bg-green-50/30 border border-green-100 rounded-3xl flex justify-between items-center group hover:bg-white hover:shadow-xl transition-all">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 border border-emerald-100"><HandCoins size={18} /></div>
+                                                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-green-600 border border-green-100"><HandCoins size={18} /></div>
                                                 <div>
                                                     <p className="font-black text-slate-900 text-lg leading-none mb-1">Rs. {pay.amount.toLocaleString()}</p>
                                                     <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{pay.method} • {new Date(pay.timestamp).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
-                                            <span className="text-[7px] font-black text-emerald-600 border border-emerald-200 px-3 py-1 rounded-full uppercase italic tracking-widest">COMITTED</span>
+                                            <span className="text-[7px] font-black text-green-600 border border-green-200 px-3 py-1 rounded-full uppercase italic tracking-widest">COMITTED</span>
                                         </div>
                                     ))}
                                 </div>
@@ -1263,7 +1263,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Security Hash: {Math.random().toString(36).substring(7).toUpperCase()}</p>
                             <div className="flex gap-4">
                                 <button className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"><Printer size={16} /> Print Report</button>
-                                <button className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-indigo-900/40"><Download size={16} /> Export CSV</button>
+                                <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-900/40"><Download size={16} /> Export CSV</button>
                             </div>
                         </div>
                     </div>
@@ -1273,11 +1273,11 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
             {/* BATCH MARK UNPAID MODAL */}
             {isBulkUnpaidModalOpen && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[6000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl animate-in zoom-in duration-300 border-[8px] border-indigo-600 overflow-hidden">
+                    <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl animate-in zoom-in duration-300 border-[8px] border-blue-600 overflow-hidden">
                         <div className="p-10 space-y-8">
                             <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-6">
-                                    <div className="w-20 h-20 bg-indigo-600 text-white rounded-[2rem] flex items-center justify-center shadow-xl italic font-black text-3xl">
+                                    <div className="w-20 h-20 bg-blue-600 text-white rounded-[2rem] flex items-center justify-center shadow-xl italic font-black text-3xl">
                                         <BadgeDollarSign size={40} />
                                     </div>
                                     <div>
@@ -1295,7 +1295,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Select Target Plan</label>
                                         <select
-                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase tracking-widest outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase tracking-widest outline-none focus:border-blue-500 transition-all cursor-pointer"
                                             value={bulkUnpaidConfig.packageId}
                                             onChange={(e) => setBulkUnpaidConfig(prev => ({ ...prev, packageId: e.target.value }))}
                                         >
@@ -1310,7 +1310,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                             type="number"
                                             min="1"
                                             max="12"
-                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg outline-none focus:border-indigo-500 transition-all font-sans"
+                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg outline-none focus:border-blue-500 transition-all font-sans"
                                             value={bulkUnpaidConfig.months}
                                             onChange={(e) => setBulkUnpaidConfig(prev => ({ ...prev, months: parseInt(e.target.value) || 1 }))}
                                         />
@@ -1338,7 +1338,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Collection Notes <span className="text-rose-500 font-black">(REQUIRED)</span></label>
                                         <textarea
-                                            className={`w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none transition-all min-h-[100px] resize-none ${!bulkUnpaidConfig.notes ? 'border-rose-100 placeholder:text-rose-300' : 'border-slate-100 focus:border-indigo-500'}`}
+                                            className={`w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none transition-all min-h-[100px] resize-none ${!bulkUnpaidConfig.notes ? 'border-rose-100 placeholder:text-rose-300' : 'border-slate-100 focus:border-blue-500'}`}
                                             placeholder="MUST INPUT REASON FOR AUDIT LOG..."
                                             value={bulkUnpaidConfig.notes}
                                             onChange={(e) => setBulkUnpaidConfig(prev => ({ ...prev, notes: e.target.value }))}
@@ -1347,8 +1347,8 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                 </div>
                             </div>
 
-                            <div className="bg-slate-50 p-6 rounded-3xl border border-dashed border-indigo-200">
-                                <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-1 italic">Payment Summary:</p>
+                            <div className="bg-slate-50 p-6 rounded-3xl border border-dashed border-blue-200">
+                                <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1 italic">Payment Summary:</p>
                                 <p className="text-xl font-black text-slate-900 leading-none">
                                     Total Charge: Rs. {((state.packages.find(p => p.id === bulkUnpaidConfig.packageId)?.price || 0) * bulkUnpaidConfig.months).toLocaleString()} 
                                     <span className="text-[10px] text-slate-400 ml-2 font-black italic">
@@ -1360,7 +1360,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                             <button
                                 onClick={handleBatchMarkUnpaid}
                                 disabled={isProcessing || !bulkUnpaidConfig.notes}
-                                className={`w-full py-8 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl italic transition-all active:scale-95 flex items-center justify-center gap-4 ${!bulkUnpaidConfig.notes ? 'bg-slate-200 cursor-not-allowed' : 'bg-slate-950 shadow-indigo-100'}`}
+                                className={`w-full py-8 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl italic transition-all active:scale-95 flex items-center justify-center gap-4 ${!bulkUnpaidConfig.notes ? 'bg-slate-200 cursor-not-allowed' : 'bg-slate-950 shadow-blue-100'}`}
                             >
                                 <Zap size={28} /> {isProcessing ? 'AUTHORIZING...' : !bulkUnpaidConfig.notes ? 'Audit Notes Missing' : 'DEPLOY FISCAL ARREARS'}
                             </button>
@@ -1372,11 +1372,11 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
             {/* BATCH ACTIVATE MODAL */}
             {isBulkActivateModalOpen && (
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[6000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl animate-in zoom-in duration-300 border-[8px] border-emerald-600 overflow-hidden">
+                    <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl animate-in zoom-in duration-300 border-[8px] border-green-600 overflow-hidden">
                         <div className="p-10 space-y-8">
                             <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-6">
-                                    <div className="w-20 h-20 bg-emerald-600 text-white rounded-[2rem] flex items-center justify-center shadow-xl italic font-black text-3xl">
+                                    <div className="w-20 h-20 bg-green-600 text-white rounded-[2rem] flex items-center justify-center shadow-xl italic font-black text-3xl">
                                         <Zap size={40} />
                                     </div>
                                     <div>
@@ -1394,7 +1394,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Select Target Plan</label>
                                         <select
-                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase tracking-widest outline-none focus:border-emerald-500 transition-all cursor-pointer"
+                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase tracking-widest outline-none focus:border-green-500 transition-all cursor-pointer"
                                             value={bulkActivateConfig.packageId}
                                             onChange={(e) => setBulkActivateConfig(prev => ({ ...prev, packageId: e.target.value }))}
                                         >
@@ -1407,7 +1407,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">New Expiration Registry (Calendar)</label>
                                         <input
                                             type="date"
-                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg outline-none focus:border-emerald-500 transition-all font-sans"
+                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg outline-none focus:border-green-500 transition-all font-sans"
                                             value={bulkActivateConfig.expiryDate}
                                             onChange={(e) => setBulkActivateConfig(prev => ({ ...prev, expiryDate: e.target.value }))}
                                         />
@@ -1437,7 +1437,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Operational Memo <span className="text-rose-500 font-black">(REQUIRED)</span></label>
                                         <textarea
-                                            className={`w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none transition-all min-h-[100px] resize-none ${!bulkActivateConfig.notes ? 'border-rose-100 placeholder:text-rose-300' : 'border-slate-100 focus:border-emerald-500'}`}
+                                            className={`w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none transition-all min-h-[100px] resize-none ${!bulkActivateConfig.notes ? 'border-rose-100 placeholder:text-rose-300' : 'border-slate-100 focus:border-green-500'}`}
                                             placeholder="MUST INPUT REASON FOR AUDIT LOG..."
                                             value={bulkActivateConfig.notes}
                                             onChange={(e) => setBulkActivateConfig(prev => ({ ...prev, notes: e.target.value }))}
@@ -1449,7 +1449,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                             <button
                                 onClick={handleConfirmBulkActivate}
                                 disabled={isProcessing || !bulkActivateConfig.notes}
-                                className={`w-full py-8 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl italic transition-all active:scale-95 flex items-center justify-center gap-4 ${!bulkActivateConfig.notes ? 'bg-slate-200 cursor-not-allowed' : 'bg-slate-950 shadow-emerald-100'}`}
+                                className={`w-full py-8 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl italic transition-all active:scale-95 flex items-center justify-center gap-4 ${!bulkActivateConfig.notes ? 'bg-slate-200 cursor-not-allowed' : 'bg-slate-950 shadow-green-100'}`}
                             >
                                 <Zap size={28} /> {isProcessing ? 'AUTHORIZING...' : !bulkActivateConfig.notes ? 'Audit Notes Missing' : 'EXECUTE MASS ACTIVATION'}
                             </button>
@@ -1633,4 +1633,5 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
 };
 
 export default Recovery;
+
 

@@ -68,7 +68,7 @@ export const PWAPrompt: React.FC = () => {
 
                 <div className="flex items-start gap-6">
                     {/* App Icon Mockup */}
-                    <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100 shrink-0 group-hover:scale-110 transition-transform duration-500">
+                    <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100 shrink-0 group-hover:scale-110 transition-transform duration-500">
                         <Smartphone size={32} />
                     </div>
 
@@ -111,8 +111,9 @@ export const PWAPrompt: React.FC = () => {
                 </div>
 
                 {/* Decoration */}
-                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-50/50 rounded-full blur-3xl" />
+                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-blue-50/50 rounded-full blur-3xl" />
             </div>
         </div>
     );
 };
+

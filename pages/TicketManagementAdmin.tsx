@@ -89,8 +89,8 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
   const getStatusColor = (s: TicketStatus) => {
     switch(s) {
-      case TicketStatus.OPEN: return 'bg-indigo-600 text-white';
-      case TicketStatus.RESOLVED: return 'bg-emerald-600 text-white';
+      case TicketStatus.OPEN: return 'bg-blue-600 text-white';
+      case TicketStatus.RESOLVED: return 'bg-green-600 text-white';
       case TicketStatus.IN_PROGRESS: return 'bg-blue-600 text-white';
       case TicketStatus.CLOSED: return 'bg-slate-200 text-slate-500';
       default: return 'bg-slate-100 text-slate-400';
@@ -102,7 +102,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-1">
           <h2 className="text-3xl font-black text-slate-950 tracking-tight flex items-center gap-3 italic leading-none">
-            <LifeBuoy className="text-indigo-600" size={32} />
+            <LifeBuoy className="text-blue-600" size={32} />
             Support Tickets
           </h2>
           <p className="text-slate-600 font-medium uppercase text-[10px] tracking-widest">Manage customer support requests and network alerts</p>
@@ -110,13 +110,13 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
            <button 
              onClick={() => setActiveTab('tickets')}
-             className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'tickets' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+             className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'tickets' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
            >
               <MessageSquare size={16}/> Tickets
            </button>
            <button 
              onClick={() => setActiveTab('noc')}
-             className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'noc' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+             className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'noc' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
            >
               <Activity size={16}/> Network Alerts
            </button>
@@ -130,7 +130,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
-                  className="w-full pl-11 pr-4 py-4 bg-slate-100 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-black text-slate-900"
+                  className="w-full pl-11 pr-4 py-4 bg-slate-100 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-black text-slate-900"
                   placeholder="Search tickets..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
@@ -170,7 +170,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
               </div>
               <button 
                 onClick={() => { setStatusFilter('All'); setPriorityFilter('All'); setAssigneeFilter('All'); setDateStartFilter(''); setDateEndFilter(''); setSearchTerm(''); }}
-                className="w-full py-2 text-[8px] font-black uppercase text-slate-400 hover:text-indigo-600 transition-colors"
+                className="w-full py-2 text-[8px] font-black uppercase text-slate-400 hover:text-blue-600 transition-colors"
               >
                 Clear Filters
               </button>
@@ -179,7 +179,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[650px]">
                <div className="p-6 bg-slate-950 border-b border-white/5 flex items-center justify-between">
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ticket List</h3>
-                  <span className="text-[9px] font-black text-indigo-400 bg-white/5 px-2 py-0.5 rounded uppercase">Live</span>
+                  <span className="text-[9px] font-black text-blue-400 bg-white/5 px-2 py-0.5 rounded uppercase">Live</span>
                </div>
                <div className="divide-y divide-slate-100 overflow-y-auto custom-scrollbar flex-1 bg-white">
                   {filteredTickets.map(ticket => {
@@ -188,17 +188,17 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                       <div 
                         key={ticket.id}
                         onClick={() => setSelectedTicketId(ticket.id)}
-                        className={`w-full p-6 text-left transition-all flex flex-col gap-4 cursor-pointer group relative ${selectedTicketId === ticket.id ? 'bg-indigo-50' : 'hover:bg-slate-50'} ${isHigh ? 'border-l-4 border-rose-500' : ''}`}
+                        className={`w-full p-6 text-left transition-all flex flex-col gap-4 cursor-pointer group relative ${selectedTicketId === ticket.id ? 'bg-blue-50' : 'hover:bg-slate-50'} ${isHigh ? 'border-l-4 border-rose-500' : ''}`}
                       >
                          <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">
-                               <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${ticket.status === TicketStatus.OPEN ? 'bg-indigo-600' : 'bg-slate-300'}`}></div>
+                               <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${ticket.status === TicketStatus.OPEN ? 'bg-blue-600' : 'bg-slate-300'}`}></div>
                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{ticket.id}</span>
                             </div>
                             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${getPriorityColor(ticket.priority)}`}>{ticket.priority}</span>
                          </div>
                          <div>
-                            <h4 className="font-black text-slate-900 uppercase tracking-tight text-sm leading-tight group-hover:text-indigo-600 transition-colors line-clamp-2">{ticket.subject}</h4>
+                            <h4 className="font-black text-slate-900 uppercase tracking-tight text-sm leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">{ticket.subject}</h4>
                             <p className="text-[10px] text-slate-500 font-bold uppercase mt-1 italic">{ticket.userName}</p>
                          </div>
                          <div className="flex justify-between items-center pt-2">
@@ -241,7 +241,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                        <h3 className="text-3xl font-black uppercase tracking-tighter italic leading-none">{selectedTicket.subject}</h3>
                        <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2">
-                             <User size={14} className="text-indigo-400" />
+                             <User size={14} className="text-blue-400" />
                              <span className="text-xs font-black uppercase">{selectedTicket.userName}</span>
                           </div>
                           <span className="text-slate-700">•</span>
@@ -252,7 +252,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 space-y-2">
                           <p className="text-[8px] font-black uppercase text-slate-500">Assigned To</p>
                           <select 
-                            className="bg-transparent text-xs font-black uppercase outline-none text-indigo-400"
+                            className="bg-transparent text-xs font-black uppercase outline-none text-blue-400"
                             value={selectedTicket.assignedTo || ''}
                             onChange={(e) => handleAssignTicket(selectedTicket.id, e.target.value)}
                           >
@@ -272,7 +272,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
                     <div className="space-y-6">
                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-200 pb-2">
-                          <Layers size={14} className="text-indigo-600" /> Conversation History
+                          <Layers size={14} className="text-blue-600" /> Conversation History
                        </h4>
                        <div className="space-y-4">
                           {selectedTicket.comments.map(comment => (
@@ -296,7 +296,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                  <div className="p-8 bg-white border-t border-slate-200 space-y-6 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.03)]">
                     <div className="flex gap-4">
                        <select 
-                         className="flex-1 p-4 bg-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-indigo-500/10 border-none"
+                         className="flex-1 p-4 bg-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/10 border-none"
                          value={selectedTicket.status}
                          onChange={e => handleStatusUpdate(selectedTicket.id, e.target.value as TicketStatus)}
                        >
@@ -305,7 +305,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                     <div className="relative flex items-center gap-4">
                        <textarea 
-                         className="flex-1 pl-6 pr-16 py-5 bg-slate-100 border-none rounded-3xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-bold text-sm h-16 resize-none uppercase"
+                         className="flex-1 pl-6 pr-16 py-5 bg-slate-100 border-none rounded-3xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-bold text-sm h-16 resize-none uppercase"
                          placeholder="Type your reply to the customer..."
                          value={commentText}
                          onChange={e => setCommentText(e.target.value)}
@@ -313,7 +313,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                        <button 
                          onClick={handleAddComment}
                          disabled={!commentText.trim()}
-                         className="absolute right-2 p-4 bg-indigo-600 text-white rounded-2xl shadow-xl hover:bg-indigo-700 transition-all active:scale-95 disabled:opacity-50"
+                         className="absolute right-2 p-4 bg-blue-600 text-white rounded-2xl shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50"
                        >
                           <Send size={20}/>
                        </button>
@@ -342,12 +342,12 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                       <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${event.severity === 'Critical' ? 'bg-rose-600 text-white shadow-lg shadow-rose-200' : event.severity === 'Warning' ? 'bg-amber-500 text-white' : 'bg-blue-500 text-white'}`}>
                         {event.severity}
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${event.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100 animate-pulse' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                      <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${event.status === 'Active' ? 'bg-green-50 text-green-600 border-green-100 animate-pulse' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                         {event.status}
                       </div>
                    </div>
                    <div className="relative z-10 space-y-4">
-                      <h4 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic group-hover:text-indigo-600 transition-colors leading-none">{event.title}</h4>
+                      <h4 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic group-hover:text-blue-600 transition-colors leading-none">{event.title}</h4>
                       <div className="flex items-center gap-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">
                          <Hash size={12}/> {event.area}
                       </div>
@@ -358,11 +358,11 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                             <span className="text-[9px] font-black uppercase">{new Date(event.startTime).toLocaleString()}</span>
                          </div>
                          {event.status === 'Active' && (
-                           <button onClick={() => db.resolveNOCEvent(event.id)} className="text-emerald-600 font-black text-[10px] uppercase tracking-widest hover:underline transition-all">Mark as Resolved</button>
+                           <button onClick={() => db.resolveNOCEvent(event.id)} className="text-green-600 font-black text-[10px] uppercase tracking-widest hover:underline transition-all">Mark as Resolved</button>
                          )}
                       </div>
                    </div>
-                   <Activity className="absolute -right-8 -bottom-8 opacity-[0.03] scale-150 text-indigo-900" size={180} />
+                   <Activity className="absolute -right-8 -bottom-8 opacity-[0.03] scale-150 text-blue-900" size={180} />
                 </div>
               ))}
            </div>
@@ -453,3 +453,4 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default TicketManagementAdmin;
+

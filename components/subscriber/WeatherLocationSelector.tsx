@@ -47,7 +47,7 @@ const WeatherLocationSelector: React.FC<Props> = ({ onClose, onSelect }) => {
       <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden border-[8px] border-slate-50 flex flex-col">
         <div className="p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
               <Globe size={20} />
             </div>
             <div>
@@ -66,7 +66,7 @@ const WeatherLocationSelector: React.FC<Props> = ({ onClose, onSelect }) => {
             <input 
               type="text" 
               placeholder="Search global city..." 
-              className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all uppercase tracking-widest"
+              className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black outline-none focus:ring-4 focus:ring-blue-500/10 transition-all uppercase tracking-widest"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
@@ -79,10 +79,10 @@ const WeatherLocationSelector: React.FC<Props> = ({ onClose, onSelect }) => {
               <button 
                 key={`${city.name}-${idx}`}
                 onClick={() => onSelect(city)}
-                className="w-full p-4 flex items-center justify-between bg-white border border-slate-100 rounded-2xl hover:border-indigo-500 hover:bg-indigo-50/30 transition-all group"
+                className="w-full p-4 flex items-center justify-between bg-white border border-slate-100 rounded-2xl hover:border-blue-500 hover:bg-blue-50/30 transition-all group"
               >
                 <div className="flex items-center gap-4 text-left">
-                  <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-indigo-600">
+                  <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-blue-600">
                     <MapPin size={18} />
                   </div>
                   <div>
@@ -90,7 +90,7 @@ const WeatherLocationSelector: React.FC<Props> = ({ onClose, onSelect }) => {
                     <p className="text-[9px] text-slate-400 font-bold uppercase">{city.admin1 ? `${city.admin1}, ` : ''}{city.country}</p>
                   </div>
                 </div>
-                <ChevronRight size={16} className="text-slate-200 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                <ChevronRight size={16} className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
               </button>
             ))}
             {query.length >= 3 && results.length === 0 && !loading && (

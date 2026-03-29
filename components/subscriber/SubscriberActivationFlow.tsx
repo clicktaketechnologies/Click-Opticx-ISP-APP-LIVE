@@ -96,7 +96,7 @@ const SubscriberActivationFlow: React.FC<Props> = ({ user, state, packageId, isR
   const getGatewayColor = (id: string) => {
     switch(id) {
       case 'stripe': return 'bg-blue-600';
-      case 'easypaisa': return 'bg-emerald-600';
+      case 'easypaisa': return 'bg-green-600';
       case 'jazzcash': return 'bg-rose-600';
       case 'cash': return 'bg-slate-900';
       default: return 'bg-blue-600';
@@ -142,13 +142,13 @@ const SubscriberActivationFlow: React.FC<Props> = ({ user, state, packageId, isR
                      <button 
                       onClick={() => handleMethodSelect('Top-Up Balance')} 
                       disabled={user.balance < total}
-                      className={`w-full p-6 border-2 transition-all flex items-center justify-between group rounded-3xl shrink-0 shadow-sm ${user.balance >= total ? 'bg-emerald-50 border-transparent hover:border-emerald-500' : 'bg-slate-50 border-transparent grayscale opacity-50 cursor-not-allowed'}`}
+                      className={`w-full p-6 border-2 transition-all flex items-center justify-between group rounded-3xl shrink-0 shadow-sm ${user.balance >= total ? 'bg-green-50 border-transparent hover:border-green-500' : 'bg-slate-50 border-transparent grayscale opacity-50 cursor-not-allowed'}`}
                      >
                         <div className="flex items-center gap-4">
-                           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${user.balance >= total ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-white'}`}><Wallet size={24}/></div>
+                           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${user.balance >= total ? 'bg-green-600 text-white' : 'bg-slate-300 text-white'}`}><Wallet size={24}/></div>
                            <div className="text-left"><p className="text-xs font-black uppercase text-slate-900">Wallet Balance</p><p className="text-[9px] text-slate-400 font-bold uppercase">Available: Rs. {user.balance.toLocaleString()}</p></div>
                         </div>
-                        {user.balance >= total && <ChevronRight size={18} className="text-emerald-300 group-hover:translate-x-1 transition-transform" />}
+                        {user.balance >= total && <ChevronRight size={18} className="text-green-300 group-hover:translate-x-1 transition-transform" />}
                      </button>
                    )}
 
@@ -240,7 +240,7 @@ const SubscriberActivationFlow: React.FC<Props> = ({ user, state, packageId, isR
 
             {step === 'success' && (
               <div className="p-16 text-center space-y-10 animate-in zoom-in duration-500">
-                 <div className="w-24 h-24 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner animate-bounce border-4 border-emerald-100">
+                 <div className="w-24 h-24 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner animate-bounce border-4 border-green-100">
                     <CheckCircle size={56} />
                  </div>
                  <div className="space-y-3">
@@ -267,3 +267,4 @@ const SubscriberActivationFlow: React.FC<Props> = ({ user, state, packageId, isR
 };
 
 export default SubscriberActivationFlow;
+

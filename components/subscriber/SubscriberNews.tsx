@@ -68,3 +68,4 @@ const SubscriberNews: React.FC<Props> = ({ state }) => {
 };
 
 export default SubscriberNews;
+

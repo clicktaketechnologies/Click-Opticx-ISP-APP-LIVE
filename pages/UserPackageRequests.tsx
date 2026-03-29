@@ -35,7 +35,7 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
 
   const getMethodIcon = (method: string) => {
     switch(method) {
-      case 'Cash': return <Banknote size={16} className="text-emerald-500" />;
+      case 'Cash': return <Banknote size={16} className="text-green-500" />;
       case 'Home Collection': return <Landmark size={16} className="text-purple-500" />;
       case 'Online': case 'Stripe': return <Globe size={16} className="text-blue-500" />;
       default: return <Activity size={16} className="text-slate-400" />;
@@ -101,7 +101,7 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
                  <button 
                    disabled={!!isProcessing}
                    onClick={() => handleApprove(req.id)}
-                   className="flex-[2] py-5 bg-emerald-600 text-white hover:bg-emerald-700 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-100 transition-all active:scale-95 flex items-center justify-center gap-3"
+                   className="flex-[2] py-5 bg-green-600 text-white hover:bg-green-700 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-green-100 transition-all active:scale-95 flex items-center justify-center gap-3"
                  >
                     {isProcessing === req.id ? <Mini5GMicroLoader /> : <ShieldCheck size={20} />}
                     Authorize Provisioning
@@ -122,7 +122,7 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
 
       <div className="bg-slate-900 rounded-[3rem] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden shadow-2xl">
          <div className="relative z-10 max-w-xl space-y-4">
-            <div className="flex items-center gap-3 text-emerald-400">
+            <div className="flex items-center gap-3 text-green-400">
                <ShieldAlert size={28} />
                <h3 className="text-xl font-black uppercase tracking-tight">Authority Guideline</h3>
             </div>
@@ -135,3 +135,4 @@ const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default UserPackageRequests;
+

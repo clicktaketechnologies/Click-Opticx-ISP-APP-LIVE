@@ -63,7 +63,7 @@ const PayFastSettings: React.FC<Props> = ({ state, onBack }) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-4 duration-500 pb-20 max-w-4xl mx-auto">
       <div className="flex items-center gap-6">
-         <button onClick={onBack} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-indigo-600 transition-all active:scale-90">
+         <button onClick={onBack} className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm text-slate-400 hover:text-blue-600 transition-all active:scale-90">
             <ArrowLeft size={24} />
          </button>
          <div>
@@ -89,25 +89,25 @@ const PayFastSettings: React.FC<Props> = ({ state, onBack }) => {
                   </div>
                   <div className="flex bg-white p-1 rounded-2xl border shadow-sm">
                     <button onClick={() => setFormData({...formData, sandbox: true})} className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${formData.sandbox ? 'bg-amber-500 text-white shadow-lg' : 'text-slate-400'}`}>Test</button>
-                    <button onClick={() => setFormData({...formData, sandbox: false})} className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${!formData.sandbox ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-400'}`}>Live</button>
+                    <button onClick={() => setFormData({...formData, sandbox: false})} className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${!formData.sandbox ? 'bg-green-600 text-white shadow-lg' : 'text-slate-400'}`}>Live</button>
                   </div>
                </div>
 
                <div className="space-y-6">
                   <div className="flex items-center justify-between">
                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Merchant Integration</h4>
-                     <button onClick={() => setShowSecrets(!showSecrets)} className="text-[9px] font-black uppercase text-indigo-600 flex items-center gap-2">
+                     <button onClick={() => setShowSecrets(!showSecrets)} className="text-[9px] font-black uppercase text-blue-600 flex items-center gap-2">
                         {showSecrets ? <EyeOff size={14}/> : <Eye size={14}/>} {showSecrets ? 'Hide' : 'Show'} Keys
                      </button>
                   </div>
                   <div className="grid grid-cols-1 gap-6">
                      <div className="space-y-2">
                         <label className="text-[9px] font-black text-slate-500 uppercase ml-1 italic">Merchant ID</label>
-                        <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-indigo-500 transition-all" value={formData.config.merchantId} onChange={e => updateConfig('merchantId', e.target.value)} />
+                        <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-blue-500 transition-all" value={formData.config.merchantId} onChange={e => updateConfig('merchantId', e.target.value)} />
                      </div>
                      <div className="space-y-2">
                         <label className="text-[9px] font-black text-slate-500 uppercase ml-1 italic">Merchant Key</label>
-                        <input type={showSecrets ? 'text' : 'password'} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-indigo-500 transition-all" value={formData.config.merchantKey} onChange={e => updateConfig('merchantKey', e.target.value)} />
+                        <input type={showSecrets ? 'text' : 'password'} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:border-blue-500 transition-all" value={formData.config.merchantKey} onChange={e => updateConfig('merchantKey', e.target.value)} />
                      </div>
                   </div>
                </div>
@@ -165,3 +165,4 @@ const PayFastSettings: React.FC<Props> = ({ state, onBack }) => {
 };
 
 export default PayFastSettings;
+

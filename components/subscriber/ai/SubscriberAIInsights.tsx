@@ -20,7 +20,7 @@ const SubscriberAIInsights: React.FC<Props> = ({ user, state, onBack }) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-right duration-500 pb-24">
       <div className="flex items-center gap-4 px-2">
-         <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 active:scale-90 transition-all shadow-sm">
+         <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-blue-600 active:scale-90 transition-all shadow-sm">
             <ArrowLeft size={20} />
          </button>
          <div>
@@ -32,10 +32,10 @@ const SubscriberAIInsights: React.FC<Props> = ({ user, state, onBack }) => {
       <div className="bg-white rounded-[3rem] p-8 border border-slate-100 shadow-sm h-80 flex flex-col">
         <div className="flex justify-between items-center mb-8 px-2">
            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <TrendingUp size={16} className="text-indigo-500" />
+              <TrendingUp size={16} className="text-blue-500" />
               Node Consumption (Weekly)
            </h3>
-           <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full uppercase italic">Peak Load Detect</span>
+           <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase italic">Peak Load Detect</span>
         </div>
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
@@ -58,7 +58,7 @@ const SubscriberAIInsights: React.FC<Props> = ({ user, state, onBack }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          {[
-           { label: 'Uptime Grade', value: '99.98%', icon: Globe, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+           { label: 'Uptime Grade', value: '99.98%', icon: Globe, color: 'text-green-600', bg: 'bg-green-50' },
            { label: 'Peak Interval', value: '18:00 - 22:00', icon: Zap, color: 'text-amber-600', bg: 'bg-amber-50' }
          ].map(item => (
            <div key={item.label} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 flex items-center gap-5">
@@ -89,3 +89,4 @@ const SubscriberAIInsights: React.FC<Props> = ({ user, state, onBack }) => {
 };
 
 export default SubscriberAIInsights;
+

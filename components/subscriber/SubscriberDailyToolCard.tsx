@@ -15,7 +15,7 @@ const SubscriberDailyToolCard: React.FC<Props> = ({ title, icon: Icon, color, bg
   return (
     <button 
       onClick={onClick}
-      className="flex-none w-40 p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-indigo-100 transition-all duration-300 active:scale-95 group text-left flex flex-col gap-4"
+      className="flex-none w-40 p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-100 transition-all duration-300 active:scale-95 group text-left flex flex-col gap-4"
     >
       <div className={`w-12 h-12 ${bgColor} ${color} rounded-2xl flex items-center justify-center shadow-inner group-hover:rotate-6 transition-transform duration-500`}>
         <Icon size={24} />
@@ -29,3 +29,4 @@ const SubscriberDailyToolCard: React.FC<Props> = ({ title, icon: Icon, color, bg
 };
 
 export default SubscriberDailyToolCard;
+

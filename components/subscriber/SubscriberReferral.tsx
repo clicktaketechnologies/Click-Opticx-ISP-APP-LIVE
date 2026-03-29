@@ -61,21 +61,21 @@ const SubscriberReferral: React.FC = () => {
                </div>
                <div className="text-right">
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Ratio: 1000 Pts = Rs 10</p>
-                  <p className="text-xs font-black text-emerald-400 uppercase mt-1">Verified</p>
+                  <p className="text-xs font-black text-green-400 uppercase mt-1">Verified</p>
                </div>
             </div>
             
             <div className="text-center">
                <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-2">Available Points</p>
                <h2 className="text-7xl font-black italic tracking-tighter text-white drop-shadow-2xl">{currentPoints.toLocaleString()}</h2>
-               <p className="text-sm font-bold text-indigo-400 mt-2 uppercase tracking-widest">Est. Value: Rs. {walletValue.toLocaleString()}</p>
+               <p className="text-sm font-bold text-blue-400 mt-2 uppercase tracking-widest">Est. Value: Rs. {walletValue.toLocaleString()}</p>
             </div>
 
             <div className="flex gap-4">
                <button 
                  onClick={handleConvert}
                  disabled={isConverting || currentPoints < 1000}
-                 className="flex-1 py-5 bg-indigo-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                 className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                >
                   <Wallet size={16} /> {isConverting ? 'Processing...' : 'Convert to Cash'}
                </button>
@@ -126,7 +126,7 @@ const SubscriberReferral: React.FC = () => {
                 <div key={ref.id} className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6 group hover:shadow-xl transition-all">
                    <div className="flex justify-between items-start">
                       <div className="flex items-center gap-4">
-                         <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center border border-indigo-100">
+                         <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center border border-blue-100">
                             <Users size={24} />
                          </div>
                          <div>
@@ -135,7 +135,7 @@ const SubscriberReferral: React.FC = () => {
                          </div>
                       </div>
                       <div className="text-right">
-                         <p className="text-lg font-black text-indigo-600 italic">+{ref.totalPointsEarned}</p>
+                         <p className="text-lg font-black text-blue-600 italic">+{ref.totalPointsEarned}</p>
                          <p className="text-[8px] text-slate-400 uppercase font-bold">Points Earned</p>
                       </div>
                    </div>
@@ -143,8 +143,8 @@ const SubscriberReferral: React.FC = () => {
                    <div className="grid grid-cols-4 gap-2 pt-2">
                       {ref.stages.map((stg, si) => (
                         <div key={si} className="flex flex-col items-center gap-2">
-                           <div className={`w-full h-1.5 rounded-full ${stg.completed ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-100'}`}></div>
-                           <p className={`text-[7px] font-black uppercase text-center ${stg.completed ? 'text-emerald-600' : 'text-slate-300'}`}>{stg.label.split(' ')[0]}</p>
+                           <div className={`w-full h-1.5 rounded-full ${stg.completed ? 'bg-green-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-100'}`}></div>
+                           <p className={`text-[7px] font-black uppercase text-center ${stg.completed ? 'text-green-600' : 'text-slate-300'}`}>{stg.label.split(' ')[0]}</p>
                         </div>
                       ))}
                    </div>
@@ -154,7 +154,7 @@ const SubscriberReferral: React.FC = () => {
          </div>
       </div>
 
-      <button onClick={handleCopyLink} className="w-full py-6 bg-emerald-600 text-white font-black rounded-[2rem] shadow-2xl shadow-emerald-100 active:scale-95 transition-all flex items-center justify-center gap-4 uppercase tracking-[0.2em] text-[10px]">
+      <button onClick={handleCopyLink} className="w-full py-6 bg-green-600 text-white font-black rounded-[2rem] shadow-2xl shadow-green-100 active:scale-95 transition-all flex items-center justify-center gap-4 uppercase tracking-[0.2em] text-[10px]">
          <Share2 size={24} /> Share Invite Link
       </button>
 
@@ -169,3 +169,4 @@ const SubscriberReferral: React.FC = () => {
 };
 
 export default SubscriberReferral;
+

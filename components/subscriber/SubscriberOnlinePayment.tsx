@@ -92,9 +92,9 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
    const getGatewayColor = (id: string) => {
       switch (id) {
          case 'stripe': return 'bg-blue-600';
-         case 'paypal': return 'bg-indigo-700';
+         case 'paypal': return 'bg-blue-700';
          case 'payfast': return 'bg-amber-500';
-         case 'easypaisa': return 'bg-emerald-600';
+         case 'easypaisa': return 'bg-green-600';
          case 'jazzcash': return 'bg-rose-600';
          case 'bank': return 'bg-blue-600';
          case 'cash': return 'bg-slate-600';
@@ -105,15 +105,15 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
    return (
       <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
          {isProcessing ? (
-            <div className="h-[500px] flex flex-col items-center justify-center text-center p-10 space-y-8 bg-white rounded-[3rem] shadow-xl border-4 border-indigo-50">
+            <div className="h-[500px] flex flex-col items-center justify-center text-center p-10 space-y-8 bg-white rounded-[3rem] shadow-xl border-4 border-blue-50">
                <div className="relative w-32 h-32 flex items-center justify-center">
-                  <div className="absolute inset-0 border-4 border-indigo-100 rounded-full"></div>
-                  <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
-                  <RefreshCw size={48} className="text-indigo-600 animate-pulse" />
+                  <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
+                  <RefreshCw size={48} className="text-blue-600 animate-pulse" />
                </div>
                <div className="space-y-2">
                   <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900">Digital Handshake</h3>
-                  <p className="text-[10px] text-indigo-600 font-black uppercase tracking-[0.4em] animate-pulse">{handshakeStep}</p>
+                  <p className="text-[10px] text-blue-600 font-black uppercase tracking-[0.4em] animate-pulse">{handshakeStep}</p>
                </div>
                <p className="text-xs text-slate-400 font-bold uppercase leading-relaxed max-w-xs">
                   Communicating with {selectedGateway?.name} production infrastructure. Do not reload the terminal.
@@ -132,7 +132,7 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
                      </div>
                      <div>
                         <h3 className="text-3xl font-black italic tracking-tighter uppercase leading-none">Instant Pay</h3>
-                        <p className="text-xs font-bold text-indigo-300 uppercase mt-2 opacity-80 italic">Registry-Grade SSL Encryption Active</p>
+                        <p className="text-xs font-bold text-blue-300 uppercase mt-2 opacity-80 italic">Registry-Grade SSL Encryption Active</p>
                      </div>
                   </div>
                   <div className="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
@@ -172,7 +172,7 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
                            ) : (
                               <button
                                  onClick={handleInstantPay}
-                                 className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
+                                 className="w-full py-3 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
                               >
                                  <RefreshCw size={14} /> Retry Transaction
                               </button>
@@ -187,7 +187,7 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
                      <div className="space-y-2">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Target Service Tier</label>
                         <select
-                           className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-800 outline-none focus:border-indigo-500 transition-all shadow-inner"
+                           className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-slate-800 outline-none focus:border-blue-500 transition-all shadow-inner"
                            value={selectedPkgId}
                            onChange={e => setSelectedPkgId(e.target.value)}
                         >
@@ -214,19 +214,19 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
                                  <button
                                     key={m.id}
                                     onClick={() => setSelectedGateway(m)}
-                                    className={`w-full p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all group ${selectedGateway?.id === m.id ? 'bg-indigo-50 border-indigo-600 shadow-xl scale-[1.02]' : 'bg-white border-slate-50 text-slate-400 hover:bg-slate-50 hover:border-slate-200'}`}
+                                    className={`w-full p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all group ${selectedGateway?.id === m.id ? 'bg-blue-50 border-blue-600 shadow-xl scale-[1.02]' : 'bg-white border-slate-50 text-slate-400 hover:bg-slate-50 hover:border-slate-200'}`}
                                  >
                                     <div className="flex items-center gap-5">
                                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-105 ${getGatewayColor(m.id)} text-white`}>
                                           {getGatewayIcon(m.id)}
                                        </div>
                                        <div className="text-left">
-                                          <span className={`text-sm font-black uppercase tracking-tight block ${selectedGateway?.id === m.id ? 'text-indigo-950' : 'text-slate-800'}`}>{m.name}</span>
+                                          <span className={`text-sm font-black uppercase tracking-tight block ${selectedGateway?.id === m.id ? 'text-blue-950' : 'text-slate-800'}`}>{m.name}</span>
                                           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Handshake Registry active</span>
                                        </div>
                                     </div>
                                     {selectedGateway?.id === m.id ? (
-                                       <CheckCircle size={24} className="text-indigo-600" />
+                                       <CheckCircle size={24} className="text-blue-600" />
                                     ) : (
                                        <div className="w-6 h-6 rounded-full border-2 border-slate-100 group-hover:border-slate-200 transition-colors"></div>
                                     )}
@@ -240,7 +240,7 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
                         <div className="p-6 bg-slate-900 rounded-[2.5rem] text-center shadow-2xl relative overflow-hidden">
                            <div className="relative z-10">
                               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Amount to Settle</p>
-                              <h3 className="text-4xl font-black text-indigo-400 italic tracking-tighter">Rs. {total.toLocaleString()}</h3>
+                              <h3 className="text-4xl font-black text-blue-400 italic tracking-tighter">Rs. {total.toLocaleString()}</h3>
                            </div>
                            <Zap className="absolute -right-4 -bottom-4 opacity-5" size={100} />
                         </div>
@@ -249,7 +249,7 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
                      <button
                         onClick={handleInstantPay}
                         disabled={!selectedPkgId || !selectedGateway}
-                        className="w-full py-6 bg-indigo-600 text-white font-black rounded-3xl shadow-xl shadow-indigo-500/20 transition-all active:scale-95 hover:bg-indigo-700 flex items-center justify-center gap-4 uppercase tracking-[0.3em] text-xs disabled:opacity-50 disabled:grayscale"
+                        className="w-full py-6 bg-blue-600 text-white font-black rounded-3xl shadow-xl shadow-blue-500/20 transition-all active:scale-95 hover:bg-blue-700 flex items-center justify-center gap-4 uppercase tracking-[0.3em] text-xs disabled:opacity-50 disabled:grayscale"
                      >
                         <ExternalLink size={20} />
                         Initialize Secure Tunnel
@@ -263,3 +263,4 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
 };
 
 export default SubscriberOnlinePayment;
+

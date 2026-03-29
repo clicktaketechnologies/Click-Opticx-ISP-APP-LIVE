@@ -37,8 +37,8 @@ const SubscriberAISuggestions: React.FC<Props> = ({ user, state, onBack, onActio
       title: 'Registry Bonus Ready', 
       desc: 'You have 0 active referrals. Share your link to earn Rs 500 per node activation.',
       icon: Trophy,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50',
+      color: 'text-blue-600',
+      bg: 'bg-blue-50',
       actionLabel: 'Get Credits',
       actionTab: 'referral'
     }
@@ -47,7 +47,7 @@ const SubscriberAISuggestions: React.FC<Props> = ({ user, state, onBack, onActio
   return (
     <div className="space-y-8 animate-in slide-in-from-right duration-500 pb-24">
       <div className="flex items-center gap-4 px-2">
-         <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-indigo-600 active:scale-90 transition-all shadow-sm">
+         <button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-blue-600 active:scale-90 transition-all shadow-sm">
             <ArrowLeft size={20} />
          </button>
          <div>
@@ -58,7 +58,7 @@ const SubscriberAISuggestions: React.FC<Props> = ({ user, state, onBack, onActio
 
       <div className="space-y-4">
          {suggestions.map(sug => (
-           <div key={sug.id} className="bg-white rounded-[3rem] p-8 border-2 border-slate-100 shadow-sm hover:border-indigo-500 transition-all group overflow-hidden relative">
+           <div key={sug.id} className="bg-white rounded-[3rem] p-8 border-2 border-slate-100 shadow-sm hover:border-blue-500 transition-all group overflow-hidden relative">
               <div className="relative z-10 space-y-6">
                  <div className="flex items-center gap-5">
                     <div className={`w-14 h-14 ${sug.bg} ${sug.color} rounded-2xl flex items-center justify-center border shadow-inner transition-transform group-hover:scale-110`}>
@@ -74,7 +74,7 @@ const SubscriberAISuggestions: React.FC<Props> = ({ user, state, onBack, onActio
 
                  <button 
                   onClick={() => onAction(sug.actionTab)}
-                  className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl shadow-slate-200"
+                  className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-3 active:scale-95 shadow-xl shadow-slate-200"
                  >
                     {sug.actionLabel} <ArrowRight size={14} />
                  </button>
@@ -86,7 +86,7 @@ const SubscriberAISuggestions: React.FC<Props> = ({ user, state, onBack, onActio
 
       <div className="p-10 bg-slate-900 rounded-[3rem] text-white flex flex-col items-center text-center space-y-4 relative overflow-hidden">
          <div className="relative z-10 w-16 h-16 bg-white/10 rounded-[2rem] flex items-center justify-center border border-white/10 mb-2">
-            <RefreshCw size={28} className="text-indigo-400" />
+            <RefreshCw size={28} className="text-blue-400" />
          </div>
          <h4 className="relative z-10 text-xl font-black uppercase italic tracking-tight">Real-time Recalibration</h4>
          <p className="relative z-10 text-[9px] text-slate-500 font-bold uppercase leading-relaxed max-w-xs">AI suggestions refresh every 6 hours based on your node's physical and fiscal handshake data.</p>
@@ -97,3 +97,4 @@ const SubscriberAISuggestions: React.FC<Props> = ({ user, state, onBack, onActio
 };
 
 export default SubscriberAISuggestions;
+

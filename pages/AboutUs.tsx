@@ -85,14 +85,14 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6">
            <div className="space-y-1">
               <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic">
-                <Edit3 className="text-indigo-600" size={32} />
+                <Edit3 className="text-blue-600" size={32} />
                 Edit Company Info
               </h2>
               <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">Update your company branding and website settings</p>
            </div>
            <div className="flex gap-3 w-full sm:w-auto">
               <button onClick={() => setIsEditing(false)} className="flex-1 sm:flex-none px-6 py-4 bg-slate-100 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all">Cancel</button>
-              <button onClick={handleSave} disabled={isSaving} className="flex-1 sm:flex-none px-10 py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
+              <button onClick={handleSave} disabled={isSaving} className="flex-1 sm:flex-none px-10 py-4 bg-green-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all">
                  {isSaving ? <Mini5GMicroLoader size={16} /> : <ShieldCheck size={16}/>}
                  Save Changes
               </button>
@@ -110,7 +110,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm p-10 space-y-12">
            <div className="space-y-8">
               <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-                 <Building2 className="text-indigo-600" size={24} />
+                 <Building2 className="text-blue-600" size={24} />
                  <h3 className="text-lg font-black uppercase italic tracking-tight">Company Branding</h3>
               </div>
 
@@ -119,7 +119,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Company Name</label>
                   <input 
                     type="text" 
-                    className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-indigo-600 outline-none transition-all" 
+                    className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-blue-600 outline-none transition-all" 
                     value={brandData.businessName} 
                     onChange={e => setBrandData({...brandData, businessName: e.target.value})} 
                   />
@@ -128,7 +128,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Short Name</label>
                   <input 
                     type="text" 
-                    className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-indigo-600 outline-none transition-all" 
+                    className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-blue-600 outline-none transition-all" 
                     value={brandData.shortName} 
                     onChange={e => setBrandData({...brandData, shortName: e.target.value})} 
                   />
@@ -145,20 +145,20 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                       <p className="text-[9px] font-black text-slate-400 uppercase ml-1">{slot.label}</p>
                       <div 
                         onClick={() => triggerUpload(slot.id as any)}
-                        className={`h-40 rounded-[2rem] border-2 border-dashed transition-all cursor-pointer group flex flex-col items-center justify-center p-4 relative overflow-hidden ${ (brandData as any)[slot.id] ? 'border-emerald-200 bg-emerald-50/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-indigo-300' }`}
+                        className={`h-40 rounded-[2rem] border-2 border-dashed transition-all cursor-pointer group flex flex-col items-center justify-center p-4 relative overflow-hidden ${ (brandData as any)[slot.id] ? 'border-green-200 bg-green-50/20' : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-blue-300' }`}
                       >
                          {(brandData as any)[slot.id] ? (
                            <>
                              <img src={(brandData as any)[slot.id]} className="h-full object-contain drop-shadow-sm group-hover:opacity-50 transition-opacity" />
                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button className="p-3 bg-white text-indigo-600 rounded-full shadow-xl">
+                                <button className="p-3 bg-white text-blue-600 rounded-full shadow-xl">
                                    <Upload size={20} />
                                 </button>
                              </div>
                            </>
                          ) : (
                            <>
-                              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-slate-300 mb-2 shadow-sm border border-slate-100 group-hover:text-indigo-400 transition-colors">
+                              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-slate-300 mb-2 shadow-sm border border-slate-100 group-hover:text-blue-400 transition-colors">
                                  <Upload size={24} />
                               </div>
                               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest text-center">{slot.desc}</p>
@@ -172,7 +172,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
 
            <div className="space-y-8 pt-8 border-t border-slate-100">
               <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-                 <Network className="text-indigo-600" size={24} />
+                 <Network className="text-blue-600" size={24} />
                  <h3 className="text-lg font-black uppercase italic tracking-tight">Website Settings</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -180,7 +180,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Domain Name</label>
                   <input 
                     type="text" 
-                    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600" 
+                    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-blue-600" 
                     value={infraData.domainNode} 
                     onChange={e => setInfraData({...infraData, domainNode: e.target.value})} 
                   />
@@ -189,7 +189,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Server IP</label>
                   <input 
                     type="text" 
-                    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-indigo-600" 
+                    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-blue-600" 
                     value={infraData.targetIP} 
                     onChange={e => setInfraData({...infraData, targetIP: e.target.value})} 
                   />
@@ -197,7 +197,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                 <div className="space-y-2">
                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Domain Status</label>
                    <select 
-                     className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm uppercase outline-none focus:border-indigo-600"
+                     className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm uppercase outline-none focus:border-blue-600"
                      value={infraData.dnsStatus}
                      onChange={e => setInfraData({...infraData, dnsStatus: e.target.value as any})}
                    >
@@ -211,24 +211,24 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
 
            <div className="space-y-8 pt-8 border-t border-slate-100">
               <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-                 <History className="text-indigo-600" size={24} />
+                 <History className="text-blue-600" size={24} />
                  <h3 className="text-lg font-black uppercase italic tracking-tight">Our Story</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Our Mission</label>
-                    <textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs h-24 resize-none outline-none focus:border-indigo-500" value={formData.mission} onChange={e => setFormData({...formData, mission: e.target.value})} />
+                    <textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs h-24 resize-none outline-none focus:border-blue-500" value={formData.mission} onChange={e => setFormData({...formData, mission: e.target.value})} />
                  </div>
                  <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Our Vision</label>
-                    <textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs h-24 resize-none outline-none focus:border-indigo-500" value={formData.vision} onChange={e => setFormData({...formData, vision: e.target.value})} />
+                    <textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs h-24 resize-none outline-none focus:border-blue-500" value={formData.vision} onChange={e => setFormData({...formData, vision: e.target.value})} />
                  </div>
               </div>
 
               <div className="space-y-2">
                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Company History</label>
-                 <textarea className="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs h-40 outline-none focus:border-indigo-500 resize-none" value={formData.companyStory} onChange={e => setFormData({...formData, companyStory: e.target.value})} />
+                 <textarea className="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs h-40 outline-none focus:border-blue-500 resize-none" value={formData.companyStory} onChange={e => setFormData({...formData, companyStory: e.target.value})} />
               </div>
            </div>
         </div>
@@ -246,7 +246,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                      {branding.logoSquare ? (
                        <img src={branding.logoSquare} className="w-full h-full object-contain" alt="Logo" />
                      ) : (
-                       <Globe size={48} className="text-indigo-600" />
+                       <Globe size={48} className="text-blue-600" />
                      )}
                   </div>
                   <div>
@@ -254,11 +254,11 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                        <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase leading-none">{branding.businessName}</h1>
                        {isAdmin && (
                          <button onClick={() => setIsEditing(true)} className="p-3 bg-white/10 hover:bg-white/20 rounded-2xl transition-all border border-white/5 active:scale-90 group">
-                            <Edit3 size={18} className="text-indigo-400 group-hover:text-white" />
+                            <Edit3 size={18} className="text-blue-400 group-hover:text-white" />
                          </button>
                        )}
                     </div>
-                    <p className="text-[12px] font-black text-indigo-400 uppercase tracking-[0.5em] mt-3 opacity-80 italic">About Our Company</p>
+                    <p className="text-[12px] font-black text-blue-400 uppercase tracking-[0.5em] mt-3 opacity-80 italic">About Our Company</p>
                   </div>
                </div>
                
@@ -284,8 +284,8 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                   <p className="text-sm font-bold text-slate-300 leading-relaxed uppercase italic">{formData.vision}</p>
                </div>
                <div className="p-10 bg-white/5 rounded-[2.5rem] backdrop-blur-xl border border-white/10 space-y-4 group hover:bg-white/10 transition-all hover:translate-y-[-4px]">
-                  <div className="flex items-center gap-4 text-emerald-400 mb-2">
-                     <div className="w-12 h-12 bg-emerald-400/10 rounded-2xl flex items-center justify-center border border-emerald-400/20 shadow-inner">
+                  <div className="flex items-center gap-4 text-green-400 mb-2">
+                     <div className="w-12 h-12 bg-green-400/10 rounded-2xl flex items-center justify-center border border-green-400/20 shadow-inner">
                         <Zap size={28} />
                      </div>
                      <h4 className="font-black uppercase tracking-[0.3em] text-xs">Our Mission</h4>
@@ -304,7 +304,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                <Network size={20} className="text-blue-600" /> Website & App Access
             </h3>
             <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest border ${
-              state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
+              state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? 'bg-green-50 text-green-600 border-green-100' : 
               state.settings.infrastructure.dnsStatus === 'ERROR' ? 'bg-rose-50 text-rose-600 border-rose-100' : 
               'bg-amber-50 text-amber-600 border-amber-100 animate-pulse'
             }`}>
@@ -325,9 +325,9 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between group hover:bg-white transition-all">
                <div>
                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Domain Status</p>
-                  <p className="text-base font-black text-emerald-600 uppercase">{state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? 'HEALTHY' : 'PENDING'}</p>
+                  <p className="text-base font-black text-green-600 uppercase">{state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? 'HEALTHY' : 'PENDING'}</p>
                </div>
-               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'}`}>
+               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600'}`}>
                   {state.settings.infrastructure.dnsStatus === 'PROPAGATED' ? <CheckCircle size={20} /> : <Mini5GMicroLoader size={20} />}
                </div>
             </div>
@@ -337,25 +337,25 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
          <div className="lg:col-span-2 bg-white rounded-[3rem] p-12 border border-slate-100 shadow-sm space-y-8 relative overflow-hidden group">
             <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] flex items-center gap-3">
-               <History size={20} className="text-indigo-600" /> Our Story
+               <History size={20} className="text-blue-600" /> Our Story
             </h3>
             <div className="prose max-w-none relative z-10">
                <p className="text-xl font-bold text-slate-800 leading-relaxed uppercase italic">
                  {formData.companyStory}
                </p>
             </div>
-            <Award className="absolute -right-8 -bottom-8 opacity-[0.02] text-indigo-900 group-hover:scale-125 transition-transform duration-1000" size={240} />
+            <Award className="absolute -right-8 -bottom-8 opacity-[0.02] text-blue-900 group-hover:scale-125 transition-transform duration-1000" size={240} />
          </div>
          
-         <div className="bg-indigo-600 rounded-[3rem] p-12 text-white relative overflow-hidden shadow-xl">
+         <div className="bg-blue-600 rounded-[3rem] p-12 text-white relative overflow-hidden shadow-xl">
             <div className="relative z-10 space-y-10">
-               <h3 className="text-[11px] font-black uppercase tracking-[0.4em] flex items-center gap-3 text-indigo-200">
+               <h3 className="text-[11px] font-black uppercase tracking-[0.4em] flex items-center gap-3 text-blue-200">
                   <Star size={20} className="text-amber-400" /> Our Values
                </h3>
                <div className="space-y-5">
                   {formData.values.map((v, i) => (
                     <div key={i} className="flex items-center gap-5 bg-white/10 p-5 rounded-3xl border border-white/10 group hover:bg-white/20 transition-all cursor-default">
-                       <ShieldCheck size={18} className="text-emerald-400 group-hover:scale-110 transition-transform" />
+                       <ShieldCheck size={18} className="text-green-400 group-hover:scale-110 transition-transform" />
                        <span className="text-[11px] font-black uppercase tracking-widest leading-none">{v}</span>
                     </div>
                   ))}
@@ -377,8 +377,8 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
          </div>
          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {formData.features.map(f => (
-              <div key={f.id} className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm group hover:shadow-2xl hover:border-indigo-100 transition-all duration-500 relative overflow-hidden flex flex-col items-center text-center">
-                 <div className="w-16 h-16 bg-slate-950 rounded-[1.5rem] flex items-center justify-center text-indigo-400 mb-8 group-hover:scale-110 group-hover:rotate-12 transition-all shadow-2xl border border-white/5">
+              <div key={f.id} className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm group hover:shadow-2xl hover:border-blue-100 transition-all duration-500 relative overflow-hidden flex flex-col items-center text-center">
+                 <div className="w-16 h-16 bg-slate-950 rounded-[1.5rem] flex items-center justify-center text-blue-400 mb-8 group-hover:scale-110 group-hover:rotate-12 transition-all shadow-2xl border border-white/5">
                     <Activity size={32}/>
                  </div>
                  <h4 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic mb-4">{f.title}</h4>
@@ -391,7 +391,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
 
       <div className="bg-white border-2 border-slate-100 rounded-[4rem] p-12 flex flex-col md:flex-row items-center justify-between gap-12 shadow-xl hover:shadow-2xl transition-all duration-500">
          <div className="flex flex-col md:flex-row items-center gap-8 text-center md:text-left">
-            <div className="w-20 h-20 bg-emerald-50 rounded-[2rem] flex items-center justify-center shadow-inner border border-emerald-100 text-emerald-600 group-hover:scale-105 transition-transform">
+            <div className="w-20 h-20 bg-green-50 rounded-[2rem] flex items-center justify-center shadow-inner border border-green-100 text-green-600 group-hover:scale-105 transition-transform">
                <ShieldCheck size={40}/>
             </div>
             <div>
@@ -405,3 +405,4 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AboutUs;
+
