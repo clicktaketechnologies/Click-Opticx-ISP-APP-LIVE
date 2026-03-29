@@ -1,6 +1,6 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, Firestore } from 'firebase/firestore';
-import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, Auth } from 'firebase/auth';
+import { getAuth, signInWithRedirect, signInWithPopup, getRedirectResult, GoogleAuthProvider, Auth } from 'firebase/auth';
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 import { io, Socket } from 'socket.io-client';
 import { notificationManager } from './utils/NotificationManager';
@@ -36,7 +36,7 @@ export interface ConnectionAudit {
 
 const firebaseConfig = {
   apiKey: "AIzaSyC940eEHtHhJiEAROA7DlvaBYgAi4A3e9I",
-  authDomain: "isp-click-opticx.web.app",
+  authDomain: "ap-click-opticx.firebaseapp.com",
   projectId: "ap-click-opticx",
   storageBucket: "ap-click-opticx.firebasestorage.app",
   messagingSenderId: "1036833166674",
@@ -821,7 +821,38 @@ class DB {
     try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithRedirect(this.auth, provider);
+      const result = await signInWithPopup(this.auth, provider);
+      
+      if (result.user) {
+          const user = result.user;
+          
+          // Check staff first
+          const staffMember = this.state.staff.find(s => s.email.toLowerCase() === user.email?.toLowerCase());
+          if (staffMember) {
+              this.state.currentUser = staffMember;
+              this.notify();
+              return { success: true };
+          }
+
+          // Then check users/customers
+          let existingUser = this.state.users.find(u => u.email === user.email);
+          if (existingUser) {
+              this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
+              this.notify();
+          } else {
+              const newUser = {
+                  name: user.displayName || 'Google User',
+                  email: user.email || '',
+                  status: UserStatus.ACTIVE,
+                  profilePic: user.photoURL || ''
+              };
+              const addRes = await this.addUser(newUser);
+              if (addRes.success) {
+                  this.state.currentUser = { ...addRes.user, role: Role.CUSTOMER } as ISPUser;
+                  this.notify();
+              }
+          }
+      }
       return { success: true };
     } catch (e: any) {
       console.error('[AUTH] Sign-in error:', e);
