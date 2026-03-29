@@ -36,7 +36,7 @@ export interface ConnectionAudit {
 
 const firebaseConfig = {
   apiKey: "AIzaSyC940eEHtHhJiEAROA7DlvaBYgAi4A3e9I",
-  authDomain: "ap-click-opticx.firebaseapp.com",
+  authDomain: "isp-click-opticx.web.app",
   projectId: "ap-click-opticx",
   storageBucket: "ap-click-opticx.firebasestorage.app",
   messagingSenderId: "1036833166674",
