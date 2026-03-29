@@ -115,6 +115,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
         { id: 'permissions', label: 'Roles & Permissions', icon: ShieldCheck },
         { id: 'auth-control', label: 'Login & Security Settings', icon: Key },
         { id: 'system-flash', label: 'System Flash', icon: Zap },
+        { id: 'system-config', label: 'System Config', icon: Settings },
       ]
     },
     {

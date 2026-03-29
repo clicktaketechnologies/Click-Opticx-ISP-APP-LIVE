@@ -70,6 +70,7 @@ const OLTManagement = lazy(() => import('./pages/OLTManagement'));
 const NOCDashboard = lazy(() => import('./pages/NOCDashboard'));
 const AuthControlCenter = lazy(() => import('./pages/AuthControlCenter'));
 const SystemFlash = lazy(() => import('./pages/SystemFlash'));
+const SystemConfig = lazy(() => import('./pages/SystemConfig'));
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 import { FiveGLaunchAnimation } from './components/FiveGLaunchAnimation';
 
@@ -315,6 +316,8 @@ const App: React.FC = () => {
                     case 'accounting': return <AccountingLedger state={dbState} />;
                     case 'archive': return <ArchivePage state={dbState} />;
                     case 'staff': return <AccessControlPage state={dbState} />;
+                    case 'system-flash': return <SystemFlash state={dbState} />;
+                    case 'system-config': return <SystemConfig state={dbState} />;
                     case 'permissions': return <PermissionsPage state={dbState} />;
                     case 'import': return <DataImportPage state={dbState} />;
                     case 'monitor': return <DatabaseMonitor state={dbState} />;
@@ -357,7 +360,6 @@ const App: React.FC = () => {
                     case 'nas-management': return <NASManagement state={dbState} />;
                     case 'olt-management': return <OLTManagement state={dbState} />;
                     case 'noc-dashboard': return <NOCDashboard state={dbState} />;
-                    case 'system-flash': return <SystemFlash state={dbState} />;
                     default: return <Dashboard state={dbState} onNavigate={navigateTo} />;
                   }
                 })()}

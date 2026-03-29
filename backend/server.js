@@ -4,6 +4,7 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const admin = require('firebase-admin');
 require('dotenv').config();
 
 const nasRoutes = require('./routes/nas');
@@ -25,6 +26,26 @@ const io = socketIo(server, {
         methods: ['GET', 'POST']
     }
 });
+
+// --- Firebase Admin Initialization ---
+try {
+    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT 
+        ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT) 
+        : null;
+
+    if (serviceAccount || process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+        admin.initializeApp({
+            credential: serviceAccount 
+                ? admin.credential.cert(serviceAccount) 
+                : admin.credential.applicationDefault()
+        });
+        logger.info('🔥 Firebase Admin: Initialized for Push Notifications');
+    } else {
+        logger.warn('⚠️ Firebase Admin: Service account not provided. Push notifications are disabled.');
+    }
+} catch (error) {
+    logger.error(`❌ Firebase Admin Init Failed: ${error.message}`);
+}
 
 // Middleware
 app.use(helmet());
@@ -68,6 +89,30 @@ app.use('/api/mikrotik', mikrotikRoutes);
 app.use('/api/automation', automationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/health-monitor', healthRoutes);
+
+// --- Push Notification API ---
+app.post('/api/push-notify', async (req, res) => {
+    const { token, title, body, data } = req.body;
+    
+    if (!admin.apps.length) {
+        return res.status(503).json({ success: false, message: 'Push service not configured' });
+    }
+
+    try {
+        const message = {
+            notification: { title, body },
+            data: data || {},
+            token: token
+        };
+
+        const response = await admin.messaging().send(message);
+        logger.info(`[PUSH] Sent successfully to token ending in ...${token.slice(-5)}: ${response}`);
+        res.json({ success: true, messageId: response });
+    } catch (error) {
+        logger.error(`[PUSH] Error sending to ...${token.slice(-5)}: ${error.message}`);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 // Initialize WebSocket Live Connections
 require('./socket/liveSocket')(io);

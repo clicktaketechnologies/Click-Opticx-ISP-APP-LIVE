@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline | Click Optix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen flex flex-col items-center justify-center p-8">
+    <div class="max-w-md w-full text-center">
+        <div class="mb-8 relative inline-block">
+            <div class="absolute inset-0 bg-indigo-500 blur-3xl opacity-20 animate-pulse"></div>
+            <div class="relative bg-white/5 border border-white/10 p-10 rounded-[3rem] backdrop-blur-3xl shadow-2xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 text-indigo-400 mx-auto animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 4.243a5 5 0 01-7.072 0m0 0l2.829-2.829m-2.829 2.829L3 21M9.172 9.172a4 4 0 010 5.656m0 0l-2.828-2.828" />
+                </svg>
+            </div>
+        </div>
+
+        <h1 class="text-4xl font-black uppercase italic tracking-tighter mb-4 italic">Connection Severed</h1>
+        <p class="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] leading-relaxed mb-10">
+            Internal sensors indicate you are currently offline. Access to the real-time node is temporarily restricted.
+        </p>
+
+        <div class="space-y-4">
+            <button onclick="window.location.reload()" class="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] transition-all active:scale-95 shadow-xl shadow-indigo-500/20">
+                Re-Initialize Link
+            </button>
+            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-loose">
+                Need immediate support? <br/>
+                Call NOC: +92 300 1234567
+            </p>
+        </div>
+    </div>
+</body>
+</html>

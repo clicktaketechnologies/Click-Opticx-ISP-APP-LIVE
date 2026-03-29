@@ -2,6 +2,7 @@
 import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, Firestore } from 'firebase/firestore';
 import { getAuth, signInWithPopup, GoogleAuthProvider, Auth } from 'firebase/auth';
+import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 import { io, Socket } from 'socket.io-client';
 import { notificationManager } from './utils/NotificationManager';
 
@@ -202,61 +203,52 @@ const INITIAL_STATE: AppState = {
   duplicateLogs: [],
   approvalRequests: [],
   settings: {
-    branding: { businessName: "Click Optix", shortName: "CO ISP", logoLight: "", logoDark: "", logoSquare: "", favicon: "", primaryColor: "#4f46e5", secondaryColor: "#10b981", accentColor: "#f59e0b", textColorLight: "#ffffff", textColorDark: "#0f172a", primaryFont: "Inter", secondaryFont: "Inter" },
-    profile: { legalName: "Click Optix Pvt Ltd", tradingName: "Click Optix", tagline: "Stable & Fast Regional Connectivity", establishedYear: "2023", registrationNumber: "", taxNumber: "", headOffice: "Central Office, Karachi", country: "Pakistan", timezone: "Asia/Karachi" },
-    support: { email: "support@clickoptix.com", phone: "+92 300 1234567", whatsapp: "923001234567", emergencyPhone: "+92 300 9999999", address: "Karachi", workingHoursWeekdays: "09:00 AM - 09:00 PM", workingHoursWeekends: "10:00 AM - 04:00 PM", emergencySupport: true, afterHoursMessage: "Support resumes at 09:00 AM.", phoneEnabled: true, whatsappEnabled: true, emailEnabled: true, greeting: "Welcome to Click Optix Support.", autoReplyFooter: "Powered by Click Optix." },
-    digitalPresence: { website: "https://clickoptix.com", portal: "https://my.clickoptix.com", facebook: "", instagram: "", twitter: "", linkedin: "", youtube: "" },
-    invoiceBranding: { logoPreference: "primary", headerText: "TAX INVOICE", footerDisclaimer: "Computer generated document.", authorizedSignature: "", prefix: "CO-INV-", nextNumber: 1001, terms: "Payment due within 5 days.", privacy: "All data encrypted.", refundPolicyUrl: "", customNotes: "" },
-    notificationBranding: { appSenderName: "CO ALERTS", emailSenderName: "CO SUPPORT", smsSenderId: "CLICKOPTIX" },
-    appearance: {
-      showWallet: true, showEmergencyLoad: true, showAIChat: true, showAICalling: true,
-      showNews: true, showQuickActions: true, maintenanceMode: false, show5GLaunchAnimation: true,
-      loadingStyle: '5G',
-      appPages: INITIAL_APP_PAGES,
-      homeCards: [],
-      sections: INITIAL_APP_SECTIONS
-    },
-    referral: { enabled: true, signupPoints: 500, pkg1Points: 1000, pkg2Points: 1000, pkg3Points: 500, minPkgPrice: 1000, conversionRatio: 0.01 },
-    aboutUs: { vision: "", mission: "", companyStory: "", features: [], values: [], version: "v8.6.0", lastUpdated: new Date().toISOString() },
+    branding: { businessName: 'Click Optix', shortName: 'CO ISP', logoLight: '', logoDark: '', logoSquare: '', favicon: '', primaryColor: '#4f46e5', secondaryColor: '#10b981', accentColor: '#f59e0b', textColorLight: '#ffffff', textColorDark: '#0f172a', primaryFont: 'Inter', secondaryFont: 'Inter' },
+    profile: { legalName: 'Click Optix ISP', tradingName: 'Click Optix', tagline: 'Connecting to Cloud Securely', establishedYear: '2026', registrationNumber: 'REG-2026-ISP', taxNumber: 'TAX-001-CO', headOffice: 'Karachi, Pakistan', country: 'Pakistan', timezone: 'UTC+5' },
+    support: { email: 'support@clickoptix.com', phone: '03001234567', whatsapp: '03120000000', emergencyPhone: '03337777777', address: 'Plot 42, KDA Scheme', workingHoursWeekdays: '09:00-18:00', workingHoursWeekends: '10:00-14:00', emergencySupport: true, afterHoursMessage: 'Our NOC is monitoring your link. Please wait for the next available agent.', phoneEnabled: true, whatsappEnabled: true, emailEnabled: true, greeting: 'Welcome to Click Optix Support', autoReplyFooter: 'This is an automated response.' },
+    digitalPresence: { website: 'https://clickoptix.com', portal: 'https://isp-click-opticx.web.app', facebook: '', instagram: '', twitter: '', linkedin: '', youtube: '' },
+    invoiceBranding: { logoPreference: 'primary', headerText: 'OFFICIAL TAX INVOICE', footerDisclaimer: 'Subject to terms and conditions of Click Optix.', authorizedSignature: 'Account Manager', prefix: 'INV-CO', nextNumber: 5001, terms: 'Due in 7 days.', privacy: '', refundPolicyUrl: '', customNotes: '' },
+    notificationBranding: { appSenderName: 'Click Optix', emailSenderName: 'Click Optix Billing', smsSenderId: 'CLICK-OPTIX' },
+    appearance: { showWallet: true, showEmergencyLoad: true, showAIChat: true, showAICalling: true, showNews: true, showQuickActions: true, maintenanceMode: false, show5GLaunchAnimation: true, loadingStyle: '5G', appPages: INITIAL_APP_PAGES, homeCards: [], sections: INITIAL_APP_SECTIONS },
+    referral: { enabled: true, signupPoints: 50, pkg1Points: 100, pkg2Points: 200, pkg3Points: 0, minPkgPrice: 1000, conversionRatio: 1 },
+    aboutUs: { vision: 'Seamless connectivity for everyone.', mission: 'Innovating the ISP edge via AI.', companyStory: 'Founded in 2026 to bring fiber-speed to the masses.', features: [], values: [], version: '1.2.5', lastUpdated: new Date().toISOString() },
     notificationTemplates: [],
-    footerText: "Official ISP Management Portal",
-    copyrightLine: "© 2025 Click Optix",
+    footerText: 'Powered by Click Optix Infrastructure',
+    copyrightLine: '© 2026 Click Optix. All Rights Reserved.',
     socialLinks: [],
-    appVersion: "v8.6.0",
+    appVersion: 'v1.2.5',
     autoTaxPercentage: 15,
     enableTax: true,
-    taxLabel: "Regulatory Tax",
-    globalEmergencyLimit: 2500,
+    taxLabel: 'GST',
+    globalEmergencyLimit: 500,
     paymentGateways: INITIAL_GATEWAYS,
-    techConfig: { wireless: { cat6PricePerMeter: 50, clipPrice: 5, ravalBoldPricePerPair: 1200, polls: [], receivers: [], onus: [] }, fiber: { wirePricePerMeter: 30, baseInstallation: 2500, onus: [], routers: [] } },
-    currency: "Rs.",
-    taxId: "TX-4492-CO",
+    techConfig: { wireless: { cat6PricePerMeter: 50, clipPrice: 5, ravalBoldPricePerPair: 2000, polls: [], receivers: [], onus: [] }, fiber: { wirePricePerMeter: 30, baseInstallation: 2500, onus: [], routers: [] } },
+    currency: 'PKR',
+    taxId: 'GST-ISP-001',
     whiteLabelMode: false,
     allowWifiReset: true,
-    nasSystemEnabled: false,
+    nasSystemEnabled: true,
     aiConfig: INITIAL_AI_CONFIG,
-    aiCallConfig: { enabled: true, voiceName: 'Zephyr', persona: 'Professional', language: 'English', speakingSpeed: 1.0, maxCallDuration: 300, officeHours: { start: '09:00', end: '21:00', enabled: true }, knowledgeBase: { outageScripts: '', billingPolicy: '', emergencyTerms: '' } },
+    aiCallConfig: { enabled: false, voiceName: 'Zephyr', persona: 'Professional', language: 'English', speakingSpeed: 1, maxCallDuration: 10, officeHours: { start: '09:00', end: '18:00', enabled: true }, knowledgeBase: { outageScripts: '', billingPolicy: '', emergencyTerms: '' } },
     commConfig: INITIAL_COMM_CONFIG,
     infrastructure: INITIAL_INFRA_CONFIG,
     legal: INITIAL_LEGAL_CONFIG,
-    authSettings: {
-      loginEnabled: true,
-      signupEnabled: true,
-      forgotPasswordEnabled: true,
-      otpEnabled: true,
-      dealerSignupEnabled: false,
-      enableUniversalLogin: true,
-      allowedIdentifiers: { email: true, phone: true, cnic: true, username: true, pppoe: true },
-      signupMode: 'Auto',
-      requireEmailVerification: false,
-      requirePhoneOTP: false,
-      requireCNIC: false,
-      defaultRole: Role.CUSTOMER,
-      duplicateControl: { enabled: true, blockDuplicate: true, allowWithWarning: false },
-      securitySettings: { maxLoginAttempts: 5, blockDurationMin: 10, enableCaptcha: false, enable2FA: false },
-      forgotPasswordSettings: { resetViaEmail: true, resetViaOTP: true, resetViaUsername: false },
-      postSignup: { welcomePopup: true, customMessage: 'Welcome to Click Optix!', redirectUrl: '/dashboard' }
-    }
+    authSettings: { loginEnabled: true, signupEnabled: true, forgotPasswordEnabled: true, otpEnabled: true, dealerSignupEnabled: false, enableUniversalLogin: false, allowedIdentifiers: { email: true, phone: true, cnic: false, username: true, pppoe: true }, signupMode: 'Manual', requireEmailVerification: true, requirePhoneOTP: false, requireCNIC: false, defaultRole: Role.CUSTOMER, duplicateControl: { enabled: true, blockDuplicate: true, allowWithWarning: false }, securitySettings: { maxLoginAttempts: 5, blockDurationMin: 30, enableCaptcha: false, enable2FA: false }, forgotPasswordSettings: { resetViaEmail: true, resetViaOTP: true, resetViaUsername: false }, postSignup: { welcomePopup: true, customMessage: 'Registration successful. Waiting for admin approval.', redirectUrl: '/' } },
+    technicalKeys: { 
+        firebaseApiKey: firebaseConfig.apiKey, 
+        firebaseAuthDomain: firebaseConfig.authDomain, 
+        firebaseProjectId: firebaseConfig.projectId, 
+        firebaseStorageBucket: firebaseConfig.storageBucket, 
+        firebaseMessagingSenderId: firebaseConfig.messagingSenderId, 
+        firebaseAppId: firebaseConfig.appId, 
+        firebaseVapidKey: '', // TO BE FILLED BY ADMIN
+        geminiApiKey: '', 
+        smtpHost: INITIAL_COMM_CONFIG.smtpConfig.host, 
+        smtpPort: INITIAL_COMM_CONFIG.smtpConfig.port, 
+        smtpUser: INITIAL_COMM_CONFIG.smtpConfig.username, 
+        smtpPass: '' 
+    },
+    pushConfig: { enabled: true, autoExpireAlerts: true, lowSignalAlerts: true, invoiceAlerts: true, marketingAlerts: false }
   },
   permissions: [
     { id: 'dashboard', view: ALL_ROLES, edit: [Role.SUPER_ADMIN], delete: [Role.SUPER_ADMIN] },
@@ -343,6 +335,7 @@ class DB {
   private initialized = false;
   private firestore: Firestore | null = null;
   private auth: Auth | null = null;
+  private messaging: Messaging | null = null;
   private app: FirebaseApp | null = null;
   private socket: Socket | null = null;
   private backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
@@ -414,6 +407,14 @@ class DB {
       this.app = !apps.length ? initializeApp(firebaseConfig) : apps[0];
       this.firestore = getFirestore(this.app);
       this.auth = getAuth(this.app);
+      
+      // Initialize Messaging
+      try {
+        this.messaging = getMessaging(this.app);
+      } catch (e) {
+        console.warn('[FCM] Push Messaging not supported on this browser context');
+      }
+
       await this.syncWithCloudMaster();
     } catch (e: any) {
       this.initialized = true;

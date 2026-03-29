@@ -1,5 +1,6 @@
-const redis = require('./redisService');
 const logger = require('../utils/logger');
+const admin = require('firebase-admin');
+const axios = require('axios');
 
 class FaultDetection {
 
@@ -49,7 +50,9 @@ class FaultDetection {
     
     const alertData = {
       type,
+      message: this.getMessageForType(type, onu),
       onu: onu.id || onu.serial,
+      severity: this.getSeverity(type),
       timestamp: Date.now()
     };
     
@@ -60,8 +63,47 @@ class FaultDetection {
       // Broadcast to specific user room if they are watching their ONU
       io.to(onu.id || onu.serial).emit('fault-alert', alertData);
     }
+
+    // Trigger FCM Push if subscriber has a token
+    if (onu.fcmToken && admin.apps.length) {
+        this.sendPush(onu.fcmToken, alertData);
+    }
     
     return alertData;
+  }
+
+  static getMessageForType(type, onu) {
+      switch(type) {
+          case 'FIBER_CUT': return `CRITICAL: Fiber cut detected at your location. Our team is on the way.`;
+          case 'ONU_OFFLINE': return `Your device went offline. Please check your power supply.`;
+          case 'SIGNAL_FLUCTUATION': return `We detected a signal fluctuation. Connectivity might be unstable.`;
+          default: return `Network alert detected on your line.`;
+      }
+  }
+
+  static getSeverity(type) {
+      return type === 'FIBER_CUT' ? 'Critical' : 'Warning';
+  }
+
+  static async sendPush(token, alert) {
+      try {
+          const message = {
+              notification: {
+                  title: 'ISP Network Alert',
+                  body: alert.message
+              },
+              data: {
+                  type: alert.type,
+                  onu: alert.onu,
+                  click_action: 'FLUTTER_NOTIFICATION_CLICK'
+              },
+              token: token
+          };
+          await admin.messaging().send(message);
+          logger.info(`[PUSH-AUTO] Alert sent to subscriber: ${alert.type}`);
+      } catch (e) {
+          logger.error(`[PUSH-AUTO] Failed to send: ${e.message}`);
+      }
   }
 }
 

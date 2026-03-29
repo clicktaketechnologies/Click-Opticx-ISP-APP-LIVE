@@ -402,6 +402,7 @@ export interface ISPUser {
   securityFlags?: string[];
   internalNotes?: string;
   notes?: string;
+  fcmToken?: string;
   isRecoveryMode?: boolean;
   lastPaymentDate?: string;
   promiseToPayDate?: string;
@@ -1058,6 +1059,30 @@ export interface AuthSettings {
   };
 }
 
+export interface TechnicalKeys {
+  firebaseApiKey: string;
+  firebaseAuthDomain: string;
+  firebaseProjectId: string;
+  firebaseStorageBucket: string;
+  firebaseMessagingSenderId: string;
+  firebaseAppId: string;
+  firebaseVapidKey: string;
+  geminiApiKey: string;
+  smtpHost: string;
+  smtpPort: number;
+  smtpUser: string;
+  smtpPass: string;
+  fcmServerKey?: string;
+}
+
+export interface PushConfig {
+  enabled: boolean;
+  autoExpireAlerts: boolean;
+  lowSignalAlerts: boolean;
+  invoiceAlerts: boolean;
+  marketingAlerts: boolean;
+}
+
 export interface SystemSettings {
   branding: BrandingConfig;
   profile: BusinessProfile;
@@ -1090,6 +1115,8 @@ export interface SystemSettings {
   infrastructure: InfrastructureConfig;
   legal: LegalConfig;
   authSettings: AuthSettings;
+  technicalKeys: TechnicalKeys;
+  pushConfig: PushConfig;
 }
 
 export interface CreditScoreLog {
