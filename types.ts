@@ -16,7 +16,7 @@ export enum UserStatus {
 export enum VerificationStatus {
   UNVERIFIED = 'Unverified',
   PENDING = 'Pending Approval',
-  VERIFIED = 'Verified Node',
+  VERIFIED = 'Verified Account',
   REVISION = 'Revision Required'
 }
 
@@ -617,6 +617,20 @@ export interface EmailTemplate {
   lastUpdated: string;
 }
 
+export interface NotificationTemplate {
+  id: string;
+  name: string;
+  event: NotificationTriggerEvent | 'GENERAL';
+  pushTitle?: string;
+  pushBody?: string;
+  smsMessage?: string;
+  emailSubject?: string;
+  emailBody?: string;
+  channels: ('Push' | 'SMS' | 'Email')[];
+  category: 'Billing' | 'Technical' | 'Marketing' | 'System';
+  lastUpdated: string;
+}
+
 export interface AudienceSegment {
   id: string;
   name: string;
@@ -651,25 +665,41 @@ export interface CommunicationAutomationRule {
   trigger: 'Package_Expiry' | 'Payment_Failed' | 'Emergency_Load_Active' | 'Outage_Detected' | 'Signup_Approved';
   condition: string;
   actions: {
-    type: 'Email' | 'Push';
+    type: 'Email' | 'Push' | 'SMS' | 'Smart';
     templateId?: string;
     message?: string;
   }[];
   enabled: boolean;
 }
 
+export type NotificationDeliveryStatus = 'Pending' | 'Sent' | 'Delivered' | 'Seen' | 'Failed' | 'Retried';
+export type NotificationGateway = 'Firebase' | 'SMS' | 'WhatsApp';
+export type NotificationTriggerEvent = 
+  | 'PACKAGE_ACTIVATED' 
+  | 'PAYMENT_RECEIVED' 
+  | 'INVOICE_GENERATED' 
+  | 'EMERGENCY_LOAD_USED' 
+  | 'INTERNET_DISCONNECTED' 
+  | 'SIGNUP_APPROVED'
+  | 'AUTH_OTP';
+
 export interface DeliveryLog {
   id: string;
   userId: string;
   userName: string;
-  type: 'Email' | 'Push';
+  type: 'Email' | 'Push' | 'SMS' | 'WhatsApp';
   channel: string;
-  status: 'Delivered' | 'Failed' | 'Opened' | 'Clicked';
+  status: 'Delivered' | 'Failed' | 'Opened' | 'Clicked' | NotificationDeliveryStatus;
+  gatewayUsed?: NotificationGateway;
+  fallbackUsed?: NotificationGateway;
+  event?: NotificationTriggerEvent;
+  retryCount?: number;
   timestamp: string;
   campaignId?: string;
-  triggerSource: 'Manual' | 'Automation';
+  triggerSource: 'Manual' | 'Automation' | 'System';
 }
 
+export type NotificationMasterMode = 'Push_Only' | 'SMS_Only' | 'Push_And_SMS' | 'Auto_Fallback';
 export type EmailGatewayMode = 'CUSTOM_SMTP' | 'PROVIDER_API' | 'HYBRID';
 
 export interface SenderIdentity {
@@ -694,6 +724,9 @@ export interface CommunicationSettings {
     password?: string;
   };
   pushEnabled: boolean;
+  notificationMode: NotificationMasterMode;
+  autoFallbackEnabled: boolean;
+  globalNotificationEnabled: boolean;
   quietHours: {
     start: string;
     end: string;
@@ -788,6 +821,7 @@ export interface AppState {
   emailTemplates: EmailTemplate[];
   audienceSegments: AudienceSegment[];
   commAutomationRules: CommunicationAutomationRule[];
+  notificationTemplates: NotificationTemplate[];
   deliveryLogs: DeliveryLog[];
   recoveryLogs: RecoveryLog[];
   commLogs: CommunicationLog[];

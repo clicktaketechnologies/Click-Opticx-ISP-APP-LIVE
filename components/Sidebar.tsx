@@ -50,17 +50,19 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       ]
     },
     {
-      title: 'Messages & Notifications',
+      title: 'Automated Communications',
       items: [
-        { id: 'comm-campaigns', label: 'Email Messages', icon: Send },
-        { id: 'comm-templates', label: 'Email Templates', icon: FileText },
-        { id: 'comm-rules', label: 'Auto Messages', icon: Zap },
-        { id: 'comm-push', label: 'Send Notifications', icon: BellRing },
-        { id: 'comm-segments', label: 'User Groups', icon: Users },
-        { id: 'comm-logs', label: 'Message History', icon: ListChecks },
-        { id: 'comm-settings', label: 'Email Settings', icon: Zap },
+        { id: 'notification-control', label: 'Notification Master', icon: BellRing },
+        { id: 'notification-analytics', label: 'Dispatch Analytics', icon: BarChart3 },
+        { id: 'comm-templates', label: 'Smart Templates', icon: FileText },
+        { id: 'admin-user-devices', label: 'Push Devices', icon: Smartphone },
+        { id: 'comm-campaigns', label: 'Email Campaigns', icon: Send },
+        { id: 'comm-push', label: 'Manual Despatch', icon: Zap },
+        { id: 'comm-rules', label: 'Auto Actions', icon: Cpu },
+        { id: 'comm-segments', label: 'Audiences', icon: Users },
+        { id: 'comm-logs', label: 'Gateway Logs', icon: ListChecks },
+        { id: 'comm-settings', label: 'Comms Setup', icon: Settings },
       ]
-
     },
     {
       title: 'Network Monitor',
@@ -141,9 +143,9 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
     const modulePerm = state.permissions.find(p => p.id === item.id);
     if (modulePerm) return modulePerm.view.includes(role);
     if (role === Role.ADMIN) return true;
-    if (role === Role.BUSINESS_ADMIN && ['business-settings', 'dashboard', 'about-us', 'auth-control'].includes(item.id)) return true;
+    if (role === Role.BUSINESS_ADMIN && ['business-settings', 'dashboard', 'about-us', 'auth-control', 'notification-control', 'notification-analytics', 'comm-templates', 'comm-logs', 'admin-user-devices'].includes(item.id)) return true;
     if (role === Role.FINANCE_ADMIN && ['approval-desk', 'wallet', 'recovery', 'accounting', 'invoice-engine', 'invoice-management', 'gateway-settings', 'emergency-load'].includes(item.id)) return true;
-    if (role === Role.SUPPORT_ADMIN && ['approval-desk', 'customer-360', 'user-app', 'tickets', 'about-us', 'admin-password-requests'].includes(item.id)) return true;
+    if (role === Role.SUPPORT_ADMIN && ['approval-desk', 'customer-360', 'user-app', 'tickets', 'about-us', 'admin-password-requests', 'notification-control', 'comm-templates', 'admin-user-devices'].includes(item.id)) return true;
     if (role === Role.NETWORK_ADMIN && ['admin-live-monitoring', 'admin-devices', 'admin-device-mapping', 'connection-setup', 'about-us'].includes(item.id)) return true;
     if (['tasks', 'about-us'].includes(item.id)) return true;
     return false;

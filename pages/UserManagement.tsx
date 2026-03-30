@@ -370,8 +370,8 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
            <div className="flex items-center gap-4 border-r-0 sm:border-r border-white/10 pr-0 sm:pr-6 shrink-0">
               <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg animate-pulse"><Layers size={20} /></div>
               <div>
-                 <p className="text-sm font-black italic tracking-tighter leading-none">{selectedIds.size} Linked Nodes</p>
-                 <p className="text-[8px] text-blue-400 font-black uppercase mt-1 tracking-widest italic">Batch Node Ready</p>
+                 <p className="text-sm font-black italic tracking-tighter leading-none">{selectedIds.size} Linked Accounts</p>
+                 <p className="text-[8px] text-blue-400 font-black uppercase mt-1 tracking-widest italic">Batch Network Ready</p>
               </div>
            </div>
            <div className="flex items-center gap-2 flex-wrap justify-center">
@@ -493,7 +493,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                         const url = window.URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
-                        a.download = `ClickOptix_BulkExport_${new Date().toISOString().split('T')[0]}.csv`;
+                        a.download = `ClickOpticx_BulkExport_${new Date().toISOString().split('T')[0]}.csv`;
                         a.click();
                         setSelectedIds(new Set());
                       }}>Export Users</button>

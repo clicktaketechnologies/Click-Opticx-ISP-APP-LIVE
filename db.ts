@@ -18,7 +18,8 @@ import {
   EmailCampaign, EmailTemplate, AudienceSegment, CommunicationAutomationRule, DeliveryLog, CommunicationSettings, SenderIdentity, PaymentGateway, AppSection, InfrastructureConfig, LegalConfig,
   RecoveryLog, RecoveryActionType, BillingPaymentType, BillingCycle, CommunicationLog,
   AdminReminder, ReminderStatus, ReminderIssueType, NASConfig, LiveUsage, OLTConfig, ONU,
-  AuthSettings, OTP, DuplicateActionLog, TestLog, FlashLog
+  AuthSettings, OTP, DuplicateActionLog, TestLog, FlashLog, NotificationTemplate, NotificationTriggerEvent,
+  NotificationDeliveryStatus, NotificationGateway
 } from './types';
 
 // Monitoring interface nodes
@@ -65,6 +66,12 @@ const INITIAL_AI_CONFIG: AIConfig = {
   aiKeys: { gemini: '', openai: '', deepseek: '', anthropic: '' }
 };
 
+const logger = {
+  info: (m: string) => console.log(`[INFO] ${m}`),
+  warn: (m: string) => console.warn(`[WARN] ${m}`),
+  error: (m: string) => console.error(`[ERROR] ${m}`)
+};
+
 const INITIAL_INFRA_CONFIG: InfrastructureConfig = {
   domainNode: 'clickopticx.com',
   targetIP: '103.14.55.1',
@@ -90,6 +97,9 @@ const INITIAL_COMM_CONFIG: CommunicationSettings = {
     { id: 'SDR-2', name: 'Click Opticx Billing', email: 'billing@clickopticx.com', isVerified: false, isDefault: false, createdAt: new Date().toISOString() }
   ],
   pushEnabled: true,
+  notificationMode: 'Auto_Fallback',
+  autoFallbackEnabled: true,
+  globalNotificationEnabled: true,
   quietHours: { start: '22:00', end: '08:00', enabled: true },
   rateLimits: { emailsPerHour: 1000, emailsPerDay: 10000, burstLimit: 50, pushPerDayPerUser: 5 },
   warmup: { enabled: true, currentDay: 1, limit: 50 },
@@ -103,11 +113,11 @@ const INITIAL_COMM_CONFIG: CommunicationSettings = {
 };
 
 const INITIAL_GATEWAYS: PaymentGateway[] = [
-  { id: 'stripe', name: 'Stripe Node', type: 'online', enabled: true, priority: 1, sandbox: true, allowedFor: ['packages', 'wallet', 'invoices'], config: { publishableKey: '', secretKey: '', webhookSecret: '' } },
-  { id: 'paypal', name: 'PayPal Hub', type: 'online', enabled: true, priority: 2, sandbox: true, allowedFor: ['packages', 'wallet'], config: { clientId: '', secret: '' } },
-  { id: 'jazzcash', name: 'JazzCash Wallet', type: 'wallet', enabled: true, priority: 3, sandbox: true, allowedFor: ['packages', 'wallet', 'emergency'], config: { merchantId: '', password: '', salt: '' } },
-  { id: 'easypaisa', name: 'EasyPaisa Hub', type: 'wallet', enabled: true, priority: 4, sandbox: true, allowedFor: ['packages', 'wallet', 'emergency'], config: { storeId: '', hashKey: '' } },
-  { id: 'payfast', name: 'PayFast Protocol', type: 'online', enabled: true, priority: 5, sandbox: true, allowedFor: ['packages'], config: { merchantId: '', merchantKey: '' } },
+  { id: 'stripe', name: 'Stripe Gateway', type: 'online', enabled: true, priority: 1, sandbox: true, allowedFor: ['packages', 'wallet', 'invoices'], config: { publishableKey: '', secretKey: '', webhookSecret: '' } },
+  { id: 'paypal', name: 'PayPal Gateway', type: 'online', enabled: true, priority: 2, sandbox: true, allowedFor: ['packages', 'wallet'], config: { clientId: '', secret: '' } },
+  { id: 'jazzcash', name: 'JazzCash Gateway', type: 'wallet', enabled: true, priority: 3, sandbox: true, allowedFor: ['packages', 'wallet', 'emergency'], config: { merchantId: '', password: '', salt: '' } },
+  { id: 'easypaisa', name: 'EasyPaisa Gateway', type: 'wallet', enabled: true, priority: 4, sandbox: true, allowedFor: ['packages', 'wallet', 'emergency'], config: { storeId: '', hashKey: '' } },
+  { id: 'payfast', name: 'PayFast Gateway', type: 'online', enabled: true, priority: 5, sandbox: true, allowedFor: ['packages'], config: { merchantId: '', merchantKey: '' } },
   { id: 'cash', name: 'Physical Cash', type: 'offline', enabled: true, priority: 6, sandbox: false, allowedFor: ['packages', 'wallet', 'invoices'], config: {}, instructions: 'Pay at any authorized regional shop.' },
   { id: 'bank', name: 'Bank Wire', type: 'offline', enabled: true, priority: 7, sandbox: false, allowedFor: ['wallet', 'invoices'], config: { bankName: '', accountTitle: '', iban: '' }, instructions: 'Upload receipt after wire transfer.' },
   { id: 'home', name: 'Field Collection', type: 'offline', enabled: true, priority: 8, sandbox: false, allowedFor: ['invoices'], config: { fee: '100' }, instructions: 'Our agent will visit your location.' }
@@ -152,7 +162,7 @@ const ALL_ROLES = Object.values(Role).filter(r => r !== Role.CUSTOMER);
 
 const INITIAL_STATE: AppState = {
   staff: [
-    { email: 'admin@clickoptix.com', name: 'System Administrator', role: Role.SUPER_ADMIN, status: 'Active', password: 'Click@Opticx2026', balance: 1000000 },
+    { email: 'admin@clickopticx.com', name: 'System Administrator', role: Role.SUPER_ADMIN, status: 'Active', password: 'Click@Opticx2026', balance: 1000000 },
   ],
   nas: [],
   packages: [
@@ -226,7 +236,7 @@ const INITIAL_STATE: AppState = {
     },
     profile: { legalName: 'Click Opticx ISP', tradingName: 'Click Opticx', tagline: 'Connecting to Cloud Securely', establishedYear: '2026', registrationNumber: 'REG-2026-ISP', taxNumber: 'TAX-001-CO', headOffice: 'Karachi, Pakistan', country: 'Pakistan', timezone: 'UTC+5' },
     support: { email: 'support@clickopticx.com', phone: '03001234567', whatsapp: '03120000000', emergencyPhone: '03337777777', address: 'Plot 42, KDA Scheme', workingHoursWeekdays: '09:00-18:00', workingHoursWeekends: '10:00-14:00', emergencySupport: true, afterHoursMessage: 'Our NOC is monitoring your link. Please wait for the next available agent.', phoneEnabled: true, whatsappEnabled: true, emailEnabled: true, greeting: 'Welcome to Click Opticx Support', autoReplyFooter: 'This is an automated response.' },
-    digitalPresence: { website: 'https://clickoptix.com', portal: 'https://isp-click-opticx.web.app', facebook: '', instagram: '', twitter: '', linkedin: '', youtube: '' },
+    digitalPresence: { website: 'https://clickopticx.com', portal: 'https://isp-click-opticx.web.app', facebook: '', instagram: '', twitter: '', linkedin: '', youtube: '' },
     invoiceBranding: { logoPreference: 'primary', headerText: 'OFFICIAL TAX INVOICE', footerDisclaimer: 'Subject to terms and conditions of Click Opticx.', authorizedSignature: 'Account Manager', prefix: 'INV-CO', nextNumber: 5001, terms: 'Due in 7 days.', privacy: '', refundPolicyUrl: '', customNotes: '' },
     notificationBranding: { appSenderName: 'Click Opticx', emailSenderName: 'Click Opticx Billing', smsSenderId: 'CLICK-OPTICX' },
     appearance: { showWallet: true, showEmergencyLoad: true, showAIChat: true, showAICalling: true, showNews: true, showQuickActions: true, maintenanceMode: false, show5GLaunchAnimation: true, loadingStyle: '5G', appPages: INITIAL_APP_PAGES, homeCards: [], sections: INITIAL_APP_SECTIONS },
@@ -312,6 +322,7 @@ const INITIAL_STATE: AppState = {
     { id: 'tickets', view: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN, Role.SUPPORT_EXECUTIVE, Role.NETWORK_ADMIN], edit: ALL_ROLES, delete: [Role.SUPER_ADMIN] }
   ],
   notifications: [],
+  notificationTemplates: [],
   roles: ALL_ROLES,
   archives: [],
   signupRequests: [],
@@ -400,7 +411,7 @@ class DB {
 
   private ensureDefaultAdmin() {
     const defaultAdmin: StaffUser = {
-      email: 'admin@clickoptix.com',
+      email: 'admin@clickopticx.com',
       name: 'System Administrator',
       role: Role.SUPER_ADMIN,
       status: 'Active',
@@ -471,14 +482,14 @@ class DB {
       });
 
       this.socket.on('connect', () => {
-        console.log('[REALTIME] Node Linked via WebSocket');
+        console.log('[REALTIME] Network Linked via WebSocket');
         this.state.connectionStatus = 'online';
         this.authenticateSocket();
         this.notify();
       });
 
       this.socket.on('disconnect', () => {
-        console.warn('[REALTIME] Node Severed');
+        console.warn('[REALTIME] Connection Severed');
         this.state.connectionStatus = 'offline';
         this.notify();
       });
@@ -593,7 +604,7 @@ class DB {
   async forceSync() {
     this.notify(); // Immediate UI feedback
     await this.syncWithCloudMaster();
-    this.logNotification('all', 'success', 'Registry Sync', 'Manual handshake with master cloud node completed.');
+    this.logNotification('all', 'success', 'Registry Sync', 'Manual handshake with master cloud server completed.');
   }
 
   private async syncWithCloudMaster() {
@@ -634,6 +645,11 @@ class DB {
     if (!this.state.settings.support) this.state.settings.support = INITIAL_STATE.settings.support;
     if (!this.state.settings.paymentGateways) this.state.settings.paymentGateways = INITIAL_GATEWAYS;
     if (!this.state.settings.appearance) this.state.settings.appearance = INITIAL_STATE.settings.appearance;
+    if (this.state.settings.commConfig) {
+      if (!this.state.settings.commConfig.notificationMode) this.state.settings.commConfig.notificationMode = 'Auto_Fallback';
+      if (this.state.settings.commConfig.autoFallbackEnabled === undefined) this.state.settings.commConfig.autoFallbackEnabled = true;
+      if (this.state.settings.commConfig.globalNotificationEnabled === undefined) this.state.settings.commConfig.globalNotificationEnabled = true;
+    }
 
     // Merge Missing Gateways
     INITIAL_GATEWAYS.forEach(ig => {
@@ -721,6 +737,7 @@ class DB {
     if (!Array.isArray(this.state.aiSuggestions)) this.state.aiSuggestions = [];
     if (!Array.isArray(this.state.aiCallLogs)) this.state.aiCallLogs = [];
     if (!Array.isArray(this.state.aiCallRules)) this.state.aiCallRules = [];
+    if (!Array.isArray(this.state.notificationTemplates)) this.state.notificationTemplates = [];
     if (!Array.isArray(this.state.notifications)) this.state.notifications = [];
     if (!Array.isArray(this.state.flashLogs)) this.state.flashLogs = [];
     if (!Array.isArray(this.state.archives)) this.state.archives = [];
@@ -792,7 +809,7 @@ class DB {
       action,
       targetId,
       targetName: 'System',
-      adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com',
+      adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com',
       adminIp: '127.0.0.1',
       details,
       timestamp: new Date().toISOString(),
@@ -1261,6 +1278,80 @@ class DB {
     await this.commit();
   }
 
+  async saveNotificationTemplate(t: Partial<NotificationTemplate>) {
+    const id = t.id || 'NTMP-' + Date.now();
+    const idx = this.state.notificationTemplates.findIndex(x => x.id === id);
+    const data = { 
+        ...t, 
+        id, 
+        lastUpdated: new Date().toISOString(),
+        channels: t.channels || ['Push'],
+        event: t.event || 'GENERAL'
+    } as NotificationTemplate;
+    if (idx !== -1) this.state.notificationTemplates[idx] = data;
+    else this.state.notificationTemplates.push(data);
+    await this.commit();
+    return { success: true, data };
+  }
+
+  async deleteNotificationTemplate(id: string) {
+    this.state.notificationTemplates = this.state.notificationTemplates.filter(t => t.id !== id);
+    await this.commit();
+  }
+
+  async dispatchSmartNotification(userId: string, event: NotificationTriggerEvent | 'GENERAL', data?: any) {
+    const user = this.state.users.find(u => u.id === userId);
+    if (!user) return { success: false, message: 'User not found' };
+
+    const template = this.state.notificationTemplates.find(t => t.event === event);
+    if (!template && event !== 'GENERAL') {
+        logger.warn(`No template found for event: ${event}`);
+    }
+
+    const payload = {
+        userId: user.id,
+        userPhone: user.phone,
+        fcmToken: user.fcmToken, // Assuming this field exists or will be added
+        event,
+        title: template?.pushTitle || 'Click Opticx Notification',
+        body: template?.pushBody || 'New update from Click Opticx',
+        config: this.state.settings.commConfig,
+        data: data || {}
+    };
+
+    try {
+        const res = await fetch(`${this.backendUrl}/api/smart-notify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const report = await res.json();
+        
+        // Log the delivery
+        const log: DeliveryLog = {
+            id: 'LOG-' + Date.now(),
+            userId: user.id,
+            userName: user.name,
+            event: event as NotificationTriggerEvent,
+            timestamp: new Date().toISOString(),
+            gatewayUsed: report.gatewayUsed as NotificationGateway,
+            fallbackUsed: report.fallbackUsed as NotificationGateway,
+            status: report.status as NotificationDeliveryStatus,
+            retryCount: report.retryCount || 0,
+            triggerSource: 'Automation',
+            type: report.fallbackUsed ? 'SMS' : 'Push',
+            channel: report.fallbackUsed ? 'Global SMS' : 'Firebase FCM'
+        };
+        this.state.deliveryLogs.unshift(log);
+        await this.commit();
+        this.notify();
+        
+        return report;
+    } catch (error: any) {
+        return { success: false, status: 'Failed', error: error.message };
+    }
+  }
+
   async saveAudienceSegment(s: Partial<AudienceSegment>) {
     const id = s.id || 'SEG-' + Date.now();
     const idx = this.state.audienceSegments.findIndex(x => x.id === id);
@@ -1525,6 +1616,13 @@ class DB {
         }
       }
 
+      // Smart Notification Integration
+      await this.dispatchSmartNotification(userId, 'PACKAGE_ACTIVATED', {
+          packageId: pkgId,
+          packageName: pkg?.name || pkgId,
+          expiryDate: this.state.users[uIdx].expiryDate
+      });
+
       await this.commit();
       this.notify();
       return { success: true };
@@ -1549,6 +1647,13 @@ class DB {
     
     // FINAL SYNC: Re-evaluate account status
     await this.syncUserStatusWithBilling(inv.userId);
+
+    // Smart Notification Integration
+    await this.dispatchSmartNotification(inv.userId, 'PAYMENT_RECEIVED', {
+        amount: inv.paidAmount,
+        invoiceId: inv.id,
+        method: 'Wallet'
+    });
 
     await this.commit();
     return { success: true };
@@ -2050,7 +2155,7 @@ class DB {
       status: 'Approved',
       method: 'Admin Adjustment',
       timestamp,
-      collectorEmail: this.state.currentUser?.email || 'admin@clickoptix.com',
+      collectorEmail: this.state.currentUser?.email || 'admin@clickopticx.com',
       notes: `Credit Provisioning: ${mode}`
     } as any);
 
@@ -2070,7 +2175,7 @@ class DB {
     this.state.securityLogs.push({
       id: 'LOG-' + Date.now(),
       timestamp: new Date().toISOString(),
-      adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com',
+      adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com',
       adminIp: '127.0.0.1',
       action: 'Staff Settlement',
       targetId: email,
@@ -2088,7 +2193,7 @@ class DB {
     this.state.securityLogs.push({
       id: 'LOG-' + Date.now(),
       timestamp,
-      adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com',
+      adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com',
       adminIp: '127.0.0.1',
       action: log.action || 'Unknown',
       targetId: log.targetId || 'System',
@@ -3857,7 +3962,7 @@ class DB {
     
     // Activity Log
     const actionDesc = `Status: ${status}${expiryDate ? ' (Expiry: ' + expiryDate + ')' : ''}`;
-    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com', adminIp: '127.0.0.1', action: 'Bulk Set Status', targetId: 'Multiple', targetName: `${userIds.length} users`, details: actionDesc, riskLevel: 'Low' });
+    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Bulk Set Status', targetId: 'Multiple', targetName: `${userIds.length} users`, details: actionDesc, riskLevel: 'Low' });
 
     await this.commit();
     this.notify();
@@ -3954,7 +4059,7 @@ class DB {
       if (i % 10 === 0) await new Promise(r => setTimeout(r, 0)); // Yield
     }
     
-    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com', adminIp: '127.0.0.1', action: 'Bulk Invoices Created', targetId: 'Multiple', targetName: `${generated} generated`, details: 'Monthly recurring billing run.', riskLevel: 'Low' });
+    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Bulk Invoices Created', targetId: 'Multiple', targetName: `${generated} generated`, details: 'Monthly recurring billing run.', riskLevel: 'Low' });
 
     await this.commit();
     this.notify();
@@ -3980,7 +4085,7 @@ class DB {
     }
 
     this.state.users = this.state.users.filter(u => !ids.has(u.id));
-    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com', adminIp: '127.0.0.1', action: 'Bulk Purge Accounts', targetId: 'Multiple', targetName: `${userIds.length} users purged`, details: `Deleted identities from registry. Credit Action: ${creditAction}. Adjusted ${creditAdjustedCount} users for total Rs. ${totalCreditAdjusted}.`, riskLevel: 'Critical' });
+    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Bulk Purge Accounts', targetId: 'Multiple', targetName: `${userIds.length} users purged`, details: `Deleted identities from registry. Credit Action: ${creditAction}. Adjusted ${creditAdjustedCount} users for total Rs. ${totalCreditAdjusted}.`, riskLevel: 'Critical' });
     await this.commit();
     this.notify();
     return { success: true, count: userIds.length, creditAdjusted: totalCreditAdjusted };
@@ -3997,7 +4102,7 @@ class DB {
       }
       if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
     }
-    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com', adminIp: '127.0.0.1', action: 'Bulk Custom Expiry', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `New Expiry: ${expiryDate}. Reason: ${reason}`, riskLevel: 'Low' });
+    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Bulk Custom Expiry', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `New Expiry: ${expiryDate}. Reason: ${reason}`, riskLevel: 'Low' });
     await this.commit();
     this.notify();
     return { success: true, count: userIds.length };
@@ -4014,7 +4119,7 @@ class DB {
       }
       if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
     }
-    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com', adminIp: '127.0.0.1', action: 'Bulk Rotation', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `Rotated to: ${targetNode}`, riskLevel: 'Low' });
+    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Bulk Rotation', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `Rotated to: ${targetNode}`, riskLevel: 'Low' });
     await this.commit();
     this.notify();
     return { success: true, count: userIds.length };
@@ -4031,7 +4136,7 @@ class DB {
       }
       if (i % 10 === 0) await new Promise(r => setTimeout(r, 0));
     }
-    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickoptix.com', adminIp: '127.0.0.1', action: 'Bulk Password Reset', targetId: 'Multiple', targetName: `${userIds.length} users affected`, details: `Reset apps to default.`, riskLevel: 'Medium' });
+    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Bulk Password Reset', targetId: 'Multiple', targetName: `${userIds.length} users affected`, details: `Reset apps to default.`, riskLevel: 'Medium' });
     await this.commit();
     this.notify();
     return { success: true, count: userIds.length };

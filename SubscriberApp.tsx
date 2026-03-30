@@ -241,7 +241,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                      </div>
                      <h4 class="text-xl font-black uppercase italic tracking-tighter">Identity Verification</h4>
                      <p class="text-[10px] font-black uppercase tracking-widest leading-loose text-slate-400">
-                        We are currently verifying your credentials node.<br/>
+                        We are currently verifying your credentials.<br/>
                         Administrative approval is required to unlock interaction.
                      </p>
                   `;

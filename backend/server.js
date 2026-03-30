@@ -17,6 +17,7 @@ const oltRealRoutes = require('./routes/oltRealRoutes');
 const mikrotikRoutes = require('./routes/mikrotikRoutes');
 const automationRoutes = require('./routes/automationRoutes');
 const livePoller = require('./jobs/livePoller');
+const notificationEngine = require('./services/notificationEngine');
 
 const app = express();
 const server = http.createServer(app);
@@ -65,7 +66,7 @@ app.use('/api/', limiter);
 // Root Welcome Message
 app.get('/', (req, res) => {
     res.json({
-        service: 'Click Optix ISP Backend',
+        service: 'Click Opticx ISP Backend',
         status: 'Operational',
         timestamp: new Date().toISOString(),
         documentation: 'https://isp-click-opticx.web.app'
@@ -111,6 +112,30 @@ app.post('/api/push-notify', async (req, res) => {
     } catch (error) {
         logger.error(`[PUSH] Error sending to ...${token.slice(-5)}: ${error.message}`);
         res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// --- Smart Notification Engine API ---
+app.post('/api/smart-notify', async (req, res) => {
+    const { userId, userPhone, fcmToken, event, title, body, config, data } = req.body;
+    
+    try {
+        logger.info(`[SMART-NOTIFY] Event: ${event} for User: ${userId}`);
+        const report = await notificationEngine.dispatchNotification({
+            userId,
+            userPhone,
+            fcmToken,
+            event,
+            title,
+            body,
+            config,
+            data
+        });
+        
+        res.json(report);
+    } catch (error) {
+        logger.error(`[SMART-NOTIFY] Failed: ${error.message}`);
+        res.status(500).json({ success: false, status: 'Failed', error: error.message });
     }
 });
 

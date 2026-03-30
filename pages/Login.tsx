@@ -479,7 +479,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             className="w-full py-5 bg-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3"
          >
             {isProcessing ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18} />}
-            Confirm & Access Node
+            Confirm & Access Account
          </button>
       </form>
    );
@@ -605,7 +605,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                            System initializing...
                         </p>
                         <p className="text-white/80 font-bold">
-                           Click Opticx – Your 5G Ultra Node
+                           Click Opticx – Your 5G Ultra Network
                         </p>
                         <p>
                            Ready to connect you.
