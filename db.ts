@@ -124,8 +124,8 @@ const INITIAL_GATEWAYS: PaymentGateway[] = [
 ];
 
 const INITIAL_APP_PAGES: AppPage[] = [
-  { id: 'home', label: 'Dashboard', icon: 'Home', category: 'Core', enabled: true, showInDirectory: true, isDefault: true, swatch: '#1570ef' },
-  { id: 'wallet', label: 'My Wallet', icon: 'Wallet', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#32d583' },
+  { id: 'home', label: 'Dashboard', icon: 'Home', category: 'Core', enabled: true, showInDirectory: true, isDefault: true, swatch: '#0084ff' },
+  { id: 'wallet', label: 'My Wallet', icon: 'Wallet', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#32d64f' },
   { id: 'packages', label: 'Service Plans', icon: 'Signal', category: 'Core', enabled: true, showInDirectory: true, isDefault: false, swatch: '#3b82f6' },
   { id: 'profile', label: 'Profile', icon: 'User', category: 'Core', enabled: true, showInDirectory: false, isDefault: false, swatch: '#6366f1' },
   { id: 'notifs', label: 'Alerts', icon: 'Bell', category: 'Support', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
@@ -133,12 +133,12 @@ const INITIAL_APP_PAGES: AppPage[] = [
   { id: 'aichat', label: 'AI Chat Assistant', icon: 'MessageSquare', category: 'Utility', enabled: true, showInDirectory: true, isDefault: false, swatch: '#06b6d4' },
   { id: 'ai-voice-call', label: 'AI Voice Support', icon: 'Mic', category: 'Utility', enabled: true, showInDirectory: true, isDefault: false, swatch: '#ec4899' },
   { id: 'namaz', label: 'Prayer Times', icon: 'Clock', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#059669' },
-  { id: 'quran', label: 'Noble Quran', icon: 'Book', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#32d583' },
+  { id: 'quran', label: 'Noble Quran', icon: 'Book', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#32d64f' },
   { id: 'qibla', label: 'Qibla Finder', icon: 'Compass', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#b45309' },
   { id: 'tasbih', label: 'Digital Tasbih', icon: 'Fingerprint', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#334155' },
   { id: 'live-usage', label: 'Live Usage', icon: 'Monitor', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#3b82f6' },
   { id: 'speed-test', label: 'Speed Test', icon: 'Gauge', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#6366f1' },
-  { id: 'connection', label: 'Connection', icon: 'Signal', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#1570ef' },
+  { id: 'connection', label: 'Connection', icon: 'Signal', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#0084ff' },
   { id: 'reset-password', label: 'Reset Wifi', icon: 'Key', category: 'Network', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
   { id: 'news', label: 'Broadcasts', icon: 'Bell', category: 'Communication', enabled: true, showInDirectory: true, isDefault: false, swatch: '#ef4444' },
   { id: 'referral', label: 'Refer & Earn', icon: 'Gift', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
@@ -167,8 +167,8 @@ const INITIAL_STATE: AppState = {
   nas: [],
   packages: [
     { id: 'PKG-1', name: 'Home Basic 15M', subtitle: 'Standard Tier', speed: '15 Mbps', uploadSpeed: '10 Mbps', dataLimit: 'Unlimited', price: 1500, taxRate: 15, duration: 30, color: '#3b82f6', isRecommended: true },
-    { id: 'PKG-2', name: 'Extreme 50M', subtitle: 'Pro Gamer Pack', speed: '50 Mbps', uploadSpeed: '50 Mbps', dataLimit: 'Unlimited', price: 2500, taxRate: 15, duration: 30, color: '#1570ef' },
-    { id: 'PKG-3M', name: 'Activation Tier 3M', subtitle: 'New User Default', speed: '3 Mbps', uploadSpeed: '1 Mbps', dataLimit: 'Unlimited', price: 0, taxRate: 0, duration: 30, color: '#94a3b8' },
+    { id: 'PKG-2', name: 'Extreme 50M', subtitle: 'Pro Gamer Pack', speed: '50 Mbps', uploadSpeed: '50 Mbps', dataLimit: 'Unlimited', price: 2500, taxRate: 15, duration: 30, color: '#0084ff' },
+    { id: 'PKG-3M', name: 'Activation Tier 3M', subtitle: 'New User Default', speed: '3 Mbps', uploadSpeed: '1 Mbps', dataLimit: 'Unlimited', price: 0, taxRate: 0, duration: 30, color: '#32d64f' },
   ],
   invoices: [],
   payments: [],
@@ -222,13 +222,13 @@ const INITIAL_STATE: AppState = {
       shortName: 'CO ISP', 
       appTitle: 'Click Opticx ISP', 
       appSubtitle: 'Automation Engine v1.2.6',
-      logoLight: '', 
-      logoDark: '', 
-      logoSquare: '', 
-      favicon: '', 
-      primaryColor: '#1570ef', 
-      secondaryColor: '#32d583', 
-      accentColor: '#32d583', 
+      logoLight: '/favicon.png', 
+      logoDark: '/favicon.png', 
+      logoSquare: '/favicon.png', 
+      favicon: '/favicon.png', 
+      primaryColor: '#0084ff', 
+      secondaryColor: '#32d64f', 
+      accentColor: '#32d64f', 
       textColorLight: '#ffffff', 
       textColorDark: '#0f172a', 
       primaryFont: 'Inter', 
@@ -367,8 +367,8 @@ class DB {
   private app: FirebaseApp | null = null;
   private socket: Socket | null = null;
   private backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-    ? 'http://127.0.0.1:5000' 
-    : 'https://click-opticx-isp-app-live.onrender.com';
+    ? 'http://localhost:5001'
+    : 'https://click-opticx-backend.onrender.com';
 
   constructor() {
     this.state = INITIAL_STATE;
@@ -376,6 +376,13 @@ class DB {
       const cached = localStorage.getItem('clickopticx_v16_registry');
       if (cached) {
         const parsed = JSON.parse(cached);
+        // Deep merge or ensure branding paths aren't empty
+        if (parsed.settings?.branding) {
+          if (!parsed.settings.branding.logoLight) parsed.settings.branding.logoLight = '/favicon.png';
+          if (!parsed.settings.branding.logoDark) parsed.settings.branding.logoDark = '/favicon.png';
+          if (!parsed.settings.branding.logoSquare) parsed.settings.branding.logoSquare = '/favicon.png';
+          if (!parsed.settings.branding.favicon) parsed.settings.branding.favicon = '/favicon.png';
+        }
         this.state = { ...INITIAL_STATE, ...parsed };
 
         // Deep-merge settings so new defaults (like authSettings) are always present
@@ -638,6 +645,7 @@ class DB {
     }
   }
 
+
   private patchState() {
     if (!this.state.settings) this.state.settings = INITIAL_STATE.settings;
     if (!this.state.settings.branding) this.state.settings.branding = INITIAL_STATE.settings.branding;
@@ -846,22 +854,43 @@ class DB {
       let existingStaff = this.state.staff.find(s => s.email === user.email);
       if (existingStaff) {
           this.state.currentUser = { ...existingStaff };
+          this.authenticateSocket();
           this.notify();
-          return { success: true, user: this.state.currentUser };
+          return { success: true, user: this.state.currentUser, type: 'staff' };
       }
 
       let existingUser = this.state.users.find(u => u.email === user.email);
       if (existingUser) {
           this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
+          this.authenticateSocket();
           this.notify();
-          return { success: true, user: this.state.currentUser };
+          return { success: true, user: this.state.currentUser, type: 'customer' };
       }
 
-      return { success: false, message: 'Account not found. Please register first.' };
+      const existingRequest = this.state.signupRequests.find(r => r.email === user.email);
+      if (existingRequest) {
+          return { success: false, message: 'Your registration is already pending admin approval.' };
+      }
+
+      // Auto-registration path
+      await this.submitSignupRequest({
+        name: user.displayName || 'Google User',
+        email: user.email || '',
+        username: user.email?.split('@')[0] || 'user_' + Date.now(),
+        phone: '',
+        password: 'PASS_' + Math.random().toString(36).slice(-8),
+        address: 'Registered via Google',
+        area: 'Digital',
+        connectionType: 'Fiber',
+        packageId: 'PKG-3M'
+      });
+
+      return { success: false, message: 'Google account linked. Your request is now pending admin approval.' };
     } catch (e: any) {
       return { success: false, message: e.message };
     }
   }
+
 
   // --- NEW AUTH METHODS ---
   async sendPasswordReset(email: string) {
@@ -1689,55 +1718,6 @@ class DB {
     if (idx !== -1) { this.state.users[idx].welcomeChecklistShown = true; await this.commit(); }
   }
 
-  async approveSignup(id: string) {
-    const reqIdx = this.state.signupRequests.findIndex(r => r.id === id);
-    if (reqIdx === -1) return { success: false, message: 'Request not found' };
-    const req = this.state.signupRequests[reqIdx];
-
-    // Provision with 3M Activation Tier regardless of what they asked for
-    const res = await this.addUser({
-      ...req,
-      packageId: 'PKG-3M',
-      status: UserStatus.ACTIVE
-    });
-
-    if (res.success) {
-      // Dispatch Welcome Email
-      this.dispatchEmail(
-        req.email, 
-        'Protocol Verified: Welcome to Click Opticx', 
-        `<h2>Welcome ${req.name}!</h2><p>Your subscription node has been successfully provisioned. You can now access the portal with your credentials.</p>`,
-        'Automation',
-        res.user.id
-      );
-
-      // If they requested a specific paid package, log it as a pending request for follow-up
-      if (req.packageId && req.packageId !== 'PKG-3M') {
-        const pkg = this.state.packages.find(p => p.id === req.packageId);
-        if (pkg) {
-          const taxMultiplier = this.state.settings.enableTax ? (1 + (this.state.settings.autoTaxPercentage / 100)) : 1;
-          const amount = Math.round(pkg.price * taxMultiplier);
-          this.state.packageRequests.push({
-            id: 'PRQ-' + Date.now(),
-            userId: res.user.id,
-            userName: res.user.name,
-            packageId: pkg.id,
-            packageName: pkg.name,
-            amount: amount,
-            status: 'Pending',
-            paymentMethod: 'Pre-Selected',
-            timestamp: new Date().toISOString()
-          });
-        }
-      }
-
-      this.state.signupRequests.splice(reqIdx, 1);
-      await this.commit();
-      return { success: true };
-    }
-    return { success: false, message: 'User provision failed' };
-  }
-
   getLiveUsage(id: string) { 
     // REAL-TIME TELEMETRY: Pull from the backend socket-driven state if available
     // For now, we use a slightly more stable 'observed' value instead of pure randomness
@@ -1801,12 +1781,10 @@ class DB {
     }
     return { success: false, message: 'Subscriber node not found.' };
   }
-
   async submitTopupRequest(r: any) { this.state.topupRequests.push({ ...r, id: 'REQ_' + Date.now(), status: 'Pending', timestamp: new Date().toISOString() }); await this.commit(); }
   async submitTicket(t: any) { this.state.tickets.push({ ...t, id: 'TCK_' + Date.now(), status: TicketStatus.OPEN, priority: TicketPriority.MEDIUM, comments: [], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }); await this.commit(); }
   async updateTicketStatus(id: string, s: any) { const idx = this.state.tickets.findIndex(t => t.id === id); if (idx !== -1) { this.state.tickets[idx].status = s; await this.commit(); } }
   async addTicketComment(id: string, t: string, i: boolean) { const idx = this.state.tickets.findIndex(x => x.id === id); if (idx !== -1) { this.state.tickets[idx].comments.push({ id: 'CMT_' + Date.now(), authorName: 'Admin', authorEmail: 'admin@opticx.com', authorRole: Role.ADMIN, text: t, timestamp: new Date().toISOString(), isInternal: i }); await this.commit(); } }
-  
   async approveUnifiedRequest(id: string, type: string) {
     try {
       if (type === 'package') {
@@ -1840,60 +1818,7 @@ class DB {
           this.logActivity(load.userId, 'Approval', 'Emergency load activated.');
         }
       } else if (type === 'signup') {
-        const req = this.state.signupRequests.find(r => r.id === id);
-        if (req) {
-          req.status = 'Approved';
-          const settings = this.state.settings.authSettings || INITIAL_STATE.settings.authSettings;
-          const newUser: ISPUser = {
-            id: 'USR-' + Date.now(),
-            name: req.name,
-            email: req.email,
-            phone: req.phone,
-            cnic: req.cnic,
-            username: req.username,
-            password: req.password,
-            status: UserStatus.ACTIVE,
-            role: settings.defaultRole as any,
-            portalEnabled: true,
-            createdAt: new Date().toISOString(),
-            balance: 0,
-            activationCount: 0,
-            managementMode: 'Manual',
-            connectionType: 'Fiber',
-            nasConnectionType: 'Manual',
-            creditScore: 600,
-            address: req.address || '',
-            area: req.area || '',
-            packageId: req.packageId,
-            connectionId: 'CID-' + Math.floor(Math.random() * 100000),
-            referralCode: 'REF-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
-            welcomeChecklistShown: false,
-            verificationStatus: VerificationStatus.UNVERIFIED,
-            verificationSuccessShown: false,
-            expiryDate: '',
-            graceDaysRemaining: 0,
-            notes: '',
-            activityLog: []
-          };
-          this.state.users.push(newUser);
-          await this.syncUserStatusWithBilling(newUser.id);
-          await this.commit();
-          
-          this.dispatchEmail(
-               req.email, 
-               'Protocol Verified: Welcome to Click Opticx', 
-               `<h2>Welcome ${req.name}!</h2><p>Your subscriber node has been provisioned. Access granted.</p>`,
-               'Automation',
-               newUser.id
-          );
-
-          const res = await this.resolvePlanActivationBilling(newUser.id, req.packageId, req.amount, 'Paid', 'System Approval', { notes: 'Signup connection activated via Approval Center.' });
-          
-          if (res.success) {
-            this.logNotification(newUser.id, 'success', 'Welcome!', `Your connection request has been approved. Welcome to ${this.state.settings.branding.businessName}!`);
-            this.logActivity(newUser.id, 'Activation', 'Connection request approved and account activated.');
-          }
-        }
+        return await this.approveSignup(id);
       }
       await this.commit();
       return { success: true };
@@ -1901,6 +1826,60 @@ class DB {
       return { success: false, message: e.message };
     }
   }
+
+
+  async approveSignup(requestId: string) {
+    try {
+      const req = this.state.signupRequests.find(r => r.id === requestId);
+      if (!req) return { success: false, message: 'Signup request node not found.' };
+
+      const userId = 'USR-' + Date.now();
+      const newUser: any = {
+        id: userId,
+        name: req.name,
+        username: req.username,
+        email: req.email,
+        phone: req.phone,
+        password: req.password,
+        address: req.address,
+        area: req.area,
+        status: UserStatus.ACTIVE,
+        packageId: req.packageId || 'PKG-3M',
+        portalEnabled: true,
+        connectionId: 'CID-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
+        creditScore: 500,
+        referralPoints: 0,
+        referralCode: (req.username || 'user').toUpperCase().slice(0, 5) + Math.floor(Math.random() * 100),
+        activationCount: 1,
+        connectionType: req.connectionType || 'Fiber',
+        managementMode: 'Manual',
+        nasConnectionType: 'Manual',
+        activityLog: [],
+        createdAt: new Date().toISOString(),
+        lastPaymentDate: new Date().toISOString(),
+        expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      };
+
+      this.state.users.push(newUser);
+      req.status = 'Approved';
+      req.processedAt = new Date().toISOString();
+
+      const pkg = this.state.packages.find(p => p.id === newUser.packageId);
+      await this.resolvePlanActivationBilling(userId, newUser.packageId, pkg?.price || 0, 'Paid', 'System');
+      
+      this.logNotification(userId, 'success', 'Connection Established', 'Welcome to Click Opticx! Your high-speed link is now active.');
+      this.logActivity(userId, 'Onboarding', 'Signup request approved.');
+
+      await this.commit();
+      this.notify();
+      return { success: true, userId };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  }
+
+
+
 
   async rejectUnifiedRequest(id: string, type: string, r: string) {
     try {

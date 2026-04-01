@@ -276,10 +276,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                <div className="w-1.5 h-4 bg-blue-500 rounded-full"></div>
                <h4 className="text-sm font-bold text-slate-900">Basic Information</h4>
             </div>
+            <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Full Name</label>
+               <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="Enter your full name" value={signupData.name} onChange={e => setSignupData({ ...signupData, name: e.target.value })} required autoComplete="off" />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
                   <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Username</label>
-                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="Choose a username" value={signupData.name} onChange={e => setSignupData({ ...signupData, name: e.target.value })} required autoComplete="off" />
+                  <input className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-medium outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all text-slate-800 placeholder:text-slate-400" placeholder="Choose a username" value={signupData.username} onChange={e => setSignupData({ ...signupData, username: e.target.value })} required autoComplete="off" />
                </div>
                <div className="space-y-1.5 focus-within:z-10 animate-in fade-in slide-in-from-right-4 duration-500 delay-100">
                   <label className="text-sm font-semibold text-slate-700 block ml-1 mb-1">Contact Number</label>
@@ -571,7 +576,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100%] h-[100%] bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.03)_0%,transparent_70%)]"></div>
 
             {/* Grid Pattern Overlay */}
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"></div>
+            <div className="absolute inset-0 bg-slate-950/20 opacity-[0.03] mix-blend-overlay"></div>
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
          </div>
 

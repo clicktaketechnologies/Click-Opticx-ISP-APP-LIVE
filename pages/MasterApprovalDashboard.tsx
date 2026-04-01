@@ -74,7 +74,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
     if (res.success) {
       setSelectedRequestId(null);
     } else {
-      alert(res.message);
+      alert((res as any).message || 'Request failed to process.');
     }
   };
 
