@@ -2,7 +2,7 @@ import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { AppState, CommunicationSettings, EmailGatewayMode, SenderIdentity } from '../../types';
-import { db } from '../../db';
+import { db, INITIAL_COMM_CONFIG } from '../../db';
 import {
    Settings, Mail, Globe, Clock, ShieldCheck,
    Save, RefreshCw, Smartphone, Key, Lock,
@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => {
-   const [formData, setFormData] = useState<CommunicationSettings>(state.settings.commConfig);
+   const [formData, setFormData] = useState<CommunicationSettings>(state?.settings?.commConfig || INITIAL_COMM_CONFIG);
    const [isSaving, setIsSaving] = useState(false);
    const [showSecrets, setShowSecrets] = useState(false);
    const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -31,7 +31,7 @@ const CommunicationSettingsPage: React.FC<{ state: AppState }> = ({ state }) => 
    const [testEmailData, setTestEmailData] = useState({
       recipient: '',
       subject: 'Operational Test - Payment Due - Click Opticx',
-      templateId: state.emailTemplates[0]?.id || ''
+      templateId: state?.emailTemplates?.[0]?.id || ''
    });
 
    const handleSave = async () => {

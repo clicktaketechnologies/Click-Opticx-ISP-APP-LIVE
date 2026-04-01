@@ -18,21 +18,31 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
   });
   const [showPass, setShowPass] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setIsUploading(true);
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const base64String = reader.result as string;
-        await db.updateStaff(user.email, { profileImage: base64String } as any);
-        if (state.currentUser) {
-           state.currentUser.profileImage = base64String;
+        try {
+          const base64String = reader.result as string;
+          const photoUrl = await db.uploadMedia(`profiles/admin-${user.email}-${Date.now()}`, base64String);
+          await db.updateStaff(user.email, { profileImage: photoUrl } as any);
+          if (state.currentUser) {
+             state.currentUser.profileImage = photoUrl;
+          }
+          setSuccess(true);
+          setTimeout(() => setSuccess(false), 3000);
+        } catch (error) {
+          console.error('[Upload Error]', error);
+          alert('Failed to upload profile image.');
+        } finally {
+          setIsUploading(false);
         }
-        setSuccess(true);
-        setTimeout(() => setSuccess(false), 3000);
       };
       reader.readAsDataURL(file);
     }
@@ -89,8 +99,13 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
           <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl">
             <div className="relative z-10 flex flex-col items-center text-center space-y-6">
                <div className="relative group">
-                  <div className="w-32 h-32 bg-white/10 rounded-[2.5rem] flex items-center justify-center border-4 border-white/5 shadow-2xl overflow-hidden backdrop-blur-md">
+                  <div className="w-32 h-32 bg-white/10 rounded-[2.5rem] flex items-center justify-center border-4 border-white/5 shadow-2xl overflow-hidden backdrop-blur-md relative">
                      {(user as any).profileImage ? <img src={(user as any).profileImage} className="w-full h-full object-cover" /> : <User size={64} className="text-blue-400" />}
+                     {isUploading && (
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-20">
+                           <Mini5GMicroLoader size={24} />
+                        </div>
+                     )}
                   </div>
                   <button 
                     onClick={() => fileInputRef.current?.click()}

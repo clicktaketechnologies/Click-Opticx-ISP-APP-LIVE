@@ -2,6 +2,7 @@ import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, Firestore } from 'firebase/firestore';
 import { getAuth, signInWithRedirect, signInWithPopup, getRedirectResult, GoogleAuthProvider, Auth, sendPasswordResetEmail, signInWithPhoneNumber, RecaptchaVerifier } from 'firebase/auth';
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
+import { getStorage, ref, uploadString, getDownloadURL, FirebaseStorage } from 'firebase/storage';
 import { io, Socket } from 'socket.io-client';
 import { notificationManager } from './utils/NotificationManager';
 
@@ -19,7 +20,7 @@ import {
   RecoveryLog, RecoveryActionType, BillingPaymentType, BillingCycle, CommunicationLog,
   AdminReminder, ReminderStatus, ReminderIssueType, NASConfig, LiveUsage, OLTConfig, ONU,
   AuthSettings, OTP, DuplicateActionLog, TestLog, FlashLog, NotificationTemplate, NotificationTriggerEvent,
-  NotificationDeliveryStatus, NotificationGateway
+  NotificationDeliveryStatus, NotificationGateway, SignupRequest, AuditLog
 } from './types';
 
 // Monitoring interface nodes
@@ -86,7 +87,7 @@ const INITIAL_LEGAL_CONFIG: LegalConfig = {
   refundPolicy: 'Refunds are subject to verification of downtime exceeding 48 consecutive hours.'
 };
 
-const INITIAL_COMM_CONFIG: CommunicationSettings = {
+export const INITIAL_COMM_CONFIG: CommunicationSettings = {
   simulationMode: false,
   emailMode: 'CUSTOM_SMTP',
   emailProvider: 'SMTP',
@@ -183,6 +184,8 @@ const INITIAL_STATE: AppState = {
   tickets: [],
   nocEvents: [],
   aiLogs: [],
+  auditLogs: [],
+  signupRequests: [],
   aiEvents: [],
   aiSuggestions: [],
   aiCallLogs: [],
@@ -245,6 +248,26 @@ const INITIAL_STATE: AppState = {
     notificationTemplates: [],
     footerText: 'Powered by Click Opticx Infrastructure',
     copyrightLine: '© 2026 Click Opticx. All Rights Reserved.',
+    authSettings: {
+      loginEnabled: true,
+      signupEnabled: true,
+      forgotPasswordEnabled: true,
+      otpEnabled: true,
+      dealerSignupEnabled: false,
+      enableUniversalLogin: true,
+      allowedIdentifiers: { email: true, phone: true, cnic: true, username: true, pppoe: true },
+      signupMode: 'Manual',
+      requireEmailVerification: false,
+      requirePhoneOTP: false,
+      requireCNIC: false,
+      defaultRole: Role.CUSTOMER,
+      duplicateControl: { enabled: true, blockDuplicate: false, allowWithWarning: true },
+      securitySettings: { maxLoginAttempts: 5, blockDurationMin: 10, enableCaptcha: false, enable2FA: false },
+      forgotPasswordSettings: { resetViaEmail: true, resetViaOTP: true, resetViaUsername: false },
+      postSignup: { welcomePopup: true, customMessage: 'Welcome to Click Opticx! Your request has been queued.', redirectUrl: '/dashboard' }
+    },
+    signupRequests: [],
+    auditLogs: [],
     socialLinks: [],
     appVersion: 'v1.2.5',
     autoTaxPercentage: 15,
@@ -263,7 +286,6 @@ const INITIAL_STATE: AppState = {
     commConfig: INITIAL_COMM_CONFIG,
     infrastructure: INITIAL_INFRA_CONFIG,
     legal: INITIAL_LEGAL_CONFIG,
-    authSettings: { loginEnabled: true, signupEnabled: true, forgotPasswordEnabled: true, otpEnabled: true, dealerSignupEnabled: false, enableUniversalLogin: false, allowedIdentifiers: { email: true, phone: true, cnic: false, username: true, pppoe: true }, signupMode: 'Manual', requireEmailVerification: true, requirePhoneOTP: false, requireCNIC: false, defaultRole: Role.CUSTOMER, duplicateControl: { enabled: true, blockDuplicate: true, allowWithWarning: false }, securitySettings: { maxLoginAttempts: 5, blockDurationMin: 30, enableCaptcha: false, enable2FA: false }, forgotPasswordSettings: { resetViaEmail: true, resetViaOTP: true, resetViaUsername: false }, postSignup: { welcomePopup: true, customMessage: 'Registration successful. Waiting for admin approval.', redirectUrl: '/' } },
     technicalKeys: { 
         firebaseApiKey: firebaseConfig.apiKey, 
         firebaseAuthDomain: firebaseConfig.authDomain, 
@@ -325,7 +347,6 @@ const INITIAL_STATE: AppState = {
   notificationTemplates: [],
   roles: ALL_ROLES,
   archives: [],
-  signupRequests: [],
   securityLogs: [],
   connectionStatus: 'online',
   isImpersonating: false,
@@ -364,6 +385,7 @@ class DB {
   private firestore: Firestore | null = null;
   private auth: Auth | null = null;
   private messaging: Messaging | null = null;
+  private storage: FirebaseStorage | null = null;
   private app: FirebaseApp | null = null;
   private socket: Socket | null = null;
   private backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
@@ -442,6 +464,7 @@ class DB {
       this.app = !apps.length ? initializeApp(firebaseConfig) : apps[0];
       this.firestore = getFirestore(this.app);
       this.auth = getAuth(this.app);
+      this.storage = getStorage(this.app);
       
       // Handle Redirect Result
       getRedirectResult(this.auth).then(async (result) => {
@@ -750,6 +773,7 @@ class DB {
     if (!Array.isArray(this.state.flashLogs)) this.state.flashLogs = [];
     if (!Array.isArray(this.state.archives)) this.state.archives = [];
     if (!Array.isArray(this.state.signupRequests)) this.state.signupRequests = [];
+    if (!Array.isArray(this.state.auditLogs)) this.state.auditLogs = [];
     if (!Array.isArray(this.state.securityLogs)) this.state.securityLogs = [];
     if (!Array.isArray(this.state.passwordRequests)) this.state.passwordRequests = [];
     if (!Array.isArray(this.state.networkNodes)) this.state.networkNodes = [];
@@ -825,6 +849,25 @@ class DB {
     };
     if (!this.state.securityLogs) this.state.securityLogs = [];
     this.state.securityLogs.push(log);
+    await this.commit();
+  }
+
+  async logAudit(action: string, type: AuditLog['type'], details: string, userId?: string, userName?: string, metadata?: any) {
+    const admin = this.state.currentUser;
+    const log: AuditLog = {
+      id: 'AUD-' + Date.now() + Math.random().toString(36).substr(2, 5),
+      timestamp: new Date().toISOString(),
+      action,
+      type,
+      details,
+      userId,
+      userName,
+      adminId: admin?.id,
+      adminName: admin?.name,
+      metadata
+    };
+    if (!this.state.auditLogs) this.state.auditLogs = [];
+    this.state.auditLogs.unshift(log); // Newest first
     await this.commit();
   }
 
@@ -1077,31 +1120,34 @@ class DB {
       if (identifierType === 'phone' && !settings.allowedIdentifiers.phone) return { success: false, message: 'Phone login is disabled.' };
       if (identifierType === 'cnic' && !settings.allowedIdentifiers.cnic) return { success: false, message: 'CNIC login is disabled.' };
     }
-
     const user = this.state.users.find(u => !u.deleted && (
       (u.username || '').toLowerCase() === input ||
       (u.email || '').toLowerCase() === input ||
-      u.phone === input ||
-      u.cnic === input ||
+      (u.phone || '').replace(/\D/g, '') === input.replace(/\D/g, '') ||
+      (u.cnic || '').replace(/\D/g, '') === input.replace(/\D/g, '') ||
       (u.pppoeId || '').toLowerCase() === input ||
-      u.connectionId === input
+      (u.connectionId || '').toLowerCase() === input ||
+      (u.connectionId || '').replace(/-/g, '').toLowerCase() === input.replace(/-/g, '')
     ));
 
     if (!user) return { success: false, message: 'Identity lookup failed.' };
 
     if (user.password !== pass) {
+      this.logAudit('Failed Login', 'System', `Failed login attempt for ${user.name} (${input})`, user.id, user.name);
       return { success: false, message: 'Invalid credentials.' };
     }
 
-    if (user.status === UserStatus.PENDING_VERIFICATION) {
-      return { success: false, message: 'Your account is pending verification.' };
+    if (user.status === UserStatus.DISABLED || user.status === UserStatus.BLOCKED) {
+      return { success: false, message: 'Your account is currently Restricted. Contact NOC.' };
     }
 
     this.state.currentUser = { ...user, role: Role.CUSTOMER };
     this.authenticateSocket();
     this.notify();
+    this.logAudit('User Login', 'System', `User logged in via ${identifierType || 'Universal'}`, user.id, user.name);
     return { success: true, user: this.state.currentUser, type: 'customer' };
   }
+
 
   async logout() {
     if (this.socket) {
@@ -1767,7 +1813,42 @@ class DB {
     return { success: true, message: 'Rescue link established.' };
   }
 
-  async submitKYC(u: string, t: string, f: string) { return true; }
+  async submitKYC(u: string, t: string, f: string) {
+    let photoUrl = f;
+    if (f.startsWith('data:')) {
+       photoUrl = await this.uploadMedia(`kyc/${u}-${Date.now()}`, f);
+    }
+    const idx = this.state.users.findIndex(user => user.id === u);
+    if (idx !== -1) {
+      if (!(this.state.users[idx] as any).kycDocuments) (this.state.users[idx] as any).kycDocuments = [];
+      (this.state.users[idx] as any).kycDocuments.push({ documentType: t, documentUrl: photoUrl, status: 'Pending', submittedAt: new Date().toISOString() });
+      if (this.state.currentUser && this.state.currentUser.id === u) {
+        (this.state.currentUser as any).kycDocuments = (this.state.users[idx] as any).kycDocuments;
+      }
+    }
+    await this.updateSubscriberProfile(u, { verificationStatus: 'Pending' });
+    await this.commit();
+    return { success: true };
+  }
+
+  async uploadMedia(path: string, base64Data: string): Promise<string> {
+    if (!this.storage) throw new Error("Cloud Storage Node disconnected.");
+    try {
+      const storageRef = ref(this.storage, path);
+      // Determine format
+      const isBase64 = base64Data.startsWith('data:');
+      if (isBase64) {
+         await uploadString(storageRef, base64Data, 'data_url');
+      } else {
+         // Should not naturally happen as all components pass base64
+         await uploadString(storageRef, base64Data, 'raw');
+      }
+      return await getDownloadURL(storageRef);
+    } catch (e) {
+      console.error('[STORAGE ERROR]', e);
+      throw e;
+    }
+  }
 
   async updateSubscriberProfile(id: string, d: any) {
     const idx = this.state.users.findIndex(u => u.id === id);
@@ -1869,6 +1950,7 @@ class DB {
       
       this.logNotification(userId, 'success', 'Connection Established', 'Welcome to Click Opticx! Your high-speed link is now active.');
       this.logActivity(userId, 'Onboarding', 'Signup request approved.');
+      this.logAudit('Signup Approved', 'Approval', `Signup request for ${req.name} approved by ${this.state.currentUser?.name || 'System'}`, userId, req.name);
 
       await this.commit();
       this.notify();
@@ -1919,6 +2001,8 @@ class DB {
         this.logNotification(targetUserId, 'error', 'Request Declined', `Your ${requestName} was declined. Reason: ${r}`);
         this.logActivity(targetUserId, 'Rejection', `${requestName} declined by admin. Reason: ${r}`);
       }
+
+      this.logAudit('Request Rejected', 'Rejection', `${requestName} for ${id} rejected by ${this.state.currentUser?.name || 'System'}. Reason: ${r}`, targetUserId);
 
       await this.commit();
       return { success: true };
@@ -3229,40 +3313,60 @@ class DB {
     }
 
     let duplicateFound = false;
-    if (settings.duplicateControl.enabled) {
-      const isDuplicate = (existing: any) => {
-        const checkEmail = data.email && (existing.email || '').toLowerCase().trim() === data.email.toLowerCase().trim();
-        const checkPhone = data.phone && data.phone.replace(/\D/g, '') !== '' && (existing.phone || '').replace(/\D/g, '') === data.phone.replace(/\D/g, '');
-        const checkCnic = data.cnic && data.cnic.replace(/\D/g, '') !== '' && (existing.cnic || '').replace(/\D/g, '') === data.cnic.replace(/\D/g, '');
-        const checkUsername = data.username && (existing.username || '').toLowerCase().trim() === data.username.toLowerCase().trim();
-        return checkEmail || checkPhone || checkCnic || checkUsername;
-      };
-
-      const existsInUsers = this.state.users.some(isDuplicate);
-      const existsInRequests = this.state.signupRequests.some(r => r.status === 'Pending' && isDuplicate(r));
-
-      if (existsInUsers || existsInRequests) {
-        if (settings.duplicateControl.blockDuplicate) {
-          return { success: false, message: 'IDENTITY_CONFLICT: A subscriber with this Email, Phone, National Identity, or Username already exists. Please verify your details or use the recovery tool.' };
-        } else if (settings.duplicateControl.allowWithWarning) {
-          duplicateFound = true;
-        }
+    let duplicateReason = '';
+    
+    const isDuplicate = (existing: any) => {
+      if (data.email && (existing.email || '').toLowerCase().trim() === data.email.toLowerCase().trim()) {
+        duplicateReason = `Email (${data.email}) already exists`;
+        return true;
       }
+      if (data.phone && data.phone.replace(/\D/g, '') !== '' && (existing.phone || '').replace(/\D/g, '') === data.phone.replace(/\D/g, '')) {
+        duplicateReason = `Phone Number (${data.phone}) already exists`;
+        return true;
+      }
+      if (data.cnic && data.cnic.replace(/\D/g, '') !== '' && (existing.cnic || '').replace(/\D/g, '') === data.cnic.replace(/\D/g, '')) {
+        duplicateReason = `CNIC (${data.cnic}) already exists`;
+        return true;
+      }
+      if (data.username && (existing.username || '').toLowerCase().trim() === data.username.toLowerCase().trim()) {
+        duplicateReason = `Username (${data.username}) already exists`;
+        return true;
+      }
+      return false;
+    };
+
+    const existsInUsers = this.state.users.some(isDuplicate);
+    const existsInRequests = this.state.signupRequests.some(r => (r.status === 'Pending' || r.status === 'Duplicate') && isDuplicate(r));
+
+    if (existsInUsers || existsInRequests) {
+      duplicateFound = true;
+      // Instead of blocking, we now always allow but flag it as "Duplicate" 
+      // if the user wants visibility in Approval Center.
     }
 
-    const newRequest = {
+    const newRequest: SignupRequest = {
       ...data,
       id: 'SR-' + Date.now(),
-      status: settings.signupMode === 'Auto' ? 'Approved' : 'Pending',
+      status: duplicateFound ? 'Duplicate' : (settings.signupMode === 'Auto' ? 'Approved' : 'Pending'),
       duplicateWarning: duplicateFound,
+      duplicateReason: duplicateReason,
       timestamp: new Date().toISOString()
     };
 
     this.state.signupRequests.push(newRequest);
+    this.logAudit(
+      newRequest.status === 'Duplicate' ? 'Duplicate Signup Attempt' : 'New Signup Request',
+      'System',
+      `Signup request submitted for ${data.name}. Status: ${newRequest.status}. ${newRequest.duplicateReason || ''}`,
+      undefined,
+      data.name,
+      { requestId: newRequest.id, identifiers: { email: data.email, phone: data.phone, cnic: data.cnic } }
+    );
 
-    if (settings.signupMode === 'Auto') {
-      const newUser: Partial<ISPUser> = {
+    if (newRequest.status === 'Approved') {
+      const newUser: ISPUser = {
         id: 'USR-' + Date.now(),
+        connectionId: 'CID-' + Math.floor(Math.random() * 100000),
         name: data.name,
         email: data.email,
         phone: data.phone,
@@ -3270,28 +3374,31 @@ class DB {
         username: data.username,
         password: data.password,
         status: UserStatus.ACTIVE,
-        role: settings.defaultRole as any,
+        role: Role.CUSTOMER,
         portalEnabled: true,
         activityLog: [],
         createdAt: new Date().toISOString(),
         balance: 0,
         activationCount: 0,
         managementMode: 'Manual',
-        connectionType: 'Fiber',
+        connectionType: data.connectionType || 'Fiber',
         nasConnectionType: 'Manual',
         creditScore: 600,
         address: data.address || '',
         area: data.area || '',
         packageId: data.packageId,
-        connectionId: 'CID-' + Math.floor(Math.random() * 100000)
+        referralCode: (data.username || 'user').toUpperCase().slice(0, 5) + Math.floor(Math.random() * 100)
       };
-      this.state.users.push(newUser as any);
+      this.state.users.push(newUser);
+      this.logAudit('Auto Signup', 'Approval', `Account auto-created for ${data.name}`, newUser.id, newUser.name);
+    } else {
+      this.logAudit('Signup Request Submitted', 'Request', `New ${duplicateFound ? 'DUPLICATE' : ''} request from ${data.name} (${duplicateReason || 'Normal'})`, undefined, data.name);
     }
 
     await this.commit();
     return { 
       success: true, 
-      message: settings.signupMode === 'Auto' ? 'Account Auto-Activated.' : 'Signup node initialized.',
+      message: newRequest.status === 'Approved' ? 'Account Auto-Activated.' : 'Signup node initialized.',
       duplicateWarning: duplicateFound
     };
   }

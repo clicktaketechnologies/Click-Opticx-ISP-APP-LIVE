@@ -600,20 +600,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
                   <div className="space-y-6 mt-20">
                      <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-[0.9] max-w-[350px]">
-                        Fast, <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">Reliable</span> <br />
-                        Connection
+                        Welcome <br />
+                        Back
                      </h1>
                      <div className="text-slate-400 text-sm font-medium leading-relaxed max-w-[350px] space-y-2 mt-4">
-                        <p className="flex items-center gap-2">
-                           <Loader2 size={16} className="animate-spin text-green-400" />
-                           System initializing...
-                        </p>
                         <p className="text-white/80 font-bold">
-                           Click Opticx – Your 5G Ultra Network
-                        </p>
-                        <p>
-                           Ready to connect you.
+                           High-Speed Portal
                         </p>
                      </div>
                   </div>
@@ -667,18 +659,18 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   {view !== 'reset_request' && (
                      <div className="mb-10 text-center lg:text-left">
                         <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-tight">
-                           {view === 'login' ? 'Login to Your Account' :
-                              view === 'signup' ? 'Get Connected' :
-                              view === 'phone_login' ? 'Mobile Access' :
-                              view === 'otp_verify' ? 'Confirm Identity' :
+                           {view === 'login' ? 'Sign In' :
+                              view === 'signup' ? 'Sign Up' :
+                              view === 'phone_login' ? 'Mobile Sign In' :
+                              view === 'otp_verify' ? 'Verify OTP' :
                                  'Reset Password'}
                         </h3>
                         <p className="text-slate-400 mt-2 font-black text-[10px] uppercase tracking-[0.3em] opacity-80">
-                           {view === 'login' ? 'Access your internet account easily' :
-                              view === 'signup' ? 'Start Your Internet Connection' :
-                              view === 'phone_login' ? 'Enter your mobile registry number' :
-                              view === 'otp_verify' ? 'Verification token required' :
-                                 'Standard Recovery Protocol'}
+                           {view === 'login' ? 'Enter Credentials' :
+                              view === 'signup' ? 'Create Account' :
+                              view === 'phone_login' ? 'Enter Mobile Number' :
+                              view === 'otp_verify' ? 'Confirm Identity' :
+                                 'Recover Account'}
                         </p>
                      </div>
                   )}

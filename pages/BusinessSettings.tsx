@@ -18,6 +18,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
   const [activeTab, setActiveTab] = useState<'branding' | 'profile' | 'support' | 'digital' | 'invoices' | 'notifications' | 'appearance' | 'ai-agent' | 'legal' | 'communications'>('branding');
   const [formData, setFormData] = useState<SystemSettings>(state.settings);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showSecrets, setShowSecrets] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,16 +36,25 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    setIsUploading(true);
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...(prev as any)[parent],
-          [slot]: base64
-        }
-      }));
+    reader.onload = async (event) => {
+      try {
+        const base64 = event.target?.result as string;
+        const photoUrl = await db.uploadMedia(`branding/${slot}-${Date.now()}`, base64);
+        setFormData(prev => ({
+          ...prev,
+          [parent]: {
+            ...(prev as any)[parent],
+            [slot]: photoUrl
+          }
+        }));
+      } catch (err) {
+        console.error('[Upload Error]', err);
+        alert('Failed to upload branding image. Please try again.');
+      } finally {
+        setIsUploading(false);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -139,11 +149,16 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                     {['logoLight', 'logoDark', 'logoSquare'].map((slot: any) => (
                       <div key={slot} className="space-y-3">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">{slot.replace(/([A-Z])/g, ' $1')}</label>
-                        <div onClick={() => triggerUpload(slot)} className="h-40 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-all group overflow-hidden">
+                        <div onClick={() => triggerUpload(slot)} className="h-40 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-all group overflow-hidden relative">
                           {(formData.branding as any)[slot] ? (
                             <img src={(formData.branding as any)[slot]} className="h-full object-contain p-4 group-hover:scale-105 transition-transform" />
                           ) : (
                             <Upload className="text-slate-300" size={32} />
+                          )}
+                          {isUploading && (
+                             <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
+                                <Mini5GMicroLoader size={24} />
+                             </div>
                           )}
                         </div>
                       </div>

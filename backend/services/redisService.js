@@ -32,35 +32,51 @@ class MemoryRedis {
   on() { return this; } // Mock event listener
 }
 
-let redis;
+// Let exports point to this Proxy which always routes to the current active client
+let activeClient;
+const redisProxy = new Proxy({}, {
+  get: (target, prop) => {
+    if (typeof activeClient[prop] === 'function') {
+      return activeClient[prop].bind(activeClient);
+    }
+    return activeClient[prop];
+  }
+});
+
+function switchToMemory() {
+  if (activeClient instanceof MemoryRedis) return;
+  logger.warn('🔄 SWAPPING REDIS -> INTERNAL MEMORY STORE');
+  activeClient = new MemoryRedis();
+}
+
 try {
-  redis = new Redis({
+  const ioredisClient = new Redis({
     host: process.env.REDIS_HOST || '127.0.0.1',
     port: process.env.REDIS_PORT || 6379,
     maxRetriesPerRequest: 1,
     retryStrategy: (times) => {
       if (times > 2) {
-        logger.error('❌ Redis Connection Failed after 3 attempts. Switching to INTERNAL MEMORY.');
-        return null; // Stop retrying
+        logger.error('❌ Redis Connection Failed after 3 attempts. Fallback initiated.');
+        switchToMemory();
+        return null;
       }
       return 100;
     }
   });
 
-  redis.on('error', (err) => {
-    if (redis instanceof Redis) {
-        logger.error('Redis connection error:', err.message);
-        redis = new MemoryRedis(); // Swap to memory on failure
-    }
+  ioredisClient.on('error', (err) => {
+    logger.error('Redis connection error:', err.message);
+    switchToMemory();
   });
 
-  redis.on('connect', () => {
+  ioredisClient.on('connect', () => {
     logger.info('✅ Successfully connected to Redis Cluster');
   });
 
+  activeClient = ioredisClient;
 } catch (e) {
   logger.error('Redis library failure, using memory fallback');
-  redis = new MemoryRedis();
+  activeClient = new MemoryRedis();
 }
 
-module.exports = redis;
+module.exports = redisProxy;

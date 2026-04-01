@@ -11,9 +11,10 @@ interface HeaderProps {
   onLogout: () => void;
   searchTerm: string;
   onSearch: (term: string) => void;
+  isPending?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, onLogout, searchTerm, onSearch }) => {
+const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, onLogout, searchTerm, onSearch, isPending }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const state = db.getState();
   const branding = state.settings.branding;
@@ -85,7 +86,14 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
   };
 
   return (
-    <header className="h-12 bg-white border-b border-slate-200 px-3 md:px-5 flex items-center justify-between sticky top-0 z-[60] shadow-sm">
+    <header className="h-12 bg-white border-b border-slate-200 px-3 md:px-5 flex items-center justify-between sticky top-0 z-[60] shadow-sm relative overflow-hidden">
+      {/* Page Transition Progress Bar */}
+      {isPending && (
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-blue-500 z-[70] animate-progress-glow overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-shimmer scale-x-150"></div>
+        </div>
+      )}
+
       <div className="flex items-center gap-2 md:gap-3 flex-1">
         <button 
           onClick={toggleSidebar}

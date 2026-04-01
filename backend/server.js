@@ -68,15 +68,20 @@ app.get('/', (req, res) => {
     res.json({
         service: 'Click Opticx ISP Backend',
         status: 'Operational',
+        ping: 'pong',
         timestamp: new Date().toISOString(),
-        documentation: 'https://isp-click-opticx.web.app'
+        documentation: 'https://app.clickopticx.com'
     });
 });
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
+    const redis = require('./services/redisService');
+    const isUsingRedis = !(redis.constructor.name === 'MemoryRedis');
+    
     res.json({
         status: 'online',
+        caching: isUsingRedis ? 'Redis Cluster' : 'In-Memory Fallback',
         timestamp: new Date().toISOString(),
         version: '1.0.0'
     });

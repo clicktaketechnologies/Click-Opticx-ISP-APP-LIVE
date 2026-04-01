@@ -87,15 +87,22 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
       setIsUploading(true);
       const reader = new FileReader();
       reader.onload = async (event) => {
-         const base64 = event.target?.result as string;
-         const res = await db.updateSubscriberProfile(user.id, { profileImage: base64 });
-         if (res.success) {
-            setFormData(prev => ({ ...prev, profileImage: base64 }));
-            triggerToast("Avatar Synced");
-         } else {
-            alert(res.message);
+         try {
+           const base64 = event.target?.result as string;
+           const photoUrl = await db.uploadMedia(`profiles/sub-${user.id}-${Date.now()}`, base64);
+           const res = await db.updateSubscriberProfile(user.id, { profileImage: photoUrl });
+           if (res.success) {
+              setFormData(prev => ({ ...prev, profileImage: photoUrl }));
+              triggerToast("Avatar Synced");
+           } else {
+              alert(res.message);
+           }
+         } catch (err) {
+           console.error('[Upload Error]', err);
+           alert('Failed to upload profile avatar.');
+         } finally {
+           setIsUploading(false);
          }
-         setIsUploading(false);
       };
       reader.readAsDataURL(file);
    };

@@ -17,6 +17,7 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
   const [brandData, setBrandData] = useState<BrandingConfig>(state.settings.branding);
   const [infraData, setInfraData] = useState<InfrastructureConfig>(state.settings.infrastructure);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadSlot, setUploadSlot] = useState<'logoLight' | 'logoDark' | 'logoSquare' | null>(null);
@@ -49,14 +50,23 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
     const file = e.target.files?.[0];
     if (!file || !uploadSlot) return;
 
+    setIsUploading(true);
     const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setBrandData(prev => ({
-        ...prev,
-        [uploadSlot]: base64
-      }));
-      setUploadSlot(null);
+    reader.onload = async (event) => {
+      try {
+        const base64 = event.target?.result as string;
+        const photoUrl = await db.uploadMedia(`branding/${uploadSlot}-${Date.now()}`, base64);
+        setBrandData(prev => ({
+          ...prev,
+          [uploadSlot]: photoUrl
+        }));
+      } catch (err) {
+        console.error('[Upload Error]', err);
+        alert('Failed to upload logo.');
+      } finally {
+        setIsUploading(false);
+        setUploadSlot(null);
+      }
     };
     reader.readAsDataURL(file);
   };
@@ -163,6 +173,11 @@ const AboutUs: React.FC<{ state: AppState }> = ({ state }) => {
                               </div>
                               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest text-center">{slot.desc}</p>
                            </>
+                         )}
+                         {isUploading && uploadSlot === slot.id && (
+                             <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-10">
+                                <Mini5GMicroLoader size={24} />
+                             </div>
                          )}
                       </div>
                    </div>

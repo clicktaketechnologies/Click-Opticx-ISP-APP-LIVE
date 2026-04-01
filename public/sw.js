@@ -41,15 +41,31 @@ self.addEventListener('fetch', (event) => {
     // Only handle GET requests
     if (event.request.method !== 'GET') return;
 
+    // Special handling for navigation (HTML) - ALWAYS check network first
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                    return response;
+                })
+                .catch(() => caches.match(event.request) || caches.match(OFFLINE_URL))
+        );
+        return;
+    }
+
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
-        if (cachedResponse) return cachedResponse;
+        if (cachedResponse) {
+            // For other assets, serve cache but update in background
+            fetch(event.request).then(response => {
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, response));
+            });
+            return cachedResponse;
+        }
 
         return fetch(event.request).catch(() => {
-          // If the request is for a navigation (HTML) page, show offline.html
-          if (event.request.mode === 'navigate') {
-            return caches.match(OFFLINE_URL);
-          }
           return null;
         });
       })

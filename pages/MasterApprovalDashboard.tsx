@@ -8,16 +8,17 @@ import {
   ShieldCheck, ChevronRight, Activity, 
   HardDrive, AlertTriangle, Layers, Banknote, Globe, Landmark,
   ShieldAlert, RefreshCw, Search, Filter, Hash, Eye, Info,
-  Wallet, Smartphone, AlertCircle, FileText, UserCircle, X
+  Wallet, Smartphone, AlertCircle, FileText, UserCircle, X, DatabaseZap
 } from 'lucide-react';
 
 interface Props {
   state: AppState;
-  defaultTab?: 'all' | 'package' | 'topup' | 'emergency' | 'home';
+  defaultTab?: 'all' | 'package' | 'topup' | 'emergency' | 'signup' | 'duplicates' | 'audit';
 }
 
 const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' }) => {
   const [activeTab, setActiveTab] = useState(defaultTab);
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'Approved' | 'Rejected'>('Pending');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRequestId, setSelectedRequestId] = useState<{id: string, type: any} | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -30,20 +31,21 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
   const unifiedRequests = useMemo(() => {
     const pkgs = (state.packageRequests || []).map(r => ({ ...r, unifiedType: 'package' as const }));
     const topups = (state.topupRequests || []).map(r => ({ ...r, unifiedType: 'topup' as const }));
-    const emer = (state.emergencyLoads || []).filter(l => l.status === 'Pending_Activation').map(l => ({ 
+    const emer = (state.emergencyLoads || []).map(l => ({ 
       ...l, 
       unifiedType: 'emergency' as const, 
       packageName: l.packageId ? (state.packages.find(p => p.id === l.packageId)?.name || 'Rescue') : 'Rescue Credit',
-      paymentMethod: 'Auto-Advance'
+      paymentMethod: 'Auto-Advance',
+      status: l.status === 'Pending_Activation' ? 'Pending' : (l.status === 'Active' || l.status === 'Paid' ? 'Approved' : 'Rejected')
     }));
-    const signups = (state.signupRequests || []).filter(r => r.status === 'Pending').map(r => ({
+    const signups = (state.signupRequests || []).map(r => ({
       ...r,
       unifiedType: 'signup' as const,
       paymentMethod: 'N/A',
       amount: 0,
       userId: 'NEW',
       userName: r.name,
-      packageName: 'New Connection'
+      packageName: r.status === 'Duplicate' ? 'Conflict Detected' : 'New Connection'
     }));
 
     return [...pkgs, ...topups, ...emer, ...signups].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
@@ -51,15 +53,25 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
 
   const filteredRequests = useMemo(() => {
     return unifiedRequests.filter(r => {
-      const matchesTab = activeTab === 'all' || r.unifiedType === activeTab;
+      // Tab Filter
+      const matchesTab = activeTab === 'all' || r.unifiedType === activeTab || (activeTab === 'duplicates' && r.status === 'Duplicate');
+      
+      // Status Filter
+      let matchesStatus = true;
+      if (statusFilter !== 'All') {
+        if (statusFilter === 'Pending') matchesStatus = r.status === 'Pending' || r.status === 'Duplicate';
+        else matchesStatus = r.status === statusFilter;
+      }
+
+      // Search Filter
       const term = searchTerm.toLowerCase();
       const matchesSearch = r.userName.toLowerCase().includes(term) || 
                            r.userId.toLowerCase().includes(term) ||
                            (r as any).packageName?.toLowerCase().includes(term);
-      const matchesStatus = r.status === 'Pending' || r.status === 'Pending_Activation';
-      return matchesTab && matchesSearch && matchesStatus;
+      
+      return matchesTab && matchesStatus && matchesSearch;
     });
-  }, [unifiedRequests, activeTab, searchTerm]);
+  }, [unifiedRequests, activeTab, statusFilter, searchTerm]);
 
   const selectedRequestData = useMemo(() => {
     if (!selectedRequestId) return null;
@@ -114,6 +126,8 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
             { id: 'topup', label: 'Top-up Requests' },
             { id: 'emergency', label: 'Emergency Credit' },
             { id: 'signup', label: 'New User Requests' },
+            { id: 'duplicates', label: 'Duplicates' },
+            { id: 'audit', label: 'System Log System' },
           ].map(tab => (
             <button 
               key={tab.id} 
@@ -136,8 +150,16 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
               onChange={e => setSearchTerm(e.target.value)}
             />
          </div>
-         <div className="px-6 py-4 bg-slate-100 text-slate-400 rounded-2xl font-black text-[10px] uppercase flex items-center gap-2">
-            <Filter size={14}/> Showing: Pending Requests
+         <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
+            {['Pending', 'Approved', 'Rejected', 'All'].map(s => (
+              <button 
+                key={s}
+                onClick={() => setStatusFilter(s as any)}
+                className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${statusFilter === s ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                {s}
+              </button>
+            ))}
          </div>
       </div>
 
@@ -147,7 +169,7 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">User</th>
-                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Request Type</th>
+                     <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Request & Status</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Payment Method</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Amount</th>
                      <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Timestamp</th>
@@ -168,10 +190,24 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                              </div>
                           </div>
                        </td>
-                       <td className="px-8 py-5">
-                          <div className="flex items-center gap-2">
-                             {getIcon(req.unifiedType)}
-                             <span className="text-xs font-black text-slate-700 uppercase italic">{(req as any).packageName || req.unifiedType}</span>
+                        <td className="px-8 py-5">
+                          <div className="flex flex-col gap-1.5">
+                             <div className="flex items-center gap-2">
+                                {getIcon(req.unifiedType)}
+                                <span className="text-xs font-black uppercase text-slate-700 italic">
+                                  {(req as any).packageName || req.unifiedType}
+                                </span>
+                             </div>
+                             <div className="flex gap-2">
+                                <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${
+                                  req.status === 'Approved' ? 'bg-green-50 text-green-600 border-green-100' :
+                                  req.status === 'Rejected' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                  req.status === 'Duplicate' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                  'bg-blue-50 text-blue-600 border-blue-100'
+                                }`}>
+                                  {req.status}
+                                </span>
+                             </div>
                           </div>
                        </td>
                        <td className="px-8 py-5">
@@ -244,6 +280,19 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                     </div>
                  </div>
 
+                 {/* Duplicate Alert Panel */}
+                 {selectedRequestData.status === 'Duplicate' && (
+                   <div className="p-8 bg-rose-50 border border-rose-100 rounded-[2.5rem] space-y-4 shadow-sm animate-pulse">
+                      <h4 className="text-[11px] font-black text-rose-700 uppercase tracking-[0.2em] flex items-center gap-2">
+                         <ShieldAlert size={16} /> Identity Conflict Detected
+                      </h4>
+                      <p className="text-xs font-bold text-rose-600">
+                        { (selectedRequestData as any).duplicateReason || 'A subscriber with these details already exists in the registry.' }
+                      </p>
+                      <p className="text-[10px] text-rose-500/80 font-medium">Verify the authenticity of this request before proceeding. Duplicates often indicate shared connections or re-registrations.</p>
+                   </div>
+                 )}
+
                  {/* System Pre-check Panel */}
                  <div className="p-8 bg-white border border-slate-200 rounded-[2.5rem] space-y-6 shadow-sm">
                     <h4 className="text-[11px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2">
@@ -284,6 +333,53 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
                     </div>
                  </div>
 
+                 {/* Audit Timeline Section */}
+                 <div className="space-y-4">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2 flex justify-between items-center">
+                      Request Audit History
+                      <span className="text-blue-600">LIVE FEED</span>
+                    </h4>
+                    <div className="space-y-4 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                      {(state.auditLogs || [])
+                        .filter(log => 
+                          (log.userId && log.userId === selectedRequestData.userId) || 
+                          (log.userName && log.userName === selectedRequestData.userName) ||
+                          (log.metadata?.requestId === selectedRequestData.id)
+                        )
+                        .map(log => (
+                          <div key={log.id} className="flex gap-4 items-start bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                            <div className={`mt-1 p-1.5 rounded-lg ${
+                              log.type === 'Approval' ? 'bg-green-100 text-green-600' :
+                              log.type === 'Rejection' ? 'bg-rose-100 text-rose-600' :
+                              'bg-blue-100 text-blue-600'
+                            }`}>
+                              {log.type === 'Approval' ? <CheckCircle size={12}/> : 
+                               log.type === 'Rejection' ? <XCircle size={12}/> : 
+                               <Info size={12}/>}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-center mb-1">
+                                <p className="text-[10px] font-black text-slate-900 uppercase">{log.action}</p>
+                                <span className="text-[8px] font-bold text-slate-400">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                              <p className="text-[10px] text-slate-500 font-medium leading-relaxed">{log.details}</p>
+                              {log.adminName && (
+                                <p className="text-[8px] font-black text-blue-600 uppercase mt-1 italic">Performed by: {log.adminName}</p>
+                              )}
+                            </div>
+                          </div>
+                      ))}
+                      {(state.auditLogs || []).filter(log => 
+                          (log.userId && log.userId === selectedRequestData.userId) || 
+                          (log.userName && log.userName === selectedRequestData.userName)
+                        ).length === 0 && (
+                        <div className="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No previous audit logs found</p>
+                        </div>
+                      )}
+                    </div>
+                 </div>
+
                  <div className="space-y-3">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Reason for Rejection (Mandatory for Denials)</label>
                     <textarea 
@@ -315,9 +411,64 @@ const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'all' })
            </div>
         </div>
       )}
+
+      {activeTab === 'audit' && (
+         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40">
+             <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-6">
+               <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/20"><Activity size={24}/></div>
+                  <div>
+                    <h3 className="text-xl font-black uppercase italic tracking-tighter">System-Wide Audit Trail</h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Historical record of all approval & signup handshakes</p>
+                  </div>
+               </div>
+               <button onClick={() => window.print()} className="p-4 bg-slate-50 text-slate-400 hover:text-blue-600 rounded-2xl transition-all border border-slate-100 hover:border-blue-200"><Hash size={20}/></button>
+             </div>
+ 
+             <div className="space-y-4 max-h-[600px] overflow-y-auto custom-scrollbar pr-4">
+                {(state.auditLogs || []).length > 0 ? (
+                  [...(state.auditLogs || [])].reverse().map(log => (
+                    <div key={log.id} className="flex gap-6 items-start bg-white p-6 rounded-[2rem] border border-slate-100 hover:border-blue-200 transition-all shadow-sm group">
+                       <div className="shrink-0 flex flex-col items-center gap-2">
+                          <div className={`p-4 rounded-2xl ${
+                            log.type === 'Approval' ? 'bg-green-50 text-green-600' :
+                            log.type === 'Rejection' ? 'bg-rose-50 text-rose-600' :
+                            log.type === 'System' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'
+                          }`}>
+                            {log.type === 'Approval' ? <CheckCircle size={24}/> : 
+                             log.type === 'Rejection' ? <XCircle size={24}/> : 
+                             log.type === 'System' ? <ShieldCheck size={24}/> : <Info size={24}/>}
+                          </div>
+                          <span className="text-[9px] font-black text-slate-300 uppercase italic whitespace-nowrap">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                       </div>
+                       <div className="flex-1 space-y-1">
+                          <div className="flex justify-between items-start">
+                             <h4 className="text-sm font-black text-slate-800 uppercase tracking-tighter italic">{log.action}</h4>
+                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em]">{new Date(log.timestamp).toLocaleDateString()}</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 font-bold leading-relaxed">{log.details}</p>
+                          {(log.userName || log.adminName) && (
+                            <div className="flex gap-4 pt-2">
+                               {log.userName && <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 uppercase tracking-widest italic">User: {log.userName}</span>}
+                               {log.adminName && <span className="text-[9px] font-black text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200 uppercase tracking-widest italic">Actor: {log.adminName}</span>}
+                            </div>
+                          )}
+                       </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-20 text-center border-2 border-dashed border-slate-100 rounded-[3rem]">
+                     <DatabaseZap size={48} className="text-slate-100 mx-auto mb-4" />
+                     <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.3em]">No Audit Fragments Detected</p>
+                  </div>
+                )}
+             </div>
+           </div>
+         </div>
+       )}
     </div>
   );
 };
 
-export default MasterApprovalDashboard;
 

@@ -11,14 +11,10 @@ export const PWAPrompt: React.FC = () => {
         const ios = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
         setIsIOS(ios);
 
-        // Check cooldown (3 days)
-        const lastShown = localStorage.getItem('pwa_prompt_last_shown');
-        const now = Date.now();
-        const threeDays = 3 * 24 * 60 * 60 * 1000;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+        if (isStandalone) return; // If already in app, do not show prompt
 
-        if (lastShown && (now - parseInt(lastShown) < threeDays)) {
-            return;
-        }
+        // We removed the 3-day cooldown to ensure it always asks on the web link until dismissed strictly in that session.
 
         // Capture Android/Desktop prompt
         const handler = (e: any) => {
@@ -29,9 +25,9 @@ export const PWAPrompt: React.FC = () => {
 
         window.addEventListener('beforeinstallprompt', handler);
 
-        // Show iOS guide if not installed (and not in standalone mode)
-        if (ios && !((window.navigator as any).standalone)) {
-            setTimeout(() => setIsVisible(true), 5000); // Wait 5s for better UX
+        // Show iOS guide immediately if not installed
+        if (ios && !isStandalone) {
+            setIsVisible(true);
         }
 
         return () => window.removeEventListener('beforeinstallprompt', handler);
@@ -50,10 +46,10 @@ export const PWAPrompt: React.FC = () => {
 
     const handleClose = () => {
         setIsVisible(false);
-        localStorage.setItem('pwa_prompt_last_shown', Date.now().toString());
+        sessionStorage.setItem('pwa_prompt_dismissed', 'true'); // Only dismiss for current session
     };
 
-    if (!isVisible) return null;
+    if (!isVisible || sessionStorage.getItem('pwa_prompt_dismissed') === 'true') return null;
 
     return (
         <div className="fixed bottom-6 left-6 right-6 md:left-auto md:right-8 md:w-96 z-[9999] animate-in slide-in-from-bottom-10 duration-700">
@@ -97,16 +93,29 @@ export const PWAPrompt: React.FC = () => {
                                 </div>
                                 <p className="text-[10px] font-black uppercase text-slate-600">2. Select "Add to Home Screen"</p>
                             </div>
+                            <button 
+                                onClick={handleClose}
+                                className="w-full py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-3 mt-4"
+                            >
+                                Continue In Web Version
+                            </button>
                         </div>
                     ) : (
-                        <button 
-                            onClick={handleInstall}
-                            className="w-full py-5 bg-slate-900 hover:bg-black text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3"
-                        >
-                            <Download size={18} />
-                            Install Now
-                            <ArrowRight size={18} className="opacity-30 group-hover:translate-x-1 transition-transform" />
-                        </button>
+                        <div className="space-y-3">
+                            <button 
+                                onClick={handleInstall}
+                                className="w-full py-5 bg-slate-900 hover:bg-black text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3"
+                            >
+                                <Download size={18} />
+                                Install App
+                            </button>
+                            <button 
+                                onClick={handleClose}
+                                className="w-full py-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-3"
+                            >
+                                Continue In Web Version
+                            </button>
+                        </div>
                     )}
                 </div>
 

@@ -84,6 +84,21 @@
         .animate-premium {
             animation: premium-fade-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
+        @keyframes progress-glow {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(0%); }
+            100% { transform: translateX(100%); }
+        }
+        .animate-progress-glow {
+            animation: progress-glow 2s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-150%) skewX(-20deg); }
+            100% { transform: translateX(150%) skewX(-20deg); }
+        }
+        .animate-shimmer {
+            animation: shimmer 1.5s infinite;
+        }
     </style>
 
 </head>

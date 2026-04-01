@@ -35,8 +35,8 @@ const Dashboard: React.FC<{
   const currentUser = state.currentUser;
   const isDealer = currentUser?.role === Role.DEALER;
 
-  const branding = state.settings.branding;
-  const logo = branding.logoLight || branding.logoSquare;
+  const branding = state?.settings?.branding;
+  const logo = branding?.logoLight || branding?.logoSquare;
 
   useEffect(() => {
     db.auditOverdueLoads();

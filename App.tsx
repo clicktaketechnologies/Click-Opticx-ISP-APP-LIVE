@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, lazy, Suspense, Component } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense, Component, useTransition } from 'react';
 import { db } from './db';
 import { Role, AppState, SystemNotification } from './types';
 import {
@@ -76,7 +76,6 @@ const SystemFlash = lazy(() => import('./pages/SystemFlash'));
 const SystemConfig = lazy(() => import('./pages/SystemConfig'));
 const SystemReadiness = lazy(() => import('./pages/SystemReadiness'));
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
-import { FiveGLaunchAnimation } from './components/FiveGLaunchAnimation';
 
 interface EBProps {
   children: React.ReactNode;
@@ -158,10 +157,10 @@ const App: React.FC = () => {
   const [dbState, setDbState] = useState<AppState>(db.getState());
   const [isConfigured, setIsConfigured] = useState(db.isConfigured());
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [targetUserId, setTargetUserId] = useState<string | null>(null);
   const [targetAction, setTargetAction] = useState<string | null>(null);
   const [criticalAlert, setCriticalAlert] = useState<SystemNotification | null>(null);
-  const [show5G, setShow5G] = useState(true);
   const [globalSearchTerm, setGlobalSearchTerm] = useState('');
 
   useEffect(() => {
@@ -196,14 +195,16 @@ const App: React.FC = () => {
   };
 
   const navigateTo = (page: string, params?: { userId?: string, action?: string }) => {
-    if (params?.userId) setTargetUserId(params.userId);
-    else setTargetUserId(null);
+    startTransition(() => {
+      if (params?.userId) setTargetUserId(params.userId);
+      else setTargetUserId(null);
 
-    if (params?.action) setTargetAction(params.action);
-    else setTargetAction(null);
+      if (params?.action) setTargetAction(params.action);
+      else setTargetAction(null);
 
-    setCurrentPage(page);
-    setIsSidebarOpen(false);
+      setCurrentPage(page);
+      setIsSidebarOpen(false);
+    });
   };
 
   const dismissCritical = () => {
@@ -269,7 +270,6 @@ const App: React.FC = () => {
             <span>REGIONAL SYSTEM</span>
           </div>
         </div>
-        {show5G && <FiveGLaunchAnimation state={dbState} onComplete={() => setShow5G(false)} />}
       </div>
     );
   };
@@ -280,12 +280,9 @@ const App: React.FC = () => {
 
     if (!authState) {
       return (
-        <>
-          {show5G && <FiveGLaunchAnimation state={dbState} onComplete={() => setShow5G(false)} />}
-          <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center"><Mini5GMicroLoader size={48} /><p className="mt-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Security Handshake...</p></div>}>
-            <Login onLogin={handleLogin} />
-          </Suspense>
-        </>
+        <Suspense fallback={<div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-white text-center"><Mini5GMicroLoader size={48} /><p className="mt-8 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Security Handshake...</p></div>}>
+          <Login onLogin={handleLogin} />
+        </Suspense>
       );
     }
 
@@ -301,7 +298,6 @@ const App: React.FC = () => {
           )}
           <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />
           <AIAgentWidget state={dbState} />
-          {show5G && <FiveGLaunchAnimation state={dbState} onComplete={() => setShow5G(false)} />}
         </Suspense>
       );
     }
@@ -309,7 +305,6 @@ const App: React.FC = () => {
     console.log('Rendering Admin Layout, Page:', currentPage);
     return (
       <div className="flex min-h-screen bg-slate-50 overflow-hidden">
-        {show5G && <FiveGLaunchAnimation state={dbState} onComplete={() => setShow5G(false)} />}
         <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-950"><Mini5GMicroLoader size={48} /></div>}>
           {criticalAlert && (
             <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[3000] flex items-center justify-center p-6">
@@ -333,6 +328,7 @@ const App: React.FC = () => {
               onLogout={handleLogout}
               searchTerm={globalSearchTerm}
               onSearch={setGlobalSearchTerm}
+              isPending={isPending}
             />
             <main className="p-4 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
               <Suspense fallback={<div className="h-full w-full flex flex-col items-center justify-center animate-premium"><div className="w-10 h-10 border-4 border-slate-100 border-t-blue-500 rounded-full animate-spin"></div></div>}>
@@ -407,7 +403,6 @@ const App: React.FC = () => {
           <Suspense fallback={null}>
             <AIAgentWidget state={dbState} />
           </Suspense>
-          <PWAPrompt />
         </Suspense>
       </div>
     );
@@ -416,6 +411,7 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       {renderApp()}
+      <PWAPrompt />
     </ErrorBoundary>
   );
 };

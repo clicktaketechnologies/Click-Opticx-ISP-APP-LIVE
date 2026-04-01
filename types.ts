@@ -213,6 +213,40 @@ export interface SecurityLog {
   riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
 }
 
+export interface SignupRequest {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  phone: string;
+  cnic?: string;
+  password?: string;
+  address: string;
+  area: string;
+  packageId?: string;
+  connectionType?: 'Fiber' | 'Wireless';
+  status: 'Pending' | 'Approved' | 'Rejected' | 'Duplicate';
+  duplicateWarning?: boolean;
+  duplicateReason?: string;
+  timestamp: string;
+  processedAt?: string;
+  processedBy?: string;
+  viewedBy?: string[]; // Tracking who viewed it
+}
+
+export interface AuditLog {
+  id: string;
+  timestamp: string;
+  action: string;
+  userId?: string;
+  userName?: string;
+  adminId?: string;
+  adminName?: string;
+  details: string;
+  type: 'Request' | 'Approval' | 'Rejection' | 'View' | 'System';
+  metadata?: any;
+}
+
 export interface TicketComment {
   id: string;
   authorName: string;
@@ -803,7 +837,8 @@ export interface AppState {
   archives: ArchiveRecord[];
   tickets: SupportTicket[];
   nocEvents: NOCEvent[];
-  signupRequests: any[];
+  signupRequests: SignupRequest[];
+  auditLogs: AuditLog[];
   securityLogs: SecurityLog[];
   aiLogs: AIActionLog[];
   aiEvents: AIEvent[];
@@ -1157,6 +1192,8 @@ export interface SystemSettings {
   authSettings: AuthSettings;
   technicalKeys: TechnicalKeys;
   pushConfig: PushConfig;
+  signupRequests: SignupRequest[];
+  auditLogs: AuditLog[];
 }
 
 export interface CreditScoreLog {
