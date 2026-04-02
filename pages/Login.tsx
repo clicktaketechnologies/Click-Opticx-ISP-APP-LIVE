@@ -123,9 +123,13 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       try {
          const res = await db.submitSignupRequest(signupData);
          if (res.success) {
-            if (res.message === 'Account Auto-Activated.') {
-               alert('✅ Account created successfully! You can now log in.');
-               setView('login');
+            if (res.message === 'Account Auto-Activated.' || res.user) {
+               // Immediate Login for Smart Access
+               const loginRes = await onLogin(signupData.username, signupData.password);
+               if (!loginRes.success) {
+                  setError("Account created, but auto-login failed. Please sign in manually.");
+                  setView('login');
+               }
             } else {
                setView('pending');
             }

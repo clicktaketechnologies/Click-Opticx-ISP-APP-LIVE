@@ -3427,8 +3427,9 @@ class DB {
       { requestId: newRequest.id, identifiers: { email: data.email, phone: data.phone, cnic: data.cnic } }
     );
 
+    let newUser: any = undefined;
     if (newRequest.status === 'Approved' || (newRequest.status === 'Duplicate' && settings.allowDuplicateSignup)) {
-      const newUser: ISPUser = {
+      newUser = {
         id: 'USR-' + Date.now(),
         connectionId: 'CID-' + Math.floor(Math.random() * 100000),
         name: data.name,
@@ -3473,7 +3474,8 @@ class DB {
     return { 
       success: true, 
       message: newRequest.status === 'Approved' ? 'Account Auto-Activated.' : 'Signup node initialized.',
-      duplicateWarning: duplicateFound
+      duplicateWarning: duplicateFound,
+      user: newUser
     };
   }
 
