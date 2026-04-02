@@ -93,6 +93,49 @@ const SubscriberHome: React.FC<Props> = ({
         <div key="status" className="space-y-6">
           <SubscriberQuickStatus user={user} currentPkg={currentPkg} />
 
+          {/* KYC Status Banners */}
+          {!user.isKYCVerified && !user.isKYCSubmitted && (
+            <div className="mx-4 p-6 bg-rose-50 border-2 border-rose-200 rounded-[2.5rem] flex items-center justify-between shadow-xl animate-in slide-in-from-top-4 duration-500 overflow-hidden relative group">
+              <div className="flex items-center gap-5 relative z-10">
+                <div className="w-14 h-14 bg-rose-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-rose-200">
+                  <ShieldAlert size={28} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-rose-900 uppercase tracking-widest leading-none mb-1">Action Required</p>
+                  <h4 className="text-sm font-black text-rose-950 uppercase italic tracking-tight italic">Verify Your Identity</h4>
+                  <p className="text-[9px] text-rose-700 font-bold uppercase mt-1 tracking-tight leading-none italic">Complete KYC to unlock all features.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => onAction('packages')} // Logic in SubscriberApp will intercept this and show KYC popup
+                className="px-6 py-3 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-rose-200 hover:bg-rose-700 active:scale-95 transition-all relative z-10"
+              >
+                Complete Now
+              </button>
+              <Zap className="absolute -right-4 -bottom-4 opacity-5 text-rose-500 pointer-events-none group-hover:scale-125 transition-transform duration-700" size={100} />
+            </div>
+          )}
+
+          {user.isKYCSubmitted && !user.isKYCVerified && (
+            <div className="mx-4 p-6 bg-blue-50 border-2 border-blue-200 rounded-[2.5rem] flex items-center justify-between shadow-xl animate-in slide-in-from-top-4 duration-500 overflow-hidden relative group">
+              <div className="flex items-center gap-5 relative z-10">
+                <div className="w-14 h-14 bg-blue-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 animate-pulse">
+                  <Clock size={28} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest leading-none mb-1">Identity Received</p>
+                  <h4 className="text-sm font-black text-blue-950 uppercase italic tracking-tight italic">Verification Pending</h4>
+                  <p className="text-[9px] text-blue-700 font-bold uppercase mt-1 tracking-tight leading-none italic">Our team is reviewing your artifacts.</p>
+                </div>
+              </div>
+              <div className="px-4 py-2 bg-blue-100/50 rounded-xl border border-blue-100 flex items-center gap-2 relative z-10">
+                  <Activity size={12} className="text-blue-500 animate-pulse" />
+                  <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Scanning...</span>
+              </div>
+              <Fingerprint className="absolute -right-4 -bottom-4 opacity-5 text-blue-500 pointer-events-none group-hover:scale-125 transition-transform duration-700" size={100} />
+            </div>
+          )}
+
           {/* Transaction Heartbeat Node - Orange Card */}
           {pendingPkgReq && (
             <div className="mx-4 p-6 bg-amber-50 border-2 border-amber-200 rounded-3xl flex items-center justify-between shadow-xl animate-in slide-in-from-top-4 duration-500">

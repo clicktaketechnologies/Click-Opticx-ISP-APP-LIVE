@@ -45,6 +45,7 @@ import AboutUs from './AboutUs';
 import EmergencyLoadDashboard from '../components/subscriber/EmergencyLoadDashboard';
 import RequestEmergencyLoad from '../components/subscriber/RequestEmergencyLoad';
 import EmergencyLoadHistory from '../components/subscriber/EmergencyLoadHistory';
+import SmartKYCPopup from '../components/subscriber/SmartKYCPopup';
 
 type SubTab = 'home' | 'wallet' | 'packages' | 'billing' | 'profile' | 'namaz' | 'qibla' | 'tasbih' | 'quran' | 'weather' | 'network' | 'insights' | 'support' | 'cash_pay' | 'online_pay' | 'aichat' | 'referral' | 'news' | 'notifs' | 'emergency' | 'emergency-request' | 'emergency-history' | 'credit-score' | 'connection' | 'about-us' | 'live-usage' | 'connected-devices' | 'reset-password' | 'speed-test' | 'ai-control' | 'ai-home' | 'ai-insights' | 'ai-network' | 'ai-risk' | 'ai-suggestions' | 'ai-voice-call';
 
@@ -55,6 +56,8 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
   const [showPass, setShowPass] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [isKYCOpen, setIsKYCOpen] = useState(false);
+  const [kycIntent, setKycIntent] = useState<SubTab | null>(null);
 
   // Verification Overlay Logic
   const [showWelcome, setShowWelcome] = useState(!user.welcomeChecklistShown && user.verificationStatus === VerificationStatus.UNVERIFIED);
@@ -75,6 +78,15 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
 
   const handleTabChange = (tab: SubTab) => {
     if (!isPageEnabled(tab)) return;
+
+    // KYC Enforcement for Critical Tabs
+    const criticalTabs: SubTab[] = ['wallet', 'packages', 'billing', 'cash_pay', 'online_pay', 'emergency', 'emergency-request'];
+    if (criticalTabs.includes(tab) && !user.isKYCVerified) {
+      setKycIntent(tab);
+      setIsKYCOpen(true);
+      return;
+    }
+
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -171,6 +183,19 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
 
   return (
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden text-slate-900 pt-12 md:pt-0">
+      <SmartKYCPopup 
+        user={user} 
+        isOpen={isKYCOpen} 
+        onClose={() => setIsKYCOpen(false)} 
+        onSuccess={() => {
+          setIsKYCOpen(false);
+          if (kycIntent) {
+            // We don't auto-navigate because KYC is still "Pending" 
+            // but we can show a toast or message.
+            setKycIntent(null);
+          }
+        }} 
+      />
       {showWelcome && <SubscriberWelcomeChecklist user={user} onComplete={() => setShowWelcome(false)} />}
       {showVerificationSuccess && (
         <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[1000] flex items-center justify-center p-6 animate-in fade-in duration-500">

@@ -44,8 +44,11 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
               <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1 italic">
                 Your Plan & Connection
               </span>
-              <h4 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none italic">
+              <h4 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none italic flex items-center gap-2">
                 Hello, {firstName}! 👋
+                {user.isKYCVerified && (
+                  <ShieldCheck size={20} className="text-blue-600 fill-blue-50" />
+                )}
               </h4>
             </div>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-1">

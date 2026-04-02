@@ -5,9 +5,10 @@ import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging
 import { getStorage, ref, uploadString, getDownloadURL, FirebaseStorage } from 'firebase/storage';
 import { io, Socket } from 'socket.io-client';
 import { notificationManager } from './utils/NotificationManager';
+import { checkKYCLifecycle } from './utils/kycReminders';
 
 import {
-  AppState, UserStatus, PaymentStatus, LedgerType, VerificationStatus,
+  AppState, UserStatus, PaymentStatus, LedgerType, VerificationStatus, KYCMethod,
   ISPUser, Package, PaymentMethod, Role, SystemSettings, ReferralRecord,
   StaffUser, PaymentRecord, TopupRequest, ArchiveRecord, SecurityLog, PackageRequest,
   CreditScoreLog, TechnicalConfig, WithdrawalRequest, UserSession,
@@ -355,10 +356,10 @@ const INITIAL_STATE: AppState = {
 
   networkMappings: [],
   users: [
-    { id: 'USR-REC-1', name: 'Zohaib Hassan', status: UserStatus.SUSPENDED, packageId: 'PKG-1', balance: 1500, phone: '03001234567', address: 'Block 5, Gulshan', area: 'Gulshan', portalEnabled: true, connectionId: 'CID-001', creditScore: 750, referralPoints: 0, referralCode: 'ZO123', activationCount: 5, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
-    { id: 'USR-REC-2', name: 'Maria Khan', status: UserStatus.ACTIVE, packageId: 'PKG-2', balance: 0, lastPaymentDate: new Date().toISOString(), phone: '03217654321', address: 'Phase 6, DHA', area: 'DHA', portalEnabled: true, connectionId: 'CID-002', creditScore: 820, referralPoints: 100, referralCode: 'MK789', activationCount: 12, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
-    { id: 'USR-REC-3', name: 'Asif Ali', status: UserStatus.ACTIVE, packageId: 'PKG-1', balance: 750, isRecoveryMode: true, phone: '03149876543', address: 'North Karachi', area: 'North', portalEnabled: true, connectionId: 'CID-003', creditScore: 640, referralPoints: 10, referralCode: 'AA444', activationCount: 3, connectionType: 'Wireless', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
-    { id: 'USR-REC-4', name: 'Noman Siddiqui', status: UserStatus.EXPIRED, packageId: 'PKG-1', balance: 1500, phone: '03331112233', address: 'Johar Block 15', area: 'Johar', portalEnabled: true, connectionId: 'CID-004', creditScore: 710, referralPoints: 50, referralCode: 'NS111', activationCount: 8, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-1', name: 'Zohaib Hassan', status: UserStatus.SUSPENDED, isKYCVerified: false, isKYCSubmitted: false, packageId: 'PKG-1', balance: 1500, phone: '03001234567', address: 'Block 5, Gulshan', area: 'Gulshan', portalEnabled: true, connectionId: 'CID-001', creditScore: 750, referralPoints: 0, referralCode: 'ZO123', activationCount: 5, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-2', name: 'Maria Khan', status: UserStatus.ACTIVE, isKYCVerified: true, isKYCSubmitted: true, packageId: 'PKG-2', balance: 0, lastPaymentDate: new Date().toISOString(), phone: '03217654321', address: 'Phase 6, DHA', area: 'DHA', portalEnabled: true, connectionId: 'CID-002', creditScore: 820, referralPoints: 100, referralCode: 'MK789', activationCount: 12, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-3', name: 'Asif Ali', status: UserStatus.ACTIVE, isKYCVerified: false, isKYCSubmitted: true, packageId: 'PKG-1', balance: 750, isRecoveryMode: true, phone: '03149876543', address: 'North Karachi', area: 'North', portalEnabled: true, connectionId: 'CID-003', creditScore: 640, referralPoints: 10, referralCode: 'AA444', activationCount: 3, connectionType: 'Wireless', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-4', name: 'Noman Siddiqui', status: UserStatus.EXPIRED, isKYCVerified: false, isKYCSubmitted: false, packageId: 'PKG-1', balance: 1500, phone: '03331112233', address: 'Johar Block 15', area: 'Johar', portalEnabled: true, connectionId: 'CID-004', creditScore: 710, referralPoints: 50, referralCode: 'NS111', activationCount: 8, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
   ],
   liveUsage: [],
   oltNodes: [
@@ -436,6 +437,7 @@ class DB {
     console.log('DB Initialized. Configured:', this.initialized);
     this.initializeCloudLayer();
     this.initializeSocketLayer();
+    setTimeout(() => checkKYCLifecycle(this), 2000);
   }
 
   private ensureDefaultAdmin() {
@@ -662,6 +664,9 @@ class DB {
       setInterval(() => this.runRecoveryMaintenance(), 3600000);
       // Run once on init
       setTimeout(() => this.runRecoveryMaintenance(), 5000);
+      
+      // Handle Firebase Auth Redirect Result
+      await this.handleAuthRedirect();
     } catch (e: any) {
       this.initialized = true;
       this.notify();
@@ -737,6 +742,21 @@ class DB {
     }
     if (!this.state.settings.pushConfig) {
       this.state.settings.pushConfig = INITIAL_STATE.settings.pushConfig;
+    }
+
+    // REAL-TIME SESSION SYNC (Fix for "password not changing in real-time" issue)
+    if (this.state.currentUser) {
+      // 1. Check Staff Array
+      const staff = this.state.staff.find(s => s.email === this.state.currentUser.email);
+      if (staff) {
+        this.state.currentUser = { ...this.state.currentUser, ...staff };
+      } else {
+        // 2. Check Users Array
+        const user = this.state.users.find(u => u.id === this.state.currentUser.id);
+        if (user) {
+          this.state.currentUser = { ...this.state.currentUser, ...user, role: this.state.currentUser.role };
+        }
+      }
     }
 
     this.ensureArrays();
@@ -891,46 +911,55 @@ class DB {
     if (!this.auth) return { success: false, message: 'Auth Layer Offline' };
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(this.auth, provider);
-      const user = result.user;
-      
-      let existingStaff = this.state.staff.find(s => s.email === user.email);
-      if (existingStaff) {
-          this.state.currentUser = { ...existingStaff };
-          this.authenticateSocket();
-          this.notify();
-          return { success: true, user: this.state.currentUser, type: 'staff' };
-      }
-
-      let existingUser = this.state.users.find(u => u.email === user.email);
-      if (existingUser) {
-          this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
-          this.authenticateSocket();
-          this.notify();
-          return { success: true, user: this.state.currentUser, type: 'customer' };
-      }
-
-      const existingRequest = this.state.signupRequests.find(r => r.email === user.email);
-      if (existingRequest) {
-          return { success: false, message: 'Your registration is already pending admin approval.' };
-      }
-
-      // Auto-registration path
-      await this.submitSignupRequest({
-        name: user.displayName || 'Google User',
-        email: user.email || '',
-        username: user.email?.split('@')[0] || 'user_' + Date.now(),
-        phone: '',
-        password: 'PASS_' + Math.random().toString(36).slice(-8),
-        address: 'Registered via Google',
-        area: 'Digital',
-        connectionType: 'Fiber',
-        packageId: 'PKG-3M'
-      });
-
-      return { success: false, message: 'Google account linked. Your request is now pending admin approval.' };
+      await signInWithRedirect(this.auth, provider);
+      return { success: true, message: 'Redirecting to Google...' };
     } catch (e: any) {
       return { success: false, message: e.message };
+    }
+  }
+
+  private async handleAuthRedirect() {
+    if (!this.auth) return;
+    try {
+      const result = await getRedirectResult(this.auth);
+      if (result) {
+        const user = result.user;
+        console.log('[AUTH] Handling Redirect Success:', user.email);
+        
+        // Use normalized logic for staff / user matching
+        let existingStaff = this.state.staff.find(s => s.email === user.email);
+        if (existingStaff) {
+            this.state.currentUser = { ...existingStaff };
+        } else {
+            let existingUser = this.state.users.find(u => u.email === user.email);
+            if (existingUser) {
+                this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
+            }
+        }
+        
+        if (this.state.currentUser) {
+            this.authenticateSocket();
+            this.notify();
+            this.logAudit('Google Login', 'Login', `Authenticated via Redirect: ${user.email}`, this.state.currentUser.id, this.state.currentUser.name);
+        } else {
+            // New user case - submit signup
+            await this.submitSignupRequest({
+              name: user.displayName || 'Google User',
+              email: user.email || '',
+              username: user.email?.split('@')[0] || 'user_' + Date.now(),
+              phone: '',
+              password: 'PASS_' + Math.random().toString(36).slice(-8),
+              address: 'Registered via Google (Redirect)',
+              area: 'Digital',
+              connectionType: 'Fiber',
+              packageId: 'PKG-3M'
+            });
+            this.logNotification('all', 'info', 'Registration Pending', 'Google account linked. Approval required.');
+        }
+      }
+    } catch (e: any) {
+      console.error('[AUTH] Redirect Error:', e);
+      this.logNotification('all', 'error', 'Auth Failure', e.message);
     }
   }
 
@@ -1103,10 +1132,22 @@ class DB {
 
     const staff = this.state.staff.find(s => s.email.toLowerCase() === input && s.password === pass);
     if (staff) {
+      if (staff.status === 'Suspended') {
+        this.logAudit('Suspended Login', 'Login', `Suspended staff ${staff.name} attempted entry.`, undefined, staff.name);
+        return { success: false, message: 'Your administrative access is currently Suspended.' };
+      }
       this.state.currentUser = staff;
       this.authenticateSocket();
       this.notify();
+      this.logAudit('Staff Login', 'Login', `Staff logged in: ${staff.role}`, undefined, staff.name);
       return { success: true, user: staff, type: 'staff' };
+    }
+
+    // Check if staff existed but wrong password for logging
+    const potentialStaff = this.state.staff.find(s => s.email.toLowerCase() === input);
+    if (potentialStaff) {
+      this.logAudit('Failed Staff Login', 'Login', `Incorrect password for staff: ${input}`, undefined, potentialStaff.name);
+      return { success: false, message: 'Invalid administrative credentials.' };
     }
 
     // Determine Input Type
@@ -1130,21 +1171,25 @@ class DB {
       (u.connectionId || '').replace(/-/g, '').toLowerCase() === input.replace(/-/g, '')
     ));
 
-    if (!user) return { success: false, message: 'Identity lookup failed.' };
+    if (!user) {
+      this.logAudit('Invalid Lookup', 'Login', `Identity lookup failed for: ${input}`);
+      return { success: false, message: 'Identity lookup failed.' };
+    }
 
     if (user.password !== pass) {
-      this.logAudit('Failed Login', 'System', `Failed login attempt for ${user.name} (${input})`, user.id, user.name);
+      this.logAudit('Failed Login', 'Login', `Failed login attempt for ${user.name} (${input})`, user.id, user.name);
       return { success: false, message: 'Invalid credentials.' };
     }
 
     if (user.status === UserStatus.DISABLED || user.status === UserStatus.BLOCKED) {
+      this.logAudit('Restricted Entry', 'Login', `Restricted user ${user.name} attempted login. Status: ${user.status}`, user.id, user.name);
       return { success: false, message: 'Your account is currently Restricted. Contact NOC.' };
     }
 
     this.state.currentUser = { ...user, role: Role.CUSTOMER };
     this.authenticateSocket();
     this.notify();
-    this.logAudit('User Login', 'System', `User logged in via ${identifierType || 'Universal'}`, user.id, user.name);
+    this.logAudit('User Login', 'Login', `User logged in via ${identifierType || 'Universal'}`, user.id, user.name);
     return { success: true, user: this.state.currentUser, type: 'customer' };
   }
 
@@ -1193,6 +1238,8 @@ class DB {
       portalEnabled: true,
       connectionType: 'Fiber',
       activityLog: [],
+      isKYCVerified: false,
+      isKYCSubmitted: false,
       referralCode: 'REF-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
       packageId: 'PKG-3M', // Force 3M for all new manually added users too
       managementMode: 'Manual',
@@ -1813,22 +1860,39 @@ class DB {
     return { success: true, message: 'Rescue link established.' };
   }
 
-  async submitKYC(u: string, t: string, f: string) {
-    let photoUrl = f;
-    if (f.startsWith('data:')) {
-       photoUrl = await this.uploadMedia(`kyc/${u}-${Date.now()}`, f);
-    }
-    const idx = this.state.users.findIndex(user => user.id === u);
-    if (idx !== -1) {
-      if (!(this.state.users[idx] as any).kycDocuments) (this.state.users[idx] as any).kycDocuments = [];
-      (this.state.users[idx] as any).kycDocuments.push({ documentType: t, documentUrl: photoUrl, status: 'Pending', submittedAt: new Date().toISOString() });
-      if (this.state.currentUser && this.state.currentUser.id === u) {
-        (this.state.currentUser as any).kycDocuments = (this.state.users[idx] as any).kycDocuments;
+  async submitKYC(userId: string, method: KYCMethod, files: string[], notes?: string) {
+    const idx = this.state.users.findIndex(u => u.id === userId);
+    if (idx === -1) return { success: false, message: 'Identity node not found.' };
+
+    const user = this.state.users[idx];
+    const documents: KYCDocument[] = [];
+
+    for (const file of files) {
+      let photoUrl = file;
+      if (file.startsWith('data:')) {
+        photoUrl = await this.uploadMedia(`kyc/${userId}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`, file);
       }
+      documents.push({
+        type: method as any,
+        fileUrl: photoUrl,
+        submittedAt: new Date().toISOString()
+      });
     }
-    await this.updateSubscriberProfile(u, { verificationStatus: 'Pending' });
+
+    user.kycDocuments = [...(user.kycDocuments || []), ...documents];
+    user.kycMethod = method;
+    user.kycNotes = notes;
+    user.isKYCSubmitted = true;
+    user.kycSubmissionDate = new Date().toISOString();
+    user.verificationStatus = VerificationStatus.PENDING;
+
+    if (this.state.currentUser && this.state.currentUser.id === userId) {
+      this.state.currentUser = { ...this.state.currentUser, ...user };
+    }
+
+    this.logAudit('KYC Submission', 'Request', `Subscriber ${user.name} submitted KYC via ${method}`, userId, user.name);
     await this.commit();
-    return { success: true };
+    return { success: true, message: 'KYC Dispatch Successful: Identity node is now pending verification.' };
   }
 
   async uploadMedia(path: string, base64Data: string): Promise<string> {
@@ -1897,6 +1961,16 @@ class DB {
           load.status = 'Active';
           this.logNotification(load.userId, 'success', 'Emergency Load Active', 'Your emergency load is now active.');
           this.logActivity(load.userId, 'Approval', 'Emergency load activated.');
+        }
+      } else if (type === 'kyc') {
+        const user = this.state.users.find(u => u.id === id);
+        if (user) {
+          user.isKYCVerified = true;
+          user.verificationStatus = VerificationStatus.VERIFIED;
+          user.verificationSuccessShown = false; // Trigger the success modal in UI
+          this.logNotification(user.id, 'success', 'Identity Verified', 'Your KYC has been approved. Full access unlocked.');
+          this.logActivity(user.id, 'KYC', 'Identity verification approved.');
+          this.logAudit('KYC Approved', 'Approval', `KYC for ${user.name} approved.`, user.id, user.name);
         }
       } else if (type === 'signup') {
         return await this.approveSignup(id);
@@ -3363,7 +3437,7 @@ class DB {
       { requestId: newRequest.id, identifiers: { email: data.email, phone: data.phone, cnic: data.cnic } }
     );
 
-    if (newRequest.status === 'Approved') {
+    if (newRequest.status === 'Approved' || (newRequest.status === 'Duplicate' && settings.allowDuplicateSignup)) {
       const newUser: ISPUser = {
         id: 'USR-' + Date.now(),
         connectionId: 'CID-' + Math.floor(Math.random() * 100000),
@@ -3374,6 +3448,8 @@ class DB {
         username: data.username,
         password: data.password,
         status: UserStatus.ACTIVE,
+        isKYCVerified: false,
+        isKYCSubmitted: false,
         role: Role.CUSTOMER,
         portalEnabled: true,
         activityLog: [],
@@ -3387,12 +3463,20 @@ class DB {
         address: data.address || '',
         area: data.area || '',
         packageId: data.packageId,
+        pppoeId: data.pppoeId || `pppoe_${data.username || Math.floor(Math.random() * 1000)}`,
         referralCode: (data.username || 'user').toUpperCase().slice(0, 5) + Math.floor(Math.random() * 100)
       };
       this.state.users.push(newUser);
-      this.logAudit('Auto Signup', 'Approval', `Account auto-created for ${data.name}`, newUser.id, newUser.name);
-    } else {
-      this.logAudit('Signup Request Submitted', 'Request', `New ${duplicateFound ? 'DUPLICATE' : ''} request from ${data.name} (${duplicateReason || 'Normal'})`, undefined, data.name);
+      this.logAudit('Auto Signup', 'Approval', `Account auto-created for ${data.name}. KYC Pending.`, newUser.id, newUser.name);
+      
+      // If it was a duplicate, we still record it in signupRequests for audit
+      if (duplicateFound) {
+        newRequest.status = 'Approved'; // Upgrade to approved since we are creating the user
+      }
+    } else if (newRequest.status === 'Duplicate') {
+       // If duplicates are strictly forbidden, we stay as Duplicate and don't create user
+       this.logAudit('Signup Blocked', 'System', `Signup blocked for ${data.name} due to identity conflict: ${duplicateReason}`, undefined, data.name);
+       return { success: false, message: `Identity Conflict: ${duplicateReason}` };
     }
 
     await this.commit();

@@ -20,6 +20,13 @@ export enum VerificationStatus {
   REVISION = 'Revision Required'
 }
 
+export enum KYCMethod {
+  CNIC = 'CNIC',
+  PASSPORT = 'Passport',
+  LIVE_SCAN = 'Live Scan',
+  MANUAL = 'Manual'
+}
+
 export enum ConnectionStatus {
   PENDING = 'Pending',
   INSTALLED = 'Installed',
@@ -243,7 +250,7 @@ export interface AuditLog {
   adminId?: string;
   adminName?: string;
   details: string;
-  type: 'Request' | 'Approval' | 'Rejection' | 'View' | 'System';
+  type: 'Request' | 'Approval' | 'Rejection' | 'View' | 'System' | 'Login';
   metadata?: any;
 }
 
@@ -365,6 +372,11 @@ export interface ISPUser {
   area: string;
   status: UserStatus;
   verificationStatus?: VerificationStatus;
+  isKYCVerified: boolean;
+  isKYCSubmitted: boolean;
+  kycSubmissionDate?: string;
+  lastKYCReminderDay?: number;
+  kycMethod?: KYCMethod;
   kycDocuments?: KYCDocument[];
   kycNotes?: string;
   connectionStatus?: ConnectionStatus;
@@ -1099,6 +1111,7 @@ export interface AuthSettings {
   otpEnabled: boolean;
   dealerSignupEnabled: boolean;
   enableUniversalLogin: boolean;
+  allowDuplicateSignup?: boolean;
   allowedIdentifiers: {
     email: boolean;
     phone: boolean;
