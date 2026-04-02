@@ -468,29 +468,8 @@ class DB {
       this.auth = getAuth(this.app);
       this.storage = getStorage(this.app);
       
-      // Handle Redirect Result
-      getRedirectResult(this.auth).then(async (result) => {
-        if (result?.user) {
-            const user = result.user;
-            let existingUser = this.state.users.find(u => u.email === user.email);
-            if (existingUser) {
-                this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
-                this.notify();
-            } else {
-                const newUser = {
-                    name: user.displayName || 'Google User',
-                    email: user.email || '',
-                    status: UserStatus.ACTIVE,
-                    profilePic: user.photoURL || ''
-                };
-                const addRes = await this.addUser(newUser);
-                if (addRes.success) {
-                    this.state.currentUser = { ...addRes.user, role: Role.CUSTOMER } as ISPUser;
-                    this.notify();
-                }
-            }
-        }
-      });
+      // Handle Redirect Result via centralized method
+      this.handleAuthRedirect();
 
       // Initialize Messaging
       try {
@@ -943,7 +922,7 @@ class DB {
             this.logAudit('Google Login', 'Login', `Authenticated via Redirect: ${user.email}`, this.state.currentUser.id, this.state.currentUser.name);
         } else {
             // New user case - submit signup
-            await this.submitSignupRequest({
+            const signupRes = await this.submitSignupRequest({
               name: user.displayName || 'Google User',
               email: user.email || '',
               username: user.email?.split('@')[0] || 'user_' + Date.now(),
@@ -954,7 +933,18 @@ class DB {
               connectionType: 'Fiber',
               packageId: 'PKG-3M'
             });
-            this.logNotification('all', 'info', 'Registration Pending', 'Google account linked. Approval required.');
+
+            if (signupRes.success) {
+              const newUser = this.state.users.find(u => u.email === user.email);
+              if (newUser) {
+                this.state.currentUser = { ...newUser, role: Role.CUSTOMER };
+                this.authenticateSocket();
+                this.notify();
+                this.logAudit('Google Signup', 'Login', `Account auto-created and logged in: ${user.email}`, newUser.id, newUser.name);
+              }
+            } else {
+              this.logNotification('all', 'error', 'Registration Failed', signupRes.message || 'Auto-approval failed.');
+            }
         }
       }
     } catch (e: any) {
