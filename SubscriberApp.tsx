@@ -77,11 +77,18 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
    const handleTabChange = (tab: SubTab) => {
       if (!isPageEnabled(tab)) return;
 
-      // KYC Enforcement for Critical Tabs
-      const criticalTabs: SubTab[] = ['wallet', 'packages', 'billing', 'cash_pay', 'online_pay', 'emergency', 'emergency-request'];
-      if (criticalTabs.includes(tab) && !user.isKYCVerified) {
+      // KYC Enforcement: Block EVERYTHING except home, profile, legal, support if KYC is not verified
+      const allowedWithoutKYC: SubTab[] = ['home', 'profile', 'support', 'legal', 'notifs'];
+      if (!allowedWithoutKYC.includes(tab) && user.kyc_status !== 'verified') {
          setKycIntent(tab);
          setIsKYCOpen(true);
+         return;
+      }
+
+      // Approval Enforcement: Block EVERYTHING except home, profile, support, legal if not approved
+      const allowedWithoutApproval: SubTab[] = ['home', 'profile', 'support', 'legal', 'notifs'];
+      if (!allowedWithoutApproval.includes(tab) && user.approval_status !== 'approved') {
+         alert("Your account is pending admin approval. Some features are restricted.");
          return;
       }
 
@@ -227,9 +234,9 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
          </header>
          <main className="flex-1 overflow-y-auto p-4 pb-32 custom-scrollbar">
             <div className="max-w-xl mx-auto h-full space-y-4">
-               {/* Verification Status Banners */}
-               {user.verificationStatus === VerificationStatus.UNVERIFIED && (
-                  <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500">
+               {/* KYC Enforcement Banner */}
+               {user.kyc_status === 'pending' && (
+                  <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500 shadow-sm">
                      <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
                            <ShieldAlert size={20} />
@@ -241,19 +248,19 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                      </div>
                      <button 
                         onClick={() => setIsKYCOpen(true)}
-                        className="px-4 py-2 bg-amber-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all shadow-lg shadow-amber-600/10 active:scale-95"
+                        className="px-4 py-2 bg-amber-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all shadow-lg active:scale-95"
                      >
                         Verify Now
                      </button>
                   </div>
                )}
 
-               {user.verificationStatus === VerificationStatus.PENDING && (
-                  <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500">
+               {/* Approval Progress Banner */}
+               {user.kyc_status === 'submitted' && user.approval_status === 'pending' && (
+                  <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500 shadow-sm">
                      <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm relative overflow-hidden">
                            <History size={20} className="animate-spin-slow relative z-10" />
-                           <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-transparent"></div>
                         </div>
                         <div>
                            <p className="text-[10px] font-black uppercase tracking-tight text-blue-900 leading-none">Smart Access Active</p>
@@ -261,7 +268,32 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                         </div>
                      </div>
                      <div className="px-3 py-1 bg-blue-600/10 rounded-full border border-blue-600/20">
-                        <span className="text-[7px] font-black text-blue-600 uppercase tracking-widest animate-pulse">Synchronizing</span>
+                        <span className="text-[7px] font-black text-blue-600 uppercase tracking-widest animate-pulse">Reviewing</span>
+                     </div>
+                  </div>
+               )}
+
+               {/* Waiting for Approval Screen (Only if not verified and not pending KYC) */}
+               {user.kyc_status === 'verified' && user.approval_status === 'pending' && (
+                  <div className="p-6 bg-slate-900 border border-slate-800 rounded-3xl flex flex-col gap-6 animate-in slide-in-from-top-4 duration-500 shadow-2xl overflow-hidden relative group">
+                     <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 blur-[60px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                     <div className="flex items-center gap-5 relative z-10">
+                        <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                           <Clock size={28} className="animate-pulse" />
+                        </div>
+                        <div className="flex-1">
+                           <h4 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-1">Final Approval Pending</h4>
+                           <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest leading-relaxed">Your KYC is VERIFIED. Please wait for the final administrator signature.</p>
+                        </div>
+                     </div>
+                     <div className="space-y-4 pt-2 relative z-10">
+                        <div className="flex items-center justify-between text-[8px] font-black uppercase text-slate-500 tracking-widest">
+                           <span>Verification Node</span>
+                           <span className="text-blue-400">95% Synchronized</span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
+                           <div className="h-full bg-blue-600 animate-pulse w-[95%]"></div>
+                        </div>
                      </div>
                   </div>
                )}

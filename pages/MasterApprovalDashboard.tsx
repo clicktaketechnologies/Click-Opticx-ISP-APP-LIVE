@@ -60,9 +60,9 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
       unifiedType: 'signup' as const,
       paymentMethod: 'N/A',
       amount: 0,
-      userId: 'LEGACY',
+      userId: r.userId || 'REQ',
       userName: r.name,
-      packageName: r.status === 'Duplicate' ? 'Conflict' : 'Old Signup'
+      packageName: r.status === 'Duplicate' ? 'Identity Conflict' : 'New Account Request'
     }));
 
     const kycRequests = state.users
@@ -283,6 +283,20 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
                           }`}>
                           {req.status}
                         </span>
+                        {(req.unifiedType === 'signup' || req.unifiedType === 'kyc') && (
+                          <>
+                            {(req as any).kyc_status && (
+                               <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${(req as any).kyc_status === 'verified' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
+                                 KYC: {(req as any).kyc_status}
+                               </span>
+                            )}
+                            {(req as any).approval_status && (
+                               <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${(req as any).approval_status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
+                                 Auth: {(req as any).approval_status}
+                               </span>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
                   </td>

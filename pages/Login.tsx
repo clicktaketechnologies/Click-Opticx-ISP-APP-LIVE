@@ -124,16 +124,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       try {
          const res = await db.submitSignupRequest(signupData);
          if (res.success) {
-            // Immediate Login for Smart Access (Direct-to-Dashboard)
-            if (res.status === 'Approved') {
-               const loginRes = await onLogin(signupData.username, signupData.password);
-               if (!loginRes.success) {
-                  setError("Account created, but auto-login failed. Please sign in manually.");
-                  setView('login');
-               }
-            } else {
-               // If for some reason it's still pending (e.g. signupMode changed to Manual)
-               alert("Your request has been received. Our team will review it shortly.");
+            // New Flow: Always login immediately if signup was successful
+            const loginRes = await onLogin(signupData.username, signupData.password);
+            if (!loginRes.success) {
+               setError("Signup successful, but auto-login failed. Please sign in manually.");
                setView('login');
             }
          } else {

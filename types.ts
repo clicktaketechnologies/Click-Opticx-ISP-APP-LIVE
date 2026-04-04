@@ -250,6 +250,9 @@ export interface SignupRequest {
   duplicateWarning?: boolean;
   duplicateReason?: string;
   timestamp: string;
+  userId?: string;
+  kyc_status?: 'pending' | 'submitted' | 'verified' | 'rejected';
+  approval_status?: 'pending' | 'approved' | 'rejected';
   processedAt?: string;
   processedBy?: string;
   viewedBy?: string[]; // Tracking who viewed it
@@ -473,6 +476,8 @@ export interface ISPUser {
   isActive?: boolean;
   daily_usage?: number;
   monthly_usage?: number;
+  kyc_status: 'pending' | 'submitted' | 'verified' | 'rejected';
+  approval_status: 'pending' | 'approved' | 'rejected';
 }
 
 

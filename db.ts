@@ -400,10 +400,10 @@ const INITIAL_STATE: AppState = {
 
   networkMappings: [],
   users: [
-    { id: 'USR-REC-1', name: 'Zohaib Hassan', status: UserStatus.SUSPENDED, isKYCVerified: false, isKYCSubmitted: false, packageId: 'PKG-1', balance: 1500, phone: '03001234567', address: 'Block 5, Gulshan', area: 'Gulshan', portalEnabled: true, connectionId: 'CID-001', creditScore: 750, referralPoints: 0, referralCode: 'ZO123', activationCount: 5, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
-    { id: 'USR-REC-2', name: 'Maria Khan', status: UserStatus.ACTIVE, isKYCVerified: true, isKYCSubmitted: true, packageId: 'PKG-2', balance: 0, lastPaymentDate: new Date().toISOString(), phone: '03217654321', address: 'Phase 6, DHA', area: 'DHA', portalEnabled: true, connectionId: 'CID-002', creditScore: 820, referralPoints: 100, referralCode: 'MK789', activationCount: 12, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
-    { id: 'USR-REC-3', name: 'Asif Ali', status: UserStatus.ACTIVE, isKYCVerified: false, isKYCSubmitted: true, packageId: 'PKG-1', balance: 750, isRecoveryMode: true, phone: '03149876543', address: 'North Karachi', area: 'North', portalEnabled: true, connectionId: 'CID-003', creditScore: 640, referralPoints: 10, referralCode: 'AA444', activationCount: 3, connectionType: 'Wireless', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
-    { id: 'USR-REC-4', name: 'Noman Siddiqui', status: UserStatus.EXPIRED, isKYCVerified: false, isKYCSubmitted: false, packageId: 'PKG-1', balance: 1500, phone: '03331112233', address: 'Johar Block 15', area: 'Johar', portalEnabled: true, connectionId: 'CID-004', creditScore: 710, referralPoints: 50, referralCode: 'NS111', activationCount: 8, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-1', name: 'Zohaib Hassan', status: UserStatus.SUSPENDED, isKYCVerified: false, isKYCSubmitted: false, kyc_status: 'pending', approval_status: 'pending', packageId: 'PKG-1', balance: 1500, phone: '03001234567', address: 'Block 5, Gulshan', area: 'Gulshan', portalEnabled: true, connectionId: 'CID-001', creditScore: 750, referralPoints: 0, referralCode: 'ZO123', activationCount: 5, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-2', name: 'Maria Khan', status: UserStatus.ACTIVE, isKYCVerified: true, isKYCSubmitted: true, kyc_status: 'verified', approval_status: 'approved', packageId: 'PKG-2', balance: 0, lastPaymentDate: new Date().toISOString(), phone: '03217654321', address: 'Phase 6, DHA', area: 'DHA', portalEnabled: true, connectionId: 'CID-002', creditScore: 820, referralPoints: 100, referralCode: 'MK789', activationCount: 12, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-3', name: 'Asif Ali', status: UserStatus.ACTIVE, isKYCVerified: false, isKYCSubmitted: true, kyc_status: 'submitted', approval_status: 'pending', packageId: 'PKG-1', balance: 750, isRecoveryMode: true, phone: '03149876543', address: 'North Karachi', area: 'North', portalEnabled: true, connectionId: 'CID-003', creditScore: 640, referralPoints: 10, referralCode: 'AA444', activationCount: 3, connectionType: 'Wireless', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-4', name: 'Noman Siddiqui', status: UserStatus.EXPIRED, isKYCVerified: false, isKYCSubmitted: false, kyc_status: 'pending', approval_status: 'pending', packageId: 'PKG-1', balance: 1500, phone: '03331112233', address: 'Johar Block 15', area: 'Johar', portalEnabled: true, connectionId: 'CID-004', creditScore: 710, referralPoints: 50, referralCode: 'NS111', activationCount: 8, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
   ],
   liveUsage: [],
   oltNodes: [
@@ -1948,6 +1948,7 @@ class DB {
     user.kycMethod = method;
     user.kycNotes = notes;
     user.isKYCSubmitted = true;
+    user.kyc_status = 'submitted';
     user.kycSubmissionDate = new Date().toISOString();
     user.verificationStatus = VerificationStatus.PENDING;
 
@@ -2053,47 +2054,23 @@ class DB {
       const req = this.state.signupRequests.find(r => r.id === requestId);
       if (!req) return { success: false, message: 'Signup request node not found.' };
 
-      const userId = 'USR-' + Date.now();
-      const newUser: any = {
-        id: userId,
-        name: req.name,
-        username: req.username,
-        email: req.email,
-        phone: req.phone,
-        password: req.password,
-        address: req.address,
-        area: req.area,
-        status: UserStatus.ACTIVE,
-        packageId: req.packageId || 'PKG-3M',
-        portalEnabled: true,
-        connectionId: 'CID-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0'),
-        creditScore: 500,
-        referralPoints: 0,
-        referralCode: (req.username || 'user').toUpperCase().slice(0, 5) + Math.floor(Math.random() * 100),
-        activationCount: 1,
-        connectionType: req.connectionType || 'Fiber',
-        managementMode: 'Manual',
-        nasConnectionType: 'Manual',
-        activityLog: [],
-        createdAt: new Date().toISOString(),
-        lastPaymentDate: new Date().toISOString(),
-        expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-      };
+      // Find the user created during signup
+      const user = this.state.users.find(u => u.id === req.userId || u.username === req.username || u.email === req.email);
+      if (!user) return { success: false, message: 'Associated subscriber node not found.' };
 
-      this.state.users.push(newUser);
+      user.approval_status = 'approved';
+      user.status = UserStatus.ACTIVE;
       req.status = 'Approved';
+      req.approval_status = 'approved';
       req.processedAt = new Date().toISOString();
 
-      const pkg = this.state.packages.find(p => p.id === newUser.packageId);
-      await this.resolvePlanActivationBilling(userId, newUser.packageId, pkg?.price || 0, 'Paid', 'System');
-      
-      this.logNotification(userId, 'success', 'Connection Established', 'Welcome to Click Opticx! Your high-speed link is now active.');
-      this.logActivity(userId, 'Onboarding', 'Signup request approved.');
-      this.logAudit('Signup Approved', 'Approval', `Signup request for ${req.name} approved by ${this.state.currentUser?.name || 'System'}`, userId, req.name);
+      this.logNotification(user.id, 'success', 'Account Approved', 'Your signup request has been approved. Welcome to ClickOptix!');
+      this.logActivity(user.id, 'Approval', 'Subscriber account approved by administrator.');
+      this.logAudit('Signup Approved', 'Approval', `Signup for ${user.name} approved.`, user.id, user.name);
 
       await this.commit();
       this.notify();
-      return { success: true, userId };
+      return { success: true, message: 'Identity approved.', userId: user.id };
     } catch (e: any) {
       return { success: false, message: e.message };
     }
@@ -2132,7 +2109,28 @@ class DB {
         const req = this.state.signupRequests.find(r => r.id === id);
         if (req) {
           req.status = 'Rejected';
+          req.approval_status = 'rejected';
           requestName = 'New Connection Request';
+          targetUserId = req.userId || '';
+          
+          // Also block the user if they were pre-created
+          if (targetUserId) {
+            const user = this.state.users.find(u => u.id === targetUserId);
+            if (user) {
+              user.approval_status = 'rejected';
+              user.status = UserStatus.BLOCKED;
+            }
+          }
+        }
+      } else if (type === 'kyc') {
+        const user = this.state.users.find(u => u.id === id);
+        if (user) {
+          user.kyc_status = 'rejected';
+          user.isKYCVerified = false;
+          user.isKYCSubmitted = false;
+          user.verificationStatus = VerificationStatus.UNVERIFIED;
+          targetUserId = user.id;
+          requestName = 'KYC Verification';
         }
       }
 
@@ -3504,73 +3502,60 @@ class DB {
           break; 
         }
       }
-    }
+    }    const newUser: ISPUser = {
+      id: 'USR-' + Date.now(),
+      connectionId: 'CID-' + Math.floor(10000 + Math.random() * 90000),
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      cnic: data.cnic,
+      username: data.username,
+      password: data.password,
+      status: UserStatus.ACTIVE,
+      kyc_status: 'pending',
+      approval_status: 'pending',
+      isKYCVerified: false,
+      isKYCSubmitted: false,
+      verificationStatus: VerificationStatus.PENDING,
+      role: Role.CUSTOMER,
+      portalEnabled: true,
+      activityLog: [],
+      createdAt: new Date().toISOString(),
+      balance: 0,
+      activationCount: 0,
+      managementMode: 'Manual',
+      connectionType: data.connectionType || 'Fiber',
+      nasConnectionType: 'Manual',
+      creditScore: 600,
+      address: data.address || '',
+      area: data.area || '',
+      packageId: data.packageId || this.state.packages[0]?.id || 'PKG-1',
+      pppoeId: data.pppoeId || `pppoe_${data.username || Math.floor(Math.random() * 100)}`,
+      referralCode: (data.username || 'user').toUpperCase().slice(0, 5) + Math.floor(Math.random() * 100)
+    };
 
     const newRequest: SignupRequest = {
       ...data,
       id: 'SR-' + Date.now(),
-      status: duplicateFound ? 'Duplicate' : (settings.signupMode === 'Auto' ? 'Approved' : 'Pending'),
+      userId: newUser.id,
+      status: 'Pending',
+      kyc_status: 'pending',
+      approval_status: 'pending',
       duplicateWarning: duplicateFound,
       duplicateReason: duplicateReason,
       timestamp: new Date().toISOString()
     };
 
     this.state.signupRequests.push(newRequest);
-    
-    let newUser: any = undefined;
-    
-    // Auto-create user if mode is Auto OR if it's a Duplicate but we don't block
-    if (settings.signupMode === 'Auto') {
-      newUser = {
-        id: 'USR-' + Date.now(),
-        connectionId: 'CID-' + Math.floor(10000 + Math.random() * 90000),
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        cnic: data.cnic,
-        username: data.username,
-        password: data.password,
-        status: UserStatus.ACTIVE,
-        isApproved: true,
-        isKYCVerified: false,
-        isKYCSubmitted: false,
-        verificationStatus: VerificationStatus.UNVERIFIED,
-        role: Role.CUSTOMER,
-        portalEnabled: true,
-        activityLog: [],
-        createdAt: new Date().toISOString(),
-        balance: 0,
-        activationCount: 0,
-        managementMode: 'Manual',
-        connectionType: data.connectionType || 'Fiber',
-        nasConnectionType: 'Manual',
-        creditScore: 600,
-        address: data.address || '',
-        area: data.area || '',
-        packageId: data.packageId || this.state.packages[0]?.id || 'PKG-1',
-        pppoeId: data.pppoeId || `pppoe_${data.username || Math.floor(Math.random() * 1000)}`,
-        referralCode: (data.username || 'user').toUpperCase().slice(0, 5) + Math.floor(Math.random() * 100)
-      };
-      this.state.users.push(newUser);
-      
-      this.logAudit(
-        duplicateFound ? 'Duplicate AutoSignup' : 'Auto Signup', 
-        'Approval', 
-        `Account auto-created for ${data.name}. KYC Pending. ${duplicateFound ? 'Warning: ' + duplicateReason : ''}`, 
-        newUser.id, 
-        newUser.name
-      );
-      
-      newRequest.status = 'Approved';
-    } else {
-       this.logAudit(
-         newRequest.status === 'Duplicate' ? 'Duplicate Signup Attempt' : 'New Signup Request',
-         'System',
-         `Signup request submitted for ${data.name}. Status: ${newRequest.status}. ${newRequest.duplicateReason || ''}`,
-         undefined,
-         data.name
-       );
-    }
+    this.state.users.push(newUser);
+
+    this.logAudit(
+      'New User Signup',
+      'Request',
+      `New user ${data.name} signed up. Redirecting to KYC dashboard.`,
+      newUser.id,
+      newUser.name
+    );
 
     await this.commit();
     return { 
