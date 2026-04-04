@@ -1,4 +1,4 @@
-const CACHE_NAME = 'click-opticx-v2';
+const CACHE_NAME = 'click-opticx-v3';
 const OFFLINE_URL = '/offline.html';
 
 const ASSETS_TO_CACHE = [
