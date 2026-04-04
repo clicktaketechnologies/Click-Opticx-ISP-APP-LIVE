@@ -99,6 +99,66 @@
         .animate-shimmer {
             animation: shimmer 1.5s infinite;
         }
+
+        /* Global Modal SaaS Redesign */
+        .modal, [data-modal] {
+            background: #FFFFFF !important;
+            color: #0F172A !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+            border: 1px solid #E2E8F0 !important;
+        }
+
+        .modal input, 
+        .modal select, 
+        .modal textarea,
+        [data-modal] input,
+        [data-modal] select,
+        [data-modal] textarea {
+            background: #F8FAFC !important;
+            border: 1px solid #E2E8F0 !important;
+            color: #0F172A !important;
+            border-radius: 10px !important;
+            padding: 10px 12px !important;
+            font-size: 14px !important;
+            transition: all 0.2s ease-out !important;
+            outline: none !important;
+        }
+
+        .modal input:focus, 
+        .modal select:focus, 
+        .modal textarea:focus,
+        [data-modal] input:focus,
+        [data-modal] select:focus,
+        [data-modal] textarea:focus {
+            border-color: #3B82F6 !important;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1) !important;
+            background: #FFFFFF !important;
+        }
+
+        .modal label, [data-modal] label {
+            color: #334155 !important;
+            font-weight: 600 !important;
+            font-size: 11px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            margin-bottom: 6px !important;
+            display: block !important;
+        }
+
+        .modal h1, .modal h2, .modal h3, [data-modal] h1, [data-modal] h2, [data-modal] h3 {
+            color: #0F172A !important;
+        }
+
+        .modal input, .modal select, .modal textarea {
+            width: 100% !important;
+        }
+
+        .modal input::placeholder, 
+        .modal textarea::placeholder,
+        [data-modal] input::placeholder,
+        [data-modal] textarea::placeholder {
+            color: #94A3B8 !important;
+        }
     </style>
 
 </head>

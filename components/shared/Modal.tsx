@@ -117,17 +117,19 @@ export const Modal: React.FC<ModalProps> = ({
       ref={overlayRef}
       onClick={handleOverlayClick}
       className="fixed inset-0 z-[9000] flex items-center justify-center p-4 transition-all duration-300"
-      style={{ backgroundColor: 'rgba(15, 23, 42, 0.5)', backdropFilter: 'blur(8px)' }}
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(6px)' }}
     >
       <div
         ref={modalRef}
-        className={`relative w-full ${maxWidth} rounded-2xl flex flex-col shadow-2xl transition-all duration-200`}
+        data-modal="true"
+        className={`modal relative w-full ${maxWidth} rounded-2xl flex flex-col shadow-2xl transition-all duration-200 overflow-hidden`}
         style={{
           background: '#FFFFFF',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          animation: 'modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+          animation: 'modalIn 0.2s ease-out',
           maxHeight: '90vh',
-          border: '1px solid rgba(0,0,0,0.05)'
+          border: '1px solid #E2E8F0',
+          color: '#0F172A'
         }}
       >
         {/* HEADER */}
@@ -147,7 +149,7 @@ export const Modal: React.FC<ModalProps> = ({
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-all disabled:opacity-30"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all disabled:opacity-30"
               >
                 <X size={18} />
               </button>
@@ -169,7 +171,7 @@ export const Modal: React.FC<ModalProps> = ({
         {/* FOOTER */}
         {(footer || showDefaultFooter) && (
           <div
-            className="px-6 py-5 flex items-center justify-end gap-3 shrink-0"
+            className="px-6 py-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0"
             style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}
           >
             {footer ? (
@@ -179,7 +181,7 @@ export const Modal: React.FC<ModalProps> = ({
                 <button
                   onClick={onClose}
                   disabled={isLoading}
-                  className="px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-[#475569] hover:bg-slate-50 transition-all disabled:opacity-30 border border-slate-200"
+                  className="px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-[#0F172A] bg-[#F1F5F9] hover:bg-slate-200 transition-all disabled:opacity-30 border border-slate-200"
                 >
                   {cancelLabel}
                 </button>
@@ -188,8 +190,8 @@ export const Modal: React.FC<ModalProps> = ({
                   disabled={isLoading}
                   className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-white flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50 ${
                     confirmDanger || type === 'danger'
-                      ? 'bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-900/30'
-                      : 'bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-900/30'
+                      ? 'bg-[#EF4444] hover:bg-rose-700 shadow-lg shadow-rose-200'
+                      : 'bg-[#3B82F6] hover:bg-blue-700 shadow-lg shadow-blue-200'
                   }`}
                   style={{ opacity: isLoading ? 0.7 : 1 }}
                 >

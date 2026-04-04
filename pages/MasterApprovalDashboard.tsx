@@ -454,7 +454,7 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
             {selectedRequestData.unifiedType !== 'active-users' && (
               <div className="space-y-2">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rejection Reason (Required for Denials)</label>
-                <textarea className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-white text-xs h-24 resize-none outline-none focus:border-rose-600 transition-all" placeholder="Explain why this request is being rejected..." value={rejectionReason} onChange={e => setRejectionReason(e.target.value)} />
+                <textarea className="w-full h-24 resize-none" placeholder="Explain why this request is being rejected..." value={rejectionReason} onChange={e => setRejectionReason(e.target.value)} />
               </div>
             )}
           </div>
