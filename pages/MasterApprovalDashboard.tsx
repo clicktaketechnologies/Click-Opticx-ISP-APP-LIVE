@@ -15,7 +15,7 @@ import { Modal } from '../components/shared/Modal';
 // Safe Icon Wrapper to prevent #306 "Element type is invalid" if an icon is undefined or not a component
 const SafeIcon: React.FC<{ icon: any; size?: number; className?: string; strokeWidth?: number }> = ({ icon: Icon, size = 18, className = '', strokeWidth }) => {
   if (!Icon) return <div style={{ width: size, height: size }} className={`bg-slate-200/50 rounded-full ${className}`} />;
-  
+
   // Robust check for Icon being a valid React component type (function or string)
   const isValidType = typeof Icon === 'function' || typeof Icon === 'string' || (typeof Icon === 'object' && Icon !== null && '$$typeof' in Icon);
   if (!isValidType) {
@@ -142,18 +142,24 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
     setIsProcessing(false);
     if (res.success) {
       setSelectedRequestId(null);
+      // Optional: notification of success already handled by db.ts but we can add a local one if needed
     } else {
-      alert((res as any).message || 'Request failed to process.');
+      alert((res as any).message || 'Handshake Protocol Failure: Request could not be authorized.');
     }
   };
 
   const handleReject = async () => {
     if (!selectedRequestId || !rejectionReason) return;
     setIsProcessing(true);
-    await db.rejectUnifiedRequest(selectedRequestId.id, selectedRequestId.type, rejectionReason);
+    const res = await db.rejectUnifiedRequest(selectedRequestId.id, selectedRequestId.type, rejectionReason);
     setIsProcessing(false);
-    setSelectedRequestId(null);
-    setRejectionReason('');
+
+    if (res.success) {
+      setSelectedRequestId(null);
+      setRejectionReason('');
+    } else {
+      alert((res as any).message || 'Rejection Fault: System failed to commit rejection.');
+    }
   };
 
   const getIcon = (type: string) => {
@@ -277,23 +283,23 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
                       </div>
                       <div className="flex gap-2">
                         <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${req.status === 'Approved' ? 'bg-green-50 text-green-600 border-green-100' :
-                            req.status === 'Rejected' ? 'bg-rose-50 text-rose-600 border-rose-100' :
-                              req.status === 'Duplicate' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                'bg-blue-50 text-blue-600 border-blue-100'
+                          req.status === 'Rejected' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                            req.status === 'Duplicate' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                              'bg-blue-50 text-blue-600 border-blue-100'
                           }`}>
                           {req.status}
                         </span>
                         {(req.unifiedType === 'signup' || req.unifiedType === 'kyc') && (
                           <>
                             {(req as any).kyc_status && (
-                               <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${(req as any).kyc_status === 'verified' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
-                                 KYC: {(req as any).kyc_status}
-                               </span>
+                              <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${(req as any).kyc_status === 'verified' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
+                                KYC: {(req as any).kyc_status}
+                              </span>
                             )}
                             {(req as any).approval_status && (
-                               <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${(req as any).approval_status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
-                                 Auth: {(req as any).approval_status}
-                               </span>
+                              <span className={`text-[8px] font-black px-2 py-0.5 rounded-full border uppercase tracking-wider ${(req as any).approval_status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
+                                Auth: {(req as any).approval_status}
+                              </span>
                             )}
                           </>
                         )}
@@ -345,41 +351,80 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
             {selectedRequestData?.unifiedType === 'active-users' ? (
               <>
                 {selectedRequestData?.status === UserStatus.BLOCKED ? (
-                  <button onClick={async () => { setIsProcessing(true); await db.unblockUser(selectedRequestData.id); setIsProcessing(false); setSelectedRequestId(null); }}
+                  <button onClick={async () => {
+                    setIsProcessing(true);
+                    const res = await db.unblockUser(selectedRequestData.id);
+                    setIsProcessing(false);
+                    if (res.success) {
+                      setSelectedRequestId(null);
+                    } else {
+                      alert(res.message || 'Restoration Fault: Access could not be restored.');
+                    }
+                  }}
                     className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
                     <SafeIcon icon={CheckCircle} size={16} /> Restore Full Access
                   </button>
                 ) : (
                   <>
-                    {!blockReason ? (
-                      <div className="flex-1 flex gap-2">
-                        <input value={blockReason} onChange={e => setBlockReason(e.target.value)} placeholder="Enter block reason..." className="flex-1 px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-white text-xs font-bold outline-none" />
-                        <button onClick={async () => { if (!blockReason) return; setIsProcessing(true); await db.blockUser(selectedRequestData.id, blockReason); setIsProcessing(false); setSelectedRequestId(null); setBlockReason(''); }}
+                    <div className="flex-1 flex flex-col gap-3">
+                      <div className="flex gap-2">
+                        <input
+                          value={blockReason}
+                          onChange={e => setBlockReason(e.target.value)}
+                          placeholder="Enter block reason..."
+                          className="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-rose-500/20"
+                        />
+                        <button
+                          onClick={async () => {
+                            if (!blockReason) return;
+                            setIsProcessing(true);
+                            const res = await db.blockUser(selectedRequestData.id, blockReason);
+                            setIsProcessing(false);
+                            if (res.success) {
+                              setSelectedRequestId(null);
+                              setBlockReason('');
+                            } else {
+                              alert(res.message || 'Block Fault: Failed to restrict access.');
+                            }
+                          }}
                           disabled={!blockReason || isProcessing}
-                          className="px-5 py-3 bg-rose-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest disabled:opacity-40 flex items-center gap-2">
-                          <SafeIcon icon={ShieldAlert} size={14} /> Block
+                          className="px-5 py-3 bg-rose-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest disabled:opacity-40 flex items-center gap-2"
+                        >
+                          {isProcessing ? <Mini5GMicroLoader size={14} /> : <SafeIcon icon={ShieldAlert} size={14} />}
+                          Block
                         </button>
                       </div>
-                    ) : (
-                      <button onClick={async () => { setIsProcessing(true); await db.blockUser(selectedRequestData!.id, blockReason); setIsProcessing(false); setSelectedRequestId(null); setBlockReason(''); }}
-                        className="flex-1 py-3 bg-rose-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
-                        <SafeIcon icon={ShieldAlert} size={16} /> Block Identity Access
-                      </button>
-                    )}
+                    </div>
                   </>
                 )}
               </>
             ) : (
               <>
-                <button onClick={handleReject} disabled={!rejectionReason || isProcessing}
-                  className="flex-1 py-3 bg-rose-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-40">
-                  <SafeIcon icon={XCircle} size={16} /> Reject
-                </button>
-                <button onClick={handleApprove} disabled={isProcessing}
-                  className="flex-[2] py-3 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2">
-                  {isProcessing ? <Mini5GMicroLoader size={16} /> : <SafeIcon icon={ShieldCheck} size={16} />}
-                  Approve & Activate
-                </button>
+                <div className="flex-1 flex flex-col gap-2">
+                  <textarea
+                    className="w-full h-20 bg-white border border-slate-200 rounded-xl p-3 text-xs font-bold text-slate-900 outline-none focus:ring-2 focus:ring-slate-500/10"
+                    placeholder="Denial context (Required for rejection)..."
+                    value={rejectionReason}
+                    onChange={e => setRejectionReason(e.target.value)}
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleReject}
+                      disabled={!rejectionReason || isProcessing}
+                      className="flex-1 py-3 bg-rose-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-40"
+                    >
+                      <SafeIcon icon={XCircle} size={16} /> Reject
+                    </button>
+                    <button
+                      onClick={handleApprove}
+                      disabled={isProcessing}
+                      className="flex-[2] py-3 bg-emerald-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
+                    >
+                      {isProcessing ? <Mini5GMicroLoader size={16} /> : <SafeIcon icon={ShieldCheck} size={16} />}
+                      Approve & Activate
+                    </button>
+                  </div>
+                </div>
               </>
             )}
           </div>
@@ -439,15 +484,19 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><SafeIcon icon={Activity} size={12} className="text-blue-400" /> System Check</h4>
               <div className="flex items-center justify-between py-2 border-b border-slate-700/50">
                 <span className="text-[10px] font-bold text-slate-500 uppercase">Existing Package Check</span>
-                {(() => { const user = state.users.find(u => u.id === selectedRequestData.userId); const exp = user?.expiryDate ? new Date(user.expiryDate) < new Date() : true;
+                {(() => {
+                  const user = state.users.find(u => u.id === selectedRequestData.userId); const exp = user?.expiryDate ? new Date(user.expiryDate) < new Date() : true;
                   return exp ? <span className="text-[9px] font-black text-emerald-400 uppercase flex items-center gap-1"><SafeIcon icon={CheckCircle} size={11} /> No Active Package</span>
-                    : <span className="text-[9px] font-black text-rose-400 uppercase flex items-center gap-1"><SafeIcon icon={AlertCircle} size={11} /> Has Active Package</span>; })()}
+                    : <span className="text-[9px] font-black text-rose-400 uppercase flex items-center gap-1"><SafeIcon icon={AlertCircle} size={11} /> Has Active Package</span>;
+                })()}
               </div>
               <div className="flex items-center justify-between py-2">
                 <span className="text-[10px] font-bold text-slate-500 uppercase">Credit Score</span>
-                {(() => { const score = state.users.find(u => u.id === selectedRequestData.userId)?.creditScore || 0;
+                {(() => {
+                  const score = state.users.find(u => u.id === selectedRequestData.userId)?.creditScore || 0;
                   return score >= 600 ? <span className="text-[9px] font-black text-emerald-400 uppercase">Good ({score})</span>
-                    : <span className="text-[9px] font-black text-orange-400 uppercase">Low ({score})</span>; })()}
+                    : <span className="text-[9px] font-black text-orange-400 uppercase">Low ({score})</span>;
+                })()}
               </div>
             </div>
 
@@ -463,79 +512,77 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
 
       {activeTab === 'login' && (
         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl relative overflow-hidden">
-              <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                 <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center border border-blue-100 shadow-inner">
-                       <SafeIcon icon={ShieldAlert} size={32} />
-                    </div>
-                    <div>
-                       <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">Authentication Monitor</h3>
-                       <p className="text-blue-600/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2 italic">Real-time terminal access auditing</p>
-                    </div>
-                 </div>
-                 <div className="flex gap-3">
-                    <div className="px-6 py-3 bg-slate-50 rounded-2xl border border-slate-100 text-center">
-                       <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Total Attempts</p>
-                       <p className="text-xl font-black text-slate-800 italic">{(state.auditLogs || []).filter(l => l.type === 'Login').length}</p>
-                    </div>
-                    <div className="px-6 py-3 bg-rose-50 rounded-2xl border border-rose-100 text-center">
-                       <p className="text-[8px] font-black text-rose-500 uppercase mb-1">Failed</p>
-                       <p className="text-xl font-black text-rose-600 italic">{(state.auditLogs || []).filter(l => l.type === 'Login' && (l.action.includes('Failed') || l.action.includes('Invalid'))).length}</p>
-                    </div>
-                 </div>
+          <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl relative overflow-hidden">
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-5">
+                <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center border border-blue-100 shadow-inner">
+                  <SafeIcon icon={ShieldAlert} size={32} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">Authentication Monitor</h3>
+                  <p className="text-blue-600/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2 italic">Real-time terminal access auditing</p>
+                </div>
               </div>
-              <SafeIcon icon={Activity} className="absolute -right-20 -bottom-20 text-white/5 scale-150 pointer-events-none" size={300} />
-           </div>
+              <div className="flex gap-3">
+                <div className="px-6 py-3 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                  <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Total Attempts</p>
+                  <p className="text-xl font-black text-slate-800 italic">{(state.auditLogs || []).filter(l => l.type === 'Login').length}</p>
+                </div>
+                <div className="px-6 py-3 bg-rose-50 rounded-2xl border border-rose-100 text-center">
+                  <p className="text-[8px] font-black text-rose-500 uppercase mb-1">Failed</p>
+                  <p className="text-xl font-black text-rose-600 italic">{(state.auditLogs || []).filter(l => l.type === 'Login' && (l.action.includes('Failed') || l.action.includes('Invalid'))).length}</p>
+                </div>
+              </div>
+            </div>
+            <SafeIcon icon={Activity} className="absolute -right-20 -bottom-20 text-white/5 scale-150 pointer-events-none" size={300} />
+          </div>
 
-           <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
-              <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] italic">Access Registry (Newest First)</h4>
-                 <div className="flex items-center gap-2 text-[9px] font-black text-blue-600 uppercase">
-                    <SafeIcon icon={RefreshCw} size={12} className={isPending ? 'animate-spin' : ''} /> Live Stream
-                 </div>
+          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
+            <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] italic">Access Registry (Newest First)</h4>
+              <div className="flex items-center gap-2 text-[9px] font-black text-blue-600 uppercase">
+                <SafeIcon icon={RefreshCw} size={12} className={isPending ? 'animate-spin' : ''} /> Live Stream
               </div>
-              <div className="divide-y divide-slate-50 overflow-y-auto max-h-[600px] custom-scrollbar">
-                 {(state.auditLogs || [])
-                    .filter(log => log.type === 'Login')
-                    .map(log => (
-                       <div key={log.id} className={`p-6 hover:bg-slate-50 transition-all flex items-center justify-between group ${log.action.includes('Failed') || log.action.includes('Invalid') ? 'bg-rose-50/30' : ''}`}>
-                          <div className="flex items-center gap-6">
-                             <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-sm transition-transform group-hover:scale-110 ${
-                                log.action.includes('Failed') || log.action.includes('Invalid') ? 'bg-rose-50 text-rose-500 border-rose-100' : 
-                                log.action.includes('Suspended') ? 'bg-amber-50 text-amber-500 border-amber-100' : 
-                                'bg-green-50 text-green-500 border-green-100'
-                             }`}>
-                                <SafeIcon icon={log.action.includes('Failed') || log.action.includes('Invalid') ? XCircle : ShieldCheck} size={22} strokeWidth={3} />
-                             </div>
-                             <div className="space-y-1">
-                                <div className="flex items-center gap-3">
-                                   <p className="text-sm font-black text-slate-900 uppercase italic leading-none">{log.action}</p>
-                                   <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
-                                </div>
-                                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight leading-relaxed">{log.details}</p>
-                                {log.userName && <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-1">Identity: {log.userName}</p>}
-                             </div>
-                          </div>
-                          <div className="text-right">
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{new Date(log.timestamp).toLocaleDateString()}</p>
-                             <div className={`inline-flex px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter border ${
-                                log.action.includes('Failed') || log.action.includes('Invalid') ? 'bg-rose-600 text-white border-rose-700 shadow-md' : 'bg-slate-100 text-slate-900 border-slate-200'
-                             }`}>
-                                {log.action.includes('Failed') ? 'Access Denied' : 'Session OK'}
-                             </div>
-                          </div>
-                       </div>
-                    ))}
-                 {(state.auditLogs || []).filter(log => log.type === 'Login').length === 0 && (
-                    <div className="p-32 text-center flex flex-col items-center">
-                       <SafeIcon icon={Database} className="text-slate-100 mb-6" size={80} />
-                       <h3 className="text-xl font-black text-slate-300 uppercase tracking-widest italic">Registry Void</h3>
-                       <p className="text-slate-400 text-[10px] uppercase font-bold tracking-widest mt-2">No authentication handshakes captured in this cycle.</p>
+            </div>
+            <div className="divide-y divide-slate-50 overflow-y-auto max-h-[600px] custom-scrollbar">
+              {(state.auditLogs || [])
+                .filter(log => log.type === 'Login')
+                .map(log => (
+                  <div key={log.id} className={`p-6 hover:bg-slate-50 transition-all flex items-center justify-between group ${log.action.includes('Failed') || log.action.includes('Invalid') ? 'bg-rose-50/30' : ''}`}>
+                    <div className="flex items-center gap-6">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-sm transition-transform group-hover:scale-110 ${log.action.includes('Failed') || log.action.includes('Invalid') ? 'bg-rose-50 text-rose-500 border-rose-100' :
+                        log.action.includes('Suspended') ? 'bg-amber-50 text-amber-500 border-amber-100' :
+                          'bg-green-50 text-green-500 border-green-100'
+                        }`}>
+                        <SafeIcon icon={log.action.includes('Failed') || log.action.includes('Invalid') ? XCircle : ShieldCheck} size={22} strokeWidth={3} />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <p className="text-sm font-black text-slate-900 uppercase italic leading-none">{log.action}</p>
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight leading-relaxed">{log.details}</p>
+                        {log.userName && <p className="text-[9px] font-black text-blue-600 uppercase tracking-widest mt-1">Identity: {log.userName}</p>}
+                      </div>
                     </div>
-                 )}
-              </div>
-           </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{new Date(log.timestamp).toLocaleDateString()}</p>
+                      <div className={`inline-flex px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter border ${log.action.includes('Failed') || log.action.includes('Invalid') ? 'bg-rose-600 text-white border-rose-700 shadow-md' : 'bg-slate-100 text-slate-900 border-slate-200'
+                        }`}>
+                        {log.action.includes('Failed') ? 'Access Denied' : 'Session OK'}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              {(state.auditLogs || []).filter(log => log.type === 'Login').length === 0 && (
+                <div className="p-32 text-center flex flex-col items-center">
+                  <SafeIcon icon={Database} className="text-slate-100 mb-6" size={80} />
+                  <h3 className="text-xl font-black text-slate-300 uppercase tracking-widest italic">Registry Void</h3>
+                  <p className="text-slate-400 text-[10px] uppercase font-bold tracking-widest mt-2">No authentication handshakes captured in this cycle.</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -559,8 +606,8 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
                   <div key={log.id} className="flex gap-6 items-start bg-white p-6 rounded-[2rem] border border-slate-100 hover:border-blue-200 transition-all shadow-sm group">
                     <div className="shrink-0 flex flex-col items-center gap-2">
                       <div className={`p-4 rounded-2xl ${log.type === 'Approval' ? 'bg-green-50 text-green-600' :
-                          log.type === 'Rejection' ? 'bg-rose-50 text-rose-600' :
-                            log.type === 'System' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'
+                        log.type === 'Rejection' ? 'bg-rose-50 text-rose-600' :
+                          log.type === 'System' ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'
                         }`}>
                         <SafeIcon icon={log.type === 'Approval' ? CheckCircle : (log.type === 'Rejection' ? XCircle : (log.type === 'System' ? ShieldCheck : Info))} size={24} />
                       </div>

@@ -57,17 +57,25 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
    const [isKYCOpen, setIsKYCOpen] = useState(false);
    const [kycIntent, setKycIntent] = useState<SubTab | null>(null);
 
-   // Verification Overlay Logic
-   const [showWelcome, setShowWelcome] = useState(!user.welcomeChecklistShown && user.verificationStatus === VerificationStatus.UNVERIFIED);
-   const [showVerificationSuccess, setShowVerificationSuccess] = useState(user.verificationStatus === VerificationStatus.VERIFIED && !user.verificationSuccessShown);
+    // Verification Overlay Logic
+    const [showWelcome, setShowWelcome] = useState(!user.welcomeChecklistShown && user.verificationStatus === VerificationStatus.UNVERIFIED);
+    const [showVerificationSuccess, setShowVerificationSuccess] = useState(user.verificationStatus === VerificationStatus.VERIFIED && !user.verificationSuccessShown);
 
-   const appearance = state.settings.appearance;
-   const appPages = appearance.appPages || [];
+    const appearance = state.settings.appearance;
+    const appPages = appearance.appPages || [];
 
-   const pendingTopups = useMemo(() => (state.topupRequests || []).filter(r => r.userId === user.id && r.status === 'Pending'), [state.topupRequests, user.id]);
-   const currentPkg = useMemo(() => state.packages.find(p => p.id === user.packageId), [state.packages, user.packageId]);
-   const unreadCount = (state.notifications || []).filter(n => n.targetId === 'all' || n.targetId === user.id).filter(n => !n.read).length;
-   const branding = state.settings.branding;
+    // AUTO-TRIGGER KYC FOR NEW USERS
+    useEffect(() => {
+       if (user.kyc_status === 'pending' || !user.isKYCVerified) {
+          const timer = setTimeout(() => setIsKYCOpen(true), 1500);
+          return () => clearTimeout(timer);
+       }
+    }, [user.kyc_status, user.isKYCVerified]);
+
+    const pendingTopups = useMemo(() => (state.topupRequests || []).filter(r => r.userId === user.id && r.status === 'Pending'), [state.topupRequests, user.id]);
+    const currentPkg = useMemo(() => state.packages.find(p => p.id === user.packageId), [state.packages, user.packageId]);
+    const unreadCount = (state.notifications || []).filter(n => n.targetId === 'all' || n.targetId === user.id).filter(n => !n.read).length;
+    const branding = state.settings.branding;
 
    const isPageEnabled = (id: string) => {
       if (['home', 'profile', 'ai-home', 'ai-insights', 'ai-network', 'ai-risk', 'ai-suggestions', 'aichat', 'emergency', 'emergency-request', 'emergency-history', 'ai-voice-call', 'legal', 'namaz', 'qibla', 'tasbih', 'quran'].includes(id)) return true;

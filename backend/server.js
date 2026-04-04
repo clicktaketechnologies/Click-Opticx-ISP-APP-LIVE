@@ -16,6 +16,7 @@ const logger = require('./utils/logger');
 const oltRealRoutes = require('./routes/oltRealRoutes');
 const mikrotikRoutes = require('./routes/mikrotikRoutes');
 const automationRoutes = require('./routes/automationRoutes');
+const authRoutes = require('./routes/auth');
 const livePoller = require('./jobs/livePoller');
 const notificationEngine = require('./services/notificationEngine');
 
@@ -95,6 +96,7 @@ app.use('/api/mikrotik', mikrotikRoutes);
 app.use('/api/automation', automationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/health-monitor', healthRoutes);
+app.use('/api/auth', authRoutes);
 
 // --- Push Notification API ---
 app.post('/api/push-notify', async (req, res) => {

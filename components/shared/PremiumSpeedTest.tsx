@@ -5,7 +5,8 @@ import {
   ArrowDownCircle, ArrowUpCircle, ShieldCheck, 
   History as HistoryIcon, Server, Zap, AlertTriangle, 
   CheckCircle2, Gauge, RefreshCw, ChevronDown, 
-  MapPin, Radio, Signal, Cpu, Network, X, ArrowRight
+  MapPin, Radio, Signal, Cpu, Network, X, ArrowRight,
+  Lock
 } from 'lucide-react';
 import { 
   AreaChart, Area, ResponsiveContainer 
@@ -131,7 +132,7 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
   const currentSpeed = phase === 'upload' ? results.ul : results.dl;
 
   return (
-    <div className={`speedtest-modal w-full bg-white rounded-[2rem] border-2 border-slate-100 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col ${isModal ? 'max-h-[90vh] overflow-y-auto' : ''} ${className}`}>
+    <div className={`speedtest-modal w-full bg-white text-[#0F172A] rounded-[2rem] border-2 border-slate-100 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col ${isModal ? 'max-h-[90vh] overflow-y-auto' : ''} ${className}`} style={{ backgroundColor: '#FFFFFF', color: '#0F172A' }}>
       
       {/* Visual Identity Strip */}
       <div className="h-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 absolute top-0 left-0 right-0 z-50"></div>
@@ -328,12 +329,12 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
 };
 
 const DiagnosticMetric = ({ label, value, icon: Icon, color, bg }: any) => (
-  <div className="bg-slate-50 border border-slate-100 p-5 rounded-[2.5rem] flex flex-col items-center text-center transition-all hover:bg-white hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10 group cursor-default">
-     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-all group-hover:rotate-[360deg] duration-700 ${bg} ${color} shadow-sm`}>
-        <Icon size={22} />
+  <div className="bg-slate-50 border border-slate-100 p-4 sm:p-5 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col items-center text-center transition-all hover:bg-white hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10 group cursor-default">
+     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 transition-all group-hover:rotate-[360deg] duration-700 ${bg} ${color} shadow-sm`}>
+        <Icon size={18} />
      </div>
-     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 leading-none">{label}</span>
-     <span className="text-xl font-black text-slate-900 italic tracking-tight leading-none">{value}</span>
+     <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 sm:mb-1.5 leading-none">{label}</span>
+     <span className="text-lg sm:text-xl font-black text-[#0F172A] italic tracking-tight leading-none">{value}</span>
   </div>
 );
 

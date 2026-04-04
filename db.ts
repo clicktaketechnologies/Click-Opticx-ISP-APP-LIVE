@@ -1193,77 +1193,66 @@ class DB {
 
   async login(credential: string, pass: string) {
     if (!credential) return { success: false, message: 'Identity required for lookup.' };
-    const input = credential.toLowerCase().trim();
+    const identifier = credential.trim();
     const settings = this.state.settings.authSettings || INITIAL_STATE.settings.authSettings;
 
     if (!settings.loginEnabled) {
       return { success: false, message: 'Logins are currently disabled by administration.' };
     }
 
-    const staff = this.state.staff.find(s => s.email.toLowerCase() === input && s.password === pass);
-    if (staff) {
-      if (staff.status === 'Suspended') {
-        this.logAudit('Suspended Login', 'Login', `Suspended staff ${staff.name} attempted entry.`, undefined, staff.name);
-        return { success: false, message: 'Your administrative access is currently Suspended.' };
+    try {
+      console.log('[DB-AUTH] Initiating security handshake for:', identifier);
+
+      const response = await fetch(`${this.backendUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password: pass })
+      });
+
+      const res = await response.json();
+      if (!res.success) {
+        this.logAudit('Failed Login', 'Login', `Login failed: ${res.message} for ${identifier}`);
+        return { success: false, message: res.message || 'Identity verification failed.' };
       }
-      this.state.currentUser = staff;
+
+      // Store JWT token securely (for future requests)
+      if (res.token) {
+        localStorage.setItem('clickopticx_auth_token', res.token);
+      }
+
+      // The backend returns the full user object (staff or user)
+      const authenticatedEntity = res.user;
+      
+      // Update local session state
+      this.state.currentUser = authenticatedEntity;
+      
+      // If it's a staff member, we use the role from their object
+      // If it's a user, we ensure role is CUSTOMER for frontend logic
+      if (res.userType === 'customer') {
+          this.state.currentUser.role = Role.CUSTOMER;
+      }
+
       this.authenticateSocket();
       this.notify();
-      this.logAudit('Staff Login', 'Login', `Staff logged in: ${staff.role}`, undefined, staff.name);
-      return { success: true, user: staff, type: 'staff' };
+      
+      this.logAudit(
+        res.userType === 'staff' ? 'Staff Login' : 'User Login', 
+        'Login', 
+        `${res.userType === 'staff' ? 'Administrative identity' : 'Subscriber identity'} authenticated successfully.`,
+        authenticatedEntity.id,
+        authenticatedEntity.name
+      );
+
+      return { 
+        success: true, 
+        user: this.state.currentUser, 
+        type: res.userType 
+      };
+
+    } catch (e: any) {
+      console.error('[DB-AUTH-ERROR] Login Protocol Failed:', e);
+      return { success: false, message: 'Communication bridge failure. Check network link.' };
     }
-
-    // Check if staff existed but wrong password for logging
-    const potentialStaff = this.state.staff.find(s => s.email.toLowerCase() === input);
-    if (potentialStaff) {
-      this.logAudit('Failed Staff Login', 'Login', `Incorrect password for staff: ${input}`, undefined, potentialStaff.name);
-      return { success: false, message: 'Invalid administrative credentials.' };
-    }
-
-    // Determine Input Type
-    let identifierType: 'email' | 'phone' | 'cnic' | 'username' = 'username';
-    if (input.includes('@')) identifierType = 'email';
-    else if (/^\d{11}$/.test(input)) identifierType = 'phone';
-    else if (/^\d{5}-?\d{7}-?\d{1}$/.test(input)) identifierType = 'cnic';
-
-    if (settings.enableUniversalLogin && settings.allowedIdentifiers) {
-      if (identifierType === 'email' && !settings.allowedIdentifiers.email) return { success: false, message: 'Email login is disabled.' };
-      if (identifierType === 'phone' && !settings.allowedIdentifiers.phone) return { success: false, message: 'Phone login is disabled.' };
-      if (identifierType === 'cnic' && !settings.allowedIdentifiers.cnic) return { success: false, message: 'CNIC login is disabled.' };
-    }
-    const user = this.state.users.find(u => !u.deleted && (
-      (u.username || '').toLowerCase() === input ||
-      (u.email || '').toLowerCase() === input ||
-      (u.phone || '').replace(/\D/g, '') === input.replace(/\D/g, '') ||
-      (u.cnic || '').replace(/\D/g, '') === input.replace(/\D/g, '') ||
-      (u.pppoeId || '').toLowerCase() === input ||
-      (u.connectionId || '').toLowerCase() === input ||
-      (u.connectionId || '').replace(/-/g, '').toLowerCase() === input.replace(/-/g, '')
-    ));
-
-    if (!user) {
-      this.logAudit('Invalid Lookup', 'Login', `Identity lookup failed for: ${input}`);
-      return { success: false, message: 'Identity lookup failed.' };
-    }
-
-    if (user.password !== pass) {
-      this.logAudit('Failed Login', 'Login', `Failed login attempt for ${user.name} (${input})`, user.id, user.name);
-      return { success: false, message: 'Invalid credentials.' };
-    }
-
-    if (user.status === UserStatus.DISABLED || user.status === UserStatus.BLOCKED) {
-      this.logAudit('Restricted Entry', 'Login', `Restricted user ${user.name} (${user.id}) attempted login. Status: ${user.status}`, user.id, user.name);
-      const msg = user.status === UserStatus.BLOCKED 
-        ? 'ACCESS_RESTRICTED: Your account access has been restricted by administration. Please contact support.' 
-        : 'Your account is currently Disabled. Contact NOC.';
-      return { success: false, message: msg };
-    }
-
-    this.state.currentUser = { ...user, role: Role.CUSTOMER };
-    this.authenticateSocket();
-    this.notify();
-    this.logAudit('User Login', 'Login', `User logged in via ${identifierType || 'Universal'}`, user.id, user.name);
-    return { success: true, user: this.state.currentUser, type: 'customer' };
   }
 
 
@@ -1337,10 +1326,17 @@ class DB {
   }
 
   async updateUser(id: string, d: any) {
-    const idx = this.state.users.findIndex(u => u.id === id);
+    const idx = this.state.users.findIndex(u => 
+       u.id === id || 
+       (u.username && u.username === id) || 
+       (u.pppoeId && u.pppoeId === id) ||
+       (u.phone && u.phone === id)
+    );
+    
     if (idx !== -1) {
+      const targetId = this.state.users[idx].id;
       this.state.users[idx] = { ...this.state.users[idx], ...d };
-      if (this.state.currentUser && this.state.currentUser.id === id) {
+      if (this.state.currentUser && this.state.currentUser.id === targetId) {
         this.state.currentUser = { ...this.state.currentUser, ...d };
       }
 
@@ -1350,29 +1346,29 @@ class DB {
       // NAS Auto-Disconnect on manual suspension
       if (d.status === UserStatus.SUSPENDED || d.status === UserStatus.EXPIRED || d.status === UserStatus.DISABLED || d.status === UserStatus.BLOCKED) {
         if (this.state.settings.nasSystemEnabled && isNasControlled) {
-          await this.sendCoACommand(id, 'Disconnect');
+          await this.sendCoACommand(targetId, 'Disconnect');
         }
       }
 
       // NAS Sync on package or mode change
       if (this.state.settings.nasSystemEnabled && isNasControlled) {
         if (d.packageId || d.managementMode || d.routerId || d.username || d.password || d.nasConnectionType) {
-          setTimeout(() => this.syncUserToNAS(id, 'upsert'), 300);
+          setTimeout(() => this.syncUserToNAS(targetId, 'upsert'), 300);
         }
         // Speed-reset CoA when package changes
         if (d.packageId && d.status === UserStatus.ACTIVE) {
-          setTimeout(() => this.sendCoACommand(id, 'SpeedChange'), 800);
+          setTimeout(() => this.sendCoACommand(targetId, 'SpeedChange'), 800);
         }
       }
 
       // INTEGRATION: Real-time status sync on any user update
-      await this.syncUserStatusWithBilling(id);
+      await this.syncUserStatusWithBilling(targetId);
       
       await this.commit();
       this.notify();
-      return { success: true };
+      return { success: true, message: `Identity ${targetId} updated successfully.` };
     }
-    return { success: false };
+    return { success: false, message: `Handshake Error: Identity artifact [${id}] not found in registry.` };
   }
 
   async blockUser(id: string, reason: string = 'Administrative Action') {
@@ -2040,53 +2036,71 @@ class DB {
   async addTicketComment(id: string, t: string, i: boolean) { const idx = this.state.tickets.findIndex(x => x.id === id); if (idx !== -1) { this.state.tickets[idx].comments.push({ id: 'CMT_' + Date.now(), authorName: 'Admin', authorEmail: 'admin@opticx.com', authorRole: Role.ADMIN, text: t, timestamp: new Date().toISOString(), isInternal: i }); await this.commit(); } }
   async approveUnifiedRequest(id: string, type: string) {
     try {
+      console.log(`[APPROVE-HANDLER] Initializing approval for ${type} ID: ${id}`);
+      
       if (type === 'package') {
         const req = this.state.packageRequests.find(r => r.id === id);
-        if (req) {
-          req.status = 'Approved';
-          await this.activatePackage(req.userId, req.packageId);
-          await this.generateAdHocInvoice(req.userId, req.packageId, req.amount, [{ id: 'L1', description: `Package Activation: ${req.packageName}`, quantity: 1, unitPrice: req.amount, total: req.amount, category: 'Service' }]);
-          const inv = this.state.invoices[this.state.invoices.length - 1];
-          if (inv) {
-            inv.status = PaymentStatus.PAID;
-            inv.paidAt = new Date().toISOString();
-            inv.paidAmount = inv.totalAmount;
-          }
-          this.logNotification(req.userId, 'success', 'Request Approved', `Your ${req.packageName} request has been approved.`);
-          this.logActivity(req.userId, 'Approval', `Package ${req.packageName} approved.`);
+        if (!req) return { success: false, message: 'Registry Error: Package request artifact not found.' };
+
+        const activation = await this.activatePackage(req.userId, req.packageId);
+        if (!activation.success) return activation;
+
+        req.status = 'Approved';
+        await this.generateAdHocInvoice(req.userId, req.packageId, req.amount, [{ id: 'L1', description: `Package Activation: ${req.packageName}`, quantity: 1, unitPrice: req.amount, total: req.amount, category: 'Service' }]);
+        
+        const inv = this.state.invoices[this.state.invoices.length - 1];
+        if (inv) {
+          inv.status = PaymentStatus.PAID;
+          inv.paidAt = new Date().toISOString();
+          inv.paidAmount = inv.totalAmount;
         }
+        
+        this.logNotification(req.userId, 'success', 'Package Activated', `Service [${req.packageName}] has been activated on your node.`);
+        this.logActivity(req.userId, 'Approval', `Package activation ${req.packageName} approved.`);
+        this.logAudit('Package Approved', 'Approval', `Package request ${id} for ${req.userId} approved.`, req.userId);
+
       } else if (type === 'topup') {
         const req = this.state.topupRequests.find(r => r.id === id);
-        if (req) {
-          req.status = 'Approved';
-          await this.processTopup('Admin', req.userId, 'user', req.amount);
-          this.logNotification(req.userId, 'success', 'Top-up Approved', `Your top-up of ${req.amount} has been credited.`);
-          this.logActivity(req.userId, 'Approval', `Top-up of ${req.amount} approved.`);
-        }
+        if (!req) return { success: false, message: 'Registry Error: Top-up request artifact not found.' };
+
+        req.status = 'Approved';
+        await this.processTopup('Admin', req.userId, 'user', req.amount);
+        this.logNotification(req.userId, 'success', 'Balance Credited', `Your refill of ${req.amount} has been processed.`);
+        this.logActivity(req.userId, 'Approval', `Wallet refill of ${req.amount} approved.`);
+        this.logAudit('Topup Approved', 'Approval', `Topup request ${id} of ${req.amount} for ${req.userId} approved.`, req.userId);
+
       } else if (type === 'emergency') {
         const load = this.state.emergencyLoads.find(l => l.id === id);
-        if (load) {
-          load.status = 'Active';
-          this.logNotification(load.userId, 'success', 'Emergency Load Active', 'Your emergency load is now active.');
-          this.logActivity(load.userId, 'Approval', 'Emergency load activated.');
-        }
+        if (!load) return { success: false, message: 'Registry Error: Emergency load node not found.' };
+
+        load.status = 'Active';
+        this.logNotification(load.userId, 'success', 'Emergency Power Active', 'Your rescue credit has been authorized and activated.');
+        this.logActivity(load.userId, 'Approval', 'Emergency rescue load authorized.');
+        this.logAudit('Emergency Approved', 'Approval', `Emergency load ${id} for ${load.userId} approved.`, load.userId);
+
       } else if (type === 'kyc') {
         const user = this.state.users.find(u => u.id === id);
-        if (user) {
-          user.isKYCVerified = true;
-          user.verificationStatus = VerificationStatus.VERIFIED;
-          user.verificationSuccessShown = false; // Trigger the success modal in UI
-          this.logNotification(user.id, 'success', 'Identity Verified', 'Your KYC has been approved. Full access unlocked.');
-          this.logActivity(user.id, 'KYC', 'Identity verification approved.');
-          this.logAudit('KYC Approved', 'Approval', `KYC for ${user.name} approved.`, user.id, user.name);
-        }
+        if (!user) return { success: false, message: 'Registry Error: Subscriber identity artifact not found.' };
+
+        user.isKYCVerified = true;
+        user.verificationStatus = VerificationStatus.VERIFIED;
+        user.verificationSuccessShown = false; 
+        this.logNotification(user.id, 'success', 'KYC Handshake Verified', 'Your identity artifacts have been verified. Full system access granted.');
+        this.logActivity(user.id, 'KYC', 'Identity verification authorized by administrator.');
+        this.logAudit('KYC Approved', 'Approval', `KYC for ${user.name} (${user.id}) approved.`, user.id, user.name);
+
       } else if (type === 'signup') {
         return await this.approveSignup(id);
+      } else {
+        return { success: false, message: `System Error: Unsupported request type [${type}]` };
       }
+
       await this.commit();
-      return { success: true };
+      this.notify();
+      return { success: true, message: `${type.toUpperCase()} request processed successfully.` };
     } catch (e: any) {
-      return { success: false, message: e.message };
+      console.error('[DB-APPROVE-CRITICAL] Protocol failure during unified approval:', e);
+      return { success: false, message: `Handshake Fault: ${e.message}` };
     }
   }
 
@@ -2094,37 +2108,82 @@ class DB {
   async approveSignup(requestId: string) {
     try {
       const req = this.state.signupRequests.find(r => r.id === requestId);
-      if (!req) return { success: false, message: 'Signup request node not found.' };
+      if (!req) return { success: false, message: 'Registry Query Error: Signup request node not found in current state.' };
 
-      // Find the user created during signup with multiple fallback identifiers
-      const user = this.state.users.find(u => 
-        u.id === req.userId || 
-        (req.username && u.username?.toLowerCase() === req.username.toLowerCase()) || 
-        (req.email && u.email?.toLowerCase() === req.email.toLowerCase()) ||
-        (req.phone && u.phone?.replace(/\D/g, '') === req.phone.replace(/\D/g, '')) ||
-        (req.cnic && u.cnic?.replace(/\D/g, '') === req.cnic.replace(/\D/g, ''))
-      );
+      console.log('[DB-AUTH] Approving signup request:', requestId, 'User ID Reference:', req.userId);
+
+      // BROAD SPECTRUM IDENTITY MATCHING:
+      // We look for any user that matches ID, username, email, phone, or cnic
+      let user = this.state.users.find(u => {
+        // Direct ID match (Highest confidence)
+        if (req.userId && u.id === req.userId) return true;
+        
+        // Identity fallback matches
+        const reqUser = (req.username || '').toLowerCase().trim();
+        const dbUser = (u.username || '').toLowerCase().trim();
+        if (reqUser && dbUser && reqUser === dbUser) return true;
+
+        const reqEmail = (req.email || '').toLowerCase().trim();
+        const dbEmail = (u.email || '').toLowerCase().trim();
+        if (reqEmail && dbEmail && reqEmail === dbEmail) return true;
+
+        const reqPhone = (req.phone || '').replace(/\D/g, '');
+        const dbPhone = (u.phone || '').replace(/\D/g, '');
+        if (reqPhone && dbPhone && reqPhone === dbPhone && reqPhone.length >= 10) return true;
+
+        return false;
+      });
 
       if (!user) {
-        console.error('[DB ERROR] Associated subscriber node not found for request:', requestId, 'Data:', { userId: req.userId, username: req.username, email: req.email });
-        return { success: false, message: 'Associated subscriber node not found. Please verify the user exists in the system.' };
+        console.warn('[DB-AUTH-HEAL] Identity gap detected during approval. Reconstructing subscriber node for request:', requestId);
+        
+        // SELF-HEALING: If user is missing from registry but request exists, re-create them
+        const healedUser: any = {
+           id: req.userId || ('USR-' + Date.now()),
+           name: req.name || 'New Subscriber',
+           username: (req.username || '').toLowerCase().trim(),
+           email: (req.email || '').toLowerCase().trim(),
+           phone: (req.phone || '').replace(/\D/g, ''),
+           password: req.password || '', // Inherit from request if present
+           status: UserStatus.ACTIVE,
+           approval_status: 'approved',
+           kyc_status: 'pending',
+           role: Role.CUSTOMER,
+           createdAt: req.timestamp || new Date().toISOString(),
+           packageId: 'PKG-BASIC', // Default or inherit from request
+           balance: 0,
+           unpaidInvoices: 0,
+           isKYCVerified: false,
+           verificationStatus: VerificationStatus.UNVERIFIED,
+           tags: ['Healed-Identity']
+        };
+
+        this.state.users.push(healedUser);
+        user = healedUser;
       }
 
+      // Update Identity Payload
       user.approval_status = 'approved';
       user.status = UserStatus.ACTIVE;
+      user.kyc_status = user.kyc_status || 'pending';
+      
+      // Update Request Payload
       req.status = 'Approved';
       req.approval_status = 'approved';
       req.processedAt = new Date().toISOString();
+      req.processedBy = this.state.currentUser?.name || 'Administrator';
 
-      this.logNotification(user.id, 'success', 'Account Approved', 'Your signup request has been approved. Welcome to ClickOptix!');
-      this.logActivity(user.id, 'Approval', 'Subscriber account approved by administrator.');
-      this.logAudit('Signup Approved', 'Approval', `Signup for ${user.name} approved.`, user.id, user.name);
+      this.logNotification(user.id, 'success', 'Account Activated', 'Your identity has been verified. Welcome to ClickOptix!');
+      this.logActivity(user.id, 'Approval', 'Subscriber handshake approved by administrator.');
+      this.logAudit('Signup Approved', 'Approval', `Signup for ${user.name} (${user.id}) approved. Access granted.`, user.id, user.name);
 
       await this.commit();
       this.notify();
-      return { success: true, message: 'Identity approved.', userId: user.id };
+      
+      return { success: true, message: 'Identity Approved Successfully. Session link active.', userId: user.id };
     } catch (e: any) {
-      return { success: false, message: e.message };
+      console.error('[DB-AUTH-CRITICAL] Approval Bridge Failure:', e);
+      return { success: false, message: `System Fault: ${e.message}` };
     }
   }
 
@@ -2138,65 +2197,61 @@ class DB {
 
       if (type === 'package') {
         const req = this.state.packageRequests.find(r => r.id === id);
-        if (req) {
-          req.status = 'Rejected';
-          targetUserId = req.userId;
-          requestName = (this.state.packages.find(p => p.id === req.packageId)?.name || 'Package') + ' Request';
-        }
+        if (!req) return { success: false, message: 'Registry Query Error: Package request artifact not found.' };
+        req.status = 'Rejected';
+        targetUserId = req.userId;
+        requestName = (this.state.packages.find(p => p.id === req.packageId)?.name || 'Package') + ' Request';
       } else if (type === 'topup') {
         const req = this.state.topupRequests.find(r => r.id === id);
-        if (req) {
-          req.status = 'Rejected';
-          targetUserId = req.userId;
-          requestName = 'Top-up Request';
-        }
+        if (!req) return { success: false, message: 'Registry Query Error: Top-up request artifact not found.' };
+        req.status = 'Rejected';
+        targetUserId = req.userId;
+        requestName = 'Top-up Request';
       } else if (type === 'emergency') {
         const load = this.state.emergencyLoads.find(l => l.id === id);
-        if (load) {
-          load.status = 'Cancelled';
-          targetUserId = load.userId;
-          requestName = 'Emergency Load';
-        }
+        if (!load) return { success: false, message: 'Registry Query Error: Emergency load node not found.' };
+        load.status = 'Cancelled';
+        targetUserId = load.userId;
+        requestName = 'Emergency Load';
       } else if (type === 'signup') {
         const req = this.state.signupRequests.find(r => r.id === id);
-        if (req) {
-          req.status = 'Rejected';
-          req.approval_status = 'rejected';
-          requestName = 'New Connection Request';
-          targetUserId = req.userId || '';
-          
-          // Also block the user if they were pre-created
-          if (targetUserId) {
-            const user = this.state.users.find(u => u.id === targetUserId);
-            if (user) {
-              user.approval_status = 'rejected';
-              user.status = UserStatus.BLOCKED;
-            }
+        if (!req) return { success: false, message: 'Registry Query Error: Signup request artifact not found.' };
+        req.status = 'Rejected';
+        req.approval_status = 'rejected';
+        requestName = 'New Connection Request';
+        targetUserId = req.userId || '';
+        
+        if (targetUserId) {
+          const user = this.state.users.find(u => u.id === targetUserId);
+          if (user) {
+            user.approval_status = 'rejected';
+            user.status = UserStatus.BLOCKED;
           }
         }
       } else if (type === 'kyc') {
         const user = this.state.users.find(u => u.id === id);
-        if (user) {
-          user.kyc_status = 'rejected';
-          user.isKYCVerified = false;
-          user.isKYCSubmitted = false;
-          user.verificationStatus = VerificationStatus.UNVERIFIED;
-          targetUserId = user.id;
-          requestName = 'KYC Verification';
-        }
+        if (!user) return { success: false, message: 'Registry Query Error: Subscriber identity artifact not found.' };
+        user.kyc_status = 'rejected';
+        user.isKYCVerified = false;
+        user.isKYCSubmitted = false;
+        user.verificationStatus = VerificationStatus.UNVERIFIED;
+        targetUserId = user.id;
+        requestName = 'KYC Verification';
       }
 
       if (targetUserId) {
-        this.logNotification(targetUserId, 'error', 'Request Declined', `Your ${requestName} was declined. Reason: ${r}`);
-        this.logActivity(targetUserId, 'Rejection', `${requestName} declined by admin. Reason: ${r}`);
+        this.logNotification(targetUserId, 'error', 'Request Denied', `Your ${requestName} was declined. Reason: ${r}`);
+        this.logActivity(targetUserId, 'Rejection', `${requestName} rejected by security officer. Reason: ${r}`);
       }
 
-      this.logAudit('Request Rejected', 'Rejection', `${requestName} for ${id} rejected by ${this.state.currentUser?.name || 'System'}. Reason: ${r}`, targetUserId);
+      this.logAudit('Request Rejected', 'Rejection', `${requestName} for ${id} denied by ${this.state.currentUser?.name || 'Administrator'}. Reason: ${r}`, targetUserId);
 
       await this.commit();
-      return { success: true };
+      this.notify();
+      return { success: true, message: `${type.toUpperCase()} request has been rejected and logged.` };
     } catch (e: any) {
-      return { success: false, message: e.message };
+      console.error('[DB-REJECT-CRITICAL] Failure during unified rejection protocol:', e);
+      return { success: false, message: `System Error: ${e.message}` };
     }
   }
 
@@ -3504,120 +3559,48 @@ class DB {
       return { success: false, message: 'Signups are currently disabled.' };
     }
 
-    let duplicateFound = false;
-    let duplicateReason = '';
-    
-    const checkDuplicate = (existing: any) => {
-      const dEmail = (data.email || '').toLowerCase().trim();
-      const eEmail = (existing.email || '').toLowerCase().trim();
-      if (dEmail && dEmail === eEmail) return `Email (${data.email}) already exists`;
+    try {
+      // Normalize values before dispatching
+      const payload = {
+        ...data,
+        email: data.email?.toLowerCase().trim(),
+        username: data.username?.toLowerCase().trim(),
+        phone: data.phone?.trim()
+      };
 
-      const dPhone = (data.phone || '').replace(/\D/g, '');
-      const ePhone = (existing.phone || '').replace(/\D/g, '');
-      if (dPhone && dPhone === ePhone) return `Phone Number (${data.phone}) already exists`;
+      console.log('[DB-AUTH] Dispatching signup protocol for:', payload.username);
 
-      const dCnic = (data.cnic || '').replace(/\D/g, '');
-      const eCnic = (existing.cnic || '').replace(/\D/g, '');
-      if (dCnic && dCnic === eCnic) return `CNIC (${data.cnic}) already exists`;
+      const response = await fetch(`${this.backendUrl}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-      const dUsername = (data.username || '').toLowerCase().trim();
-      const eUsername = (existing.username || '').toLowerCase().trim();
-      if (dUsername && dUsername === eUsername) return `Username (${data.username}) already exists`;
-
-      const dPppoe = (data.pppoeId || '').toLowerCase().trim();
-      const ePppoe = (existing.pppoeId || '').toLowerCase().trim();
-      if (dPppoe && dPppoe === ePppoe) return `PPPoE ID (${data.pppoeId}) is already registered`;
-
-      return null;
-    };
-
-    // Check users for hard blocks
-    for (const u of this.state.users) {
-      if (u.deleted) continue;
-      const reason = checkDuplicate(u);
-      if (reason) {
-        this.logAudit('Signup Blocked', 'System', `Signup blocked for ${data.name} due to identity conflict with existing user: ${reason}`, undefined, data.name);
-        return { success: false, message: `Conflict: ${reason}. This identity is already active in the system.` };
+      const res = await response.json();
+      if (!res.success) {
+        return { success: false, message: res.message || 'Signup refused by authority node.' };
       }
+
+      this.logAudit(
+        'New User Signup',
+        'Request',
+        `New user ${data.name} signed up via secure backend.`,
+        res.user.id,
+        data.name
+      );
+
+      // We do NOT manually push to state.users here as the backend performs the write 
+      // to Firestore, and our onSnapshot listener will hydrate the local state automatically.
+      return { 
+        success: true, 
+        message: 'Account Handshake Successful.',
+        user: res.user 
+      };
+
+    } catch (e: any) {
+      console.error('[DB-AUTH-ERROR] Signup Protocol Failed:', e);
+      return { success: false, message: 'Identity dispatch failed. Check network link.' };
     }
-
-    // Check pending requests for warnings or soft blocks
-    for (const r of this.state.signupRequests) {
-      if (r.status === 'Rejected') continue;
-      const reason = checkDuplicate(r);
-      if (reason) {
-        if (settings.duplicateControl.blockDuplicate) {
-          this.logAudit('Signup Blocked', 'System', `Signup blocked for ${data.name} due to pending request conflict: ${reason}`, undefined, data.name);
-          return { success: false, message: `Conflict: ${reason}. A signup request with this identity is already in progress.` };
-        } else {
-          duplicateFound = true;
-          duplicateReason = reason;
-          break; 
-        }
-      }
-    }    const newUser: ISPUser = {
-      id: 'USR-' + Date.now(),
-      connectionId: 'CID-' + Math.floor(10000 + Math.random() * 90000),
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      cnic: data.cnic,
-      username: data.username,
-      password: data.password,
-      status: UserStatus.ACTIVE,
-      kyc_status: 'pending',
-      approval_status: 'pending',
-      isKYCVerified: false,
-      isKYCSubmitted: false,
-      verificationStatus: VerificationStatus.PENDING,
-      role: Role.CUSTOMER,
-      portalEnabled: true,
-      activityLog: [],
-      createdAt: new Date().toISOString(),
-      balance: 0,
-      activationCount: 0,
-      managementMode: 'Manual',
-      connectionType: data.connectionType || 'Fiber',
-      nasConnectionType: 'Manual',
-      creditScore: 600,
-      address: data.address || '',
-      area: data.area || '',
-      packageId: data.packageId || this.state.packages[0]?.id || 'PKG-1',
-      pppoeId: data.pppoeId || `pppoe_${data.username || Math.floor(Math.random() * 100)}`,
-      referralCode: (data.username || 'user').toUpperCase().slice(0, 5) + Math.floor(Math.random() * 100)
-    };
-
-    const newRequest: SignupRequest = {
-      ...data,
-      id: 'SR-' + Date.now(),
-      userId: newUser.id,
-      status: 'Pending',
-      kyc_status: 'pending',
-      approval_status: 'pending',
-      duplicateWarning: duplicateFound,
-      duplicateReason: duplicateReason,
-      timestamp: new Date().toISOString()
-    };
-
-    this.state.signupRequests.push(newRequest);
-    this.state.users.push(newUser);
-
-    this.logAudit(
-      'New User Signup',
-      'Request',
-      `New user ${data.name} signed up. Redirecting to KYC dashboard.`,
-      newUser.id,
-      newUser.name
-    );
-
-    await this.commit();
-    return { 
-      success: true, 
-      message: settings.signupMode === 'Auto' ? 'Account Auto-Activated.' : 'Request Received.',
-      duplicateWarning: duplicateFound,
-      user: newUser,
-      status: newRequest.status
-    };
   }
 
   async initiatePasswordReset(identifier: string) {
@@ -4394,6 +4377,13 @@ class DB {
     }
 
     this.state.users = this.state.users.filter(u => !ids.has(u.id));
+    this.state.signupRequests = (this.state.signupRequests || []).filter(r => !ids.has(r.userId) && !ids.has(r.id));
+    this.state.packageRequests = (this.state.packageRequests || []).filter(r => !ids.has(r.userId));
+    this.state.topupRequests = (this.state.topupRequests || []).filter(r => !ids.has(r.userId));
+    this.state.emergencyLoads = (this.state.emergencyLoads || []).filter(r => !ids.has(r.userId));
+    this.state.invoices = (this.state.invoices || []).filter(i => !ids.has(i.userId));
+    this.state.ledger = (this.state.ledger || []).filter(l => !ids.has(l.userId));
+
     this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Bulk Purge Accounts', targetId: 'Multiple', targetName: `${userIds.length} users purged`, details: `Deleted identities from registry. Credit Action: ${creditAction}. Adjusted ${creditAdjustedCount} users for total Rs. ${totalCreditAdjusted}.`, riskLevel: 'Critical' });
     await this.commit();
     this.notify();
