@@ -8,6 +8,7 @@ import {
   Settings2, Power, Layers, ArrowRight, Landmark, Map, X,
   History, Clock, ArrowRightLeft, UserCircle
 } from 'lucide-react';
+import { Modal } from '../components/shared/Modal';
 
 interface Props {
   state: AppState;
@@ -152,83 +153,58 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
          </button>
       </div>
 
-      {showLogs && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[500] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3rem] w-full max-w-4xl h-[80vh] shadow-2xl animate-in zoom-in duration-300 overflow-hidden flex flex-col">
-              <div className="p-8 border-b bg-slate-50 flex justify-between items-center">
-                 <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                       <History size={28}/>
+      <Modal
+        isOpen={showLogs}
+        onClose={() => setShowLogs(false)}
+        title="Fiscal Protocol Logs"
+        type="form"
+        icon={<History size={20} className="text-blue-400" />}
+        maxWidth="max-w-4xl"
+        scrollable
+        headerRightContent={
+          <select
+            className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-[10px] font-black uppercase tracking-widest outline-none text-white"
+            value={logFilter}
+            onChange={e => setLogFilter(e.target.value)}
+          >
+            <option value="All">All Gateways</option>
+            {gateways.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
+          </select>
+        }
+      >
+        <div className="space-y-3" style={{ minHeight: '400px' }}>
+          {filteredLogs.length === 0 ? (
+            <div className="h-64 flex flex-col items-center justify-center text-center opacity-30">
+              <ShieldAlert size={48} className="mb-4" />
+              <p className="text-sm font-black uppercase tracking-widest">No gateway logs found.</p>
+            </div>
+          ) : (
+            filteredLogs.map(log => (
+              <div key={log.id} className="p-4 bg-slate-800 border border-slate-700 rounded-2xl flex items-center justify-between hover:border-blue-700 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+                    log.type === LedgerType.DEBIT ? 'bg-red-900/30 border-red-800 text-red-400' : 'bg-green-900/30 border-green-800 text-green-400'
+                  }`}>
+                    <ArrowRightLeft size={18} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-black text-white uppercase tracking-tight">{log.description}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[9px] text-blue-400 font-black uppercase bg-blue-900/30 px-1.5 py-0.5 rounded">{log.method}</span>
+                      <span className="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-1"><Clock size={9}/> {new Date(log.timestamp).toLocaleString()}</span>
                     </div>
-                    <div>
-                       <h3 className="text-2xl font-black italic uppercase text-slate-900">Fiscal Protocol Logs</h3>
-                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Gateway Registry Audit trail</p>
-                    </div>
-                 </div>
-                 <div className="flex items-center gap-4">
-                    <select 
-                      className="px-4 py-2 bg-white border rounded-xl text-[10px] font-black uppercase tracking-widest outline-none"
-                      value={logFilter}
-                      onChange={e => setLogFilter(e.target.value)}
-                    >
-                       <option value="All">All Gateways</option>
-                       {gateways.map(g => <option key={g.id} value={g.name}>{g.name}</option>)}
-                    </select>
-                    <button onClick={() => setShowLogs(false)} className="p-2 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-xl transition-all">
-                       <X size={24}/>
-                    </button>
-                 </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={`text-lg font-black italic ${log.type === LedgerType.DEBIT ? 'text-red-400' : 'text-green-400'}`}>
+                    {log.type === LedgerType.DEBIT ? '-' : '+'} Rs. {log.amount.toLocaleString()}
+                  </p>
+                </div>
               </div>
-
-              <div className="flex-1 overflow-y-auto p-8 space-y-4 bg-slate-50/30 custom-scrollbar">
-                 {filteredLogs.length === 0 ? (
-                   <div className="h-full flex flex-col items-center justify-center text-center opacity-30">
-                      <ShieldAlert size={64} className="mb-4" />
-                      <p className="text-sm font-black uppercase tracking-widest">No gateway logs found in current registry pulse.</p>
-                   </div>
-                 ) : (
-                   filteredLogs.map(log => (
-                     <div key={log.id} className="p-6 bg-white border border-slate-100 rounded-[2rem] flex items-center justify-between group hover:shadow-xl hover:border-blue-100 transition-all">
-                        <div className="flex items-center gap-5">
-                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center border shadow-inner ${log.type === LedgerType.DEBIT ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>
-                              <ArrowRightLeft size={20} />
-                           </div>
-                           <div>
-                              <p className="text-xs font-black text-slate-900 uppercase tracking-tight">{log.description}</p>
-                              <div className="flex items-center gap-3 mt-1.5">
-                                 <span className="text-[9px] text-blue-600 font-black uppercase tracking-widest bg-blue-50 px-2 py-0.5 rounded">{log.method}</span>
-                                 <span className="text-[10px] text-slate-300">•</span>
-                                 <span className="text-[9px] text-slate-400 font-bold uppercase flex items-center gap-1"><Clock size={10}/> {new Date(log.timestamp).toLocaleString()}</span>
-                              </div>
-                           </div>
-                        </div>
-                        <div className="text-right">
-                           <p className={`text-xl font-black italic tracking-tighter ${log.type === LedgerType.DEBIT ? 'text-red-600' : 'text-green-600'}`}>
-                              {log.type === LedgerType.DEBIT ? '-' : '+'} Rs. {log.amount.toLocaleString()}
-                           </p>
-                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Registry ID: {log.id.split('_').pop()}</p>
-                        </div>
-                     </div>
-                   ))
-                 )}
-              </div>
-
-              <div className="p-6 bg-slate-950 border-t border-white/5 flex items-center justify-between text-white">
-                 <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                       <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                       <span className="text-[9px] font-black uppercase text-slate-400">Ledger Verified</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                       <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                       <span className="text-[9px] font-black uppercase text-slate-400">AES-256 Encrypted</span>
-                    </div>
-                 </div>
-                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">ClickOpticx Fiscal v8.5</p>
-              </div>
-           </div>
+            ))
+          )}
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

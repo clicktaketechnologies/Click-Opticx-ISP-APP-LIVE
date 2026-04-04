@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { AppState, OLTConfig, ONU } from '../types';
 import { db } from '../db';
+import { Modal } from '../components/shared/Modal';
+import { ConfirmDialog } from '../components/shared/ConfirmDialog';
 
 const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
    const [isAddModal, setIsAddModal] = useState(false);
@@ -20,6 +22,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
    const [isTestingId, setIsTestingId] = useState<string | null>(null);
    const [testResult, setTestResult] = useState<any>(null);
    const [isTestModal, setIsTestModal] = useState(false);
+   const [deleteOltId, setDeleteOltId] = useState<string | null>(null);
 
    const [formData, setFormData] = useState<Partial<OLTConfig>>({
       name: '', ip: '', brand: 'Huawei', accessType: 'SSH', username: 'admin', password: '',
@@ -271,9 +274,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                  <Pencil size={16} />
                               </button>
                               <button 
-                                 onClick={async () => {
-                                    if (confirm('Delete this OLT?')) await db.deleteOLT(olt.id);
-                                 }}
+                                 onClick={() => setDeleteOltId(olt.id)}
                                  className="flex-1 flex items-center justify-center bg-rose-50 text-rose-500 rounded-2xl hover:bg-rose-500 hover:text-white transition-all active:scale-95"
                               >
                                  <Trash2 size={16} />
@@ -506,231 +507,161 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
          )}
 
          {/* ADD/EDIT MODAL */}
-         {(isAddModal || isEditModal) && (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl animate-in fade-in duration-300">
-               <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-                  <div className="p-10 border-b border-slate-100 flex items-center justify-between bg-white/50">
-                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white">
-                           <Plus size={24} />
-                        </div>
-                        <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900">
-                           {isEditModal ? 'Update OLT Node' : 'Register New OLT'}
-                        </h2>
-                     </div>
-                     <button onClick={() => { setIsAddModal(false); setIsEditModal(false); resetForm(); }} className="w-12 h-12 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl flex items-center justify-center transition-colors">
-                        <X size={24} />
-                     </button>
-                  </div>
-
-                  <div className="p-10 bg-white grid grid-cols-2 gap-8">
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Device Name</label>
-                        <input 
-                           value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })}
-                           className="w-full px-6 py-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-                        />
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">IP Address</label>
-                        <input 
-                           value={formData.ip} onChange={e => setFormData({ ...formData, ip: e.target.value })}
-                           className="w-full px-6 py-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-                        />
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Brand</label>
-                        <select 
-                           value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value as any })}
-                           className="w-full px-6 py-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20 appearance-none capitalize"
-                        >
-                           {['Huawei', 'ZTE', 'BDCOM', 'VSOL', 'Raisecom', 'FiberHome'].map(b => <option key={b} value={b}>{b}</option>)}
-                        </select>
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Location / Sector</label>
-                        <input 
-                           value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })}
-                           className="w-full px-6 py-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-                        />
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Username</label>
-                        <input 
-                           value={formData.username} onChange={e => setFormData({ ...formData, username: e.target.value })}
-                           className="w-full px-6 py-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-                        />
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password</label>
-                        <input 
-                           type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })}
-                           className="w-full px-6 py-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-                        />
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PON Port Count</label>
-                        <input 
-                           type="number" value={formData.ponPorts} onChange={e => setFormData({ ...formData, ponPorts: parseInt(e.target.value) })}
-                           className="w-full px-6 py-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-                        />
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">SSH Port</label>
-                        <input 
-                           type="number" value={formData.port} onChange={e => setFormData({ ...formData, port: parseInt(e.target.value) })}
-                           className="w-full px-6 py-4 bg-slate-50 rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-                        />
-                     </div>
-                  </div>
-
-                  <div className="px-10 py-8 bg-slate-50 flex items-center justify-end gap-3">
-                     <button 
-                        onClick={() => { setIsAddModal(false); setIsEditModal(false); resetForm(); }}
-                        className="px-8 py-4 bg-white text-slate-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-200"
-                     >
-                        Cancel
-                     </button>
-                     <button 
-                        onClick={isEditModal ? handleUpdateOLT : handleAddOLT}
-                        className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all active:scale-95"
-                     >
-                        {isEditModal ? 'Save Changes' : 'Confirm Registration'}
-                     </button>
-                  </div>
+         <Modal
+            isOpen={isAddModal || isEditModal}
+            onClose={() => { setIsAddModal(false); setIsEditModal(false); resetForm(); }}
+            title={isEditModal ? 'Update OLT Node' : 'Register New OLT'}
+            type="form"
+            maxWidth="max-w-2xl"
+            scrollable
+            onConfirm={isEditModal ? handleUpdateOLT : handleAddOLT}
+            confirmLabel={isEditModal ? 'Save Changes' : 'Confirm Registration'}
+            cancelLabel="Cancel"
+         >
+            <div className="grid grid-cols-2 gap-4 py-2">
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Device Name</label>
+                  <input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/30 text-white placeholder:text-slate-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">IP Address</label>
+                  <input value={formData.ip} onChange={e => setFormData({ ...formData, ip: e.target.value })} className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/30 text-white placeholder:text-slate-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Brand</label>
+                  <select value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value as any })} className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/30 text-white appearance-none">
+                     {['Huawei', 'ZTE', 'BDCOM', 'VSOL', 'Raisecom', 'FiberHome'].map(b => <option key={b} value={b}>{b}</option>)}
+                  </select>
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location / Sector</label>
+                  <input value={formData.location} onChange={e => setFormData({ ...formData, location: e.target.value })} className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/30 text-white placeholder:text-slate-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Username</label>
+                  <input value={formData.username} onChange={e => setFormData({ ...formData, username: e.target.value })} className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/30 text-white placeholder:text-slate-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Password</label>
+                  <input type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/30 text-white placeholder:text-slate-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">PON Port Count</label>
+                  <input type="number" value={formData.ponPorts} onChange={e => setFormData({ ...formData, ponPorts: parseInt(e.target.value) })} className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/30 text-white" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">SSH Port</label>
+                  <input type="number" value={formData.port} onChange={e => setFormData({ ...formData, port: parseInt(e.target.value) })} className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/30 text-white" />
                </div>
             </div>
-         )}
+         </Modal>
 
          {/* TEST CONNECTION MODAL */}
-         {isTestModal && (
-            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl animate-in fade-in duration-300">
-               <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-                  <div className="p-10 text-center space-y-6">
-                     {isTestingId ? (
-                        <div className="flex flex-col items-center gap-6 py-8">
-                           <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
-                              <Loader2 size={40} className="text-blue-500 animate-spin" />
-                           </div>
-                           <div>
-                              <p className="font-black text-slate-800 uppercase tracking-tight">Testing Connection</p>
-                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Attempting SSH handshake...</p>
-                           </div>
-                        </div>
-                     ) : testResult ? (
-                        <div className="space-y-6">
-                           <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${testResult.success ? 'bg-green-50' : 'bg-rose-50'}`}>
-                              {testResult.success ? <CheckCircle2 size={40} className="text-green-500" /> : <XCircle size={40} className="text-rose-500" />}
-                           </div>
-                           <div>
-                              <h3 className="text-xl font-black uppercase italic tracking-tighter text-slate-900">
-                                 {testResult.success ? 'Connected Successfully' : 'Connection Failed'}
-                              </h3>
-                              {testResult.success && testResult.details && (
-                                 <p className="text-[10px] text-green-500 font-bold mt-2">Latency: OK • Status: {testResult.status || 'Online'}</p>
-                              )}
-                              {!testResult.success && testResult.error && (
-                                 <div className="mt-4 p-4 bg-rose-50 rounded-2xl border border-rose-100 text-left">
-                                    <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-1">Error Details</p>
-                                    <p className="text-[10px] text-rose-400 font-medium">{testResult.error}</p>
-                                 </div>
-                              )}
-                           </div>
-                        </div>
-                     ) : null}
+         <Modal
+            isOpen={isTestModal}
+            onClose={() => { setIsTestModal(false); setTestResult(null); }}
+            title="Connection Test"
+            type={testResult?.success ? 'success' : testResult ? 'error' : 'info'}
+            maxWidth="max-w-md"
+         >
+            <div className="py-4 text-center space-y-6">
+               {isTestingId ? (
+                  <div className="flex flex-col items-center gap-4 py-6">
+                     <div className="w-16 h-16 bg-blue-900/40 rounded-full flex items-center justify-center">
+                        <Loader2 size={36} className="text-blue-400 animate-spin" />
+                     </div>
+                     <div>
+                        <p className="font-black text-white uppercase tracking-tight">Testing Connection</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Attempting SSH handshake...</p>
+                     </div>
                   </div>
-                  <div className="px-10 py-6 bg-slate-50 flex items-center justify-center">
-                     <button 
-                        onClick={() => { setIsTestModal(false); setTestResult(null); }}
-                        className="px-12 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all active:scale-95"
-                     >
-                        Close
-                     </button>
+               ) : testResult ? (
+                  <div className="space-y-4">
+                     <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto ${testResult.success ? 'bg-emerald-900/30' : 'bg-rose-900/30'}`}>
+                        {testResult.success ? <CheckCircle2 size={36} className="text-emerald-400" /> : <XCircle size={36} className="text-rose-400" />}
+                     </div>
+                     <h3 className="text-lg font-black uppercase italic tracking-tighter text-white">
+                        {testResult.success ? 'Connected Successfully' : 'Connection Failed'}
+                     </h3>
+                     {testResult.success && testResult.details && (
+                        <p className="text-[10px] text-emerald-400 font-bold">Latency: OK • Status: {testResult.status || 'Online'}</p>
+                     )}
+                     {!testResult.success && testResult.error && (
+                        <div className="mt-2 p-4 bg-rose-950/50 rounded-xl border border-rose-800/40 text-left">
+                           <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-1">Error Details</p>
+                           <p className="text-[10px] text-rose-300 font-medium">{testResult.error}</p>
+                        </div>
+                     )}
                   </div>
-               </div>
+               ) : null}
             </div>
-         )}
+         </Modal>
 
          {/* HEALTH CHECK / DISCOVERY MODAL */}
-         {isHealthCheckModal && (
-            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xl animate-in fade-in duration-300">
-               <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-                  <div className="p-10 border-b border-slate-100 flex items-center justify-between bg-white/50">
-                     <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${healthCheckResult?.success ? 'bg-green-500 text-white' : 'bg-rose-500 text-white'}`}>
-                           {healthCheckResult?.discovery ? <Search size={24} /> : (healthCheckResult?.success ? <CheckCircle size={24} /> : <AlertTriangle size={24} />)}
-                        </div>
-                        <h2 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900">
-                           {healthCheckResult?.discovery ? 'Discovery Results' : 'Diagnostic Report'}
-                        </h2>
-                     </div>
-                     <button onClick={() => setIsHealthCheckModal(false)} className="w-12 h-12 bg-slate-50 text-slate-400 hover:text-slate-900 rounded-2xl flex items-center justify-center transition-colors">
-                        <X size={24} />
-                     </button>
+         <Modal
+            isOpen={isHealthCheckModal}
+            onClose={() => setIsHealthCheckModal(false)}
+            title={healthCheckResult?.discovery ? 'Discovery Results' : 'Diagnostic Report'}
+            type={isChecking ? 'info' : healthCheckResult?.success ? 'success' : 'error'}
+            maxWidth="max-w-2xl"
+            scrollable
+         >
+            <div className="py-2">
+               {isChecking ? (
+                  <div className="flex flex-col items-center justify-center py-16 gap-4">
+                     <RefreshCw className="animate-spin text-blue-400" size={40} />
+                     <div className="font-black text-slate-400 uppercase tracking-widest text-[10px]">Interrogating OLT Hardware...</div>
                   </div>
-
-                  <div className="p-10 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                     {isChecking ? (
-                        <div className="flex flex-col items-center justify-center py-20 gap-6">
-                           <RefreshCw className="animate-spin text-blue-500" size={48} />
-                           <div className="font-black text-slate-400 uppercase tracking-widest text-[10px]">Interrogating OLT Hardware...</div>
+               ) : (
+                  <div className="space-y-4">
+                     <div className="flex items-center justify-between p-4 bg-slate-800/60 rounded-xl">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol Status</span>
+                        <StatusBadge status={healthCheckResult?.status || (healthCheckResult?.success ? 'Online' : 'Offline')} />
+                     </div>
+                     {healthCheckResult?.discovery ? (
+                        <div className="p-4 bg-slate-800 rounded-xl">
+                           <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                              <DatabaseZap className="text-blue-400" size={14} /> Raw Discovery Data
+                           </h3>
+                           <pre className="text-[10px] font-mono text-slate-300 whitespace-pre-wrap break-all leading-relaxed h-48 overflow-y-auto pr-2 custom-scrollbar">
+                              {healthCheckResult.rawDiscovery || 'No unconfigured ONUs found.'}
+                           </pre>
                         </div>
                      ) : (
-                        <div className="space-y-6">
-                           <div className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl">
-                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol Status</span>
-                              <StatusBadge status={healthCheckResult?.status || (healthCheckResult?.success ? 'Online' : 'Offline')} />
-                           </div>
-
-                           {healthCheckResult?.discovery ? (
-                              <div className="space-y-4">
-                                 <div className="p-6 bg-slate-900 rounded-3xl text-white">
-                                    <h3 className="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2">
-                                       <DatabaseZap className="text-blue-400" size={16} /> Raw Discovery Data
-                                    </h3>
-                                    <pre className="text-[10px] font-mono opacity-80 whitespace-pre-wrap break-all leading-relaxed h-48 overflow-y-auto pr-2 custom-scrollbar">
-                                       {healthCheckResult.rawDiscovery || "Internal scanning complete. No unconfigured ONUs found responding to discovery packets."}
-                                    </pre>
-                                 </div>
-                                 <div className="text-center p-4">
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase">Parsing active... Found unregistered SNs will appear in the registry auto-add stream.</p>
-                                 </div>
+                        <div className="space-y-3">
+                           <div className="p-4 bg-slate-800/60 rounded-xl space-y-2">
+                              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Technical Details</h3>
+                              <div className="flex justify-between">
+                                 <span className="text-xs text-slate-400 font-bold">Node Identity</span>
+                                 <span className="text-xs text-white font-black">{healthCheckResult?.name || 'Remote Link'}</span>
                               </div>
-                           ) : (
-                              <div className="space-y-4">
-                                 <div className="p-6 bg-slate-50 rounded-3xl space-y-3">
-                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Technical Details</h3>
-                                    <div className="flex justify-between">
-                                       <span className="text-xs text-slate-600 font-bold">Node Identity</span>
-                                       <span className="text-xs text-slate-900 font-black">{healthCheckResult?.name || 'Remote Link'}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                       <span className="text-xs text-slate-600 font-bold">Latency Check</span>
-                                       <span className="text-xs text-green-500 font-black">Success</span>
-                                    </div>
-                                 </div>
-                                 {healthCheckResult?.error && (
-                                    <div className="p-4 bg-rose-50 text-rose-600 rounded-2xl text-xs font-bold border border-rose-100 italic">
-                                       DEBUG: {healthCheckResult.error}
-                                    </div>
-                                 )}
+                              <div className="flex justify-between">
+                                 <span className="text-xs text-slate-400 font-bold">Latency Check</span>
+                                 <span className="text-xs text-emerald-400 font-black">Success</span>
+                              </div>
+                           </div>
+                           {healthCheckResult?.error && (
+                              <div className="p-3 bg-rose-950/50 text-rose-400 rounded-xl text-xs font-bold border border-rose-800/40 italic">
+                                 DEBUG: {healthCheckResult.error}
                               </div>
                            )}
                         </div>
                      )}
                   </div>
-
-                  <div className="px-10 py-8 bg-slate-50 flex items-center justify-end">
-                     <button 
-                        onClick={() => setIsHealthCheckModal(false)}
-                        className="px-12 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all active:scale-95"
-                     >
-                        Close Report
-                     </button>
-                  </div>
-               </div>
+               )}
             </div>
-         )}
+         </Modal>
+
+         {/* DELETE CONFIRM */}
+         <ConfirmDialog
+            isOpen={!!deleteOltId}
+            onClose={() => setDeleteOltId(null)}
+            onConfirm={async () => { await db.deleteOLT(deleteOltId!); setDeleteOltId(null); }}
+            title="Delete OLT Node"
+            message="This will permanently remove the OLT and all associated ONU registrations. This action cannot be undone."
+            confirmLabel="Delete OLT"
+            danger
+         />
       </div>
    );
 };

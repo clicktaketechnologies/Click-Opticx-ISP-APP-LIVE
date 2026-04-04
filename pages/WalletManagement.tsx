@@ -1,4 +1,5 @@
 import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
+import { Modal } from '../components/shared/Modal';
 
 import React, { useState, useMemo } from 'react';
 import { AppState, Role, StaffUser, ISPUser, LedgerType, TopupRequest } from '../types';
@@ -297,41 +298,35 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
          )}
 
          {/* TOPUP MODAL */}
-         {isTopupModalOpen && selectedTarget && (
-            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[500] flex items-center justify-center p-4">
-               <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl animate-in zoom-in duration-300 overflow-hidden border border-white/20 flex flex-col">
-                  <div className="px-10 py-8 bg-green-600 text-white flex justify-between items-center">
-                     <div>
-                        <h3 className="text-2xl font-black uppercase tracking-tighter italic">Add Credits</h3>
-                        <p className="text-green-100 text-[10px] font-bold uppercase mt-1 tracking-widest">Target: {selectedTarget.name}</p>
-                     </div>
-                     <button onClick={() => setIsTopupModalOpen(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-green-100 hover:text-white"><X size={28} /></button>
-                  </div>
-                  <div className="p-10 space-y-10">
-                     <div>
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">Credits to Add (Rs.)</label>
-                        <div className="relative">
-                           <DollarSign className="absolute left-6 top-1/2 -translate-y-1/2 text-green-50 font-black text-2xl" />
-                           <input
-                              type="number"
-                              className="w-full pl-16 pr-6 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-5xl outline-none focus:border-green-500 transition-all text-slate-900 shadow-inner"
-                              value={amount}
-                              onChange={e => setAmount(Number(e.target.value))}
-                              autoFocus
-                           />
-                        </div>
-                     </div>
-                     <button
-                        onClick={handleProcessTopup}
-                        disabled={amount <= 0 || (!isSuperAdmin && (currentUser.balance || 0) < amount)}
-                        className="w-full py-6 bg-green-600 text-white font-black rounded-[2rem] hover:bg-green-700 transition-all shadow-2xl shadow-green-200 uppercase tracking-[0.3em] text-xs active:scale-95 disabled:grayscale disabled:opacity-50"
-                     >
-                        Confirm Transfer
-                     </button>
-                  </div>
+         <Modal
+           isOpen={isTopupModalOpen && !!selectedTarget}
+           onClose={() => { setIsTopupModalOpen(false); setAmount(0); }}
+           title="Add Credits"
+           type="form"
+           icon={<HandCoins size={20} className="text-green-400" />}
+           maxWidth="max-w-lg"
+           onConfirm={handleProcessTopup}
+           confirmLabel="Confirm Transfer"
+         >
+           {selectedTarget && (
+             <div className="space-y-4">
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Target: <span className="text-white">{selectedTarget.name}</span></p>
+               <div>
+                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Credits to Add (Rs.)</label>
+                 <div className="relative">
+                   <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
+                   <input
+                     type="number"
+                     className="w-full pl-12 pr-4 py-5 bg-slate-800 border border-slate-700 rounded-2xl font-black text-4xl outline-none focus:border-green-500 transition-all text-white"
+                     value={amount}
+                     onChange={e => setAmount(Number(e.target.value))}
+                     autoFocus
+                   />
+                 </div>
                </div>
-            </div>
-         )}
+             </div>
+           )}
+         </Modal>
       </div>
    );
 };

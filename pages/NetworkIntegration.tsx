@@ -11,6 +11,7 @@ import {
    Key, Shield, Settings2, Power, AlertCircle, Clock
 } from 'lucide-react';
 import ModuleGuide from '../components/shared/ModuleGuide';
+import Modal from '../components/shared/Modal';
 
 const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
    const [nodes, setNodes] = useState<NetworkNode[]>(state.networkNodes);
@@ -293,135 +294,116 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
          </div>
 
          {/* Add Physical Node Modal */}
-         {isAddModalOpen && (
-            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] flex items-center justify-center p-6 animate-in fade-in duration-300">
-               <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col max-h-[90vh]">
-                  <div className="p-10 border-b bg-slate-50 flex justify-between items-center shrink-0">
-                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                           <Plus size={28} />
-                        </div>
-                        <div>
-                           <h3 className="text-2xl font-black uppercase italic tracking-tighter">Provision Node</h3>
-                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Hardware Deployment</p>
-                        </div>
-                     </div>
-                     <button onClick={() => setIsAddModalOpen(false)} className="p-3 hover:bg-red-50 text-slate-300 hover:text-red-500 transition-all rounded-xl">
-                        <X size={24} />
-                     </button>
-                  </div>
+         <Modal
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
+            title="Provision Node"
+            type="form"
+            message="Hardware Deployment"
+            icon={<Plus size={28} className="text-blue-500" />}
+            confirmLabel="Initialize Deployment"
+            onConfirm={handleAddNode}
+            maxWidth="max-w-2xl"
+            hideCloseButton={false}
+         >
+            <div className="space-y-6">
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Node Label (Friendly Name)</label>
+                  <input
+                     className="w-full p-5 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-black text-lg outline-none focus:border-blue-500 transition-all shadow-inner"
+                     placeholder="e.g. OLT-NORTH-05"
+                     value={newNodeData.name}
+                     onChange={e => setNewNodeData({ ...newNodeData, name: e.target.value })}
+                     required
+                     autoFocus
+                  />
+               </div>
 
-                  <form onSubmit={handleAddNode} className="p-10 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
-                     <div className="space-y-6">
-                        <div className="space-y-2">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Node Label (Friendly Name)</label>
-                           <input
-                              className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg outline-none focus:border-blue-600 transition-all text-slate-900 shadow-inner"
-                              placeholder="e.g. OLT-NORTH-05"
-                              value={newNodeData.name}
-                              onChange={e => setNewNodeData({ ...newNodeData, name: e.target.value })}
-                              required
-                              autoFocus
-                           />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                           <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Vendor Architecture</label>
-                              <select
-                                 className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-xs uppercase outline-none focus:border-blue-600"
-                                 value={newNodeData.vendor}
-                                 onChange={e => setNewNodeData({ ...newNodeData, vendor: e.target.value as any })}
-                              >
-                                 {vendorOptions.map(v => (
-                                    <option key={v} value={v}>{v.replace('_', ' ')} Node</option>
-                                 ))}
-                              </select>
-                           </div>
-                           <div className="grid grid-cols-3 gap-3">
-                              <div className="col-span-2 space-y-2">
-                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Public IP</label>
-                                 <input
-                                    className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-bold text-xs outline-none focus:border-blue-600"
-                                    placeholder="10.0.0.X"
-                                    value={newNodeData.ip}
-                                    onChange={e => setNewNodeData({ ...newNodeData, ip: e.target.value })}
-                                    required
-                                 />
-                              </div>
-                              <div className="space-y-2">
-                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Port</label>
-                                 <input
-                                    type="number"
-                                    className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-bold text-xs outline-none focus:border-blue-600"
-                                    value={newNodeData.port}
-                                    onChange={e => setNewNodeData({ ...newNodeData, port: Number(e.target.value) })}
-                                    required
-                                 />
-                              </div>
-                           </div>
-                        </div>
-
-                        <div className="p-8 bg-slate-900 rounded-[2.5rem] space-y-6">
-                           <div className="flex items-center gap-3 text-blue-400">
-                              <Key size={18} />
-                              <h4 className="text-xs font-black uppercase tracking-widest italic">Communication Auth</h4>
-                           </div>
-                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <div className="space-y-2">
-                                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Access Protocol</label>
-                                 <select
-                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-xl font-black text-white text-[10px] uppercase outline-none"
-                                    value={newNodeData.protocol}
-                                    onChange={e => setNewNodeData({ ...newNodeData, protocol: e.target.value as any })}
-                                 >
-                                    <option value="SSH" className="bg-slate-900">SSH Protocol</option>
-                                    <option value="SNMP" className="bg-slate-900">SNMP v2/v3</option>
-                                    <option value="API" className="bg-slate-900">REST API</option>
-                                    <option value="Telnet" className="bg-slate-900">Telnet (Legacy)</option>
-                                 </select>
-                              </div>
-                              <div className="space-y-2">
-                                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Username / Community</label>
-                                 <input
-                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-xl font-bold text-white text-xs outline-none"
-                                    value={newNodeData.username}
-                                    onChange={e => setNewNodeData({ ...newNodeData, username: e.target.value })}
-                                 />
-                              </div>
-                              <div className="md:col-span-2 space-y-2">
-                                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Security Secret / Auth Key</label>
-                                 <input
-                                    type="password"
-                                    className="w-full p-3 bg-white/5 border border-white/10 rounded-xl font-bold text-white text-xs outline-none"
-                                    placeholder="Node password or community string"
-                                    value={newNodeData.password}
-                                    onChange={e => setNewNodeData({ ...newNodeData, password: e.target.value })}
-                                 />
-                              </div>
-                           </div>
-                        </div>
-                     </div>
-
-                     <div className="p-6 bg-blue-50 border border-blue-100 rounded-3xl flex items-start gap-4">
-                        <ShieldAlert size={24} className="text-blue-600 shrink-0 mt-1" />
-                        <p className="text-[9px] text-blue-700 font-bold uppercase leading-relaxed tracking-tighter">
-                           Provisioning a node requires verified physical presence in the POP location. API will attempt immediate connection after deployment using the specified protocol.
-                        </p>
-                     </div>
-
-                     <button
-                        type="submit"
-                        disabled={isSaving}
-                        className="w-full py-6 bg-blue-600 text-white font-black rounded-3xl shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all active:scale-95 uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-3 disabled:opacity-50"
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Vendor Architecture</label>
+                     <select
+                        className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-black text-xs uppercase outline-none focus:border-blue-500"
+                        value={newNodeData.vendor}
+                        onChange={e => setNewNodeData({ ...newNodeData, vendor: e.target.value as any })}
                      >
-                        {isSaving ? <Mini5GMicroLoader size={20} /> : <Save size={20} />}
-                        Initialize Deployment
-                     </button>
-                  </form>
+                        {vendorOptions.map(v => (
+                           <option key={v} value={v}>{v.replace('_', ' ')} Node</option>
+                        ))}
+                     </select>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                     <div className="col-span-2 space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Public IP</label>
+                        <input
+                           className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-xs outline-none focus:border-blue-500"
+                           placeholder="10.0.0.X"
+                           value={newNodeData.ip}
+                           onChange={e => setNewNodeData({ ...newNodeData, ip: e.target.value })}
+                           required
+                        />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Port</label>
+                        <input
+                           type="number"
+                           className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-xs outline-none focus:border-blue-500"
+                           value={newNodeData.port}
+                           onChange={e => setNewNodeData({ ...newNodeData, port: Number(e.target.value) })}
+                           required
+                        />
+                     </div>
+                  </div>
+               </div>
+
+               <div className="p-8 bg-slate-900 rounded-[2.5rem] space-y-6">
+                  <div className="flex items-center gap-3 text-blue-400">
+                     <Key size={18} />
+                     <h4 className="text-xs font-black uppercase tracking-widest italic">Communication Auth</h4>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div className="space-y-2">
+                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Access Protocol</label>
+                        <select
+                           className="w-full p-3 bg-white/5 border border-white/10 rounded-xl font-black text-white text-[10px] uppercase outline-none"
+                           value={newNodeData.protocol}
+                           onChange={e => setNewNodeData({ ...newNodeData, protocol: e.target.value as any })}
+                        >
+                           <option value="SSH" className="bg-slate-900">SSH Protocol</option>
+                           <option value="SNMP" className="bg-slate-900">SNMP v2/v3</option>
+                           <option value="API" className="bg-slate-900">REST API</option>
+                           <option value="Telnet" className="bg-slate-900">Telnet (Legacy)</option>
+                        </select>
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Username / Community</label>
+                        <input
+                           className="w-full p-3 bg-white/5 border border-white/10 rounded-xl font-bold text-white text-xs outline-none"
+                           value={newNodeData.username}
+                           onChange={e => setNewNodeData({ ...newNodeData, username: e.target.value })}
+                        />
+                     </div>
+                     <div className="md:col-span-2 space-y-2">
+                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Security Secret / Auth Key</label>
+                        <input
+                           type="password"
+                           className="w-full p-3 bg-white/5 border border-white/10 rounded-xl font-bold text-white text-xs outline-none"
+                           placeholder="Node password or community string"
+                           value={newNodeData.password}
+                           onChange={e => setNewNodeData({ ...newNodeData, password: e.target.value })}
+                        />
+                     </div>
+                  </div>
+               </div>
+
+               <div className="p-6 bg-blue-950/40 border border-blue-500/30 rounded-3xl flex items-start gap-4">
+                  <ShieldAlert size={24} className="text-blue-500 shrink-0 mt-1" />
+                  <p className="text-[9px] text-blue-300 font-bold uppercase leading-relaxed tracking-tighter">
+                     Provisioning a node requires verified physical presence in the POP location. API will attempt immediate connection after deployment using the specified protocol.
+                  </p>
                </div>
             </div>
-         )}
+         </Modal>
       </div>
    );
 };

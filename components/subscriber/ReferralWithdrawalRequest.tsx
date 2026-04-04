@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { X, ShieldCheck, Wallet, ArrowRight, CheckCircle, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import { db } from '../../db';
 import { ISPUser } from '../../types';
+import Modal from '../shared/Modal';
 
 interface Props {
   onClose: () => void;
@@ -29,19 +30,31 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[800] flex items-center justify-center p-6">
-      <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300">
-        
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Withdrawal Protocol"
+      type="info"
+      icon={<Wallet size={24} className="text-white" />}
+      maxWidth="max-w-lg"
+      footer={
+        step === 'form' ? (
+          <div className="flex gap-4 w-full">
+            <button onClick={onClose} className="flex-1 py-4 font-black text-slate-400 uppercase text-[10px] hover:bg-slate-50 rounded-2xl transition-all">Cancel</button>
+            <button onClick={handleConfirm} className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-2xl shadow-2xl active:scale-95 transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-3">
+               Authorize Conversion <ArrowRight size={16} />
+            </button>
+          </div>
+        ) : step === 'success' ? (
+          <button onClick={() => { onWithdraw(); onClose(); }} className="w-full py-6 bg-slate-900 text-white font-black rounded-3xl shadow-xl active:scale-95 transition-all uppercase text-xs tracking-[0.2em]">
+            Back to List
+          </button>
+        ) : null
+      }
+    >
+      <div className="space-y-10">
         {step === 'form' && (
-          <div className="p-10 space-y-10">
-            <div className="flex justify-between items-start">
-               <div className="space-y-1">
-                  <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-800">Withdrawal Protocol</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Fiscal Conversion Handshake</p>
-               </div>
-               <button onClick={onClose} className="p-2 text-slate-300 hover:text-red-500 transition-colors"><X size={24}/></button>
-            </div>
-
+          <div className="space-y-10">
             <div className="space-y-6 text-center">
                <div className="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100 shadow-inner">
                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Payout Value</p>
@@ -64,18 +77,11 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
                   </div>
                </div>
             </div>
-
-            <div className="flex gap-4">
-               <button onClick={onClose} className="flex-1 py-4 font-black text-slate-400 uppercase text-[10px] hover:bg-slate-50 rounded-2xl transition-all">Cancel</button>
-               <button onClick={handleConfirm} className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-2xl shadow-2xl active:scale-95 transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-3">
-                  Authorize Conversion <ArrowRight size={16} />
-               </button>
-            </div>
           </div>
         )}
 
         {step === 'processing' && (
-          <div className="p-24 text-center space-y-8 animate-pulse">
+          <div className="py-20 text-center space-y-8 animate-pulse">
             <Mini5GMicroLoader size={64} />
             <div className="space-y-1">
                <h4 className="text-xl font-black uppercase italic tracking-tighter">Registry Syncing...</h4>
@@ -85,7 +91,7 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
         )}
 
         {step === 'success' && (
-          <div className="p-16 text-center space-y-10 animate-in zoom-in duration-500">
+          <div className="py-12 text-center space-y-10 animate-in zoom-in duration-500">
              <div className="w-24 h-24 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner animate-bounce">
                 <CheckCircle size={56} />
              </div>
@@ -95,13 +101,10 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
                   Conversion protocol initiated. An administrator will audit the linked nodes. You will be notified via the alert relay upon clearance.
                 </p>
              </div>
-             <button onClick={() => { onWithdraw(); onClose(); }} className="w-full py-6 bg-slate-900 text-white font-black rounded-3xl shadow-xl active:scale-95 transition-all uppercase text-xs tracking-[0.2em]">
-                Back to List
-             </button>
           </div>
         )}
       </div>
-    </div>
+    </Modal>
   );
 };
 

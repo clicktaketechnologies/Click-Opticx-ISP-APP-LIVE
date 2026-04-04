@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { ISPUser, VerificationStatus } from '../../types';
 import { db } from '../../db';
+import Modal from '../shared/Modal';
 
 interface Props {
   user: ISPUser;
@@ -337,30 +338,22 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[1000] flex items-center justify-center p-6 animate-in fade-in duration-500">
-      <div className="bg-white w-full max-w-lg rounded-[3.5rem] shadow-2xl overflow-hidden border-[8px] border-slate-100 flex flex-col max-h-[90vh] animate-in zoom-in duration-300 relative">
-        <div className="p-10 bg-slate-900 text-white relative overflow-hidden shrink-0">
-          <div className="relative z-10 flex justify-between items-center pr-10">
-            <div className="space-y-2">
-              <h3 className="text-3xl font-black italic tracking-tighter uppercase leading-none">WELCOME</h3>
-              <p className="text-green-400 text-[10px] font-black uppercase tracking-[0.4em]">Initial Account Setup</p>
-            </div>
-          </div>
-          <ShieldCheck size={140} className="absolute -right-8 -bottom-8 opacity-10 rotate-12" fill="currentColor" />
-        </div>
-
-        <div className="p-10 flex-1 overflow-y-auto custom-scrollbar">
-          {renderSubStep()}
-        </div>
-
-        <div className="p-10 bg-slate-50 border-t flex flex-col gap-4 shrink-0">
+    <Modal
+      isOpen={true} // Controlled by parent rendering condition
+      onClose={onComplete}
+      title="Access Protocol"
+      type="info"
+      icon={<ShieldCheck size={24} className="text-white" />}
+      maxWidth="max-w-lg"
+      footer={
+        <div className="w-full flex flex-col gap-4">
           {completedSteps.size >= steps.length && !activeSubStep ? (
             <button
               onClick={handleFinish}
               disabled={isProcessing}
               className="w-full py-6 bg-green-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
             >
-              {isProcessing ? <Mini5GMicroLoader size={20} /> : <>GET STARTED <ArrowRight size={20} /></>}
+              {isProcessing ? <Mini5GMicroLoader size={20} /> : <>Node Activation <ArrowRight size={20} /></>}
             </button>
           ) : (
             <div className="flex gap-3">
@@ -368,20 +361,34 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
                 onClick={onComplete}
                 className="flex-1 py-5 bg-white border border-slate-200 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all shadow-sm"
               >
-                Remind Later
+                Postpone
               </button>
               <button
                 onClick={handleSkip}
                 disabled={isProcessing}
                 className="flex-1 py-5 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all flex items-center justify-center gap-2 group shadow-xl"
               >
-                {isProcessing ? <Mini5GMicroLoader size={14} /> : <><span className="text-[9px]">Skip Setup</span> <FastForward size={16} className="group-hover:translate-x-1 transition-transform" /></>}
+                {isProcessing ? <Mini5GMicroLoader size={14} /> : <><span className="text-[9px]">Skip Protocol</span> <FastForward size={16} className="group-hover:translate-x-1 transition-transform" /></>}
               </button>
             </div>
           )}
         </div>
+      }
+    >
+      <div className="space-y-6">
+        <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden">
+          <div className="relative z-10">
+            <h3 className="text-2xl font-black italic tracking-tighter uppercase leading-none">Initialization</h3>
+            <p className="text-green-400 text-[9px] font-black uppercase tracking-[0.4em] mt-2">Initial Account Setup Protocol</p>
+          </div>
+          <Zap size={80} className="absolute -right-4 -bottom-4 opacity-10 rotate-12" fill="currentColor" />
+        </div>
+
+        <div className="min-h-[300px]">
+          {renderSubStep()}
+        </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

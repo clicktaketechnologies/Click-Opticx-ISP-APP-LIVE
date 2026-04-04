@@ -4,8 +4,9 @@ import { AppState, Role, PaymentMethod, PaymentStatus, PaymentRecord, StaffUser,
 import { db } from '../db';
 import {
   CheckCircle, Clock, Plus, Wallet, ShieldCheck, X, Filter, Search, Info,
-  Users, UserCheck, ShieldAlert, BadgeDollarSign, ArrowRightLeft, Landmark, HandCoins, Building2, History, ChevronRight, UserCircle, ExternalLink, Activity, CreditCard, Zap, TrendingUp, XCircle
+  Users, UserCheck, ShieldAlert, BadgeDollarSign, ArrowRightLeft, Landmark, HandCoins, Building2, History, ChevronRight, UserCircle, ExternalLink, Activity, CreditCard, Zap, TrendingUp, XCircle, Shield
 } from 'lucide-react';
+import Modal from '../components/shared/Modal';
 
 const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
   const [activeTab, setActiveTab] = useState<'collections' | 'approvals' | 'team' | 'dealers'>('approvals');
@@ -465,146 +466,140 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
         </div>
       )}
 
-      {selectedStaff && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-end">
-          <div className="w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-500">
-            <div className="p-10 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-5">
-                <div className="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center border-4 border-white/5 shadow-2xl">
-                  <History size={32} />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-black uppercase tracking-tight italic">{selectedStaff.name}</h3>
-                  <p className="text-[10px] text-blue-400 font-black uppercase tracking-[0.3em] mt-1">Audit Protocol v2.1</p>
-                </div>
-              </div>
-              <button onClick={() => setSelectedStaff(null)} className="p-3 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all">
-                <X size={28} />
-              </button>
+      {/* STAFF AUDIT MODAL */}
+      <Modal
+        isOpen={!!selectedStaff}
+        onClose={() => setSelectedStaff(null)}
+        title={selectedStaff?.name || 'Staff Audit'}
+        type="info"
+        icon={<History size={24} className="text-white" />}
+        maxWidth="max-w-2xl"
+        footer={
+          canSettle && selectedStaff && settlementStats[selectedStaff.email]?.pending > 0 ? (
+            <button
+              onClick={() => handleSettleStaff(selectedStaff.email)}
+              className="w-full py-6 bg-green-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-green-900/20 hover:bg-green-700 transition-all active:scale-95 flex items-center justify-center gap-4"
+            >
+              <ShieldCheck size={24} />
+              Authorize Settlement
+            </button>
+          ) : null
+        }
+      >
+        <div className="space-y-10">
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-slate-950 p-8 rounded-[2rem] border border-slate-800 shadow-inner group">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Unsettled Cash</p>
+              <p className="text-3xl font-black text-rose-500 tracking-tighter">Rs. {selectedStaff ? (settlementStats[selectedStaff.email]?.pending.toLocaleString() || 0) : 0}</p>
             </div>
+            <div className="bg-slate-950 p-8 rounded-[2rem] border border-slate-800 shadow-inner group">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Total Attributed</p>
+              <p className="text-3xl font-black text-green-500 tracking-tighter">Rs. {selectedStaff ? (settlementStats[selectedStaff.email]?.total.toLocaleString() || 0) : 0}</p>
+            </div>
+          </div>
 
-            <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar bg-slate-50/30">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm group">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Unsettled Cash</p>
-                  <p className="text-3xl font-black text-red-600 tracking-tighter">Rs. {settlementStats[selectedStaff.email]?.pending.toLocaleString() || 0}</p>
-                </div>
-                <div className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm group">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Total Attributed</p>
-                  <p className="text-3xl font-black text-green-600 tracking-tighter">Rs. {settlementStats[selectedStaff.email]?.total.toLocaleString() || 0}</p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-                  <ArrowRightLeft size={16} className="text-blue-500" />
-                  Recent Team Collections
-                </h4>
-                <div className="space-y-3">
-                  {state.payments
-                    .filter(p => p.collectorEmail === selectedStaff.email && p.status === 'Approved')
-                    .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-                    .slice(0, 20)
-                    .map(p => (
-                      <div key={p.id} className="p-6 bg-white border border-slate-100 rounded-3xl flex items-center justify-between hover:shadow-xl transition-all group">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-300 group-hover:text-blue-500 transition-colors">
-                            <UserCircle size={20} />
-                          </div>
-                          <div>
-                            <p className="font-black text-slate-900 uppercase tracking-tight text-sm">{p.userName}</p>
-                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{new Date(p.timestamp).toLocaleDateString()} • {p.method}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-6">
-                          <div className="text-right">
-                            <p className="font-black text-slate-900 text-lg tracking-tighter">Rs. {p.amount.toLocaleString()}</p>
-                            <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${p.isCleared ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600 shadow-sm'}`}>
-                              {p.isCleared ? 'Registry Settled' : 'In Team Hand'}
-                            </span>
-                          </div>
-                          <button
-                            title="View User Details"
-                            className="p-3 bg-slate-50 text-slate-400 hover:bg-blue-600 hover:text-white rounded-2xl transition-all"
-                            onClick={() => alert("Forwarding to Customer 360: " + p.userName)}
-                          >
-                            <ExternalLink size={16} />
-                          </button>
-                        </div>
+          <div className="space-y-4">
+            <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2 mb-6">
+              <ArrowRightLeft size={16} className="text-blue-500" />
+              Recent Team Collections
+            </h4>
+            <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+              {selectedStaff && state.payments
+                .filter(p => p.collectorEmail === selectedStaff.email && p.status === 'Approved')
+                .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+                .slice(0, 20)
+                .map(p => (
+                  <div key={p.id} className="p-6 bg-slate-950 border border-slate-800 rounded-3xl flex items-center justify-between hover:border-slate-700 transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-slate-600 group-hover:text-blue-500 transition-colors">
+                        <UserCircle size={20} />
                       </div>
-                    ))}
+                      <div>
+                        <p className="font-black text-slate-100 uppercase tracking-tight text-sm">{p.userName}</p>
+                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{new Date(p.timestamp).toLocaleDateString()} • {p.method}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="text-right">
+                        <p className="font-black text-slate-100 text-lg tracking-tighter">Rs. {p.amount.toLocaleString()}</p>
+                        <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${p.isCleared ? 'bg-green-500/10 text-green-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                          {p.isCleared ? 'Registry Settled' : 'In Team Hand'}
+                        </span>
+                      </div>
+                      <button
+                        title="View User Details"
+                        className="p-3 bg-slate-900 text-slate-500 hover:bg-blue-600 hover:text-white rounded-2xl transition-all border border-slate-800"
+                        onClick={() => alert("Forwarding to Customer 360: " + p.userName)}
+                      >
+                        <ExternalLink size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              {selectedStaff && state.payments.filter(p => p.collectorEmail === selectedStaff.email && p.status === 'Approved').length === 0 && (
+                <div className="py-20 text-center border-2 border-dashed border-slate-800 rounded-[2.5rem]">
+                   <Activity size={40} className="text-slate-800 mx-auto mb-4" />
+                   <p className="text-slate-600 font-black uppercase tracking-widest text-[9px]">No collection history found for this member</p>
                 </div>
-              </div>
-            </div>
-
-            {canSettle && settlementStats[selectedStaff.email]?.pending > 0 && (
-              <div className="p-10 border-t bg-white shrink-0">
-                <button
-                  onClick={() => handleSettleStaff(selectedStaff.email)}
-                  className="w-full py-6 bg-green-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl shadow-green-100 hover:bg-green-700 transition-all active:scale-95 flex items-center justify-center gap-4"
-                >
-                  <ShieldCheck size={24} />
-                  Authorize Settlement
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {paymentModal && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl animate-in zoom-in overflow-hidden border border-white/20 flex flex-col max-h-[90vh]">
-            <div className="p-10 border-b border-slate-100 bg-slate-50 flex justify-between items-center shrink-0">
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase italic">Log Collection</h3>
-              <button onClick={() => setPaymentModal(null)} className="p-3 hover:bg-rose-50 rounded-2xl transition-all text-slate-400 hover:text-rose-600"><X size={28} /></button>
-            </div>
-            <div className="p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1">
-              <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block ml-1">Receipt Amount (Rs.)</label>
-                <div className="relative">
-                  <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-black text-2xl">{state.settings.currency}</span>
-                  <input
-                    type="number"
-                    className="w-full pl-16 pr-6 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-4xl outline-none focus:border-green-500 transition-all text-slate-900 shadow-inner"
-                    value={amount}
-                    onChange={(e) => setAmount(Number(e.target.value))}
-                  />
-                </div>
-              </div>
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 block ml-1">Payment Status</label>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { id: 'Cash', label: 'Cash Entry', icon: Landmark },
-                    { id: 'Online', label: 'Digital Transfer', icon: CreditCard },
-                    { id: 'Bank', label: 'Bank Direct', icon: Landmark },
-                    { id: 'Home Collection', label: 'Field Pickup', icon: HandCoins }
-                  ].map(m => (
-                    <button
-                      key={m.id}
-                      onClick={() => setMethod(m.id as any)}
-                      className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all font-black text-[10px] uppercase tracking-widest ${method === m.id ? 'bg-green-50 border-green-500 text-green-700 shadow-lg' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
-                    >
-                      <m.icon size={18} />
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="p-10 bg-slate-50 border-t shrink-0">
-              <button
-                onClick={handleManualPayment}
-                className="w-full py-6 bg-green-600 text-white font-black rounded-[2rem] hover:bg-green-700 transition-all shadow-2xl shadow-green-200 uppercase tracking-[0.3em] text-xs active:scale-95 flex items-center justify-center gap-3"
-              >
-                <ShieldCheck size={20} />
-                Validate & Record
-              </button>
+              )}
             </div>
           </div>
         </div>
-      )}
+      </Modal>
+
+      {/* LOG COLLECTION MODAL */}
+      <Modal
+        isOpen={!!paymentModal}
+        onClose={() => setPaymentModal(null)}
+        title="Log Collection"
+        type="success"
+        icon={<HandCoins size={24} className="text-white" />}
+        maxWidth="max-w-lg"
+        footer={
+          <button 
+            onClick={handleManualPayment}
+            className="w-full py-6 bg-green-600 text-white font-black rounded-[2.5rem] hover:bg-green-700 transition-all shadow-2xl shadow-green-900/20 uppercase tracking-[0.3em] text-xs active:scale-95 flex items-center justify-center gap-3"
+          >
+            <ShieldCheck size={20} />
+            Validate & Record
+          </button>
+        }
+      >
+        <div className="space-y-8">
+           <div>
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block ml-1 italic">Receipt Amount (Rs.)</label>
+              <div className="relative">
+                 <span className="absolute left-8 top-1/2 -translate-y-1/2 text-slate-500 font-black text-2xl">{state.settings.currency}</span>
+                 <input
+                   type="number"
+                   className="w-full pl-20 pr-8 py-8 bg-slate-950 border border-slate-800 rounded-[2.5rem] font-black text-4xl outline-none focus:border-green-500 transition-all text-white shadow-inner"
+                   value={amount}
+                   onChange={(e) => setAmount(Number(e.target.value))}
+                 />
+              </div>
+           </div>
+           <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block ml-1 italic">Payment Protocol</label>
+              <div className="grid grid-cols-2 gap-3">
+                 {[
+                   { id: 'Cash', label: 'Cash Entry', icon: Landmark },
+                   { id: 'Online', label: 'Digital Transfer', icon: CreditCard },
+                   { id: 'Bank', label: 'Bank Direct', icon: Landmark },
+                   { id: 'Home Collection', label: 'Field Pickup', icon: HandCoins }
+                 ].map(m => (
+                   <button
+                     key={m.id}
+                     onClick={() => setMethod(m.id as any)}
+                     className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all font-black text-[10px] uppercase tracking-widest ${method === m.id ? 'bg-green-500/10 border-green-500 text-green-400 shadow-lg' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}`}
+                   >
+                     <m.icon size={18} />
+                     {m.label}
+                   </button>
+                 ))}
+              </div>
+           </div>
+        </div>
+      </Modal>
     </div>
   );
 };

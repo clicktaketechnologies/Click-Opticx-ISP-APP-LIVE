@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Download, X, Smartphone, ArrowRight, Share, PlusSquare } from 'lucide-react';
+import { useBranding } from '../hooks/useBranding';
 
 export const PWAPrompt: React.FC = () => {
+    const branding = useBranding();
+    const displayLogo = branding.logo || branding.logoSquare || branding.logoLight;
+    const brandName = branding.brandName || branding.businessName || 'App';
+
     const [isVisible, setIsVisible] = useState(false);
     const [isIOS, setIsIOS] = useState(false);
     const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -64,12 +69,16 @@ export const PWAPrompt: React.FC = () => {
 
                 <div className="flex items-start gap-6">
                     {/* App Icon Mockup */}
-                    <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-100 shrink-0 group-hover:scale-110 transition-transform duration-500">
-                        <Smartphone size={32} />
+                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-lg shadow-blue-100 shrink-0 group-hover:scale-110 transition-transform duration-500 overflow-hidden border border-slate-100 p-2">
+                        {displayLogo ? (
+                            <img src={displayLogo} alt={brandName} className="w-full h-full object-contain" />
+                        ) : (
+                            <Smartphone size={32} />
+                        )}
                     </div>
 
                     <div className="flex-1 pr-6">
-                        <h3 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">Install App</h3>
+                        <h3 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">Install {brandName}</h3>
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 leading-relaxed">
                             {isIOS 
                                 ? 'Get faster access & optimized experience on your device.'

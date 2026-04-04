@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { AppState, NASConfig } from '../types';
 import { db } from '../db';
+import Modal from '../components/shared/Modal';
 
 const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
    const [isAddModal, setIsAddModal] = useState(false);
@@ -196,144 +197,97 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
          </div>
 
          {/* ADD/EDIT MODAL */}
-         {(isAddModal || isEditModal) && (
-            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
-               <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in flex flex-col max-h-[92vh]">
-                  <header className="p-8 border-b bg-blue-600 text-white flex justify-between items-center shrink-0">
-                     <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center"><Server size={30} /></div>
-                        <div>
-                           <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">
-                              {isEditModal ? 'Update Router Node' : 'Register New NAS'}
-                           </h3>
-                           <p className="text-blue-100 text-[10px] font-black uppercase tracking-widest mt-2 opacity-80">Final Architecture Cloud Node</p>
-                        </div>
+         <Modal
+            isOpen={isAddModal || isEditModal}
+            onClose={() => {setIsAddModal(false); setIsEditModal(false);}}
+            title={isEditModal ? 'Update Router Node' : 'Register New NAS'}
+            type="form"
+            message="Final Architecture Cloud Node"
+            icon={<Server size={28} className="text-blue-500" />}
+            confirmLabel={isEditModal ? 'Update Node' : 'Register NAS'}
+            onConfirm={isEditModal ? handleUpdate : handleAdd}
+            maxWidth="max-w-2xl"
+         >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Router Name</label>
+                  <input type="text" placeholder="e.g. Tower A" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500 placeholder:text-slate-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">IP Address</label>
+                  <input type="text" placeholder="0.0.0.0" value={formData.ip} onChange={e => setFormData({...formData, ip: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500 placeholder:text-slate-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Radius Secret</label>
+                  <input type="password" value={formData.secret} onChange={e => setFormData({...formData, secret: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500 placeholder:text-slate-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Radius CoA Port</label>
+                  <input type="number" value={formData.coaPort} onChange={e => setFormData({...formData, coaPort: parseInt(e.target.value)})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">API Admin Username</label>
+                  <input type="text" value={formData.apiUsername} onChange={e => setFormData({...formData, apiUsername: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">API Admin Password</label>
+                  <input type="password" value={formData.apiPassword} onChange={e => setFormData({...formData, apiPassword: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500" />
+               </div>
+               <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Location</label>
+                  <input type="text" placeholder="e.g. North Sector" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500" />
+               </div>
+               <div className="space-y-1.5 flex items-center gap-4 h-full pt-6">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                     <div className="relative">
+                        <input 
+                           type="checkbox" 
+                           checked={formData.coaEnabled} 
+                           onChange={e => setFormData({...formData, coaEnabled: e.target.checked})} 
+                           className="sr-only"
+                        />
+                        <div className={`w-12 h-6 rounded-full transition-colors ${formData.coaEnabled ? 'bg-blue-600' : 'bg-slate-700'}`}></div>
+                        <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.coaEnabled ? 'translate-x-6' : ''}`}></div>
                      </div>
-                     <button onClick={() => {setIsAddModal(false); setIsEditModal(false);}} className="p-2 hover:bg-white/10 rounded-xl transition-colors"><X size={24} /></button>
-                  </header>
-
-                  <div className="p-8 flex-1 overflow-y-auto custom-scrollbar">
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-1.5">
-                           <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Router Name</label>
-                           <input type="text" placeholder="e.g. Tower A" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-slate-300" />
-                        </div>
-                        <div className="space-y-1.5">
-                           <label className="text-[10px] font-black text-slate-400 uppercase ml-1">IP Address</label>
-                           <input type="text" placeholder="0.0.0.0" value={formData.ip} onChange={e => setFormData({...formData, ip: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-slate-300" />
-                        </div>
-                        <div className="space-y-1.5">
-                           <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Radius Secret</label>
-                           <input type="password" value={formData.secret} onChange={e => setFormData({...formData, secret: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10 placeholder:text-slate-300" />
-                        </div>
-                        <div className="space-y-1.5">
-                           <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Radius CoA Port</label>
-                           <input type="number" value={formData.coaPort} onChange={e => setFormData({...formData, coaPort: parseInt(e.target.value)})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10" />
-                        </div>
-                        <div className="space-y-1.5">
-                           <label className="text-[10px] font-black text-slate-400 uppercase ml-1">API Admin Username</label>
-                           <input type="text" value={formData.apiUsername} onChange={e => setFormData({...formData, apiUsername: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10" />
-                        </div>
-                        <div className="space-y-1.5">
-                           <label className="text-[10px] font-black text-slate-400 uppercase ml-1">API Admin Password</label>
-                           <input type="password" value={formData.apiPassword} onChange={e => setFormData({...formData, apiPassword: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10" />
-                        </div>
-                        <div className="space-y-1.5">
-                           <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Location</label>
-                           <input type="text" placeholder="e.g. North Sector" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-sm outline-none focus:ring-2 focus:ring-blue-500/10" />
-                        </div>
-                        <div className="space-y-1.5 flex items-center gap-4 h-full pt-6">
-                           <label className="flex items-center gap-3 cursor-pointer group">
-                              <div className="relative">
-                                 <input 
-                                    type="checkbox" 
-                                    checked={formData.coaEnabled} 
-                                    onChange={e => setFormData({...formData, coaEnabled: e.target.checked})} 
-                                    className="sr-only"
-                                 />
-                                 <div className={`w-12 h-6 rounded-full transition-colors ${formData.coaEnabled ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
-                                 <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.coaEnabled ? 'translate-x-6' : ''}`}></div>
-                              </div>
-                              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-900 transition-colors">Enable CoA Disconnect</span>
-                           </label>
-                        </div>
-                     </div>
-                  </div>
-
-                  <div className="p-8 bg-slate-50 border-t border-slate-100 flex gap-3 shrink-0">
-                     <button 
-                        onClick={() => {setIsAddModal(false); setIsEditModal(false);}}
-                        className="flex-1 py-5 bg-white border border-slate-200 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all"
-                     >
-                        Cancel
-                     </button>
-                     <button 
-                        onClick={isEditModal ? handleUpdate : handleAdd}
-                        className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:shadow-blue-200/50 hover:bg-blue-700 transition-all active:scale-95 flex items-center justify-center gap-2"
-                     >
-                        {isEditModal ? <CheckCircle size={18} /> : <Plus size={18} />} 
-                        {isEditModal ? 'Update Node' : 'Register NAS'}
-                     </button>
-                  </div>
+                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-white transition-colors">Enable CoA Disconnect</span>
+                  </label>
                </div>
             </div>
-         )}
+         </Modal>
 
          {/* HEALTH CHECK MODAL */}
-         {isHealthCheckModal && (
-            <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[3000] flex items-center justify-center p-6 animate-in fade-in duration-500">
-               <div className="bg-white rounded-[3.5rem] w-full max-w-md shadow-2xl p-10 sm:p-12 text-center space-y-10 animate-in zoom-in border border-slate-100 relative overflow-hidden">
-                  <div className={`absolute top-0 left-0 w-full h-2 ${isChecking ? 'bg-slate-100 overflow-hidden' : healthCheckResult?.status === 'Online' ? 'bg-gradient-to-r from-green-400 to-teal-500' : 'bg-rose-500'}`}>
-                     {isChecking && <div className="h-full bg-blue-600 animate-loading-bar w-1/2"></div>}
-                  </div>
-                  
-                  <div className="space-y-6">
-                     <div className={`w-28 h-28 mx-auto rounded-[2.5rem] flex items-center justify-center shadow-inner border-4 border-white ${
-                        isChecking ? 'bg-blue-50 text-blue-500' : 
-                        healthCheckResult?.status === 'Online' ? 'bg-green-50 text-green-500' : 'bg-rose-50 text-rose-500'
-                     }`}>
-                        {isChecking ? <Mini5GMicroLoader size={48} /> : 
-                         healthCheckResult?.status === 'Online' ? <CheckCircle size={48} className="animate-bounce-slow" /> : <AlertTriangle size={48} />}
+         <Modal
+            isOpen={isHealthCheckModal}
+            onClose={() => setIsHealthCheckModal(false)}
+            title={isChecking ? 'Analyzing Node' : healthCheckResult?.status === 'Online' ? 'Device Online' : 'Connection Failed'}
+            type={isChecking ? 'info' : healthCheckResult?.status === 'Online' ? 'success' : 'danger'}
+            message={isChecking ? `Contacting Router ${healthCheckResult?.name || ''}...` : `Remote Router Presence ${healthCheckResult?.status === 'Online' ? 'Confirmed' : 'Unreachable'}`}
+            icon={
+               isChecking ? <Mini5GMicroLoader size={48} /> : 
+               healthCheckResult?.status === 'Online' ? <CheckCircle size={48} className="animate-bounce-slow text-green-500" /> : <AlertTriangle size={48} className="text-rose-500" />
+            }
+            confirmLabel={isChecking ? 'CHECKING STATUS...' : 'Confirm Status'}
+            onConfirm={() => setIsHealthCheckModal(false)}
+            hideCloseButton={isChecking}
+            disableConfirm={isChecking}
+         >
+            {!isChecking && (
+               <div className="grid grid-cols-3 gap-3 pt-4">
+                  {[
+                     { name: 'RADIUS', s: healthCheckResult?.radius },
+                     { name: 'API', s: healthCheckResult?.api },
+                     { name: 'CoA', s: healthCheckResult?.coa }
+                  ].map((node, i) => (
+                     <div key={i} className="bg-slate-800/80 p-4 rounded-3xl border border-slate-700/50">
+                        <p className="text-[8px] font-black text-slate-400 uppercase mb-2">{node.name}</p>
+                        <span className={`text-[9px] font-black italic uppercase flex items-center justify-center ${node.s === 'Connected' || node.s === 'Enabled' ? 'text-green-500' : 'text-rose-500'}`}>
+                           {node.s}
+                        </span>
                      </div>
-                     
-                     <div className="space-y-3">
-                        <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none">
-                           {isChecking ? 'Analyzing Node' : healthCheckResult?.status === 'Online' ? 'Device Online' : 'Connection Failed'}
-                        </h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em] px-8">
-                           {isChecking ? `Contacting Router ${healthCheckResult?.name || ''}...` : `Remote Router Presence ${healthCheckResult?.status === 'Online' ? 'Confirmed' : 'Unreachable'}`}
-                        </p>
-                     </div>
-                  </div>
-
-                  {!isChecking && (
-                     <div className="grid grid-cols-3 gap-3">
-                        {[
-                           { name: 'RADIUS', s: healthCheckResult?.radius },
-                           { name: 'API', s: healthCheckResult?.api },
-                           { name: 'CoA', s: healthCheckResult?.coa }
-                        ].map((node, i) => (
-                           <div key={i} className="bg-slate-50 p-4 rounded-3xl border border-slate-100">
-                              <p className="text-[8px] font-black text-slate-400 uppercase mb-2">{node.name}</p>
-                              <span className={`text-[9px] font-black italic uppercase ${node.s === 'Connected' || node.s === 'Enabled' ? 'text-green-500' : 'text-rose-500'}`}>
-                                 {node.s}
-                              </span>
-                           </div>
-                        ))}
-                     </div>
-                  )}
-
-                  <button 
-                     onClick={() => setIsHealthCheckModal(false)}
-                     disabled={isChecking}
-                     className="w-full py-6 bg-slate-900 hover:bg-black text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:shadow-2xl transition-all active:scale-95 disabled:opacity-20 flex items-center justify-center gap-2"
-                  >
-                     {isChecking ? <Plus className="animate-spin opacity-40" /> : <ShieldCheck size={18} />} 
-                     {isChecking ? 'CHECKING STATUS...' : 'Confirm Status'}
-                  </button>
+                  ))}
                </div>
-            </div>
-         )}
+            )}
+         </Modal>
       </div>
    );
 };

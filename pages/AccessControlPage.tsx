@@ -9,6 +9,7 @@ import {
   Users, ShieldCheck, Settings, Mail, Fingerprint,
   Check, Ban, Pencil, Trash2, Activity
 } from 'lucide-react';
+import { Modal } from '../components/shared/Modal';
 
 const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
   const [activeView, setActiveView] = useState<'personnel' | 'governance'>('personnel');
@@ -257,55 +258,50 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
         </div>
       )}
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl animate-in zoom-in duration-300 overflow-hidden border border-white/20 flex flex-col max-h-[90vh]">
-            <div className="px-10 py-10 bg-slate-950 text-white flex justify-between items-center shrink-0">
-              <div>
-                <h3 className="text-3xl font-black italic tracking-tighter uppercase">{editingStaff ? 'Update Creds' : 'Provision Identity'}</h3>
-                <p className="text-blue-400 text-[10px] font-black uppercase mt-1 tracking-[0.4em]">Protocol: Security Handshake</p>
-              </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-slate-500 hover:text-white"><X size={32} /></button>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingStaff ? 'Update Credentials' : 'Provision Identity'}
+        type="form"
+        maxWidth="max-w-lg"
+        scrollable
+        onConfirm={handleSave}
+        confirmLabel={editingStaff ? 'Save Changes' : 'Commit to Team'}
+        cancelLabel="Abort Mission"
+      >
+        <div className="space-y-5 py-2">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Personnel Full Name</label>
+            <input type="text" className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl outline-none font-black text-white focus:border-blue-500 transition-all text-base" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. John Wick" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Assigned Scope</label>
+              <select className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl outline-none font-black text-white focus:border-blue-500 transition-all uppercase tracking-tighter" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
+                {state.roles.map(role => <option key={role} value={role}>{role}</option>)}
+              </select>
             </div>
-            <div className="p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Personnel Full Name</label>
-                <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-800 focus:border-blue-500 transition-all text-lg shadow-sm" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} placeholder="e.g. John Wick" />
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Access Secret</label>
+              <div className="relative">
+                <input type={showPass ? 'text' : 'password'} className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl outline-none font-black text-white focus:border-blue-500 transition-all pr-12" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
+                <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200">{showPass ? <EyeOff size={20} /> : <Eye size={20} />}</button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Scope</label>
-                  <select className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-700 focus:border-blue-500 transition-all uppercase tracking-tighter" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}>
-                    {state.roles.map(role => <option key={role} value={role}>{role}</option>)}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Access Secret</label>
-                  <div className="relative">
-                    <input type={showPass ? 'text' : 'password'} className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-700 focus:border-blue-500 transition-all pr-14 shadow-sm" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} placeholder="••••••••" />
-                    <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">{showPass ? <EyeOff size={22} /> : <Eye size={22} />}</button>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Corporate Identity (Email)</label>
-                <div className="relative">
-                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
-                  <input type="email" className="w-full pl-14 pr-5 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl outline-none font-black text-slate-800 disabled:opacity-50" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="id@clickopticx.com" disabled={!!editingStaff} />
-                </div>
-              </div>
-              <div className="p-6 bg-blue-50 border border-blue-100 rounded-3xl flex items-start gap-4 shadow-inner">
-                <Key className="text-blue-500 mt-1 shrink-0" size={24} />
-                <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed">Set unique access secrets. Users will be required to verify their corporate identity upon next login. Governance matrix overrides will apply immediately.</p>
-              </div>
-            </div>
-            <div className="p-10 bg-slate-50 border-t border-slate-100 flex gap-4 shrink-0">
-              <button onClick={() => setIsModalOpen(false)} className="flex-1 py-5 font-black text-slate-400 hover:bg-white hover:text-red-500 rounded-2xl transition-all uppercase tracking-widest text-[11px]">Abort Mission</button>
-              <button onClick={handleSave} className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-2xl hover:bg-blue-700 shadow-2xl shadow-blue-100 active:scale-95 transition-all uppercase tracking-[0.2em] text-xs">{editingStaff ? 'Save Changes' : 'Commit to Team'}</button>
             </div>
           </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Corporate Identity (Email)</label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+              <input type="email" className="w-full pl-12 pr-4 py-4 bg-slate-800/80 border border-slate-700 rounded-xl outline-none font-black text-white disabled:opacity-40" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="id@clickopticx.com" disabled={!!editingStaff} />
+            </div>
+          </div>
+          <div className="p-4 bg-blue-950/40 border border-blue-800/40 rounded-xl flex items-start gap-3">
+            <Key className="text-blue-400 mt-0.5 shrink-0" size={18} />
+            <p className="text-[10px] text-blue-300 font-bold uppercase leading-relaxed">Set unique access secrets. Governance matrix overrides will apply immediately.</p>
+          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

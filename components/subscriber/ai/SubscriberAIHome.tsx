@@ -45,22 +45,25 @@ const SubscriberAIHome: React.FC<Props> = ({ user, state, onNavigate }) => {
          <Activity className="absolute -right-20 -bottom-20 opacity-5 scale-[2.5]" size={300} />
       </div>
 
-      {/* Credit Summary Insight */}
+      {/* Credit Summary Insight - Now points to the Control Plane for WOW factor */}
       <button 
-        onClick={() => onNavigate('ai-risk')}
+        onClick={() => onNavigate('ai-control')}
         className="w-full bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex items-center justify-between group active:scale-[0.98] transition-all"
       >
          <div className="flex items-center gap-6">
-            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center border border-blue-100 shadow-inner group-hover:bg-blue-600 group-hover:text-white transition-all">
-               <HeartPulse size={32} />
+            <div className="w-16 h-16 bg-slate-950 text-blue-400 rounded-3xl flex items-center justify-center border border-slate-800 shadow-2xl group-hover:bg-blue-600 group-hover:text-white transition-all">
+               <Cpu size={32} className="animate-pulse" />
             </div>
             <div className="text-left">
-               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Billing Summary Insight</p>
-               <h4 className="text-xl font-black text-slate-900 uppercase italic tracking-tight">Trust Score: {user.creditScore}</h4>
-               <p className="text-[9px] text-green-600 font-bold uppercase mt-1">AI Rank: High Performance Node</p>
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Central Intelligence Hub</p>
+               <h4 className="text-xl font-black text-slate-900 uppercase italic tracking-tight">AI Control Plane</h4>
+               <p className="text-[9px] text-blue-600 font-bold uppercase mt-1">Smart Access Node {user?.creditScore || 600} Integrity</p>
             </div>
          </div>
-         <ChevronRight className="text-slate-200 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" size={24} />
+         <div className="flex items-center gap-2">
+            <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all">Enter Plane</span>
+            <ChevronRight className="text-slate-200 group-hover:text-blue-600 transition-transform group-hover:translate-x-1" size={24} />
+         </div>
       </button>
 
       {/* Grid of AI Sub-Modules */}

@@ -17,6 +17,7 @@ import {
 } from 'recharts';
 import { db } from '../db';
 import ModuleGuide from '../components/shared/ModuleGuide';
+import Modal from '../components/shared/Modal';
 import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 type DateFilterType = '3d' | '7d' | '30d' | 'all' | 'custom';
@@ -25,7 +26,8 @@ const Dashboard: React.FC<{
   state: AppState; 
   onNavigate?: (page: string, params?: { userId?: string, action?: string }) => void;
   searchTerm?: string;
-}> = ({ state, onNavigate, searchTerm }) => {
+  onClearSearch?: () => void;
+}> = ({ state, onNavigate, searchTerm, onClearSearch }) => {
   const [dateFilter, setDateFilter] = useState<DateFilterType>('7d');
   const [customStartDate, setCustomStartDate] = useState<string>(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
   const [customEndDate, setCustomEndDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -475,104 +477,108 @@ const Dashboard: React.FC<{
       </div>
 
       {/* SEARCH RESULTS OVERLAY */}
-      {searchTerm && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300 flex items-start justify-center pt-32 px-6">
-          <div className="bg-white w-full max-w-4xl rounded-[3rem] shadow-[0_40px_80px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden flex flex-col max-h-[70vh]">
-            <div className="p-10 border-b border-slate-50 flex items-center justify-between">
-              <div>
-                <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Global System Records</h3>
-                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Searching for: "{searchTerm}"</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center">
-                <Search size={24} />
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-10 space-y-12 no-scrollbar">
-              {/* Subscribers Section */}
-              <section className="space-y-6">
-                <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em] flex items-center gap-2 italic">
-                  Matched Users
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {state.users.filter(u => 
-                    u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                    u.connectionId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    u.phone?.includes(searchTerm)
-                  ).length > 0 ? (
-                    state.users.filter(u => 
-                      u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                      u.connectionId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                      u.phone?.includes(searchTerm)
-                    ).map(u => (
-                      <div 
-                        key={u.id} 
-                        onClick={() => onNavigate?.('profile', { userId: u.id })}
-                        className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-blue-300 hover:shadow-xl transition-all cursor-pointer"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all">
-                            <UserCircle size={20} />
-                          </div>
-                          <div>
-                            <p className="text-xs font-black text-slate-900 uppercase leading-none mb-1">{u.name}</p>
-                            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">{u.connectionId || 'NEW_USER'}</p>
-                          </div>
+      <Modal
+        isOpen={!!searchTerm}
+        onClose={() => {
+            if (onClearSearch) onClearSearch();
+        }}
+        title="Global System Records"
+        icon={<Search size={24} className="text-blue-400" />}
+        message={`Searching for: "${searchTerm}"`}
+        maxWidth="max-w-4xl"
+        scrollable
+        hideCloseButton={!onClearSearch}
+        footer={
+           <div className="flex items-center justify-between w-full">
+               <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Global System Lookup • {state.users.length + state.invoices.length} Total Records Checked</p>
+               {onClearSearch && (
+                  <button onClick={onClearSearch} className="px-8 py-3 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-md">Close Search</button>
+               )}
+           </div>
+        }
+      >
+         <div className="space-y-12 mb-4">
+            {/* Subscribers Section */}
+            <section className="space-y-6">
+              <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] flex items-center gap-2 italic border-b border-slate-50 pb-3">
+                Matched Users
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {state.users.filter(u => 
+                  u.name.toLowerCase().includes(searchTerm?.toLowerCase() || '') || 
+                  u.connectionId?.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
+                  u.email?.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
+                  u.phone?.includes(searchTerm || '')
+                ).length > 0 ? (
+                  state.users.filter(u => 
+                    u.name.toLowerCase().includes(searchTerm?.toLowerCase() || '') || 
+                    u.connectionId?.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
+                    u.email?.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
+                    u.phone?.includes(searchTerm || '')
+                  ).map(u => (
+                    <div 
+                      key={u.id} 
+                      onClick={() => {
+                          if (onClearSearch) onClearSearch();
+                          onNavigate?.('profile', { userId: u.id });
+                      }}
+                      className="p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-blue-300 hover:shadow-md transition-all cursor-pointer shadow-sm"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all">
+                          <UserCircle size={20} className={u.status === UserStatus.ACTIVE ? 'text-green-500 group-hover:text-white' : 'text-slate-400 group-hover:text-white'} />
                         </div>
-                        <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-2 py-6 text-center opacity-30 italic text-[10px] uppercase font-black tracking-widest border-2 border-dashed border-slate-100 rounded-2xl">No user records matched.</div>
-                  )}
-                </div>
-              </section>
-
-              {/* Transactions Section */}
-              <section className="space-y-6">
-                <h4 className="text-[10px] font-black text-green-600 uppercase tracking-[0.4em] flex items-center gap-2 italic">
-                  Payment Records
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {state.invoices.filter(i => 
-                    i.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                    i.userName.toLowerCase().includes(searchTerm.toLowerCase())
-                  ).length > 0 ? (
-                    state.invoices.filter(i => 
-                      i.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                      i.userName.toLowerCase().includes(searchTerm.toLowerCase())
-                    ).map(inv => (
-                      <div key={inv.id} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-green-300 hover:shadow-xl transition-all">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-green-600 group-hover:text-white transition-all">
-                            <Banknote size={20} />
-                          </div>
-                          <div>
-                            <p className="text-xs font-black text-slate-900 uppercase leading-none mb-1">{inv.userName}</p>
-                            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">{inv.id}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[10px] font-black text-slate-900">Rs. {inv.totalAmount}</p>
-                          <p className={`text-[7px] font-black uppercase ${inv.status === PaymentStatus.PAID ? 'text-green-500' : 'text-rose-500'}`}>{inv.status}</p>
+                        <div>
+                          <p className="text-xs font-black text-slate-900 uppercase leading-none mb-1">{u.name}</p>
+                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{u.connectionId || 'NEW_USER'}</p>
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="col-span-2 py-6 text-center opacity-30 italic text-[10px] uppercase font-black tracking-widest border-2 border-dashed border-slate-100 rounded-2xl">No records matched.</div>
-                  )}
-                </div>
-              </section>
-            </div>
+                      <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-2 py-8 text-center opacity-40 italic text-xs uppercase font-black tracking-widest border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50">No user records matched.</div>
+                )}
+              </div>
+            </section>
 
-            <div className="p-8 bg-slate-50 border-t border-slate-100 text-center">
-              <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Global System Lookup • {state.users.length + state.invoices.length} Total Records Checked</p>
-            </div>
-          </div>
-        </div>
-      )}
+            {/* Transactions Section */}
+            <section className="space-y-6">
+              <h4 className="text-[10px] font-black text-green-500 uppercase tracking-[0.4em] flex items-center gap-2 italic border-b border-slate-50 pb-3">
+                Payment Records
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {state.invoices.filter(i => 
+                  i.id.toLowerCase().includes(searchTerm?.toLowerCase() || '') || 
+                  i.userName.toLowerCase().includes(searchTerm?.toLowerCase() || '')
+                ).length > 0 ? (
+                  state.invoices.filter(i => 
+                    i.id.toLowerCase().includes(searchTerm?.toLowerCase() || '') || 
+                    i.userName.toLowerCase().includes(searchTerm?.toLowerCase() || '')
+                  ).map(inv => (
+                    <div key={inv.id} className="p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-green-300 hover:shadow-md transition-all shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-green-600 group-hover:text-white transition-all text-slate-400">
+                          <Banknote size={20} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-slate-900 uppercase leading-none mb-1">{inv.userName}</p>
+                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{inv.id}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-black text-slate-900">Rs. {inv.totalAmount}</p>
+                        <p className={`text-[9px] font-black uppercase tracking-wider ${inv.status === PaymentStatus.PAID ? 'text-green-600' : 'text-rose-600'}`}>{inv.status}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-2 py-8 text-center opacity-40 italic text-xs uppercase font-black tracking-widest border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50">No records matched.</div>
+                )}
+              </div>
+            </section>
+         </div>
+      </Modal>
     </div>
   );
 };

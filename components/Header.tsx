@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { Role } from '../types';
 import { Bell, Search, UserCircle, Database, X, CheckCircle, Info, AlertTriangle, CloudOff, RefreshCw, CloudUpload, Menu, Globe, LogOut, Cloud, ListChecks, Zap, ShieldAlert } from 'lucide-react';
 import { db } from '../db';
+import { useBranding } from '../hooks/useBranding';
 
 interface HeaderProps {
   user: { id?: string; email: string; role: Role; name: string };
@@ -17,7 +18,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, onLogout, searchTerm, onSearch, isPending }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const state = db.getState();
-  const branding = state.settings.branding;
+  const branding = useBranding();
   
   const userNotifications = useMemo(() => {
     // ADMIN TERMINAL FILTER: Only show admin or system audience notifications
@@ -104,14 +105,14 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
 
         <div className="flex items-center gap-2 md:pr-4 md:border-r border-slate-100 md:mr-1 group cursor-pointer">
            <div className="w-7 h-7 bg-slate-50 rounded-lg flex items-center justify-center overflow-hidden border border-slate-100 shadow-inner group-hover:scale-105 transition-transform">
-              {branding.logoSquare ? (
-                 <img src={branding.logoSquare} className="w-full h-full object-contain p-1" alt="Logo" />
+              {(branding.logo || branding.logoSquare || branding.logoLight) ? (
+                 <img src={branding.logo || branding.logoSquare || branding.logoLight} className="w-full h-full object-contain p-1" alt={branding.brandName || branding.businessName} />
               ) : (
                  <Globe size={14} className="text-blue-600" />
               )}
            </div>
            <div className="hidden lg:block">
-              <p className="text-[8px] font-black uppercase tracking-tighter italic text-slate-800 leading-none">{branding.businessName}</p>
+              <p className="text-[8px] font-black uppercase tracking-tighter italic text-slate-800 leading-none">{branding.brandName || branding.businessName}</p>
            </div>
         </div>
 

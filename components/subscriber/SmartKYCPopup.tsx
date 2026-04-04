@@ -7,6 +7,7 @@ import {
 import { db } from '../../db';
 import { ISPUser, KYCMethod } from '../../types';
 import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
+import Modal from '../shared/Modal';
 
 interface SmartKYCPopupProps {
   user: ISPUser;
@@ -23,8 +24,6 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeSide, setActiveSide] = useState<'front' | 'back' | 'selfie' | 'document' | null>(null);
-
-  if (!isOpen) return null;
 
   const handleMethodSelect = (m: KYCMethod) => {
     setMethod(m);
@@ -51,7 +50,6 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
   const handleSubmit = async () => {
     if (!method) return;
     
-    // Basic validation
     if (method === KYCMethod.CNIC && (!files.front || !files.back)) {
       setError("Please upload both front and back images of your CNIC.");
       return;
@@ -251,20 +249,48 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
     </div>
   );
 
+  const RefreshCw = ({ className, size }: { className?: string, size?: number }) => (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      width={size || 24} 
+      height={size || 24} 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="3" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      className={className}
+    >
+      <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85.83 6.72 2.24L21 8" />
+      <path d="M21 3v5h-5" />
+    </svg>
+  );
+
   return (
-    <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xl z-[2000] flex items-center justify-center p-6 animate-in fade-in duration-300">
-      <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col relative">
-        <button onClick={onClose} className="absolute top-8 right-8 p-3 hover:bg-slate-100 rounded-2xl text-slate-400 transition-all z-20"><X size={24} /></button>
-        
-        <div className="p-10 pb-6 shrink-0 flex flex-col items-center text-center">
-          <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center shadow-inner border border-blue-100/50 mb-6">
-            <Fingerprint size={32} />
-          </div>
-          <h2 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter italic leading-none mb-2">Smart Identity Node</h2>
-          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em] opacity-80">KYC Verification Protocol v2.4</p>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Smart Identity Node"
+      type="info"
+      icon={<Fingerprint size={24} className="text-white" />}
+      maxWidth="max-w-lg"
+      footer={
+        <div className="flex items-center justify-between w-full">
+           <div className="flex items-center gap-2">
+              <ShieldCheck className="text-green-500" size={14} />
+              <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">End-to-End Encrypted</span>
+           </div>
+           <Zap className="text-amber-500 animate-pulse" size={14} />
+        </div>
+      }
+    >
+      <div className="space-y-6">
+        <div className="text-center space-y-1">
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] opacity-80">KYC Verification Protocol v2.4</p>
         </div>
 
-        <div className="p-10 pt-4 flex-1 overflow-y-auto custom-scrollbar">
+        <div className="min-h-[300px]">
           {step === 'methods' && renderMethods()}
           {step === 'upload' && renderUpload()}
           {step === 'processing' && renderProcessing()}
@@ -278,16 +304,8 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
           accept="image/*" 
           onChange={handleFileChange} 
         />
-        
-        <div className="px-10 py-6 bg-slate-50 border-t flex items-center justify-between shrink-0">
-           <div className="flex items-center gap-2">
-              <ShieldCheck className="text-green-500" size={14} />
-              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">End-to-End Encrypted</span>
-           </div>
-           <Zap className="text-amber-500 animate-pulse" size={14} />
-        </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

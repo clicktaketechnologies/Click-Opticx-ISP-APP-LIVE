@@ -7,6 +7,7 @@ import {
 import { AppState, FlashLog, UserStatus, PaymentStatus } from '../types';
 import { db } from '../db';
 import ModuleGuide from '../components/shared/ModuleGuide';
+import { Modal } from '../components/shared/Modal';
 
 const SystemFlash: React.FC<{ state: AppState }> = ({ state }) => {
     const [selectedMonth, setSelectedMonth] = useState(new Date().toISOString().substring(0, 7));
@@ -205,56 +206,50 @@ const SystemFlash: React.FC<{ state: AppState }> = ({ state }) => {
             </div>
 
             {/* CONFIRMATION MODAL */}
-            {isConfirmModalOpen && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-2xl animate-in fade-in duration-300">
-                    <div className="bg-white w-full max-w-lg rounded-[3.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-100">
-                        <div className="p-10 text-center space-y-6">
-                            <div className="w-24 h-24 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-rose-50/50">
-                                <ShieldAlert size={48} className="animate-pulse" />
-                            </div>
-                            <div>
-                                <h2 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none mb-3">Extreme Caution Protocol</h2>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] leading-relaxed max-w-xs mx-auto">
-                                    Initiating System Flash for <span className="text-slate-900">{selectedMonth}</span>. All subscriber nodes will be reset to N/A / Inactive.
-                                </p>
-                            </div>
-
-                            <div className="space-y-4">
-                                <label className="text-[9px] font-black text-rose-500 uppercase tracking-widest">Type "CONFIRM FLASH" to authorize deployment</label>
-                                <input 
-                                    type="text" 
-                                    value={confirmText}
-                                    onChange={(e) => setFlashConfirmText(e.target.value)}
-                                    placeholder="CONFIRM FLASH"
-                                    className="w-full px-8 py-5 bg-rose-50 border-2 border-rose-100 rounded-3xl text-sm font-black outline-none focus:border-rose-300 transition-all text-center uppercase tracking-[0.3em] placeholder:tracking-normal placeholder:font-bold"
-                                />
-                            </div>
-
-                            <div className="flex gap-4 pt-4">
-                                <button 
-                                    onClick={() => { setIsConfirmModalOpen(false); setFlashConfirmText(''); }}
-                                    className="flex-1 px-8 py-5 bg-slate-100 text-slate-600 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all active:scale-95"
-                                >
-                                    Abort Operation
-                                </button>
-                                <button 
-                                    onClick={handleFlash}
-                                    disabled={confirmText !== 'CONFIRM FLASH' || isProcessing}
-                                    className="flex-1 px-8 py-5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl shadow-red-200 transition-all active:scale-95 flex items-center justify-center gap-2"
-                                >
-                                    {isProcessing ? <Clock className="animate-spin" size={18} /> : <ShieldCheck size={18} />}
-                                    Commit Flash
-                                </button>
-                            </div>
-                        </div>
-                        <div className="bg-slate-50 p-6 text-center border-t border-slate-100">
-                            <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest italic flex items-center justify-center gap-2">
-                                <Clock size={12} /> Execution Timestamp: {new Date().toLocaleTimeString()}
-                            </p>
-                        </div>
-                    </div>
+            <Modal
+              isOpen={isConfirmModalOpen}
+              onClose={() => { setIsConfirmModalOpen(false); setFlashConfirmText(''); }}
+              title="Extreme Caution Protocol"
+              type="danger"
+              icon={<ShieldAlert size={22} className="text-rose-400 animate-pulse" />}
+              maxWidth="max-w-lg"
+              isLoading={isProcessing}
+              footer={
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => { setIsConfirmModalOpen(false); setFlashConfirmText(''); }}
+                    disabled={isProcessing}
+                    className="flex-1 px-6 py-3 bg-slate-800 text-slate-300 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-700 transition-all disabled:opacity-30"
+                  >
+                    Abort Operation
+                  </button>
+                  <button
+                    onClick={handleFlash}
+                    disabled={confirmText !== 'CONFIRM FLASH' || isProcessing}
+                    className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    {isProcessing ? <Clock className="animate-spin" size={16} /> : <ShieldCheck size={16} />}
+                    Commit Flash
+                  </button>
                 </div>
-            )}
+              }
+            >
+              <div className="space-y-4">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                  Initiating System Flash for <span className="text-white">{selectedMonth}</span>. All subscriber nodes will be reset to N/A / Inactive.
+                </p>
+                <div className="space-y-3">
+                  <label className="text-[9px] font-black text-rose-400 uppercase tracking-widest">Type "CONFIRM FLASH" to authorize deployment</label>
+                  <input
+                    type="text"
+                    value={confirmText}
+                    onChange={(e) => setFlashConfirmText(e.target.value)}
+                    placeholder="CONFIRM FLASH"
+                    className="w-full px-6 py-4 bg-slate-800 border border-rose-800/50 rounded-2xl text-sm font-black outline-none focus:border-rose-500 transition-all text-center uppercase tracking-widest text-white"
+                  />
+                </div>
+              </div>
+            </Modal>
         </div>
     );
 };

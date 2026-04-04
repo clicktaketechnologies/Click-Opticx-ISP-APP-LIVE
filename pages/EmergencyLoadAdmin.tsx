@@ -8,6 +8,7 @@ import {
   RefreshCw, Filter, DollarSign, Activity, TrendingUp, HandCoins,
   Pencil, Save, X, Layers, Box, Settings2, Calendar, ArrowUpRight
 } from 'lucide-react';
+import { Modal } from '../components/shared/Modal';
 
 const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
   const [filter, setFilter] = useState<'All' | 'Active' | 'Pending_Activation' | 'Overdue' | 'Settled'>('All');
@@ -194,86 +195,75 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
          </div>
       </div>
 
-      {/* Extension Modal */}
-      {showExtensionModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1100] flex items-center justify-center p-6 animate-in zoom-in duration-300">
-           <div className="bg-white rounded-[3.5rem] w-full max-w-md shadow-2xl overflow-hidden border-[8px] border-slate-50">
-              <div className="p-8 bg-blue-600 text-white flex justify-between items-center">
-                 <div className="flex items-center gap-4">
-                    <Clock size={28} />
-                    <h3 className="text-xl font-black uppercase italic tracking-tighter leading-none">Push Expiry</h3>
-                 </div>
-                 <button onClick={() => setShowExtensionModal(null)} className="p-2 hover:bg-white/10 rounded-xl"><X size={24}/></button>
-              </div>
-              <div className="p-10 space-y-8">
-                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Extension Tier (Days)</label>
-                    <div className="grid grid-cols-4 gap-2">
-                       {[1, 3, 5, 7].map(d => (
-                         <button 
-                           key={d} 
-                           onClick={() => setExtensionDays(d)}
-                           className={`py-3 rounded-xl border-2 font-black text-sm transition-all ${extensionDays === d ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
-                         >
-                            {d}d
-                         </button>
-                       ))}
-                    </div>
-                 </div>
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Authorized Logic Reason</label>
-                    <textarea 
-                      className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xs h-24 resize-none outline-none focus:border-blue-600 transition-all uppercase"
-                      value={extensionReason}
-                      onChange={e => setExtensionReason(e.target.value)}
-                    />
-                 </div>
-                 <button 
-                  onClick={handleApplyExtension}
-                  className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-100 active:scale-95 transition-all flex items-center justify-center gap-3"
-                 >
-                    <RefreshCw size={18}/> Authorize Registry Push
-                 </button>
-              </div>
-           </div>
-        </div>
-      )}
 
-      {/* Edit Load Modal (Legacy logic kept but updated UI) */}
-      {editingLoad && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1100] flex items-center justify-center p-6 animate-in zoom-in duration-300">
-           <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50">
-              <div className="p-8 bg-slate-950 text-white flex justify-between items-center">
-                 <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg"><Settings2 size={24}/></div>
-                    <div>
-                       <h3 className="text-xl font-black uppercase italic tracking-tighter leading-none">Modify Rescue Node</h3>
-                       <p className="text-[9px] text-blue-400 font-black uppercase tracking-widest mt-1">{editingLoad.userName}</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setEditingLoad(null)} className="p-2 hover:bg-white/10 rounded-xl"><X size={28}/></button>
-              </div>
-              <div className="p-10 space-y-8">
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Advance Credit Override (Rs)</label>
-                    <input type="number" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-lg" value={editingLoad.amount} onChange={e => setEditingLoad({...editingLoad, amount: Number(e.target.value)})} />
-                 </div>
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Registry State Transformation</label>
-                    <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-xs uppercase" value={editingLoad.status} onChange={e => setEditingLoad({...editingLoad, status: e.target.value as any})}>
-                       <option value="Pending_Activation">SYNCING (15m Lock)</option>
-                       <option value="Active">ACTIVE LINK</option>
-                       <option value="Overdue">DEFAULT RISK</option>
-                       <option value="Settled">SETTLED LEDGER</option>
-                    </select>
-                 </div>
-                 <button onClick={handleUpdateLoad} className="w-full py-5 bg-blue-600 text-white rounded-2xl shadow-xl hover:bg-blue-700 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-3">
-                    <Save size={18}/> Save Changes
-                 </button>
-              </div>
-           </div>
+      {/* Extension Modal */}
+      <Modal
+        isOpen={!!showExtensionModal}
+        onClose={() => setShowExtensionModal(null)}
+        title="Push Expiry Registry"
+        type="form"
+        icon={<Clock size={20} className="text-blue-400" />}
+        maxWidth="max-w-md"
+        onConfirm={handleApplyExtension}
+        confirmLabel="Authorize Registry Push"
+      >
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Extension Tier (Days)</label>
+            <div className="grid grid-cols-4 gap-2">
+              {[1, 3, 5, 7].map(d => (
+                <button
+                  key={d}
+                  onClick={() => setExtensionDays(d)}
+                  className={`py-3 rounded-xl border-2 font-black text-sm transition-all ${
+                    extensionDays === d ? 'bg-blue-600 border-blue-600 text-white' : 'bg-slate-800 border-slate-700 text-slate-400'
+                  }`}
+                >
+                  {d}d
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Authorized Logic Reason</label>
+            <textarea
+              className="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-xs h-20 resize-none outline-none focus:border-blue-500 text-white uppercase"
+              value={extensionReason}
+              onChange={e => setExtensionReason(e.target.value)}
+            />
+          </div>
         </div>
-      )}
+      </Modal>
+
+      {/* Edit Load Modal */}
+      <Modal
+        isOpen={!!editingLoad}
+        onClose={() => setEditingLoad(null)}
+        title="Modify Rescue Node"
+        type="form"
+        icon={<Settings2 size={20} className="text-blue-400" />}
+        maxWidth="max-w-lg"
+        onConfirm={handleUpdateLoad}
+        confirmLabel="Save Changes"
+      >
+        {editingLoad && (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Advance Credit Override (Rs)</label>
+              <input type="number" className="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-black text-lg text-white outline-none focus:border-blue-500" value={editingLoad.amount} onChange={e => setEditingLoad({...editingLoad, amount: Number(e.target.value)})} />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Registry State Transformation</label>
+              <select className="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-black text-xs uppercase text-white outline-none focus:border-blue-500" value={editingLoad.status} onChange={e => setEditingLoad({...editingLoad, status: e.target.value as any})}>
+                <option value="Pending_Activation">SYNCING (15m Lock)</option>
+                <option value="Active">ACTIVE LINK</option>
+                <option value="Overdue">DEFAULT RISK</option>
+                <option value="Settled">SETTLED LEDGER</option>
+              </select>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

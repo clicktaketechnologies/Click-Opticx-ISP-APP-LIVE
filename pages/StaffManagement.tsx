@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { AppState, Role, StaffUser } from '../types';
 import { db } from '../db';
 import { UserCheck, Plus, Shield, Search, X, Edit, Power } from 'lucide-react';
+import Modal from '../components/shared/Modal';
 
 const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -104,62 +105,52 @@ const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {
         </table>
       </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200 overflow-hidden border border-slate-100">
-            <div className="p-6 border-b flex justify-between items-center bg-slate-50">
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight">{editingStaff ? 'Edit Staff Member' : 'Add New Staff Member'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-xl transition-all text-slate-400 hover:text-slate-900"><X size={24} /></button>
-            </div>
-            <div className="p-8 space-y-5">
-              <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-2">Full Name</label>
-                <input 
-                  type="text" 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
-                  value={formData.name}
-                  onChange={e => setFormData({...formData, name: e.target.value})}
-                  placeholder="e.g. Alice Smith"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-2">Email Address</label>
-                <input 
-                  type="email" 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-medium"
-                  value={formData.email}
-                  onChange={e => setFormData({...formData, email: e.target.value})}
-                  placeholder="name@clickopticx.com"
-                  disabled={!!editingStaff}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-[0.15em] mb-2">Job Role / Permission Level</label>
-                <select 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-bold text-slate-700"
-                  value={formData.role}
-                  onChange={e => setFormData({...formData, role: e.target.value as Role})}
-                >
-                  {Object.values(Role).map(role => <option key={role} value={role}>{role}</option>)}
-                </select>
-              </div>
-              <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex gap-3 text-xs text-blue-700 font-medium">
-                <Shield size={16} className="shrink-0" />
-                <p>Note: New staff members can login using 'superpass' initially. They should change their password after the first login.</p>
-              </div>
-            </div>
-            <div className="p-6 bg-slate-50 border-t flex gap-4">
-              <button onClick={() => setIsModalOpen(false)} className="flex-1 py-3 font-bold text-slate-500 hover:bg-slate-200 rounded-xl transition-all">Cancel</button>
-              <button 
-                onClick={handleSave}
-                className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-xl shadow-blue-200 active:scale-95 transition-all"
-              >
-                {editingStaff ? 'Update Account' : 'Add Staff Member'}
-              </button>
-            </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={editingStaff ? 'Edit Staff Member' : 'Add New Staff Member'}
+        type="form"
+        onConfirm={handleSave}
+        confirmLabel={editingStaff ? 'Update Account' : 'Add Staff Member'}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Full Name</label>
+            <input 
+              type="text" 
+              className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700/50 rounded-xl outline-none focus:border-blue-500 transition-all font-black text-white"
+              value={formData.name}
+              onChange={e => setFormData({...formData, name: e.target.value})}
+              placeholder="e.g. Alice Smith"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Email Address</label>
+            <input 
+              type="email" 
+              className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700/50 rounded-xl outline-none focus:border-blue-500 transition-all font-black text-white"
+              value={formData.email}
+              onChange={e => setFormData({...formData, email: e.target.value})}
+              placeholder="name@clickopticx.com"
+              disabled={!!editingStaff}
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Job Role / Permission Level</label>
+            <select 
+              className="w-full px-4 py-3 bg-slate-800/80 border border-slate-700/50 rounded-xl outline-none focus:border-blue-500 transition-all font-black text-white"
+              value={formData.role}
+              onChange={e => setFormData({...formData, role: e.target.value as Role})}
+            >
+              {Object.values(Role).map(role => <option key={role} value={role}>{role}</option>)}
+            </select>
+          </div>
+          <div className="p-4 bg-blue-900/40 border border-blue-500/30 rounded-xl flex gap-3 text-xs text-blue-200 font-medium tracking-tight">
+            <Shield size={16} className="shrink-0 text-blue-400 mt-0.5" />
+            <p>Note: New staff members can login using 'superpass' initially. They should change their password after the first login.</p>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

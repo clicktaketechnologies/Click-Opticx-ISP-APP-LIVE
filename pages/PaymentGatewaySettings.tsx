@@ -1,4 +1,5 @@
 import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
+import { Modal } from '../components/shared/Modal';
 
 import React, { useState } from 'react';
 import { AppState, PaymentGateway, Role } from '../types';
@@ -163,116 +164,102 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
          </div>
 
          {/* Configuration Modal */}
-         {isConfigOpen && selectedGateway && (
-            <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-               <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl animate-in zoom-in duration-300 overflow-hidden border border-white/20 flex flex-col max-h-[90vh]">
-                  <div className="p-10 border-b bg-slate-50 flex justify-between items-center shrink-0">
-                     <div className="flex items-center gap-5">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center border shadow-sm">
-                           {getGatewayIcon(selectedGateway.id)}
-                        </div>
-                        <div>
-                           <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">{selectedGateway.name} Configuration</h3>
-                           <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Gateway Profile</p>
-                        </div>
-                     </div>
-                     <button onClick={() => setIsConfigOpen(false)} className="p-3 hover:bg-red-50 rounded-2xl text-slate-400 hover:text-red-600"><X size={28} /></button>
-                  </div>
-
-                  <div className="p-10 space-y-10 overflow-y-auto custom-scrollbar flex-1">
-                     {selectedGateway.type !== 'offline' && (
-                        <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between">
-                           <div>
-                              <h4 className="text-sm font-black uppercase text-slate-900">Environmentironment</h4>
-                              <p className="text-[10px] text-slate-400 font-bold uppercase">Toggle between Sandbox and Production nodes</p>
-                           </div>
-                           <div className="flex p-1 bg-white border rounded-2xl shadow-sm">
-                              <button
-                                 onClick={() => setSelectedGateway({ ...selectedGateway, sandbox: true })}
-                                 className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${selectedGateway.sandbox ? 'bg-amber-500 text-white shadow-lg' : 'text-slate-400'}`}
-                              >
-                                 Sandbox
-                              </button>
-                              <button
-                                 onClick={() => setSelectedGateway({ ...selectedGateway, sandbox: false })}
-                                 className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${!selectedGateway.sandbox ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400'}`}
-                              >
-                                 Live Node
-                              </button>
-                           </div>
-                        </div>
-                     )}
-
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Info size={14} /> Subscriber Guidance</label>
-                        <textarea
-                           className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-xs h-24 outline-none focus:border-blue-500 uppercase"
-                           placeholder="Instructions displayed to the user during payment..."
-                           value={selectedGateway.instructions || ''}
-                           onChange={e => setSelectedGateway({ ...selectedGateway, instructions: e.target.value })}
-                        />
-                     </div>
-
-                     <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Connection Parameters</h4>
-                           <button
-                              onClick={() => setShowSecrets(!showSecrets)}
-                              className="flex items-center gap-2 text-[9px] font-black uppercase text-blue-600"
-                           >
-                              {showSecrets ? <EyeOff size={14} /> : <Eye size={14} />} {showSecrets ? 'Mask Tokens' : 'Reveal Secrets'}
-                           </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                           {Object.keys(selectedGateway.config).map(key => (
-                              <div key={key} className="space-y-1">
-                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">{key.replace(/([A-Z])/g, ' $1')}</label>
-                                 <input
-                                    type={!showSecrets && (key.toLowerCase().includes('secret') || key.toLowerCase().includes('key') || key.toLowerCase().includes('password')) ? 'password' : 'text'}
-                                    className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs outline-none focus:border-blue-500"
-                                    value={selectedGateway.config[key]}
-                                    onChange={e => {
-                                       const newConfig = { ...selectedGateway.config };
-                                       newConfig[key] = e.target.value;
-                                       setSelectedGateway({ ...selectedGateway, config: newConfig });
-                                    }}
-                                 />
-                              </div>
-                           ))}
-                           {Object.keys(selectedGateway.config).length === 0 && (
-                              <div className="col-span-2 p-10 text-center border-2 border-dashed border-slate-100 rounded-3xl">
-                                 <ShieldAlert className="text-slate-100 mx-auto mb-4" size={32} />
-                                 <p className="text-[10px] font-black text-slate-300 uppercase">No manual parameters required for this node type.</p>
-                              </div>
-                           )}
-                        </div>
-                     </div>
-
-                     <div className="pt-6 border-t flex flex-col sm:flex-row gap-4">
-                        <button className="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2">
-                           <Play size={14} /> Test Connection Pulse
-                        </button>
-                        <button className="flex-1 py-4 bg-slate-100 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest cursor-not-allowed flex items-center justify-center gap-2">
-                           <ExternalLink size={14} /> Documentation API
-                        </button>
-                     </div>
-                  </div>
-
-                  <div className="p-10 bg-slate-50 border-t flex gap-4 shrink-0">
-                     <button onClick={() => setIsConfigOpen(false)} className="flex-1 py-5 font-black text-slate-400 hover:bg-white hover:text-red-500 rounded-2xl transition-all uppercase tracking-widest text-[11px]">Abort Updates</button>
+         <Modal
+           isOpen={isConfigOpen && !!selectedGateway}
+           onClose={() => setIsConfigOpen(false)}
+           title={selectedGateway ? `${selectedGateway.name} Configuration` : 'Configuration'}
+           type="form"
+           icon={selectedGateway ? getGatewayIcon(selectedGateway.id) : undefined}
+           maxWidth="max-w-2xl"
+           scrollable
+           isLoading={isSaving}
+           footer={
+             <div className="flex gap-3">
+               <button onClick={() => setIsConfigOpen(false)} disabled={isSaving} className="flex-1 py-3 font-black text-slate-400 hover:bg-white/5 rounded-xl transition-all uppercase tracking-widest text-[10px] disabled:opacity-30">Abort Updates</button>
+               <button
+                 onClick={handleSaveConfig}
+                 disabled={isSaving}
+                 className="flex-[2] py-3 bg-green-600 text-white font-black rounded-xl hover:bg-green-700 transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2 active:scale-95"
+               >
+                 {isSaving ? <Mini5GMicroLoader size={16} /> : <ShieldCheck size={16} />}
+                 Authorize & Publish
+               </button>
+             </div>
+           }
+         >
+           {selectedGateway && (
+             <div className="space-y-6">
+               {selectedGateway.type !== 'offline' && (
+                 <div className="p-4 bg-slate-800 rounded-2xl flex items-center justify-between">
+                   <div>
+                     <h4 className="text-sm font-black uppercase text-white">Environment</h4>
+                     <p className="text-[10px] text-slate-400 font-bold uppercase">Toggle between Sandbox and Production nodes</p>
+                   </div>
+                   <div className="flex p-1 bg-slate-700 rounded-xl">
                      <button
-                        onClick={handleSaveConfig}
-                        disabled={isSaving}
-                        className="flex-[2] py-5 bg-green-600 text-white font-black rounded-2xl hover:bg-green-700 shadow-xl shadow-green-100 transition-all uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-3 active:scale-95"
-                     >
-                        {isSaving ? <Mini5GMicroLoader size={20} /> : <ShieldCheck size={20} />}
-                        Authorize & Publish
-                     </button>
-                  </div>
+                       onClick={() => setSelectedGateway({ ...selectedGateway, sandbox: true })}
+                       className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${selectedGateway.sandbox ? 'bg-amber-500 text-white shadow-lg' : 'text-slate-400'}`}
+                     >Sandbox</button>
+                     <button
+                       onClick={() => setSelectedGateway({ ...selectedGateway, sandbox: false })}
+                       className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${!selectedGateway.sandbox ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400'}`}
+                     >Live Node</button>
+                   </div>
+                 </div>
+               )}
+               <div className="space-y-2">
+                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Info size={12}/> Subscriber Guidance</label>
+                 <textarea
+                   className="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-xs h-20 outline-none focus:border-blue-500 uppercase text-white"
+                   placeholder="Instructions displayed to the user during payment..."
+                   value={selectedGateway.instructions || ''}
+                   onChange={e => setSelectedGateway({ ...selectedGateway, instructions: e.target.value })}
+                 />
                </div>
-            </div>
-         )}
+               <div className="space-y-4">
+                 <div className="flex items-center justify-between">
+                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Connection Parameters</h4>
+                   <button
+                     onClick={() => setShowSecrets(!showSecrets)}
+                     className="flex items-center gap-2 text-[9px] font-black uppercase text-blue-400"
+                   >
+                     {showSecrets ? <EyeOff size={12}/> : <Eye size={12}/>} {showSecrets ? 'Mask Tokens' : 'Reveal Secrets'}
+                   </button>
+                 </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   {Object.keys(selectedGateway.config).map(key => (
+                     <div key={key} className="space-y-1">
+                       <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">{key.replace(/([A-Z])/g, ' $1')}</label>
+                       <input
+                         type={!showSecrets && (key.toLowerCase().includes('secret') || key.toLowerCase().includes('key') || key.toLowerCase().includes('password')) ? 'password' : 'text'}
+                         className="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-xs outline-none focus:border-blue-500 text-white"
+                         value={selectedGateway.config[key]}
+                         onChange={e => {
+                           const newConfig = { ...selectedGateway.config };
+                           newConfig[key] = e.target.value;
+                           setSelectedGateway({ ...selectedGateway, config: newConfig });
+                         }}
+                       />
+                     </div>
+                   ))}
+                   {Object.keys(selectedGateway.config).length === 0 && (
+                     <div className="col-span-2 p-8 text-center border border-dashed border-slate-700 rounded-2xl">
+                       <p className="text-[10px] font-black text-slate-500 uppercase">No manual parameters required for this node type.</p>
+                     </div>
+                   )}
+                 </div>
+               </div>
+               <div className="pt-4 border-t border-white/5 flex gap-3">
+                 <button className="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
+                   <Play size={12}/> Test Connection Pulse
+                 </button>
+                 <button className="flex-1 py-3 bg-slate-800/50 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest cursor-not-allowed flex items-center justify-center gap-2">
+                   <ExternalLink size={12}/> Documentation API
+                 </button>
+               </div>
+             </div>
+           )}
+         </Modal>
       </div>
    );
 };

@@ -1,166 +1,141 @@
 
-
 import React, { useState, useEffect } from 'react';
-import { Gauge, Play, Loader2, ArrowDownCircle, ArrowUpCircle, Activity, Globe, Wifi, ShieldCheck, History } from 'lucide-react';
-import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
-import { runPingTest, runDownloadTest, runUploadTest } from '../utils/speedtest';
+import { History as HistoryIcon, Clock, Zap, Activity, AlertTriangle } from 'lucide-react';
+import PremiumSpeedTest from '../components/shared/PremiumSpeedTest';
+import { db } from '../db';
 
 const SpeedTestPage: React.FC = () => {
-  const [isTesting, setIsTesting] = useState(false);
-  const [phase, setPhase] = useState<'idle' | 'ping' | 'download' | 'upload' | 'completed'>('idle');
-  const [results, setResults] = useState<{dl: number, ul: number, ping: number} | null>(null);
   const [testHistory, setTestHistory] = useState<any[]>([]);
 
   useEffect(() => {
-     const savedHistory = localStorage.getItem('isp_speedHistory');
-     if (savedHistory) {
-         try { setTestHistory(JSON.parse(savedHistory)); } catch (e) {}
-     }
+    const state = db.getState();
+    if (state.speedTestHistory) {
+      setTestHistory(state.speedTestHistory.slice(0, 10));
+    }
+    
+    return db.onStateChange((newState) => {
+      setTestHistory((newState.speedTestHistory || []).slice(0, 10));
+    });
   }, []);
 
-  const startTest = async () => {
-    if (isTesting) return;
-    setIsTesting(true);
-    setResults({ dl: 0, ul: 0, ping: 0 });
-    setPhase('ping');
-
-    // Ping
-    const pingRes = await runPingTest();
-    setResults(prev => ({ ...prev!, ping: pingRes }));
-
-    // Download
-    setPhase('download');
-    const dlRes = await runDownloadTest((progressDl) => {
-        setResults(prev => ({ ...prev!, dl: progressDl }));
+  const handleTestComplete = (results: any) => {
+    const currentUser = db.getState().currentUser;
+    db.addSpeedTestHistory({
+      userId: currentUser?.id || 'ANON',
+      userName: currentUser?.name || 'Anonymous',
+      downloadMbps: results.dl,
+      uploadMbps: results.ul,
+      pingMs: results.ping,
+      jitterMs: results.jitter,
+      packetLoss: results.packetLoss,
+      server: results.server || 'Auto-Select',
+      ip: results.ip || 'N/A',
+      isp: results.isp || 'N/A',
+      timestamp: new Date().toISOString()
     });
-    setResults(prev => ({ ...prev!, dl: dlRes }));
-
-    // Upload
-    setPhase('upload');
-    const ulRes = await runUploadTest((progressUl) => {
-        setResults(prev => ({ ...prev!, ul: progressUl }));
-    });
-
-    const finalResults = { dl: dlRes, ul: ulRes, ping: pingRes };
-    setResults(finalResults);
-    setPhase('completed');
-
-    const newEntry = { ...finalResults, timestamp: new Date().toLocaleString() };
-    const newHistory = [newEntry, ...testHistory].slice(0, 5);
-    setTestHistory(newHistory);
-    localStorage.setItem('isp_speedHistory', JSON.stringify(newHistory));
-
-    setIsTesting(false);
   };
 
-  // Visual Progress calculation
-  let progress = 0;
-  if (phase === 'ping') progress = 10;
-  else if (phase === 'download') progress = 10 + (results ? Math.min((results.dl / 100) * 40, 40) : 0);
-  else if (phase === 'upload') progress = 50 + (results ? Math.min((results.ul / 50) * 50, 50) : 0);
-  else if (phase === 'completed') progress = 100;
-
-  const displayValue = phase === 'idle' || phase === 'completed'
-     ? (results ? results.dl.toFixed(1) : '0.0')
-     : phase === 'download'
-         ? (results ? results.dl.toFixed(1) : '0.0')
-         : phase === 'upload'
-             ? (results ? results.ul.toFixed(1) : '0.0')
-             : (results?.ping ? results.ping.toString() : '0');
-
-  const displayLabel = phase === 'idle' || phase === 'completed'
-      ? 'Mbps Download'
-      : phase === 'ping'
-          ? 'Measuring Ping (ms)...'
-          : phase === 'download'
-              ? 'Downloading...'
-              : 'Uploading...';
-
   return (
-    <div className="space-y-8 pb-24 animate-in fade-in duration-500">
-      <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-xl flex flex-col items-center text-center space-y-10 relative overflow-hidden">
-        <div className="space-y-2 relative z-10">
-          <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.4em]">Connection Test</h3>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">Speed Test</h2>
-        </div>
+    <div className="max-w-6xl mx-auto space-y-12 pb-32 animate-in fade-in duration-700">
+      
+      {/* Premium Test Engine */}
+      <section>
+        <PremiumSpeedTest onComplete={handleTestComplete} />
+      </section>
 
-        <div className="relative w-64 h-64 flex items-center justify-center z-10">
-           <div className="absolute inset-0 rounded-full border-[15px] border-slate-50 shadow-inner"></div>
-           <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none">
-             <circle
-               cx="50%" cy="50%" r="44%" fill="none" stroke="currentColor" strokeWidth="15"
-               strokeDasharray="276" strokeDashoffset={`${276 - (276 * progress) / 100}`}
-               className={`transition-all duration-300 ${phase === 'upload' ? 'text-green-500' : 'text-blue-600'}`}
-             />
-           </svg>
-           <div className="flex flex-col items-center z-10">
-              <h2 className="text-6xl font-black text-slate-900 italic tracking-tighter">
-                {displayValue}
-              </h2>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{displayLabel}</p>
-           </div>
-        </div>
+      {/* Historical Diagnostics */}
+      <section className="bg-slate-900/50 backdrop-blur-xl border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl">
+         <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+            <div>
+               <h3 className="text-white font-bold text-lg flex items-center gap-2">
+                  <HistoryIcon size={20} className="text-blue-400"/> Diagnostic History
+               </h3>
+               <p className="text-white/30 text-[10px] font-black uppercase tracking-widest mt-1">Previous 10 session captures</p>
+            </div>
+            <button 
+              onClick={() => { setTestHistory([]); localStorage.removeItem('click_speedHistory'); }}
+              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/80 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+            >
+               Clear Logs
+            </button>
+         </div>
 
-        <button 
-          onClick={startTest}
-          disabled={isTesting}
-          className="w-full max-w-sm py-6 bg-slate-950 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-4 relative z-10"
-        >
-           {isTesting ? <Mini5GMicroLoader size={20} /> : <Play size={20} fill="currentColor" />}
-           {isTesting ? 'Testing...' : (phase === 'completed' ? 'Test Again' : 'Start Speed Test')}
-        </button>
+         <div className="overflow-x-auto">
+            <table className="w-full text-left">
+               <thead>
+                  <tr className="bg-white/5 text-white/20 text-[9px] font-black uppercase tracking-widest">
+                     <th className="px-8 py-4">Session Timestamp</th>
+                     <th className="px-8 py-4">Download</th>
+                     <th className="px-8 py-4">Upload</th>
+                     <th className="px-8 py-4">Ping/Jitter</th>
+                     <th className="px-8 py-4">Packet Loss</th>
+                     <th className="px-8 py-4 text-right">Status</th>
+                  </tr>
+               </thead>
+               <tbody className="divide-y divide-white/5">
+                  {testHistory.map((test) => (
+                    <tr key={test.id} className="hover:bg-white/[0.02] transition-colors group">
+                       <td className="px-8 py-5">
+                          <div className="flex items-center gap-3">
+                             <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+                                <Clock size={14}/>
+                             </div>
+                             <span className="text-xs font-bold text-white/80">{test.timestamp}</span>
+                          </div>
+                       </td>
+                       <td className="px-8 py-5 text-sm font-black text-white italic">{test.downloadMbps.toFixed(1)} <span className="text-[10px] font-medium text-white/20 not-italic ml-1">Mbps</span></td>
+                       <td className="px-8 py-5 text-sm font-black text-white/60 italic">{test.uploadMbps.toFixed(1)} <span className="text-[10px] font-medium text-white/10 not-italic ml-1">Mbps</span></td>
+                       <td className="px-8 py-5">
+                          <div className="flex flex-col">
+                             <span className="text-xs font-bold text-white/70">{test.pingMs} ms</span>
+                             <span className="text-[9px] font-black text-white/20 uppercase">Jitter: {test.jitterMs}ms</span>
+                          </div>
+                       </td>
+                       <td className="px-8 py-5 text-xs font-bold text-rose-400/60">{test.packetLoss}% Loss</td>
+                       <td className="px-8 py-5 text-right">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                             test.downloadMbps > 30 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
+                          }`}>
+                             {test.downloadMbps > 30 ? 'Optimal' : 'Standard'}
+                          </span>
+                       </td>
+                    </tr>
+                  ))}
+                  {testHistory.length === 0 && (
+                    <tr>
+                       <td colSpan={6} className="px-8 py-20 text-center">
+                          <Activity size={40} className="mx-auto mb-4 text-white/5" />
+                          <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">No diagnostic data in local registry</p>
+                       </td>
+                    </tr>
+                  )}
+               </tbody>
+            </table>
+         </div>
+      </section>
 
-        <Activity className="absolute -right-12 -bottom-12 opacity-[0.03] scale-[4] pointer-events-none text-blue-900" size={200} />
+      {/* Warning/Guide Footer */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-blue-600/5 p-8 rounded-[2.5rem] border border-blue-500/10">
+         <div className="flex items-start gap-4">
+            <div className="p-3 rounded-2xl bg-blue-500/20 text-blue-400">
+               <Zap size={24} />
+            </div>
+            <div>
+               <h4 className="text-white font-bold mb-1">Optimizing Your Test</h4>
+               <p className="text-white/40 text-xs leading-relaxed">For the most accurate diagnostic result, disconnect from VPNs and ensure no high-bandwidth background downloads are active.</p>
+            </div>
+         </div>
+         <div className="flex items-start gap-4">
+            <div className="p-3 rounded-2xl bg-amber-500/20 text-amber-400">
+               <AlertTriangle size={24} />
+            </div>
+            <div>
+               <h4 className="text-white font-bold mb-1">Environmental Factors</h4>
+               <p className="text-white/40 text-xs leading-relaxed">WiFi interference and distance from the router can significantly impact the 'Signal @ ONU' and 'Jitter' metrics.</p>
+            </div>
+         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-         <div className={`p-8 rounded-[2rem] border shadow-sm flex flex-col items-center gap-4 transition-all ${phase === 'upload' ? 'bg-white border-green-400 scale-105 z-10' : 'bg-white border-slate-100 hover:bg-green-50'}`}>
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform ${phase === 'upload' ? 'bg-green-100 text-green-600 animate-bounce' : 'bg-slate-50 text-green-600'}`}>
-               <ArrowUpCircle size={28} />
-            </div>
-            <div className="text-center">
-               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Peak Upload</p>
-               <p className="text-2xl font-black text-slate-900 italic tracking-tighter">{results?.ul ? results.ul.toFixed(1) : '0.0'} Mbps</p>
-            </div>
-         </div>
-         <div className={`p-8 rounded-[2rem] border shadow-sm flex flex-col items-center gap-4 transition-all ${phase === 'ping' ? 'bg-white border-blue-400 scale-105 z-10' : 'bg-white border-slate-100 hover:bg-blue-50'}`}>
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-transform ${phase === 'ping' ? 'bg-blue-100 text-blue-600 animate-pulse' : 'bg-slate-50 text-blue-600'}`}>
-               <Activity size={28} />
-            </div>
-            <div className="text-center">
-               <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Ping</p>
-               <p className="text-2xl font-black text-slate-900 italic tracking-tighter">{results?.ping || '0'} ms</p>
-            </div>
-         </div>
-      </div>
-
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-         <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-               <History size={14} className="text-blue-600"/> Test History
-            </h3>
-         </div>
-         <div className="divide-y divide-slate-50">
-            {testHistory.map((test, i) => (
-              <div key={i} className="p-5 flex items-center justify-between hover:bg-slate-50 transition-all group">
-                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-blue-600"><Wifi size={18}/></div>
-                    <div>
-                       <p className="text-xs font-black text-slate-900 uppercase">Speed Test</p>
-                       <p className="text-[8px] text-slate-400 font-bold uppercase">{test.timestamp}</p>
-                    </div>
-                 </div>
-                 <div className="text-right">
-                    <p className="text-sm font-black text-slate-800">{test.dl} / {test.ul} Mbps</p>
-                    <p className="text-[8px] font-black text-slate-400 uppercase">{test.ping}ms Latency</p>
-                 </div>
-              </div>
-            ))}
-            {testHistory.length === 0 && (
-              <div className="p-10 text-center text-slate-300 font-black uppercase text-[9px] tracking-widest">No previous tests.</div>
-            )}
-         </div>
-      </div>
     </div>
   );
 };

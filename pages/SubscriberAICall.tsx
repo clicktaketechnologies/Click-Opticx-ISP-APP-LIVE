@@ -7,9 +7,10 @@ import {
   Mic, MicOff, PhoneOff, ArrowLeft, RefreshCw,
   Activity, Headphones, Volume2, Globe, Zap,
   CheckCircle, User as UserIcon, X, Phone,
-  AlertCircle, Bot, Loader2
+  AlertCircle, Bot, Loader2, ShieldCheck
 } from 'lucide-react';
 import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
+import Modal from '../components/shared/Modal';
 
 interface Props {
   user: ISPUser;
@@ -284,20 +285,34 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
         </div>
       )}
 
-      {phase === 'summary' && (
-        <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[2000] flex items-center justify-center p-6">
-          <div className="bg-white rounded-[3.5rem] w-full max-sm shadow-2xl p-12 text-center space-y-10 animate-in zoom-in border-[8px] border-slate-50">
-            <div className="w-24 h-24 bg-green-500 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce border-4 border-white">
+      {/* SESSION COMPLETE MODAL */}
+      <Modal
+        isOpen={phase === 'summary'}
+        onClose={onBack}
+        title="Session Complete"
+        type="success"
+        icon={<CheckCircle size={24} className="text-white" />}
+        maxWidth="max-w-md"
+        footer={
+          <button 
+            onClick={onBack} 
+            className="w-full py-5 bg-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all shadow-xl"
+          >
+            Acknowledge & Close
+          </button>
+        }
+      >
+        <div className="py-12 flex flex-col items-center justify-center space-y-8 text-center">
+            <div className="w-24 h-24 bg-green-500/10 text-green-500 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce border-4 border-green-500/20">
               <CheckCircle size={56} strokeWidth={3} />
             </div>
-            <div className="space-y-2">
-              <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none">Session Complete</h3>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-4">Call Ended</p>
+            <div className="space-y-3">
+              <p className="text-[11px] text-slate-400 font-black uppercase tracking-widest leading-relaxed max-w-[250px] mx-auto">
+                AI support session has ended. Your connection audit and troubleshooting logs have been updated.
+              </p>
             </div>
-            <button onClick={onBack} className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all">Go Back</button>
-          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

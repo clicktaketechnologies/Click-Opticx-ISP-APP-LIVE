@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense, Component, useTransition } from 'react';
 import { db } from './db';
-import { Role, AppState, SystemNotification } from './types';
+import { MasterApprovalDashboard } from './pages/MasterApprovalDashboard';
+import { Role, AppState, SystemNotification, UserStatus } from './types';
 import {
   Receipt, Wallet, ShieldCheck, LogOut,
   Wifi, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap, Loader2, Cloud, X, Zap, RefreshCcw
 } from 'lucide-react';
 import { PWAPrompt } from './components/PWAPrompt';
+import Modal from './components/shared/Modal';
 
 // Lazy load pages for performance
 const Login = lazy(() => import('./pages/Login'));
@@ -50,24 +52,14 @@ const AboutUs = lazy(() => import('./pages/AboutUs'));
 const AdminLiveMonitoring = lazy(() => import('./pages/AdminLiveMonitoring'));
 const AdminPasswordRequests = lazy(() => import('./pages/AdminPasswordRequests'));
 const UserDeviceMapping = lazy(() => import('./pages/UserDeviceMapping'));
-const MasterApprovalDashboard = lazy(() => import('./pages/MasterApprovalDashboard'));
 const AdminProfile = lazy(() => import('./pages/AdminProfile'));
 const AIControlPlane = lazy(() => import('./pages/AIControlPlane'));
+const AICentralDashboard = lazy(() => import('./pages/AICentralDashboard'));
 const AICallingAdmin = lazy(() => import('./pages/AICallingAdmin'));
 const AICallLogs = lazy(() => import('./pages/AICallLogs'));
 const AIAgentWidget = lazy(() => import('./components/AIAgentWidget'));
-const EmailCampaigns = lazy(() => import('./pages/comm/EmailCampaigns'));
-const NotificationTemplates = lazy(() => import('./pages/comm/NotificationTemplates'));
-const AutomationRules = lazy(() => import('./pages/comm/AutomationRules'));
-const AdminNotificationControl = lazy(() => import('./pages/admin/NotificationControl'));
-const AdminNotificationAnalytics = lazy(() => import('./pages/admin/NotificationAnalytics'));
-const AdminUserDevices = lazy(() => import('./pages/admin/AdminUserDevices'));
-const PushNotifications = lazy(() => import('./pages/comm/PushNotifications'));
-const AudienceSegments = lazy(() => import('./pages/comm/AudienceSegments'));
-const DeliveryLogs = lazy(() => import('./pages/comm/DeliveryLogs'));
-const CommunicationSettingsPage = lazy(() => import('./pages/comm/CommunicationSettings'));
+const EmailControlCenter = lazy(() => import('./pages/comm/EmailControlCenter'));
 const AdminReminders = lazy(() => import('./pages/AdminReminders'));
-const SenderIdentities = lazy(() => import('./pages/comm/SenderIdentities'));
 const NASManagement = lazy(() => import('./pages/NASManagement'));
 const OLTManagement = lazy(() => import('./pages/OLTManagement'));
 const NOCDashboard = lazy(() => import('./pages/NOCDashboard'));
@@ -75,6 +67,7 @@ const AuthControlCenter = lazy(() => import('./pages/AuthControlCenter'));
 const SystemFlash = lazy(() => import('./pages/SystemFlash'));
 const SystemConfig = lazy(() => import('./pages/SystemConfig'));
 const SystemReadiness = lazy(() => import('./pages/SystemReadiness'));
+const SpeedTestPage = lazy(() => import('./pages/SpeedTestPage'));
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 
 interface EBProps {
@@ -157,6 +150,7 @@ const App: React.FC = () => {
   const [dbState, setDbState] = useState<AppState>(db.getState());
   const [isConfigured, setIsConfigured] = useState(db.isConfigured());
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [targetUserId, setTargetUserId] = useState<string | null>(null);
   const [targetAction, setTargetAction] = useState<string | null>(null);
@@ -169,6 +163,16 @@ const App: React.FC = () => {
       setDbState(newState);
       setAuthState(newState.currentUser);
       setIsConfigured(db.isConfigured());
+      
+      // Global Branding Updates
+      const branding = newState.settings.branding;
+      document.title = branding.brandName || branding.appTitle || 'Click Opticx ISP';
+      const link: any = document.querySelector("link[rel~='icon']") || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'icon';
+      link.href = branding.favicon || branding.logo || '/favicon.ico';
+      document.getElementsByTagName('head')[0].appendChild(link);
+
       const user = newState.currentUser;
       if (user && user.role !== Role.CUSTOMER) {
         const criticals = newState.notifications.filter(n => !n.read && n.priority === 'critical' && (n.audience === 'admin' || n.audience === 'system'));
@@ -177,7 +181,11 @@ const App: React.FC = () => {
     });
 
     // Ensure state transition if already configured on mount
-    if (db.isConfigured()) setIsConfigured(true);
+    if (db.isConfigured()) {
+       setIsConfigured(true);
+       const branding = db.getState().settings.branding;
+       document.title = branding.brandName || branding.appTitle || 'Click Opticx ISP';
+    }
 
     return () => unsubscribe();
   }, []);
@@ -275,8 +283,36 @@ const App: React.FC = () => {
   };
 
   const renderApp = () => {
-    console.log('Rendering App branch. Configured:', isConfigured, 'Auth:', authState?.email);
     if (!isConfigured) return renderConfiguring();
+
+    if (dbState.currentUser?.status === UserStatus.BLOCKED) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(225,29,72,0.1)_0%,transparent_70%)] animate-pulse"></div>
+          <div className="max-w-md w-full bg-white rounded-[3rem] p-12 text-center space-y-8 shadow-2xl relative z-10 border border-rose-100 animate-in zoom-in duration-500">
+            <div className="w-24 h-24 bg-rose-50 text-rose-600 rounded-[2.5rem] flex items-center justify-center mx-auto border-2 border-rose-100 shadow-xl shadow-rose-500/10">
+              <ShieldAlert size={48} strokeWidth={2.5} />
+            </div>
+            <div className="space-y-4">
+               <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Access Restricted</h2>
+               <p className="text-[10px] font-black text-rose-600 uppercase tracking-[0.3em]">Identity Node Locked</p>
+               <p className="text-sm text-slate-500 font-medium leading-relaxed pt-4">
+                  Your account access has been restricted by the administration. All terminal operations and data transfers are currently suspended.
+               </p>
+            </div>
+            <div className="pt-6">
+               <button 
+                  onClick={handleLogout}
+                  className="w-full py-4 bg-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-xl"
+                >
+                  Terminate Session
+               </button>
+               <p className="mt-6 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Protocol ID: {dbState.currentUser.id}</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     if (!authState) {
       return (
@@ -306,21 +342,40 @@ const App: React.FC = () => {
     return (
       <div className="flex min-h-screen bg-slate-50 overflow-hidden">
         <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-950"><Mini5GMicroLoader size={48} /></div>}>
-          {criticalAlert && (
-            <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[3000] flex items-center justify-center p-6">
-              <div className="bg-white rounded-[3.5rem] w-full max-lg shadow-2xl overflow-hidden border-[8px] border-rose-500 animate-in zoom-in duration-300">
-                <div className="p-10 text-center space-y-8">
-                  <div className="w-24 h-24 bg-rose-600 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-pulse"><ShieldAlert size={56} strokeWidth={3} /></div>
-                  <div className="space-y-3"><h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">{criticalAlert.title}</h3><p className="text-[11px] text-slate-500 font-bold uppercase tracking-[0.2em] leading-relaxed px-4">{criticalAlert.message}</p></div>
-                  <button onClick={dismissCritical} className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 shadow-xl transition-all flex items-center justify-center gap-2">Acknowledge Alert <ShieldCheck size={18} /></button>
-                </div>
-              </div>
-            </div>
-          )}
+          <Modal
+            isOpen={!!criticalAlert}
+            onClose={dismissCritical}
+            title={criticalAlert?.title || "System Alert"}
+            type="danger"
+            icon={<ShieldAlert size={24} className="text-white" />}
+            footer={
+               <button 
+                 onClick={dismissCritical} 
+                 className="w-full py-4 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-xl transition-all flex items-center justify-center gap-2"
+               >
+                 Acknowledge Alert <ShieldCheck size={16} />
+               </button>
+            }
+          >
+             <p className="text-sm text-slate-400 font-bold uppercase tracking-widest leading-relaxed text-center py-4">
+                {criticalAlert?.message}
+             </p>
+          </Modal>
 
-          {isSidebarOpen && <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[110] lg:hidden" onClick={() => setIsSidebarOpen(false)} />}
-          <Sidebar current={currentPage} onNavigate={navigateTo} role={authState.role} onLogout={handleLogout} isOpen={isSidebarOpen} businessName={dbState.settings.branding.businessName} />
-          <div className="flex-1 flex flex-col h-screen overflow-hidden">
+          {isSidebarOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] lg:hidden animate-in fade-in duration-300" onClick={() => setIsSidebarOpen(false)} />}
+          <Sidebar 
+            current={currentPage} 
+            onNavigate={navigateTo} 
+            role={authState.role} 
+            onLogout={handleLogout} 
+            isOpen={isSidebarOpen} 
+            isCollapsed={isCollapsed}
+            onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
+            businessName={dbState.settings.branding.businessName} 
+          />
+          <div 
+            className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${isCollapsed ? 'lg:pl-[70px]' : 'lg:pl-[240px]'}`}
+          >
             <Header 
               user={authState as any} 
               toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
@@ -334,8 +389,9 @@ const App: React.FC = () => {
               <Suspense fallback={<div className="h-full w-full flex flex-col items-center justify-center animate-premium"><div className="w-10 h-10 border-4 border-slate-100 border-t-blue-500 rounded-full animate-spin"></div></div>}>
                 {(() => {
                   switch (currentPage) {
-                    case 'dashboard': return <Dashboard state={dbState} onNavigate={navigateTo} searchTerm={globalSearchTerm} />;
+                    case 'dashboard': return <Dashboard state={dbState} onNavigate={navigateTo} searchTerm={globalSearchTerm} onClearSearch={() => setGlobalSearchTerm('')} />;
                     case 'ai-control': return <AIControlPlane state={dbState} />;
+                    case 'ai-central': return <AICentralDashboard state={dbState} />;
                     case 'ai-calling': return <AICallingAdmin state={dbState} />;
                     case 'ai-call-logs': return <AICallLogs state={dbState} />;
                     case 'users': return <UserManagement state={dbState} autoOpenAction={targetAction || undefined} searchTerm={globalSearchTerm} />;
@@ -379,22 +435,24 @@ const App: React.FC = () => {
                     case 'admin-device-mapping': return <UserDeviceMapping state={dbState} />;
                     case 'admin-profile': return <AdminProfile state={dbState} />;
                     case 'tasks': return <TaskManagement state={dbState} />;
-                    case 'comm-campaigns': return <EmailCampaigns state={dbState} />;
-                    case 'comm-templates': return <NotificationTemplates state={dbState} />;
-                    case 'comm-rules': return <AutomationRules state={dbState} />;
-                    case 'notification-control': return <AdminNotificationControl state={dbState} />;
-                    case 'notification-analytics': return <AdminNotificationAnalytics state={dbState} />;
-                    case 'admin-user-devices': return <AdminUserDevices state={dbState} />;
-                    case 'comm-push': return <PushNotifications state={dbState} />;
-                    case 'comm-segments': return <AudienceSegments state={dbState} />;
-                    case 'comm-logs': return <DeliveryLogs state={dbState} />;
-                    case 'comm-settings': return <CommunicationSettingsPage state={dbState} />;
-                    case 'comm-identities': return <SenderIdentities state={dbState} />;
+                    case 'comm-campaigns':
+                    case 'comm-templates':
+                    case 'comm-rules':
+                    case 'notification-control':
+                    case 'notification-analytics':
+                    case 'admin-user-devices':
+                    case 'comm-push':
+                    case 'comm-segments':
+                    case 'comm-logs':
+                    case 'comm-settings':
+                    case 'comm-identities':
+                      return <EmailControlCenter state={dbState} activePage={currentPage} />;
                     case 'admin-reminders': return <AdminReminders state={dbState} onNavigate={navigateTo} />;
                     case 'nas-management': return <NASManagement state={dbState} />;
                     case 'olt-management': return <OLTManagement state={dbState} />;
                     case 'noc-dashboard': return <NOCDashboard state={dbState} />;
-                    default: return <Dashboard state={dbState} onNavigate={navigateTo} />;
+                    case 'speed-test': return <SpeedTestPage />;
+                    default: return <Dashboard state={dbState} onNavigate={navigateTo} onClearSearch={() => setGlobalSearchTerm('')} />;
                   }
                 })()}
               </Suspense>

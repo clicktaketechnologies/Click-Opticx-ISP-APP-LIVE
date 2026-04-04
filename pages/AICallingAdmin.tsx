@@ -11,6 +11,7 @@ import {
   HeadphonesIcon, Shield, AlertTriangle, Play, TrendingUp, Info
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { Modal } from '../components/shared/Modal';
 
 const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'settings' | 'personality' | 'rules' | 'logs'>('dashboard');
@@ -379,48 +380,50 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
         </div>
       )}
 
-      {takeoverSession && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[1500] flex items-center justify-center p-4 animate-in fade-in duration-300">
-           <div className="bg-white rounded-[4rem] w-full max-w-xl shadow-2xl overflow-hidden border-[10px] border-blue-600 flex flex-col">
-              <div className="p-10 bg-slate-900 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center border shadow-xl animate-pulse">
-                       <Headphones size={32} />
-                    </div>
-                    <div>
-                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">Live Intervention</h3>
-                       <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest">Agent Link: STANDBY</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setTakeoverSession(null)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-slate-500 hover:text-white"><X size={32}/></button>
+      <Modal
+        isOpen={!!takeoverSession}
+        onClose={() => setTakeoverSession(null)}
+        title="Live Intervention"
+        type="info"
+        icon={<Headphones size={24} className="text-white" />}
+        maxWidth="max-w-xl"
+        footer={
+          <div className="flex gap-4 w-full">
+            <button 
+              onClick={() => setTakeoverSession(null)}
+              className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+            >
+              Send Suggestion
+            </button>
+            <button 
+              onClick={() => alert("COMM_CHANNEL_ESTABLISHED: AI Voice Muted. Human agent is live.")}
+              className="flex-1 py-4 bg-green-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-green-100 active:scale-95 transition-all flex items-center justify-center gap-3"
+            >
+               <Play size={18} fill="currentColor"/> Join Live Call
+            </button>
+          </div>
+        }
+      >
+        {takeoverSession && (
+          <div className="space-y-6">
+            <div className="p-6 bg-slate-800/50 border border-slate-700 rounded-2xl space-y-4">
+              <div className="flex justify-between items-center">
+                <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Handover Protocol</h4>
+                <span className="px-2 py-0.5 bg-rose-500/10 text-rose-400 rounded-lg text-[8px] font-black uppercase border border-rose-500/20">
+                  Low AI Confidence ({Math.round(takeoverSession.confidence * 100)}%)
+                </span>
               </div>
-
-              <div className="p-12 space-y-10">
-                 <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-6">
-                    <div className="flex justify-between items-center">
-                       <h4 className="text-sm font-black uppercase text-slate-900">Handover Protocol</h4>
-                       <span className="px-3 py-1 bg-rose-100 text-rose-600 rounded-full text-[8px] font-black uppercase">Low AI Confidence ({Math.round(takeoverSession.confidence * 100)}%)</span>
-                    </div>
-                    <div className="space-y-4">
-                       <p className="text-xs font-bold text-slate-500 uppercase leading-relaxed">
-                          The subscriber is agitated regarding a billing mismatch. AI suggests manual verification.
-                       </p>
-                    </div>
-                 </div>
-
-                 <div className="flex gap-4">
-                    <button className="flex-1 py-6 bg-slate-100 text-slate-500 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all">Send Suggestion</button>
-                    <button 
-                      onClick={() => alert("COMM_CHANNEL_ESTABLISHED: AI Voice Muted. Human agent is live.")}
-                      className="flex-1 py-6 bg-green-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest shadow-xl shadow-green-100 active:scale-95 transition-all flex items-center justify-center gap-3"
-                    >
-                       <Play size={20} fill="currentColor"/> Join Live Call
-                    </button>
-                 </div>
-              </div>
-           </div>
-        </div>
-      )}
+              <p className="text-xs font-bold text-slate-300 uppercase leading-relaxed">
+                The subscriber is agitated regarding a billing mismatch. AI suggests manual verification.
+              </p>
+            </div>
+            <div className="flex items-center gap-4 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+              <Bot size={20} className="text-blue-400" />
+              <p className="text-[10px] text-blue-300 font-bold uppercase tracking-widest">Agent Link Status: STANDBY</p>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

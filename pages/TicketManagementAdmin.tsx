@@ -7,6 +7,7 @@ import {
   Send, ShieldAlert, Activity, Hash, Layers, Monitor, HardDrive,
   Plus, UserPlus, Calendar, ShieldCheck, RefreshCw, Trash2
 } from 'lucide-react';
+import Modal from '../components/shared/Modal';
 
 const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
   const [activeTab, setActiveTab] = useState<'tickets' | 'noc'>('tickets');
@@ -370,84 +371,67 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
       )}
 
       {/* ADD NOC EVENT MODAL */}
-      {isAddNOCModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] flex items-center justify-center p-6">
-           <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col max-h-[90vh]">
-              <div className="p-10 border-b bg-rose-600 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
-                       <Activity size={28} />
-                    </div>
-                    <div>
-                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">New Network Alert</h3>
-                       <p className="text-rose-100 text-[10px] font-black uppercase tracking-widest">Post a public service announcement</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setIsAddNOCModalOpen(false)} className="p-3 hover:bg-white/10 rounded-2xl text-rose-100 hover:text-white transition-all"><X size={32} /></button>
+      <Modal
+        isOpen={isAddNOCModalOpen}
+        onClose={() => setIsAddNOCModalOpen(false)}
+        title="New Network Alert"
+        type="danger"
+        message="Post a public service announcement"
+        icon={<Activity size={24} className="text-rose-500" />}
+        confirmLabel="Post Alert Now"
+        onConfirm={handleAddNOC}
+        maxWidth="max-w-xl"
+      >
+        <div className="space-y-6">
+           <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Alert Title</label>
+              <input 
+                className="w-full p-4 bg-slate-800/80 border border-slate-700/50 rounded-2xl font-black text-white outline-none focus:border-rose-500 uppercase"
+                placeholder="e.g. Fiber Cut near Main Street..."
+                value={nocFormData.title}
+                onChange={e => setNocFormData({...nocFormData, title: e.target.value})}
+              />
+           </div>
+           <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Affected Area</label>
+                 <input 
+                   className="w-full p-4 bg-slate-800/80 border border-slate-700/50 rounded-2xl font-black text-white outline-none focus:border-rose-500 uppercase"
+                   placeholder="e.g. North Zone..."
+                   value={nocFormData.area}
+                   onChange={e => setNocFormData({...nocFormData, area: e.target.value})}
+                 />
               </div>
-
-              <div className="p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1">
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Alert Title</label>
-                    <input 
-                      className="w-full p-4 bg-slate-50 border rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-rose-500/10 uppercase"
-                      placeholder="e.g. Fiber Cut near Main Street..."
-                      value={nocFormData.title}
-                      onChange={e => setNocFormData({...nocFormData, title: e.target.value})}
-                    />
-                 </div>
-                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Affected Area</label>
-                       <input 
-                         className="w-full p-4 bg-slate-50 border rounded-2xl font-black text-slate-900 outline-none uppercase"
-                         placeholder="e.g. North Zone..."
-                         value={nocFormData.area}
-                         onChange={e => setNocFormData({...nocFormData, area: e.target.value})}
-                       />
-                    </div>
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Severity</label>
-                       <select 
-                         className="w-full p-4 bg-slate-50 border rounded-2xl font-black text-slate-900 outline-none uppercase text-xs"
-                         value={nocFormData.severity}
-                         onChange={e => setNocFormData({...nocFormData, severity: e.target.value as any})}
-                       >
-                          <option value="Info">Low (Info)</option>
-                          <option value="Warning">Medium (Warning)</option>
-                          <option value="Critical">High (Critical)</option>
-                       </select>
-                    </div>
-                 </div>
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
-                    <textarea 
-                      className="w-full p-5 bg-slate-50 border rounded-2xl font-bold text-xs h-32 resize-none outline-none focus:ring-4 focus:ring-rose-500/10 uppercase"
-                      placeholder="Please explain the issue and expected fix time..."
-                      value={nocFormData.description}
-                      onChange={e => setNocFormData({...nocFormData, description: e.target.value})}
-                    />
-                 </div>
-                 <div className="p-6 bg-rose-50 border border-rose-100 rounded-3xl flex items-start gap-4">
-                    <ShieldAlert size={24} className="text-rose-600 shrink-0 mt-1" />
-                    <p className="text-[9px] text-rose-700 font-bold uppercase leading-relaxed tracking-tighter">
-                       Publishing this alert will make it visible to customers on their portal and in the app. Use only for confirmed issues.
-                    </p>
-                 </div>
-              </div>
-
-              <div className="p-10 bg-slate-50 border-t flex gap-4 shrink-0">
-                 <button onClick={() => setIsAddNOCModalOpen(false)} className="flex-1 py-5 font-black text-slate-500 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Cancel</button>
-                 <button 
-                   onClick={handleAddNOC}
-                   className="flex-[2] py-5 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-rose-700 transition-all active:scale-95 flex items-center justify-center gap-3"
+              <div className="space-y-2">
+                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Severity</label>
+                 <select 
+                   className="w-full p-4 bg-slate-800/80 border border-slate-700/50 rounded-2xl font-black text-white outline-none focus:border-rose-500 uppercase text-xs"
+                   value={nocFormData.severity}
+                   onChange={e => setNocFormData({...nocFormData, severity: e.target.value as any})}
                  >
-                    <Send size={18}/> Post Alert Now
-                 </button>
+                    <option value="Info">Low (Info)</option>
+                    <option value="Warning">Medium (Warning)</option>
+                    <option value="Critical">High (Critical)</option>
+                 </select>
               </div>
            </div>
+           <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
+              <textarea 
+                className="w-full p-5 bg-slate-800/80 border border-slate-700/50 rounded-2xl font-bold text-xs h-32 resize-none outline-none focus:border-rose-500 uppercase text-white"
+                placeholder="Please explain the issue and expected fix time..."
+                value={nocFormData.description}
+                onChange={e => setNocFormData({...nocFormData, description: e.target.value})}
+              />
+           </div>
+           <div className="p-6 bg-rose-950/40 border border-rose-500/30 rounded-3xl flex items-start gap-4">
+              <ShieldAlert size={24} className="text-rose-500 shrink-0 mt-1" />
+              <p className="text-[9px] text-rose-300 font-bold uppercase leading-relaxed tracking-tighter">
+                 Publishing this alert will make it visible to customers on their portal and in the app. Use only for confirmed issues.
+              </p>
+           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
+import { useBranding } from '../hooks/useBranding';
+import { Modal } from '../components/shared/Modal';
 
 interface LoginProps {
    onLogin: (credential: string, pass: string) => any;
@@ -14,10 +16,10 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const state = db.getState();
-   const branding = state.settings.branding;
+   const branding = useBranding();
    const legal = state.settings.legal;
 
-   const [view, setView] = useState<'login' | 'signup' | 'pending' | 'reset_request' | 'reset_finalize' | 'phone_login' | 'otp_verify'>('login');
+   const [view, setView] = useState<'login' | 'signup' | 'reset_request' | 'reset_finalize' | 'phone_login' | 'otp_verify'>('login');
    const [credential, setCredential] = useState('');
    const [password, setPassword] = useState('');
    const [rememberMe, setRememberMe] = useState(true);
@@ -41,7 +43,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       password: '', confirmPassword: ''
    });
 
-   const displayLogo = branding.logoLight || branding.logoSquare || branding.logoDark;
+   const displayLogo = branding.logo || branding.logoLight || branding.logoSquare || branding.logoDark;
+   const brandName = branding.brandName || branding.businessName || 'Click Opticx';
+   const tagline = branding.tagline || 'Welcome to the Next Gen Internet';
+   const developer = branding.developer || 'ClickTake Technologies';
 
    const handleLogin = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -52,11 +57,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setIsProcessing(false);
 
       if (!res.success) {
-         if (res.message === 'PENDING_FEASIBILITY') {
-            setView('pending');
-         } else {
-            setError(res.message || 'Login failed. Please check your credentials.');
-         }
+         setError(res.message || 'Login failed. Please check your credentials.');
       }
    };
 
@@ -123,15 +124,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       try {
          const res = await db.submitSignupRequest(signupData);
          if (res.success) {
-            if (res.message === 'Account Auto-Activated.' || res.user) {
-               // Immediate Login for Smart Access
+            // Immediate Login for Smart Access (Direct-to-Dashboard)
+            if (res.status === 'Approved') {
                const loginRes = await onLogin(signupData.username, signupData.password);
                if (!loginRes.success) {
                   setError("Account created, but auto-login failed. Please sign in manually.");
                   setView('login');
                }
             } else {
-               setView('pending');
+               // If for some reason it's still pending (e.g. signupMode changed to Manual)
+               alert("Your request has been received. Our team will review it shortly.");
+               setView('login');
             }
          } else {
             setError(res.message || 'Signup failed.');
@@ -538,38 +541,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       </form>
    );
 
-   if (view === 'pending') {
-      return (
-         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-white rounded-[2.5rem] md:rounded-[4rem] shadow-2xl p-8 md:p-12 text-center space-y-10 animate-in zoom-in duration-500 border border-slate-100 mx-auto">
-               <div className="w-28 h-28 bg-green-50 text-green-600 rounded-[3rem] flex items-center justify-center mx-auto shadow-inner border-4 border-green-100 relative">
-                  <Clock size={56} className="animate-spin-slow" />
-                  <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                     <MapPin size={24} className="text-rose-500" />
-                  </div>
-               </div>
-               <div className="space-y-4">
-                  <h2 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">Under Review</h2>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed px-6">
-                     Our team is currently verifying network availability at your location. We will notify you via SMS within 24 hours.
-                  </p>
-               </div>
-               <div className="grid grid-cols-1 gap-2 pt-4">
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                     <span className="text-[9px] font-black text-slate-400 uppercase">Current Status</span>
-                     <span className="text-[9px] font-black text-blue-600 uppercase italic">PENDING VERIFICATION</span>
-                  </div>
-               </div>
-               <button
-                  onClick={() => setView('login')}
-                  className="w-full bg-slate-950 text-white font-black py-5 rounded-[2rem] hover:bg-black transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-xs"
-               >
-                  <ArrowLeft size={16} /> Return to Home
-               </button>
-            </div>
-         </div>
-      );
-   }
 
    return (
       <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden font-sans">
@@ -593,25 +564,26 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
                <div className="relative z-10">
                   <div className="flex items-center gap-4 mb-12">
-                     <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-2xl">
-                        {displayLogo ? <img src={displayLogo} className="h-8 object-contain" /> : <Wifi className="text-green-400" size={28} />}
+                     <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-2xl overflow-hidden">
+                        {displayLogo ? <img src={displayLogo} className="h-10 w-10 object-contain p-1" /> : <Wifi className="text-green-400" size={28} />}
                      </div>
                      <div>
-                        <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic leading-none">Click Opticx</h2>
-                        <p className="text-green-400/60 text-[8px] font-black uppercase tracking-[0.3em] mt-1">Fiber Infrastructure</p>
+                        <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic leading-none">{brandName}</h2>
+                        <p className="text-green-400/60 text-[8px] font-black uppercase tracking-[0.3em] mt-1">{tagline}</p>
                      </div>
                   </div>
 
-                  <div className="space-y-6 mt-20">
+                  <div className="space-y-6 mt-16">
                      <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic leading-[0.9] max-w-[350px]">
                         Welcome <br />
                         Back
                      </h1>
-                     <div className="text-slate-400 text-sm font-medium leading-relaxed max-w-[350px] space-y-2 mt-4">
-                        <p className="text-white/80 font-bold">
-                           High-Speed Portal
-                        </p>
-                     </div>
+                     <p className="text-slate-400 text-sm font-semibold leading-relaxed max-w-[300px] mt-4">
+                        {tagline}
+                     </p>
+                     <p className="text-slate-600 text-[9px] font-bold uppercase tracking-[0.3em]">
+                        Developed by {developer}
+                     </p>
                   </div>
                </div>
 
@@ -649,14 +621,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                {/* Mobile Logo (Visible only on small screens) */}
                <div className="lg:hidden flex flex-col items-center mb-8">
                   {displayLogo ? (
-                     <img src={displayLogo} className="w-full max-w-[200px] h-auto object-contain mb-4" alt="5G Logo" />
+                     <img src={displayLogo} className="w-16 h-16 object-contain mb-3" alt={brandName} />
                   ) : (
-                     <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center shadow-xl mb-4 relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-green-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        <Wifi className="text-green-400 relative z-10" size={32} />
+                     <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center shadow-xl mb-3 relative overflow-hidden">
+                        <Wifi className="text-green-400" size={32} />
                      </div>
                   )}
-               {!displayLogo && <h1 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Click Opticx</h1>}
+                  <h1 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">{brandName}</h1>
+                  <p className="text-[10px] text-slate-400 font-semibold mt-1">{tagline}</p>
                </div>
 
                <div className="max-w-[400px] mx-auto w-full">
@@ -695,48 +667,46 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                      {view === 'otp_verify' && renderOTPVerify()}
                   </div>
 
-                  <div className="mt-12 pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
-                     <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-full text-slate-400">
-                        <Cpu size={10} className="animate-pulse" />
-                        <span className="text-[7px] font-black uppercase tracking-widest">Core v8.6.0-Live</span>
-                     </div>
-                     <div className="flex items-center gap-4">
-                        <Globe size={14} className="text-slate-300 hover:text-blue-500 transition-colors cursor-pointer" />
-                        <Info size={14} className="text-slate-300 hover:text-blue-500 transition-colors cursor-pointer" />
-                     </div>
+                  <div className="mt-12 pt-8 border-t border-slate-50 flex flex-col items-center gap-3">
+                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        Developed by <span className="text-blue-500">{developer}</span>
+                     </p>
+                     {branding.website && (
+                        <a href={`https://${branding.website}`} target="_blank" rel="noopener noreferrer" className="text-[9px] text-slate-300 hover:text-blue-500 transition-colors font-bold uppercase tracking-widest flex items-center gap-1">
+                           <Globe size={10} />
+                           {branding.website}
+                        </a>
+                     )}
                   </div>
                </div>
             </div>
          </div>
 
-         {/* Legal Modals */}
-         {showLegalModal && (
-            <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-md z-[2000] flex items-center justify-center p-6 animate-in fade-in duration-300">
-               <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl overflow-hidden border border-white animate-in zoom-in duration-300 flex flex-col max-h-[85vh]">
-                  <div className="p-8 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
-                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                           <Scale size={24} />
-                        </div>
-                        <h3 className="text-xl font-black uppercase italic tracking-tighter">
-                           {showLegalModal === 'terms' ? 'Terms of Use' : 'Service Agreement'}
-                        </h3>
-                     </div>
-                     <button onClick={() => setShowLegalModal(null)} className="p-2 text-slate-400 hover:text-white transition-all"><X size={24} /></button>
-                  </div>
-                  <div className="p-10 flex-1 overflow-y-auto custom-scrollbar bg-white">
-                     <p className="text-xs font-bold text-slate-600 leading-relaxed uppercase italic whitespace-pre-wrap">
-                        {showLegalModal === 'terms' ? legal.termsAndConditions : legal.serviceAgreement}
-                     </p>
-                  </div>
-                  <div className="p-8 bg-slate-50 border-t flex justify-center shrink-0">
-                     <button onClick={() => setShowLegalModal(null)} className="px-12 py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-blue-700 active:scale-95 transition-all">I Accept All Terms</button>
-                  </div>
-               </div>
-            </div>
-         )}
-      </div>
-   );
+      {/* Legal Modals */}
+      <Modal
+        isOpen={!!showLegalModal}
+        onClose={() => setShowLegalModal(null)}
+        title={showLegalModal === 'terms' ? 'Terms of Use' : 'Service Agreement'}
+        type="info"
+        icon={<Scale size={24} className="text-white" />}
+        maxWidth="max-w-lg"
+        footer={
+          <button 
+            onClick={() => setShowLegalModal(null)} 
+            className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-blue-700 active:scale-95 transition-all"
+          >
+            I Accept All Terms
+          </button>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-xs font-bold text-slate-500 leading-relaxed uppercase italic whitespace-pre-wrap">
+            {showLegalModal === 'terms' ? legal.termsAndConditions : legal.serviceAgreement}
+          </p>
+        </div>
+      </Modal>
+    </div>
+  );
 };
 
 export default Login;

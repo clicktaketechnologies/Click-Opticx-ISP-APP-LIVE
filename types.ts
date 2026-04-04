@@ -75,13 +75,27 @@ export interface TestLog {
 export interface CommunicationLog {
   id: string;
   userId: string;
+  userName: string;
   email: string;
   subject: string;
   sentBy: string;
   sentAt: string;
-  status: 'Sent' | 'Failed';
+  status: 'Sent' | 'Failed' | 'Pending';
+  provider: string;
   error?: string;
   templateId?: string;
+}
+
+export interface CommStats {
+  totalSent: number;
+  delivered: number;
+  failed: number;
+  opened: number;
+  clicked: number;
+  providerUsage: {
+    smtp: number;
+    backup: number;
+  }
 }
 
 export enum ReminderStatus {
@@ -808,6 +822,17 @@ export interface CommunicationSettings {
   enableActivationSMS?: boolean;
   activationSMSTemplate?: string;
   activationEmailTemplateId?: string;
+  backupProvider: 'FIREBASE_REST' | 'SENDGRID' | 'MAILGUN';
+  failoverEnabled: boolean;
+  trackingEnabled: boolean;
+  toggles: {
+    welcomeEmail: boolean;
+    otpEmail: boolean;
+    invoiceEmail: boolean;
+    expiryReminder: boolean;
+    lowBalanceAlert: boolean;
+    adminAlerts: boolean;
+  };
 }
 
 export interface InfrastructureConfig {
@@ -822,6 +847,21 @@ export interface LegalConfig {
   serviceAgreement: string;
   privacyPolicy: string;
   refundPolicy: string;
+}
+
+export interface SpeedTestResult {
+  id: string;
+  userId: string;
+  userName: string;
+  downloadMbps: number;
+  uploadMbps: number;
+  pingMs: number;
+  jitterMs: number;
+  packetLoss: number;
+  server: string;
+  ip: string;
+  isp: string;
+  timestamp: string;
 }
 
 export interface AppState {
@@ -872,6 +912,7 @@ export interface AppState {
   deliveryLogs: DeliveryLog[];
   recoveryLogs: RecoveryLog[];
   commLogs: CommunicationLog[];
+  commStats: CommStats;
   testLogs: TestLog[];
   adminReminders: AdminReminder[];
   liveUsage: LiveUsage[];
@@ -884,6 +925,7 @@ export interface AppState {
   duplicateLogs: DuplicateActionLog[];
   approvalRequests: ApprovalRequest[];
   flashLogs: FlashLog[];
+  speedTestHistory: SpeedTestResult[];
 }
 
 export interface StaffUser {
@@ -1060,6 +1102,15 @@ export interface BrandingConfig {
   textColorDark: string;
   primaryFont: string;
   secondaryFont: string;
+  
+  // New Global Branding Fields
+  brandName?: string;
+  tagline?: string;
+  logo?: string;
+  developer?: string;
+  phone?: string;
+  website?: string;
+  socialLinks?: { platform: string; url: string }[];
 }
 
 export interface SupportConfig {

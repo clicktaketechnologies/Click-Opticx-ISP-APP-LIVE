@@ -46,6 +46,7 @@ import RequestEmergencyLoad from './components/subscriber/RequestEmergencyLoad';
 import EmergencyLoadHistory from './components/subscriber/EmergencyLoadHistory';
 import SubscriberLegalCenter from './components/subscriber/SubscriberLegalCenter';
 import SmartKYCPopup from './components/subscriber/SmartKYCPopup';
+import Modal from './components/shared/Modal';
 
 type SubTab = 'home' | 'wallet' | 'packages' | 'billing' | 'profile' | 'namaz' | 'qibla' | 'tasbih' | 'quran' | 'weather' | 'network' | 'insights' | 'support' | 'cash_pay' | 'online_pay' | 'aichat' | 'referral' | 'news' | 'notifs' | 'emergency' | 'emergency-request' | 'emergency-history' | 'credit-score' | 'connection' | 'about-us' | 'live-usage' | 'connected-devices' | 'reset-password' | 'speed-test' | 'ai-control' | 'ai-home' | 'ai-insights' | 'ai-network' | 'ai-risk' | 'ai-suggestions' | 'ai-voice-call' | 'legal';
 
@@ -177,17 +178,30 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
             }} 
          />
          {showWelcome && <SubscriberWelcomeChecklist user={user} onComplete={() => setShowWelcome(false)} />}
-         {showVerificationSuccess && (
-            <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[1000] flex items-center justify-center p-6 animate-in fade-in duration-500">
-               <div className="bg-white rounded-[3.5rem] w-full max-sm shadow-2xl p-10 text-center space-y-8 animate-in zoom-in border-[8px] border-green-50">
-                  <div className="w-24 h-24 bg-green-500 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce">
-                     <CheckCircle size={56} strokeWidth={3} />
-                  </div>
-                  <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">Account Verified</h3>
-                  <button onClick={acknowledgeVerification} className="w-full py-5 bg-slate-900 text-white rounded-3xl font-black text-xs uppercase tracking-widest">Explore Home</button>
-               </div>
-            </div>
-         )}
+         <Modal
+            isOpen={showVerificationSuccess}
+            onClose={acknowledgeVerification}
+            title="Account Verified"
+            type="success"
+            icon={<ShieldCheck size={24} className="text-white" />}
+            footer={
+               <button 
+                 onClick={acknowledgeVerification} 
+                 className="w-full py-4 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-xl transition-all"
+               >
+                 Explore Home
+               </button>
+            }
+          >
+             <div className="py-6 text-center space-y-4">
+                <div className="w-20 h-20 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner border-4 border-green-100">
+                   <CheckCircle size={44} />
+                </div>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed px-6">
+                   Identity node synchronized. Your security registry has been updated and all restricted features are now available.
+                </p>
+             </div>
+          </Modal>
          <header className="h-14 bg-white border-b border-slate-100 px-6 flex items-center justify-between sticky top-0 z-[200] shrink-0 shadow-sm">
             <div className="flex items-center gap-3">
                <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center border shadow-inner">
@@ -212,7 +226,46 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
             </div>
          </header>
          <main className="flex-1 overflow-y-auto p-4 pb-32 custom-scrollbar">
-            <div className="max-w-xl mx-auto h-full">
+            <div className="max-w-xl mx-auto h-full space-y-4">
+               {/* Verification Status Banners */}
+               {user.verificationStatus === VerificationStatus.UNVERIFIED && (
+                  <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                           <ShieldAlert size={20} />
+                        </div>
+                        <div>
+                           <p className="text-[10px] font-black uppercase tracking-tight text-amber-900 leading-none">KYC Required</p>
+                           <p className="text-[9px] font-bold uppercase text-amber-600 mt-0.5 tracking-widest leading-none">Complete identity node for full access</p>
+                        </div>
+                     </div>
+                     <button 
+                        onClick={() => setIsKYCOpen(true)}
+                        className="px-4 py-2 bg-amber-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all shadow-lg shadow-amber-600/10 active:scale-95"
+                     >
+                        Verify Now
+                     </button>
+                  </div>
+               )}
+
+               {user.verificationStatus === VerificationStatus.PENDING && (
+                  <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm relative overflow-hidden">
+                           <History size={20} className="animate-spin-slow relative z-10" />
+                           <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-transparent"></div>
+                        </div>
+                        <div>
+                           <p className="text-[10px] font-black uppercase tracking-tight text-blue-900 leading-none">Smart Access Active</p>
+                           <p className="text-[9px] font-bold uppercase text-blue-400 mt-0.5 tracking-widest leading-none">Identity Dispatch in Progress: Priority Access Node</p>
+                        </div>
+                     </div>
+                     <div className="px-3 py-1 bg-blue-600/10 rounded-full border border-blue-600/20">
+                        <span className="text-[7px] font-black text-blue-600 uppercase tracking-widest animate-pulse">Synchronizing</span>
+                     </div>
+                  </div>
+               )}
+
                {renderContent()}
             </div>
          </main>

@@ -93,26 +93,25 @@ const SubscriberHome: React.FC<Props> = ({
         <div key="status" className="space-y-6">
           <SubscriberQuickStatus user={user} currentPkg={currentPkg} />
 
-          {/* KYC Status Banners */}
+          {/* KYC Status Banners - THE ONLY SOURCE OF VERIFICATION TRUTH */}
           {!user.isKYCVerified && !user.isKYCSubmitted && (
-            <div className="mx-4 p-6 bg-rose-50 border-2 border-rose-200 rounded-[2.5rem] flex items-center justify-between shadow-xl animate-in slide-in-from-top-4 duration-500 overflow-hidden relative group">
+            <div className="mx-4 p-6 bg-amber-50 border-2 border-amber-200 rounded-[2.5rem] flex items-center justify-between shadow-xl animate-in slide-in-from-top-4 duration-500 overflow-hidden relative group">
               <div className="flex items-center gap-5 relative z-10">
-                <div className="w-14 h-14 bg-rose-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-rose-200">
+                <div className="w-14 h-14 bg-amber-500 text-white rounded-2xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-amber-200">
                   <ShieldAlert size={28} />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-rose-900 uppercase tracking-widest leading-none mb-1">Action Required</p>
-                  <h4 className="text-sm font-black text-rose-950 uppercase italic tracking-tight italic">Verify Your Identity</h4>
-                  <p className="text-[9px] text-rose-700 font-bold uppercase mt-1 tracking-tight leading-none italic">Complete KYC to unlock all features.</p>
+                  <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest leading-none mb-1">Identity Required</p>
+                  <h4 className="text-sm font-black text-amber-950 uppercase italic tracking-tight italic">Verify Your Identity</h4>
+                  <p className="text-[9px] text-amber-700 font-bold uppercase mt-1 tracking-tight leading-none italic">Complete KYC to unlock full network features.</p>
                 </div>
               </div>
               <button 
-                onClick={() => onAction('packages')} // Logic in SubscriberApp will intercept this and show KYC popup
-                className="px-6 py-3 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-rose-200 hover:bg-rose-700 active:scale-95 transition-all relative z-10"
+                onClick={() => onAction('packages')} 
+                className="px-6 py-3 bg-amber-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-amber-200 hover:bg-amber-700 active:scale-95 transition-all relative z-10 flex-shrink-0"
               >
-                Complete Now
+                Verify Now
               </button>
-              <Zap className="absolute -right-4 -bottom-4 opacity-5 text-rose-500 pointer-events-none group-hover:scale-125 transition-transform duration-700" size={100} />
             </div>
           )}
 

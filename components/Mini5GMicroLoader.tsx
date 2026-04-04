@@ -10,7 +10,7 @@ interface LoaderProps {
 
 export const Mini5GMicroLoader: React.FC<LoaderProps> = ({ size = 20, className = '', style: propStyle }) => {
     const settings = db.getState().settings;
-    const activeStyle = propStyle || settings.appearance.loadingStyle || '5G';
+    const activeStyle = propStyle || settings?.appearance?.loadingStyle || '5G';
 
     const renderStyle = () => {
         switch (activeStyle) {

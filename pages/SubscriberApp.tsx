@@ -5,6 +5,7 @@ import { db } from '../db';
 import { 
   Home, Wallet, Wifi, User, Headphones, Zap, Menu, Bell, MessageSquare, Megaphone, Share2, BarChart3, ShieldAlert, Lock, RefreshCw, Eye, EyeOff, ShieldCheck, Smartphone, Network, Info, Globe, Monitor, Key, Gauge, AlertCircle, CheckCircle, X, ArrowRight, Clock, ChevronRight, LogOut, Cpu, Sparkles, History, Mic
 } from 'lucide-react';
+import Modal from '../components/shared/Modal';
 
 import SubscriberHome from '../components/subscriber/SubscriberHome';
 import SubscriberWallet from '../components/subscriber/SubscriberWallet';
@@ -197,17 +198,32 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
         }} 
       />
       {showWelcome && <SubscriberWelcomeChecklist user={user} onComplete={() => setShowWelcome(false)} />}
-      {showVerificationSuccess && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[1000] flex items-center justify-center p-6 animate-in fade-in duration-500">
-           <div className="bg-white rounded-[3.5rem] w-full max-sm shadow-2xl p-10 text-center space-y-8 animate-in zoom-in border-[8px] border-green-50">
-              <div className="w-24 h-24 bg-green-500 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce">
-                 <CheckCircle size={56} strokeWidth={3}/>
-              </div>
-              <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">Node Verified</h3>
-              <button onClick={acknowledgeVerification} className="w-full py-5 bg-slate-900 text-white rounded-3xl font-black text-xs uppercase tracking-widest">Open Hub</button>
+      {/* VERIFICATION SUCCESS MODAL */}
+      <Modal
+        isOpen={showVerificationSuccess}
+        onClose={acknowledgeVerification}
+        title="Node Verified"
+        type="success"
+        icon={<CheckCircle size={24} className="text-white" />}
+        maxWidth="max-w-md"
+        footer={
+          <button 
+            onClick={acknowledgeVerification} 
+            className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all"
+          >
+            Open Hub
+          </button>
+        }
+      >
+        <div className="py-10 text-center space-y-6">
+           <div className="w-24 h-24 bg-green-500/10 text-green-500 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-inner border border-green-500/20 animate-bounce">
+              <CheckCircle size={56} strokeWidth={3}/>
            </div>
+           <p className="text-[11px] text-slate-400 font-black uppercase leading-relaxed tracking-widest max-w-[250px] mx-auto">
+             Your account identity has been successfully validated. All infrastructure nodes are now accessible.
+           </p>
         </div>
-      )}
+      </Modal>
       <header className="h-14 bg-white border-b border-slate-100 px-6 flex items-center justify-between sticky top-0 z-[200] shrink-0 shadow-sm">
          <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center border shadow-inner">

@@ -3,8 +3,9 @@ import { db } from '../db';
 import { 
   ShieldCheck, AlertTriangle, CheckCircle2, XCircle, 
   Terminal, Database, Globe, Bell, Mail, Server, 
-  Cpu, Cloud, Activity, ExternalLink
+  Cpu, Cloud, Activity, ExternalLink, Zap
 } from 'lucide-react';
+import PremiumSpeedTest from '../components/shared/PremiumSpeedTest';
 
 const SystemReadiness: React.FC = () => {
   const [dbState, setDbState] = useState(db.getState());
@@ -132,30 +133,19 @@ const SystemReadiness: React.FC = () => {
         ))}
       </div>
 
-      <div className="bg-slate-900 p-8 rounded-[3rem] text-white overflow-hidden relative">
+      <div className="bg-slate-900 p-8 rounded-[3rem] text-white overflow-hidden relative min-h-[600px] flex flex-col">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 blur-[100px] -mr-32 -mt-32"></div>
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        
+        <div className="relative z-10 flex flex-col space-y-12">
             <div>
-                <h2 className="text-2xl font-black uppercase italic tracking-tighter mb-4">Manual Setup Required?</h2>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-loose">
-                    If integration points show "Missing", navigate to the <span className="text-blue-400">System Config</span> page to provide the necessary API keys and credentials.
+                <h2 className="text-3xl font-black uppercase italic tracking-tighter mb-2">Live Network Diagnostic</h2>
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-loose max-w-2xl">
+                    Execute a deep-spectral analysis of the current infrastructure node. Measures throughput, jitter, and packet stability in real-time.
                 </p>
-                <div className="mt-8 flex gap-4">
-                    <button className="px-6 py-3 bg-blue-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all">
-                        Open Config Plane
-                    </button>
-                    <button className="px-6 py-3 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">
-                        Setup Documentation
-                    </button>
-                </div>
             </div>
-            <div className="bg-black/40 border border-white/5 p-6 rounded-3xl font-mono text-[10px] text-emerald-400/80 leading-relaxed shadow-inner">
-                <div className="flex gap-2 mb-2"><span className="text-slate-500">$</span> diagnostic --verbose</div>
-                <div>{">"} Checking environment variables... [OK]</div>
-                <div>{">"} Initializing Socket.io stream... {socketConnected ? '[CONNECTED]' : '[WAITING]'}</div>
-                <div>{">"} PWA Manifest Integrity... [VALID]</div>
-                <div>{">"} OLT Registry Polling... [ACTIVE]</div>
-                <div>{">"} System Readiness Score: {(overallHealth * 100).toFixed(0)}%</div>
+
+            <div className="flex-1">
+               <PremiumSpeedTest className="!bg-black/40 border-white/5 shadow-inner" />
             </div>
         </div>
       </div>

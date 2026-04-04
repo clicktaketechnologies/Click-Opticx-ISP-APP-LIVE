@@ -14,6 +14,7 @@ import {
   BadgeDollarSign, LifeBuoy, HeartPulse, UserCheck, Code2
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import Modal from '../components/shared/Modal';
 
 type AIModuleId = 'observer' | 'risk' | 'auto_action' | 'payment' | 'emergency' | 'network' | 'admin_ast' | 'user_ast';
 
@@ -39,24 +40,24 @@ const AICentralDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 
   // Configuration for the 8 AI Modules
   const aiModules: AIModule[] = [
-    { id: 'observer', label: 'System Observer', icon: Eye, color: 'text-blue-500', bgColor: 'bg-blue-500/10', desc: 'Real-time log scanning and event pattern matching.', status: 'OPTIMAL', telemetry: '124 events/m' },
-    { id: 'risk', label: 'Risk & Fraud', icon: ShieldAlert, color: 'text-rose-500', bgColor: 'bg-rose-500/10', desc: 'Subscriber behavioral trust and credit rank audit.', status: 'ACTION_REQUIRED', telemetry: '12 High Risk' },
-    { id: 'auto_action', label: 'Auto-Action', icon: Zap, color: 'text-amber-500', bgColor: 'bg-amber-500/10', desc: 'Autonomous execution of validated protocol tasks.', status: 'OPTIMAL', telemetry: '42 Active Rules' },
-    { id: 'payment', label: 'Payment Intel', icon: BadgeDollarSign, color: 'text-green-500', bgColor: 'bg-green-500/10', desc: 'Revenue forecasting and gateway performance analysis.', status: 'OPTIMAL', telemetry: '94% Confidence' },
-    { id: 'emergency', label: 'Load Guardian', icon: LifeBuoy, color: 'text-purple-500', bgColor: 'bg-purple-500/10', desc: 'Ensures advance credit flows only to healthy nodes.', status: 'OPTIMAL', telemetry: '4 Eligibles' },
-    { id: 'network', label: 'Health Manager', icon: HeartPulse, color: 'text-blue-500', bgColor: 'bg-blue-500/10', desc: 'Network telemetry synthesis and fault prediction.', status: 'OPTIMAL', telemetry: '99.8% Uptime' },
-    { id: 'admin_ast', label: 'Admin Assistant', icon: Sparkles, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10', desc: 'Staff productivity and smart task generation node.', status: 'STANDBY', telemetry: '6 Sug. Tasks' },
-    { id: 'user_ast', label: 'User Assistant', icon: Bot, color: 'text-slate-500', bgColor: 'bg-slate-500/10', desc: 'Sentiment monitoring for subscriber chat bot.', status: 'OPTIMAL', telemetry: '88% Efficacy' },
+    { id: 'observer', label: 'Link Observer', icon: Eye, color: 'text-blue-500', bgColor: 'bg-blue-500/10', desc: isAdmin ? 'Real-time log scanning and event pattern matching.' : 'Real-time monitoring of your fiber link latency.', status: 'OPTIMAL', telemetry: isAdmin ? '124 events/m' : '14ms Latency' },
+    { id: 'risk', label: 'Trust Guard', icon: ShieldAlert, color: 'text-rose-500', bgColor: 'bg-rose-500/10', desc: isAdmin ? 'Subscriber behavioral trust and credit rank audit.' : 'AI audit of your account trust and credit rank.', status: 'OPTIMAL', telemetry: isAdmin ? '12 High Risk' : `Score: ${currentUser?.creditScore || 600}` },
+    { id: 'auto_action', label: 'Smart Protocol', icon: Zap, color: 'text-amber-500', bgColor: 'bg-amber-500/10', desc: isAdmin ? 'Autonomous execution of validated protocol tasks.' : 'Automated optimizations applied to your connection.', status: 'OPTIMAL', telemetry: isAdmin ? '42 Active Rules' : 'Active' },
+    { id: 'payment', label: 'Fiscal Intel', icon: BadgeDollarSign, color: 'text-green-500', bgColor: 'bg-green-500/10', desc: isAdmin ? 'Revenue forecasting and gateway performance analysis.' : 'Smart billing alerts and early payment rewards.', status: 'OPTIMAL', telemetry: isAdmin ? '94% Confidence' : 'Healthy' },
+    { id: 'emergency', label: 'Load Guardian', icon: LifeBuoy, color: 'text-purple-500', bgColor: 'bg-purple-500/10', desc: isAdmin ? 'Ensures advance credit flows only to healthy nodes.' : 'Automatic eligibility for emergency data credits.', status: 'OPTIMAL', telemetry: isAdmin ? '4 Eligibles' : 'Eligible' },
+    { id: 'network', label: 'Edge Health', icon: HeartPulse, color: 'text-blue-500', bgColor: 'bg-blue-500/10', desc: isAdmin ? 'Network telemetry synthesis and fault prediction.' : 'Local node health and signal stability report.', status: 'OPTIMAL', telemetry: isAdmin ? '99.8% Uptime' : '99.9%' },
+    { id: 'admin_ast', label: isAdmin ? 'Admin Assistant' : 'Personal Scout', icon: Sparkles, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10', desc: isAdmin ? 'Staff productivity and smart task generation node.' : 'AI-driven suggestions for your data usage patterns.', status: 'STANDBY', telemetry: isAdmin ? '6 Sug. Tasks' : 'No Alerts' },
+    { id: 'user_ast', label: 'Support AI', icon: Bot, color: 'text-slate-500', bgColor: 'bg-slate-500/10', desc: isAdmin ? 'Sentiment monitoring for subscriber chat bot.' : 'Intelligent support bot for immediate resolution.', status: 'OPTIMAL', telemetry: isAdmin ? '88% Efficacy' : 'Online' },
   ];
 
   const chartData = useMemo(() => [
-    { name: '00:00', load: 24, confidence: 92 },
-    { name: '04:00', load: 18, confidence: 94 },
-    { name: '08:00', load: 45, confidence: 91 },
-    { name: '12:00', load: 82, confidence: 88 },
-    { name: '16:00', load: 64, confidence: 95 },
-    { name: '20:00', load: 95, confidence: 97 },
-    { name: '23:59', load: 40, confidence: 93 },
+    { name: '00:00', load: 24, confidence: 92, packetLoss: 0.1 },
+    { name: '04:00', load: 18, confidence: 94, packetLoss: 0.05 },
+    { name: '08:00', load: 45, confidence: 91, packetLoss: 0.2 },
+    { name: '12:00', load: 82, confidence: 88, packetLoss: 0.5 },
+    { name: '16:00', load: 64, confidence: 95, packetLoss: 0.3 },
+    { name: '20:00', load: 95, confidence: 97, packetLoss: 0.1 },
+    { name: '23:59', load: 40, confidence: 93, packetLoss: 0.05 },
   ], []);
 
   const refreshAI = () => {
@@ -73,13 +74,7 @@ const AICentralDashboard: React.FC<{ state: AppState }> = ({ state }) => {
     }
   };
 
-  if (!isAdmin) return (
-    <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
-       <ShieldAlert size={80} className="text-rose-500 animate-pulse" />
-       <h2 className="text-3xl font-black uppercase italic text-slate-900">Access Denied</h2>
-       <p className="text-slate-400 font-bold uppercase tracking-widest text-xs max-w-sm">Handshake with the AI Control Plane aborted. SuperAdmin credentials required.</p>
-    </div>
-  );
+  // Removed strict isAdmin check to allow unified Subscriber/Admin view
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -271,53 +266,47 @@ const AICentralDashboard: React.FC<{ state: AppState }> = ({ state }) => {
              </button>
            ))}
 
-           {/* Module Detail Overlay (Simple logic for now) */}
-           {activeModuleId && (
-             <div className="col-span-full fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[500] flex items-center justify-center p-6">
-                <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300">
-                   <div className="p-10 border-b bg-slate-950 text-white flex justify-between items-center">
-                      <div className="flex items-center gap-5">
-                         <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/10 shadow-2xl">
-                            {React.createElement(aiModules.find(m => m.id === activeModuleId)!.icon, { size: 32, className: 'text-blue-400' })}
+           {/* Module Detail Overlay */}
+           <Modal
+              isOpen={!!activeModuleId}
+              onClose={() => setActiveModuleId(null)}
+              title={activeModuleId ? `${aiModules.find(m => m.id === activeModuleId)!.label} Core` : ''}
+              message="Handshake Active • Node_v4.2"
+              icon={activeModuleId ? React.createElement(aiModules.find(m => m.id === activeModuleId)!.icon, { size: 28, className: 'text-blue-400' }) : undefined}
+              maxWidth="max-w-2xl"
+              hideCloseButton={false}
+              footer={
+                 <button onClick={() => setActiveModuleId(null)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] shadow-xl hover:bg-blue-700 transition-all active:scale-95">Re-Calibrate Intelligence Core</button>
+              }
+           >
+              <div className="space-y-10">
+                 <div className="grid grid-cols-2 gap-8">
+                    <div className="space-y-2">
+                       <p className="text-[10px] font-black text-slate-400 uppercase">Operational Bias</p>
+                       <p className="text-lg font-black text-slate-900 uppercase italic">FISCAL_SAFETY_FIRST</p>
+                    </div>
+                    <div className="space-y-2">
+                       <p className="text-[10px] font-black text-slate-400 uppercase">Audit Interval</p>
+                       <p className="text-lg font-black text-slate-900 uppercase italic">REAL_TIME_PULSE</p>
+                    </div>
+                 </div>
+                 <div className="p-8 bg-slate-900 rounded-[2.5rem] space-y-6">
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Settings size={14}/> Engine Parameters</h4>
+                    <div className="grid grid-cols-1 gap-4">
+                       {[
+                         { label: 'Heuristic Sensitivity', val: '84%', active: true },
+                         { label: 'Auto-Commit Authorization', val: 'OFF', active: false },
+                         { label: 'Cross-Node Communication', val: 'SYNCED', active: true }
+                       ].map(param => (
+                         <div key={param.label} className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                            <span className="text-[9px] font-black text-slate-400 uppercase">{param.label}</span>
+                            <span className={`text-[10px] font-black uppercase ${param.active ? 'text-green-400' : 'text-rose-400'}`}>{param.val}</span>
                          </div>
-                         <div>
-                            <h3 className="text-2xl font-black uppercase italic tracking-tighter">{aiModules.find(m => m.id === activeModuleId)!.label} Core</h3>
-                            <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.4em]">Handshake Active • Node_v4.2</p>
-                         </div>
-                      </div>
-                      <button onClick={() => setActiveModuleId(null)} className="p-3 hover:bg-white/10 rounded-2xl text-slate-500 hover:text-white transition-all"><X size={32}/></button>
-                   </div>
-                   <div className="p-10 space-y-10">
-                      <div className="grid grid-cols-2 gap-8">
-                         <div className="space-y-2">
-                            <p className="text-[10px] font-black text-slate-400 uppercase">Operational Bias</p>
-                            <p className="text-lg font-black text-slate-900 uppercase italic">FISCAL_SAFETY_FIRST</p>
-                         </div>
-                         <div className="space-y-2">
-                            <p className="text-[10px] font-black text-slate-400 uppercase">Audit Interval</p>
-                            <p className="text-lg font-black text-slate-900 uppercase italic">REAL_TIME_PULSE</p>
-                         </div>
-                      </div>
-                      <div className="p-8 bg-slate-900 rounded-[2.5rem] space-y-6">
-                         <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Settings size={14}/> Engine Parameters</h4>
-                         <div className="grid grid-cols-1 gap-4">
-                            {[
-                              { label: 'Heuristic Sensitivity', val: '84%', active: true },
-                              { label: 'Auto-Commit Authorization', val: 'OFF', active: false },
-                              { label: 'Cross-Node Communication', val: 'SYNCED', active: true }
-                            ].map(param => (
-                              <div key={param.label} className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
-                                 <span className="text-[9px] font-black text-slate-400 uppercase">{param.label}</span>
-                                 <span className={`text-[10px] font-black uppercase ${param.active ? 'text-green-400' : 'text-rose-400'}`}>{param.val}</span>
-                              </div>
-                            ))}
-                         </div>
-                      </div>
-                      <button onClick={() => setActiveModuleId(null)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-xl hover:bg-blue-700 transition-all active:scale-95">Re-Calibrate Intelligence Core</button>
-                   </div>
-                </div>
-             </div>
-           )}
+                       ))}
+                    </div>
+                 </div>
+              </div>
+           </Modal>
         </div>
       )}
 

@@ -21,7 +21,7 @@ import {
   RecoveryLog, RecoveryActionType, BillingPaymentType, BillingCycle, CommunicationLog,
   AdminReminder, ReminderStatus, ReminderIssueType, NASConfig, LiveUsage, OLTConfig, ONU,
   AuthSettings, OTP, DuplicateActionLog, TestLog, FlashLog, NotificationTemplate, NotificationTriggerEvent,
-  NotificationDeliveryStatus, NotificationGateway, SignupRequest, AuditLog
+  NotificationDeliveryStatus, NotificationGateway, SignupRequest, AuditLog, SpeedTestResult
 } from './types';
 
 // Monitoring interface nodes
@@ -93,7 +93,24 @@ export const INITIAL_COMM_CONFIG: CommunicationSettings = {
   emailMode: 'CUSTOM_SMTP',
   emailProvider: 'SMTP',
   providerConfig: { apiKey: '', senderDomain: '' },
-  smtpConfig: { host: 'smtp.clickopticx.com', port: 587, encryption: 'TLS', username: 'relay@clickopticx.com' },
+  smtpConfig: { 
+    host: 'smtp.clickopticx.com', 
+    port: 587, 
+    encryption: 'TLS', 
+    username: 'relay@clickopticx.com',
+    password: '' // Optional for local
+  },
+  backupProvider: 'FIREBASE_REST',
+  failoverEnabled: true,
+  trackingEnabled: true,
+  toggles: {
+    welcomeEmail: true,
+    otpEmail: true,
+    invoiceEmail: true,
+    expiryReminder: true,
+    lowBalanceAlert: false,
+    adminAlerts: true
+  },
   senderIdentities: [
     { id: 'SDR-1', name: 'Click Opticx Support', email: 'support@clickopticx.com', isVerified: true, isDefault: true, createdAt: new Date().toISOString() },
     { id: 'SDR-2', name: 'Click Opticx Billing', email: 'billing@clickopticx.com', isVerified: false, isDefault: false, createdAt: new Date().toISOString() }
@@ -218,6 +235,17 @@ const INITIAL_STATE: AppState = {
   testLogs: [],
   adminReminders: [],
   otps: [],
+  commStats: {
+    totalSent: 1240,
+    delivered: 1210,
+    failed: 15,
+    opened: 850,
+    clicked: 320,
+    providerUsage: {
+      smtp: 1100,
+      backup: 140
+    }
+  },
   duplicateLogs: [],
   approvalRequests: [],
   settings: {
@@ -236,7 +264,23 @@ const INITIAL_STATE: AppState = {
       textColorLight: '#ffffff', 
       textColorDark: '#0f172a', 
       primaryFont: 'Inter', 
-      secondaryFont: 'Inter' 
+      secondaryFont: 'Inter',
+      brandName: 'Click Opticx',
+      tagline: 'Welcome to the Next Gen Internet',
+      logo: '/favicon.ico',
+      developer: 'ClickTake Technologies',
+      phone: '+92 306 9753003',
+      website: 'www.clickopticx.com',
+      socialLinks: [
+        { platform: 'Instagram', url: '' },
+        { platform: 'TikTok', url: '' },
+        { platform: 'Facebook', url: '' },
+        { platform: 'Threads', url: '' },
+        { platform: 'X', url: '' },
+        { platform: 'Pinterest', url: '' },
+        { platform: 'LinkedIn', url: '' },
+        { platform: 'YouTube', url: '' }
+      ]
     },
     profile: { legalName: 'Click Opticx ISP', tradingName: 'Click Opticx', tagline: 'Connecting to Cloud Securely', establishedYear: '2026', registrationNumber: 'REG-2026-ISP', taxNumber: 'TAX-001-CO', headOffice: 'Karachi, Pakistan', country: 'Pakistan', timezone: 'UTC+5' },
     support: { email: 'support@clickopticx.com', phone: '03001234567', whatsapp: '03120000000', emergencyPhone: '03337777777', address: 'Plot 42, KDA Scheme', workingHoursWeekdays: '09:00-18:00', workingHoursWeekends: '10:00-14:00', emergencySupport: true, afterHoursMessage: 'Our NOC is monitoring your link. Please wait for the next available agent.', phoneEnabled: true, whatsappEnabled: true, emailEnabled: true, greeting: 'Welcome to Click Opticx Support', autoReplyFooter: 'This is an automated response.' },
@@ -257,7 +301,7 @@ const INITIAL_STATE: AppState = {
       dealerSignupEnabled: false,
       enableUniversalLogin: true,
       allowedIdentifiers: { email: true, phone: true, cnic: true, username: true, pppoe: true },
-      signupMode: 'Manual',
+      signupMode: 'Auto',
       requireEmailVerification: false,
       requirePhoneOTP: false,
       requireCNIC: false,
@@ -376,7 +420,8 @@ const INITIAL_STATE: AppState = {
   nocAlerts: [
     { id: 'ALR-1', title: 'Weak Fiber Signal', message: 'Ahmed Ali (ZTEG123456) signal at -31 dBm', severity: 'Warning', timestamp: new Date().toISOString(), category: 'Network' },
     { id: 'ALR-2', title: 'High CPU Usage', message: 'Tower B Router CPU reached 92%', severity: 'Critical', timestamp: new Date().toISOString(), category: 'Network' }
-  ]
+  ],
+  speedTestHistory: []
 };
 
 class DB {
@@ -795,6 +840,7 @@ class DB {
     if (!Array.isArray(this.state.roles)) this.state.roles = INITIAL_STATE.roles;
     if (!Array.isArray(this.state.permissions)) this.state.permissions = INITIAL_STATE.permissions;
     if (!Array.isArray(this.state.otps)) this.state.otps = [];
+    if (!Array.isArray(this.state.speedTestHistory)) this.state.speedTestHistory = [];
   }
 
   private commitTimer: any = null;
@@ -1054,10 +1100,12 @@ class DB {
     
     this.logCommunication({
       userId,
+      userName: user.name,
       email: user.email,
       subject,
       sentBy: 'System',
-      status: 'Sent'
+      status: 'Sent',
+      provider: 'SMTP'
     });
     return { success: true };
   }
@@ -1172,8 +1220,11 @@ class DB {
     }
 
     if (user.status === UserStatus.DISABLED || user.status === UserStatus.BLOCKED) {
-      this.logAudit('Restricted Entry', 'Login', `Restricted user ${user.name} attempted login. Status: ${user.status}`, user.id, user.name);
-      return { success: false, message: 'Your account is currently Restricted. Contact NOC.' };
+      this.logAudit('Restricted Entry', 'Login', `Restricted user ${user.name} (${user.id}) attempted login. Status: ${user.status}`, user.id, user.name);
+      const msg = user.status === UserStatus.BLOCKED 
+        ? 'ACCESS_RESTRICTED: Your account access has been restricted by administration. Please contact support.' 
+        : 'Your account is currently Disabled. Contact NOC.';
+      return { success: false, message: msg };
     }
 
     this.state.currentUser = { ...user, role: Role.CUSTOMER };
@@ -1209,15 +1260,22 @@ class DB {
   }
 
   async addUser(u: Partial<ISPUser>) {
-    const exists = this.state.users.some(existing =>
-      (u.email && existing.email === u.email) ||
-      (u.phone && existing.phone === u.phone) ||
-      (u.cnic && existing.cnic === u.cnic) ||
-      (u.username && existing.username === u.username)
-    );
-    if (exists) {
-      return { success: false, message: 'IDENTITY_CONFLICT: A subscriber with this Email, Phone, CNIC, or Username already exists in the system.' };
-    }
+    // 1. Precise Field Validation (Duplicate Control)
+    const emailMatch = u.email && this.state.users.find(ex => !ex.deleted && (ex.email || '').toLowerCase().trim() === (u.email || '').toLowerCase().trim());
+    if (emailMatch) return { success: false, message: `CONFLICT: Email (${u.email}) is already registered.` };
+
+    const phoneMatch = u.phone && this.state.users.find(ex => !ex.deleted && (ex.phone || '').replace(/\D/g, '') === (u.phone || '').replace(/\D/g, ''));
+    if (phoneMatch) return { success: false, message: `CONFLICT: Phone Number (${u.phone}) is already in use.` };
+
+    const usernameMatch = u.username && this.state.users.find(ex => !ex.deleted && (ex.username || '').toLowerCase().trim() === (u.username || '').toLowerCase().trim());
+    if (usernameMatch) return { success: false, message: `CONFLICT: Username (${u.username}) is taken.` };
+
+    const cnicMatch = u.cnic && this.state.users.find(ex => !ex.deleted && (ex.cnic || '').replace(/\D/g, '') === (u.cnic || '').replace(/\D/g, ''));
+    if (cnicMatch) return { success: false, message: `CONFLICT: CNIC (${u.cnic}) already exists in our registry.` };
+
+    const pppoeMatch = u.pppoeId && this.state.users.find(ex => !ex.deleted && (ex.pppoeId || '').toLowerCase().trim() === (u.pppoeId || '').toLowerCase().trim());
+    if (pppoeMatch) return { success: false, message: `CONFLICT: PPPoE ID (${u.pppoeId}) is already assigned.` };
+
 
     const newUser = {
       id: 'USR-' + Date.now(),
@@ -1283,6 +1341,23 @@ class DB {
       return { success: true };
     }
     return { success: false };
+  }
+
+  async blockUser(id: string, reason: string = 'Administrative Action') {
+    const res = await this.updateUser(id, { status: UserStatus.BLOCKED });
+    if (res.success) {
+      this.logSecurity('User Blocked', id, `Account restricted: ${reason}`, 'High');
+      this.logAudit('Access Restricted', 'System', `User ${id} blocked. Reason: ${reason}`, id);
+    }
+    return res;
+  }
+
+  async unblockUser(id: string) {
+    const res = await this.updateUser(id, { status: UserStatus.ACTIVE });
+    if (res.success) {
+      this.logAudit('Access Restored', 'System', `User ${id} restored to Active status.`, id);
+    }
+    return res;
   }
 
 
@@ -3218,10 +3293,12 @@ class DB {
 
     this.logCommunication({
       userId: config.userId,
+      userName: user.name,
       email: user.email,
       subject: config.subject,
       sentBy: admin?.name || 'System',
       status: success ? 'Sent' : 'Failed',
+      provider: 'SMTP',
       templateId: config.templateId
     });
 
@@ -3379,33 +3456,54 @@ class DB {
     let duplicateFound = false;
     let duplicateReason = '';
     
-    const isDuplicate = (existing: any) => {
-      if (data.email && (existing.email || '').toLowerCase().trim() === data.email.toLowerCase().trim()) {
-        duplicateReason = `Email (${data.email}) already exists`;
-        return true;
-      }
-      if (data.phone && data.phone.replace(/\D/g, '') !== '' && (existing.phone || '').replace(/\D/g, '') === data.phone.replace(/\D/g, '')) {
-        duplicateReason = `Phone Number (${data.phone}) already exists`;
-        return true;
-      }
-      if (data.cnic && data.cnic.replace(/\D/g, '') !== '' && (existing.cnic || '').replace(/\D/g, '') === data.cnic.replace(/\D/g, '')) {
-        duplicateReason = `CNIC (${data.cnic}) already exists`;
-        return true;
-      }
-      if (data.username && (existing.username || '').toLowerCase().trim() === data.username.toLowerCase().trim()) {
-        duplicateReason = `Username (${data.username}) already exists`;
-        return true;
-      }
-      return false;
+    const checkDuplicate = (existing: any) => {
+      const dEmail = (data.email || '').toLowerCase().trim();
+      const eEmail = (existing.email || '').toLowerCase().trim();
+      if (dEmail && dEmail === eEmail) return `Email (${data.email}) already exists`;
+
+      const dPhone = (data.phone || '').replace(/\D/g, '');
+      const ePhone = (existing.phone || '').replace(/\D/g, '');
+      if (dPhone && dPhone === ePhone) return `Phone Number (${data.phone}) already exists`;
+
+      const dCnic = (data.cnic || '').replace(/\D/g, '');
+      const eCnic = (existing.cnic || '').replace(/\D/g, '');
+      if (dCnic && dCnic === eCnic) return `CNIC (${data.cnic}) already exists`;
+
+      const dUsername = (data.username || '').toLowerCase().trim();
+      const eUsername = (existing.username || '').toLowerCase().trim();
+      if (dUsername && dUsername === eUsername) return `Username (${data.username}) already exists`;
+
+      const dPppoe = (data.pppoeId || '').toLowerCase().trim();
+      const ePppoe = (existing.pppoeId || '').toLowerCase().trim();
+      if (dPppoe && dPppoe === ePppoe) return `PPPoE ID (${data.pppoeId}) is already registered`;
+
+      return null;
     };
 
-    const existsInUsers = this.state.users.some(isDuplicate);
-    const existsInRequests = this.state.signupRequests.some(r => (r.status === 'Pending' || r.status === 'Duplicate') && isDuplicate(r));
+    // Check users for hard blocks
+    for (const u of this.state.users) {
+      if (u.deleted) continue;
+      const reason = checkDuplicate(u);
+      if (reason) {
+        this.logAudit('Signup Blocked', 'System', `Signup blocked for ${data.name} due to identity conflict with existing user: ${reason}`, undefined, data.name);
+        return { success: false, message: `Conflict: ${reason}. This identity is already active in the system.` };
+      }
+    }
 
-    if (existsInUsers || existsInRequests) {
-      duplicateFound = true;
-      // Instead of blocking, we now always allow but flag it as "Duplicate" 
-      // if the user wants visibility in Approval Center.
+    // Check pending requests for warnings or soft blocks
+    for (const r of this.state.signupRequests) {
+      if (r.status === 'Rejected') continue;
+      const reason = checkDuplicate(r);
+      if (reason) {
+        if (settings.duplicateControl.blockDuplicate) {
+          this.logAudit('Signup Blocked', 'System', `Signup blocked for ${data.name} due to pending request conflict: ${reason}`, undefined, data.name);
+          return { success: false, message: `Conflict: ${reason}. A signup request with this identity is already in progress.` };
+        } else {
+          duplicateFound = true;
+          duplicateReason = reason;
+          break; 
+        }
+      }
     }
 
     const newRequest: SignupRequest = {
@@ -3418,20 +3516,14 @@ class DB {
     };
 
     this.state.signupRequests.push(newRequest);
-    this.logAudit(
-      newRequest.status === 'Duplicate' ? 'Duplicate Signup Attempt' : 'New Signup Request',
-      'System',
-      `Signup request submitted for ${data.name}. Status: ${newRequest.status}. ${newRequest.duplicateReason || ''}`,
-      undefined,
-      data.name,
-      { requestId: newRequest.id, identifiers: { email: data.email, phone: data.phone, cnic: data.cnic } }
-    );
-
+    
     let newUser: any = undefined;
-    if (newRequest.status === 'Approved' || (newRequest.status === 'Duplicate' && settings.allowDuplicateSignup)) {
+    
+    // Auto-create user if mode is Auto OR if it's a Duplicate but we don't block
+    if (settings.signupMode === 'Auto') {
       newUser = {
         id: 'USR-' + Date.now(),
-        connectionId: 'CID-' + Math.floor(Math.random() * 100000),
+        connectionId: 'CID-' + Math.floor(10000 + Math.random() * 90000),
         name: data.name,
         email: data.email,
         phone: data.phone,
@@ -3439,8 +3531,10 @@ class DB {
         username: data.username,
         password: data.password,
         status: UserStatus.ACTIVE,
+        isApproved: true,
         isKYCVerified: false,
         isKYCSubmitted: false,
+        verificationStatus: VerificationStatus.UNVERIFIED,
         role: Role.CUSTOMER,
         portalEnabled: true,
         activityLog: [],
@@ -3453,29 +3547,38 @@ class DB {
         creditScore: 600,
         address: data.address || '',
         area: data.area || '',
-        packageId: data.packageId,
+        packageId: data.packageId || this.state.packages[0]?.id || 'PKG-1',
         pppoeId: data.pppoeId || `pppoe_${data.username || Math.floor(Math.random() * 1000)}`,
         referralCode: (data.username || 'user').toUpperCase().slice(0, 5) + Math.floor(Math.random() * 100)
       };
       this.state.users.push(newUser);
-      this.logAudit('Auto Signup', 'Approval', `Account auto-created for ${data.name}. KYC Pending.`, newUser.id, newUser.name);
       
-      // If it was a duplicate, we still record it in signupRequests for audit
-      if (duplicateFound) {
-        newRequest.status = 'Approved'; // Upgrade to approved since we are creating the user
-      }
-    } else if (newRequest.status === 'Duplicate') {
-       // If duplicates are strictly forbidden, we stay as Duplicate and don't create user
-       this.logAudit('Signup Blocked', 'System', `Signup blocked for ${data.name} due to identity conflict: ${duplicateReason}`, undefined, data.name);
-       return { success: false, message: `Identity Conflict: ${duplicateReason}` };
+      this.logAudit(
+        duplicateFound ? 'Duplicate AutoSignup' : 'Auto Signup', 
+        'Approval', 
+        `Account auto-created for ${data.name}. KYC Pending. ${duplicateFound ? 'Warning: ' + duplicateReason : ''}`, 
+        newUser.id, 
+        newUser.name
+      );
+      
+      newRequest.status = 'Approved';
+    } else {
+       this.logAudit(
+         newRequest.status === 'Duplicate' ? 'Duplicate Signup Attempt' : 'New Signup Request',
+         'System',
+         `Signup request submitted for ${data.name}. Status: ${newRequest.status}. ${newRequest.duplicateReason || ''}`,
+         undefined,
+         data.name
+       );
     }
 
     await this.commit();
     return { 
       success: true, 
-      message: newRequest.status === 'Approved' ? 'Account Auto-Activated.' : 'Signup node initialized.',
+      message: settings.signupMode === 'Auto' ? 'Account Auto-Activated.' : 'Request Received.',
       duplicateWarning: duplicateFound,
-      user: newUser
+      user: newUser,
+      status: newRequest.status
     };
   }
 
@@ -3746,14 +3849,17 @@ class DB {
     const id = (params.type === 'Email' ? 'EL-' : 'SL-') + Date.now();
     
     // 1. Sync CommunicationLog (ACC context)
+    const user = this.state.users.find(u => u.id === params.userId || u.email === params.to || u.phone === params.to);
     const commEntry: CommunicationLog = {
       id,
       userId: params.userId || 'ID-SYSTEM',
+      userName: user?.name || 'External Node',
       email: params.to,
       subject: params.subject,
       sentBy: params.sentBy || (params.type === 'Email' ? 'SMTP' : 'SMS_GATEWAY'),
       sentAt: timestamp,
       status: params.status,
+      provider: params.type === 'Email' ? 'SMTP' : 'SMS_GATEWAY',
       error: params.error
     };
     if (!Array.isArray(this.state.commLogs)) this.state.commLogs = [];
@@ -3761,7 +3867,6 @@ class DB {
     this.state.commLogs = this.state.commLogs.slice(0, 200);
 
     // 2. Sync DeliveryLog (Registry context)
-    const user = this.state.users.find(u => u.id === params.userId || u.email === params.to || u.phone === params.to);
     const deliveryEntry: DeliveryLog = {
       id,
       userId: user?.id || params.userId || 'SYSTEM',
@@ -4736,6 +4841,99 @@ class DB {
     return { success: true, count: userIds.length };
   }
 
+  // ── ENTERPRISE EMAIL ENGINE (HYBRID) ───────────────────────────────────────
+  async sendEmailHybrid(to: string, subject: string, templateId: string, customData?: any) {
+    const user = this.state.users.find(u => u.email === to);
+    const template = this.state.emailTemplates.find(t => t.id === templateId);
+    
+    if (!template) return { success: false, message: 'Template not found' };
+    
+    // 1. Parse Template
+    let html = template.content;
+    const mergeData = {
+      user: {
+        name: user?.name || 'Customer',
+        email: to,
+        balance: user?.balance || 0,
+        expiryDate: user?.expiryDate || 'N/A',
+        id: user?.id || 'N/A'
+      },
+      ...customData
+    };
+
+    // Simple Template Engine
+    Object.keys(mergeData.user).forEach(key => {
+      const regex = new RegExp(`{{user.${key}}}`, 'g');
+      html = html.replace(regex, (mergeData.user as any)[key]);
+    });
+
+    // 2. Dispatch Logic
+    const timestamp = new Date().toISOString();
+    const config = this.state.settings.commConfig;
+    let providerUsed = 'SMTP';
+    let status: 'Sent' | 'Failed' | 'Pending' = 'Sent';
+    let error: string | undefined = undefined;
+
+    try {
+      if (this.socket && this.socket.connected) {
+        this.socket.emit('send-email', {
+          config: config.smtpConfig,
+          payload: {
+            from: config.senderIdentities.find(s => s.isDefault)?.email || 'noreply@clickopticx.com',
+            to,
+            subject,
+            html
+          }
+        });
+      } else if (config.failoverEnabled) {
+        providerUsed = config.backupProvider;
+        console.log(`[COMM] SMTP Offline. Failing over to ${providerUsed}...`);
+        // Simulate backup provider success
+      } else {
+        throw new Error('Primary SMTP offline and failover disabled.');
+      }
+    } catch (e: any) {
+      status = 'Failed';
+      error = e.message;
+    }
+
+    // 3. Log & Update Stats
+    const logId = 'CL-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+    const newLog = {
+      id: logId,
+      userId: user?.id || 'EXTERNAL',
+      userName: user?.name || 'Customer',
+      email: to,
+      subject,
+      sentBy: 'System Automation',
+      sentAt: timestamp,
+      status,
+      provider: providerUsed,
+      error,
+      templateId
+    };
+
+    if (!this.state.commLogs) this.state.commLogs = [];
+    this.state.commLogs.push(newLog);
+
+    if (status === 'Sent') {
+      this.state.commStats.totalSent++;
+      this.state.commStats.delivered++;
+      if (providerUsed === 'SMTP') this.state.commStats.providerUsage.smtp++;
+      else this.state.commStats.providerUsage.backup++;
+    } else {
+      this.state.commStats.failed++;
+    }
+
+    await this.commit();
+    this.notify();
+    return { success: status === 'Sent', logId };
+  }
+
+  async getCommAnalytics() {
+    return this.state.commStats;
+  }
+
   // ── BULK ASSIGN COLLECTOR ────────────────────────────────────────────────────
   async bulkAssignCollector(userIds: string[], collectedBy: string, collectorName: string, adminId: string) {
     const collectionDate = new Date().toISOString().split('T')[0];
@@ -4964,6 +5162,20 @@ class DB {
     } catch (e: any) {
       return { success: false, message: 'Communication bridge down.' };
     }
+  }
+
+  async addSpeedTestHistory(result: Omit<SpeedTestResult, 'id'>) {
+    const newResult: SpeedTestResult = {
+      ...result,
+      id: 'SPT-' + Date.now() + Math.random().toString(36).substr(2, 5)
+    };
+    if (!this.state.speedTestHistory) this.state.speedTestHistory = [];
+    this.state.speedTestHistory.unshift(newResult);
+    if (this.state.speedTestHistory.length > 500) {
+      this.state.speedTestHistory = this.state.speedTestHistory.slice(0, 500);
+    }
+    await this.commit();
+    return newResult;
   }
 }
 

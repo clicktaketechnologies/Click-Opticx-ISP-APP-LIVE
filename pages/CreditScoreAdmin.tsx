@@ -6,6 +6,7 @@ import {
   BarChart3, Search, UserCircle, ShieldCheck, ShieldAlert, History, 
   RefreshCw, TrendingUp, TrendingDown, ArrowRight, X, Save, Shield, Lock, AlertTriangle 
 } from 'lucide-react';
+import Modal from '../components/shared/Modal';
 
 const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -229,57 +230,47 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
       </div>
 
       {/* Manual Adjustment Modal */}
-      {isAdjustModalOpen && selectedUser && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[500] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3rem] w-full max-w-lg shadow-2xl animate-in zoom-in duration-300 overflow-hidden border border-white/20 flex flex-col">
-              <div className="px-10 py-8 bg-blue-600 text-white flex justify-between items-center">
-                 <div>
-                    <h3 className="text-2xl font-black uppercase tracking-tighter italic">Risk Adjustment</h3>
-                    <p className="text-blue-100 text-[10px] font-bold uppercase mt-1 tracking-widest">Target: {selectedUser.name}</p>
-                 </div>
-                 <button onClick={() => setIsAdjustModalOpen(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-blue-100 hover:text-white"><X size={28} /></button>
-              </div>
-              <div className="p-10 space-y-8">
-                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Score Delta (Add or Subtract)</label>
-                    <div className="flex items-center gap-6">
-                       <input 
-                        type="number" 
-                        className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-5xl outline-none focus:border-blue-500 transition-all text-slate-900 shadow-inner text-center"
-                        value={delta}
-                        onChange={e => setDelta(Number(e.target.value))}
-                      />
-                    </div>
-                 </div>
+      <Modal
+         isOpen={isAdjustModalOpen && !!selectedUser}
+         onClose={() => setIsAdjustModalOpen(false)}
+         title="Risk Adjustment"
+         message={`Target: ${selectedUser?.name}`}
+         type="form"
+         icon={<BarChart3 size={22} className="text-blue-500" />}
+         confirmLabel="Authorize Adjustment"
+         onConfirm={handleAdjust}
+         isConfirmDisabled={!reason || delta === 0 || isSaving}
+         maxWidth="max-w-lg"
+      >
+         <div className="space-y-8">
+            <div className="space-y-4">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Score Delta (Add or Subtract)</label>
+               <input 
+                  type="number" 
+                  className="w-full p-6 bg-slate-800/80 border border-slate-700/50 rounded-[2rem] font-black text-5xl outline-none focus:border-blue-500 transition-all text-white shadow-inner text-center placeholder:text-slate-500"
+                  value={delta}
+                  onChange={e => setDelta(Number(e.target.value))}
+               />
+            </div>
 
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mandatory Override Reason</label>
-                    <textarea 
-                      className="w-full p-5 bg-slate-50 border border-slate-100 rounded-3xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 h-32 resize-none uppercase"
-                      placeholder="Audit justification protocol..."
-                      value={reason}
-                      onChange={e => setReason(e.target.value)}
-                    />
-                 </div>
+            <div className="space-y-2">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mandatory Override Reason</label>
+               <textarea 
+                  className="w-full p-5 bg-slate-800/80 border border-slate-700/50 rounded-3xl font-bold text-sm outline-none focus:border-blue-500 h-32 resize-none uppercase text-white placeholder:text-slate-500"
+                  placeholder="Audit justification protocol..."
+                  value={reason}
+                  onChange={e => setReason(e.target.value)}
+               />
+            </div>
 
-                 <div className="p-6 bg-amber-50 border border-amber-100 rounded-3xl flex items-start gap-4 shadow-inner">
-                    <AlertTriangle className="text-amber-600 mt-1 shrink-0" size={24} />
-                    <p className="text-[10px] text-amber-900 font-bold uppercase leading-relaxed">
-                       Manual score adjustments directly bypass the automated logic engine. All overrides are permanent and logged for supervisory audit.
-                    </p>
-                 </div>
-
-                 <button 
-                  onClick={handleAdjust}
-                  disabled={!reason || delta === 0 || isSaving}
-                  className="w-full py-6 bg-blue-600 text-white font-black rounded-[2rem] hover:bg-blue-700 transition-all shadow-2xl shadow-blue-200 uppercase tracking-[0.3em] text-xs active:scale-95 disabled:grayscale disabled:opacity-50"
-                 >
-                    {isSaving ? 'Synchronizing...' : 'Authorize Adjustment'}
-                 </button>
-              </div>
-           </div>
-        </div>
-      )}
+            <div className="p-6 bg-amber-950/40 border border-amber-500/30 rounded-3xl flex items-start gap-4 shadow-inner mt-6">
+               <AlertTriangle className="text-amber-500 mt-1 shrink-0" size={24} />
+               <p className="text-[10px] text-amber-200 font-bold uppercase leading-relaxed">
+                  Manual score adjustments directly bypass the automated logic engine. All overrides are permanent and logged for supervisory audit.
+               </p>
+            </div>
+         </div>
+      </Modal>
     </div>
   );
 };

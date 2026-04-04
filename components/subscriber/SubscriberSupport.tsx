@@ -7,6 +7,7 @@ import {
   Headphones, MessageSquare, Plus, ChevronRight, Phone, Mail, Globe, 
   ShieldCheck, Activity, LifeBuoy, X, Send, Clock, AlertTriangle, RefreshCw
 } from 'lucide-react';
+import Modal from '../shared/Modal';
 
 const SubscriberSupport: React.FC = () => {
   const state = db.getState();
@@ -130,96 +131,89 @@ const SubscriberSupport: React.FC = () => {
          </div>
       </div>
 
-      {showTicketForm && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[1000] flex items-center justify-center p-6">
-           <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col max-h-[90vh]">
-              <div className="p-10 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                       <Plus size={28} />
-                    </div>
-                     <div>
-                       <h3 className="text-2xl font-black uppercase italic tracking-tighter">Open Ticket</h3>
-                       <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest">New Support Request</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setShowTicketForm(false)} className="p-3 hover:bg-white/10 rounded-2xl text-slate-500 hover:text-white transition-all"><X size={32} /></button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1">
-                 <div className="space-y-6">
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Category</label>
-                       <div className="grid grid-cols-2 gap-3">
-                          {['Technical', 'Billing', 'Sales', 'Upgrade'].map(cat => (
-                            <button 
-                              key={cat} 
-                              type="button"
-                              onClick={() => setFormData({...formData, category: cat as any})}
-                              className={`py-4 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${formData.category === cat ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-blue-100'}`}
-                            >
-                               {cat}
-                            </button>
-                          ))}
-                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Subject</label>
-                       <input 
-                         className="w-full p-5 bg-slate-100 border-none rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/10 uppercase placeholder:lowercase"
-                         placeholder="Brief summary of your issue..."
-                         value={formData.subject}
-                         onChange={e => setFormData({...formData, subject: e.target.value})}
-                         required
-                       />
-                    </div>
-
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Priority</label>
-                       <select 
-                         className="w-full p-4 bg-slate-100 border-none rounded-2xl font-black text-slate-700 outline-none uppercase text-xs"
-                         value={formData.priority}
-                         onChange={e => setFormData({...formData, priority: e.target.value as any})}
-                       >
-                          {Object.values(TicketPriority).map(p => <option key={p} value={p}>{p} Severity</option>)}
-                       </select>
-                    </div>
-
-                    <div className="space-y-2">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
-                       <textarea 
-                         className="w-full p-5 bg-slate-100 border-none rounded-2xl font-bold text-xs h-32 resize-none outline-none focus:ring-4 focus:ring-blue-500/10 uppercase"
-                         placeholder="Please describe your issue in detail..."
-                         value={formData.description}
-                         onChange={e => setFormData({...formData, description: e.target.value})}
-                         required
-                       />
-                    </div>
-                 </div>
-
-                 <div className="p-6 bg-blue-50 border border-blue-100 rounded-3xl flex items-start gap-4">
-                    <AlertTriangle size={24} className="text-blue-600 shrink-0 mt-1" />
-                    <p className="text-[9px] text-blue-700 font-bold uppercase leading-relaxed tracking-tighter">
-                       Standard response time is within 4-6 business hours. High priority issues are addressed as soon as possible.
-                    </p>
-                 </div>
-              </form>
-
-              <div className="p-10 bg-slate-100 border-t flex gap-4 shrink-0">
-                 <button onClick={() => setShowTicketForm(false)} className="flex-1 py-5 font-black text-slate-500 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Cancel</button>
-                 <button 
-                   onClick={handleSubmit}
-                   disabled={isSubmitting || !formData.subject || !formData.description}
-                   className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
-                 >
-                    {isSubmitting ? <Mini5GMicroLoader size={18} /> : <Send size={18}/>}
-                    Send Ticket
-                 </button>
-              </div>
+      <Modal
+        isOpen={showTicketForm}
+        onClose={() => setShowTicketForm(false)}
+        title="Open Ticket"
+        type="form"
+        icon={<Plus size={24} className="text-white" />}
+        footer={
+           <div className="flex gap-4 w-full">
+              <button 
+                onClick={() => setShowTicketForm(false)} 
+                className="flex-1 py-4 font-black text-slate-500 hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSubmit}
+                disabled={isSubmitting || !formData.subject || !formData.description}
+                className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+              >
+                 {isSubmitting ? <Mini5GMicroLoader size={18} /> : <Send size={18}/>}
+                 Send Ticket
+              </button>
            </div>
-        </div>
-      )}
+        }
+      >
+         <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Category</label>
+               <div className="grid grid-cols-2 gap-3">
+                  {['Technical', 'Billing', 'Sales', 'Upgrade'].map(cat => (
+                    <button 
+                      key={cat} 
+                      type="button"
+                      onClick={() => setFormData({...formData, category: cat as any})}
+                      className={`py-4 rounded-xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${formData.category === cat ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-blue-100'}`}
+                    >
+                       {cat}
+                    </button>
+                  ))}
+               </div>
+            </div>
+
+            <div className="space-y-2">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Issue Subject</label>
+               <input 
+                 className="w-full p-5 bg-slate-100 border-none rounded-2xl font-black text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/10 uppercase placeholder:lowercase"
+                 placeholder="Brief summary of your issue..."
+                 value={formData.subject}
+                 onChange={e => setFormData({...formData, subject: e.target.value})}
+                 required
+               />
+            </div>
+
+            <div className="space-y-2">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Priority</label>
+               <select 
+                 className="w-full p-4 bg-slate-100 border-none rounded-2xl font-black text-slate-700 outline-none uppercase text-xs"
+                 value={formData.priority}
+                 onChange={e => setFormData({...formData, priority: e.target.value as any})}
+               >
+                  {Object.values(TicketPriority).map(p => <option key={p} value={p}>{p} Severity</option>)}
+               </select>
+            </div>
+
+            <div className="space-y-2">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Description</label>
+               <textarea 
+                 className="w-full p-5 bg-slate-100 border-none rounded-2xl font-bold text-xs h-32 resize-none outline-none focus:ring-4 focus:ring-blue-500/10 uppercase"
+                 placeholder="Please describe your issue in detail..."
+                 value={formData.description}
+                 onChange={e => setFormData({...formData, description: e.target.value})}
+                 required
+               />
+            </div>
+
+            <div className="p-6 bg-blue-50 border border-blue-100 rounded-3xl flex items-start gap-4">
+               <AlertTriangle size={24} className="text-blue-600 shrink-0 mt-1" />
+               <p className="text-[9px] text-blue-700 font-bold uppercase leading-relaxed tracking-tighter">
+                  Standard response time is within 4-6 business hours. High priority issues are addressed as soon as possible.
+               </p>
+            </div>
+         </form>
+      </Modal>
     </div>
   );
 };

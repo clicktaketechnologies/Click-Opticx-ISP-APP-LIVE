@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Role } from '../../types';
 import { db } from '../../db';
+import Modal from '../shared/Modal';
 
 interface Props {
   onClose: () => void;
@@ -20,21 +21,29 @@ const SubscriberQuickActions: React.FC<Props> = ({ onClose, onAction }) => {
   }, [state.currentUser]);
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[600] flex items-end justify-center animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-xl rounded-t-[3.5rem] p-10 space-y-10 animate-in slide-in-from-bottom duration-500 border-t-8 border-blue-600">
-         <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-               <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                  <Zap size={24} fill="currentColor" />
-               </div>
-               <div>
-                  <h3 className="text-2xl font-black uppercase italic tracking-tighter">Command Override</h3>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol Direct Link v6.0</p>
-               </div>
-            </div>
-            <button onClick={onClose} className="p-3 bg-slate-100 rounded-2xl active:scale-90 transition-transform">
-               <X size={24} />
-            </button>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Command Override"
+      type="info"
+      icon={<Zap size={24} fill="currentColor" className="text-white" />}
+      maxWidth="max-w-xl"
+      footer={
+        <div className="bg-slate-900 p-6 rounded-[2rem] text-white flex items-center justify-between w-full relative overflow-hidden">
+           <div className="relative z-10">
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Public Node IP</p>
+              <h4 className="text-xl font-black italic text-green-400">182.164.3.42</h4>
+           </div>
+           <Wifi className="text-white/10 absolute -right-4 -bottom-4" size={120} />
+           <div className="relative z-10 px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-[10px] font-black uppercase">
+              Secured Node
+           </div>
+        </div>
+      }
+    >
+      <div className="space-y-6">
+         <div className="text-center space-y-1">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol Direct Link v6.0</p>
          </div>
 
          <div className="grid grid-cols-2 gap-4">
@@ -81,19 +90,8 @@ const SubscriberQuickActions: React.FC<Props> = ({ onClose, onAction }) => {
                <p className="text-[8px] font-black mt-2 uppercase opacity-60">Force Active</p>
             </button>
          </div>
-
-         <div className="bg-slate-900 p-8 rounded-[2.5rem] text-white flex items-center justify-between relative overflow-hidden">
-            <div className="relative z-10">
-               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 italic">Public Node IP</p>
-               <h4 className="text-xl font-black italic text-green-400">182.164.3.42</h4>
-            </div>
-            <Wifi className="text-white/10 absolute -right-4 -bottom-4" size={120} />
-            <div className="relative z-10 px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 rounded-full text-[10px] font-black uppercase">
-               Secured
-            </div>
-         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

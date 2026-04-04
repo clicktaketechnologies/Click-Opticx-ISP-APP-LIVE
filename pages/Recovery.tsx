@@ -7,8 +7,9 @@ import {
     Clock, BadgeDollarSign, CreditCard, Landmark, HandCoins,
     History, FileText, Download, Printer, ChevronRight, X, AlertTriangle,
     MoreVertical, CheckSquare, Square, Lock, Unlock, Zap, MoreHorizontal,
-    Mail, Phone, UserCheck, Activity
+    Mail, Phone, UserCheck, Activity, Scale
 } from 'lucide-react';
+import { Modal } from '../components/shared/Modal';
 import ModuleGuide from '../components/shared/ModuleGuide';
 
 const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?: string }> = ({ state, searchTerm: globalSearchTerm, autoOpenAction }) => {
@@ -931,703 +932,709 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
             </div>
         </div>
 
-            {/* SUSPEND MODAL */}
-            {isSuspendModalOpen && (
-                <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[6000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-xl shadow-2xl overflow-hidden border-[8px] border-rose-500 animate-in zoom-in duration-300">
-                        <div className="p-12 text-center space-y-8">
-                            <div className="w-24 h-24 bg-rose-600 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-pulse"><Lock size={56} strokeWidth={3} /></div>
-                            <div className="space-y-3">
-                                <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900">Isolation Protocol</h3>
-                                <p className="text-[11px] text-slate-500 font-bold uppercase tracking-[0.2em] leading-relaxed px-4">Suspending {selectedUsers.size} users will instantly kill their network sessions and lock billing actions.</p>
-                            </div>
-                            <div className="text-left space-y-4">
-                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-4">Suspension Logic Signature</label>
-                                <input
-                                    className="w-full px-8 py-5 bg-slate-50 border-none rounded-3xl font-black text-xs uppercase tracking-widest outline-none focus:ring-4 focus:ring-rose-500/10 placeholder:font-normal"
-                                    value={suspendReason}
-                                    onChange={(e) => setSuspendReason(e.target.value)}
-                                    placeholder="Input reason for suspension audit..."
-                                />
-                            </div>
-                            <div className="flex gap-4">
-                                <button onClick={() => setIsSuspendModalOpen(false)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all">Cancel</button>
-                                <button onClick={handleBatchSuspend} className="flex-2 py-6 bg-rose-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 shadow-xl shadow-rose-100 transition-all">Command Suspension</button>
-                            </div>
-                        </div>
-                    </div>
+      {/* SUSPEND MODAL */}
+      <Modal
+        isOpen={isSuspendModalOpen}
+        onClose={() => setIsSuspendModalOpen(false)}
+        title="Isolation Protocol"
+        type="error"
+        icon={<Lock size={24} className="text-white" />}
+        maxWidth="max-w-xl"
+        footer={
+          <div className="flex gap-4 w-full">
+            <button 
+              onClick={() => setIsSuspendModalOpen(false)} 
+              className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleBatchSuspend} 
+              className="flex-[2] py-4 bg-rose-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 shadow-xl shadow-rose-100 transition-all"
+            >
+              Command Suspension
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-8">
+          <div className="p-8 bg-rose-50 border border-rose-100 rounded-[2.5rem] flex items-start gap-4">
+            <AlertTriangle size={24} className="text-rose-600 shrink-0 mt-1" />
+            <p className="text-[11px] text-rose-700 font-bold uppercase tracking-[0.2em] leading-relaxed">
+              Suspending {selectedUsers.size} users will instantly kill their network sessions and lock billing actions.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-4">Suspension Logic Signature</label>
+            <input
+              className="w-full px-8 py-5 bg-slate-900/50 border border-slate-800 rounded-3xl font-black text-xs uppercase tracking-widest outline-none focus:border-rose-500 transition-all text-white placeholder:text-slate-600"
+              value={suspendReason}
+              onChange={(e) => setSuspendReason(e.target.value)}
+              placeholder="Input reason for suspension audit..."
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* ACTION PANEL POPUP (Payment Modal) */}
+      <Modal
+        isOpen={isPaymentModalOpen && !!activeUser}
+        onClose={() => setIsPaymentModalOpen(false)}
+        title="Collection Protocol"
+        type="info"
+        icon={<Receipt size={24} className="text-white" />}
+        maxWidth="max-w-5xl"
+        footer={
+          <div className="flex gap-4 w-full">
+             <div className="flex-1 p-6 bg-blue-500/10 border border-blue-500/20 rounded-3xl flex items-center gap-4">
+                 <ShieldAlert size={20} className="text-blue-500" />
+                 <p className="text-[10px] font-black uppercase tracking-widest text-blue-400 leading-relaxed italic">
+                    Authorize Provisioning triggers global state update across cloud registry.
+                 </p>
+             </div>
+             <button 
+               onClick={handleRecoveryPayment}
+               disabled={isProcessing}
+               className="flex-1 py-6 bg-blue-600 text-white rounded-3xl font-black text-sm uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 flex items-center justify-center gap-3 italic"
+             >
+                {isProcessing ? <Activity className="animate-spin" size={24} /> : <ShieldCheck size={24} />} 
+                Authorize Provisioning
+             </button>
+          </div>
+        }
+      >
+        {activeUser && (
+          <div className="grid lg:grid-cols-2 gap-10">
+            {/* Left Panel: Profile & Ledger */}
+            <div className="space-y-8">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 bg-blue-600 text-white rounded-3xl flex items-center justify-center shadow-xl italic font-black text-2xl">
+                  {activeUser.name.charAt(0)}
                 </div>
-            )}
-
-            {/* ACTION PANEL POPUP */}
-            {isPaymentModalOpen && activeUser && (
-                <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[6000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-4xl shadow-2xl overflow-hidden border-[8px] border-blue-500 animate-in zoom-in duration-300 flex max-h-[95vh]">
-
-                        {/* LEFT PANEL: ASSORTED ACTIONS & USER DETAILS */}
-                        <div className="flex-1 p-10 flex flex-col overflow-y-auto custom-scrollbar bg-slate-50 relative">
-                            <div className="flex justify-between items-start mb-8">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-16 h-16 bg-blue-600 text-white rounded-3xl flex items-center justify-center shadow-xl italic font-black text-2xl">{activeUser.name.charAt(0)}</div>
-                                    <div>
-                                        <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900 leading-none mb-1">{activeUser.name}</h3>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{activeUser.id} • {state.packages.find(p => p.id === activeUser.packageId)?.name}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 mb-8">
-                                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Outstanding</p>
-                                    <p className="text-2xl font-black text-rose-600">Rs. {activeUser.balance.toLocaleString()}</p>
-                                </div>
-                                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Last Payment</p>
-                                    <p className="text-sm font-black text-slate-700 mt-2">{activeUser.lastPaymentDate ? new Date(activeUser.lastPaymentDate).toLocaleDateString() : 'None'}</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6 flex-1">
-                                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Invoice History</p>
-                                    <div className="space-y-2">
-                                        {state.invoices.filter(i => i.userId === activeUser.id).slice(0, 3).map(inv => (
-                                            <div key={inv.id} className="flex justify-between items-center bg-slate-50 p-3 rounded-xl">
-                                                <div className="flex items-center gap-3">
-                                                    <Receipt size={14} className="text-slate-400" />
-                                                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">{new Date(inv.createdAt).toLocaleDateString()}</p>
-                                                </div>
-                                                <div className="flex items-center gap-3">
-                                                    <p className="text-[10px] font-black">Rs. {inv.totalAmount.toLocaleString()}</p>
-                                                    <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${inv.status === PaymentStatus.PAID ? 'bg-green-100 text-green-700' : 'bg-rose-100 text-rose-700'}`}>{inv.status}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                        {state.invoices.filter(i => i.userId === activeUser.id).length === 0 && (
-                                            <p className="text-[10px] font-bold text-slate-400 italic">No invoices found.</p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Follow Up Actions</p>
-                                    <div className="flex gap-2">
-                                        <input type="date" className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-black outline-none" value={promiseDate} onChange={(e) => setPromiseDate(e.target.value)} />
-                                        <button onClick={handleSetPromiseToPay} className="px-4 py-3 bg-blue-100 text-blue-700 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-200">Set Promise</button>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                         <button onClick={() => handleSendReminder('WhatsApp')} className="py-3 bg-green-50 text-green-700 border border-green-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-100 hover:border-green-300">WhatsApp</button>
-                                         <button onClick={() => handleSendReminder('Email')} className="py-3 bg-slate-50 text-slate-600 border border-slate-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:border-blue-300">Email</button>
-                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* RIGHT PANEL: PAYMENT CAPTURE */}
-                        <div className="flex-1 p-10 flex flex-col bg-white">
-                            <div className="flex justify-end mb-4">
-                                <button onClick={() => setIsPaymentModalOpen(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all"><X size={24} /></button>
-                            </div>
-
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Activation Strategy</h4>
-
-                            <div className="grid grid-cols-2 gap-3 mb-6">
-                                {[
-                                    { id: 'Paid', label: 'Full Paid', desc: 'Activate with payment', icon: <ShieldCheck size={16} />, color: 'bg-green-600' },
-                                    { id: 'Half', label: 'Half Paid', desc: '50% collection', icon: <Activity size={16} />, color: 'bg-blue-600' },
-                                    { id: 'Unpaid', label: 'Unpaid', desc: 'Activate on credit', icon: <Clock size={16} />, color: 'bg-orange-600' },
-                                    { id: 'Emergency', label: 'Emergency', desc: '3-day grace access', icon: <Zap size={16} />, color: 'bg-rose-600' }
-                                ].map(m => (
-                                    <button
-                                        key={m.id}
-                                        onClick={() => setPaymentStatus(m.id as any)}
-                                        className={`flex flex-col items-start p-5 rounded-[2rem] border-2 transition-all group ${paymentStatus === m.id ? 'border-blue-600 bg-blue-50 shadow-lg' : 'border-slate-100 bg-slate-50 hover:bg-white hover:border-slate-200'}`}
-                                    >
-                                        <div className={`w-10 h-10 ${m.color} text-white rounded-2xl flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform`}>{m.icon}</div>
-                                        <p className={`font-black text-[10px] uppercase tracking-widest ${paymentStatus === m.id ? 'text-blue-700' : 'text-slate-600'}`}>{m.label}</p>
-                                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1">{m.desc}</p>
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="space-y-4 mb-8">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Collection Date</label>
-                                        <input
-                                            type="date"
-                                            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/10"
-                                            value={collectionDetails.collectionDate}
-                                            onChange={(e) => setCollectionDetails({ ...collectionDetails, collectionDate: e.target.value })}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Collected By</label>
-                                        <input
-                                            type="text"
-                                            className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/10"
-                                            value={collectionDetails.collectorName}
-                                            onChange={(e) => setCollectionDetails({ ...collectionDetails, collectorName: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2">Collector Notes</label>
-                                    <textarea
-                                        className="w-full px-5 py-4 bg-slate-50 border-none rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:ring-4 focus:ring-blue-500/10 min-h-[80px]"
-                                        value={collectionDetails.notes}
-                                        onChange={(e) => setCollectionDetails({ ...collectionDetails, notes: e.target.value })}
-                                        placeholder="Enter collection notes or payment details..."
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="mt-auto">
-                                <button onClick={handleRecoveryPayment} className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-slate-100 transition-all active:scale-95 flex items-center justify-center gap-3 italic">
-                                    <ShieldCheck size={24} /> Authorize Provisioning
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                <div>
+                  <h4 className="text-2xl font-black uppercase italic tracking-tighter text-white leading-none mb-1">{activeUser.name}</h4>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{activeUser.id} • {state.packages.find(p => p.id === activeUser.packageId)?.name}</p>
                 </div>
-            )}
+              </div>
 
-            {/* ADVANCED BILLING MODAL */}
-            {isAdvancedModalOpen && activeUser && (
-                <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[6000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border-[8px] border-green-500 animate-in zoom-in duration-300">
-                        <div className="p-12 space-y-10">
-                            <div className="flex justify-between items-start">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-20 h-20 bg-green-600 text-white rounded-[2rem] flex items-center justify-center shadow-xl italic font-black text-3xl"><Zap size={40} /></div>
-                                    <div>
-                                        <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none mb-1">Advanced Override</h3>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Strategic Billing Configuration for {activeUser.name}</p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setIsAdvancedModalOpen(false)} className="p-4 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all"><X size={28} /></button>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-10">
-                                <div className="space-y-6">
-                                    <div className="space-y-3">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Override Payment Type</label>
-                                        <div className="space-y-2">
-                                            {['Full Paid', 'Half Paid', 'Advance Paid'].map(t => (
-                                                <button
-                                                    key={t}
-                                                    onClick={() => setBillingConfig(prev => ({ ...prev, paymentType: t as any }))}
-                                                    className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${billingConfig.paymentType === t ? 'bg-green-50 border-green-500 text-green-700' : 'bg-white border-slate-100 text-slate-400'}`}
-                                                >
-                                                    {t} {billingConfig.paymentType === t && <ShieldCheck size={14} />}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Billing Cycle Protocol</label>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {['15 days', '30 days', 'Custom', 'Manual'].map(c => (
-                                                <button
-                                                    key={c}
-                                                    onClick={() => setBillingConfig(prev => ({ ...prev, cycle: c as any }))}
-                                                    className={`flex items-center justify-center p-4 rounded-2xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${billingConfig.cycle === c ? 'bg-blue-50 border-blue-500 text-blue-700' : 'bg-white border-slate-100 text-slate-400'}`}
-                                                >
-                                                    {c}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div className="space-y-3">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Collected Cash (PKR)</label>
-                                        <input
-                                            type="number"
-                                            className="w-full px-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-2xl tracking-tighter outline-none focus:border-green-500 transition-all"
-                                            value={paymentAmount}
-                                            onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                                        />
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Manual Expiry Override</label>
-                                        <input
-                                            type="date"
-                                            className="w-full px-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none focus:border-green-500 transition-all"
-                                            onChange={(e) => setBillingConfig(prev => ({ ...prev, customExpiry: e.target.value }))}
-                                        />
-                                        <p className="text-[8px] text-slate-400 font-bold uppercase italic leading-tight px-2">Leave blank for automatic cycle calculation based on selection.</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button onClick={handleAdvancedBilling} className="w-full py-8 bg-slate-900 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-blue-100 italic transition-all active:scale-95 flex items-center justify-center gap-4">
-                                <Activity size={28} /> Deploy Optimized Billing
-                            </button>
-                        </div>
-                    </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Outstanding</p>
+                  <p className="text-2xl font-black text-rose-500">Rs. {activeUser.balance.toLocaleString()}</p>
                 </div>
-            )}
-
-            {/* AUDIT MODAL */}
-            {isAuditModalOpen && auditData && (
-                <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[6000] flex items-center justify-center p-8">
-                    <div className="bg-white rounded-[4rem] w-full max-w-4xl max-h-[90vh] shadow-high overflow-hidden border border-white/20 flex flex-col animate-in zoom-in duration-500">
-                        <div className="p-12 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center shrink-0">
-                            <div className="flex items-center gap-6">
-                                <div className="w-20 h-20 bg-slate-900 text-white rounded-[2rem] flex items-center justify-center shadow-2xl border-4 border-white">
-                                    <FileText size={32} strokeWidth={3} />
-                                </div>
-                                <div>
-                                    <h3 className="text-4xl font-black uppercase italic tracking-tighter text-slate-950 font-sans leading-none mb-2">User Profile: {auditData.identity.name}</h3>
-                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] italic">Comprehensive Asset & Ledger Investigation Protocol</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-3">
-                                <button onClick={() => window.print()} className="p-4 bg-white border border-slate-200 text-slate-600 rounded-2xl hover:bg-slate-50 transition-all shadow-sm"><Printer size={20} /></button>
-                                <button onClick={() => setIsAuditModalOpen(false)} className="p-4 bg-slate-100 text-slate-400 hover:text-rose-600 rounded-2xl transition-all"><X size={20} /></button>
-                            </div>
-                        </div>
-
-                        <div className="p-12 overflow-y-auto custom-scrollbar flex-1 space-y-12 bg-white selection:bg-blue-100 italic">
-                            <div className="grid grid-cols-3 gap-8">
-                                <div className="p-8 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">Identity Fingerprint</p>
-                                    <div className="space-y-4 font-black">
-                                        <p className="text-xs uppercase flex items-center justify-between">Node ID: <span className="text-slate-950">{auditData.identity.id}</span></p>
-                                        <p className="text-xs uppercase flex items-center justify-between">Status: <span className="text-blue-600">{auditData.identity.status}</span></p>
-                                        <p className="text-xs uppercase flex items-center justify-between">Region: <span className="text-slate-950">{auditData.identity.area}</span></p>
-                                    </div>
-                                </div>
-                                <div className="p-8 bg-green-50 text-green-900 rounded-[2.5rem] border-2 border-green-100">
-                                    <p className="text-[9px] font-black text-green-500 uppercase tracking-widest mb-4">Service Asset</p>
-                                    <div className="space-y-1">
-                                        <p className="text-2xl font-black italic tracking-tighter leading-none">{auditData.package?.name || 'TERMINATED'}</p>
-                                        <p className="text-[10px] uppercase font-black tracking-widest">Rate: Rs. {(auditData.package?.price || 0).toLocaleString()}/mo</p>
-                                    </div>
-                                </div>
-                                <div className="p-8 bg-rose-50 text-rose-900 rounded-[2.5rem] border-2 border-rose-100">
-                                    <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-4">Fiscal Risk</p>
-                                    <p className="text-3xl font-black italic tracking-tighter leading-none mb-1">Rs. {auditData.identity.balance || 0}</p>
-                                    <p className="text-[10px] uppercase font-black tracking-widest">Outstanding Receivables</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 border-l-4 border-blue-600 pl-4">System Transaction Ledger (Last 50 Events)</h4>
-                                <div className="space-y-3">
-                                    {auditData.systemLogs.length === 0 ? (
-                                        <div className="py-12 text-center text-slate-300 font-black uppercase text-[10px] border-2 border-dashed rounded-[2rem]">No recovery actions recorded for this node.</div>
-                                    ) : (
-                                        auditData.systemLogs.sort((a, b) => b.timestamp.localeCompare(a.timestamp)).map((log: any) => (
-                                            <div key={log.id} className="p-6 bg-slate-50 border border-slate-100 rounded-3xl flex items-center justify-between group hover:bg-white hover:shadow-xl transition-all">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-slate-400 font-black border border-slate-100 group-hover:text-blue-600 group-hover:border-blue-100 transition-all"><Zap size={20} /></div>
-                                                    <div>
-                                                        <p className="font-black text-slate-900 uppercase tracking-tight text-sm leading-none mb-1">{log.action}</p>
-                                                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{log.details}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-[10px] font-black text-slate-950 leading-none mb-1">{new Date(log.timestamp).toLocaleString()}</p>
-                                                    <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest italic">Authorized by {log.adminName}</p>
-                                                </div>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2 border-l-4 border-green-600 pl-4">Financial Receipt History</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {auditData.paymentHistory.map((pay: any) => (
-                                        <div key={pay.id} className="p-6 bg-green-50/30 border border-green-100 rounded-3xl flex justify-between items-center group hover:bg-white hover:shadow-xl transition-all">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-green-600 border border-green-100"><HandCoins size={18} /></div>
-                                                <div>
-                                                    <p className="font-black text-slate-900 text-lg leading-none mb-1">Rs. {pay.amount.toLocaleString()}</p>
-                                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{pay.method} • {new Date(pay.timestamp).toLocaleDateString()}</p>
-                                                </div>
-                                            </div>
-                                            <span className="text-[7px] font-black text-green-600 border border-green-200 px-3 py-1 rounded-full uppercase italic tracking-widest">COMITTED</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-10 bg-slate-950 text-white shrink-0 flex justify-between items-center italic">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Security Hash: {Math.random().toString(36).substring(7).toUpperCase()}</p>
-                            <div className="flex gap-4">
-                                <button className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"><Printer size={16} /> Print Report</button>
-                                <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-900/40"><Download size={16} /> Export CSV</button>
-                            </div>
-                        </div>
-                    </div>
+                <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Last Payment</p>
+                  <p className="text-sm font-black text-slate-300 mt-2">{activeUser.lastPaymentDate ? new Date(activeUser.lastPaymentDate).toLocaleDateString() : 'None'}</p>
                 </div>
-            )}
+              </div>
 
-            {/* BATCH MARK UNPAID MODAL */}
-            {isBulkUnpaidModalOpen && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[6000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl animate-in zoom-in duration-300 border-[8px] border-blue-600 overflow-hidden">
-                        <div className="p-10 space-y-8">
-                            <div className="flex justify-between items-start">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-20 h-20 bg-blue-600 text-white rounded-[2rem] flex items-center justify-center shadow-xl italic font-black text-3xl">
-                                        <BadgeDollarSign size={40} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none mb-1">Mark Unpaid Protocol</h3>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Assigning fiscal arrears to {selectedUsers.size} Targets</p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setIsBulkUnpaidModalOpen(false)} className="p-4 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all">
-                                    <X size={28} />
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-8">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Select Target Plan</label>
-                                        <select
-                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase tracking-widest outline-none focus:border-blue-500 transition-all cursor-pointer"
-                                            value={bulkUnpaidConfig.packageId}
-                                            onChange={(e) => setBulkUnpaidConfig(prev => ({ ...prev, packageId: e.target.value }))}
-                                        >
-                                            {state.packages.map(pkg => (
-                                                <option key={pkg.id} value={pkg.id}>{pkg.name} - (Rs. {pkg.price})</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Quantity (Packages/Months)</label>
-                                        <input
-                                            type="number"
-                                            min="1"
-                                            max="12"
-                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg outline-none focus:border-blue-500 transition-all font-sans"
-                                            value={bulkUnpaidConfig.months}
-                                            onChange={(e) => setBulkUnpaidConfig(prev => ({ ...prev, months: parseInt(e.target.value) || 1 }))}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Fiscal Resolution Status</label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {[
-                                                { id: 'Unpaid', label: '100% Unpaid', color: 'rose' },
-                                                { id: 'Half', label: '50% Paid (Half)', color: 'amber' }
-                                            ].map(t => (
-                                                <button
-                                                    key={t.id}
-                                                    onClick={() => setBulkUnpaidConfig(prev => ({ ...prev, paymentStatus: t.id as any }))}
-                                                    className={`p-4 rounded-2xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${bulkUnpaidConfig.paymentStatus === t.id ? `bg-${t.color}-50 border-${t.color}-500 text-${t.color}-700` : 'bg-white border-slate-100 text-slate-400'}`}
-                                                >
-                                                    {t.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Collection Notes <span className="text-rose-500 font-black">(REQUIRED)</span></label>
-                                        <textarea
-                                            className={`w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none transition-all min-h-[100px] resize-none ${!bulkUnpaidConfig.notes ? 'border-rose-100 placeholder:text-rose-300' : 'border-slate-100 focus:border-blue-500'}`}
-                                            placeholder="MUST INPUT REASON FOR AUDIT LOG..."
-                                            value={bulkUnpaidConfig.notes}
-                                            onChange={(e) => setBulkUnpaidConfig(prev => ({ ...prev, notes: e.target.value }))}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-slate-50 p-6 rounded-3xl border border-dashed border-blue-200">
-                                <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest mb-1 italic">Payment Summary:</p>
-                                <p className="text-xl font-black text-slate-900 leading-none">
-                                    Total Charge: Rs. {((state.packages.find(p => p.id === bulkUnpaidConfig.packageId)?.price || 0) * bulkUnpaidConfig.months).toLocaleString()} 
-                                    <span className="text-[10px] text-slate-400 ml-2 font-black italic">
-                                        ({bulkUnpaidConfig.paymentStatus === 'Half' ? 'Rs. ' + (((state.packages.find(p => p.id === bulkUnpaidConfig.packageId)?.price || 0) * bulkUnpaidConfig.months) / 2).toLocaleString() + ' will be marked as Balance' : 'Full Arrears Committed'})
-                                    </span>
-                                </p>
-                            </div>
-
-                            <button
-                                onClick={handleBatchMarkUnpaid}
-                                disabled={isProcessing || !bulkUnpaidConfig.notes}
-                                className={`w-full py-8 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl italic transition-all active:scale-95 flex items-center justify-center gap-4 ${!bulkUnpaidConfig.notes ? 'bg-slate-200 cursor-not-allowed' : 'bg-slate-950 shadow-blue-100'}`}
-                            >
-                                <Zap size={28} /> {isProcessing ? 'AUTHORIZING...' : !bulkUnpaidConfig.notes ? 'Audit Notes Missing' : 'DEPLOY FISCAL ARREARS'}
-                            </button>
+              <div className="space-y-6">
+                <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Invoice History</p>
+                  <div className="space-y-2">
+                    {state.invoices.filter(i => i.userId === activeUser.id).slice(0, 3).map(inv => (
+                      <div key={inv.id} className="flex justify-between items-center bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+                        <div className="flex items-center gap-3">
+                          <Receipt size={14} className="text-slate-600" />
+                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{new Date(inv.createdAt).toLocaleDateString()}</p>
                         </div>
-                    </div>
+                        <div className="flex items-center gap-3">
+                          <p className="text-[10px] font-black text-white">Rs. {inv.totalAmount.toLocaleString()}</p>
+                          <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${inv.status === PaymentStatus.PAID ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>{inv.status}</span>
+                        </div>
+                      </div>
+                    ))}
+                    {state.invoices.filter(i => i.userId === activeUser.id).length === 0 && (
+                      <p className="text-[10px] font-bold text-slate-600 italic">No invoices found in registry.</p>
+                    )}
+                  </div>
                 </div>
-            )}
 
-            {/* BATCH ACTIVATE MODAL */}
-            {isBulkActivateModalOpen && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[6000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl animate-in zoom-in duration-300 border-[8px] border-green-600 overflow-hidden">
-                        <div className="p-10 space-y-8">
-                            <div className="flex justify-between items-start">
-                                <div className="flex items-center gap-6">
-                                    <div className="w-20 h-20 bg-green-600 text-white rounded-[2rem] flex items-center justify-center shadow-xl italic font-black text-3xl">
-                                        <Zap size={40} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-900 leading-none mb-1">Activation Command</h3>
-                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Re-Provisioning {selectedUsers.size} Targets</p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setIsBulkActivateModalOpen(false)} className="p-4 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all">
-                                    <X size={28} />
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-8">
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Select Target Plan</label>
-                                        <select
-                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase tracking-widest outline-none focus:border-green-500 transition-all cursor-pointer"
-                                            value={bulkActivateConfig.packageId}
-                                            onChange={(e) => setBulkActivateConfig(prev => ({ ...prev, packageId: e.target.value }))}
-                                        >
-                                            {state.packages.map(pkg => (
-                                                <option key={pkg.id} value={pkg.id}>{pkg.name} - (Rs. {pkg.price})</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">New Expiration Registry (Calendar)</label>
-                                        <input
-                                            type="date"
-                                            className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg outline-none focus:border-green-500 transition-all font-sans"
-                                            value={bulkActivateConfig.expiryDate}
-                                            onChange={(e) => setBulkActivateConfig(prev => ({ ...prev, expiryDate: e.target.value }))}
-                                        />
-                                        <p className="text-[8px] text-slate-400 font-black uppercase ml-2 italic">Standard 30-day auto-plan default</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Immediate Fiscal Resolution</label>
-                                        <div className="grid grid-cols-3 gap-2">
-                                            {[
-                                                { id: 'Paid', label: 'Paid', color: 'emerald' },
-                                                { id: 'Unpaid', label: 'Unpaid', color: 'rose' },
-                                                { id: 'Half', label: 'Half', color: 'amber' }
-                                            ].map(t => (
-                                                <button
-                                                    key={t.id}
-                                                    onClick={() => setBulkActivateConfig(prev => ({ ...prev, paymentStatus: t.id as any }))}
-                                                    className={`py-3 rounded-xl border-2 font-black text-[8px] uppercase tracking-widest transition-all ${bulkActivateConfig.paymentStatus === t.id ? `bg-${t.color}-50 border-${t.color}-500 text-${t.color}-700` : 'bg-white border-slate-100 text-slate-400'}`}
-                                                >
-                                                    {t.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-2 italic">Operational Memo <span className="text-rose-500 font-black">(REQUIRED)</span></label>
-                                        <textarea
-                                            className={`w-full px-6 py-4 bg-slate-50 border-2 rounded-2xl font-black text-[10px] uppercase tracking-widest outline-none transition-all min-h-[100px] resize-none ${!bulkActivateConfig.notes ? 'border-rose-100 placeholder:text-rose-300' : 'border-slate-100 focus:border-green-500'}`}
-                                            placeholder="MUST INPUT REASON FOR AUDIT LOG..."
-                                            value={bulkActivateConfig.notes}
-                                            onChange={(e) => setBulkActivateConfig(prev => ({ ...prev, notes: e.target.value }))}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={handleConfirmBulkActivate}
-                                disabled={isProcessing || !bulkActivateConfig.notes}
-                                className={`w-full py-8 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl italic transition-all active:scale-95 flex items-center justify-center gap-4 ${!bulkActivateConfig.notes ? 'bg-slate-200 cursor-not-allowed' : 'bg-slate-950 shadow-green-100'}`}
-                            >
-                                <Zap size={28} /> {isProcessing ? 'AUTHORIZING...' : !bulkActivateConfig.notes ? 'Audit Notes Missing' : 'EXECUTE MASS ACTIVATION'}
-                            </button>
-                        </div>
-                    </div>
+                <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 space-y-4">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Follow Up Protocols</p>
+                  <div className="flex gap-2">
+                    <input type="date" className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs font-black outline-none text-white focus:border-blue-500" value={promiseDate} onChange={(e) => setPromiseDate(e.target.value)} />
+                    <button onClick={handleSetPromiseToPay} className="px-4 py-3 bg-blue-600/10 text-blue-400 border border-blue-600/20 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all">Set Promise</button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button onClick={() => handleSendReminder('WhatsApp')} className="py-3 bg-green-500/10 text-green-400 border border-green-500/20 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-green-600 hover:text-white transition-all italic">WhatsApp Alert</button>
+                    <button onClick={() => handleSendReminder('Email')} className="py-3 bg-slate-800 text-slate-400 border border-slate-700 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-slate-900 transition-all italic">Email Alert</button>
+                  </div>
                 </div>
-            )}
-            {/* BATCH PROMISE MODAL */}
-            {isBulkPromiseModalOpen && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[6000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-300">
-                        <div className="p-8 border-b border-slate-50 flex justify-between items-center">
-                            <div>
-                                <h3 className="text-xl font-black text-slate-800 tracking-tight italic flex items-center gap-3">
-                                    <Clock className="text-amber-500" />
-                                    Batch Promise Registry
-                                </h3>
-                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Updating {selectedUsers.size} Targets</p>
-                            </div>
-                            <button onClick={() => setIsBulkPromiseModalOpen(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="p-8 space-y-6">
-                            <div>
-                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Target Extension Date</label>
-                                <input
-                                    type="date"
-                                    value={bulkPromiseDate}
-                                    onChange={(e) => setBulkPromiseDate(e.target.value)}
-                                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all"
-                                />
-                            </div>
-                            <button
-                                onClick={handleBatchPromiseToPay}
-                                disabled={!bulkPromiseDate || isProcessing}
-                                className="w-full py-5 bg-amber-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-amber-100 hover:bg-amber-700 transition-all active:scale-95 disabled:opacity-50"
-                            >
-                                AUTHORIZE BATCH TIMESTAMPS
-                            </button>
-                        </div>
-                    </div>
+              </div>
+            </div>
+
+            {/* Right Panel: Resolution Strategy */}
+            <div className="space-y-8">
+              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic">Activation Strategy Registry</h4>
+
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { id: 'Paid', label: 'Full Paid', desc: 'Activate with payment', icon: <ShieldCheck size={16} />, color: 'bg-green-600' },
+                  { id: 'Half', label: 'Half Paid', desc: '50% collection', icon: <Activity size={16} />, color: 'bg-blue-600' },
+                  { id: 'Unpaid', label: 'Unpaid', desc: 'Activate on credit', icon: <Clock size={16} />, color: 'bg-orange-600' },
+                  { id: 'Emergency', label: 'Emergency', desc: '3-day grace access', icon: <Zap size={16} />, color: 'bg-rose-600' }
+                ].map(m => (
+                  <button
+                    key={m.id}
+                    onClick={() => setPaymentStatus(m.id as any)}
+                    className={`flex flex-col items-start p-5 rounded-3xl border-2 transition-all group ${paymentStatus === m.id ? 'border-blue-600 bg-blue-500/5 shadow-lg' : 'border-slate-800 bg-slate-950/50 hover:border-slate-700'}`}
+                  >
+                    <div className={`w-10 h-10 ${m.color} text-white rounded-2xl flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform`}>{m.icon}</div>
+                    <p className={`font-black text-[10px] uppercase tracking-widest ${paymentStatus === m.id ? 'text-blue-400' : 'text-slate-400'}`}>{m.label}</p>
+                    <p className="text-[8px] text-slate-600 font-bold uppercase tracking-widest mt-1">{m.desc}</p>
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Collection Date</label>
+                    <input
+                      type="date"
+                      className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white outline-none focus:border-blue-500"
+                      value={collectionDetails.collectionDate}
+                      onChange={(e) => setCollectionDetails({ ...collectionDetails, collectionDate: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Collected By</label>
+                    <input
+                      type="text"
+                      className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white outline-none focus:border-blue-500"
+                      value={collectionDetails.collectorName}
+                      onChange={(e) => setCollectionDetails({ ...collectionDetails, collectorName: e.target.value })}
+                    />
+                  </div>
                 </div>
-            )}
-
-            {/* BULK FLASH RESET MODAL */}
-            {isBulkFlashModalOpen && (
-                <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[7000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-xl shadow-2xl animate-in zoom-in-95 duration-300 border-[6px] border-red-600 overflow-hidden">
-                        <div className="p-10 space-y-8">
-                            <div className="flex justify-between items-start">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-16 h-16 bg-red-600 text-white rounded-[1.5rem] flex items-center justify-center shadow-xl">
-                                        <Zap size={36} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900 leading-none mb-1">Account Flash Reset</h3>
-                                        <p className="text-[10px] text-red-500 font-black uppercase tracking-widest">Resetting {selectedUsers.size} accounts — irreversible</p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setIsBulkFlashModalOpen(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all">
-                                    <X size={24} />
-                                </button>
-                            </div>
-
-                            <div className="p-8 bg-rose-50 border border-rose-100 rounded-[2.5rem] space-y-4">
-                                <div className="flex items-center gap-3 text-rose-600">
-                                    <AlertTriangle size={24} />
-                                    <p className="text-[11px] font-black uppercase tracking-widest leading-relaxed">
-                                        Security Alert: Destructive Data Purge
-                                    </p>
-                                </div>
-                                <p className="text-[10px] font-bold text-rose-500 uppercase leading-relaxed">
-                                    This will clear balances to zero, purge invoice history for the selected window, and reset recovery status. ALL FISCAL RECORDS for the selected period will be erased.
-                                </p>
-                                
-                                <div className="space-y-4 pt-4 border-t border-rose-100">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Select Flash Scale (Purge Depth)</label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {[-1, 1, 3, 6, 12, 0].filter(m => m !== 0).map(m => (
-                                            <button
-                                                key={m}
-                                                type="button"
-                                                onClick={() => setFlashMonths(m)}
-                                                className={`px-4 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${flashMonths === m ? 'bg-rose-600 text-white border-rose-600 shadow-lg' : 'bg-white text-slate-400 border-slate-100 h-full'}`}
-                                            >
-                                                {m === -1 ? 'HARD WIPE' : `${m} MO`}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <p className="text-[9px] font-black text-rose-400 uppercase tracking-widest italic text-center animate-pulse">
-                                        {flashMonths === -1 ? '⚠ INITIALIZING SYSTEM HARD WIPE: ALL DATA WILL BE PURGED' : `Purging last ${flashMonths} month(s) of fiscal history`}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic text-center block">Type <span className="text-rose-600 font-black">FLASH RESET</span> to Authorize</label>
-                                <input
-                                    type="text"
-                                    value={flashConfirmText}
-                                    onChange={(e) => setFlashConfirmText(e.target.value.toUpperCase())}
-                                    placeholder="TYPE AUTHORIZATION CODE"
-                                    className={`w-full p-6 border-2 rounded-[2rem] font-black text-xl tracking-widest outline-none transition-all text-center ${flashConfirmText === 'FLASH RESET' ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-slate-100 bg-slate-50'}`}
-                                />
-                            </div>
-
-                            <button
-                                onClick={handleBulkFlash}
-                                disabled={isProcessing || flashConfirmText !== 'FLASH RESET'}
-                                className={`w-full py-6 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.3em] italic transition-all active:scale-95 flex items-center justify-center gap-3 ${flashConfirmText !== 'FLASH RESET' ? 'bg-slate-200 cursor-not-allowed text-slate-400' : 'bg-rose-600 hover:bg-rose-700 shadow-2xl shadow-rose-900/30'}`}
-                            >
-                                {isProcessing ? <Activity className="animate-spin" size={20} /> : <Zap size={20} />}
-                                {flashMonths === -1 ? 'AUTHORIZE SYSTEM WIPE' : 'EXECUTE FISCAL FLASH'}
-                            </button>
-                        </div>
-                    </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Collector Notes</label>
+                  <textarea
+                    className="w-full px-5 py-4 bg-slate-950 border border-slate-800 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white outline-none focus:border-blue-500 min-h-[120px] resize-none"
+                    value={collectionDetails.notes}
+                    onChange={(e) => setCollectionDetails({ ...collectionDetails, notes: e.target.value })}
+                    placeholder="Enter collection audit details..."
+                  />
                 </div>
-            )}
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
 
-            {/* ASSIGN COLLECTOR MODAL */}
-            {isAssignCollectorModalOpen && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[7000] flex items-center justify-center p-6">
-                    <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl animate-in zoom-in-95 duration-300 border-[6px] border-violet-600 overflow-hidden">
-                        <div className="p-10 space-y-8">
-                            <div className="flex justify-between items-start">
-                                <div className="flex items-center gap-5">
-                                    <div className="w-16 h-16 bg-violet-600 text-white rounded-[1.5rem] flex items-center justify-center shadow-xl">
-                                        <UserCheck size={32} />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900 leading-none mb-1">Assign Collector</h3>
-                                        <p className="text-[10px] text-violet-500 font-black uppercase tracking-widest">Assigning {selectedUsers.size} accounts to team member</p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setIsAssignCollectorModalOpen(false)} className="p-3 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-2xl transition-all">
-                                    <X size={24} />
-                                </button>
-                            </div>
+      {/* ADVANCED BILLING MODAL */}
+      <Modal
+        isOpen={isAdvancedModalOpen && !!activeUser}
+        onClose={() => setIsAdvancedModalOpen(false)}
+        title="Advanced Override"
+        type="warning"
+        icon={<Zap size={24} className="text-white" />}
+        maxWidth="max-w-2xl"
+        footer={
+          <button 
+            onClick={handleAdvancedBilling} 
+            className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl shadow-blue-100 italic transition-all active:scale-95 flex items-center justify-center gap-4"
+          >
+            <Activity size={24} /> Deploy Optimized Billing
+          </button>
+        }
+      >
+        {activeUser && (
+          <div className="space-y-10">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 bg-green-600 text-white rounded-[2rem] flex items-center justify-center shadow-xl italic font-black text-3xl">
+                <Zap size={40} />
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">Strategic Billing Configuration</p>
+                <h4 className="text-2xl font-black uppercase italic tracking-tighter text-white">{activeUser.name}</h4>
+              </div>
+            </div>
 
-                            <div className="space-y-3">
-                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Select Team Member</label>
-                                <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto custom-scrollbar pr-1">
-                                    {state.staff.filter(s => s.status === 'Active').map(member => (
-                                        <button
-                                            key={member.email}
-                                            onClick={() => setSelectedCollector({ email: member.email, name: member.name })}
-                                            className={`p-4 rounded-2xl border-2 flex items-center gap-4 transition-all text-left ${selectedCollector?.email === member.email ? 'border-violet-500 bg-violet-50' : 'border-slate-100 bg-white hover:border-slate-200'}`}
-                                        >
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm ${selectedCollector?.email === member.email ? 'bg-violet-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                                                {member.name.charAt(0)}
-                                            </div>
-                                            <div>
-                                                <p className={`font-black text-sm uppercase tracking-tighter leading-none ${selectedCollector?.email === member.email ? 'text-violet-700' : 'text-slate-900'}`}>{member.name}</p>
-                                                <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{member.role} • {member.email}</p>
-                                            </div>
-                                            {selectedCollector?.email === member.email && (
-                                                <ShieldCheck size={18} className="ml-auto text-violet-600" />
-                                            )}
-                                        </button>
-                                    ))}
-                                    {state.staff.filter(s => s.status === 'Active').length === 0 && (
-                                        <div className="py-8 text-center text-slate-400 font-black text-xs uppercase tracking-widest">No active team members found.</div>
-                                    )}
-                                </div>
-                            </div>
-
-                            <button
-                                onClick={handleAssignCollector}
-                                disabled={isProcessing || !selectedCollector}
-                                className={`w-full py-6 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.3em] italic transition-all active:scale-95 flex items-center justify-center gap-3 ${!selectedCollector ? 'bg-slate-200 cursor-not-allowed text-slate-400' : 'bg-violet-600 hover:bg-violet-700 shadow-2xl shadow-violet-900/20'}`}
-                            >
-                                <UserCheck size={20} /> {isProcessing ? 'ASSIGNING...' : !selectedCollector ? 'Select a Collector First' : `ASSIGN ${selectedCollector.name.toUpperCase()}`}
-                            </button>
-                        </div>
-                    </div>
+            <div className="grid md:grid-cols-2 gap-10">
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Override Payment Type</label>
+                  <div className="space-y-2">
+                    {['Full Paid', 'Half Paid', 'Advance Paid'].map(t => (
+                      <button
+                        key={t}
+                        onClick={() => setBillingConfig(prev => ({ ...prev, paymentType: t as any }))}
+                        className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${billingConfig.paymentType === t ? 'bg-green-500/10 border-green-500 text-green-400' : 'bg-slate-950/50 border-slate-800 text-slate-500'}`}
+                      >
+                        {t} {billingConfig.paymentType === t && <ShieldCheck size={14} />}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-            )}
+
+                <div className="space-y-3">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Billing Cycle Protocol</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {['15 days', '30 days', 'Custom', 'Manual'].map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setBillingConfig(prev => ({ ...prev, cycle: c as any }))}
+                        className={`flex items-center justify-center p-4 rounded-2xl border-2 font-black text-[10px] uppercase tracking-widest transition-all ${billingConfig.cycle === c ? 'bg-blue-500/10 border-blue-500 text-blue-400' : 'bg-slate-950/50 border-slate-800 text-slate-500'}`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Collected Cash (PKR)</label>
+                  <input
+                    type="number"
+                    className="w-full px-6 py-5 bg-slate-950 border-2 border-slate-800 rounded-2xl font-black text-2xl tracking-tighter text-white outline-none focus:border-green-500 transition-all"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(Number(e.target.value))}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Manual Expiry Override</label>
+                  <input
+                    type="date"
+                    className="w-full px-6 py-5 bg-slate-950 border-2 border-slate-800 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white outline-none focus:border-green-500 transition-all"
+                    onChange={(e) => setBillingConfig(prev => ({ ...prev, customExpiry: e.target.value }))}
+                  />
+                  <p className="text-[8px] text-slate-600 font-bold uppercase italic leading-tight px-2">Leave blank for automatic cycle calculation.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* AUDIT MODAL (User Profile) */}
+      <Modal
+        isOpen={isAuditModalOpen && !!auditData}
+        onClose={() => setIsAuditModalOpen(false)}
+        title="Identity Audit"
+        type="info"
+        icon={<FileText size={24} className="text-white" />}
+        maxWidth="max-w-5xl"
+        footer={
+          <div className="flex gap-4 w-full">
+            <button 
+              onClick={() => window.print()} 
+              className="flex-1 py-4 bg-slate-800 text-white border border-slate-700 rounded-2xl shadow-xl hover:bg-slate-700 transition-all flex items-center justify-center gap-3 uppercase text-[10px] font-black"
+            >
+              <Printer size={18}/> Print Report
+            </button>
+            <button 
+              className="flex-1 py-4 bg-blue-600 text-white rounded-2xl shadow-xl hover:bg-blue-700 transition-all flex items-center justify-center gap-3 uppercase text-[10px] font-black"
+            >
+              <Download size={18}/> Export CSV
+            </button>
+          </div>
+        }
+      >
+        {auditData && (
+          <div className="space-y-12 italic">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="p-8 bg-slate-900/50 rounded-[2.5rem] border border-slate-800 border-dashed">
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-4">Identity Fingerprint</p>
+                <div className="space-y-4 font-black">
+                  <p className="text-xs uppercase flex items-center justify-between text-slate-300">Node ID: <span className="text-white">{auditData.identity.id}</span></p>
+                  <p className="text-xs uppercase flex items-center justify-between text-slate-300">Status: <span className="text-blue-500">{auditData.identity.status}</span></p>
+                  <p className="text-xs uppercase flex items-center justify-between text-slate-300">Region: <span className="text-white">{auditData.identity.area}</span></p>
+                </div>
+              </div>
+              <div className="p-8 bg-green-500/10 text-green-400 rounded-[2.5rem] border border-green-500/20">
+                <p className="text-[9px] font-black text-green-600 uppercase tracking-widest mb-4">Service Asset</p>
+                <div className="space-y-1">
+                  <p className="text-2xl font-black italic tracking-tighter leading-none">{auditData.package?.name || 'TERMINATED'}</p>
+                  <p className="text-[10px] uppercase font-black tracking-widest text-green-600/70">Rate: Rs. {(auditData.package?.price || 0).toLocaleString()}/mo</p>
+                </div>
+              </div>
+              <div className="p-8 bg-rose-500/10 text-rose-400 rounded-[2.5rem] border border-rose-500/20">
+                <p className="text-[9px] font-black text-rose-600 uppercase tracking-widest mb-4">Fiscal Risk</p>
+                <p className="text-3xl font-black italic tracking-tighter leading-none mb-1">Rs. {auditData.identity.balance || 0}</p>
+                <p className="text-[10px] uppercase font-black tracking-widest text-rose-600/70">Outstanding Receivables</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 border-l-4 border-blue-600 pl-4 italic">System Transaction Ledger</h4>
+              <div className="space-y-3">
+                {auditData.systemLogs.length === 0 ? (
+                  <div className="py-12 text-center text-slate-600 font-black uppercase text-[10px] border-2 border-dashed border-slate-800 rounded-[2rem] italic">No recovery actions recorded for this node.</div>
+                ) : (
+                  auditData.systemLogs.sort((a: any, b: any) => b.timestamp.localeCompare(a.timestamp)).map((log: any) => (
+                    <div key={log.id} className="p-6 bg-slate-950/50 border border-slate-800 rounded-3xl flex items-center justify-between group hover:border-slate-700 transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-slate-600 font-black border border-slate-800 group-hover:text-blue-500 group-hover:border-blue-500/30 transition-all">
+                          <Zap size={20} />
+                        </div>
+                        <div>
+                          <p className="font-black text-white uppercase tracking-tight text-sm leading-none mb-1">{log.action}</p>
+                          <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest">{log.details}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] font-black text-slate-300 leading-none mb-1">{new Date(log.timestamp).toLocaleString()}</p>
+                        <p className="text-[8px] text-slate-600 font-black uppercase tracking-widest italic">Auth by {log.adminName}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-6">
+               <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2 border-l-4 border-green-600 pl-4 italic">Financial Receipt History</h4>
+               <div className="grid md:grid-cols-2 gap-4">
+                  {auditData.paymentHistory.map((pay: any) => (
+                      <div key={pay.id} className="p-6 bg-green-500/5 border border-green-500/10 rounded-3xl flex justify-between items-center group hover:border-green-500/30 transition-all">
+                          <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-green-500 border border-slate-800"><HandCoins size={18} /></div>
+                              <div>
+                                  <p className="font-black text-white text-lg leading-none mb-1">Rs. {pay.amount.toLocaleString()}</p>
+                                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest">{pay.method} • {new Date(pay.timestamp).toLocaleDateString()}</p>
+                              </div>
+                          </div>
+                          <span className="text-[7px] font-black text-green-500 border border-green-500/20 px-3 py-1 rounded-full uppercase italic tracking-widest">COMMITTED</span>
+                      </div>
+                  ))}
+               </div>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* BATCH MARK UNPAID MODAL */}
+      <Modal
+        isOpen={isBulkUnpaidModalOpen}
+        onClose={() => setIsBulkUnpaidModalOpen(false)}
+        title="Fiscal Arrears Protocol"
+        type="warning"
+        icon={<BadgeDollarSign size={24} className="text-white" />}
+        maxWidth="max-w-2xl"
+        footer={
+          <button 
+            onClick={handleBatchMarkUnpaid}
+            disabled={isProcessing || !bulkUnpaidConfig.notes}
+            className={`w-full py-6 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl italic transition-all active:scale-95 flex items-center justify-center gap-4 ${!bulkUnpaidConfig.notes ? 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700' : 'bg-rose-600 shadow-rose-900/20'}`}
+          >
+            {isProcessing ? <Activity className="animate-spin" size={24} /> : <Zap size={24} />} 
+            {!bulkUnpaidConfig.notes ? 'Audit Notes Missing' : 'Deploy Fiscal Arrears'}
+          </button>
+        }
+      >
+        <div className="space-y-8">
+           <div className="p-6 bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">Target Identification</p>
+              <h4 className="text-xl font-black uppercase italic tracking-tighter text-white">Assigning fiscal arrears to {selectedUsers.size} Targets</h4>
+           </div>
+
+           <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Select Target Plan</label>
+                  <select
+                    className="w-full px-6 py-4 bg-slate-950 border border-slate-800 rounded-2xl font-black text-[11px] uppercase tracking-widest text-white outline-none focus:border-blue-500"
+                    value={bulkUnpaidConfig.packageId}
+                    onChange={(e) => setBulkUnpaidConfig(prev => ({ ...prev, packageId: e.target.value }))}
+                  >
+                    {state.packages.map(pkg => (
+                      <option key={pkg.id} value={pkg.id}>{pkg.name} - (Rs. {pkg.price})</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Quantity (Months)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="12"
+                    className="w-full px-6 py-4 bg-slate-950 border border-slate-800 rounded-2xl font-black text-lg text-white outline-none focus:border-blue-500"
+                    value={bulkUnpaidConfig.months}
+                    onChange={(e) => setBulkUnpaidConfig(prev => ({ ...prev, months: parseInt(e.target.value) || 1 }))}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Resolution Status</label>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      { id: 'Unpaid', label: '100% Unpaid Arrears', color: 'rose' },
+                      { id: 'Half', label: '50% Partial Payment', color: 'amber' }
+                    ].map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => setBulkUnpaidConfig(prev => ({ ...prev, paymentStatus: t.id as any }))}
+                        className={`p-4 rounded-2xl border-2 font-black text-[9px] uppercase tracking-widest transition-all ${bulkUnpaidConfig.paymentStatus === t.id ? 'bg-rose-500/10 border-rose-500 text-rose-400' : 'bg-slate-950/50 border-slate-800 text-slate-600'}`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                   <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Collection Notes <span className="text-rose-500">*</span></label>
+                   <textarea
+                     className="w-full px-6 py-4 bg-slate-950 border border-slate-800 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white outline-none focus:border-blue-500 min-h-[100px] resize-none"
+                     placeholder="MUST INPUT REASON FOR AUDIT LOG..."
+                     value={bulkUnpaidConfig.notes}
+                     onChange={(e) => setBulkUnpaidConfig(prev => ({ ...prev, notes: e.target.value }))}
+                   />
+                </div>
+              </div>
+           </div>
+
+           <div className="bg-blue-600/10 border border-blue-600/20 p-6 rounded-3xl italic">
+              <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1 leading-none">Fiscal Ledger Summary:</p>
+              <p className="text-xl font-black text-white leading-none">
+                Total Risk: Rs. {((state.packages.find(p => p.id === bulkUnpaidConfig.packageId)?.price || 0) * bulkUnpaidConfig.months).toLocaleString()}
+                <span className="text-[9px] text-slate-500 ml-3 not-italic font-bold">
+                  ({bulkUnpaidConfig.paymentStatus === 'Half' ? '50% Balance Marked' : 'Full Value Committed to Debt'})
+                </span>
+              </p>
+           </div>
+        </div>
+      </Modal>
+
+      {/* BATCH ACTIVATE MODAL */}
+      <Modal
+        isOpen={isBulkActivateModalOpen}
+        onClose={() => setIsBulkActivateModalOpen(false)}
+        title="Activation Command"
+        type="success"
+        icon={<Zap size={24} className="text-white" />}
+        maxWidth="max-w-2xl"
+        footer={
+          <button 
+            onClick={handleConfirmBulkActivate}
+            disabled={isProcessing || !bulkActivateConfig.notes}
+            className={`w-full py-6 text-white rounded-[2.5rem] font-black text-sm uppercase tracking-[0.3em] shadow-2xl italic transition-all active:scale-95 flex items-center justify-center gap-4 ${!bulkActivateConfig.notes ? 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700' : 'bg-slate-950 shadow-green-900/20'}`}
+          >
+            {isProcessing ? <Activity className="animate-spin" size={24} /> : <Zap size={24} />} 
+            {!bulkActivateConfig.notes ? 'Audit Notes Missing' : 'Execute Mass Activation'}
+          </button>
+        }
+      >
+        <div className="space-y-8">
+           <div className="p-6 bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">Target Identification</p>
+              <h4 className="text-xl font-black uppercase italic tracking-tighter text-white">Re-Provisioning {selectedUsers.size} Targets</h4>
+           </div>
+
+           <div className="grid md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Select Target Plan</label>
+                  <select
+                    className="w-full px-6 py-4 bg-slate-950 border border-slate-800 rounded-2xl font-black text-[11px] uppercase tracking-widest text-white outline-none focus:border-green-500 transition-all cursor-pointer"
+                    value={bulkActivateConfig.packageId}
+                    onChange={(e) => setBulkActivateConfig(prev => ({ ...prev, packageId: e.target.value }))}
+                  >
+                    {state.packages.map(pkg => (
+                      <option key={pkg.id} value={pkg.id}>{pkg.name} - (Rs. {pkg.price})</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                   <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">New Expiration Registry</label>
+                   <input
+                     type="date"
+                     className="w-full px-6 py-4 bg-slate-950 border border-slate-800 rounded-2xl font-black text-lg text-white outline-none focus:border-green-500 transition-all"
+                     value={bulkActivateConfig.expiryDate}
+                     onChange={(e) => setBulkActivateConfig(prev => ({ ...prev, expiryDate: e.target.value }))}
+                   />
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-2">
+                   <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Immediate Fiscal Resolution</label>
+                   <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { id: 'Paid', label: 'Paid', color: 'emerald' },
+                        { id: 'Unpaid', label: 'Unpaid', color: 'rose' },
+                        { id: 'Half', label: 'Half', color: 'amber' }
+                      ].map(t => (
+                        <button
+                          key={t.id}
+                          onClick={() => setBulkActivateConfig(prev => ({ ...prev, paymentStatus: t.id as any }))}
+                          className={`py-3 rounded-xl border-2 font-black text-[8px] uppercase tracking-widest transition-all ${bulkActivateConfig.paymentStatus === t.id ? 'bg-green-500/10 border-green-500 text-green-400' : 'bg-slate-950/50 border-slate-800 text-slate-600'}`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                   </div>
+                </div>
+                <div className="space-y-2">
+                   <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Operational Memo <span className="text-rose-500">*</span></label>
+                   <textarea
+                     className="w-full px-6 py-4 bg-slate-950 border border-slate-800 rounded-2xl font-black text-[10px] uppercase tracking-widest text-white outline-none focus:border-green-500 min-h-[100px] resize-none"
+                     placeholder="MUST INPUT REASON FOR AUDIT LOG..."
+                     value={bulkActivateConfig.notes}
+                     onChange={(e) => setBulkActivateConfig(prev => ({ ...prev, notes: e.target.value }))}
+                   />
+                </div>
+              </div>
+           </div>
+        </div>
+      </Modal>
+      {/* BATCH PROMISE MODAL */}
+      <Modal
+        isOpen={isBulkPromiseModalOpen}
+        onClose={() => setIsBulkPromiseModalOpen(false)}
+        title="Batch Promise Registry"
+        type="warning"
+        icon={<Clock size={24} className="text-white" />}
+        maxWidth="max-w-xl"
+        footer={
+          <button 
+            onClick={handleBatchPromiseToPay}
+            disabled={!bulkPromiseDate || isProcessing}
+            className="w-full py-5 bg-amber-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-amber-900/20 hover:bg-amber-700 transition-all active:scale-95 disabled:opacity-50"
+          >
+            Authorize Batch Timestamps
+          </button>
+        }
+      >
+        <div className="space-y-6">
+           <div className="p-6 bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl italic">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">Target Identification</p>
+              <h4 className="text-xl font-black uppercase italic tracking-tighter text-white">Updating {selectedUsers.size} Targets</h4>
+           </div>
+
+           <div className="space-y-3">
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Target Extension Date</label>
+              <input
+                type="date"
+                value={bulkPromiseDate}
+                onChange={(e) => setBulkPromiseDate(e.target.value)}
+                className="w-full px-6 py-4 bg-slate-950 border border-slate-800 rounded-2xl font-bold text-white focus:outline-none focus:border-amber-500 transition-all"
+              />
+           </div>
+        </div>
+      </Modal>
+
+      {/* BULK FLASH RESET MODAL */}
+      <Modal
+        isOpen={isBulkFlashModalOpen}
+        onClose={() => setIsBulkFlashModalOpen(false)}
+        title="Account Flash Reset"
+        type="error"
+        icon={<Zap size={24} className="text-white" />}
+        maxWidth="max-w-xl"
+        footer={
+          <button 
+            onClick={handleBulkFlash}
+            disabled={isProcessing || flashConfirmText !== 'FLASH RESET'}
+            className={`w-full py-6 text-white rounded-[2rem] font-black text-sm uppercase tracking-[0.3em] italic transition-all active:scale-95 flex items-center justify-center gap-3 ${flashConfirmText !== 'FLASH RESET' ? 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700' : 'bg-rose-600 hover:bg-rose-700 shadow-2xl shadow-rose-900/30'}`}
+          >
+            {isProcessing ? <Activity className="animate-spin" size={20} /> : <Zap size={20} />} 
+            {flashMonths === -1 ? 'Authorize System Wipe' : 'Execute Fiscal Flash'}
+          </button>
+        }
+      >
+        <div className="space-y-8 italic">
+          <div className="p-8 bg-rose-500/10 border border-rose-500/20 rounded-[2.5rem] space-y-4">
+            <div className="flex items-center gap-3 text-rose-500">
+               <AlertTriangle size={24} />
+               <p className="text-[11px] font-black uppercase tracking-widest leading-relaxed">Security Alert: Destructive Data Purge</p>
+            </div>
+            <p className="text-[10px] font-bold text-rose-600/70 uppercase leading-relaxed">
+               This will clear balances to zero, purge invoice history for the selected window, and reset recovery status for {selectedUsers.size} Targets.
+            </p>
+
+            <div className="space-y-4 pt-4 border-t border-rose-500/20">
+               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Select Flash Scale (Purge Depth)</label>
+               <div className="grid grid-cols-3 gap-2">
+                  {[-1, 1, 3, 6, 12].map(m => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setFlashMonths(m)}
+                      className={`px-4 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border-2 ${flashMonths === m ? 'bg-rose-600 text-white border-rose-600 shadow-lg' : 'bg-slate-950 border-slate-800 text-slate-600'}`}
+                    >
+                      {m === -1 ? 'HARD WIPE' : `${m} MO`}
+                    </button>
+                  ))}
+               </div>
+               <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest italic text-center animate-pulse">
+                  {flashMonths === -1 ? '⚠ INITIALIZING SYSTEM HARD WIPE: ALL DATA WILL BE PURGED' : `Purging last ${flashMonths} month(s) of fiscal history`}
+               </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 italic text-center block">Type <span className="text-rose-600 font-black">FLASH RESET</span> to Authorize</label>
+             <input
+               type="text"
+               value={flashConfirmText}
+               onChange={(e) => setFlashConfirmText(e.target.value.toUpperCase())}
+               placeholder="TYPE AUTHORIZATION CODE"
+               className={`w-full p-6 border-2 rounded-[2rem] font-black text-xl tracking-widest outline-none transition-all text-center ${flashConfirmText === 'FLASH RESET' ? 'border-rose-500 bg-rose-500/10 text-rose-500' : 'bg-slate-950 border-slate-800 text-slate-700'}`}
+             />
+          </div>
+        </div>
+      </Modal>
+
+      {/* ASSIGN COLLECTOR MODAL */}
+      <Modal
+        isOpen={isAssignCollectorModalOpen}
+        onClose={() => setIsAssignCollectorModalOpen(false)}
+        title="Assign Team Member"
+        type="info"
+        icon={<UserCheck size={24} className="text-white" />}
+        maxWidth="max-w-lg"
+        footer={
+          <button 
+            onClick={handleAssignCollector}
+            disabled={isProcessing || !selectedCollector}
+            className={`w-full py-6 text-white rounded-2xl font-black text-sm uppercase tracking-[0.3em] shadow-xl italic transition-all active:scale-95 flex items-center justify-center gap-3 ${!selectedCollector ? 'bg-slate-800 text-slate-600 cursor-not-allowed border border-slate-700' : 'bg-violet-600 hover:bg-violet-700 shadow-violet-900/20'}`}
+          >
+            <UserCheck size={20} /> {isProcessing ? 'ASSIGNING...' : !selectedCollector ? 'Select a Collector First' : `ASSIGN ${selectedCollector.name.toUpperCase()}`}
+          </button>
+        }
+      >
+        <div className="space-y-6 italic">
+           <div className="p-6 bg-slate-900/50 border border-slate-800 border-dashed rounded-3xl">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none mb-1">Target Identification</p>
+              <h4 className="text-xl font-black uppercase italic tracking-tighter text-white">Assigning {selectedUsers.size} Targets</h4>
+           </div>
+
+           <div className="space-y-3">
+              <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">Select Team Member</label>
+              <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto custom-scrollbar pr-1">
+                {state.staff.filter(s => s.status === 'Active').map(member => (
+                  <button
+                    key={member.email}
+                    onClick={() => setSelectedCollector({ email: member.email, name: member.name })}
+                    className={`p-4 rounded-2xl border-2 flex items-center gap-4 transition-all text-left ${selectedCollector?.email === member.email ? 'border-violet-500 bg-violet-500/10' : 'bg-slate-950 border-slate-800 hover:border-slate-700'}`}
+                  >
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm ${selectedCollector?.email === member.email ? 'bg-violet-600 text-white shadow-lg' : 'bg-slate-900 text-slate-600 border border-slate-800'}`}>
+                      {member.name.charAt(0)}
+                    </div>
+                    <div>
+                        <p className={`font-black text-sm uppercase tracking-tighter leading-none ${selectedCollector?.email === member.email ? 'text-violet-400' : 'text-slate-300'}`}>{member.name}</p>
+                        <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest">{member.role} • {member.email}</p>
+                    </div>
+                    {selectedCollector?.email === member.email && (
+                        <ShieldCheck size={18} className="ml-auto text-violet-500" />
+                    )}
+                  </button>
+                ))}
+                {state.staff.filter(s => s.status === 'Active').length === 0 && (
+                  <div className="py-8 text-center text-slate-600 font-black text-xs uppercase tracking-widest border border-dashed border-slate-800 rounded-3xl">No active team members found.</div>
+                )}
+              </div>
+           </div>
+        </div>
+      </Modal>
         </>
     );
 };

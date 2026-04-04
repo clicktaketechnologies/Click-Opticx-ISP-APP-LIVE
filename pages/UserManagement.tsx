@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
+import { Modal } from '../components/shared/Modal';
+import { ConfirmDialog } from '../components/shared/ConfirmDialog';
 
 const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?: string }> = ({ state, searchTerm: globalSearchTerm, autoOpenAction }) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -23,6 +25,16 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       setSearchTerm(globalSearchTerm);
     }
   }, [globalSearchTerm]);
+
+  useEffect(() => {
+    if (autoOpenAction === 'add-user') {
+      setOnboardingStep(1);
+      setNewUserData({...initialUserForm});
+      setIsNewUserModal(true);
+    } else if (autoOpenAction === 'recovery') {
+      setFilterType('Unpaid');
+    }
+  }, [autoOpenAction]);
   
   // Modal States
   const [onboardingStep, setOnboardingStep] = useState(1);
@@ -76,14 +88,14 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [editUserData, setEditUserData] = useState<Partial<ISPUser>>(initialUserForm);
   const [newUserData, setNewUserData] = useState<Partial<ISPUser>>(initialUserForm);
   
-  const activeUsers = useMemo(() => state.users.filter(u => !u.deleted), [state.users]);
+  const activeUsers = useMemo(() => state.users.filter(u => filterType === 'Deleted' ? u.deleted : !u.deleted), [state.users, filterType]);
   
   const filteredUsers = useMemo(() => {
     const term = searchTerm.toLowerCase().trim();
     let users = activeUsers;
 
     // Apply Filter Logic
-    if (filterType !== 'All') {
+    if (filterType !== 'All' && filterType !== 'Deleted') {
       users = users.filter(u => {
         const pkg = state.packages.find(p => p.id === u.packageId);
         switch (filterType) {
@@ -103,6 +115,9 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       u.name.toLowerCase().includes(term) || 
       (u.connectionId || '').toLowerCase().includes(term) ||
       (u.phone || '').includes(term) ||
+      (u.email || '').toLowerCase().includes(term) ||
+      (u.username || '').toLowerCase().includes(term) ||
+      (u.pppoeId || '').toLowerCase().includes(term) ||
       (u.macIp || '').toLowerCase().includes(term)
     );
   }, [activeUsers, searchTerm, filterType, state.packages]);
@@ -347,7 +362,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            {(['All', 'Expired', 'Unpaid', 'Paid', 'Half Paid', 'Half Data', 'Unverified', 'Verified'] as const).map(f => (
+            {(['All', 'Expired', 'Unpaid', 'Paid', 'Half Paid', 'Half Data', 'Unverified', 'Verified', 'Deleted'] as const).map(f => (
               <button
                 key={f}
                 onClick={() => setFilterType(f)}
@@ -592,760 +607,669 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       </div>
 
       {/* 1. ONBOARDING WIZARD */}
-      {isNewUserModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] flex items-center justify-center p-4 sm:p-6">
-           <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in flex flex-col max-h-[95vh]">
-              <header className="p-6 sm:p-10 border-b bg-slate-50 flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-5">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl italic font-black">S{onboardingStep}</div>
-                    <div>
-                       <h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter">Your Basic Information</h3>
-                       <p className="text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest">Step {onboardingStep} of 5</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setIsNewUserModal(false)} className="p-2 hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all"><X size={28}/></button>
-              </header>
-              <div className="p-6 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
-                 {(() => {
-                    switch(onboardingStep) {
-                      case 1: return (
-                        <div className="space-y-6">
-                           <h4 className="text-xs font-black uppercase text-slate-900 border-b pb-2 italic">1. Your Basic Information</h4>
-                           <div className="space-y-4">
-                              <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Full Name</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-black text-sm" value={newUserData.name} onChange={e => setNewUserData({...newUserData, name: e.target.value})} /></div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">CNIC Number</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-black text-sm" value={newUserData.cnic} onChange={e => setNewUserData({...newUserData, cnic: e.target.value})} /></div>
-                                <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-black text-sm" value={newUserData.phone} onChange={e => setNewUserData({...newUserData, phone: e.target.value})} /></div>
-                              </div>
-                           </div>
-                        </div>
-                      );
-                      case 2: return (
-                        <div className="space-y-6">
-                           <h4 className="text-xs font-black uppercase text-slate-900 border-b pb-2 italic">2. Internet Data Plan</h4>
-                           <div className="space-y-4">
-                              <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Select Bandwidth Tier</label>
-                              <div className="grid grid-cols-1 gap-2">
-                                 {state.packages.map(p => (
-                                   <button key={p.id} onClick={() => setNewUserData({...newUserData, packageId: p.id})} className={`p-4 sm:p-5 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${newUserData.packageId === p.id ? 'border-blue-600 bg-blue-50 shadow-md' : 'bg-slate-50 border-transparent'}`}>
-                                      <div><p className="font-black uppercase text-xs">{p.name}</p><p className="text-[9px] font-bold text-slate-400">{p.speed} • Rs.{p.price}</p></div>
-                                      {newUserData.packageId === p.id && <CheckCircle size={20} className="text-blue-600"/>}
-                                   </button>
-                                 ))}
-                              </div>
-                           </div>
-                        </div>
-                      );
-                      case 3: return (
-                        <div className="space-y-6">
-                           <h4 className="text-xs font-black uppercase text-slate-900 border-b pb-2 italic">3. Network Details</h4>
-                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">PPPoE Link ID</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-black text-sm" value={newUserData.pppoeId} onChange={e => setNewUserData({...newUserData, pppoeId: e.target.value})} /></div>
-                              <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">NAS Identity</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-black text-sm" value={newUserData.nasId} onChange={e => setNewUserData({...newUserData, nasId: e.target.value})} /></div>
-                              <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Target OLT Node</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-black text-sm" value={newUserData.oltNode} onChange={e => setNewUserData({...newUserData, oltNode: e.target.value})} /></div>
-                              <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">VLAN Index</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-black text-sm" value={newUserData.vlanId} onChange={e => setNewUserData({...newUserData, vlanId: e.target.value})} /></div>
-                           </div>
-                        </div>
-                      );
-                      case 4: return (
-                        <div className="space-y-6">
-                           <h4 className="text-xs font-black uppercase text-slate-900 border-b pb-2 italic">4. Signup Credentials</h4>
-                           <div className="space-y-4">
-                              <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Login Username</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-black text-sm" value={newUserData.username} onChange={e => setNewUserData({...newUserData, username: e.target.value})} /></div>
-                              <PasswordInput label="Access Secret" value={newUserData.password || ''} onChange={v => setNewUserData({...newUserData, password: v})} showStrength />
-                           </div>
-                        </div>
-                      );
-                      case 5: return (
-                        <div className="space-y-8 text-center py-10">
-                           <h4 className="text-xl font-black uppercase text-slate-900 italic">5. Register Me Now</h4>
-                           <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed max-w-md mx-auto">
-                              Ready to create account. This will enable portal access and activate the internet connection.
-                           </p>
-                           <div className="p-6 bg-green-50 border border-green-100 rounded-3xl inline-flex items-center gap-4 shadow-sm">
-                              <ShieldCheck className="text-green-600" size={32}/>
-                              <div className="text-left">
-                                 <p className="text-[10px] font-black text-green-900 uppercase">System Ready</p>
-                                 <p className="text-[8px] font-black text-green-600 uppercase">Ready to Register</p>
-                              </div>
-                           </div>
-                        </div>
-                      );
-                      default: return null;
-                    }
-                 })()}
-              </div>
-              <footer className="p-6 sm:p-10 bg-slate-50 border-t flex justify-between items-center shrink-0">
-                 <button onClick={() => setOnboardingStep(Math.max(1, onboardingStep - 1))} className="text-slate-400 font-black uppercase text-[10px] hover:text-slate-600 disabled:opacity-0" disabled={onboardingStep === 1}>Previous Step</button>
-                 {onboardingStep < 5 ? (
-                   <button onClick={() => setOnboardingStep(onboardingStep + 1)} className="px-6 sm:px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl flex items-center gap-2">Next Step <ChevronRight size={14}/></button>
-                 ) : (
-                   <button onClick={async () => { setIsProcessing(true); await db.addUser(newUserData); setIsProcessing(false); setIsNewUserModal(false); setIsSuccessModal(true); }} className="px-6 sm:px-10 py-4 bg-green-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl flex items-center gap-2">Save User <ShieldCheck size={18}/></button>
-                 )}
-              </footer>
-           </div>
-        </div>
-      )}
+      <Modal
+        isOpen={isNewUserModal}
+        onClose={() => setIsNewUserModal(false)}
+        title={
+          onboardingStep === 1 ? "Your Basic Information" :
+          onboardingStep === 2 ? "Internet Data Plan" :
+          onboardingStep === 3 ? "Network Details" :
+          onboardingStep === 4 ? "Signup Credentials" :
+          "Register Me Now"
+        }
+        icon={<div className="w-8 h-8 bg-blue-600/20 rounded-xl flex items-center justify-center text-blue-400 italic font-black text-xs">S{onboardingStep}</div>}
+        maxWidth="max-w-2xl"
+        scrollable
+        footer={
+          <div className="flex justify-between items-center w-full">
+             <button onClick={() => setOnboardingStep(Math.max(1, onboardingStep - 1))} className="px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 transition-all border border-slate-700 hover:opacity-70 disabled:opacity-30" disabled={onboardingStep === 1}>Previous Step</button>
+             {onboardingStep < 5 ? (
+               <button onClick={() => setOnboardingStep(onboardingStep + 1)} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/30 flex items-center gap-2 transition-all active:scale-95">Next Step <ChevronRight size={14}/></button>
+             ) : (
+               <button onClick={async () => { setIsProcessing(true); await db.addUser(newUserData); setIsProcessing(false); setIsNewUserModal(false); setIsSuccessModal(true); }} className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-green-900/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50" disabled={isProcessing}>
+                  {isProcessing ? <Loader2 className="animate-spin" size={14}/> : <ShieldCheck size={14}/>} Save User
+               </button>
+             )}
+          </div>
+        }
+      >
+         {(() => {
+            switch(onboardingStep) {
+              case 1: return (
+                <div className="space-y-6 mb-4">
+                   <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">1. Your Basic Information</h4>
+                   <div className="space-y-4">
+                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Full Name</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.name} onChange={e => setNewUserData({...newUserData, name: e.target.value})} /></div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">CNIC Number</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.cnic} onChange={e => setNewUserData({...newUserData, cnic: e.target.value})} /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.phone} onChange={e => setNewUserData({...newUserData, phone: e.target.value})} /></div>
+                      </div>
+                   </div>
+                </div>
+              );
+              case 2: return (
+                <div className="space-y-6 mb-4">
+                   <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">2. Internet Data Plan</h4>
+                   <div className="space-y-4">
+                      <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Select Bandwidth Tier</label>
+                      <div className="grid grid-cols-1 gap-2">
+                         {state.packages.map(p => (
+                           <button key={p.id} onClick={() => setNewUserData({...newUserData, packageId: p.id})} className={`p-4 sm:p-5 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${newUserData.packageId === p.id ? 'border-blue-600 bg-blue-50 shadow-md text-slate-900' : 'bg-slate-50 border-transparent text-slate-900'}`}>
+                              <div><p className="font-black uppercase text-xs">{p.name}</p><p className="text-[9px] font-bold text-slate-400">{p.speed} • Rs.{p.price}</p></div>
+                              {newUserData.packageId === p.id && <CheckCircle size={20} className="text-blue-600"/>}
+                           </button>
+                         ))}
+                      </div>
+                   </div>
+                </div>
+              );
+              case 3: return (
+                <div className="space-y-6 mb-4">
+                   <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">3. Network Details</h4>
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">PPPoE Link ID</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.pppoeId} onChange={e => setNewUserData({...newUserData, pppoeId: e.target.value})} /></div>
+                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">NAS Identity</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.nasId} onChange={e => setNewUserData({...newUserData, nasId: e.target.value})} /></div>
+                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Target OLT Node</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.oltNode} onChange={e => setNewUserData({...newUserData, oltNode: e.target.value})} /></div>
+                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">VLAN Index</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.vlanId} onChange={e => setNewUserData({...newUserData, vlanId: e.target.value})} /></div>
+                   </div>
+                </div>
+              );
+              case 4: return (
+                <div className="space-y-6 mb-4 text-slate-900">
+                   <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">4. Signup Credentials</h4>
+                   <div className="space-y-4">
+                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Login Username</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm" value={newUserData.username} onChange={e => setNewUserData({...newUserData, username: e.target.value})} /></div>
+                      <PasswordInput label="Access Secret" value={newUserData.password || ''} onChange={v => setNewUserData({...newUserData, password: v})} showStrength />
+                   </div>
+                </div>
+              );
+              case 5: return (
+                <div className="space-y-8 text-center py-10 mb-4">
+                   <h4 className="text-xl font-black uppercase text-slate-300 italic">5. Register Me Now</h4>
+                   <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed max-w-md mx-auto">
+                      Ready to create account. This will enable portal access and activate the internet connection.
+                   </p>
+                   <div className="p-6 bg-green-50 border border-green-100 rounded-3xl inline-flex items-center gap-4 shadow-sm">
+                      <ShieldCheck className="text-green-600" size={32}/>
+                      <div className="text-left">
+                         <p className="text-[10px] font-black text-green-900 uppercase">System Ready</p>
+                         <p className="text-[8px] font-black text-green-600 uppercase">Ready to Register</p>
+                      </div>
+                   </div>
+                </div>
+              );
+              default: return null;
+            }
+         })()}
+      </Modal>
 
       {/* 2. PLAN PROVISIONING MODAL */}
-      {isActivationModal && selectedUser && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in flex flex-col max-h-[90vh]">
-              <header className="p-8 border-b bg-green-600 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center border border-white/20 shadow-lg"><PackageIcon size={28}/></div>
-                    <div>
-                       <h3 className="text-xl font-black uppercase italic tracking-tighter leading-none">Activate Plan</h3>
-                       <p className="text-green-100 text-[10px] font-black uppercase tracking-widest mt-1">Activate User Plan</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setIsActivationModal(false)} className="p-2 hover:bg-white/10 rounded-xl"><X size={32}/></button>
-              </header>
-              <div className="p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1">
-                 {provisioningStep === 1 ? (
-                   <div className="space-y-6">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Step 1: Select Plan</p>
-                      <div className="grid grid-cols-1 gap-3">
-                        {state.packages.map(pkg => (
-                          <button key={pkg.id} onClick={() => { setSelectedPkgId(pkg.id); setProvisioningStep(2); }} className="p-6 rounded-2xl border-2 border-slate-50 bg-slate-50 hover:border-green-600 hover:bg-white transition-all text-left flex items-center justify-between group">
-                             <div><h4 className="font-black text-slate-900 uppercase italic">{pkg.name}</h4><p className="text-[9px] font-bold text-slate-400 uppercase">{pkg.speed} • Rs. {pkg.price}</p></div>
-                             <ChevronRight className="text-slate-300 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
-                          </button>
-                        ))}
-                      </div>
-                   </div>
-                 ) : (
-                   <div className="space-y-10 animate-in slide-in-from-right duration-300">
-                      <div className="flex items-center gap-4">
-                         <button onClick={() => setProvisioningStep(1)} className="p-2 bg-slate-100 rounded-lg text-slate-400 hover:text-green-600"><ChevronLeft size={20}/></button>
-                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Step 2: Payment Status</p>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                         <button onClick={() => setPaymentStatus('Paid')} className={`p-8 rounded-[2.5rem] border-4 transition-all flex flex-col items-center gap-4 ${paymentStatus === 'Paid' ? 'border-green-600 bg-green-50 text-green-700 shadow-xl' : 'border-slate-50 bg-slate-50 text-slate-300 grayscale opacity-60'}`}>
-                            <CheckCircle size={32} /><span className="text-[11px] font-black uppercase tracking-widest">Paid</span>
-                         </button>
-                         <button onClick={() => setPaymentStatus('Unpaid')} className={`p-8 rounded-[2.5rem] border-4 transition-all flex flex-col items-center gap-4 ${paymentStatus === 'Unpaid' ? 'border-rose-600 bg-rose-50 text-rose-700 shadow-xl' : 'border-slate-50 bg-slate-50 text-slate-300 grayscale opacity-60'}`}>
-                            <Clock size={32} /><span className="text-[11px] font-black uppercase tracking-widest">Unpaid</span>
-                         </button>
-                      </div>
-                      {paymentStatus === 'Paid' && (
-                        <div className="space-y-4 animate-in slide-in-from-top-2">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Method</label>
-                           <div className="grid grid-cols-4 gap-2">
-                              {['Cash', 'Bank', 'Stripe', 'EasyPaisa'].map(m => (
-                                <button key={m} onClick={() => setSelectedMethod(m as any)} className={`py-4 rounded-xl border-2 text-[9px] font-black uppercase transition-all ${selectedMethod === m ? 'bg-green-600 border-green-600 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-400'}`}>{m}</button>
-                              ))}
-                           </div>
-                        </div>
-                      )}
-                      <button onClick={handleExecuteProvisioning} disabled={isProcessing} className="w-full py-6 bg-slate-950 text-white rounded-[2rem] font-black text-[11px] uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3">
-                         {isProcessing ? <RefreshCw className="animate-spin" size={18}/> : <ShieldCheck size={18}/>} Confirm Activation
-                      </button>
-                   </div>
-                 )}
+      <Modal
+        isOpen={isActivationModal && !!selectedUser}
+        onClose={() => setIsActivationModal(false)}
+        title="Activate Plan"
+        icon={<PackageIcon size={22} className="text-green-400" />}
+        message="Activate User Plan"
+        maxWidth="max-w-2xl"
+        scrollable
+        hideCloseButton={false}
+        footer={
+           provisioningStep === 2 ? (
+              <div className="flex justify-between items-center w-full">
+                 <button onClick={() => setProvisioningStep(1)} className="px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 transition-all border border-slate-700 hover:opacity-70 disabled:opacity-30" disabled={isProcessing}>Back to Plans</button>
+                 <button onClick={handleExecuteProvisioning} disabled={isProcessing} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/30 flex items-center gap-2 active:scale-95 transition-all">
+                    {isProcessing ? <Loader2 className="animate-spin" size={14}/> : <ShieldCheck size={14}/>} Confirm Activation
+                 </button>
+              </div>
+           ) : <div/>
+        }
+      >
+        {provisioningStep === 1 ? (
+           <div className="space-y-6 mb-4">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic ml-1">Step 1: Select Plan</p>
+              <div className="grid grid-cols-1 gap-3">
+                {state.packages.map(pkg => (
+                  <button key={pkg.id} onClick={() => { setSelectedPkgId(pkg.id); setProvisioningStep(2); }} className="p-6 rounded-2xl border-2 border-transparent bg-slate-50 hover:bg-white text-slate-900 transition-all text-left flex items-center justify-between group">
+                     <div><h4 className="font-black uppercase italic">{pkg.name}</h4><p className="text-[9px] font-bold text-slate-400 uppercase">{pkg.speed} • Rs. {pkg.price}</p></div>
+                     <ChevronRight className="text-slate-300 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
+                  </button>
+                ))}
               </div>
            </div>
-        </div>
-      )}
+         ) : (
+           <div className="space-y-8 animate-in slide-in-from-right duration-300 mb-4">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic pt-2">Step 2: Payment Status</p>
+              <div className="grid grid-cols-2 gap-4">
+                 <button onClick={() => setPaymentStatus('Paid')} className={`p-8 rounded-[2.5rem] border-4 transition-all flex flex-col items-center gap-4 ${paymentStatus === 'Paid' ? 'border-green-600 bg-green-50 text-green-700 shadow-xl' : 'border-transparent bg-slate-50 text-slate-400 grayscale opacity-90'}`}>
+                    <CheckCircle size={32} /><span className="text-[11px] font-black uppercase tracking-widest">Paid</span>
+                 </button>
+                 <button onClick={() => setPaymentStatus('Unpaid')} className={`p-8 rounded-[2.5rem] border-4 transition-all flex flex-col items-center gap-4 ${paymentStatus === 'Unpaid' ? 'border-rose-600 bg-rose-50 text-rose-700 shadow-xl' : 'border-transparent bg-slate-50 text-slate-400 grayscale opacity-90'}`}>
+                    <Clock size={32} /><span className="text-[11px] font-black uppercase tracking-widest">Unpaid</span>
+                 </button>
+              </div>
+              {paymentStatus === 'Paid' && (
+                <div className="space-y-4 animate-in slide-in-from-top-2">
+                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Method</label>
+                   <div className="grid grid-cols-4 gap-2">
+                      {['Cash', 'Bank', 'Stripe', 'EasyPaisa'].map(m => (
+                        <button key={m} onClick={() => setSelectedMethod(m as any)} className={`py-4 rounded-xl border-2 text-[9px] font-black uppercase tracking-widest transition-all ${selectedMethod === m ? 'bg-green-600 border-green-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}`}>{m}</button>
+                      ))}
+                   </div>
+                </div>
+              )}
+           </div>
+         )}
+      </Modal>
 
       {/* 3. LOG COLLECTION MODAL */}
-      {isCollectPaymentModal && selectedUser && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3.5rem] w-full max-w-2xl shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in flex flex-col max-h-[95vh]">
-              <header className="p-8 sm:p-10 border-b bg-green-600 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 rounded-3xl flex items-center justify-center border-4 border-white/5 shadow-2xl"><Banknote size={32}/></div>
-                    <div>
-                       <h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter leading-none">Receive Payment</h3>
-                       <p className="text-green-100 text-[10px] font-black uppercase tracking-widest mt-1">Subscriber: {selectedUser.name}</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setIsCollectPaymentModal(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-slate-400 hover:text-white"><X size={32}/></button>
-              </header>
-              <div className="p-8 sm:p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1">
-                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic flex items-center gap-2"><PackageIcon size={12}/> Select Plan</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                       {state.packages.filter(p => !p.deleted).map(pkg => (
-                         <button 
-                           key={pkg.id} 
-                           onClick={() => setSelectedPkgId(pkg.id)}
-                           className={`p-4 rounded-2xl border-2 text-left transition-all ${selectedPkgId === pkg.id ? 'border-green-600 bg-green-50 shadow-md' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}`}
-                         >
-                            <p className="text-[11px] font-black text-slate-900 uppercase">{pkg.name}</p>
-                            <p className="text-[9px] font-bold text-slate-400">Rs. {pkg.price} + Tax</p>
-                         </button>
-                       ))}
-                       <button 
-                         onClick={() => { setSelectedPkgId(''); setCollectAmount(selectedUser.balance); }}
-                         className={`p-4 rounded-2xl border-2 text-left transition-all ${!selectedPkgId ? 'border-blue-600 bg-blue-50 shadow-md' : 'border-slate-100 bg-slate-50 hover:border-slate-300'}`}
-                       >
-                          <p className="text-[11px] font-black text-slate-900 uppercase">Custom Balance</p>
-                          <p className="text-[9px] font-bold text-slate-400">Enter Custom Amount</p>
-                       </button>
-                    </div>
-                 </div>
-                 <div className="p-8 bg-slate-900 rounded-[2.5rem] border-b-8 border-green-600 shadow-inner">
-                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4 block text-center italic">Calculated Receipt (Rs.)</label>
-                    <div className="relative">
-                       <span className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 font-black text-2xl">Rs.</span>
-                       <input 
-                         type="number" 
-                         className="w-full pl-16 pr-6 py-6 bg-transparent border-none rounded-[2.5rem] font-black text-4xl sm:text-5xl outline-none text-green-400 text-center transition-all" 
-                         value={collectAmount} 
-                         onChange={e => setCollectAmount(Number(e.target.value))} 
-                       />
-                    </div>
-                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic flex items-center gap-2"><Calendar size={12}/> Settlement Date</label>
-                       <input type="date" className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xs outline-none focus:border-green-500" value={paymentDate} onChange={e => setPaymentDate(e.target.value)} />
-                    </div>
-                    <div className="space-y-4">
-                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic flex items-center gap-2"><Clock size={12}/> Grace Period</label>
-                       <button onClick={() => setIsGraceActive(!isGraceActive)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${isGraceActive ? 'border-amber-50 bg-amber-50 shadow-md' : 'border-slate-100 bg-slate-50'}`}>
-                          <span className={`text-[10px] font-black uppercase ${isGraceActive ? 'text-amber-700' : 'text-slate-400'}`}>3-Day Active Grace</span>
-                          {isGraceActive ? <CheckCircle size={18} className="text-amber-500" /> : <div className="w-4 h-4 rounded-full border-2 border-slate-200"></div>}
-                       </button>
-                    </div>
-                 </div>
-                 <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Payment Method</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                       {['Cash', 'Bank', 'EasyPaisa', 'JazzCash'].map(m => (
-                         <button key={m} onClick={() => setSelectedMethod(m as any)} className={`py-4 rounded-2xl border-2 font-black text-[10px] uppercase transition-all ${selectedMethod === m ? 'bg-green-600 border-green-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'}`}>{m}</button>
-                       ))}
-                    </div>
-                 </div>
-                 <div className="p-6 bg-blue-50 border border-blue-100 rounded-[2rem] flex items-center justify-between shadow-sm">
-                    <div className="flex items-center gap-4">
-                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shadow-inner ${shouldActivatePkg ? 'bg-blue-600 text-white' : 'bg-white text-slate-400'}`}><Zap size={20} fill={shouldActivatePkg ? "currentColor" : "none"} /></div>
-                       <div><h5 className="text-xs font-black uppercase text-slate-900">Auto Activate Plan</h5><p className="text-[8px] text-slate-500 font-bold uppercase">Activate selected plan instantly</p></div>
-                    </div>
-                    <button onClick={() => setShouldActivatePkg(!shouldActivatePkg)} className={`w-12 h-6 rounded-full relative transition-all ${shouldActivatePkg ? 'bg-blue-600' : 'bg-slate-300'}`}><div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${shouldActivatePkg ? 'left-7' : 'left-1'}`}></div></button>
-                 </div>
-              </div>
-              <div className="p-8 sm:p-10 bg-slate-50 border-t shrink-0">
-                <button onClick={handleExecuteCollection} disabled={isProcessing || collectAmount <= 0} className="w-full py-6 bg-slate-950 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3">
-                    {isProcessing ? <Loader2 className="animate-spin" size={20}/> : <ShieldCheck size={20}/>} Confirm Payment
-                </button>
-              </div>
-           </div>
-        </div>
-      )}
+      <Modal
+        isOpen={isCollectPaymentModal && !!selectedUser}
+        onClose={() => setIsCollectPaymentModal(false)}
+        title="Receive Payment"
+        icon={<Banknote size={22} className="text-green-400" />}
+        message={`Subscriber: ${selectedUser?.name}`}
+        maxWidth="max-w-2xl"
+        scrollable
+        onConfirm={handleExecuteCollection}
+        confirmLabel="Confirm Payment"
+        isLoading={isProcessing || collectAmount <= 0}
+      >
+         <div className="space-y-4 mb-6">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic flex items-center gap-2"><PackageIcon size={12}/> Select Plan</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+               {state.packages.filter(p => !p.deleted).map(pkg => (
+                 <button 
+                   key={pkg.id} 
+                   onClick={() => setSelectedPkgId(pkg.id)}
+                   className={`p-4 rounded-2xl border-2 text-left transition-all ${selectedPkgId === pkg.id ? 'border-green-600 bg-green-50 shadow-md text-slate-900' : 'border-slate-100 bg-slate-50 hover:border-slate-300 text-slate-900'}`}
+                 >
+                    <p className="text-[11px] font-black uppercase">{pkg.name}</p>
+                    <p className="text-[9px] font-bold text-slate-400">Rs. {pkg.price} + Tax</p>
+                 </button>
+               ))}
+               <button 
+                 onClick={() => { setSelectedPkgId(''); setCollectAmount(selectedUser?.balance || 0); }}
+                 className={`p-4 rounded-2xl border-2 text-left transition-all ${!selectedPkgId ? 'border-blue-600 bg-blue-50 shadow-md text-slate-900' : 'border-slate-100 bg-slate-50 hover:border-slate-300 text-slate-900'}`}
+               >
+                  <p className="text-[11px] font-black uppercase">Custom Balance</p>
+                  <p className="text-[9px] font-bold text-slate-400">Enter Custom Amount</p>
+               </button>
+            </div>
+         </div>
+         <div className="p-8 bg-slate-900 rounded-[2.5rem] border-b-8 border-green-600 shadow-inner mb-6">
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-4 block text-center italic">Calculated Receipt (Rs.)</label>
+            <div className="relative">
+               <span className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 font-black text-2xl">Rs.</span>
+               <input 
+                 type="number" 
+                 className="w-full pl-16 pr-6 py-6 bg-transparent border-none rounded-[2.5rem] font-black text-4xl sm:text-5xl outline-none text-green-400 text-center transition-all" 
+                 value={collectAmount} 
+                 onChange={e => setCollectAmount(Number(e.target.value))} 
+               />
+            </div>
+         </div>
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+            <div className="space-y-4">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic flex items-center gap-2"><Calendar size={12}/> Settlement Date</label>
+               <input type="date" className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xs outline-none focus:border-green-500 text-slate-900" value={paymentDate} onChange={e => setPaymentDate(e.target.value)} />
+            </div>
+            <div className="space-y-4">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic flex items-center gap-2"><Clock size={12}/> Grace Period</label>
+               <button onClick={() => setIsGraceActive(!isGraceActive)} className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${isGraceActive ? 'border-amber-50 bg-amber-50 shadow-md' : 'border-slate-100 bg-slate-50'}`}>
+                  <span className={`text-[10px] font-black uppercase ${isGraceActive ? 'text-amber-700' : 'text-slate-400'}`}>3-Day Active Grace</span>
+                  {isGraceActive ? <CheckCircle size={18} className="text-amber-500" /> : <div className="w-4 h-4 rounded-full border-2 border-slate-200"></div>}
+               </button>
+            </div>
+         </div>
+         <div className="space-y-4 mb-6">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Payment Method</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+               {['Cash', 'Bank', 'EasyPaisa', 'JazzCash'].map(m => (
+                 <button key={m} onClick={() => setSelectedMethod(m as any)} className={`py-4 rounded-2xl border-2 font-black text-[10px] uppercase transition-all ${selectedMethod === m ? 'bg-green-600 border-green-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'}`}>{m}</button>
+               ))}
+            </div>
+         </div>
+         <div className="p-6 bg-blue-50 border border-blue-100 rounded-[2rem] flex items-center justify-between shadow-sm mb-4">
+            <div className="flex items-center gap-4">
+               <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shadow-inner ${shouldActivatePkg ? 'bg-blue-600 text-white' : 'bg-white text-slate-400'}`}><Zap size={20} fill={shouldActivatePkg ? "currentColor" : "none"} /></div>
+               <div><h5 className="text-xs font-black uppercase text-slate-900">Auto Activate Plan</h5><p className="text-[8px] text-slate-500 font-bold uppercase">Activate selected plan instantly</p></div>
+            </div>
+            <button onClick={() => setShouldActivatePkg(!shouldActivatePkg)} className={`w-12 h-6 rounded-full relative transition-all ${shouldActivatePkg ? 'bg-blue-600' : 'bg-slate-300'}`}><div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${shouldActivatePkg ? 'left-7' : 'left-1'}`}></div></button>
+         </div>
+      </Modal>
 
       {/* 4. EDIT USER MODAL */}
-      {isEditUserModal && selectedUser && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in flex flex-col max-h-[90vh]">
-              <header className="p-8 border-b bg-blue-600 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center"><Pencil size={24}/></div>
-                    <div>
-                       <h3 className="text-xl font-black uppercase italic tracking-tighter">Edit User</h3>
-                       <p className="text-blue-100 text-[10px] font-black uppercase tracking-widest mt-1">Ref: {selectedUser.connectionId}</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setIsEditUserModal(false)} className="p-2 hover:bg-white/10 rounded-xl"><X size={32}/></button>
-              </header>
-              <div className="p-10 space-y-6 overflow-y-auto custom-scrollbar flex-1">
-                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Identity Name</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.name} onChange={e => setEditUserData({...editUserData, name: e.target.value})} /></div>
-                    <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.phone} onChange={e => setEditUserData({...editUserData, phone: e.target.value})} /></div>
-                    <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CNIC</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.cnic} onChange={e => setEditUserData({...editUserData, cnic: e.target.value})} /></div>
-                    <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Login Username</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.username} onChange={e => setEditUserData({...editUserData, username: e.target.value})} /></div>
-                 </div>
-                 <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Address</label><textarea className="w-full p-4 bg-slate-50 border rounded-xl font-bold h-24" value={editUserData.address} onChange={e => setEditUserData({...editUserData, address: e.target.value})} /></div>
-              </div>
-              <footer className="p-8 bg-slate-50 border-t">
-                 <button onClick={handleUpdateDossier} disabled={isProcessing} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all">Save Changes</button>
-              </footer>
-           </div>
-        </div>
-      )}
+      <Modal
+        isOpen={isEditUserModal && !!selectedUser}
+        onClose={() => setIsEditUserModal(false)}
+        title="Edit User"
+        icon={<Pencil size={22} className="text-blue-400" />}
+        message={`Ref: ${selectedUser?.connectionId}`}
+        maxWidth="max-w-2xl"
+        scrollable
+        onConfirm={handleUpdateDossier}
+        confirmLabel="Save Changes"
+        isLoading={isProcessing}
+      >
+         <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Identity Name</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.name} onChange={e => setEditUserData({...editUserData, name: e.target.value})} /></div>
+            <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.phone} onChange={e => setEditUserData({...editUserData, phone: e.target.value})} /></div>
+            <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CNIC</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.cnic} onChange={e => setEditUserData({...editUserData, cnic: e.target.value})} /></div>
+            <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Login Username</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.username} onChange={e => setEditUserData({...editUserData, username: e.target.value})} /></div>
+         </div>
+         <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Address</label><textarea className="w-full p-4 bg-slate-50 border rounded-xl font-bold h-24" value={editUserData.address} onChange={e => setEditUserData({...editUserData, address: e.target.value})} /></div>
+      </Modal>
 
       {/* 5. AUTH RESET MODAL */}
-      {isResetPassModal && selectedUser && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3rem] w-full max-md shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in">
-              <header className="p-8 bg-orange-500 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-4">
-                    <LockKeyhole size={28}/>
-                    <h3 className="text-xl font-black uppercase italic tracking-tighter">Auth Reset</h3>
-                 </div>
-                 <button onClick={() => setIsResetPassModal(false)} className="p-2 hover:bg-white/10 rounded-xl"><X size={28}/></button>
-              </header>
-              <div className="p-10 space-y-8">
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">New Password</label>
-                    <div className="relative">
-                       <input 
-                         type={showNewPass ? 'text' : 'password'}
-                         className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-2xl outline-none focus:border-orange-500 transition-all text-center"
-                         value={newAuthSecret}
-                         onChange={e => setNewAuthSecret(e.target.value)}
-                         placeholder="••••••••"
-                       />
-                       <button onClick={() => setShowNewPass(!showNewPass)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300">
-                          {showNewPass ? <EyeOff size={24}/> : <Eye size={24}/>}
-                       </button>
-                    </div>
-                 </div>
-                 <button onClick={handleAuthReset} disabled={isProcessing || !newAuthSecret} className="w-full py-6 bg-orange-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all">Update Password</button>
-              </div>
-           </div>
-        </div>
-      )}
+      <Modal
+        isOpen={isResetPassModal && !!selectedUser}
+        onClose={() => setIsResetPassModal(false)}
+        title="Auth Reset"
+        icon={<LockKeyhole size={22} className="text-orange-400" />}
+        maxWidth="max-w-md"
+        onConfirm={handleAuthReset}
+        confirmLabel="Update Password"
+        isLoading={isProcessing || !newAuthSecret}
+      >
+         <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">New Password</label>
+            <div className="relative">
+               <input 
+                 type={showNewPass ? 'text' : 'password'}
+                 className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-2xl outline-none focus:border-orange-500 transition-all text-center"
+                 value={newAuthSecret}
+                 onChange={e => setNewAuthSecret(e.target.value)}
+                 placeholder="••••••••"
+               />
+               <button onClick={() => setShowNewPass(!showNewPass)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors">
+                  {showNewPass ? <EyeOff size={24}/> : <Eye size={24}/>}
+               </button>
+            </div>
+         </div>
+      </Modal>
 
       {/* 6. SUSPEND / SUSPEND MODAL */}
-      {isSuspendModal && selectedUser && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3rem] w-full max-md shadow-2xl border-[12px] border-rose-50 overflow-hidden animate-in zoom-in">
-              <div className="p-10 text-center space-y-8">
-                 <div className="w-24 h-24 bg-rose-600 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-pulse"><ShieldAlert size={56}/></div>
-                 <div className="space-y-2">
-                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900">Suspend User?</h3>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed px-4">This will immediately disable internet service for {selectedUser.connectionId}.</p>
-                 </div>
-                 <div className="flex gap-3">
-                    <button onClick={() => setIsSuspendModal(false)} className="flex-1 py-4 font-black text-slate-400 uppercase text-[10px]">Cancel</button>
-                    <button onClick={() => handleStatusShift(UserStatus.SUSPENDED)} className="flex-1 py-4 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95">Suspend User</button>
-                 </div>
-              </div>
-           </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={isSuspendModal}
+        onClose={() => setIsSuspendModal(false)}
+        title="Suspend User?"
+        message={`This will immediately disable internet service for ${selectedUser?.connectionId}.`}
+        confirmLabel="Suspend User"
+        danger
+        onConfirm={() => handleStatusShift(UserStatus.SUSPENDED)}
+        isLoading={isProcessing}
+      />
 
       {/* 7. RECONNECT MODAL */}
-      {isReconnectModal && selectedUser && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
-           <div className="bg-white rounded-[3rem] w-full max-md shadow-2xl border-[12px] border-blue-50 overflow-hidden animate-in zoom-in">
-              <div className="p-10 text-center space-y-8">
-                 <div className="w-24 h-24 bg-blue-600 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl"><RefreshCw size={56}/></div>
-                 <div className="space-y-2">
-                    <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900">Reconnect User?</h3>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed px-4">This will reactivate internet service for {selectedUser.name}.</p>
-                 </div>
-                 <div className="flex gap-3">
-                    <button onClick={() => setIsReconnectModal(false)} className="flex-1 py-4 font-black text-slate-400 uppercase text-[10px]">Cancel</button>
-                    <button onClick={() => handleStatusShift(UserStatus.ACTIVE)} className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95">Reactivate</button>
-                 </div>
-              </div>
-           </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={isReconnectModal}
+        onClose={() => setIsReconnectModal(false)}
+        title="Reconnect User?"
+        message={`This will reactivate internet service for ${selectedUser?.name}.`}
+        confirmLabel="Reactivate"
+        onConfirm={() => handleStatusShift(UserStatus.ACTIVE)}
+        isLoading={isProcessing}
+      />
 
       {/* 8. CUSTOMER 360 MODAL */}
-      {isViewUserModal && selectedUser && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1000] flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-           <div className="bg-white rounded-[3.5rem] w-full max-w-5xl shadow-2xl border-[8px] border-slate-50 flex flex-col h-[90vh] animate-in zoom-in duration-300 overflow-hidden">
-              <header className="p-8 bg-slate-900 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5 shadow-2xl">
-                       <Fingerprint size={32} className="text-blue-400" />
-                    </div>
-                    <div>
-                       <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">{selectedUser.name}</h3>
-                       <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.4em] mt-2">User ID: {selectedUser.connectionId}</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setIsViewUserModal(false)} className="p-3 hover:bg-white/10 rounded-2xl transition-all text-slate-500 hover:text-white"><X size={32}/></button>
-              </header>
-
-              <div className="flex-1 overflow-y-auto custom-scrollbar p-10 bg-slate-50/50 space-y-10">
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Identity Node */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
-                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><User size={14} className="text-blue-500"/> Contact Details</h4>
-                       <div className="space-y-4">
-                          <div className="flex items-center gap-3"><Smartphone size={16} className="text-slate-300"/><span className="text-xs font-bold">{selectedUser.phone}</span></div>
-                          <div className="flex items-center gap-3"><Mail size={16} className="text-slate-300"/><span className="text-xs font-bold lowercase">{selectedUser.email || 'No email'}</span></div>
-                          <div className="flex items-center gap-3"><MapPin size={16} className="text-slate-300"/><span className="text-xs font-bold uppercase">{selectedUser.area}</span></div>
-                          <div className="flex items-center gap-3"><CreditCard size={16} className="text-slate-300"/><span className="text-xs font-bold">{selectedUser.cnic || 'Not provided'}</span></div>
-                       </div>
-                    </div>
-
-                    {/* Fiscal Node */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
-                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><DollarSign size={14} className="text-green-500"/> Billing Summary</h4>
-                       <div className="space-y-6">
-                          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                             <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Outstanding Balance</p>
-                             <p className={`text-2xl font-black ${selectedUser.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>Rs. {selectedUser.balance.toLocaleString()}</p>
-                          </div>
-                          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                             <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Credit Score</p>
-                             <p className="text-2xl font-black text-blue-600 italic tracking-tighter">{selectedUser.creditScore}</p>
-                          </div>
-                       </div>
-                    </div>
-
-                    {/* Link Layer Node */}
-                    <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
-                       <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><Wifi size={14} className="text-blue-500"/> Link Layer</h4>
-                       <div className="space-y-4">
-                          <div className="flex justify-between items-center">
-                             <span className="text-[9px] font-black text-slate-400 uppercase">Status</span>
-                             <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${selectedUser.status === UserStatus.ACTIVE ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'}`}>{selectedUser.status}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                             <span className="text-[9px] font-black text-slate-400 uppercase">Path</span>
-                             <span className="text-[10px] font-black text-slate-900 uppercase italic">{selectedUser.connectionType}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                             <span className="text-[9px] font-black text-slate-400 uppercase">Expiry Date</span>
-                             <span className="text-[10px] font-black text-slate-900 italic">{selectedUser.expiryDate ? new Date(selectedUser.expiryDate).toLocaleDateString() : 'N/A'}</span>
-                          </div>
-                       </div>
-                    </div>
-                 </div>
-
-                 {/* History Panels */}
-                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[400px]">
-                       <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 italic"><FileText size={16} className="text-blue-500"/> Invoice History</h4>
-                       </div>
-                       <div className="divide-y divide-slate-50 overflow-y-auto custom-scrollbar flex-1">
-                          {userInvoices.map(inv => (
-                            <div key={inv.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                               <div><p className="font-black text-slate-900 uppercase text-xs">{inv.packageName}</p><p className="text-[8px] text-slate-400 font-bold">{new Date(inv.createdAt).toLocaleDateString()}</p></div>
-                               <div className="text-right"><p className="text-xs font-black text-slate-900 italic">Rs. {inv.totalAmount}</p><span className={`text-[7px] font-black uppercase ${inv.status === 'Paid' ? 'text-green-600' : 'text-rose-600'}`}>{inv.status}</span></div>
-                            </div>
-                          ))}
-                          {userInvoices.length === 0 && <div className="p-10 text-center text-[10px] font-black text-slate-300 uppercase italic">No documents found.</div>}
-                       </div>
-                    </div>
-
-                    <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[400px]">
-                       <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-                          <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 italic"><Layers size={16} className="text-blue-500"/> Payment History</h4>
-                       </div>
-                       <div className="divide-y divide-slate-50 overflow-y-auto custom-scrollbar flex-1">
-                          {userLedger.map(l => (
-                            <div key={l.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
-                               <div className="flex items-center gap-3">
-                                  {l.type === LedgerType.DEBIT ? <ArrowUpRight size={14} className="text-rose-500"/> : <ArrowDownLeft size={14} className="text-green-500"/>}
-                                  <div><p className="font-black text-slate-900 uppercase text-[10px]">{l.description}</p><p className="text-[8px] text-slate-400 font-bold">{new Date(l.timestamp).toLocaleString()}</p></div>
-                               </div>
-                               <p className={`text-xs font-black italic ${l.type === LedgerType.DEBIT ? 'text-rose-600' : 'text-green-600'}`}>Rs. {l.amount}</p>
-                            </div>
-                          ))}
-                          {userLedger.length === 0 && <div className="p-10 text-center text-[10px] font-black text-slate-300 uppercase italic">No ledger activity found.</div>}
-                       </div>
-                    </div>
-                 </div>
-              </div>
-
-              <footer className="p-10 bg-slate-50 border-t border-slate-100 flex items-center justify-between shrink-0">
-                 <button 
-                    onClick={async () => {
-                        const isVerified = !!selectedUser.verifiedStatus?.identity;
-                        await db.bulkVerifyUsers([selectedUser.id], !isVerified);
-                        // Force refresh of selectedUser in UI if needed, or rely on db notify
-                    }}
-                    className="flex items-center gap-4 group cursor-pointer hover:bg-white/5 p-2 rounded-2xl transition-all"
-                 >
-                    <ShieldCheck size={24} className={selectedUser.verifiedStatus?.identity ? "text-green-500" : "text-slate-300 group-hover:text-green-400"} />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-200">
-                        {selectedUser.verifiedStatus?.identity ? 'Profile Verified' : 'Submit KYC / Verify'}
-                    </p>
-                 </button>
-                 <button onClick={() => setIsViewUserModal(false)} className="px-10 py-4 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl">Close</button>
-              </footer>
+      <Modal
+        isOpen={isViewUserModal && !!selectedUser}
+        onClose={() => setIsViewUserModal(false)}
+        title={selectedUser?.name || ''}
+        icon={<Fingerprint size={24} className="text-blue-400" />}
+        message={`User ID: ${selectedUser?.connectionId}`}
+        maxWidth="max-w-5xl"
+        scrollable
+        hideCloseButton={false}
+        footer={
+           <div className="flex items-center justify-between w-full">
+               <button 
+                  onClick={async () => {
+                      if (!selectedUser) return;
+                      const isVerified = !!selectedUser.verifiedStatus?.identity;
+                      await db.bulkVerifyUsers([selectedUser.id], !isVerified);
+                  }}
+                  className="flex items-center gap-4 group cursor-pointer hover:bg-slate-800 p-2 rounded-2xl transition-all"
+               >
+                  <ShieldCheck size={24} className={selectedUser?.verifiedStatus?.identity ? "text-green-500" : "text-slate-500 group-hover:text-green-400"} />
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-300">
+                      {selectedUser?.verifiedStatus?.identity ? 'Profile Verified' : 'Submit KYC / Verify'}
+                  </p>
+               </button>
+               <button onClick={() => setIsViewUserModal(false)} className="px-10 py-4 bg-slate-950 border border-slate-700 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 hover:border-blue-600 transition-all shadow-xl">Close</button>
            </div>
-        </div>
-      )}
-
-      {/* BULK GRACE MODAL */}
-      {isBulkGraceModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
-           <div className="bg-white rounded-[3rem] w-full max-lg shadow-2xl border-[8px] border-slate-50 overflow-hidden animate-in zoom-in">
-              <header className="p-8 sm:p-10 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-5">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg animate-pulse"><Clock size={28}/></div>
-                    <div><h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter leading-none">Grace Period</h3><p className="text-blue-400 text-[10px] font-black uppercase tracking-widest mt-1">Extend User Expiry</p></div>
-                 </div>
-                 <button onClick={() => setIsBulkGraceModal(false)} className="p-3 hover:bg-white/10 rounded-2xl"><X size={32}/></button>
-              </header>
-              <div className="p-8 sm:p-10 space-y-10">
-                 <div className="space-y-3 text-center">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">Selected: {selectedIds.size} Users</p>
-                    <p className="text-sm font-bold text-slate-600 uppercase leading-relaxed">Set "Pay Later" status and extend expiry to the specified date.</p>
-                 </div>
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">New Expiry Date</label>
-                    <input type="date" className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-xl outline-none focus:border-blue-600 transition-all text-center" value={bulkGraceDate} onChange={e => setBulkGraceDate(e.target.value)} />
-                 </div>
-                 <button onClick={executeBulkGrace} disabled={isProcessing} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3">
-                    {isProcessing ? <RefreshCw className="animate-spin" size={20}/> : <ShieldCheck size={20}/>} Apply Grace Period
-                 </button>
-              </div>
-           </div>
-        </div>
-      )}
-
-      {/* BULK PACKAGE MODAL */}
-      {isBulkPackageModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
-           <div className="bg-white rounded-[3rem] w-full max-lg shadow-2xl border-[8px] border-slate-50 overflow-hidden animate-in zoom-in">
-              <header className="p-8 sm:p-10 border-b bg-blue-600 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-5">
-                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg"><PackageIcon size={28}/></div>
-                    <div><h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter leading-none">Bulk Plan Assignment</h3><p className="text-blue-100 text-[10px] font-black uppercase tracking-widest mt-1">Global Plan Assignment</p></div>
-                 </div>
-                 <button onClick={() => setIsBulkPackageModal(false)} className="p-3 hover:bg-white/10 rounded-2xl"><X size={32}/></button>
-              </header>
-              <div className="p-8 sm:p-10 space-y-10">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-60 overflow-y-auto custom-scrollbar pr-2">
-                    {state.packages.filter(p => !p.deleted).map(pkg => (
-                       <button 
-                         key={pkg.id} 
-                         onClick={() => setSelectedPkgId(pkg.id)}
-                         className={`p-6 rounded-[2rem] border-2 text-left transition-all ${selectedPkgId === pkg.id ? 'border-blue-600 bg-blue-50 shadow-md' : 'bg-slate-50 border-transparent hover:border-slate-200'}`}
-                       >
-                          <h4 className="font-black text-slate-900 uppercase italic">{pkg.name}</h4>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase">{pkg.speed} • Rs. {pkg.price}</p>
-                       </button>
-                    ))}
-                 </div>
-                 <button 
-                   onClick={async () => {
-                     if(!selectedPkgId) return;
-                     setIsProcessing(true);
-                      await db.bulkActivateSubscribers(Array.from(selectedIds), { packageId: selectedPkgId, paymentStatus: 'Unpaid', expiryDate: new Date(Date.now() + 30 * 86400000).toISOString(), notes: 'Bulk Plan Assignment' });
-                     setIsBulkPackageModal(false);
-                     setSelectedIds(new Set());
-                     setIsProcessing(false);
-                     setIsSuccessModal(true);
-                   }} 
-                   disabled={isProcessing || !selectedPkgId} 
-                   className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-                 >
-                    {isProcessing ? <RefreshCw className="animate-spin" size={20}/> : <ShieldCheck size={20}/>} Assign Plan
-                 </button>
-              </div>
-           </div>
-        </div>
-      )}
-
-      {/* BULK FLASH MODAL */}
-      {isBulkFlashModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
-            <div className="bg-white rounded-[3rem] w-full max-lg shadow-2xl border-[8px] border-rose-50 overflow-hidden animate-in zoom-in">
-               <header className="p-8 sm:p-10 border-b bg-rose-600 text-white flex justify-between items-center shrink-0">
-                  <div className="flex items-center gap-5">
-                     <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg animate-pulse"><Flame size={28}/></div>
-                     <div><h3 className="text-xl sm:text-2xl font-black uppercase italic tracking-tighter leading-none">Security Override: Flash Reset</h3><p className="text-rose-100 text-[10px] font-black uppercase tracking-widest mt-1">Bulk Fiscal Data Purge</p></div>
-                  </div>
-                  <button onClick={() => setIsBulkFlashModal(false)} className="p-3 hover:bg-white/10 rounded-2xl"><X size={32}/></button>
-               </header>
-               <div className="p-8 sm:p-10 space-y-8">
-                  <div className="bg-rose-50 border border-rose-100 p-6 rounded-[2rem] space-y-2 text-center">
-                     <AlertTriangle className="text-rose-600 mx-auto mb-2" size={32} />
-                     <p className="text-[11px] font-black text-rose-600 uppercase tracking-widest leading-relaxed">CRITICAL WARNING: DESTRUCTIVE ACTION</p>
-                     <p className="text-[10px] font-bold text-rose-500 uppercase leading-relaxed max-w-sm mx-auto">This will clear specific months of dues or perform a FULL WIPE for {selectedIds.size} users. This action CANNOT be undone.</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                     <div className="space-y-3">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Flash Scale (Months)</label>
-                        <select 
-                          className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-xl outline-none focus:border-rose-500 transition-all text-center appearance-none" 
-                          value={flashMonths} 
-                          onChange={e => setFlashMonths(Number(e.target.value))}
-                        >
-                           <option value={1}>1 MONTH (Standard)</option>
-                           <option value={2}>2 MONTHS</option>
-                           <option value={3}>3 MONTHS</option>
-                           <option value={6}>6 MONTHS (Deep Purge)</option>
-                           <option value={12}>1 YEAR (Fiscal Flush)</option>
-                           <option value={-1}>N/A: HARD FULL WIPE</option>
-                        </select>
-                     </div>
-                     <div className="space-y-3">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Type "FLASH RESET" to Authorize</label>
-                        <input 
-                           type="text" 
-                           placeholder="Type code here..."
-                           className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-xl outline-none focus:border-rose-500 transition-all text-center uppercase" 
-                           value={flashConfirmText} 
-                           onChange={e => setFlashConfirmText(e.target.value)} 
-                        />
-                     </div>
-                  </div>
-
-                  <button 
-                    onClick={async () => {
-                       if (flashConfirmText.toUpperCase() !== 'FLASH RESET') {
-                           db.logNotification('all', 'error', 'Authorization Failed', 'Incorrect confirmation text entered.');
-                           return;
-                       }
-                       setIsProcessing(true);
-                       const res = await db.bulkFlashUsers(Array.from(selectedIds), flashMonths, state.currentUser?.email || 'admin@clickoptix.com');
-                       if (res.success) {
-                           db.logNotification('all', 'success', 'Flash Authorized', `Successfully purged data for ${res.count} users.`);
-                           setIsBulkFlashModal(false);
-                           setSelectedIds(new Set());
-                           setFlashConfirmText('');
-                           setIsSuccessModal(true);
-                       }
-                       setIsProcessing(false);
-                    }} 
-                    disabled={isProcessing || flashConfirmText.toUpperCase() !== 'FLASH RESET'} 
-                    className="w-full py-6 bg-rose-600 text-white rounded-[2.5rem] font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:grayscale"
-                  >
-                     {isProcessing ? <RefreshCw className="animate-spin" size={20}/> : <Flame size={20}/>} {flashMonths === -1 ? 'INITIALIZE HARD FULL WIPE' : 'EXECUTE SELECTIVE FLASH'}
-                  </button>
+        }
+      >
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+            {/* Identity Node */}
+            <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
+               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><User size={14} className="text-blue-500"/> Contact Details</h4>
+               <div className="space-y-4">
+                  <div className="flex items-center gap-3"><Smartphone size={16} className="text-slate-300"/><span className="text-xs font-bold text-slate-800">{selectedUser?.phone}</span></div>
+                  <div className="flex items-center gap-3"><Mail size={16} className="text-slate-300"/><span className="text-xs font-bold lowercase text-slate-800">{selectedUser?.email || 'No email'}</span></div>
+                  <div className="flex items-center gap-3"><MapPin size={16} className="text-slate-300"/><span className="text-xs font-bold uppercase text-slate-800">{selectedUser?.area}</span></div>
+                  <div className="flex items-center gap-3"><CreditCard size={16} className="text-slate-300"/><span className="text-xs font-bold text-slate-800">{selectedUser?.cnic || 'Not provided'}</span></div>
                </div>
             </div>
-        </div>
-      )}
+
+            {/* Fiscal Node */}
+            <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
+               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><DollarSign size={14} className="text-green-500"/> Billing Summary</h4>
+               <div className="space-y-6">
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                     <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Outstanding Balance</p>
+                     <p className={`text-2xl font-black ${selectedUser && selectedUser.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>Rs. {selectedUser?.balance.toLocaleString()}</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                     <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Credit Score</p>
+                     <p className="text-2xl font-black text-blue-600 italic tracking-tighter">{selectedUser?.creditScore}</p>
+                  </div>
+               </div>
+            </div>
+
+            {/* Link Layer Node */}
+            <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
+               <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><Wifi size={14} className="text-blue-500"/> Link Layer</h4>
+               <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                     <span className="text-[9px] font-black text-slate-400 uppercase">Status</span>
+                     <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${selectedUser?.status === UserStatus.ACTIVE ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'}`}>{selectedUser?.status}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                     <span className="text-[9px] font-black text-slate-400 uppercase">Path</span>
+                     <span className="text-[10px] font-black text-slate-900 uppercase italic">{selectedUser?.connectionType}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                     <span className="text-[9px] font-black text-slate-400 uppercase">Expiry Date</span>
+                     <span className="text-[10px] font-black text-slate-900 italic">{selectedUser?.expiryDate ? new Date(selectedUser.expiryDate).toLocaleDateString() : 'N/A'}</span>
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         {/* History Panels */}
+         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-4">
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[400px]">
+               <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 italic"><FileText size={16} className="text-blue-500"/> Invoice History</h4>
+               </div>
+               <div className="divide-y divide-slate-50 overflow-y-auto custom-scrollbar flex-1">
+                  {userInvoices.map(inv => (
+                    <div key={inv.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0">
+                       <div><p className="font-black text-slate-900 uppercase text-xs">{inv.packageName}</p><p className="text-[8px] text-slate-400 font-bold">{new Date(inv.createdAt).toLocaleDateString()}</p></div>
+                       <div className="text-right"><p className="text-xs font-black text-slate-900 italic">Rs. {inv.totalAmount}</p><span className={`text-[7px] font-black uppercase ${inv.status === 'Paid' ? 'text-green-600' : 'text-rose-600'}`}>{inv.status}</span></div>
+                    </div>
+                  ))}
+                  {userInvoices.length === 0 && <div className="p-10 text-center text-[10px] font-black text-slate-300 uppercase italic">No documents found.</div>}
+               </div>
+            </div>
+
+            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[400px]">
+               <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 italic"><Layers size={16} className="text-blue-500"/> Payment History</h4>
+               </div>
+               <div className="divide-y divide-slate-50 overflow-y-auto custom-scrollbar flex-1">
+                  {userLedger.map(l => (
+                    <div key={l.id} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-b-0">
+                       <div className="flex items-center gap-3">
+                          {l.type === LedgerType.DEBIT ? <ArrowUpRight size={14} className="text-rose-500"/> : <ArrowDownLeft size={14} className="text-green-500"/>}
+                          <div><p className="font-black text-slate-900 uppercase text-[10px]">{l.description}</p><p className="text-[8px] text-slate-400 font-bold">{new Date(l.timestamp).toLocaleString()}</p></div>
+                       </div>
+                       <p className={`text-xs font-black italic ${l.type === LedgerType.DEBIT ? 'text-rose-600' : 'text-green-600'}`}>Rs. {l.amount}</p>
+                    </div>
+                  ))}
+                  {userLedger.length === 0 && <div className="p-10 text-center text-[10px] font-black text-slate-300 uppercase italic">No ledger activity found.</div>}
+               </div>
+            </div>
+         </div>
+      </Modal>
+
+      {/* BULK GRACE MODAL */}
+      <Modal
+        isOpen={isBulkGraceModal}
+        onClose={() => setIsBulkGraceModal(false)}
+        title="Grace Period"
+        icon={<Clock size={22} className="text-blue-400" />}
+        message="Extend User Expiry"
+        maxWidth="max-w-lg"
+        onConfirm={executeBulkGrace}
+        confirmLabel="Apply Grace Period"
+        isLoading={isProcessing}
+      >
+         <div className="space-y-8 mb-4">
+            <div className="space-y-3 text-center mb-6">
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">Selected: {selectedIds.size} Users</p>
+               <p className="text-sm font-bold text-slate-400 uppercase leading-relaxed">Set "Pay Later" status and extend expiry to the specified date.</p>
+            </div>
+            <div className="space-y-2">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">New Expiry Date</label>
+               <input type="date" className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-xl outline-none focus:border-blue-600 transition-all text-center text-slate-900" value={bulkGraceDate} onChange={e => setBulkGraceDate(e.target.value)} />
+            </div>
+         </div>
+      </Modal>
+
+      {/* BULK PACKAGE MODAL */}
+      <Modal
+        isOpen={isBulkPackageModal}
+        onClose={() => setIsBulkPackageModal(false)}
+        title="Bulk Plan Assignment"
+        icon={<PackageIcon size={22} className="text-blue-400" />}
+        message="Global Plan Assignment"
+        maxWidth="max-w-lg"
+        onConfirm={async () => {
+             if(!selectedPkgId) return;
+             setIsProcessing(true);
+             await db.bulkActivateSubscribers(Array.from(selectedIds), { packageId: selectedPkgId, paymentStatus: 'Unpaid', expiryDate: new Date(Date.now() + 30 * 86400000).toISOString(), notes: 'Bulk Plan Assignment' });
+             setIsBulkPackageModal(false);
+             setSelectedIds(new Set());
+             setIsProcessing(false);
+             setIsSuccessModal(true);
+        }}
+        confirmLabel="Assign Plan"
+        isLoading={isProcessing || !selectedPkgId}
+      >
+         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-60 overflow-y-auto custom-scrollbar pr-2 mb-4">
+            {state.packages.filter(p => !p.deleted).map(pkg => (
+               <button 
+                 key={pkg.id} 
+                 onClick={() => setSelectedPkgId(pkg.id)}
+                 className={`p-6 rounded-[2rem] border-2 text-left transition-all ${selectedPkgId === pkg.id ? 'border-blue-600 bg-blue-50 shadow-md text-slate-900' : 'bg-slate-50 border-transparent hover:border-slate-200 text-slate-900'}`}
+               >
+                  <h4 className="font-black uppercase italic">{pkg.name}</h4>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase">{pkg.speed} • Rs. {pkg.price}</p>
+               </button>
+            ))}
+         </div>
+      </Modal>
+
+      {/* BULK FLASH MODAL */}
+      <Modal
+        isOpen={isBulkFlashModal}
+        onClose={() => setIsBulkFlashModal(false)}
+        title="Security Override: Flash Reset"
+        icon={<Flame size={22} className="text-rose-400" />}
+        message="Bulk Fiscal Data Purge"
+        maxWidth="max-w-2xl"
+        onConfirm={async () => {
+             if (flashConfirmText.toUpperCase() !== 'FLASH RESET') {
+                 db.logNotification('all', 'error', 'Authorization Failed', 'Incorrect confirmation text entered.');
+                 return;
+             }
+             setIsProcessing(true);
+             const res = await db.bulkFlashUsers(Array.from(selectedIds), flashMonths, state.currentUser?.email || 'admin@clickoptix.com');
+             if (res.success) {
+                 db.logNotification('all', 'success', 'Flash Authorized', `Successfully purged data for ${res.count} users.`);
+                 setIsBulkFlashModal(false);
+                 setSelectedIds(new Set());
+                 setFlashConfirmText('');
+                 setIsSuccessModal(true);
+             }
+             setIsProcessing(false);
+        }}
+        confirmLabel={flashMonths === -1 ? 'INITIALIZE HARD FULL WIPE' : 'EXECUTE SELECTIVE FLASH'}
+        danger
+        isLoading={isProcessing || flashConfirmText.toUpperCase() !== 'FLASH RESET'}
+      >
+         <div className="space-y-8 mb-4">
+            <div className="bg-rose-50/5 border border-rose-500/20 p-6 rounded-[2rem] space-y-2 text-center">
+               <AlertTriangle className="text-rose-600 mx-auto mb-2" size={32} />
+               <p className="text-[11px] font-black text-rose-600 uppercase tracking-widest leading-relaxed">CRITICAL WARNING: DESTRUCTIVE ACTION</p>
+               <p className="text-[10px] font-bold text-rose-400 uppercase leading-relaxed max-w-sm mx-auto">This will clear specific months of dues or perform a FULL WIPE for {selectedIds.size} users. This action CANNOT be undone.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Flash Scale (Months)</label>
+                  <select 
+                    className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-sm outline-none focus:border-rose-500 transition-all text-center appearance-none text-slate-900" 
+                    value={flashMonths} 
+                    onChange={e => setFlashMonths(Number(e.target.value))}
+                  >
+                     <option value={1}>1 MONTH (Standard)</option>
+                     <option value={2}>2 MONTHS</option>
+                     <option value={3}>3 MONTHS</option>
+                     <option value={6}>6 MONTHS (Deep Purge)</option>
+                     <option value={12}>1 YEAR (Fiscal Flush)</option>
+                     <option value={-1}>N/A: HARD FULL WIPE</option>
+                  </select>
+               </div>
+               <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Type "FLASH RESET" to Authorize</label>
+                  <input 
+                     type="text" 
+                     placeholder="Type code here..."
+                     className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] font-black text-lg outline-none focus:border-rose-500 transition-all text-center uppercase text-slate-900" 
+                     value={flashConfirmText} 
+                     onChange={e => setFlashConfirmText(e.target.value)} 
+                  />
+               </div>
+            </div>
+         </div>
+      </Modal>
 
       {/* BULK DISCOUNT MODAL */}
-      {isApplyDiscountModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
-           <div className="bg-white rounded-[3rem] w-full max-sm shadow-2xl border-[8px] border-slate-50 overflow-hidden animate-in zoom-in">
-              <header className="p-8 border-b bg-green-600 text-white flex justify-between items-center">
-                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Zap size={20}/></div>
-                    <h3 className="text-xl font-black uppercase italic tracking-tighter">Bulk Discount</h3>
-                 </div>
-                 <button onClick={() => setIsApplyDiscountModal(false)}><X size={24}/></button>
-              </header>
-              <div className="p-8 space-y-6">
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Discount Amount (Rs.)</label>
-                    <input type="number" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xl outline-none focus:border-green-500 transition-all text-center" value={bulkDiscountAmount} onChange={e => setBulkDiscountAmount(e.target.value)} />
-                 </div>
-                 <button 
-                  onClick={async () => {
-                    setIsProcessing(true);
-                    await db.bulkBalanceUpdate(Array.from(selectedIds), parseFloat(bulkDiscountAmount), false);
-                    db.logNotification('all', 'success', 'Bulk Action', `Applied Rs.${bulkDiscountAmount} discount to ${selectedIds.size} users.`);
-                    setIsProcessing(false);
-                    setIsApplyDiscountModal(false);
-                    setSelectedIds(new Set());
-                    setIsSuccessModal(true);
-                  }}
-                  className="w-full py-5 bg-green-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all"
-                 >
-                    Apply Discount to {selectedIds.size} Users
-                 </button>
-              </div>
-           </div>
-        </div>
-      )}
+      <Modal
+        isOpen={isApplyDiscountModal}
+        onClose={() => setIsApplyDiscountModal(false)}
+        title="Bulk Discount"
+        icon={<Zap size={22} className="text-green-400" />}
+        message="Apply discount to users"
+        maxWidth="max-w-md"
+        onConfirm={async () => {
+          setIsProcessing(true);
+          await db.bulkBalanceUpdate(Array.from(selectedIds), parseFloat(bulkDiscountAmount), false);
+          db.logNotification('all', 'success', 'Bulk Action', `Applied Rs.${bulkDiscountAmount} discount to ${selectedIds.size} users.`);
+          setIsProcessing(false);
+          setIsApplyDiscountModal(false);
+          setSelectedIds(new Set());
+          setIsSuccessModal(true);
+        }}
+        confirmLabel={`Apply Discount to ${selectedIds.size} Users`}
+        isLoading={isProcessing || !bulkDiscountAmount}
+      >
+         <div className="space-y-2 mb-4">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Discount Amount (Rs.)</label>
+            <input type="number" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xl outline-none focus:border-green-500 transition-all text-center text-slate-900" value={bulkDiscountAmount} onChange={e => setBulkDiscountAmount(e.target.value)} />
+         </div>
+      </Modal>
 
       {/* BULK TAG MODAL */}
-      {isBulkTagModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
-           <div className="bg-white rounded-[3rem] w-full max-sm shadow-2xl border-[8px] border-slate-50 overflow-hidden animate-in zoom-in">
-              <header className="p-8 border-b bg-blue-600 text-white flex justify-between items-center">
-                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><ShieldCheck size={20}/></div>
-                    <h3 className="text-xl font-black uppercase italic tracking-tighter">Batch Tagging</h3>
-                 </div>
-                 <button onClick={() => setIsBulkTagModal(false)}><X size={24}/></button>
-              </header>
-              <div className="p-8 space-y-6">
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tag Identifier (e.g. VIP)</label>
-                    <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xl outline-none focus:border-blue-500 transition-all text-center uppercase" value={bulkTagInput} onChange={e => setBulkTagInput(e.target.value)} placeholder="Tag Name..." />
-                 </div>
-                 <button 
-                  onClick={async () => {
-                    setIsProcessing(true);
-                    await db.bulkAddTag(Array.from(selectedIds), bulkTagInput);
-                    db.logNotification('all', 'success', 'Bulk Action', `Added tag ${bulkTagInput} to ${selectedIds.size} users.`);
-                    setIsProcessing(false);
-                    setIsBulkTagModal(false);
-                    setSelectedIds(new Set());
-                    setIsSuccessModal(true);
-                  }}
-                  className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-all"
-                 >
-                    Apply Tag to {selectedIds.size} Users
-                 </button>
-              </div>
-           </div>
-        </div>
-      )}
+      <Modal
+        isOpen={isBulkTagModal}
+        onClose={() => setIsBulkTagModal(false)}
+        title="Batch Tagging"
+        icon={<ShieldCheck size={22} className="text-blue-400" />}
+        message="Add custom tag"
+        maxWidth="max-w-md"
+        onConfirm={async () => {
+          setIsProcessing(true);
+          await db.bulkAddTag(Array.from(selectedIds), bulkTagInput);
+          db.logNotification('all', 'success', 'Bulk Action', `Added tag ${bulkTagInput} to ${selectedIds.size} users.`);
+          setIsProcessing(false);
+          setIsBulkTagModal(false);
+          setSelectedIds(new Set());
+          setIsSuccessModal(true);
+        }}
+        confirmLabel={`Apply Tag to ${selectedIds.size} Users`}
+        isLoading={isProcessing || !bulkTagInput}
+      >
+         <div className="space-y-2 mb-4">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Tag Identifier (e.g. VIP)</label>
+            <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xl outline-none focus:border-blue-500 transition-all text-center uppercase text-slate-900" value={bulkTagInput} onChange={e => setBulkTagInput(e.target.value)} placeholder="Tag Name..." />
+         </div>
+      </Modal>
 
       {/* IMPORT USERS MODAL */}
-      {isImportUsersModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2000] flex items-center justify-center p-6">
-           <div className="bg-white rounded-[3rem] w-full max-lg shadow-2xl border-[8px] border-slate-50 overflow-hidden animate-in zoom-in flex flex-col max-h-[90vh]">
-              <header className="p-8 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center"><FileInput size={20}/></div>
-                    <h3 className="text-xl font-black uppercase italic tracking-tighter">Smart Import Engine</h3>
-                 </div>
-                 <button onClick={() => setIsImportUsersModal(false)}><X size={24}/></button>
-              </header>
-              <div className="p-8 flex-1 overflow-y-auto space-y-8">
-                 <div className="bg-blue-50 border border-blue-100 p-6 rounded-2xl">
-                    <h4 className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] mb-2 flex items-center gap-2"><Info size={14}/> CSV Format Guideline</h4>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase leading-relaxed">Format: <code className="bg-white px-2 py-0.5 rounded text-blue-600">Name, Phone, Package_ID, Connection_ID</code></p>
-                 </div>
-                 <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Paste CSV Data or List</label>
-                    <textarea 
-                      className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-mono text-sm outline-none focus:border-blue-600 transition-all custom-scrollbar resize-none" 
-                      placeholder="John Doe, 03001234567, fiber-basic, CO-8822..."
-                      value={importCsvInput}
-                      onChange={e => setImportCsvInput(e.target.value)}
-                    />
-                 </div>
-                 <button 
-                  onClick={async () => {
-                    setIsProcessing(true);
-                    // Mock parser for demo - in real app would parse CSV properly
-                    const lines = importCsvInput.split('\n').filter(l => l.trim());
-                    for(const line of lines) {
-                        const parts = line.split(',').map(p => p.trim());
-                        if (parts.length >= 2) {
-                            await db.addUser({
-                                name: parts[0],
-                                phone: parts[1],
-                                packageId: parts[2] || '',
-                                connectionId: parts[3] || `TMP-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
-                                status: UserStatus.PENDING_VERIFICATION
-                            } as any);
-                        }
-                    }
-                    db.logNotification('all', 'success', 'Import Complete', `Successfully imported ${lines.length} potential users.`);
-                    setIsProcessing(false);
-                    setIsImportUsersModal(false);
-                    setImportCsvInput('');
-                    setIsSuccessModal(true);
-                  }}
-                  className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-[0.3em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
-                 >
-                    <RefreshCw className={isProcessing ? 'animate-spin' : ''} size={20}/> Initialize Bulk Ingestion
-                 </button>
-              </div>
-           </div>
-        </div>
-      )}
+      <Modal
+        isOpen={isImportUsersModal}
+        onClose={() => setIsImportUsersModal(false)}
+        title="Smart Import Engine"
+        icon={<FileInput size={22} className="text-blue-400" />}
+        message="Bulk CSV Ingestion"
+        maxWidth="max-w-2xl"
+        scrollable
+        onConfirm={async () => {
+          setIsProcessing(true);
+          // Mock parser for demo - in real app would parse CSV properly
+          const lines = importCsvInput.split('\n').filter(l => l.trim());
+          for(const line of lines) {
+              const parts = line.split(',').map(p => p.trim());
+              if (parts.length >= 2) {
+                  await db.addUser({
+                      name: parts[0],
+                      phone: parts[1],
+                      packageId: parts[2] || '',
+                      connectionId: parts[3] || `TMP-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+                      status: UserStatus.PENDING_VERIFICATION
+                  } as any);
+              }
+          }
+          db.logNotification('all', 'success', 'Import Complete', `Successfully imported ${lines.length} potential users.`);
+          setIsProcessing(false);
+          setIsImportUsersModal(false);
+          setImportCsvInput('');
+          setIsSuccessModal(true);
+        }}
+        confirmLabel="Initialize Bulk Ingestion"
+        isLoading={isProcessing || !importCsvInput}
+      >
+         <div className="space-y-8 mb-4">
+            <div className="bg-blue-50/5 border border-blue-500/20 p-6 rounded-2xl">
+               <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2"><Info size={14}/> CSV Format Guideline</h4>
+               <p className="text-[10px] font-bold text-slate-400 uppercase leading-relaxed">Format: <code className="bg-slate-800 px-2 py-0.5 rounded text-blue-400 border border-slate-700">Name, Phone, Package_ID, Connection_ID</code></p>
+            </div>
+            <div className="space-y-3">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Paste CSV Data or List</label>
+               <textarea 
+                 className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-mono text-sm outline-none focus:border-blue-600 transition-all custom-scrollbar resize-none text-slate-900" 
+                 placeholder="John Doe, 03001234567, fiber-basic, CO-8822..."
+                 value={importCsvInput}
+                 onChange={e => setImportCsvInput(e.target.value)}
+               />
+            </div>
+         </div>
+      </Modal>
 
       {/* SUCCESS MODAL */}
-      {isSuccessModal && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[2000] flex items-center justify-center p-6 animate-in fade-in duration-500">
-           <div className="bg-white rounded-[3.5rem] w-full max-sm shadow-2xl p-10 sm:p-12 text-center space-y-8 animate-in zoom-in border-[8px] border-green-50">
-[diff_block_end]
-
-Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.
-              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-green-500 text-white rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce"><CheckCircle size={56} strokeWidth={3}/></div>
-              <h3 className="text-2xl sm:text-3xl font-black uppercase italic tracking-tighter text-slate-900">Success!</h3>
-              <button onClick={() => setIsSuccessModal(false)} className="w-full py-4 sm:py-5 bg-slate-950 text-white rounded-3xl font-black text-xs uppercase tracking-widest">Back to Users</button>
-           </div>
-        </div>
-      )}
+      <Modal
+        isOpen={isSuccessModal}
+        onClose={() => setIsSuccessModal(false)}
+        title="Success!"
+        hideCloseButton
+        icon={<CheckCircle size={32} className="text-green-400" />}
+        message="Operation completed successfully."
+        maxWidth="max-w-sm"
+        onConfirm={() => setIsSuccessModal(false)}
+        confirmLabel="Back to Users"
+      >
+         <div className="text-center py-6">
+            <div className="w-24 h-24 bg-green-500/20 text-green-400 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce mb-8"><CheckCircle size={56} strokeWidth={3}/></div>
+            <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-200">Success!</h3>
+         </div>
+      </Modal>
     </div>
   );
 };
 
-export default UserManagement;
 
+export default UserManagement;

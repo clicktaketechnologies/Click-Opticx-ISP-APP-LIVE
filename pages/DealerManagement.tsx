@@ -11,6 +11,7 @@ import {
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
 } from 'recharts';
+import { Modal } from '../components/shared/Modal';
 
 const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -334,132 +335,90 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
       </div>
 
       {/* Onboard Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl animate-in zoom-in duration-300 overflow-hidden border border-slate-100 flex flex-col">
-            <div className="px-10 py-8 bg-slate-50 border-b flex justify-between items-center">
-              <div>
-                <h3 className="text-2xl font-black text-slate-900">Partner Onboarding</h3>
-                <p className="text-slate-500 text-xs font-bold uppercase mt-1">Dealer Identity Setup</p>
-              </div>
-              <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-2xl"><X size={24} /></button>
-            </div>
-            <div className="p-10 space-y-6">
-              <div className="grid grid-cols-1 gap-5">
-                 <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
-                    <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" placeholder="e.g. Al-Falah Networks" value={newDealer.name} onChange={e => setNewDealer({...newDealer, name: e.target.value})} />
-                 </div>
-                 <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email / Login ID</label>
-                    <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" placeholder="dealer@example.com" value={newDealer.email} onChange={e => setNewDealer({...newDealer, email: e.target.value})} />
-                 </div>
-                 <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Login Password</label>
-                    <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" type="text" placeholder="Set secure password" value={newDealer.password} onChange={e => setNewDealer({...newDealer, password: e.target.value})} />
-                 </div>
-                 <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Distributor Code</label>
-                    <input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold" placeholder="e.g. DLR-786" value={newDealer.dealerCode} onChange={e => setNewDealer({...newDealer, dealerCode: e.target.value})} />
-                 </div>
-              </div>
-              <button onClick={handleAddDealer} className="w-full py-5 bg-purple-600 text-white font-black rounded-2xl hover:bg-purple-700 shadow-xl transition-all uppercase tracking-widest text-xs">
-                Authorize Distributor
-              </button>
-            </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Partner Onboarding"
+        type="form"
+        maxWidth="max-w-lg"
+        onConfirm={handleAddDealer}
+        confirmLabel="Authorize Distributor"
+        cancelLabel="Cancel"
+      >
+        <div className="space-y-4 py-2">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Full Name</label>
+            <input className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-white outline-none focus:ring-2 focus:ring-blue-500/30" placeholder="e.g. Al-Falah Networks" value={newDealer.name} onChange={e => setNewDealer({...newDealer, name: e.target.value})} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email / Login ID</label>
+            <input className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-white outline-none focus:ring-2 focus:ring-blue-500/30" placeholder="dealer@example.com" value={newDealer.email} onChange={e => setNewDealer({...newDealer, email: e.target.value})} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Login Password</label>
+            <input className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-white outline-none focus:ring-2 focus:ring-blue-500/30" type="text" placeholder="Set secure password" value={newDealer.password} onChange={e => setNewDealer({...newDealer, password: e.target.value})} />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Distributor Code</label>
+            <input className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-white outline-none focus:ring-2 focus:ring-blue-500/30" placeholder="e.g. DLR-786" value={newDealer.dealerCode} onChange={e => setNewDealer({...newDealer, dealerCode: e.target.value})} />
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* Load Modal */}
-      {isLoadModalOpen && selectedDealer && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl animate-in zoom-in duration-300 overflow-hidden border border-slate-100 flex flex-col">
-            <div className="px-8 py-6 bg-purple-600 text-white flex justify-between items-center">
-              <div>
-                <h3 className="text-xl font-black">Provision Load</h3>
-                <p className="text-purple-100 text-[10px] font-bold uppercase mt-1 tracking-widest">{selectedDealer.name}</p>
-              </div>
-              <button onClick={() => setIsLoadModalOpen(false)} className="p-2 hover:bg-white/10 rounded-xl"><X size={24} /></button>
-            </div>
-            <div className="p-8 space-y-8 overflow-y-auto max-h-[70vh]">
-              <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Wallet Top-up Amount (Rs.)</label>
-                <div className="relative">
-                   <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-50" size={20} />
-                   <input type="number" className="w-full pl-12 pr-4 py-5 bg-slate-50 border border-slate-200 rounded-2xl font-black text-3xl outline-none focus:ring-4 focus:ring-purple-500/10 transition-all" value={loadData.amount} onChange={e => setLoadData({...loadData, amount: Number(e.target.value)})} />
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1 text-center">Settlement Status</label>
-                 <div className="grid grid-cols-3 gap-3">
-                    <button 
-                       onClick={() => setLoadData({...loadData, mode: 'paid'})} 
-                       className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${loadData.mode === 'paid' ? 'bg-green-50 border-green-500 text-green-700 shadow-lg scale-105' : 'bg-white border-slate-100 text-slate-400 grayscale'}`}
-                    >
-                       <Banknote size={20} />
-                       <span className="text-[8px] font-black uppercase tracking-tight">Full Paid</span>
-                    </button>
-                    <button 
-                       onClick={() => setLoadData({...loadData, mode: 'credit'})} 
-                       className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${loadData.mode === 'credit' ? 'bg-orange-50 border-orange-500 text-orange-700 shadow-lg scale-105' : 'bg-white border-slate-100 text-slate-400 grayscale'}`}
-                    >
-                       <CreditCard size={20} />
-                       <span className="text-[8px] font-black uppercase tracking-tight">On Credit</span>
-                    </button>
-                    <button 
-                       onClick={() => setLoadData({...loadData, mode: 'pay_later'})} 
-                       className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${loadData.mode === 'pay_later' ? 'bg-purple-50 border-purple-500 text-purple-700 shadow-lg scale-105' : 'bg-white border-slate-100 text-slate-400 grayscale'}`}
-                    >
-                       <Clock size={20} />
-                       <span className="text-[8px] font-black uppercase tracking-tight">Pay Later</span>
-                    </button>
-                 </div>
-              </div>
-
-              {loadData.mode === 'pay_later' && (
-                <div className="animate-in slide-in-from-top-2">
-                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block ml-1 mb-2">Promise Date</label>
-                   <input 
-                     type="date" 
-                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none" 
-                     value={loadData.dueDate} 
-                     onChange={e => setLoadData({...loadData, dueDate: e.target.value})} 
-                   />
-                </div>
-              )}
-
-              <div className="p-6 bg-slate-50 border border-slate-100 rounded-3xl flex items-start gap-4 shadow-inner">
-                 {loadData.mode === 'paid' && <ShieldCheck className="text-green-500 mt-1 shrink-0" size={24} />}
-                 {loadData.mode === 'credit' && <ShieldAlert className="text-orange-500 mt-1 shrink-0" size={24} />}
-                 {loadData.mode === 'pay_later' && <Clock className="text-purple-500 mt-1 shrink-0" size={24} />}
-                 <div>
-                    <p className="text-[10px] text-slate-800 font-black uppercase tracking-tight mb-1">
-                      {loadData.mode === 'paid' ? 'Revenue Collection' : 'Debt Entry Triggered'}
-                    </p>
-                    <p className="text-[9px] text-slate-500 font-bold uppercase leading-relaxed">
-                      {loadData.mode === 'paid' && 'Amount is recorded as cash-in-hand immediately.'}
-                      {loadData.mode === 'credit' && 'Dealer gets load now; system expects immediate payment logging.'}
-                      {loadData.mode === 'pay_later' && `Debt scheduled for recovery by ${loadData.dueDate || 'specified date'}.`}
-                    </p>
-                 </div>
-              </div>
-
-              <button 
-                onClick={handleApplyLoad}
-                disabled={loadData.amount <= 0 || (loadData.mode === 'pay_later' && !loadData.dueDate)}
-                className="w-full py-5 bg-purple-600 text-white font-black rounded-2xl hover:bg-purple-700 shadow-xl shadow-purple-200 transition-all uppercase tracking-widest text-xs active:scale-95 disabled:opacity-50 disabled:grayscale"
-              >
-                Confirm Load Provisioning
-              </button>
+      <Modal
+        isOpen={isLoadModalOpen && !!selectedDealer}
+        onClose={() => { setIsLoadModalOpen(false); setSelectedDealer(null); }}
+        title={`Provision Load — ${selectedDealer?.name || ''}`}
+        type="form"
+        maxWidth="max-w-lg"
+        scrollable
+        onConfirm={handleApplyLoad}
+        confirmLabel="Confirm Load Provisioning"
+        cancelLabel="Cancel"
+      >
+        <div className="space-y-6 py-2">
+          <div>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Wallet Top-up Amount (Rs.)</label>
+            <div className="relative">
+               <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+               <input type="number" className="w-full pl-11 pr-4 py-4 bg-slate-800/80 border border-slate-700 rounded-xl font-black text-2xl text-white outline-none focus:ring-2 focus:ring-purple-500/30" value={loadData.amount} onChange={e => setLoadData({...loadData, amount: Number(e.target.value)})} />
             </div>
           </div>
+          <div className="space-y-3">
+             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Settlement Status</label>
+             <div className="grid grid-cols-3 gap-3">
+                <button onClick={() => setLoadData({...loadData, mode: 'paid'})} className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${loadData.mode === 'paid' ? 'bg-green-950/60 border-green-500 text-green-400 shadow-lg scale-105' : 'bg-slate-800/60 border-slate-700 text-slate-500'}`}>
+                   <Banknote size={20} /><span className="text-[8px] font-black uppercase tracking-tight">Full Paid</span>
+                </button>
+                <button onClick={() => setLoadData({...loadData, mode: 'credit'})} className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${loadData.mode === 'credit' ? 'bg-orange-950/60 border-orange-500 text-orange-400 shadow-lg scale-105' : 'bg-slate-800/60 border-slate-700 text-slate-500'}`}>
+                   <CreditCard size={20} /><span className="text-[8px] font-black uppercase tracking-tight">On Credit</span>
+                </button>
+                <button onClick={() => setLoadData({...loadData, mode: 'pay_later'})} className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all ${loadData.mode === 'pay_later' ? 'bg-purple-950/60 border-purple-500 text-purple-400 shadow-lg scale-105' : 'bg-slate-800/60 border-slate-700 text-slate-500'}`}>
+                   <Clock size={20} /><span className="text-[8px] font-black uppercase tracking-tight">Pay Later</span>
+                </button>
+             </div>
+          </div>
+          {loadData.mode === 'pay_later' && (
+            <div>
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Promise Date</label>
+               <input type="date" className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-white outline-none" value={loadData.dueDate} onChange={e => setLoadData({...loadData, dueDate: e.target.value})} />
+            </div>
+          )}
+          <div className="p-4 bg-slate-800/50 border border-slate-700/50 rounded-xl flex items-start gap-3">
+             {loadData.mode === 'paid' && <ShieldCheck className="text-green-400 mt-0.5 shrink-0" size={18} />}
+             {loadData.mode === 'credit' && <ShieldAlert className="text-orange-400 mt-0.5 shrink-0" size={18} />}
+             {loadData.mode === 'pay_later' && <Clock className="text-purple-400 mt-0.5 shrink-0" size={18} />}
+             <p className="text-[10px] text-slate-400 font-bold uppercase leading-relaxed">
+               {loadData.mode === 'paid' && 'Amount is recorded as cash-in-hand immediately.'}
+               {loadData.mode === 'credit' && 'Dealer gets load now; system expects immediate payment logging.'}
+               {loadData.mode === 'pay_later' && `Debt scheduled for recovery by ${loadData.dueDate || 'specified date'}.`}
+             </p>
+          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };
 
 export default DealerManagement;
-

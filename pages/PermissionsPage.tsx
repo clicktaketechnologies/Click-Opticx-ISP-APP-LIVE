@@ -8,6 +8,7 @@ import {
   Settings, UserPlus, Users, Check, Ban, ShieldAlert,
   ArrowRight, Fingerprint, Key, Zap, RefreshCw, Layers
 } from 'lucide-react';
+import { Modal } from '../components/shared/Modal';
 
 const PermissionsPage: React.FC<{ state: AppState }> = ({ state }) => {
   const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
@@ -272,69 +273,47 @@ const PermissionsPage: React.FC<{ state: AppState }> = ({ state }) => {
         </div>
       </div>
 
-      {/* MODALS */}
-      {isAddRoleModalOpen && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[100] flex items-center justify-center p-6 sm:p-4">
-          <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl animate-in zoom-in duration-500 overflow-hidden border-[8px] border-blue-50">
-            <div className="p-10 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-              <div>
-                <h3 className="text-3xl font-black text-slate-900 tracking-tight italic">Tier Forge</h3>
-                <p className="text-slate-400 text-[10px] font-black uppercase mt-1 tracking-[0.3em]">Initialize Authority Identity</p>
-              </div>
-              <button onClick={() => setIsAddRoleModalOpen(false)} className="p-4 hover:bg-rose-50 text-slate-400 rounded-3xl transition-all hover:text-rose-600 active:scale-90"><X size={32} /></button>
-            </div>
-            <div className="p-10 space-y-10">
-              <div className="space-y-4">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] ml-2 block">Scope Descriptor</label>
-                <div className="relative">
-                  <Fingerprint className="absolute left-6 top-1/2 -translate-y-1/2 text-blue-300" size={24} />
-                  <input
-                    type="text"
-                    autoFocus
-                    className="w-full pl-16 pr-8 py-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] outline-none focus:border-blue-600 transition-all font-black text-2xl text-slate-900 uppercase tracking-tighter shadow-inner"
-                    value={newRoleName}
-                    onChange={e => setNewRoleName(e.target.value)}
-                    placeholder="E.G. TECHNICAL_UNIT"
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddRole()}
-                  />
-                </div>
-              </div>
-              <div className="flex gap-10">
-                <button onClick={() => setIsAddRoleModalOpen(false)} className="px-8 py-4 font-black text-slate-400 hover:text-slate-900 rounded-2xl uppercase tracking-[0.2em] text-[10px] transition-colors">Abort</button>
-                <button 
-                  onClick={handleAddRole} 
-                  className="flex-1 py-6 bg-blue-600 text-white font-black rounded-[2rem] hover:bg-blue-700 shadow-2xl active:scale-95 transition-all uppercase tracking-[0.4em] text-xs flex items-center justify-center gap-4"
-                >
-                  <RefreshCw size={20} />
-                  Authorize Tier
-                </button>
-              </div>
-            </div>
+      {/* Add Role Modal */}
+      <Modal
+        isOpen={isAddRoleModalOpen}
+        onClose={() => setIsAddRoleModalOpen(false)}
+        title="Tier Forge"
+        type="form"
+        icon={<UserPlus size={20} className="text-blue-400" />}
+        maxWidth="max-w-lg"
+        onConfirm={handleAddRole}
+        confirmLabel="Authorize Tier"
+      >
+        <div className="space-y-4">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block italic">Scope Descriptor</label>
+          <div className="relative">
+            <Fingerprint className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-400" size={20} />
+            <input
+              type="text"
+              autoFocus
+              className="w-full pl-12 pr-6 py-4 bg-slate-800 border border-slate-700 rounded-2xl outline-none focus:border-blue-500 transition-all font-black text-xl text-white uppercase tracking-tighter"
+              value={newRoleName}
+              onChange={e => setNewRoleName(e.target.value)}
+              placeholder="E.G. TECHNICAL_UNIT"
+              onKeyDown={(e) => e.key === 'Enter' && handleAddRole()}
+            />
           </div>
         </div>
-      )}
+      </Modal>
 
-      {isDeletingRole && (
-        <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-xl z-[110] flex items-center justify-center p-6">
-          <div className="bg-white rounded-[4rem] w-full max-w-md shadow-2xl animate-in zoom-in duration-500 overflow-hidden border-[12px] border-rose-50">
-            <div className="p-12 text-center space-y-8">
-              <div className="w-28 h-28 bg-rose-50 text-rose-600 rounded-[3rem] flex items-center justify-center mx-auto shadow-2xl shadow-rose-100 border-4 border-white animate-pulse">
-                <ShieldAlert size={56} />
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Revoke Tier?</h3>
-                <p className="text-slate-500 font-bold leading-relaxed text-xs uppercase tracking-tight">
-                  Destroying the <span className="text-rose-600 font-black">"{isDeletingRole}"</span> scope tier will instantly purge system access for all node agents.
-                </p>
-              </div>
-              <div className="flex flex-col gap-4 pt-4">
-                <button onClick={() => handleDeleteRole(isDeletingRole)} className="w-full py-6 bg-rose-600 text-white font-black rounded-[2rem] hover:bg-rose-700 shadow-2xl active:scale-95 transition-all uppercase tracking-[0.4em] text-xs">Purge Identity</button>
-                <button onClick={() => setIsDeletingRole(null)} className="w-full py-5 font-black text-slate-400 hover:bg-slate-50 rounded-3xl uppercase tracking-widest text-[10px] transition-all">Relinquish</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Role Confirm Modal */}
+      <Modal
+        isOpen={!!isDeletingRole}
+        onClose={() => setIsDeletingRole(null)}
+        title="Revoke Tier?"
+        type="danger"
+        maxWidth="max-w-md"
+        onConfirm={() => isDeletingRole && handleDeleteRole(isDeletingRole)}
+        confirmLabel="Purge Identity"
+        confirmDanger
+        cancelLabel="Relinquish"
+        message={`Destroying the "${isDeletingRole}" scope tier will instantly purge system access for all node agents.`}
+      />
     </div>
   );
 };

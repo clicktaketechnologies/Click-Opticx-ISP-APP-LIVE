@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MapPin, X, Globe, Search, ChevronRight } from 'lucide-react';
+import Modal from '../shared/Modal';
 
 interface Props {
   onClose: () => void;
@@ -25,64 +26,53 @@ const QiblaLocationSelector: React.FC<Props> = ({ onClose, onSelect }) => {
   );
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xl z-[700] flex items-center justify-center p-6 animate-in fade-in duration-300">
-      <div className="bg-white w-full max-w-md rounded-[3rem] shadow-2xl overflow-hidden border-[8px] border-slate-50 flex flex-col">
-        <div className="p-8 border-b bg-slate-50 flex justify-between items-center shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
-              <Globe size={20} />
-            </div>
-            <div>
-              <h3 className="text-xl font-black uppercase italic tracking-tighter text-slate-900">Regional Node</h3>
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Manual Location Sync</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="p-2 text-slate-300 hover:text-red-500 transition-colors">
-            <X size={24} />
-          </button>
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title="Regional Node"
+      type="info"
+      icon={<Globe size={24} className="text-white" />}
+      maxWidth="max-w-md"
+      footer={
+        <p className="text-[9px] text-slate-400 font-bold leading-relaxed uppercase text-center w-full">
+          City data is used to calculate bearing if GPS nodes are offline.
+        </p>
+      }
+    >
+      <div className="space-y-6">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <input 
+            type="text" 
+            placeholder="Search major city..." 
+            className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black outline-none focus:ring-4 focus:ring-blue-500/10 transition-all uppercase tracking-widest"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
 
-        <div className="p-8 space-y-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search major city..." 
-              className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black outline-none focus:ring-4 focus:ring-blue-500/10 transition-all uppercase tracking-widest"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
-            {filtered.map(p => (
-              <button 
-                key={p.city}
-                onClick={() => onSelect(p.city, p.country, p.lat, p.lng)}
-                className="w-full p-4 flex items-center justify-between bg-white border border-slate-100 rounded-2xl hover:border-blue-500 hover:bg-blue-50/30 transition-all group"
-              >
-                <div className="flex items-center gap-4 text-left">
-                  <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-blue-600">
-                    <MapPin size={18} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{p.city}</p>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase">{p.country}</p>
-                  </div>
+        <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+          {filtered.map(p => (
+            <button 
+              key={p.city}
+              onClick={() => onSelect(p.city, p.country, p.lat, p.lng)}
+              className="w-full p-4 flex items-center justify-between bg-white border border-slate-100 rounded-2xl hover:border-blue-500 hover:bg-blue-50/30 transition-all group"
+            >
+              <div className="flex items-center gap-4 text-left">
+                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:text-blue-600">
+                  <MapPin size={18} />
                 </div>
-                <ChevronRight size={16} className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="p-8 bg-slate-50 border-t shrink-0">
-          <p className="text-[9px] text-slate-400 font-bold leading-relaxed uppercase text-center">
-            City data is used to calculate bearing if GPS nodes are offline.
-          </p>
+                <div>
+                  <p className="text-sm font-black text-slate-900 uppercase tracking-tight">{p.city}</p>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase">{p.country}</p>
+                </div>
+              </div>
+              <ChevronRight size={16} className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+            </button>
+          ))}
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
 

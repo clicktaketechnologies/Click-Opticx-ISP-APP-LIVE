@@ -35,7 +35,10 @@ export const FiveGLaunchAnimation: React.FC<{
     }
 
     return (
-        <div className={`fixed inset-0 z-[9999] bg-slate-950 flex flex-col items-center justify-center text-white transition-opacity duration-700 ${stage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <div 
+          className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center text-white transition-all duration-700 ${stage === 3 ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+          style={{ backgroundColor: 'rgba(2, 6, 23, 0.95)', backdropFilter: 'blur(12px)' }}
+        >
             {/* Grid Background */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_30%,transparent_100%)]"></div>
 

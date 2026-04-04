@@ -9,6 +9,7 @@ import {
   Settings, Download, Upload, X, Eye, EyeOff, Globe, DatabaseZap, Flame,
   CheckCircle2, HardDrive, FileJson, Monitor, Save, Key, Wifi, WifiOff, XCircle, Code2, Cpu, Zap, Search, ShieldAlert, AlertCircle, CloudLightning, Github, Play, Box, ChevronRight, ExternalLink, ListChecks, Layers, Link2, Sparkles, Command, Send, CreditCard
 } from 'lucide-react';
+import { Modal } from '../components/shared/Modal';
 
 const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
   const [health, setHealth] = useState<DBHealth>(db.getHealth());
@@ -353,133 +354,116 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
       </div>
 
       {/* Key Vault Modal */}
-      {showKeyVault && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1100] flex items-center justify-center p-4 animate-in fade-in duration-300">
-           <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col max-h-[90vh]">
-              <div className="p-10 border-b bg-slate-950 text-white flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                       <Key size={28} />
-                    </div>
-                    <div>
-                       <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">Security Vault</h3>
-                       <p className="text-amber-400 text-[9px] font-black uppercase tracking-widest mt-1">External API Registry</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setShowKeyVault(false)} className="p-3 hover:bg-white/10 rounded-xl text-slate-500 hover:text-white transition-all"><X size={24}/></button>
+      <Modal
+        isOpen={showKeyVault}
+        onClose={() => setShowKeyVault(false)}
+        title="Security Vault"
+        type="info"
+        icon={<Key size={24} className="text-white" />}
+        maxWidth="max-w-lg"
+        footer={
+          <div className="flex gap-4 w-full">
+            <button 
+              onClick={() => setShowKeyVault(false)} 
+              className="flex-1 py-4 font-black text-slate-400 hover:bg-slate-100 rounded-2xl transition-all uppercase tracking-widest text-[10px]"
+            >
+              Abort
+            </button>
+            <button 
+              onClick={handleSaveKeys}
+              disabled={isSavingKeys}
+              className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
+            >
+              {isSavingKeys ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
+              Authorize Provisioning
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-8">
+          <div className="flex justify-between items-center px-1">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic tracking-tighter">Protocol Secrets</p>
+            <button onClick={() => setRevealKeys(!revealKeys)} className="text-[9px] font-black uppercase text-blue-400 flex items-center gap-1 hover:text-blue-300 transition-colors">
+              {revealKeys ? <EyeOff size={14}/> : <Eye size={14}/>} {revealKeys ? 'Mask' : 'Reveal'}
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {[
+              { key: 'gemini', label: 'Google Gemini Core', icon: Cpu, color: 'text-blue-400' },
+              { key: 'openai', label: 'OpenAI GPT Link', icon: Sparkles, color: 'text-amber-400' },
+              { key: 'deepseek', label: 'DeepSeek AI Model', icon: Activity, color: 'text-blue-400' }
+            ].map(item => (
+              <div key={item.key} className="space-y-2">
+                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">{item.label}</label>
+                <div className="relative group">
+                   <item.icon className={`absolute left-4 top-1/2 -translate-y-1/2 ${item.color}`} size={16} />
+                   <input 
+                    type={revealKeys ? 'text' : 'password'}
+                    className="w-full pl-12 pr-4 py-4 bg-slate-900/50 border border-slate-800 rounded-2xl font-black text-sm text-white outline-none focus:border-blue-500 group-hover:border-slate-700 transition-all shadow-inner"
+                    placeholder="Enter Key Node..."
+                    value={(aiKeys as any)[item.key]}
+                    onChange={e => setAiKeys({...aiKeys, [item.key]: e.target.value})}
+                   />
+                </div>
               </div>
+            ))}
+          </div>
 
-              <div className="p-10 space-y-8 overflow-y-auto custom-scrollbar flex-1 bg-white">
-                 <div className="flex justify-between items-center px-1">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Protocol Secrets</p>
-                    <button onClick={() => setRevealKeys(!revealKeys)} className="text-[9px] font-black uppercase text-blue-600 flex items-center gap-1">
-                       {revealKeys ? <EyeOff size={14}/> : <Eye size={14}/>} {revealKeys ? 'Mask' : 'Reveal'}
-                    </button>
-                 </div>
-
-                 <div className="space-y-6">
-                    {[
-                      { key: 'gemini', label: 'Google Gemini Core', icon: Cpu, color: 'text-blue-500' },
-                      { key: 'openai', label: 'OpenAI GPT Link', icon: Sparkles, color: 'text-green-500' },
-                      { key: 'deepseek', label: 'DeepSeek AI Model', icon: Activity, color: 'text-blue-500' }
-                    ].map(item => (
-                      <div key={item.key} className="space-y-2">
-                        <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1 italic">{item.label}</label>
-                        <div className="relative group">
-                           <item.icon className={`absolute left-4 top-1/2 -translate-y-1/2 ${item.color}`} size={16} />
-                           <input 
-                            type={revealKeys ? 'text' : 'password'}
-                            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-blue-600 transition-all shadow-inner"
-                            placeholder="Enter Key Node..."
-                            value={(aiKeys as any)[item.key]}
-                            onChange={e => setAiKeys({...aiKeys, [item.key]: e.target.value})}
-                           />
-                        </div>
-                      </div>
-                    ))}
-                 </div>
-
-                 <div className="p-8 bg-amber-50 border border-amber-100 rounded-[2.5rem] flex items-start gap-4">
-                    <ShieldAlert size={24} className="text-amber-600 shrink-0 mt-1" />
-                    <p className="text-[9px] text-amber-700 font-bold uppercase leading-relaxed tracking-tighter">
-                       KEYS ARE STORED IN THE PERSISTENT CLOUD REGISTRY. AUTHORIZING NEW KEYS WILL RE-CALIBRATE AI AUTONOMY IMMEDIATELY.
-                    </p>
-                 </div>
-              </div>
-
-              <div className="p-10 bg-slate-50 border-t flex gap-4 shrink-0">
-                 <button onClick={() => setShowKeyVault(false)} className="flex-1 py-5 font-black text-slate-400 hover:bg-white hover:text-rose-600 rounded-2xl transition-all uppercase tracking-widest text-[10px]">Abort</button>
-                 <button 
-                  onClick={handleSaveKeys}
-                  disabled={isSavingKeys}
-                  className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-3"
-                 >
-                    {isSavingKeys ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18}/>}
-                    Authorize Provisioning
-                 </button>
-              </div>
-           </div>
+          <div className="p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-start gap-4">
+            <ShieldAlert size={20} className="text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-[9px] text-amber-200/70 font-bold uppercase leading-relaxed tracking-tighter">
+              KEYS ARE STORED IN PERSISTENT CLOUD REGISTRY. UPDATING WILL RE-CALIBRATE AI AUTONOMY IMMEDIATELY.
+            </p>
+          </div>
         </div>
-      )}
+      </Modal>
 
       {/* Switch Layer Configuration Modal */}
-      {showConfigModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[1100] flex items-center justify-center p-6 animate-in fade-in duration-300">
-           <div className="bg-white rounded-[3.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300 flex flex-col max-h-[90vh]">
-              <div className="p-10 border-b bg-slate-50 flex justify-between items-center shrink-0">
-                 <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-                       <Layers size={28} />
-                    </div>
-                    <div>
-                       <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">Registry Strategy</h3>
-                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Protocol Layer Selection</p>
-                    </div>
-                 </div>
-                 <button onClick={() => setShowConfigModal(false)} className="p-3 hover:bg-red-50 text-slate-300 hover:text-red-500 transition-all rounded-xl">
-                    <X size={24}/>
-                 </button>
+      <Modal
+        isOpen={showConfigModal}
+        onClose={() => setShowConfigModal(false)}
+        title="Registry Strategy"
+        type="info"
+        icon={<Layers size={24} className="text-white" />}
+        maxWidth="max-w-lg"
+        footer={
+          <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-4 w-full">
+            <ShieldAlert size={18} className="shrink-0 mt-0.5 text-blue-400" />
+            <p className="text-[9px] font-black uppercase leading-relaxed text-blue-300">
+              CAUTION: Switching registry layers triggers a global node refresh. Ensure all dossier changes are committed.
+            </p>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {[
+            { id: 'local', label: 'Local Disk Storage', desc: 'Browser indexedDB • Zero latency.', icon: HardDrive, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+            { id: 'firebase', label: 'Firebase Production', desc: 'Cloud Firestore • Global Sync.', icon: Globe, color: 'text-orange-400', bg: 'bg-orange-500/10', active: true },
+            { id: 'mongodb', label: 'High Performance Node', desc: 'Atlas Cluster • Analytical Heavy.', icon: DatabaseZap, color: 'text-green-400', bg: 'bg-green-500/10' }
+          ].map(provider => (
+            <button 
+              key={provider.id}
+              onClick={() => {
+                alert(`Handshaking with ${provider.label}...`);
+                setShowConfigModal(false);
+              }}
+              className={`w-full p-5 rounded-2xl border transition-all text-left flex items-center justify-between group ${provider.active ? 'border-blue-500 bg-blue-500/5 shadow-lg' : 'border-slate-800 bg-slate-900/50 hover:border-slate-700'}`}
+            >
+              <div className="flex items-center gap-4">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-slate-800 ${provider.bg} ${provider.color}`}>
+                  <provider.icon size={20} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black uppercase text-white leading-none mb-1">{provider.label}</h4>
+                  <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">{provider.desc}</p>
+                </div>
               </div>
-
-              <div className="p-10 space-y-4">
-                 {[
-                   { id: 'local', label: 'Local Disk Storage', desc: 'Browser indexedDB • Zero latency.', icon: HardDrive, color: 'text-blue-500', bg: 'bg-blue-50' },
-                   { id: 'firebase', label: 'Firebase Production', desc: 'Cloud Firestore • Global Sync.', icon: Globe, color: 'text-orange-500', bg: 'bg-orange-50', active: true },
-                   { id: 'mongodb', label: 'High Performance Node', desc: 'Atlas Cluster • Analytical Heavy.', icon: DatabaseZap, color: 'text-green-500', bg: 'bg-green-50' }
-                 ].map(provider => (
-                   <button 
-                    key={provider.id}
-                    onClick={() => {
-                       alert(`Handshaking with ${provider.label}...`);
-                       setShowConfigModal(false);
-                    }}
-                    className={`w-full p-6 rounded-[2rem] border-2 text-left flex items-center justify-between group transition-all ${provider.active ? 'border-blue-600 bg-blue-50/30 shadow-lg' : 'border-slate-100 hover:border-blue-200'}`}
-                   >
-                      <div className="flex items-center gap-5">
-                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${provider.bg} ${provider.color}`}>
-                            <provider.icon size={24} />
-                         </div>
-                         <div>
-                            <h4 className="text-sm font-black uppercase text-slate-900 leading-none mb-1">{provider.label}</h4>
-                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{provider.desc}</p>
-                         </div>
-                      </div>
-                      {provider.active && <CheckCircle2 size={20} className="text-blue-600" />}
-                   </button>
-                 ))}
-              </div>
-
-              <div className="p-10 bg-slate-50 border-t">
-                 <div className="flex items-start gap-4 p-5 bg-blue-100 rounded-3xl text-blue-700">
-                    <ShieldAlert size={20} className="shrink-0 mt-0.5" />
-                    <p className="text-[9px] font-black uppercase leading-relaxed">
-                       CAUTION: Switching registry layers triggers a global node refresh. Ensure all unsaved dossier changes are committed before initializing.
-                    </p>
-                 </div>
-              </div>
-           </div>
+              {provider.active && <CheckCircle2 size={18} className="text-blue-500" />}
+            </button>
+          ))}
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

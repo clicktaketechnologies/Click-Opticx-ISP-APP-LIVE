@@ -145,6 +145,65 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       <input type="text" className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-lg focus:border-blue-600 outline-none transition-all" value={formData.branding.shortName} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, shortName: e.target.value } })} />
                     </div>
                   </div>
+
+                  {/* Global Branding Identity Section */}
+                  <div className="p-8 bg-gradient-to-br from-blue-50 to-slate-50 border-2 border-blue-100 rounded-[2.5rem] space-y-8">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                        <Globe size={20} className="text-white" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-black text-slate-800 uppercase italic tracking-tight">Global Brand Identity</h4>
+                        <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">Applies across Login, Sidebar, PWA & Emails</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Brand Name (Public-Facing)</label>
+                        <input type="text" placeholder="Click Opticx" className="w-full p-4 bg-white border-2 border-blue-100 rounded-2xl font-bold text-sm focus:border-blue-500 outline-none transition-all" value={formData.branding.brandName || ''} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, brandName: e.target.value } })} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Tagline</label>
+                        <input type="text" placeholder="Welcome to the Next Gen Internet" className="w-full p-4 bg-white border-2 border-blue-100 rounded-2xl font-bold text-sm focus:border-blue-500 outline-none transition-all" value={formData.branding.tagline || ''} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, tagline: e.target.value } })} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Developer Credit</label>
+                        <input type="text" placeholder="ClickTake Technologies" className="w-full p-4 bg-white border-2 border-blue-100 rounded-2xl font-bold text-sm focus:border-blue-500 outline-none transition-all" value={formData.branding.developer || ''} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, developer: e.target.value } })} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Contact Phone</label>
+                        <input type="text" placeholder="+92 306 9753003" className="w-full p-4 bg-white border-2 border-blue-100 rounded-2xl font-bold text-sm focus:border-blue-500 outline-none transition-all" value={formData.branding.phone || ''} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, phone: e.target.value } })} />
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Website</label>
+                        <input type="text" placeholder="www.clickopticx.com" className="w-full p-4 bg-white border-2 border-blue-100 rounded-2xl font-bold text-sm focus:border-blue-500 outline-none transition-all" value={formData.branding.website || ''} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, website: e.target.value } })} />
+                      </div>
+                    </div>
+
+                    {/* Social Links Manager */}
+                    <div className="space-y-4">
+                      <h5 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><Share2 size={14} /> Social Media Links</h5>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {(formData.branding.socialLinks || []).map((link, idx) => (
+                          <div key={idx} className="flex items-center gap-3 bg-white border border-slate-200 rounded-2xl px-4 py-3">
+                            <span className="text-[11px] font-black text-slate-700 uppercase w-[80px] shrink-0">{link.platform}</span>
+                            <input
+                              type="url"
+                              placeholder={`https://${link.platform.toLowerCase()}.com/...`}
+                              className="flex-1 text-xs font-bold text-slate-600 outline-none bg-transparent placeholder:text-slate-300"
+                              value={link.url}
+                              onChange={e => {
+                                const updated = [...(formData.branding.socialLinks || [])];
+                                updated[idx] = { ...updated[idx], url: e.target.value };
+                                setFormData({ ...formData, branding: { ...formData.branding, socialLinks: updated } });
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {['logoLight', 'logoDark', 'logoSquare'].map((slot: any) => (
                       <div key={slot} className="space-y-3">

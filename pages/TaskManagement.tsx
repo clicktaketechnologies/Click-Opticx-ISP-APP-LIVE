@@ -9,6 +9,7 @@ import {
   Activity, X, CheckCircle, UserPlus, UserCircle, Shield, ArrowRight, Layers,
   ShieldAlert
 } from 'lucide-react';
+import { Modal } from '../components/shared/Modal';
 
 const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
   const [newTaskText, setNewTaskText] = useState('');
@@ -244,102 +245,91 @@ const TaskManagement: React.FC<{ state: AppState }> = ({ state }) => {
       </div>
 
       {/* Add Task Modal */}
-      {isAdding && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[2100] flex items-center justify-center p-4 md:p-6 animate-in fade-in duration-300">
-          <div className="bg-white rounded-[3.5rem] w-full max-w-xl shadow-[0_50px_100px_rgba(0,0,0,0.3)] overflow-hidden border-[8px] border-slate-50 animate-in zoom-in duration-300">
-             <div className="p-10 border-b bg-slate-50 flex justify-between items-center">
-                <div className="flex items-center gap-5">
-                   <div className="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center text-white shadow-xl">
-                      <Plus size={32} />
-                   </div>
-                   <div>
-                      <h3 className="text-2xl font-black uppercase italic tracking-tighter leading-none">New Task</h3>
-                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-2">Task Status</p>
-                   </div>
-                </div>
-                <button onClick={() => setIsAdding(false)} className="p-3 hover:bg-rose-50 text-slate-300 hover:text-rose-500 transition-all rounded-2xl">
-                   <X size={32}/>
-                </button>
-             </div>
-
-             <form onSubmit={handleAddTask} className="p-10 space-y-10">
-                <div className="space-y-3">
-                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Task Description</label>
-                   <input 
-                    className="w-full p-6 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-xl outline-none focus:border-blue-600 transition-all text-slate-900 shadow-inner placeholder:text-slate-200"
-                    placeholder="Enter task name or description..."
-                    value={newTaskText}
-                    onChange={e => setNewTaskText(e.target.value)}
-                    required
-                    autoFocus
-                  />
-                </div>
-
-                <div className="space-y-8">
-                   <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Assign To (Staff Member)</label>
-                      <div className="relative">
-                         <UserCircle className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
-                         <select 
-                           className="w-full pl-14 pr-6 py-5 bg-white border-2 border-slate-100 rounded-[1.5rem] font-black text-xs uppercase outline-none focus:border-blue-500 appearance-none shadow-sm cursor-pointer"
-                           value={assignedTo}
-                           onChange={e => setAssignedTo(e.target.value)}
-                         >
-                            <option value="">Unassigned (System)</option>
-                            {state.staff.map(s => (
-                               <option key={s.email} value={s.email}>{s.name} ({s.role})</option>
-                            ))}
-                         </select>
-                         <ChevronRight className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 rotate-90 pointer-events-none" size={20}/>
-                      </div>
-                   </div>
-
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="space-y-3">
-                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Priority Level</label>
-                         <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
-                            {['Low', 'Medium', 'High'].map((p: any) => (
-                              <button
-                                type="button"
-                                key={p}
-                                onClick={() => setPriority(p)}
-                                className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${priority === p ? 'bg-white text-blue-600 shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
-                              >
-                                {p}
-                              </button>
-                            ))}
-                         </div>
-                      </div>
-                      <div className="space-y-3">
-                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Due Date</label>
-                         <input 
-                           type="date"
-                           className="w-full p-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-[11px] uppercase outline-none focus:border-blue-500 shadow-sm"
-                           value={dueDate}
-                           onChange={e => setDueDate(e.target.value)}
-                         />
-                      </div>
-                   </div>
-                </div>
-
-                <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2.5rem] flex items-start gap-6 shadow-inner">
-                   <ShieldAlert size={28} className="text-blue-600 shrink-0 mt-1" />
-                   <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed tracking-tighter">
-                      Assigned personnel will receive an immediate notification for tasks marked as High priority.
-                   </p>
-                </div>
-
-                <button 
-                  type="submit"
-                  className="w-full py-7 bg-slate-950 text-white font-black rounded-3xl shadow-2xl shadow-blue-900/20 hover:bg-black transition-all active:scale-95 uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-4"
-                >
-                   <CheckCircle size={24} strokeWidth={3} />
-                   Create Task
-                </button>
-             </form>
+      <Modal
+        isOpen={isAdding}
+        onClose={() => setIsAdding(false)}
+        title="New Task"
+        type="form"
+        icon={<Plus size={20} className="text-blue-400" />}
+        maxWidth="max-w-xl"
+        footer={
+          <div className="flex gap-3 w-full">
+            <button onClick={() => setIsAdding(false)} className="px-6 py-3 font-black text-slate-400 hover:text-slate-200 rounded-xl uppercase tracking-widest text-[10px] transition-colors">Cancel</button>
+            <button
+              onClick={handleAddTask as any}
+              disabled={!newTaskText.trim()}
+              className="flex-1 py-3 bg-slate-900 text-white font-black rounded-xl hover:bg-black transition-all active:scale-95 uppercase tracking-widest text-xs flex items-center justify-center gap-2 disabled:opacity-40 border border-white/10"
+            >
+              <CheckCircle size={18} strokeWidth={3} />
+              Create Task
+            </button>
           </div>
-        </div>
-      )}
+        }
+      >
+        <form onSubmit={handleAddTask} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Task Description</label>
+            <input
+              className="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl font-black text-lg outline-none focus:border-blue-500 transition-all text-white placeholder:text-slate-600"
+              placeholder="Enter task name..."
+              value={newTaskText}
+              onChange={e => setNewTaskText(e.target.value)}
+              required
+              autoFocus
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Assign To (Staff Member)</label>
+            <div className="relative">
+              <UserCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+              <select
+                className="w-full pl-12 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-xl font-black text-xs uppercase outline-none focus:border-blue-500 text-white appearance-none cursor-pointer"
+                value={assignedTo}
+                onChange={e => setAssignedTo(e.target.value)}
+              >
+                <option value="">Unassigned (System)</option>
+                {state.staff.map(s => (
+                  <option key={s.email} value={s.email}>{s.name} ({s.role})</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Priority Level</label>
+              <div className="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+                {['Low', 'Medium', 'High'].map((p: any) => (
+                  <button
+                    type="button"
+                    key={p}
+                    onClick={() => setPriority(p)}
+                    className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
+                      priority === p ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-300'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Due Date</label>
+              <input
+                type="date"
+                className="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-black text-[11px] uppercase outline-none focus:border-blue-500 text-white"
+                value={dueDate}
+                onChange={e => setDueDate(e.target.value)}
+              />
+            </div>
+          </div>
+          {priority === 'High' && (
+            <div className="p-4 bg-blue-900/20 border border-blue-800/30 rounded-2xl flex items-center gap-4">
+              <ShieldAlert size={20} className="text-blue-400 shrink-0" />
+              <p className="text-[10px] text-blue-300 font-bold uppercase leading-relaxed">Assigned personnel will receive an immediate notification for High priority tasks.</p>
+            </div>
+          )}
+        </form>
+      </Modal>
     </div>
   );
 };
