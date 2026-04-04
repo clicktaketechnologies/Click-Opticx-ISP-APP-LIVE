@@ -2069,9 +2069,19 @@ class DB {
       const req = this.state.signupRequests.find(r => r.id === requestId);
       if (!req) return { success: false, message: 'Signup request node not found.' };
 
-      // Find the user created during signup
-      const user = this.state.users.find(u => u.id === req.userId || u.username === req.username || u.email === req.email);
-      if (!user) return { success: false, message: 'Associated subscriber node not found.' };
+      // Find the user created during signup with multiple fallback identifiers
+      const user = this.state.users.find(u => 
+        u.id === req.userId || 
+        (req.username && u.username?.toLowerCase() === req.username.toLowerCase()) || 
+        (req.email && u.email?.toLowerCase() === req.email.toLowerCase()) ||
+        (req.phone && u.phone?.replace(/\D/g, '') === req.phone.replace(/\D/g, '')) ||
+        (req.cnic && u.cnic?.replace(/\D/g, '') === req.cnic.replace(/\D/g, ''))
+      );
+
+      if (!user) {
+        console.error('[DB ERROR] Associated subscriber node not found for request:', requestId, 'Data:', { userId: req.userId, username: req.username, email: req.email });
+        return { success: false, message: 'Associated subscriber node not found. Please verify the user exists in the system.' };
+      }
 
       user.approval_status = 'approved';
       user.status = UserStatus.ACTIVE;
