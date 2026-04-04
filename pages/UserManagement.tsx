@@ -361,7 +361,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
               onChange={e => setSearchTerm(e.target.value)} 
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex overflow-x-auto no-scrollbar gap-2 pb-1">
             {(['All', 'Expired', 'Unpaid', 'Paid', 'Half Paid', 'Half Data', 'Unverified', 'Verified', 'Deleted'] as const).map(f => (
               <button
                 key={f}
@@ -588,7 +588,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                       Rs. {user.balance.toLocaleString()}
                     </td>
                     <td className="px-6 py-5 text-right">
-                      <div className="flex items-center justify-end gap-1.5 transition-all">
+                      <div className="flex flex-wrap items-center justify-end gap-1.5 transition-all max-w-[180px] ml-auto">
                         <ActionIcon icon={Pencil} color="text-blue-600" label="Edit User" onClick={() => handleAction(user, 'edit')} disabled={!canPerformAction} />
                         <ActionIcon icon={LockKeyhole} color="text-orange-600" label="Change Password" onClick={() => handleAction(user, 'reset')} disabled={!canPerformAction} />
                         <ActionIcon icon={PackageIcon} color="text-blue-600" label="Setup Connection" onClick={() => handleAction(user, 'package')} disabled={!canPerformAction} />

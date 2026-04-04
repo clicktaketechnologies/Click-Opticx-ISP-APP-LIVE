@@ -463,25 +463,25 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
 
       {activeTab === 'login' && (
         <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-           <div className="bg-slate-900 p-8 rounded-[3rem] border border-slate-800 shadow-2xl relative overflow-hidden">
+           <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-xl relative overflow-hidden">
               <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                  <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-blue-600/20 text-blue-400 rounded-3xl flex items-center justify-center border border-blue-500/20 shadow-inner">
+                    <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center border border-blue-100 shadow-inner">
                        <SafeIcon icon={ShieldAlert} size={32} />
                     </div>
                     <div>
-                       <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none">Authentication Monitor</h3>
-                       <p className="text-blue-400/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2 italic">Real-time terminal access auditing</p>
+                       <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">Authentication Monitor</h3>
+                       <p className="text-blue-600/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2 italic">Real-time terminal access auditing</p>
                     </div>
                  </div>
                  <div className="flex gap-3">
-                    <div className="px-6 py-3 bg-white/5 rounded-2xl border border-white/5 text-center">
-                       <p className="text-[8px] font-black text-slate-500 uppercase mb-1">Total Attempts</p>
-                       <p className="text-xl font-black text-white italic">{(state.auditLogs || []).filter(l => l.type === 'Login').length}</p>
+                    <div className="px-6 py-3 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+                       <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Total Attempts</p>
+                       <p className="text-xl font-black text-slate-800 italic">{(state.auditLogs || []).filter(l => l.type === 'Login').length}</p>
                     </div>
-                    <div className="px-6 py-3 bg-rose-500/10 rounded-2xl border border-rose-500/10 text-center">
-                       <p className="text-[8px] font-black text-rose-500/60 uppercase mb-1">Failed</p>
-                       <p className="text-xl font-black text-rose-500 italic">{(state.auditLogs || []).filter(l => l.type === 'Login' && (l.action.includes('Failed') || l.action.includes('Invalid'))).length}</p>
+                    <div className="px-6 py-3 bg-rose-50 rounded-2xl border border-rose-100 text-center">
+                       <p className="text-[8px] font-black text-rose-500 uppercase mb-1">Failed</p>
+                       <p className="text-xl font-black text-rose-600 italic">{(state.auditLogs || []).filter(l => l.type === 'Login' && (l.action.includes('Failed') || l.action.includes('Invalid'))).length}</p>
                     </div>
                  </div>
               </div>
@@ -520,7 +520,7 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
                           <div className="text-right">
                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{new Date(log.timestamp).toLocaleDateString()}</p>
                              <div className={`inline-flex px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter border ${
-                                log.action.includes('Failed') || log.action.includes('Invalid') ? 'bg-rose-600 text-white border-rose-700 shadow-md' : 'bg-slate-900 text-white border-slate-950'
+                                log.action.includes('Failed') || log.action.includes('Invalid') ? 'bg-rose-600 text-white border-rose-700 shadow-md' : 'bg-slate-100 text-slate-900 border-slate-200'
                              }`}>
                                 {log.action.includes('Failed') ? 'Access Denied' : 'Session OK'}
                              </div>

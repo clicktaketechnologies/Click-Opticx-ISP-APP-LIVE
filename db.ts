@@ -482,7 +482,7 @@ class DB {
     console.log('DB Initialized. Configured:', this.initialized);
     this.initializeCloudLayer();
     this.initializeSocketLayer();
-    setTimeout(() => checkKYCLifecycle(this), 2000);
+    setTimeout(() => checkKYCLifecycle(this), 500);
   }
 
   private ensureDefaultAdmin() {
@@ -660,12 +660,22 @@ class DB {
   async forceSync() {
     this.notify(); // Immediate UI feedback
     await this.syncWithCloudMaster();
-    this.logNotification('all', 'success', 'Registry Sync', 'Manual handshake with master cloud server completed.');
+    this.logNotification('all', 'success', 'Registry Sync', 'Manual handshake with master cloud server completed.', 'admin');
   }
 
   private async syncWithCloudMaster() {
     if (!this.firestore) return;
     const docRef = doc(this.firestore, 'registry', 'master_state');
+    
+    // Safety Fallback: Ensure system is marked configured within 3s for UI fluidity
+    setTimeout(() => {
+       if (!this.initialized) {
+          console.warn('[DB] Handshake Timeout: Proceeding with cached state.');
+          this.initialized = true;
+          this.notify();
+       }
+    }, 3000);
+
     try {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
@@ -701,7 +711,7 @@ class DB {
       // Start recovery maintenance cycle (Every hour)
       setInterval(() => this.runRecoveryMaintenance(), 3600000);
       // Run once on init
-      setTimeout(() => this.runRecoveryMaintenance(), 5000);
+      setTimeout(() => this.runRecoveryMaintenance(), 1000);
       
       // Handle Firebase Auth Redirect Result
       await this.handleAuthRedirect();
@@ -855,6 +865,13 @@ class DB {
     if (!Array.isArray(this.state.permissions)) this.state.permissions = INITIAL_STATE.permissions;
     if (!Array.isArray(this.state.otps)) this.state.otps = [];
     if (!Array.isArray(this.state.speedTestHistory)) this.state.speedTestHistory = [];
+
+    // Log Rotation to maintain peak performance & prevent storage bloat
+    if (this.state.auditLogs.length > 500) this.state.auditLogs = this.state.auditLogs.slice(0, 500);
+    if (this.state.notifications.length > 300) this.state.notifications = this.state.notifications.slice(0, 300);
+    if (this.state.deliveryLogs.length > 500) this.state.deliveryLogs = this.state.deliveryLogs.slice(0, 500);
+    if (this.state.commLogs.length > 300) this.state.commLogs = this.state.commLogs.slice(0, 300);
+    if (this.state.speedTestHistory.length > 100) this.state.speedTestHistory = this.state.speedTestHistory.slice(0, 100);
   }
 
   private commitTimer: any = null;
@@ -875,7 +892,7 @@ class DB {
           console.error('Cloud synchronization error:', e);
         }
       }
-    }, 1000); // 1s debounce for stability and speed
+    }, 200); // 200ms debounce for ultra-fast responsiveness
 
     this.notify();
   }
@@ -1665,10 +1682,20 @@ class DB {
     await this.commit();
   }
 
-  logNotification(targetId: string, type: 'success' | 'warning' | 'info' | 'error', title: string, message: string) {
+  logNotification(targetId: string, type: 'success' | 'warning' | 'info' | 'error', title: string, message: string, audience: 'user' | 'admin' | 'system' = 'user', priority: 'low' | 'normal' | 'high' | 'critical' = 'normal') {
     const n: SystemNotification = {
-      id: 'NOT-' + Date.now(), targetId, type, title, message, read: false, timestamp: new Date().toISOString(), createdAt: Date.now(), audience: targetId === 'all' ? 'admin' : 'subscriber', priority: 'normal'
+      id: 'NOT-' + Date.now() + Math.random().toString(36).substr(2, 5),
+      targetId,
+      type,
+      title,
+      message,
+      read: false,
+      timestamp: new Date().toISOString(),
+      createdAt: Date.now(),
+      audience: targetId === 'all' ? 'admin' : (audience as any),
+      priority
     };
+    if (!this.state.notifications) this.state.notifications = [];
     this.state.notifications.unshift(n);
     this.commit();
   }
@@ -3305,7 +3332,8 @@ class DB {
     const user = this.state.users.find(u => u.id === config.userId);
     if (!user || !user.email) return { success: false, message: 'Subscriber email node not found.' };
 
-    await new Promise(r => setTimeout(r, 1500));
+    // Removed artificial delay for performance
+
 
     if (!this.state.settings.commConfig.smtpConfig.host) {
       return { success: false, message: 'Mail service down: SMTP relay not configured.' };
@@ -3736,7 +3764,8 @@ class DB {
         errorMsg = `TRANSMISSION_FAILED: ${err.message || 'Network Relay Timeout'}.`;
       }
     } else {
-      await new Promise(r => setTimeout(r, 1200));
+      // Removed artificial delay
+
     }
 
     const isOTP = subject.toLowerCase().includes('otp') || subject.toLowerCase().includes('recovery');
@@ -3783,7 +3812,8 @@ class DB {
         errorMsg = 'SMS_CONFIG_MISSING: No API Key identified in registry.';
       }
     } else {
-      await new Promise(r => setTimeout(r, 600));
+      // Removed artificial delay
+
     }
 
     const logId = await this._logDispatch({
@@ -3827,7 +3857,8 @@ class DB {
         errorMsg = 'WA_CONFIG_MISSING: No API Key identified in registry.';
       }
     } else {
-      await new Promise(r => setTimeout(r, 800));
+      // Removed artificial delay
+
     }
 
     const logId = await this._logDispatch({
@@ -4017,7 +4048,8 @@ class DB {
       this.state.testLogs = [log, ...(this.state.testLogs || [])].slice(0, 500);
       onProgress(log);
       await this.commit();
-      await new Promise(r => setTimeout(r, 800)); // Bottling effect
+      // Removed artificial bottling effect for faster response
+
     }
     
     this.notify();

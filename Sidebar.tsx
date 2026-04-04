@@ -149,7 +149,9 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
   }, [role]);
 
   return (
-    <aside className="w-72 bg-slate-950 text-white flex flex-col h-screen shrink-0 border-r border-slate-800 transition-all selection:bg-blue-500/30">
+    <aside 
+      className={`fixed inset-y-0 left-0 z-[120] w-72 bg-slate-950 text-white flex flex-col h-screen shrink-0 border-r border-slate-800 transition-all duration-300 transform lg:translate-x-0 ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'} lg:static selection:bg-blue-500/30`}
+    >
       {/* Brand Section */}
       <div className="p-8 flex items-center gap-4 border-b border-slate-800 bg-slate-950/50">
         <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-900/20 rotate-3">

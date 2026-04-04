@@ -374,7 +374,7 @@ const App: React.FC = () => {
             businessName={dbState.settings.branding.businessName} 
           />
           <div 
-            className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${isCollapsed ? 'lg:pl-[70px]' : 'lg:pl-[240px]'}`}
+            className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${isCollapsed ? 'lg:pl-[70px]' : 'lg:pl-72'}`}
           >
             <Header 
               user={authState as any} 
@@ -386,7 +386,15 @@ const App: React.FC = () => {
               isPending={isPending}
             />
             <main className="p-4 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
-              <Suspense fallback={<div className="h-full w-full flex flex-col items-center justify-center animate-premium"><div className="w-10 h-10 border-4 border-slate-100 border-t-blue-500 rounded-full animate-spin"></div></div>}>
+              <Suspense fallback={
+                <div className="h-full w-full flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-500">
+                  <div className="relative">
+                    <div className="w-12 h-12 border-4 border-slate-100 rounded-2xl"></div>
+                    <div className="absolute inset-0 border-4 border-blue-500 rounded-2xl border-t-transparent animate-spin"></div>
+                  </div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] animate-pulse italic">Synchronizing Node...</p>
+                </div>
+              }>
                 {(() => {
                   switch (currentPage) {
                     case 'dashboard': return <Dashboard state={dbState} onNavigate={navigateTo} searchTerm={globalSearchTerm} onClearSearch={() => setGlobalSearchTerm('')} />;
