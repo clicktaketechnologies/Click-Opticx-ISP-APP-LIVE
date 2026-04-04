@@ -677,6 +677,20 @@ class DB {
         if (snapshot.exists()) {
           const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...persistedData } = snapshot.data() as AppState;
           this.state = { ...this.state, ...persistedData };
+
+          // Real-time synchronization of the current user session
+          if (this.state.currentUser) {
+            const upToDateUser = this.state.users.find(u => u.id === this.state.currentUser?.id);
+            if (upToDateUser && this.state.currentUser.role === Role.CUSTOMER) {
+               this.state.currentUser = { ...upToDateUser, role: Role.CUSTOMER };
+            } else {
+               const upToDateStaff = this.state.staff.find(s => s.email === this.state.currentUser?.email);
+               if (upToDateStaff) {
+                  this.state.currentUser = { ...upToDateStaff };
+               }
+            }
+          }
+
           this.patchState();
           this.notify();
         }
@@ -1161,6 +1175,7 @@ class DB {
   }
 
   async login(credential: string, pass: string) {
+    if (!credential) return { success: false, message: 'Identity required for lookup.' };
     const input = credential.toLowerCase().trim();
     const settings = this.state.settings.authSettings || INITIAL_STATE.settings.authSettings;
 
