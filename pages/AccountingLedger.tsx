@@ -134,14 +134,19 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
               ) : (
                 filteredLedger.map((entry) => {
                   const targetUser = state.users.find(u => u.id === entry.userId);
+                  const archivedUser = !targetUser ? state.archives?.flatMap(a => a.data.users).find(u => u.id === entry.userId) : null;
                   const targetStaff = state.staff.find(s => s.email === entry.userId);
-                  const entityName = targetUser?.name || targetStaff?.name || 'System Auto';
+                  const entityName = targetUser?.name || targetStaff?.name || archivedUser?.name || 'System Auto';
+                  const isDeleted = !!archivedUser;
 
                   return (
                     <tr key={entry.id} className="hover:bg-slate-50 transition-colors group">
                       <td className="px-8 py-5 text-xs font-bold text-slate-500">{new Date(entry.timestamp).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</td>
                       <td className="px-8 py-5">
-                        <div className="text-sm font-black text-slate-800 uppercase tracking-tight group-hover:text-blue-600 transition-colors">{entityName}</div>
+                        <div className="flex items-center gap-2">
+                           <div className="text-sm font-black text-slate-800 uppercase tracking-tight group-hover:text-blue-600 transition-colors">{entityName}</div>
+                           {isDeleted && <span className="px-2 py-0.5 bg-rose-100 text-rose-600 text-[8px] font-black uppercase rounded-md tracking-widest">Deleted User</span>}
+                        </div>
                         <div className="text-[9px] text-slate-400 font-mono">REF: {entry.id.split('_')[1] || entry.id}</div>
                       </td>
                       <td className="px-8 py-5">

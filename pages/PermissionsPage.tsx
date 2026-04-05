@@ -109,9 +109,9 @@ const PermissionsPage: React.FC<{ state: AppState }> = ({ state }) => {
                   {role !== Role.SUPER_ADMIN && (
                     <button
                       onClick={() => setIsDeletingRole(role)}
-                      className="p-3 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all opacity-0 group-hover:opacity-100 active:scale-95"
+                      className="p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all opacity-0 group-hover:opacity-100 flex items-center justify-center active:scale-95"
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} strokeWidth={3} />
                     </button>
                   )}
                 </div>
@@ -291,7 +291,7 @@ const PermissionsPage: React.FC<{ state: AppState }> = ({ state }) => {
             <input
               type="text"
               autoFocus
-              className="w-full pl-12 pr-6 py-4 bg-slate-800 border border-slate-700 rounded-2xl outline-none focus:border-blue-500 transition-all font-black text-xl text-white uppercase tracking-tighter"
+              className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 transition-all font-black text-xl text-slate-900 uppercase tracking-tighter placeholder:text-slate-300"
               value={newRoleName}
               onChange={e => setNewRoleName(e.target.value)}
               placeholder="E.G. TECHNICAL_UNIT"

@@ -68,6 +68,8 @@ const SystemFlash = lazy(() => import('./pages/SystemFlash'));
 const SystemConfig = lazy(() => import('./pages/SystemConfig'));
 const SystemReadiness = lazy(() => import('./pages/SystemReadiness'));
 const SpeedTestPage = lazy(() => import('./pages/SpeedTestPage'));
+const HotspotManager = lazy(() => import('./pages/HotspotManager'));
+const PastRecords = lazy(() => import('./pages/PastRecords'));
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 
 interface EBProps {
@@ -457,6 +459,8 @@ const App: React.FC = () => {
                     case 'admin-reminders': return <AdminReminders state={dbState} onNavigate={navigateTo} />;
                     case 'nas-management': return <NASManagement state={dbState} />;
                     case 'olt-management': return <OLTManagement state={dbState} />;
+                    case 'hotspot-tokens': return <HotspotManager state={dbState} />;
+                    case 'archive-records': return <PastRecords state={dbState} />;
                     case 'noc-dashboard': return <NOCDashboard state={dbState} />;
                     case 'speed-test': return <SpeedTestPage />;
                     default: return <Dashboard state={dbState} onNavigate={navigateTo} onClearSearch={() => setGlobalSearchTerm('')} />;

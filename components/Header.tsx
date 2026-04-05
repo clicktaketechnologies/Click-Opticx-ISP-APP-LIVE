@@ -225,7 +225,11 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
             <p className="text-[7px] text-green-600 font-black uppercase tracking-widest mt-0.5 leading-none">{user.role}</p>
           </div>
           <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200 shadow-inner overflow-hidden shrink-0 group-hover:border-blue-200 group-hover:bg-blue-50 transition-all">
-             <UserCircle size={20} className="text-slate-400 group-hover:text-blue-400" />
+            {user.profileImage ? (
+              <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+            ) : (
+              <UserCircle size={20} className="text-slate-400 group-hover:text-blue-400" />
+            )}
           </div>
         </button>
       </div>

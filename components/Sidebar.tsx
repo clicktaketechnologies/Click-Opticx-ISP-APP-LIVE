@@ -6,7 +6,8 @@ import {
   Receipt, Wallet, ShieldCheck, LogOut,
   Wifi, Building2, FileText, Search, FileInput, ShieldAlert, Server, Smartphone, Zap, CreditCard, BarChart3, Trophy, ChevronRight, Network,
   ClipboardList, LifeBuoy, ListTodo, Info, Database, Monitor, Key, HardDrive, Map, Cpu, Sparkles, Calculator, History, Activity, Mic,
-  Mail, Send, ListChecks, BellRing, Settings, UserCheck, ChevronDown, ChevronUp, UserCircle, RefreshCcw, DatabaseZap, PanelLeftClose, PanelLeft, Gauge
+  Mail, Send, ListChecks, BellRing, Settings, UserCheck, ChevronDown, ChevronUp, UserCircle, RefreshCcw, DatabaseZap, PanelLeftClose, PanelLeft, Gauge,
+  Ticket, Archive
 } from 'lucide-react';
 import { useBranding } from '../hooks/useBranding';
 
@@ -110,6 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
           items: [
             { id: 'admin-device-mapping', label: 'User Device Mapping', icon: Map },
             { id: 'connection-setup', label: 'Setup Connection', icon: Network },
+            { id: 'hotspot-tokens', label: 'Hotspot Desk', icon: Ticket },
             { id: 'noc-dashboard', label: 'Network Control Panel', icon: Zap },
           ]
         }
@@ -158,7 +160,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       items: [
         { id: 'packages', label: 'Internet Packages', icon: Package },
         { id: 'import', label: 'Import Users', icon: FileInput },
-        { id: 'archive', label: 'Old Records', icon: Database },
+        { id: 'archive-records', label: 'Past Records', icon: Archive },
       ]
     },
     {

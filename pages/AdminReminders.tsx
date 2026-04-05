@@ -28,13 +28,15 @@ const AdminReminders: React.FC<Props> = ({ state, onNavigate }) => {
     }, []);
 
     const reminders = useMemo(() => {
+        const activeUserIds = new Set(state.users.map(u => u.id));
         return (state.adminReminders || []).filter(r => {
             const term = searchTerm.toLowerCase();
             const matchesSearch = r.userName.toLowerCase().includes(term) || r.userId.toLowerCase().includes(term) || r.area.toLowerCase().includes(term);
             const matchesStatus = statusFilter === 'All' || r.status === statusFilter;
-            return matchesSearch && matchesStatus;
+            const isUserActive = activeUserIds.has(r.userId);
+            return matchesSearch && matchesStatus && isUserActive;
         });
-    }, [state.adminReminders, searchTerm, statusFilter]);
+    }, [state.adminReminders, state.users, searchTerm, statusFilter]);
 
     const activeReminders = useMemo(() => reminders.filter(r => r.status !== ReminderStatus.RESOLVED), [reminders]);
 

@@ -21,7 +21,8 @@ import {
   RecoveryLog, RecoveryActionType, BillingPaymentType, BillingCycle, CommunicationLog,
   AdminReminder, ReminderStatus, ReminderIssueType, NASConfig, LiveUsage, OLTConfig, ONU,
   AuthSettings, OTP, DuplicateActionLog, TestLog, FlashLog, NotificationTemplate, NotificationTriggerEvent,
-  NotificationDeliveryStatus, NotificationGateway, SignupRequest, AuditLog, SpeedTestResult
+  NotificationDeliveryStatus, NotificationGateway, SignupRequest, AuditLog, SpeedTestResult,
+  HotspotToken, ArchiveData
 } from './types';
 
 // Monitoring interface nodes
@@ -248,6 +249,8 @@ const INITIAL_STATE: AppState = {
   },
   duplicateLogs: [],
   approvalRequests: [],
+  archives: [],
+  hotspotTokens: [],
   settings: {
     branding: { 
       businessName: 'Click Opticx', 
@@ -391,7 +394,6 @@ const INITIAL_STATE: AppState = {
   notifications: [],
   notificationTemplates: [],
   roles: ALL_ROLES,
-  archives: [],
   securityLogs: [],
   connectionStatus: 'online',
   isImpersonating: false,
@@ -407,7 +409,7 @@ const INITIAL_STATE: AppState = {
   ],
   liveUsage: [],
   oltNodes: [
-    { id: 'OLT-1', name: 'Main Core OLT', ip: '10.0.0.50', brand: 'Huawei', accessType: 'SSH', username: 'admin', port: 22, location: 'Central Office', dealerAssigned: null, status: 'Online', connectionStatus: 'Connected', lastCheck: new Date().toISOString(), ponPorts: 16 }
+    { id: 'OLT-1', name: 'Main Core OLT', ip: '10.0.0.50', brand: 'Huawei', hardwareModel: 'GENERIC_OLT', maxCapacity: 64, accessType: 'SSH', username: 'admin', port: 22, location: 'Central Office', dealerAssigned: null, status: 'Online', connectionStatus: 'Connected', lastCheck: new Date().toISOString(), ponPorts: 16 }
   ],
   onus: [
     { id: 'ONU-1', serialNumber: 'HWTC12345678', oltId: 'OLT-1', ponPort: '0/1/1', subscriberId: 'USR-REC-1', status: 'Online', signalStrength: -18.5, lastActive: new Date().toISOString(), model: 'HG8245H', alias: 'Zohaib Home' }
@@ -1269,8 +1271,36 @@ class DB {
       };
 
     } catch (e: any) {
-      console.error('[DB-AUTH-ERROR] Login Protocol Failed:', e);
-      return { success: false, message: 'Communication bridge failure. Check network link.' };
+      console.warn('[DB-AUTH-ERROR] Backend Protocol Failed. Attempting Local Handshake...', e.message);
+      
+      // Local Handshake Fallback
+      const localUser = this.state.users.find(u => 
+        (u.username?.toLowerCase() === identifier.toLowerCase() || u.email?.toLowerCase() === identifier.toLowerCase()) &&
+        u.password === pass &&
+        !u.deleted
+      );
+
+      if (localUser) {
+        this.state.currentUser = { ...localUser, role: Role.CUSTOMER };
+        this.notify();
+        this.logAudit('Local User Login', 'Login', 'Login succeeded via local database (Backend Bypass).', localUser.id, localUser.name);
+        return { success: true, user: this.state.currentUser, type: 'customer' };
+      }
+
+      // Check Staff too
+      const localStaff = this.state.staff.find(s => 
+        (s.email.toLowerCase() === identifier.toLowerCase()) && 
+        s.password === pass
+      );
+
+      if (localStaff) {
+        this.state.currentUser = localStaff;
+        this.notify();
+        this.logAudit('Local Staff Login', 'Login', 'Administrative login succeeded via local database (Backend Bypass).', localStaff.email, localStaff.name);
+        return { success: true, user: this.state.currentUser, type: 'staff' };
+      }
+
+      return { success: false, message: 'Communication bridge failure. Credentials could not be verified locally.' };
     }
   }
 
@@ -2421,7 +2451,6 @@ class DB {
   async updatePackage(id: string, d: any) { const idx = this.state.packages.findIndex(x => x.id === id); if (idx !== -1) { this.state.packages[idx] = { ...this.state.packages[idx], ...d }; await this.commit(); } }
   async addPackage(d: any) { this.state.packages.push({ ...d, id: 'PKG_' + Date.now(), deleted: false }); await this.commit(); }
 
-  async archiveMonth(m: string) { return { success: true, message: 'Registry snapshot committed to archive.' }; }
 
 
   async bulkActivatePayLater(ids: string[], p: string, a: number, d: string, r: string) { await this.commit(); }
@@ -4459,19 +4488,38 @@ class DB {
     let creditAdjustedCount = 0;
     let totalCreditAdjusted = 0;
 
-    for(let i=0; i<userIds.length; i++) {
-        const id = userIds[i];
-        const user = this.state.users.find(u => u.id === id);
-        
-        if (user && user.balance < 0 && creditAction === 'ADJUST') {
+    // 1. Prepare Archive Data
+    const archiveData: ArchiveRecord['data'] = {
+      users: this.state.users.filter(u => ids.has(u.id)),
+      invoices: (this.state.invoices || []).filter(i => ids.has(i.userId)),
+      payments: (this.state.payments || []).filter(p => ids.has(p.userId)),
+      ledger: (this.state.ledger || []).filter(l => ids.has(l.userId)),
+      emergencyLoads: (this.state.emergencyLoads || []).filter(e => ids.has(e.userId)),
+      tickets: (this.state.tickets || []).filter(t => ids.has(t.userId || '')),
+      signupRequests: (this.state.signupRequests || []).filter(r => ids.has(r.userId) || ids.has(r.id)),
+      packageRequests: (this.state.packageRequests || []).filter(r => ids.has(r.userId)),
+      topupRequests: (this.state.topupRequests || []).filter(r => ids.has(r.userId))
+    };
+
+    // 2. Adjust Balance if requested
+    for(const user of archiveData.users) {
+        if (user.balance < 0 && creditAction === 'ADJUST') {
             totalCreditAdjusted += Math.abs(user.balance);
             user.balance = 0;
             creditAdjustedCount++;
         }
-
-        if(onProgress) onProgress(i+1, userIds.length, `User ${userIds[i]}`);
     }
 
+    // 3. Create Archive Record
+    const newArchive: ArchiveRecord = {
+      month: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }),
+      archivedAt: new Date().toISOString(),
+      data: archiveData
+    };
+    if (!this.state.archives) this.state.archives = [];
+    this.state.archives.push(newArchive);
+
+    // 4. Perform Global Removal
     this.state.users = this.state.users.filter(u => !ids.has(u.id));
     this.state.signupRequests = (this.state.signupRequests || []).filter(r => !ids.has(r.userId) && !ids.has(r.id));
     this.state.packageRequests = (this.state.packageRequests || []).filter(r => !ids.has(r.userId));
@@ -4479,8 +4527,12 @@ class DB {
     this.state.emergencyLoads = (this.state.emergencyLoads || []).filter(r => !ids.has(r.userId));
     this.state.invoices = (this.state.invoices || []).filter(i => !ids.has(i.userId));
     this.state.ledger = (this.state.ledger || []).filter(l => !ids.has(l.userId));
+    this.state.payments = (this.state.payments || []).filter(p => !ids.has(p.userId));
+    this.state.tickets = (this.state.tickets || []).filter(t => !ids.has(t.userId || ''));
+    this.state.adminReminders = (this.state.adminReminders || []).filter(r => !ids.has(r.userId));
 
-    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Bulk Purge Accounts', targetId: 'Multiple', targetName: `${userIds.length} users purged`, details: `Deleted identities from registry. Credit Action: ${creditAction}. Adjusted ${creditAdjustedCount} users for total Rs. ${totalCreditAdjusted}.`, riskLevel: 'Critical' });
+    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Deep Archive & Purge', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `Moved identities to deep archive. Credit Action: ${creditAction}. Adjusted Rs. ${totalCreditAdjusted}.`, riskLevel: 'Critical' });
+    
     await this.commit();
     this.notify();
     return { success: true, count: userIds.length, creditAdjusted: totalCreditAdjusted };
@@ -4681,6 +4733,8 @@ class DB {
       location: node.location || 'Unknown',
       dealerAssigned: node.dealerAssigned || null,
       status: node.status || 'Offline',
+      hardwareModel: node.hardwareModel || 'GENERIC_OLT',
+      maxCapacity: node.maxCapacity || 64,
       connectionStatus: 'Not Configured',
       lastCheck: new Date().toISOString(),
       ponPorts: node.ponPorts || 8,
@@ -5176,9 +5230,14 @@ class DB {
       location: node.location || 'Unknown',
       status: 'Offline',
       lastCheck: new Date().toISOString(),
+      hardwareModel: node.hardwareModel || 'GENERIC',
+      maxCapacity: node.maxCapacity || 200,
+      hotspotUrlMode: node.hotspotUrlMode || 'IP',
+      customHotspotUrl: node.customHotspotUrl || '',
       ...node
     };
     this.state.nas.push(newNode);
+    await this.logAudit('NAS Registered', 'System', `New Router Node [${newNode.name}] registered at ${newNode.ip}`, newNode.id);
     await this.commit();
     this.notify();
     return { success: true, id: newNode.id };
@@ -5190,13 +5249,16 @@ class DB {
       this.state.nas[idx] = { ...this.state.nas[idx], ...updates };
       await this.commit();
       this.notify();
+      return { success: true };
     }
+    return { success: false, message: 'Router Node not found.' };
   }
 
   async deleteNAS(id: string) {
     this.state.nas = this.state.nas.filter(n => n.id !== id);
     await this.commit();
     this.notify();
+    return { success: true };
   }
 
   async checkRouterHealth(id: string) {
@@ -5216,12 +5278,125 @@ class DB {
       this.notify();
       return { success: true, status: nas.status, radius: data.radius, api: data.api, coa: data.coa };
     } catch (e: any) {
+      // Simulation fallback if backend is down
       nas.status = 'Offline';
       nas.lastCheck = new Date().toISOString();
       await this.commit();
       this.notify();
-      return { success: false, status: 'Offline', radius: 'Failed', api: 'Failed', coa: nas.coaEnabled ? 'Enabled' : 'Disabled' };
+      return { 
+        success: false, 
+        status: 'Offline', 
+        radius: 'Failed', 
+        api: 'Failed', 
+        coa: nas.coaEnabled ? 'Enabled' : 'Disabled' 
+      };
     }
+  }
+
+  calculateNASLoad(nasId: string) {
+    const nas = this.state.nas.find(n => n.id === nasId);
+    if (!nas) return 0;
+
+    const activeUsersOnNas = this.state.users.filter(u => 
+      u.routerId === nasId && 
+      u.status === UserStatus.ACTIVE
+    ).length;
+
+    const capacity = nas.maxCapacity || 250;
+    return Math.min(Math.round((activeUsersOnNas / capacity) * 100), 100);
+  }
+
+  // --- HOTSPOT VOUCHER ENGINE ---
+  async generateHotspotTokens(nasId: string, count: number, config: Partial<HotspotToken>) {
+    const tokens: HotspotToken[] = [];
+    const now = new Date().toISOString();
+    
+    for (let i = 0; i < count; i++) {
+      tokens.push({
+        id: 'TKN-' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+        nasId,
+        token: Math.random().toString(36).substr(2, 6).toUpperCase(),
+        price: config.price || 100,
+        validityDays: config.validityDays || 1,
+        bandwidthLimit: config.bandwidthLimit || 5,
+        dataLimitMb: config.dataLimitMb || 1024,
+        status: 'Active',
+        createdAt: now,
+        ...config
+      });
+    }
+
+    if (!Array.isArray(this.state.hotspotTokens)) this.state.hotspotTokens = [];
+    this.state.hotspotTokens = [...tokens, ...this.state.hotspotTokens];
+    
+    await this.logAudit('Tokens Generated', 'System', `Provisioned ${count} vouchers for NAS Node ${nasId}`, nasId);
+    await this.commit();
+    this.notify();
+    return { success: true, count, tokens };
+  }
+
+  getHotspotTokens(nasId?: string) {
+    if (!nasId) return this.state.hotspotTokens || [];
+    return (this.state.hotspotTokens || []).filter(t => t.nasId === nasId);
+  }
+
+  async revokeToken(tokenId: string) {
+    const idx = this.state.hotspotTokens.findIndex(t => t.id === tokenId);
+    if (idx !== -1) {
+      this.state.hotspotTokens[idx].status = 'Revoked';
+      await this.commit();
+      this.notify();
+      return { success: true };
+    }
+    return { success: false };
+  }
+
+  // --- IDENTITY ARCHIVAL SYSTEM ---
+  async archiveMonth(month: string) {
+    const archiveData: ArchiveData = {
+      users: [...this.state.users],
+      invoices: [...this.state.invoices],
+      ledger: [...this.state.ledger]
+    };
+
+    const newArchive: ArchiveRecord = {
+      month,
+      archivedAt: new Date().toISOString(),
+      data: archiveData
+    };
+
+    if (!this.state.archives) this.state.archives = [];
+    this.state.archives.unshift(newArchive);
+    
+    await this.logAudit('System Archive', 'System', `Cold storage snapshot created for ${month}`, 'System');
+    await this.commit();
+    this.notify();
+    return { success: true, message: `Snapshot ${month} committed to vault.` };
+  }
+
+  async restoreFromArchive(archiveAt: string, userId: string) {
+    const archive = this.state.archives.find(a => a.archivedAt === archiveAt);
+    if (!archive) return { success: false, message: 'Archive snapshot not found.' };
+
+    const archivedUser = archive.data.users.find(u => u.id === userId);
+    if (!archivedUser) return { success: false, message: 'User identity not found in this snapshot.' };
+
+    if (this.state.users.find(u => u.id === userId)) {
+      return { success: false, message: 'Identity already active in registry.' };
+    }
+
+    this.state.users.push({ ...archivedUser, status: UserStatus.ACTIVE, tags: [...(archivedUser.tags || []), 'Restored'] });
+    
+    archive.data.invoices.forEach(inv => {
+      if (inv.userId === userId && !this.state.invoices.find(i => i.id === inv.id)) {
+        this.state.invoices.push(inv);
+      }
+    });
+
+    await this.logAudit('Identity Restored', 'System', `Recovered user ${archivedUser.name} from archival vault [${archive.month}]`, userId, archivedUser.name);
+    await this.commit();
+    this.notify();
+    return { success: true, message: 'Identity Re-Entry Successful.' };
   }
 
   // ── ISP AUTOMATION ENGINE ──────────────────────────────────────────────────
@@ -5268,7 +5443,6 @@ class DB {
     return { success: false, message: 'Section not found.' };
   }
 
-
   async vsolWifiChange(onuId: string, ssid: string, pass: string) {
     const onu = this.state.onus.find(o => o.id === onuId);
     if (!onu) return { success: false, message: 'ONU not found' };
@@ -5303,6 +5477,7 @@ class DB {
       this.state.speedTestHistory = this.state.speedTestHistory.slice(0, 500);
     }
     await this.commit();
+    this.notify();
     return newResult;
   }
 }

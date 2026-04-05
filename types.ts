@@ -907,6 +907,7 @@ export interface AppState {
   networkMappings: NetworkMapping[];
   aiCallLogs: AICallLog[];
   aiCallRules: AICallRule[];
+  hotspotTokens: HotspotToken[];
 
   // Communication Hub
   emailCampaigns: EmailCampaign[];
@@ -1010,15 +1011,6 @@ export interface WithdrawalRequest {
   auditNote?: string;
 }
 
-export interface ArchiveRecord {
-  month: string;
-  archivedAt: string;
-  data: {
-    invoices: any[];
-    payments: PaymentRecord[];
-    ledger: any[];
-  };
-}
 
 export interface TechnicalConfig {
   wireless: {
@@ -1320,6 +1312,11 @@ export interface NASConfig {
   status: 'Online' | 'Offline' | 'Warning' | 'Error';
   lastCheck?: string;
   activeUsers?: number;
+  hardwareModel: 'MIKROTIK_HEX_GR3' | 'MIKROTIK_OTHER' | 'OLT_1PON' | 'OLT_OTHER' | 'GENERIC';
+  maxCapacity: number;
+  hotspotUrlMode: 'IP' | 'DOMAIN';
+  customHotspotUrl?: string;
+  hotspotPort?: number;
 }
 
 export interface OLTConfig {
@@ -1327,6 +1324,8 @@ export interface OLTConfig {
   name: string;
   ip: string;
   brand: 'Huawei' | 'ZTE' | 'BDCOM' | 'VSOL' | 'Raisecom' | 'FiberHome';
+  hardwareModel: string;
+  maxCapacity: number;
   accessType: 'SSH' | 'Telnet' | 'SNMP' | 'API';
   username: string;
   password?: string;
@@ -1413,6 +1412,38 @@ export interface ApprovalRequest {
   payload: any;
   status: 'Pending' | 'Approved' | 'Rejected';
   timestamp: string;
+}
+
+export interface HotspotToken {
+  id: string;
+  nasId: string;
+  token: string; // 8-char secure code
+  status: 'Active' | 'Used' | 'Expired' | 'Revoked';
+  createdAt: string;
+  usedAt?: string;
+  price: number;
+  validityDays: number;
+  bandwidthLimit: number; // Mbps
+  dataLimitMb: number;
+  userId?: string; // If assigned
+}
+
+export interface ArchiveData {
+  users: ISPUser[];
+  invoices: Invoice[];
+  ledger: any[];
+  payments?: PaymentRecord[];
+  emergencyLoads?: EmergencyLoad[];
+  tickets?: SupportTicket[];
+  signupRequests?: SignupRequest[];
+  packageRequests?: PackageRequest[];
+  topupRequests?: TopupRequest[];
+}
+
+export interface ArchiveRecord {
+  month: string;
+  archivedAt: string;
+  data: ArchiveData;
 }
 
 

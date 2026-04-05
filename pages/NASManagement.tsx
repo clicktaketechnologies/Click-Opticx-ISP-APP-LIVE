@@ -5,7 +5,7 @@ import {
    Cpu, Wifi, Network, Globe, AlertTriangle, CheckCircle, Search, 
    ChevronRight, Zap, Info, DatabaseZap, HardDrive
 } from 'lucide-react';
-import { AppState, NASConfig } from '../types';
+import { AppState, NASConfig, UserStatus } from '../types';
 import { db } from '../db';
 import Modal from '../components/shared/Modal';
 
@@ -102,9 +102,9 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
                { label: 'Total Nodes', value: state.nas.length, icon: Server, color: 'indigo' },
-               { label: 'Active Sessions', value: '1,242', icon: Activity, color: 'emerald' },
+               { label: 'Active Sessions', value: state.users.filter(u => u.status === UserStatus.ACTIVE).length, icon: Activity, color: 'emerald' },
                { label: 'Cloud Gateway', value: 'Online', icon: Globe, color: 'blue' },
-               { label: 'Radius Load', value: '14%', icon: Cpu, color: 'amber' }
+               { label: 'Radius Load', value: `${state.nas.reduce((acc, n) => acc + db.calculateNASLoad(n.id), 0) / (state.nas.length || 1)}%`, icon: Cpu, color: 'amber' }
             ].map((stat, i) => (
                <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm flex items-center justify-between group hover:shadow-md transition-all">
                   <div>
@@ -141,7 +141,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         </div>
                      </div>
 
-                     <div className="grid grid-cols-2 gap-4 mb-8">
+                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100/50">
                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">IP Address</p>
                            <p className="text-sm font-black text-slate-700">{nas.ip}</p>
@@ -149,6 +149,14 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100/50">
                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">API Port</p>
                            <p className="text-sm font-black text-slate-700">{nas.apiPort} <span className="text-[10px] text-slate-300 font-normal ml-1">/ {nas.type}</span></p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100/50">
+                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hardware</p>
+                           <p className="text-sm font-black text-slate-700">{nas.hardwareModel?.replace('_', ' ') || 'GENERIC'}</p>
+                        </div>
+                        <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
+                           <p className="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-1">Load %</p>
+                           <p className="text-sm font-black text-blue-600">{db.calculateNASLoad(nas.id)}%</p>
                         </div>
                      </div>
 
@@ -211,31 +219,56 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Router Name</label>
-                  <input type="text" placeholder="e.g. Tower A" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500 placeholder:text-slate-500" />
+                  <input type="text" placeholder="e.g. Tower A" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 text-slate-900 placeholder:text-slate-400" />
                </div>
                <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-1">IP Address</label>
-                  <input type="text" placeholder="0.0.0.0" value={formData.ip} onChange={e => setFormData({...formData, ip: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500 placeholder:text-slate-500" />
+                  <input type="text" placeholder="0.0.0.0" value={formData.ip} onChange={e => setFormData({...formData, ip: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 text-slate-900 placeholder:text-slate-400" />
                </div>
                <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Radius Secret</label>
-                  <input type="password" value={formData.secret} onChange={e => setFormData({...formData, secret: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500 placeholder:text-slate-500" />
+                  <input type="password" value={formData.secret} onChange={e => setFormData({...formData, secret: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 text-slate-900 placeholder:text-slate-400" />
                </div>
                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Radius CoA Port</label>
-                  <input type="number" value={formData.coaPort} onChange={e => setFormData({...formData, coaPort: parseInt(e.target.value)})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500" />
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Hardware Model</label>
+                  <select 
+                     value={formData.hardwareModel} 
+                     onChange={e => setFormData({...formData, hardwareModel: e.target.value as any, maxCapacity: e.target.value === 'OLT_1PON' ? 64 : (e.target.value === 'MIKROTIK_HEX_GR3' ? 200 : 250)})} 
+                     className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 text-slate-900"
+                  >
+                     <option value="GENERIC">Generic Router</option>
+                     <option value="MIKROTIK_HEX_GR3">MikroTik hEX (gr3)</option>
+                     <option value="OLT_1PON">OLT (1-PON Branch)</option>
+                     <option value="MIKROTIK_OTHER">Other MikroTik</option>
+                  </select>
                </div>
                <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-1">API Admin Username</label>
-                  <input type="text" value={formData.apiUsername} onChange={e => setFormData({...formData, apiUsername: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500" />
+                  <input type="text" value={formData.apiUsername} onChange={e => setFormData({...formData, apiUsername: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 text-slate-900" />
                </div>
                <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-1">API Admin Password</label>
-                  <input type="password" value={formData.apiPassword} onChange={e => setFormData({...formData, apiPassword: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500" />
+                  <input type="password" value={formData.apiPassword} onChange={e => setFormData({...formData, apiPassword: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 text-slate-900" />
                </div>
                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Location</label>
-                  <input type="text" placeholder="e.g. North Sector" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="w-full p-4 bg-slate-800/80 text-white border border-slate-700/50 rounded-2xl font-bold text-sm outline-none focus:border-blue-500" />
+                  <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Hotspot Portal URL</label>
+                  <div className="flex gap-2">
+                     <select 
+                        value={formData.hotspotUrlMode} 
+                        onChange={e => setFormData({...formData, hotspotUrlMode: e.target.value as any})}
+                        className="p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-xs outline-none focus:ring-4 focus:ring-blue-500/10 text-slate-900"
+                     >
+                        <option value="IP">IP Link</option>
+                        <option value="DOMAIN">Custom Domain</option>
+                     </select>
+                     <input 
+                        type="text" 
+                        placeholder={formData.hotspotUrlMode === 'IP' ? `http://${formData.ip}/login` : 'hotspot.yourisp.com'} 
+                        value={formData.customHotspotUrl} 
+                        onChange={e => setFormData({...formData, customHotspotUrl: e.target.value})} 
+                        className="flex-1 p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 text-slate-900" 
+                     />
+                  </div>
                </div>
                <div className="space-y-1.5 flex items-center gap-4 h-full pt-6">
                   <label className="flex items-center gap-3 cursor-pointer group">
@@ -246,10 +279,10 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            onChange={e => setFormData({...formData, coaEnabled: e.target.checked})} 
                            className="sr-only"
                         />
-                        <div className={`w-12 h-6 rounded-full transition-colors ${formData.coaEnabled ? 'bg-blue-600' : 'bg-slate-700'}`}></div>
+                        <div className={`w-12 h-6 rounded-full transition-colors ${formData.coaEnabled ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
                         <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform ${formData.coaEnabled ? 'translate-x-6' : ''}`}></div>
                      </div>
-                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-white transition-colors">Enable CoA Disconnect</span>
+                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition-colors">Enable CoA Disconnect</span>
                   </label>
                </div>
             </div>
