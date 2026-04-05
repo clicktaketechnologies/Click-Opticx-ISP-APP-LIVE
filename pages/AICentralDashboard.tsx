@@ -16,6 +16,8 @@ import {
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import Modal from '../components/shared/Modal';
 
+const AIAgentWidget = React.lazy(() => import('../components/AIAgentWidget'));
+
 type AIModuleId = 'observer' | 'risk' | 'auto_action' | 'payment' | 'emergency' | 'network' | 'admin_ast' | 'user_ast';
 
 interface AIModule {
@@ -372,6 +374,11 @@ const AICentralDashboard: React.FC<{ state: AppState }> = ({ state }) => {
            </div>
         </div>
       )}
+
+      {/* ADMIN-ONLY AI WIDGET INTEGRATION */}
+      <React.Suspense fallback={null}>
+         <AIAgentWidget state={state} />
+      </React.Suspense>
     </div>
   );
 };

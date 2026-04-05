@@ -22,7 +22,7 @@ import {
   AdminReminder, ReminderStatus, ReminderIssueType, NASConfig, LiveUsage, OLTConfig, ONU,
   AuthSettings, OTP, DuplicateActionLog, TestLog, FlashLog, NotificationTemplate, NotificationTriggerEvent,
   NotificationDeliveryStatus, NotificationGateway, SignupRequest, AuditLog, SpeedTestResult,
-  HotspotToken, ArchiveData
+  HotspotToken, ArchiveData, MissingDataNode
 } from './types';
 
 // Monitoring interface nodes
@@ -394,10 +394,11 @@ const INITIAL_STATE: AppState = {
     { id: 'tasks', view: [...ALL_ROLES, Role.DEALER], edit: [...ALL_ROLES, Role.DEALER], delete: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
     { id: 'tickets', view: [Role.SUPER_ADMIN, Role.SUPPORT_ADMIN, Role.SUPPORT_EXECUTIVE, Role.NETWORK_ADMIN], edit: ALL_ROLES, delete: [Role.SUPER_ADMIN] }
   ],
-  notifications: [],
-  notificationTemplates: [],
   roles: ALL_ROLES,
   securityLogs: [],
+  notifications: [],
+  notificationTemplates: [],
+  missingData: [],
   connectionStatus: 'online',
   isImpersonating: false,
   passwordRequests: [],
@@ -405,10 +406,10 @@ const INITIAL_STATE: AppState = {
 
   networkMappings: [],
   users: [
-    { id: 'USR-REC-1', name: 'Zohaib Hassan', status: UserStatus.SUSPENDED, isKYCVerified: false, isKYCSubmitted: false, kyc_status: 'pending', approval_status: 'pending', packageId: 'PKG-1', balance: 1500, phone: '03001234567', address: 'Block 5, Gulshan', area: 'Gulshan', portalEnabled: true, connectionId: 'CID-001', creditScore: 750, referralPoints: 0, referralCode: 'ZO123', activationCount: 5, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
-    { id: 'USR-REC-2', name: 'Maria Khan', status: UserStatus.ACTIVE, isKYCVerified: true, isKYCSubmitted: true, kyc_status: 'verified', approval_status: 'approved', packageId: 'PKG-2', balance: 0, lastPaymentDate: new Date().toISOString(), phone: '03217654321', address: 'Phase 6, DHA', area: 'DHA', portalEnabled: true, connectionId: 'CID-002', creditScore: 820, referralPoints: 100, referralCode: 'MK789', activationCount: 12, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
-    { id: 'USR-REC-3', name: 'Asif Ali', status: UserStatus.ACTIVE, isKYCVerified: false, isKYCSubmitted: true, kyc_status: 'submitted', approval_status: 'pending', packageId: 'PKG-1', balance: 750, isRecoveryMode: true, phone: '03149876543', address: 'North Karachi', area: 'North', portalEnabled: true, connectionId: 'CID-003', creditScore: 640, referralPoints: 10, referralCode: 'AA444', activationCount: 3, connectionType: 'Wireless', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
-    { id: 'USR-REC-4', name: 'Noman Siddiqui', status: UserStatus.EXPIRED, isKYCVerified: false, isKYCSubmitted: false, kyc_status: 'pending', approval_status: 'pending', packageId: 'PKG-1', balance: 1500, phone: '03331112233', address: 'Johar Block 15', area: 'Johar', portalEnabled: true, connectionId: 'CID-004', creditScore: 710, referralPoints: 50, referralCode: 'NS111', activationCount: 8, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-1', name: 'Zohaib Hassan', status: UserStatus.SUSPENDED, verificationStatus: VerificationStatus.PENDING, isKYCVerified: false, isKYCSubmitted: false, kyc_status: 'pending', approval_status: 'pending', packageId: 'PKG-1', balance: 1500, phone: '03001234567', address: 'Block 5, Gulshan', area: 'Gulshan', portalEnabled: true, connectionId: 'CID-001', creditScore: 750, referralPoints: 0, referralCode: 'ZO123', activationCount: 5, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-2', name: 'Maria Khan', status: UserStatus.ACTIVE, verificationStatus: VerificationStatus.VERIFIED, isKYCVerified: true, isKYCSubmitted: true, kyc_status: 'verified', approval_status: 'approved', packageId: 'PKG-2', balance: 0, lastPaymentDate: new Date().toISOString(), phone: '03217654321', address: 'Phase 6, DHA', area: 'DHA', portalEnabled: true, connectionId: 'CID-002', creditScore: 820, referralPoints: 100, referralCode: 'MK789', activationCount: 12, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-3', name: 'Asif Ali', status: UserStatus.ACTIVE, verificationStatus: VerificationStatus.PENDING, isKYCVerified: false, isKYCSubmitted: true, kyc_status: 'submitted', approval_status: 'pending', packageId: 'PKG-1', balance: 750, isRecoveryMode: true, phone: '03149876543', address: 'North Karachi', area: 'North', portalEnabled: true, connectionId: 'CID-003', creditScore: 640, referralPoints: 10, referralCode: 'AA444', activationCount: 3, connectionType: 'Wireless', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
+    { id: 'USR-REC-4', name: 'Noman Siddiqui', status: UserStatus.EXPIRED, verificationStatus: VerificationStatus.PENDING, isKYCVerified: false, isKYCSubmitted: false, kyc_status: 'pending', approval_status: 'pending', packageId: 'PKG-1', balance: 1500, phone: '03331112233', address: 'Johar Block 15', area: 'Johar', portalEnabled: true, connectionId: 'CID-004', creditScore: 710, referralPoints: 50, referralCode: 'NS111', activationCount: 8, connectionType: 'Fiber', managementMode: 'Manual', nasConnectionType: 'Manual', activityLog: [] },
   ],
   liveUsage: [],
   oltNodes: [
@@ -5526,6 +5527,140 @@ class DB {
     await this.commit();
     this.notify();
     return newResult;
+  }
+
+  // --- DATA RECONCILIATION ENGINE (v8.5 HEART) ---
+  async reconcileData(type: 'user' | 'billing' | 'package' | 'entire' = 'entire') {
+    const timestamp = new Date().toISOString();
+    const newMissing: MissingDataNode[] = [];
+
+    // 1. USER SCAN
+    if (type === 'user' || type === 'entire') {
+      this.state.users.forEach(u => {
+        if (!u.packageId && u.status === UserStatus.ACTIVE) {
+          newMissing.push({
+            id: `MIS_USR_${u.id}`,
+            type: 'user',
+            severity: 'high',
+            title: 'Active User Missing Package',
+            description: `Subscriber ${u.name} is ACTIVE but has no assigned package node.`,
+            targetId: u.id,
+            suggestedFix: 'Assign Basic Package',
+            timestamp,
+            status: 'detected'
+          });
+        }
+      });
+    }
+
+    // 2. BILLING SCAN
+    if (type === 'billing' || type === 'entire') {
+      this.state.invoices.forEach(inv => {
+        const userExists = this.state.users.some(u => u.id === inv.userId || u.email === inv.userId);
+        if (!userExists) {
+          newMissing.push({
+            id: `MIS_INV_${inv.id}`,
+            type: 'billing',
+            severity: 'critical',
+            title: 'Orphaned Invoice',
+            description: `Invoice ${inv.id} belongs to a user who no longer exists in the registry.`,
+            targetId: inv.id,
+            suggestedFix: 'Archive Orphaned Invoice',
+            timestamp,
+            status: 'detected'
+          });
+        }
+      });
+
+      this.state.users.forEach(u => {
+        const totalDue = this.state.invoices
+          .filter(i => (i.userId === u.id || i.userId === u.email) && i.status === PaymentStatus.UNPAID)
+          .reduce((acc, i) => acc + i.totalAmount, 0);
+        
+        if (Math.abs(u.balance - totalDue) > 1) { 
+           newMissing.push({
+             id: `MIS_BAL_${u.id}`,
+             type: 'billing',
+             severity: 'high',
+             title: 'Balance/Invoice Mismatch',
+             description: `User ${u.name} balance (${u.balance}) does not match unpaid invoices (${totalDue}).`,
+             targetId: u.id,
+             suggestedFix: 'Re-calculate Balance',
+             timestamp,
+             status: 'detected'
+           });
+        }
+      });
+    }
+
+    // 3. PACKAGE SCAN
+    if (type === 'package' || type === 'entire') {
+       this.state.users.forEach(u => {
+         if (u.packageId && !this.state.packages.some(p => p.id === u.packageId)) {
+           newMissing.push({
+             id: `MIS_PKG_${u.id}_${u.packageId}`,
+             type: 'package',
+             severity: 'high',
+             title: 'Deleted Package Assigned',
+             description: `User ${u.name} is assigned to package ${u.packageId} which was deleted from catalog.`,
+             targetId: u.id,
+             suggestedFix: 'Re-assign to Default',
+             timestamp,
+             status: 'detected'
+           });
+         }
+       });
+    }
+
+    this.state.missingData = newMissing;
+    await this.commit();
+    this.notify();
+    return { success: true, count: newMissing.length };
+  }
+
+  async fixMissingData(nodeId: string) {
+    const node = this.state.missingData.find(n => n.id === nodeId);
+    if (!node) return { success: false, message: 'Recovery node not found.' };
+
+    node.status = 'fixing';
+    this.notify();
+
+    try {
+      if (node.title === 'Active User Missing Package') {
+        const u = this.state.users.find(x => x.id === node.targetId);
+        if (u) u.packageId = this.state.packages[0]?.id || 'PKG-BASIC';
+      } else if (node.title === 'Orphaned Invoice') {
+        const idx = this.state.invoices.findIndex(i => i.id === node.targetId);
+        if (idx !== -1) this.state.invoices.splice(idx, 1);
+      } else if (node.title === 'Balance/Invoice Mismatch') {
+        const u = this.state.users.find(x => x.id === node.targetId);
+        if (u) {
+          const totalDue = this.state.invoices
+            .filter(i => (i.userId === u.id || i.userId === u.email) && i.status === PaymentStatus.UNPAID)
+            .reduce((acc, i) => acc + i.totalAmount, 0);
+          u.balance = totalDue;
+        }
+      } else if (node.title === 'Deleted Package Assigned') {
+        const u = this.state.users.find(x => x.id === node.targetId);
+        if (u) u.packageId = this.state.packages[0]?.id || 'PKG-BASIC';
+      }
+
+      node.status = 'resolved';
+      this.state.missingData = this.state.missingData.filter(n => n.id !== nodeId);
+      await this.commit();
+      this.notify();
+      return { success: true };
+    } catch (e: any) {
+      node.status = 'detected';
+      this.notify();
+      return { success: false, message: e.message };
+    }
+  }
+
+  async clearMissingData() {
+    this.state.missingData = [];
+    await this.commit();
+    this.notify();
   }
 }
 

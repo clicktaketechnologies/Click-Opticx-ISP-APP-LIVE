@@ -380,6 +380,18 @@ export interface EmergencyLoad {
   extensions?: EmergencyLoadExtension[];
 }
 
+export interface MissingDataNode {
+  id: string;
+  type: 'user' | 'billing' | 'package' | 'entire';
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
+  description: string;
+  targetId: string;
+  suggestedFix?: string;
+  timestamp: string;
+  status: 'detected' | 'fixing' | 'resolved';
+}
+
 export interface ISPUser {
   id: string;
   connectionId: string;
@@ -390,7 +402,7 @@ export interface ISPUser {
   address: string;
   area: string;
   status: UserStatus;
-  verificationStatus?: VerificationStatus;
+  verificationStatus: VerificationStatus;
   isKYCVerified: boolean;
   isKYCSubmitted: boolean;
   kycSubmissionDate?: string;
@@ -889,7 +901,7 @@ export interface AppState {
   settings: SystemSettings;
   currentUser?: any;
   originalAdminUser?: any;
-  connectionStatus: 'online' | 'offline' | 'reconnecting';
+  connectionStatus: 'online' | 'offline' | 'maintenance';
   permissions: any[];
   notifications: SystemNotification[];
   roles: string[];
@@ -934,6 +946,7 @@ export interface AppState {
   approvalRequests: ApprovalRequest[];
   flashLogs: FlashLog[];
   speedTestHistory: SpeedTestResult[];
+  missingData: MissingDataNode[];
 }
 
 export interface StaffUser {

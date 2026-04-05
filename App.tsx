@@ -57,7 +57,6 @@ const AIControlPlane = lazy(() => import('./pages/AIControlPlane'));
 const AICentralDashboard = lazy(() => import('./pages/AICentralDashboard'));
 const AICallingAdmin = lazy(() => import('./pages/AICallingAdmin'));
 const AICallLogs = lazy(() => import('./pages/AICallLogs'));
-const AIAgentWidget = lazy(() => import('./components/AIAgentWidget'));
 const EmailControlCenter = lazy(() => import('./pages/comm/EmailControlCenter'));
 const AdminReminders = lazy(() => import('./pages/AdminReminders'));
 const NASManagement = lazy(() => import('./pages/NASManagement'));
@@ -341,7 +340,6 @@ const App: React.FC = () => {
             </div>
           )}
           <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />
-          <AIAgentWidget state={dbState} />
         </Suspense>
       );
     }
@@ -475,9 +473,6 @@ const App: React.FC = () => {
               </Suspense>
             </main>
           </div>
-          <Suspense fallback={null}>
-            <AIAgentWidget state={dbState} />
-          </Suspense>
         </Suspense>
       </div>
     );

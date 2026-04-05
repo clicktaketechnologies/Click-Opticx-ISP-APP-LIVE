@@ -8,7 +8,7 @@ import {
   Wallet, ArrowDownLeft, Receipt, History, Activity, Briefcase,
   // Fix: Added missing Bot import
   ArrowRight, Search, ChevronRight, Calculator, Archive, Sparkles, Smile, Bot,
-  UserPlus, Banknote, Send, HandCoins
+  UserPlus, Banknote, Send, HandCoins, DatabaseZap, SearchCode
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -39,6 +39,11 @@ const Dashboard: React.FC<{
 
   const branding = state?.settings?.branding;
   const logo = branding?.logoLight || branding?.logoSquare;
+
+  const [isReconcileModal, setIsReconcileModal] = useState(false);
+  const [reconcileType, setReconcileType] = useState<'user' | 'billing' | 'package' | 'entire'>('entire');
+  const [isScanning, setIsScanning] = useState(false);
+  const [isFixingAll, setIsFixingAll] = useState(false);
 
   useEffect(() => {
     db.auditOverdueLoads();
@@ -310,6 +315,9 @@ const Dashboard: React.FC<{
         <button onClick={() => onNavigate && onNavigate('comm-campaigns')} className="flex items-center gap-2 px-5 py-2.5 bg-white text-purple-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-purple-200">
           <Send size={16} /> Send Message
         </button>
+        <button onClick={() => setIsReconcileModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-amber-400 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-800">
+          <DatabaseZap size={16} /> Fetch Missing Data
+        </button>
       </div>
 
       {/* Advanced Data Metrics Matrix */}
@@ -578,6 +586,123 @@ const Dashboard: React.FC<{
               </div>
             </section>
          </div>
+      </Modal>
+
+      {/* MISSING DATA RECONCILIATION MODAL */}
+      <Modal
+        isOpen={isReconcileModal}
+        onClose={() => setIsReconcileModal(false)}
+        title="Data Integrity Recovery"
+        icon={<DatabaseZap size={24} className="text-amber-500" />}
+        maxWidth="max-w-4xl"
+        scrollable
+      >
+        <div className="space-y-8 py-4">
+          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50 p-6 rounded-3xl border border-slate-100">
+            <div className="space-y-1">
+              <h4 className="text-lg font-black text-slate-800 uppercase italic">Recovery Protocol</h4>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">Select data block to reconcile</p>
+            </div>
+            <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
+              {[
+                { id: 'user', label: 'Users' },
+                { id: 'billing', label: 'Billing' },
+                { id: 'package', label: 'Packages' },
+                { id: 'entire', label: 'Entire System' }
+              ].map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setReconcileType(t.id as any)}
+                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${reconcileType === t.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button
+              onClick={async () => {
+                setIsScanning(true);
+                await db.reconcileData(reconcileType);
+                setIsScanning(false);
+              }}
+              disabled={isScanning}
+              className={`flex-1 py-6 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all flex flex-col items-center justify-center gap-3 border shadow-sm ${isScanning ? 'bg-slate-100 text-slate-400' : 'bg-white text-slate-900 hover:shadow-xl hover:-translate-y-1 hover:border-blue-500 hover:text-blue-600'}`}
+            >
+              {isScanning ? <RefreshCcw size={32} className="animate-spin" /> : <SearchCode size={32} />}
+              {isScanning ? 'Analyzing Infrastructure...' : 'Initiate Deep Scan'}
+            </button>
+
+            <button
+              onClick={async () => {
+                if (state.missingData.length === 0) return;
+                setIsFixingAll(true);
+                for (const node of state.missingData) {
+                  await db.fixMissingData(node.id);
+                }
+                setIsFixingAll(false);
+              }}
+              disabled={isFixingAll || state.missingData.length === 0}
+              className={`flex-1 py-6 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all flex flex-col items-center justify-center gap-3 border shadow-sm ${isFixingAll || state.missingData.length === 0 ? 'bg-slate-50 text-slate-300' : 'bg-green-600 text-white hover:shadow-xl hover:-translate-y-1 shadow-green-200'}`}
+            >
+              {isFixingAll ? <RefreshCcw size={32} className="animate-spin" /> : <ShieldCheck size={32} />}
+              {isFixingAll ? 'Reconstructing Nodes...' : `Auto-Heal ${state.missingData.length} Nodes`}
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] flex items-center gap-2 border-b border-slate-100 pb-2">
+              Detected Anomalies ({state.missingData.length})
+            </h5>
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              {state.missingData.length > 0 ? (
+                state.missingData.map(node => (
+                  <div key={node.id} className="p-5 bg-white border border-slate-100 rounded-3xl flex items-center justify-between group hover:border-amber-400 hover:shadow-xl transition-all">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${node.severity === 'critical' ? 'bg-rose-50 text-rose-500' : node.severity === 'high' ? 'bg-orange-50 text-orange-500' : 'bg-blue-50 text-blue-500'}`}>
+                        {node.type === 'user' ? <Users size={20} /> : <Receipt size={20} />}
+                      </div>
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-black text-slate-900 uppercase italic leading-none">{node.title}</p>
+                          <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${node.severity === 'critical' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'}`}>{node.severity}</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-medium leading-relaxed tracking-tight">{node.description}</p>
+                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest italic flex items-center gap-1">
+                          <Zap size={8} className="text-amber-500" /> Suggested: {node.suggestedFix}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => db.fixMissingData(node.id)}
+                      disabled={node.status === 'fixing'}
+                      className={`px-6 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all ${node.status === 'fixing' ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white hover:bg-green-600 shadow-md group-hover:bg-amber-500'}`}
+                    >
+                      {node.status === 'fixing' ? 'Healing...' : 'Fix Node'}
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="py-20 text-center space-y-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[3rem]">
+                   <div className="w-20 h-20 bg-white shadow-inner rounded-3xl flex items-center justify-center mx-auto text-slate-200"><ShieldCheck size={40} /></div>
+                   <div className="space-y-1">
+                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest italic">No Missing Data Nodes Found</p>
+                     <p className="text-[10px] text-slate-300 font-bold">Registry consistency is currently 100% stable.</p>
+                   </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center bg-slate-900 -mx-6 -mb-6 px-8 py-6">
+           <div className="space-y-1">
+              <p className="text-[10px] font-black text-white uppercase italic tracking-tighter">System Health Matrix</p>
+              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">Last Render Memory Sync: {state.missingData.length > 0 ? state.missingData[0].timestamp : 'Consistent'}</p>
+           </div>
+           <button onClick={() => db.clearMissingData()} className="px-6 py-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">Flush Recognition Buffer</button>
+        </div>
       </Modal>
     </div>
   );
