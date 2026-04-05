@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import {
-  X, CheckCircle, AlertTriangle, XCircle, Info, Loader2, Trash2, Shield
+  X, CheckCircle, AlertTriangle, XCircle, Info, Loader2, Trash2, Shield, ArrowRight
 } from 'lucide-react';
 
 export type ModalType = 'confirm' | 'success' | 'error' | 'form' | 'info' | 'danger';
@@ -122,26 +122,21 @@ export const Modal: React.FC<ModalProps> = ({
       <div
         ref={modalRef}
         data-modal="true"
-        className={`modal relative w-full ${maxWidth} rounded-2xl flex flex-col shadow-2xl transition-all duration-200 overflow-hidden`}
+        className={`modal relative w-full ${maxWidth} rounded-[2rem] flex flex-col shadow-2xl transition-all duration-200 overflow-hidden bg-white border border-slate-100`}
         style={{
-          background: '#FFFFFF',
-          boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
           animation: 'modalIn 0.2s ease-out',
-          maxHeight: '90vh',
-          border: '1px solid #E2E8F0',
-          color: '#0F172A'
+          maxHeight: '90vh'
         }}
       >
         {/* HEADER */}
         <div
-          className="flex items-start sm:items-center justify-between px-6 py-4 sm:py-5 shrink-0 gap-4"
-          style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}
+          className="flex items-center justify-between px-8 py-6 shrink-0 gap-6 border-b border-slate-50"
         >
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="flex-shrink-0 flex items-center justify-center">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 shadow-sm">
               {displayIcon}
             </div>
-            <h2 className="text-sm font-black uppercase tracking-widest text-[#0F172A] leading-tight break-words">
+            <h2 className="text-sm font-black uppercase tracking-widest text-slate-900 leading-tight">
               {title}
             </h2>
           </div>
@@ -151,9 +146,9 @@ export const Modal: React.FC<ModalProps> = ({
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all disabled:opacity-30"
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all disabled:opacity-30 border border-transparent hover:border-slate-100"
               >
-                <X size={18} />
+                <X size={20} alt="Close Modal" />
               </button>
             )}
           </div>
@@ -161,11 +156,11 @@ export const Modal: React.FC<ModalProps> = ({
 
         {/* BODY */}
         <div
-          className={`${noPadding ? '' : 'px-6 py-5'} ${scrollable ? 'overflow-y-auto custom-scrollbar' : ''} flex-1`}
+          className={`${noPadding ? '' : 'px-8 py-6'} ${scrollable ? 'overflow-y-auto custom-scrollbar' : ''} flex-1`}
           style={{ minHeight: 0 }}
         >
           {message && (
-            <p className="text-sm text-slate-700 leading-relaxed mb-4">{message}</p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed mb-6 italic border-l-2 border-blue-500 pl-4">{message}</p>
           )}
           {children}
         </div>
@@ -173,8 +168,7 @@ export const Modal: React.FC<ModalProps> = ({
         {/* FOOTER */}
         {(footer || showDefaultFooter) && (
           <div
-            className="px-6 py-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0"
-            style={{ borderTop: '1px solid rgba(0,0,0,0.05)' }}
+            className="px-8 py-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0 border-t border-slate-50 bg-slate-50/30"
           >
             {footer ? (
               footer
@@ -183,27 +177,30 @@ export const Modal: React.FC<ModalProps> = ({
                 <button
                   onClick={onClose}
                   disabled={isLoading}
-                  className="px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-[#0F172A] bg-[#F1F5F9] hover:bg-slate-200 transition-all disabled:opacity-30 border border-slate-200"
+                  className="px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-30 border border-slate-200 shadow-sm shadow-slate-100"
                 >
                   {cancelLabel}
                 </button>
                 <button
                   onClick={handleConfirm}
                   disabled={isLoading}
-                  className={`px-6 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-white flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50 ${
+                  className={`px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-white flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 shadow-xl ${
                     confirmDanger || type === 'danger'
-                      ? 'bg-[#EF4444] hover:bg-rose-700 shadow-lg shadow-rose-200'
-                      : 'bg-[#3B82F6] hover:bg-blue-700 shadow-lg shadow-blue-200'
+                      ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200'
+                      : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
                   }`}
                   style={{ opacity: isLoading ? 0.7 : 1 }}
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 size={14} className="animate-spin" />
-                      Processing...
+                      <Loader2 size={16} className="animate-spin" />
+                      Protocol Syncing...
                     </>
                   ) : (
-                    confirmLabel
+                    <>
+                      {confirmLabel}
+                      {type === 'confirm' ? <ArrowRight size={14} /> : <CheckCircle size={14} />}
+                    </>
                   )}
                 </button>
               </>

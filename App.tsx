@@ -4,7 +4,7 @@ import { MasterApprovalDashboard } from './pages/MasterApprovalDashboard';
 import { Role, AppState, SystemNotification, UserStatus } from './types';
 import {
   Receipt, Wallet, ShieldCheck, LogOut,
-  Wifi, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap, Loader2, Cloud, X, Zap, RefreshCcw
+  Wifi, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap, Loader2, Cloud, X, Zap, RefreshCcw, CheckCircle
 } from 'lucide-react';
 import { PWAPrompt } from './components/PWAPrompt';
 import Modal from './components/shared/Modal';
@@ -160,6 +160,18 @@ const App: React.FC = () => {
   const [globalSearchTerm, setGlobalSearchTerm] = useState('');
 
   useEffect(() => {
+    // FORCE HARD REFRESH ON VERSION BUMP
+    const SYSTEM_VERSION = '1.2.7'; // Increment this to force reload
+    const lastVersion = localStorage.getItem('clickopticx_sys_version');
+    if (lastVersion !== SYSTEM_VERSION) {
+       console.warn('[SYSTEM] Version Mismatch. Clearing asset cache and re-initializing...');
+       localStorage.setItem('clickopticx_sys_version', SYSTEM_VERSION);
+       // Clear chunk reload tracking to ensure fresh start
+       sessionStorage.removeItem('last-chunk-reload');
+       window.location.reload();
+       return;
+    }
+
     const unsubscribe = db.onStateChange((newState) => {
       console.log('App state updated:', newState.currentUser?.email, 'Configured:', db.isConfigured());
       setDbState(newState);
@@ -233,16 +245,21 @@ const App: React.FC = () => {
 
         <div className="relative z-10 flex flex-col items-center max-w-sm w-full">
           <div className="mb-12 relative group">
-            <div className="absolute -inset-4 bg-gradient-to-tr from-blue-600 to-green-500 rounded-[2.5rem] blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-1000"></div>
-            <div className="w-28 h-28 bg-white/5 backdrop-blur-2xl rounded-[2.5rem] flex items-center justify-center shadow-2xl border border-white/10 relative overflow-hidden">
+            <div className="absolute -inset-4 bg-gradient-to-tr from-blue-600 to-emerald-500 rounded-[2.5rem] blur-2xl opacity-10 group-hover:opacity-30 transition-opacity duration-1000"></div>
+            <div className="w-28 h-28 flex items-center justify-center relative overflow-hidden">
               {branding.logoDark ? (
-                <img src={branding.logoDark} className="w-full h-full object-contain p-4 animate-in zoom-in-50 duration-700" alt="Logo" />
+                <img 
+                  src={branding.logoDark} 
+                  className="w-full h-full object-contain animate-in zoom-in-50 duration-700" 
+                  alt="Logo" 
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/favicon.png'; }}
+                />
               ) : (
-                <Wifi className="text-blue-400 animate-pulse" size={48} />
+                <img src="/favicon.png" className="w-full h-full object-contain animate-pulse" alt="Click Opticx" />
               )}
             </div>
-            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg border-2 border-slate-950 animate-bounce">
-              <Zap size={14} className="text-white" />
+            <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center shadow-lg border-2 border-slate-950 animate-bounce">
+              <CheckCircle size={14} className="text-white" />
             </div>
           </div>
 
@@ -266,20 +283,7 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30 hover:opacity-100 transition-opacity duration-300">
-          <div className="flex justify-between items-center px-6 pb-6 pt-4 border-t border-slate-100 bg-slate-50/50">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest italic">{dbState.settings?.branding?.appTitle || "Click Opticx ISP"}</p>
-            </div>
-            <p className="text-[8px] text-slate-500 font-mono tracking-tighter uppercase italic">{dbState.settings?.branding?.appSubtitle || "SYSTEM v1.2.6-LIVE"}</p>
-          </div>
-          <div className="flex items-center gap-4 text-[8px] font-black uppercase text-slate-600 tracking-widest">
-            <span>CLOUD SECURE</span>
-            <div className="w-1 h-1 rounded-full bg-green-500"></div>
-            <span>REGIONAL SYSTEM</span>
-          </div>
-        </div>
+
       </div>
     );
   };

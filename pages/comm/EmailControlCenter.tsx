@@ -9,9 +9,9 @@ import {
   Edit3, Copy, Eye, Power,
   BarChart3, User, Database,
   Repeat, Bell, Smartphone, Users,
-  MailWarning, Activity, Key, 
+  TrendingUp, Activity, Key, 
   ChevronRight, ArrowUpRight, ArrowDownRight,
-  Monitor
+  Monitor, TrendingUp as TrendingIcon
 } from 'lucide-react';
 import { db } from '../../db';
 import { Modal } from '../../components/shared/Modal';
@@ -57,6 +57,9 @@ const EmailControlCenter: React.FC<EmailControlCenterProps> = ({ state, activePa
   const [testEmailModal, setTestEmailModal] = useState<string | null>(null); // templateId
   const [testTo, setTestTo] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isMonthlyModal, setIsMonthlyModal] = useState(false);
+  const [monthlyTargetMonth, setMonthlyTargetMonth] = useState(new Date().toISOString().substring(0, 7));
+  const [monthlyProgress, setMonthlyProgress] = useState({ current: 0, total: 0, label: '' });
 
   // Tabs Definition
   const tabs = [
@@ -81,6 +84,43 @@ const EmailControlCenter: React.FC<EmailControlCenterProps> = ({ state, activePa
       setTestTo('');
       // Notification handled by DB
     }
+  };
+
+  const handleSaveTemplate = async (template: Partial<EmailTemplate>) => {
+    setIsProcessing(true);
+    const res = await db.saveEmailTemplate(template);
+    setIsProcessing(false);
+    if (res.success) {
+      setIsAddingTemplate(false);
+      setEditingTemplate(null);
+    }
+  };
+
+   const handleToggle = async (key: string, value: boolean) => {
+    const currentToggles = config.toggles || {};
+    const newConfig = { ...config, toggles: { ...currentToggles, [key]: value } };
+    await db.updateCommConfig(newConfig);
+  };
+
+  const handleMonthlyCycle = async () => {
+    setIsProcessing(true);
+    const users = state.users.map(u => u.id);
+    
+    // 1. Generate Invoices
+    setMonthlyProgress({ current: 0, total: users.length, label: 'Generating Monthly Invoices...' });
+    await db.bulkGenerateInvoices(users, (curr, tot, name) => {
+        setMonthlyProgress({ current: curr, total: tot, label: `Invoicing: ${name}` });
+    });
+
+    // 2. Dispatch Reminders
+    setMonthlyProgress({ current: 0, total: users.length, label: 'Dispatching Logic Notifications...' });
+    await db.bulkSendReminders(users, 'Email', 'TMP-1', (curr, tot, name) => {
+        setMonthlyProgress({ current: curr, total: tot, label: `Reminding: ${name}` });
+    });
+    
+    setIsProcessing(false);
+    setIsMonthlyModal(false);
+    alert(`✓ Monthly Cycle [${monthlyTargetMonth}] Successfully Dispatched.`);
   };
 
   return (
@@ -163,8 +203,11 @@ const EmailControlCenter: React.FC<EmailControlCenterProps> = ({ state, activePa
                     <div className="space-y-4">
                        <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-slate-300">Auto-Dispatcher</span>
-                          <div className="w-10 h-5 bg-blue-600 rounded-full relative p-1 cursor-pointer">
-                             <div className="w-3 h-3 bg-white rounded-full absolute right-1"></div>
+                          <div 
+                            onClick={() => handleToggle('autoDispatcher', !config?.toggles?.autoDispatcher)}
+                            className={`w-10 h-5 rounded-full relative p-1 cursor-pointer transition-all ${config?.toggles?.autoDispatcher ? 'bg-blue-600 shadow-lg shadow-blue-500/20' : 'bg-slate-700'}`}
+                          >
+                             <div className={`w-3 h-3 bg-white rounded-full absolute transition-all ${config?.toggles?.autoDispatcher ? 'right-1' : 'left-1'}`}></div>
                           </div>
                        </div>
                        <div className="flex items-center justify-between">
@@ -282,7 +325,10 @@ const EmailControlCenter: React.FC<EmailControlCenterProps> = ({ state, activePa
                            <button onClick={() => setTestEmailModal(template.id)} className="p-1.5 text-slate-400 hover:text-blue-600 transition-all" title="Test Template">
                               <Send size={14} />
                            </button>
-                           <button className="p-1.5 text-slate-400 hover:text-blue-600 transition-all">
+                           <button 
+                             onClick={() => setEditingTemplate(template)}
+                             className="p-1.5 text-slate-400 hover:text-blue-600 transition-all"
+                           >
                               <Edit3 size={14} />
                            </button>
                         </div>
@@ -314,32 +360,54 @@ const EmailControlCenter: React.FC<EmailControlCenterProps> = ({ state, activePa
                     title="Welcome Protocol" 
                     desc="Auto-send welcome sequence to new subscribers" 
                     active={config.toggles?.welcomeEmail}
+                    onToggle={(v: boolean) => handleToggle('welcomeEmail', v)}
                   />
                   <ToggleItem 
                     title="Auth Handshake" 
                     desc="Critical OTP and Password verification relay" 
                     active={config.toggles?.otpEmail}
+                    onToggle={(v: boolean) => handleToggle('otpEmail', v)}
                     isCritical
                   />
                   <ToggleItem 
                     title="Billing Notification" 
                     desc="Invoice availability and payment confirmations" 
                     active={config.toggles?.invoiceEmail}
+                    onToggle={(v: boolean) => handleToggle('invoiceEmail', v)}
                   />
                   <ToggleItem 
                     title="Lifecycle Reminders" 
                     desc="Expiry alerts (7-day, 3-day, 1-day protocols)" 
                     active={config.toggles?.expiryReminder}
+                    onToggle={(v: boolean) => handleToggle('expiryReminder', v)}
                   />
                   <ToggleItem 
                     title="Admin Pulse" 
                     desc="Dispatch critical network events to admins" 
                     active={config.toggles?.adminAlerts}
+                    onToggle={(v: boolean) => handleToggle('adminAlerts', v)}
                   />
                </div>
             </div>
 
-            <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200">
+            <div className="space-y-6">
+                <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm relative overflow-hidden group">
+                   <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full opacity-50 group-hover:scale-150 transition-transform"></div>
+                   <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-4 flex items-center gap-2 relative">
+                      <TrendingIcon size={16} className="text-blue-600" />
+                      Monthly Operations
+                   </h3>
+                   <p className="text-xs text-slate-500 font-medium mb-6 relative">Trigger the monthly billing cycle, generate bulk invoices, and dispatch payment notifications to all active nodes.</p>
+                   
+                   <button 
+                     onClick={() => setIsMonthlyModal(true)}
+                     className="w-full py-4 bg-slate-900 hover:bg-black text-white rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all relative"
+                   >
+                     Initiate Monthly Cycle <ArrowRight size={14} />
+                   </button>
+                </div>
+
+                <div className="bg-slate-50 rounded-3xl p-8 border border-slate-200">
                 <h3 className="font-black text-slate-800 uppercase tracking-widest text-xs mb-6">Sender Identity Node</h3>
                 <div className="space-y-4 mb-8">
                    {config.senderIdentities.map(sender => (
@@ -363,8 +431,9 @@ const EmailControlCenter: React.FC<EmailControlCenterProps> = ({ state, activePa
                    Manage Verified Senders <ArrowRight size={14} />
                 </button>
             </div>
-         </div>
-      )}
+          </div>
+        </div>
+       )}
 
       {activeTab === 'automation' && (
          <div className="space-y-6">
@@ -493,11 +562,161 @@ const EmailControlCenter: React.FC<EmailControlCenterProps> = ({ state, activePa
         </div>
       </Modal>
 
+      {/* Monthly Cycle Modal */}
+      <Modal
+        isOpen={isMonthlyModal}
+        onClose={() => !isProcessing && setIsMonthlyModal(false)}
+        title="Protocol: Monthly Deployment Cycle"
+        type="confirm"
+        icon={<TrendingIcon className="text-blue-600" size={20} />}
+      >
+        <div className="space-y-6 p-2">
+           <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-4">
+              <div className="p-2 bg-blue-600 text-white rounded-xl">
+                 <AlertCircle size={20} />
+              </div>
+              <p className="text-[11px] font-medium text-blue-800 leading-relaxed">
+                 You are about to initiate the **System-Wide Monthly Cycle**. This will execute bulk invoicing and dispatch payment protocols to **{state.users.length}** active nodes.
+              </p>
+           </div>
+
+           <div>
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Target Billing Cycle</label>
+              <input 
+                type="month" 
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 transition-all font-bold text-slate-800"
+                value={monthlyTargetMonth}
+                onChange={e => setMonthlyTargetMonth(e.target.value)}
+                disabled={isProcessing}
+              />
+           </div>
+
+           {isProcessing && (
+              <div className="space-y-2">
+                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    <span>{monthlyProgress.label}</span>
+                    <span>{Math.round((monthlyProgress.current / monthlyProgress.total) * 100)}%</span>
+                 </div>
+                 <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-blue-600 transition-all duration-300"
+                      style={{ width: `${(monthlyProgress.current / monthlyProgress.total) * 100}%` }}
+                    ></div>
+                 </div>
+              </div>
+           )}
+
+           <button 
+             onClick={handleMonthlyCycle}
+             disabled={isProcessing}
+             className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 transition-all disabled:opacity-50 mt-4 shadow-xl shadow-blue-500/20"
+           >
+             {isProcessing ? <Activity className="animate-spin" size={16} /> : <Zap size={16} />}
+             Authorize Operation
+           </button>
+
+           <p className="text-[10px] text-slate-400 text-center font-bold uppercase italic tracking-tighter">
+              Yield-Aware Protocol Activated to Prevent System Hang
+           </p>
+        </div>
+      </Modal>
+      
+      {/* Add / Edit Template Modal */}
+      <Modal
+        isOpen={isAddingTemplate || !!editingTemplate}
+        onClose={() => { setIsAddingTemplate(false); setEditingTemplate(null); }}
+        title={editingTemplate ? "Refine Protocol: Template Edit" : "Provision New: Email Template"}
+        type="info"
+        icon={<Layout size={20} className="text-white" />}
+        maxWidth="max-w-3xl"
+      >
+        <TemplateForm 
+            template={editingTemplate || undefined} 
+            onSave={handleSaveTemplate} 
+            onCancel={() => { setIsAddingTemplate(false); setEditingTemplate(null); }}
+            isProcessing={isProcessing}
+        />
+      </Modal>
     </div>
   );
 };
 
 // --- Helper Components ---
+
+const TemplateForm = ({ template, onSave, onCancel, isProcessing }: any) => {
+  const [formData, setFormData] = useState({
+    name: template?.name || '',
+    subject: template?.subject || '',
+    content: template?.content || '',
+    category: template?.category || 'Marketing'
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Template Label</label>
+          <input 
+            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 outline-none focus:border-blue-500 transition-all"
+            value={formData.name}
+            onChange={e => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g. Welcome Sequence A"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category Registry</label>
+          <select 
+            className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 outline-none focus:border-blue-500 transition-all"
+            value={formData.category}
+            onChange={e => setFormData({ ...formData, category: e.target.value as any })}
+          >
+            <option value="Billing">Billing Protocol</option>
+            <option value="Technical">Technical Alert</option>
+            <option value="Marketing">Marketing Engagement</option>
+            <option value="System">System Notification</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Transmission Subject Line</label>
+        <input 
+          className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 outline-none focus:border-blue-500 transition-all"
+          value={formData.subject}
+          onChange={e => setFormData({ ...formData, subject: e.target.value })}
+          placeholder="Enter subject for the subscriber..."
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payload Content (Markdown/Liquid)</label>
+        <textarea 
+          className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 outline-none focus:border-blue-500 transition-all min-h-[300px] resize-none"
+          value={formData.content}
+          onChange={e => setFormData({ ...formData, content: e.target.value })}
+          placeholder="Construct your transmission payload here..."
+        />
+      </div>
+
+      <div className="flex gap-4 pt-4">
+        <button 
+          onClick={onCancel}
+          className="flex-1 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-200 transition-all"
+        >
+          Abort Operation
+        </button>
+        <button 
+          onClick={() => onSave({ ...template, ...formData })}
+          disabled={isProcessing || !formData.name || !formData.content}
+          className="flex-[2] py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-xl shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50"
+        >
+          {isProcessing ? <Activity className="animate-spin" size={16} /> : <Database size={16} />}
+          Commit Template to Registry
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const StatCard = ({ title, value, sub, icon: Icon, color }: any) => {
   const colors: any = {
@@ -558,7 +777,7 @@ const ProviderRow = ({ name, host, status, usage, total, isPrimary }: any) => {
   );
 };
 
-const ToggleItem = ({ title, desc, active, isCritical }: any) => {
+const ToggleItem = ({ title, desc, active, isCritical, onToggle }: any) => {
   return (
     <div className="flex items-center justify-between group">
        <div className="flex-1">
@@ -568,7 +787,10 @@ const ToggleItem = ({ title, desc, active, isCritical }: any) => {
           </div>
           <p className="text-[11px] text-slate-500 font-medium leading-tight">{desc}</p>
        </div>
-       <div className={`w-12 h-6 rounded-full relative transition-all cursor-pointer ${active ? 'bg-blue-600 shadow-lg shadow-blue-500/20' : 'bg-slate-200'}`}>
+       <div 
+         onClick={() => onToggle && onToggle(!active)}
+         className={`w-12 h-6 rounded-full relative transition-all cursor-pointer ${active ? 'bg-blue-600 shadow-lg shadow-blue-500/20' : 'bg-slate-200'}`}
+       >
           <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all shadow-sm ${active ? 'right-1' : 'left-1'}`}></div>
        </div>
     </div>

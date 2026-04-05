@@ -4,8 +4,8 @@ import { useBranding } from '../hooks/useBranding';
 
 export const PWAPrompt: React.FC = () => {
     const branding = useBranding();
-    const displayLogo = branding.logo || branding.logoSquare || branding.logoLight;
-    const brandName = branding.brandName || branding.businessName || 'App';
+    const displayLogo = branding.pwaIcon || branding.logo || branding.logoSquare || branding.logoLight || '/favicon.png';
+    const brandName = branding.brandName || branding.businessName || 'Click Opticx';
 
     const [isVisible, setIsVisible] = useState(false);
     const [isIOS, setIsIOS] = useState(false);
@@ -68,13 +68,24 @@ export const PWAPrompt: React.FC = () => {
                 </button>
 
                 <div className="flex items-start gap-6">
-                    {/* App Icon Mockup */}
-                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-lg shadow-blue-100 shrink-0 group-hover:scale-110 transition-transform duration-500 overflow-hidden border border-slate-100 p-2">
+                    <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-lg shadow-blue-100 shrink-0 group-hover:scale-110 transition-transform duration-500 overflow-hidden border border-slate-100 p-2 relative">
                         {displayLogo ? (
-                            <img src={displayLogo} alt={brandName} className="w-full h-full object-contain" />
-                        ) : (
+                            <img 
+                                src={displayLogo} 
+                                alt={brandName} 
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    const fallback = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+                                    if(fallback) fallback.style.display = 'flex';
+                                }}
+                            />
+                        ) : null}
+                        <div 
+                            className={`${displayLogo ? 'hidden ' : 'flex '}absolute inset-0 w-full h-full items-center justify-center bg-white`}
+                        >
                             <Smartphone size={32} />
-                        )}
+                        </div>
                     </div>
 
                     <div className="flex-1 pr-6">

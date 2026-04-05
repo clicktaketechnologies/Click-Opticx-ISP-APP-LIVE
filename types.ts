@@ -60,6 +60,8 @@ export interface RecoveryLog {
   amount?: number;
   oldState: string;
   newState: string;
+  status?: 'Paid' | 'Unpaid' | 'Half' | 'Emergency';
+  resolvedAt?: string;
   timestamp: string;
 }
 
@@ -1104,6 +1106,9 @@ export interface BrandingConfig {
   brandName?: string;
   tagline?: string;
   logo?: string;
+  pwaIcon?: string;
+  pwaSplash?: string;
+  notificationLogo?: string;
   developer?: string;
   phone?: string;
   website?: string;
@@ -1255,6 +1260,7 @@ export interface SystemSettings {
   pushConfig: PushConfig;
   signupRequests: SignupRequest[];
   auditLogs: AuditLog[];
+  lastGlobalWipe?: string;
 }
 
 export interface CreditScoreLog {

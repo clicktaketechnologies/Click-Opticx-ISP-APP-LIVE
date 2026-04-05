@@ -62,21 +62,12 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
       resetGraph();
       setResults({ dl: 0, ul: 0, ping: 0, jitter: 0, packetLoss: 0 });
       
-      // Safety timeout protection
-      const totalTimeout = setTimeout(() => {
-        if (isTesting) {
-          setIsTesting(false);
-          setStatusText("Diagnostic Timeout - Retrying Station Link...");
-          setPhase('idle');
-        }
-      }, 30000); // 30s max
-
       // 1. Initial Handshake & Latency
       setPhase('ping');
-      setStatusText('Syncing Signal Node...');
+      setStatusText('Syncing Signal Server...');
       const pingResults = await runPingTest();
       setResults(prev => ({ ...prev, ...pingResults }));
-      setStatusText('Handshake Verified');
+      setStatusText('Connection Verified');
       await new Promise(r => setTimeout(r, 600));
 
       // 2. Download Diagnostics
@@ -98,16 +89,19 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
       setResults(prev => ({ ...prev, ul: ulRes }));
 
       // Finalize
-      clearTimeout(totalTimeout);
       setPhase('completed');
-      setStatusText('Transmission Validated');
+      setStatusText('Test Finalized');
       
       if (onComplete) {
-        onComplete({ ...results, dl: dlRes, ul: ulRes, ...pingResults });
+        try {
+          onComplete({ ...results, dl: dlRes, ul: ulRes, ...pingResults });
+        } catch (e) {
+          console.warn("[SPEEDTEST] onComplete callback error:", e);
+        }
       }
     } catch (err) {
       console.error('[DIAGNOSTIC ERROR]', err);
-      setStatusText('Encryption Fault: Try Again');
+      setStatusText('Verification Error: Try Again');
       setPhase('idle');
     } finally {
       setIsTesting(false);
@@ -132,37 +126,39 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
   const currentSpeed = phase === 'upload' ? results.ul : results.dl;
 
   return (
-    <div className={`speedtest-modal w-full bg-white text-[#0F172A] rounded-[2rem] border-2 border-slate-100 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col ${isModal ? 'max-h-[90vh] overflow-y-auto' : ''} ${className}`} style={{ backgroundColor: '#FFFFFF', color: '#0F172A' }}>
+    <div className={`speedtest-modal w-full bg-white text-[#0F172A] rounded-[2rem] border-2 border-slate-100 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col ${isModal ? 'max-h-[85vh] overflow-y-auto' : ''} ${className}`} style={{ backgroundColor: '#FFFFFF', color: '#0F172A' }}>
       
       {/* Visual Identity Strip */}
       <div className="h-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 absolute top-0 left-0 right-0 z-50"></div>
 
-      <div className="p-6 md:p-10 space-y-8 flex-1">
+      <div className="p-4 sm:p-6 md:p-10 space-y-6 md:space-y-8 flex-1">
         
         {/* Header: Infrastructure Check */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
-          <div className="flex items-center gap-4">
-             <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner border border-blue-100">
-                <Globe size={28} />
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner border border-blue-100">
+                <Globe size={24} />
              </div>
              <div>
-                <h3 className="text-slate-900 font-bold text-sm uppercase italic tracking-tighter">ISP Provider</h3>
-                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest leading-none mt-1">{networkInfo?.isp || 'Syncing Node...'}</p>
+                <h3 className="text-slate-900 font-bold text-[10px] sm:text-sm uppercase italic tracking-tighter">ISP Provider</h3>
+                <p className="text-slate-400 text-[8px] sm:text-[10px] font-black uppercase tracking-widest leading-none mt-1">{networkInfo?.isp || 'Syncing Connection...'}</p>
              </div>
           </div>
 
-          <div className="relative group">
+          <div className="relative group w-full sm:w-auto">
              <button 
                onClick={() => setShowServerList(!showServerList)}
-               className="flex items-center gap-3 px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-white hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm"
+               className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-3 px-4 py-2.5 sm:px-5 sm:py-3 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-white hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm"
              >
-                <Server size={14} className="text-blue-500" />
-                {activeServer.name}
+                <div className="flex items-center gap-2">
+                   <Server size={14} className="text-blue-500" />
+                   {activeServer.name}
+                </div>
                 <ChevronDown size={14} className={`transition-transform duration-300 ${showServerList ? 'rotate-180' : ''}`} />
              </button>
              {showServerList && (
-               <div className="absolute top-full right-0 mt-3 w-64 bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-2xl z-[100] animate-in zoom-in-95 duration-200">
-                  <div className="p-3 bg-slate-50 border-b border-slate-100"><p className="text-[9px] font-black uppercase text-slate-400">Available Test Nodes</p></div>
+               <div className="absolute top-full right-0 mt-3 w-full sm:w-64 bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-2xl z-[100] animate-in zoom-in-95 duration-200">
+                  <div className="p-3 bg-slate-50 border-b border-slate-100"><p className="text-[9px] font-black uppercase text-slate-400">Available Test Servers</p></div>
                   {SPEED_TEST_SERVERS.map(s => (
                     <button 
                       key={s.id} 
@@ -178,23 +174,23 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
         </div>
 
         {/* Diagnostic Core: Gauge & Signal */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
            
-           {/* Speed Gauge Section (Full Width on Mobile) */}
-           <div className="lg:col-span-5 flex flex-col items-center">
-              <div className="relative w-64 h-64 sm:w-80 sm:h-80 flex items-center justify-center">
+           {/* Speed Gauge Section */}
+           <div className="lg:col-span-12 xl:col-span-5 flex flex-col items-center">
+              <div className="relative w-full max-w-[280px] sm:max-w-[340px] aspect-square flex items-center justify-center">
                  {/* Gauge Background Track */}
-                 <svg className="absolute inset-0 w-full h-full -rotate-90">
+                 <svg className="absolute inset-0 w-full h-full -rotate-90 scale-95 sm:scale-100">
                     <circle 
                       cx="50%" cy="50%" r="42%" 
-                      fill="none" stroke="#F1F5F9" strokeWidth="14" 
+                      fill="none" stroke="#F8FAFC" strokeWidth="12" 
                     />
                  </svg>
                  {/* Live Speed Arc */}
-                 <svg className="absolute inset-0 w-full h-full -rotate-90">
+                 <svg className="absolute inset-0 w-full h-full -rotate-90 scale-95 sm:scale-100">
                     <circle 
                       cx="50%" cy="50%" r="42%" 
-                      fill="none" stroke="url(#co-speed-gradient)" strokeWidth="14" strokeLinecap="round"
+                      fill="none" stroke="url(#co-speed-gradient)" strokeWidth="12" strokeLinecap="round"
                       style={{ 
                         strokeDasharray: '264', 
                         strokeDashoffset: 264 - (264 * (Math.min(currentSpeed, 100) / 100)),
@@ -203,7 +199,7 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
                     />
                     <defs>
                        <linearGradient id="co-speed-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#2563EB" />
+                          <stop offset="0%" stopColor="#3B82F6" />
                           <stop offset="100%" stopColor="#10B981" />
                        </linearGradient>
                     </defs>
@@ -211,19 +207,19 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
 
                  <div className="flex flex-col items-center text-center px-4">
                     <div className="flex items-baseline justify-center">
-                       <span className="text-5xl sm:text-7xl font-black text-slate-900 italic tracking-tighter leading-none">
+                       <span className="text-5xl sm:text-7xl font-black text-slate-900 italic tracking-tighter leading-none transition-all">
                           {currentSpeed.toFixed(1)}
                        </span>
                     </div>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-4 leading-none">
-                      {phase === 'upload' ? 'Upload' : 'Download'} <span className="text-slate-900 opacity-100 font-black italic">Mbps</span>
+                    <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-3 leading-none">
+                      {phase === 'upload' ? 'Upload' : 'Download'} <span className="text-slate-900 font-extrabold italic">Mbps</span>
                     </span>
                  </div>
 
-                 {/* Absolute Status Anchor */}
-                 <div className="absolute bottom-2 flex items-center gap-2 px-5 py-2 bg-slate-950 text-white rounded-full shadow-xl border border-white/10 scale-90 sm:scale-100">
-                    <div className={`w-2 h-2 rounded-full ${isTesting ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}`}></div>
-                    <span className="text-[9px] font-black uppercase italic tracking-widest">{statusText}</span>
+                 {/* Absolute Status Anchor (LITE COLOR) */}
+                 <div className="absolute -bottom-2 sm:bottom-2 flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full shadow-md border border-blue-100 scale-90 sm:scale-100">
+                    <div className={`w-1.5 h-1.5 rounded-full ${isTesting ? 'bg-blue-600 animate-pulse' : 'bg-slate-400'}`}></div>
+                    <span className="text-[8px] sm:text-[9px] font-black uppercase italic tracking-widest">{statusText}</span>
                  </div>
               </div>
            </div>
@@ -274,35 +270,14 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
         <div className="flex flex-col md:flex-row gap-5 items-stretch md:items-center pt-6 border-t border-slate-100">
            
            <div className="flex-1">
-              {phase === 'idle' ? (
-                <button 
-                  onClick={startTest}
-                  disabled={isTesting}
-                  className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] italic shadow-2xl shadow-blue-200 hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-50"
-                >
-                   {isTesting ? <MiniLoader /> : <Play size={20} fill="currentColor" />}
-                   {isTesting ? 'Initializing Diagnostics' : 'Start Diagnostic Engine'}
-                </button>
-              ) : phase === 'completed' ? (
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button 
-                    onClick={reset}
-                    className="flex-[2] py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] italic shadow-2xl hover:bg-black active:scale-[0.98] transition-all flex items-center justify-center gap-3"
-                  >
-                     <RefreshCw size={18} /> Test Again
-                  </button>
-                  <button 
-                    onClick={() => { window.print(); }}
-                    className="flex-1 py-5 bg-white border-2 border-slate-100 text-slate-400 rounded-2xl font-black text-xs uppercase tracking-[0.3em] italic hover:border-slate-300 transition-all flex items-center justify-center gap-3"
-                  >
-                     Download PDF
-                  </button>
-                </div>
-              ) : (
-                <div className="w-full py-5 bg-slate-50 border-2 border-slate-100 text-slate-400 rounded-2xl flex items-center justify-center gap-4 font-black text-[10px] uppercase tracking-widest">
-                   <MiniLoader /> Processing Diagnostic Fragment: {phase.toUpperCase()}...
-                </div>
-              )}
+              <button 
+                onClick={phase === 'completed' ? reset : startTest}
+                disabled={isTesting}
+                className={`w-full py-5 ${phase === 'completed' ? 'bg-indigo-600 shadow-indigo-200' : 'bg-blue-600 shadow-blue-200'} text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] italic shadow-2xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-50`}
+              >
+                 {isTesting ? <MiniLoader /> : phase === 'completed' ? <RefreshCw size={20} /> : <Play size={20} fill="currentColor" />}
+                 {isTesting ? 'Initializing Diagnostics' : phase === 'completed' ? 'Restart Diagnostic Engine' : 'Start Diagnostic Engine'}
+              </button>
            </div>
 
            {insight && (
@@ -319,9 +294,9 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
         </div>
 
         <div className="flex flex-wrap justify-center gap-y-4 gap-x-8 opacity-40 text-[9px] font-black text-slate-400 uppercase tracking-[0.5em] pt-4">
-           <div className="flex items-center gap-2"><MapPin size={10} /> Localized Node Verification</div>
+           <div className="flex items-center gap-2"><MapPin size={10} /> Localized Server Verification</div>
            <div className="flex items-center gap-2"><Cpu size={10} /> Hardware Layer v3.2.1</div>
-           <div className="flex items-center gap-2"><Lock size={10} /> Secure Encryption Handshake</div>
+           <div className="flex items-center gap-2"><Lock size={10} /> Secure Encryption</div>
         </div>
       </div>
     </div>

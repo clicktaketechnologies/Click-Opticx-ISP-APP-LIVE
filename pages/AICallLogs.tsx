@@ -188,7 +188,7 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
         onClose={() => setSelectedCall(null)}
         title={`Call Audit: #${selectedCall?.id.split('-').pop()}`}
         type="info"
-        icon={<History size={24} className="text-white" />}
+        icon={<div className="p-2 bg-blue-600 rounded-lg shadow-lg shadow-blue-500/20"><History size={20} className="text-white" /></div>}
         maxWidth="max-w-4xl"
         footer={
           <div className="p-6 bg-slate-900 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 w-full rounded-2xl">
@@ -209,27 +209,29 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
           <div className="space-y-8">
             {/* Identity Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 space-y-4">
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic border-b border-slate-700 pb-2">Caller Details</p>
+              <div className="bg-slate-900 shadow-xl shadow-slate-200/50 p-6 rounded-2xl border border-slate-800 space-y-4">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic border-b border-slate-800 pb-2">Caller Details</p>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-800 shadow-inner"><UserCircle size={28} className="text-slate-600"/></div>
+                  <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center border border-slate-700 shadow-inner">
+                    <UserCircle size={28} className="text-slate-400"/>
+                  </div>
                   <div>
-                    <p className="font-black text-white uppercase text-lg leading-none">{selectedCall.userName}</p>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">Ref: {selectedCall.userId}</p>
+                    <p className="font-black text-white uppercase text-lg leading-none tracking-tight">{selectedCall.userName}</p>
+                    <p className="text-[10px] text-blue-400 font-bold uppercase mt-1">Ref: {selectedCall.userId}</p>
                   </div>
                 </div>
               </div>
-              <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 space-y-4">
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic border-b border-slate-700 pb-2">Fiscal Risk Audit</p>
+              <div className="bg-slate-900 shadow-xl shadow-slate-200/50 p-6 rounded-2xl border border-slate-800 space-y-4">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic border-b border-slate-800 pb-2">Fiscal Risk Audit</p>
                 <div className="flex justify-between items-end">
                   <p className="text-3xl font-black italic tracking-tighter text-white">{Math.round(selectedCall.confidence * 100)}%</p>
-                  <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border ${selectedCall.confidence > 0.8 ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-orange-500/10 text-orange-400 border-orange-500/20'}`}>
+                  <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border shadow-inner ${selectedCall.confidence > 0.8 ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-orange-500/10 text-orange-400 border-orange-500/20'}`}>
                     {selectedCall.confidence > 0.8 ? 'Optimized' : 'Review Required'}
                   </span>
                 </div>
               </div>
-              <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 space-y-4">
-                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest italic border-b border-slate-700 pb-2">Handshake Metrics</p>
+              <div className="bg-slate-900 shadow-xl shadow-slate-200/50 p-6 rounded-2xl border border-slate-800 space-y-4">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic border-b border-slate-800 pb-2">Handshake Metrics</p>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <Clock size={16} className="text-blue-400"/>
@@ -243,13 +245,13 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
             {/* Topics & Transcription Area */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-1 space-y-6">
-                <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 space-y-6">
-                  <h4 className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 border-b border-slate-700 pb-4 italic"><Sparkles size={14} className="text-amber-500"/> Heuristic Labels</h4>
+                <div className="bg-slate-900 shadow-xl shadow-slate-200/50 p-6 rounded-2xl border border-slate-800 space-y-6">
+                  <h4 className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 border-b border-slate-800 pb-4 italic"><Sparkles size={14} className="text-amber-500"/> Heuristic Labels</h4>
                   <div className="space-y-2">
                     {selectedCall.topics.map(t => (
-                      <div key={t} className="flex items-center justify-between p-3 bg-slate-900/50 rounded-xl border border-slate-800 group hover:border-blue-500/50 transition-all">
-                        <span className="text-[10px] font-black uppercase text-slate-400">{t}</span>
-                        <ChevronRight size={14} className="text-slate-600 group-hover:text-blue-400 transition-all" />
+                      <div key={t} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl border border-slate-700 group hover:border-blue-500/50 transition-all">
+                        <span className="text-[10px] font-black uppercase text-slate-300">{t}</span>
+                        <ChevronRight size={14} className="text-slate-500 group-hover:text-blue-400 transition-all" />
                       </div>
                     ))}
                   </div>
@@ -269,12 +271,12 @@ const AICallLogs: React.FC<{ state: AppState }> = ({ state }) => {
               </div>
 
               <div className="lg:col-span-2 space-y-4">
-                <div className="bg-slate-800/50 rounded-2xl border border-slate-700 overflow-hidden flex flex-col h-full">
-                  <div className="p-4 bg-slate-900/50 border-b border-slate-800 flex items-center justify-between">
-                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2"><FileText size={14} className="text-blue-400"/> Transcription Output</h4>
-                    <span className="text-[8px] font-black uppercase bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-slate-600">v4.2_Logs</span>
+                <div className="bg-slate-900 shadow-xl shadow-slate-200/50 rounded-2xl border border-slate-800 overflow-hidden flex flex-col h-full">
+                  <div className="p-4 bg-slate-950/50 border-b border-slate-800 flex items-center justify-between">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><FileText size={14} className="text-blue-400"/> Transcription Output</h4>
+                    <span className="text-[8px] font-black uppercase bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-slate-500">v4.2_Logs</span>
                   </div>
-                  <div className="p-6 flex-1 font-bold text-slate-300 leading-relaxed uppercase italic text-[11px] whitespace-pre-wrap">
+                  <div className="p-6 flex-1 font-bold text-white leading-relaxed uppercase italic text-[11px] whitespace-pre-wrap selection:bg-blue-500/30">
                     {selectedCall.transcription || 'NO TRANSCRIPTION METADATA AVAILABLE FOR THIS NODE PULSE.'}
                   </div>
                 </div>

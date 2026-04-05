@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 import {
    ShieldCheck, Wifi, CheckCircle, ArrowLeft, Loader2, Cpu, Zap,
    User, Smartphone, AtSign, Contact, LayoutGrid, Clock, MapPin,
-   AlertCircle, ShieldAlert, Key, Globe, Info, Package, Send, History, X, Scale
+   AlertCircle, ShieldAlert, Key, Globe, Info, Package, Send, History, X, Scale, Scan
 } from 'lucide-react';
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
 import { useBranding } from '../hooks/useBranding';
 import { Modal } from '../components/shared/Modal';
+import FaceScanner from '../components/shared/FaceScanner';
 
 interface LoginProps {
    onLogin: (credential: string, pass: string) => any;
@@ -19,7 +20,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const branding = useBranding();
    const legal = state.settings.legal;
 
-   const [view, setView] = useState<'login' | 'signup' | 'reset_request' | 'reset_finalize' | 'phone_login' | 'otp_verify'>('login');
+   const [view, setView] = useState<'login' | 'signup' | 'reset_request' | 'reset_finalize' | 'phone_login' | 'otp_verify' | 'face_reset'>('login');
    const [credential, setCredential] = useState('');
    const [password, setPassword] = useState('');
    const [rememberMe, setRememberMe] = useState(true);
@@ -140,20 +141,45 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       }
    };
 
-    const handleResetRequest = async (e: React.FormEvent) => {
+     const handleResetRequest = async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
       setIsProcessing(true);
 
       // Attempt Native Firebase Reset first (High reliability)
       const res = await db.sendPasswordReset(resetIdentifier);
-      setIsProcessing(false);
-
+      
       if (res.success) {
+         setIsProcessing(false);
          alert(`🔐 Recovery protocol initiated.\n\n[CLOUD DISPATCH]\nPlease check your registered email for the reset link. If not found, check your spam folder.`);
          setView('login');
+      } else {
+         // FALLBACK: Offer manual request
+         const manualRes = await db.submitManualPasswordRequest(resetIdentifier);
+         setIsProcessing(false);
+         if (manualRes.success) {
+            alert(`⚠️ Automated Reset Offline\n\nA manual recovery request has been dispatched to our network administrators for ${resetIdentifier}. Please wait for a contact or check back later.`);
+            setView('login');
+         } else {
+            setError(manualRes.message || "Recovery Protocol Fault: Handshake failed.");
+         }
       }
-   };
+    };
+
+    const handleFaceResetCapture = async (base64Image: string) => {
+       setError(null);
+       setIsProcessing(true);
+
+       const res = await db.verifyFaceForReset(resetIdentifier, base64Image);
+       setIsProcessing(false);
+
+       if (res.success) {
+          setResetToken('BIOMETRIC_APPROVED');
+          setView('reset_finalize');
+       } else {
+          setError(res.message);
+       }
+    };
 
    const handleResetFinalize = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -161,10 +187,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
       const verify = await db.verifyResetCode(resetIdentifier, resetToken);
 
-      if (verify.success) {
-         const userNode = await db.findUserForReset(resetIdentifier);
-         if (userNode) {
-            await db.updateCustomerPassword(userNode.id, newPassword);
+      if (verify.success || resetToken === 'BIOMETRIC_APPROVED') {
+         const userAccount = await db.findUserForReset(resetIdentifier);
+         if (userAccount) {
+            await db.updateCustomerPassword(userAccount.id, newPassword);
             setIsProcessing(false);
             setView('login');
             setError(null);
@@ -423,7 +449,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                className="w-full py-4 bg-amber-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-amber-500/10 hover:bg-amber-700 active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
             >
                {isProcessing ? <Mini5GMicroLoader size={18} /> : null}
-               Recover Account &rarr;
+               Recover via Email/SMS &rarr;
+            </button>
+            <button
+               type="button"
+               disabled={!resetIdentifier}
+               onClick={() => setView('face_reset')}
+               className="w-full py-4 bg-slate-950 text-white rounded-2xl font-bold text-sm shadow-xl hover:bg-black active:scale-95 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            >
+               <Scan size={18} />
+               Biometric Face ID Recovery &rarr;
             </button>
             <button type="button" onClick={() => setView('login')} className="w-full py-3 text-slate-500 font-semibold text-sm hover:text-slate-700 transition-colors flex items-center justify-center">
                Cancel &rarr;
@@ -431,6 +466,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          </div>
       </form>
    );
+
+   const renderFaceReset = () => (
+      <div className="space-y-6 animate-in slide-in-from-right duration-500">
+         <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-4">
+            <Info size={20} className="text-blue-500 shrink-0 mt-0.5" />
+            <p className="text-[10px] text-blue-800 font-black uppercase tracking-widest leading-relaxed">
+               Biometric Handshake Initiated. Ensure your face is clearly visible. If matched to your KYC registry, password reset will unlock instantly.
+            </p>
+         </div>
+         <FaceScanner onCapture={handleFaceResetCapture} onCancel={() => setView('reset_request')} />
+      </div>
+   );
+
    const renderResetFinalize = () => (
       <form onSubmit={handleResetFinalize} className="space-y-8 animate-in slide-in-from-right duration-500" autoComplete="off">
          <div className="p-6 bg-green-50 border border-green-100 rounded-2xl flex items-start gap-4">
@@ -439,9 +487,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          </div>
 
          <div className="space-y-6">
-            <div className="space-y-2">
+            <div className={`space-y-2 ${resetToken === 'BIOMETRIC_APPROVED' ? 'hidden' : ''}`}>
                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Verification Code</label>
-               <input className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-center text-2xl tracking-[0.8em] focus:border-blue-600 focus:bg-white outline-none transition-all" placeholder="XXXXXX" value={resetToken} onChange={e => setResetToken(e.target.value)} maxLength={6} required autoComplete="off" />
+               <input className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-center text-2xl tracking-[0.8em] focus:border-blue-600 focus:bg-white outline-none transition-all" placeholder="XXXXXX" value={resetToken} onChange={e => setResetToken(e.target.value)} maxLength={6} required={resetToken !== 'BIOMETRIC_APPROVED'} autoComplete="off" />
             </div>
 
             <PasswordInput
@@ -456,7 +504,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
          <button
             type="submit"
-            disabled={isProcessing || resetToken.length < 4}
+            disabled={isProcessing || (resetToken.length < 4 && resetToken !== 'BIOMETRIC_APPROVED')}
             className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/10 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-3"
          >
             {isProcessing ? <Mini5GMicroLoader size={18} /> : <ShieldCheck size={18} />}
@@ -559,7 +607,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                <div className="relative z-10">
                   <div className="flex items-center gap-4 mb-12">
                      <div className="w-14 h-14 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-2xl overflow-hidden">
-                        {displayLogo ? <img src={displayLogo} className="h-10 w-10 object-contain p-1" /> : <Wifi className="text-green-400" size={28} />}
+                        {displayLogo ? <img src={displayLogo} className="h-10 w-10 object-contain p-1" alt={brandName} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/favicon.png'; }} /> : <img src="/favicon.png" className="h-10 w-10 object-contain p-1" alt="Click Opticx" />}
                      </div>
                      <div>
                         <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic leading-none">{brandName}</h2>
@@ -606,7 +654,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
                {/* Background Decorative Element */}
                <div className="absolute bottom-[-5%] right-[-5%] opacity-10 scale-150 rotate-12">
-                  <Wifi size={300} strokeWidth={0.5} className="text-white" />
+                  <img src="/favicon.png" className="w-[300px] h-[300px] object-contain opacity-5 drop-shadow-2xl grayscale" alt="Background Brand" />
                </div>
             </div>
 
@@ -615,10 +663,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                {/* Mobile Logo (Visible only on small screens) */}
                <div className="lg:hidden flex flex-col items-center mb-8">
                   {displayLogo ? (
-                     <img src={displayLogo} className="w-16 h-16 object-contain mb-3" alt={brandName} />
+                     <img src={displayLogo} className="w-16 h-16 object-contain mb-3" alt={brandName} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/favicon.png'; }} />
                   ) : (
-                     <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center shadow-xl mb-3 relative overflow-hidden">
-                        <Wifi className="text-green-400" size={32} />
+                     <div className="w-16 h-16 bg-slate-950 rounded-2xl flex items-center justify-center shadow-xl mb-3 relative overflow-hidden p-3 border border-slate-800">
+                        <img src="/favicon.png" className="w-full h-full object-contain" alt="Click Opticx" />
                      </div>
                   )}
                   <h1 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">{brandName}</h1>
@@ -633,6 +681,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                               view === 'signup' ? 'Sign Up' :
                               view === 'phone_login' ? 'Mobile Sign In' :
                               view === 'otp_verify' ? 'Verify OTP' :
+                              view === 'face_reset' ? 'Biometric Face ID' :
                                  'Reset Password'}
                         </h3>
                         <p className="text-slate-400 mt-2 font-black text-[10px] uppercase tracking-[0.3em] opacity-80">
@@ -640,6 +689,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                               view === 'signup' ? 'Create Account' :
                               view === 'phone_login' ? 'Enter Mobile Number' :
                               view === 'otp_verify' ? 'Confirm Identity' :
+                              view === 'face_reset' ? 'Matrix Scanning' :
                                  'Recover Account'}
                         </p>
                      </div>
@@ -656,6 +706,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                      {view === 'login' && renderLogin()}
                      {view === 'signup' && renderSignup()}
                      {view === 'reset_request' && renderResetRequest()}
+                     {view === 'face_reset' && renderFaceReset()}
                      {view === 'reset_finalize' && renderResetFinalize()}
                      {view === 'phone_login' && renderPhoneLogin()}
                      {view === 'otp_verify' && renderOTPVerify()}

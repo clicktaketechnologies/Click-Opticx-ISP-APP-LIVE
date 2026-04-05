@@ -30,7 +30,8 @@ const SystemReadiness: React.FC = () => {
       desc: 'Enables Firestore real-time sync and Auth.',
       status: keys.firebaseApiKey && keys.firebaseProjectId ? 'Passed' : 'Missing',
       impact: 'Critical',
-      icon: Cloud
+      icon: Cloud,
+      link: '#/business-settings'
     },
     {
         id: 'firebase-vapid',
@@ -38,7 +39,8 @@ const SystemReadiness: React.FC = () => {
         desc: 'Required for browser push notifications.',
         status: keys.firebaseVapidKey ? 'Passed' : 'Missing',
         impact: 'Warning',
-        icon: Bell
+        icon: Bell,
+        link: '#/business-settings'
     },
     {
       id: 'smtp',
@@ -46,7 +48,8 @@ const SystemReadiness: React.FC = () => {
       desc: 'Required for billing and alert emails.',
       status: keys.smtpHost && keys.smtpPass ? 'Passed' : 'Missing',
       impact: 'High',
-      icon: Mail
+      icon: Mail,
+      link: '#/email-config'
     },
     {
       id: 'socket-io',
@@ -54,7 +57,8 @@ const SystemReadiness: React.FC = () => {
       desc: 'Enables live bandwidth and OLT telemetry.',
       status: socketConnected ? 'Passed' : 'Disconnected',
       impact: 'Critical',
-      icon: Activity
+      icon: Activity,
+      link: '#/network-integration'
     },
     {
       id: 'ai-engine',
@@ -62,7 +66,8 @@ const SystemReadiness: React.FC = () => {
       desc: 'Enables diagnostic assistance and AI chat.',
       status: keys.geminiApiKey ? 'Passed' : 'Missing',
       impact: 'Medium',
-      icon: Cpu
+      icon: Cpu,
+      link: '#/system-config'
     },
     {
       id: 'nas-registry',
@@ -70,11 +75,16 @@ const SystemReadiness: React.FC = () => {
       desc: 'Core networking hardware integration.',
       status: dbState.nas.length > 0 ? 'Active' : 'Not Configured',
       impact: 'High',
-      icon: Server
+      icon: Server,
+      link: '#/nas-management'
     }
   ];
 
-  const overallHealth = requirements.filter(r => r.status === 'Passed' || r.status === 'Passed' || r.status === 'Active').length / requirements.length;
+  const overallHealth = requirements.filter(r => r.status === 'Passed' || r.status === 'Active').length / requirements.length;
+
+  const navigateTo = (link?: string) => {
+    if (link) window.location.hash = link;
+  };
 
   return (
     <div className="p-8 space-y-8 animate-premium">
@@ -125,8 +135,12 @@ const SystemReadiness: React.FC = () => {
                   {req.status}
                 </span>
               </div>
-              <button className="text-slate-300 hover:text-blue-500 transition-colors">
-                <ExternalLink size={14} />
+              <button 
+                onClick={() => navigateTo(req.link)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 text-slate-400 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all text-[9px] font-black uppercase tracking-widest border border-slate-100"
+              >
+                <span>Edit</span>
+                <ExternalLink size={12} />
               </button>
             </div>
           </div>

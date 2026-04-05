@@ -394,11 +394,16 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
         {/* Header / Logo Area */}
         <div className="h-[70px] flex items-center justify-between px-5 border-b border-[rgba(255,255,255,0.05)] shrink-0 relative overflow-hidden backdrop-blur-md">
           <div className="flex items-center gap-[12px] overflow-hidden w-full transition-all">
-            <div className="w-9 h-9 bg-white/5 rounded-lg flex items-center justify-center shadow-lg shrink-0 border border-white/10 group hover:bg-white/10 transition-colors">
+            <div className="w-10 h-10 flex items-center justify-center shrink-0 group transition-colors">
               {branding.logo || branding.logoDark || branding.logoSquare ? (
-                <img src={branding.logo || branding.logoDark || branding.logoSquare} className="w-full h-full object-contain p-1" />
+                <img 
+                  src={branding.logo || branding.logoDark || branding.logoSquare} 
+                  className="w-full h-full object-contain p-1" 
+                  alt="Logo"
+                  onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/favicon.png'; }}
+                />
               ) : (
-                <Wifi className="text-[#3B82F6] group-hover:scale-110 transition-transform duration-[200ms] ease-out" size={20} />
+                <img src="/favicon.png" className="w-[80%] h-[80%] object-contain p-0.5 group-hover:scale-110 transition-transform duration-[200ms] ease-out" alt="Logo" />
               )}
             </div>
             {!isCollapsed && (

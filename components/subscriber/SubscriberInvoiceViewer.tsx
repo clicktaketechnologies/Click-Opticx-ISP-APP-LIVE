@@ -228,7 +228,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                         <div className="flex justify-between items-start">
                            <div className="flex gap-4">
                               <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center p-2">
-                                 {displayLogo ? <img src={displayLogo} className="w-full h-full object-contain" /> : <Wifi className="text-blue-400" />}
+                                 {displayLogo ? <img src={displayLogo} className="w-full h-full object-contain" onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/favicon.png'; }} /> : <img src="/favicon.png" className="w-[80%] h-[80%] object-contain" alt="Logo" />}
                               </div>
                               <div>
                                  <h2 className="text-2xl font-black italic tracking-tighter uppercase text-slate-900">{branding.businessName}</h2>

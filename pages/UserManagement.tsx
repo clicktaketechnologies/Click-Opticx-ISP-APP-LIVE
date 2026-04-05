@@ -104,7 +104,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
           case 'Paid': return u.balance <= 0 && u.packageId;
           case 'Half Paid': return pkg && u.balance > 0 && u.balance < pkg.price;
           case 'Half Data': return u.dataUsed && u.dataLimit && (u.dataUsed / u.dataLimit) >= 0.5;
-          case 'Unverified': return u.verificationStatus === VerificationStatus.PENDING || u.status === UserStatus.PENDING_VERIFICATION;
+          case 'Unverified': return u.verificationStatus === VerificationStatus.UNVERIFIED || u.verificationStatus === VerificationStatus.PENDING || u.status === UserStatus.PENDING_VERIFICATION;
           case 'Verified': return u.verificationStatus === VerificationStatus.VERIFIED;
           default: return true;
         }
@@ -669,7 +669,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">PPPoE Link ID</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.pppoeId} onChange={e => setNewUserData({...newUserData, pppoeId: e.target.value})} /></div>
                       <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">NAS Identity</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.nasId} onChange={e => setNewUserData({...newUserData, nasId: e.target.value})} /></div>
-                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Target OLT Node</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.oltNode} onChange={e => setNewUserData({...newUserData, oltNode: e.target.value})} /></div>
+                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Network Station (OLT)</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.oltNode} onChange={e => setNewUserData({...newUserData, oltNode: e.target.value})} /></div>
                       <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">VLAN Index</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.vlanId} onChange={e => setNewUserData({...newUserData, vlanId: e.target.value})} /></div>
                    </div>
                 </div>
@@ -941,7 +941,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
         }
       >
          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-            {/* Identity Node */}
+            {/* Subscriber Identity */}
             <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><User size={14} className="text-blue-500"/> Contact Details</h4>
                <div className="space-y-4">
@@ -952,7 +952,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                </div>
             </div>
 
-            {/* Fiscal Node */}
+            {/* Fiscal Record */}
             <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><DollarSign size={14} className="text-green-500"/> Billing Summary</h4>
                <div className="space-y-6">
@@ -967,7 +967,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                </div>
             </div>
 
-            {/* Link Layer Node */}
+            {/* Network Link Layer */}
             <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><Wifi size={14} className="text-blue-500"/> Link Layer</h4>
                <div className="space-y-4">

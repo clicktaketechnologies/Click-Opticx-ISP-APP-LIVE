@@ -62,7 +62,8 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
       amount: 0,
       userId: r.userId || 'REQ',
       userName: r.name,
-      packageName: r.status === 'Duplicate' ? 'Identity Conflict' : 'New Account Request'
+      packageName: r.status === 'Duplicate' ? 'Identity Conflict' : 'New Account Request',
+      kycDocuments: state.users.find(u => u.id === r.userId)?.kycDocuments || []
     }));
 
     const kycRequests = state.users
@@ -452,7 +453,7 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
               </div>
             </div>
 
-            {selectedRequestData.unifiedType === 'kyc' && (
+            {(selectedRequestData.unifiedType === 'kyc' || selectedRequestData.unifiedType === 'signup') && (selectedRequestData as any).kycDocuments?.length > 0 && (
               <div className="space-y-4">
                 <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest border-b border-blue-900/50 pb-2 flex items-center gap-2">
                   <SafeIcon icon={ShieldCheck} size={12} /> Identity Artifacts ({(selectedRequestData as any).kycMethod || 'Manual'})
@@ -474,28 +475,28 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
             )}
 
             {selectedRequestData.status === 'Duplicate' && (
-              <div className="p-4 bg-rose-950/60 border border-rose-800/50 rounded-xl space-y-2">
-                <h4 className="text-[10px] font-black text-rose-400 uppercase tracking-widest flex items-center gap-2"><SafeIcon icon={ShieldAlert} size={14} /> Identity Conflict Detected</h4>
-                <p className="text-xs font-bold text-rose-400">{(selectedRequestData as any).duplicateReason || 'A subscriber with these details already exists.'}</p>
+              <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl space-y-2">
+                <h4 className="text-[10px] font-black text-rose-600 uppercase tracking-widest flex items-center gap-2"><SafeIcon icon={ShieldAlert} size={14} /> Identity Conflict Detected</h4>
+                <p className="text-xs font-bold text-rose-500">{(selectedRequestData as any).duplicateReason || 'A subscriber with these details already exists.'}</p>
               </div>
             )}
 
-            <div className="p-4 bg-slate-800/60 border border-slate-700/50 rounded-xl space-y-3">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><SafeIcon icon={Activity} size={12} className="text-blue-400" /> System Check</h4>
-              <div className="flex items-center justify-between py-2 border-b border-slate-700/50">
-                <span className="text-[10px] font-bold text-slate-500 uppercase">Existing Package Check</span>
+            <div className="p-4 bg-blue-50/50 border border-slate-200 rounded-xl space-y-3">
+              <h4 className="text-[10px] font-black text-slate-700 uppercase tracking-widest flex items-center gap-2"><SafeIcon icon={Activity} size={12} className="text-blue-500" /> System Check</h4>
+              <div className="flex items-center justify-between py-2 border-b border-slate-200">
+                <span className="text-[10px] font-bold text-slate-600 uppercase">Existing Package Check</span>
                 {(() => {
                   const user = state.users.find(u => u.id === selectedRequestData.userId); const exp = user?.expiryDate ? new Date(user.expiryDate) < new Date() : true;
-                  return exp ? <span className="text-[9px] font-black text-emerald-400 uppercase flex items-center gap-1"><SafeIcon icon={CheckCircle} size={11} /> No Active Package</span>
-                    : <span className="text-[9px] font-black text-rose-400 uppercase flex items-center gap-1"><SafeIcon icon={AlertCircle} size={11} /> Has Active Package</span>;
+                  return exp ? <span className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-1"><SafeIcon icon={CheckCircle} size={11} /> No Active Package</span>
+                    : <span className="text-[9px] font-black text-rose-600 uppercase flex items-center gap-1"><SafeIcon icon={AlertCircle} size={11} /> Has Active Package</span>;
                 })()}
               </div>
               <div className="flex items-center justify-between py-2">
-                <span className="text-[10px] font-bold text-slate-500 uppercase">Credit Score</span>
+                <span className="text-[10px] font-bold text-slate-600 uppercase">Credit Score</span>
                 {(() => {
                   const score = state.users.find(u => u.id === selectedRequestData.userId)?.creditScore || 0;
-                  return score >= 600 ? <span className="text-[9px] font-black text-emerald-400 uppercase">Good ({score})</span>
-                    : <span className="text-[9px] font-black text-orange-400 uppercase">Low ({score})</span>;
+                  return score >= 600 ? <span className="text-[9px] font-black text-emerald-600 uppercase">Good ({score})</span>
+                    : <span className="text-[9px] font-black text-orange-500 uppercase">Low ({score})</span>;
                 })()}
               </div>
             </div>

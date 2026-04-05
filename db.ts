@@ -274,6 +274,9 @@ const INITIAL_STATE: AppState = {
       developer: 'ClickTake Technologies',
       phone: '+92 306 9753003',
       website: 'www.clickopticx.com',
+      pwaIcon: '/favicon.ico',
+      pwaSplash: '/favicon.ico',
+      notificationLogo: '/favicon.ico',
       socialLinks: [
         { platform: 'Instagram', url: '' },
         { platform: 'TikTok', url: '' },
@@ -897,8 +900,26 @@ class DB {
     if (this.localCommitTimer) clearTimeout(this.localCommitTimer);
     this.localCommitTimer = setTimeout(() => {
       try {
+        // --- QUOTA CONTROL: Prune historical logs to stay within 5MB LocalStorage limit ---
+        if (this.state.auditLogs?.length > 100) this.state.auditLogs = this.state.auditLogs.slice(-100);
+        if (this.state.deliveryLogs?.length > 100) this.state.deliveryLogs = this.state.deliveryLogs.slice(-100);
+        if (this.state.aiLogs?.length > 100) this.state.aiLogs = this.state.aiLogs.slice(-100);
+        if (this.state.nocEvents?.length > 100) this.state.nocEvents = this.state.nocEvents.slice(-100);
+        if (this.state.ledger?.length > 300) this.state.ledger = this.state.ledger.slice(-300);
+        if (this.state.invoices?.length > 300) this.state.invoices = this.state.invoices.slice(-300);
+        if (this.state.notifications?.length > 100) this.state.notifications = this.state.notifications.slice(-100);
+
         localStorage.setItem('clickopticx_v16_registry', JSON.stringify(this.state));
-      } catch (e) { console.warn('[DB] localStorage write failed:', e); }
+      } catch (e) { 
+        console.warn('[DB] localStorage write failed:', e); 
+        // If it still fails, wipe oldest logs aggressively
+        if (e.name === 'QuotaExceededError') {
+           this.state.auditLogs = [];
+           this.state.deliveryLogs = [];
+           this.state.aiLogs = [];
+           console.log('[DB] Emergency flush performed due to storage pressure.');
+        }
+      }
     }, 400);
 
     // Firestore cloud sync — debounced separately at 500ms
@@ -1004,20 +1025,20 @@ class DB {
         console.log('[AUTH] Handling Redirect Success:', user.email);
         
         // Use normalized logic for staff / user matching
-        let existingStaff = this.state.staff.find(s => s.email === user.email);
+        let existingStaff = this.state.staff.find(s => s.email?.toLowerCase() === user.email?.toLowerCase());
+        let existingUser = this.state.users.find(u => u.email?.toLowerCase() === user.email?.toLowerCase());
+        
         if (existingStaff) {
             this.state.currentUser = { ...existingStaff };
-        } else {
-            let existingUser = this.state.users.find(u => u.email === user.email);
-            if (existingUser) {
-                this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
-            }
+        } else if (existingUser) {
+            this.state.currentUser = { ...existingUser, role: Role.CUSTOMER };
         }
         
         if (this.state.currentUser) {
             this.authenticateSocket();
             this.notify();
             this.logAudit('Google Login', 'Login', `Authenticated via Redirect: ${user.email}`, this.state.currentUser.id, this.state.currentUser.name);
+            console.log('[AUTH] Matched existing user for Google Login:', user.email);
         } else {
             // New user case - submit signup
             const signupRes = await this.submitSignupRequest({
@@ -2229,7 +2250,9 @@ class DB {
       // Update Identity Payload
       user.approval_status = 'approved';
       user.status = UserStatus.ACTIVE;
-      user.kyc_status = user.kyc_status || 'pending';
+      user.isKYCVerified = true;
+      user.verificationStatus = VerificationStatus.VERIFIED;
+      user.kyc_status = 'verified';
       
       // Update Request Payload
       req.status = 'Approved';
@@ -3686,13 +3709,33 @@ class DB {
         address: payload.address || '',
         area: payload.area || '',
         packageId: payload.packageId || (this.state.packages[0]?.id || ''),
-        status: 'Pending_Verification',
+        status: UserStatus.PENDING_VERIFICATION,
+        verificationStatus: VerificationStatus.UNVERIFIED,
         kyc_status: 'pending',
         role: 'Customer',
         balance: 0,
         creditScore: 600,
         createdAt: new Date().toISOString()
       };
+      
+      // SHADOW USER: Create a pending user in the main list immediately for Admin visibility
+      const shadowUser: ISPUser = {
+        ...newUser,
+        id: newUser.id,
+        connectionId: 'PENDING-' + newUser.id.slice(-4),
+        isKYCVerified: false,
+        isKYCSubmitted: false,
+        balance: 0,
+        dataLimit: 0,
+        dataUsed: 0,
+        expiryDate: '',
+        lastActive: '',
+        portalEnabled: true,
+        notificationPrefs: { email: true, sms: true, push: true, whatsapp: true }
+      };
+      
+      this.state.users.unshift(shadowUser);
+      this.state.signupRequests.unshift(newUser);
 
       const newRequest: any = {
         id: 'SR-' + Date.now(),

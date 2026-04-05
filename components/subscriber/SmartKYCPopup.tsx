@@ -206,9 +206,10 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
         </button>
         <button
           onClick={handleSubmit}
-          className="flex-[2] py-5 bg-slate-950 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:shadow-blue-500/10 transition-all flex items-center justify-center gap-2"
+          disabled={isSubmitting}
+          className={`flex-[2] py-5 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-2 ${isSubmitting ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-950 hover:shadow-blue-500/10'}`}
         >
-          Submit Identity Node
+          {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Sending...</> : 'Send for Review'}
         </button>
       </div>
     </div>
@@ -223,8 +224,8 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
         </div>
       </div>
       <div className="text-center space-y-2">
-        <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter italic leading-none">Scanning Biometrics</h3>
-        <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em]">Vault relay in progress...</p>
+        <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter italic leading-none">Checking Everything</h3>
+        <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em]">Just a second...</p>
       </div>
     </div>
   );
@@ -235,16 +236,16 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
         <CheckCircle size={56} strokeWidth={3} />
       </div>
       <div className="text-center space-y-3">
-        <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter italic leading-none">Node Submitted</h3>
+        <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter italic leading-none">All Set!</h3>
         <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest leading-relaxed max-w-[250px] mx-auto">
-          Your identity artifact has been relayed to the infrastructure vault. Review takes approx. 4-12 hours.
+          We've received your documents! We are verifying them now, and after verification you can use our app. This usually takes just a few hours.
         </p>
       </div>
       <button
         onClick={onClose}
         className="w-full py-5 bg-slate-950 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-black transition-all"
       >
-        Acknowledge & Access Hub
+        Got it!
       </button>
     </div>
   );
@@ -271,7 +272,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Smart Identity Node"
+      title="Let's Get You Verified"
       type="info"
       icon={<Fingerprint size={24} className="text-white" />}
       maxWidth="max-w-lg"
@@ -287,7 +288,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
     >
       <div className="space-y-6">
         <div className="text-center space-y-1">
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] opacity-80">KYC Verification Protocol v2.4</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] opacity-80">One last step to unlock your account</p>
         </div>
 
         <div className="min-h-[300px]">
@@ -308,23 +309,5 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
     </Modal>
   );
 };
-
-const RefreshCw = ({ className, size }: { className?: string, size?: number }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width={size || 24} 
-    height={size || 24} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="3" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85.83 6.72 2.24L21 8" />
-    <path d="M21 3v5h-5" />
-  </svg>
-);
 
 export default SmartKYCPopup;

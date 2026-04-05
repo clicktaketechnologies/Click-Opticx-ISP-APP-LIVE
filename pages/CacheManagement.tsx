@@ -6,7 +6,8 @@ import { db } from '../db';
 import {
     RefreshCw, Trash2, ShieldAlert, Cpu,
     HardDrive, Monitor, Zap, CheckCircle2,
-    XCircle, Loader2, AlertTriangle, ShieldCheck
+    XCircle, Loader2, AlertTriangle, ShieldCheck,
+    DatabaseZap
 } from 'lucide-react';
 
 const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
@@ -172,14 +173,27 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
                 </div>
             </div>
 
-            <div className="p-8 bg-amber-50 border-2 border-amber-100 rounded-[3rem] flex items-start gap-6 shadow-sm mx-1">
-                <ShieldAlert className="text-amber-600 mt-1 shrink-0" size={32} />
-                <div className="flex-1 space-y-2">
-                    <p className="text-[12px] font-black text-amber-900 uppercase tracking-widest italic leading-none">Caution: Master Reset Authorized</p>
-                    <p className="text-[10px] text-amber-700 font-bold leading-relaxed uppercase opacity-80">
-                        RESETTING STORAGE WILL VOID CURRENT TOKEN HANDSHAKES. USERS ADMINISTERING THIS ACTION WILL BE IMMEDIATELY REDIRECTED TO THE LOGIN GATEWAY FOR RE-AUTHENTICATION. USE ONLY FOR INFRASTRUCTURE DE-SYNCHRONIZATION AUDITS.
-                    </p>
+            <div className="p-8 bg-amber-50 border-2 border-amber-100 rounded-[3rem] flex flex-col md:flex-row items-center gap-8 shadow-sm">
+                <div className="flex items-start gap-6 flex-1">
+                    <ShieldAlert className="text-amber-600 mt-1 shrink-0" size={32} />
+                    <div className="space-y-2 text-left">
+                        <p className="text-[12px] font-black text-amber-900 uppercase tracking-widest italic leading-none">Global Infrastructure Wipe Authorized</p>
+                        <p className="text-[10px] text-amber-700 font-bold leading-relaxed uppercase opacity-80">
+                            SETTING A GLOBAL WIPE TIMESTAMP WILL FORCE ALL CONNECTED CLIENT DEVICES (SUBSCRIBERS & STAFF) TO CLEAR THEIR LOCAL CACHE AND RE-SYNC WITH THE MASTER REGISTRY ON THEIR NEXT HANDSHAKE. USE ONLY FOR CRITICAL PLATFORM UPDATES.
+                        </p>
+                    </div>
                 </div>
+                <button
+                    onClick={() => {
+                        if (confirm('AUTHORIZE GLOBAL WIPE: This will force a platform-wide state refresh for ALL users. Proceed?')) {
+                            db.triggerGlobalWipe();
+                        }
+                    }}
+                    className="px-10 py-5 bg-amber-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-amber-700 transition-all shadow-xl shadow-amber-200 active:scale-95 whitespace-nowrap flex items-center gap-3"
+                >
+                    <DatabaseZap size={18} />
+                    Execute Global Wipe
+                </button>
             </div>
         </div>
     );

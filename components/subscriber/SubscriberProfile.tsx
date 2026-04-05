@@ -294,6 +294,26 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                            <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all ${formData.biometricAllowed ? 'left-7' : 'left-1'}`}></div>
                         </button>
                      </div>
+
+                     {/* --- Cache System Clearance --- */}
+                     <div className="mt-6 pt-6 border-t border-slate-50 flex flex-col sm:flex-row items-center gap-6 justify-between">
+                        <div className="flex items-center gap-4 text-left">
+                           <div className="w-12 h-12 rounded-2xl flex items-center justify-center border bg-amber-50 text-amber-600 border-amber-100 italic font-black shadow-inner">
+                              <RefreshCw size={24} className="animate-spin-slow" />
+                           </div>
+                           <div className="text-left">
+                              <h4 className="text-xs font-black uppercase text-slate-900 leading-none mb-1 text-left">State Registry Refresh</h4>
+                              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest text-left">Clear local profile cache & re-sync</p>
+                           </div>
+                        </div>
+                        <button
+                           type="button"
+                           onClick={() => db.clearProfileCache(user.id)}
+                           className="px-6 py-3 bg-amber-50 text-amber-600 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-amber-100 border border-amber-100 transition-all active:scale-95 shadow-sm whitespace-nowrap"
+                        >
+                           Clear Cache
+                        </button>
+                     </div>
                   </div>
 
                   <button onClick={onLogout} className="w-full py-5 bg-slate-950 text-white rounded-3xl font-black text-[11px] uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-xl">
@@ -411,4 +431,3 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
 };
 
 export default SubscriberProfile;
-

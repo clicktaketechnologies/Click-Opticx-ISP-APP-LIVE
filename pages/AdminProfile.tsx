@@ -135,18 +135,19 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
           </div>
 
           <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
-             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                <ShieldCheck size={14} className="text-green-500" /> Security Status
+             <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
+                <RefreshCw size={14} className="animate-spin-slow" /> Local Memory Node
              </h4>
              <div className="space-y-4">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                   <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Two-Factor Auth</p>
-                   <p className="text-xs font-black text-slate-400 uppercase">Disabled</p>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                   <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Last Login</p>
-                   <p className="text-xs font-black text-slate-900 uppercase">{new Date().toLocaleDateString()} @ {new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
-                </div>
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                   Sync your local registry with the cloud master. Forces a manual state refresh.
+                </p>
+                <button
+                   onClick={() => db.clearProfileCache(user.email)}
+                   className="w-full py-4 bg-amber-50 text-amber-600 border border-amber-100 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-100 transition-all active:scale-95 shadow-sm"
+                >
+                   Clear Personal Cache
+                </button>
              </div>
           </div>
         </div>
@@ -263,4 +264,3 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
 };
 
 export default AdminProfile;
-

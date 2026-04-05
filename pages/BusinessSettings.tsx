@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
-  const [activeTab, setActiveTab] = useState<'branding' | 'profile' | 'support' | 'digital' | 'invoices' | 'notifications' | 'appearance' | 'ai-agent' | 'legal' | 'communications'>('branding');
+  const [activeTab, setActiveTab] = useState<'branding' | 'profile' | 'support' | 'digital' | 'invoices' | 'notifications' | 'appearance' | 'ai-agent' | 'legal' | 'communications' | 'app-settings'>('branding');
   const [formData, setFormData] = useState<SystemSettings>(state.settings);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -78,6 +78,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
     { id: 'ai-agent', label: 'AI Settings', icon: Bot },
     { id: 'legal', label: 'Legal Policies', icon: Scale },
     { id: 'communications', label: 'E-Communications', icon: Share2 },
+    { id: 'app-settings', label: 'App Settings', icon: SmartphoneIcon },
   ];
 
   return (
@@ -625,6 +626,69 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
                       <h4 className="text-sm font-black text-amber-900 uppercase italic">Anti-Spam Clearance</h4>
                       <p className="text-[10px] text-amber-700 font-bold uppercase leading-relaxed tracking-widest max-w-xl">Make sure these addresses are verified in your SMTP/SendGrid portal and not BANNED by major providers (Gmail/Outlook). Using a dedicated sub-domain for OTPs is recommended.</p>
                     </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* APP SETTINGS TAB */}
+              {activeTab === 'app-settings' && (
+                <div className="space-y-12 animate-in slide-in-from-right-4 duration-500">
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase italic tracking-tighter"><SmartphoneIcon className="text-blue-600" size={32} /> App Settings</h3>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">PWA & Notification Branding</p>
+                  </div>
+                  
+                  {/* PWA Section */}
+                  <div className="p-10 bg-slate-50 border-2 border-slate-100 rounded-[3rem] space-y-10">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-xl border border-slate-100"><Smartphone size={28}/></div>
+                      <div>
+                        <h4 className="text-lg font-black text-slate-900 uppercase italic tracking-tight">PWA Configuration</h4>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-2">Mobile Install Presence</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                       <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">PWA Install Icon</label>
+                          <div onClick={() => triggerUpload('pwaIcon')} className="aspect-square w-40 bg-white border-2 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-all group overflow-hidden relative shadow-sm">
+                             {formData.branding.pwaIcon ? (
+                               <img src={formData.branding.pwaIcon} className="w-full h-full object-contain p-6" />
+                             ) : (
+                               <Upload className="text-slate-200" size={32} />
+                             )}
+                          </div>
+                          <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">Square PNG Recommended (512x512)</p>
+                       </div>
+                       
+                       <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Notification Logo</label>
+                          <div onClick={() => triggerUpload('notificationLogo')} className="aspect-square w-40 bg-white border-2 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-all group overflow-hidden relative shadow-sm">
+                             {formData.branding.notificationLogo ? (
+                               <img src={formData.branding.notificationLogo} className="w-full h-full object-contain p-6" />
+                             ) : (
+                               <Upload className="text-slate-200" size={32} />
+                             )}
+                          </div>
+                          <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">Circular PNG Recommended (Maskable)</p>
+                       </div>
+                    </div>
+                  </div>
+                  
+                  {/* Metadata Section */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">App Title (Browser)</label>
+                        <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.branding.appTitle || ''} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, appTitle: e.target.value } })} placeholder="Click Opticx ISP" />
+                     </div>
+                     <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">App Short Name</label>
+                        <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.branding.shortName || ''} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, shortName: e.target.value } })} placeholder="CO ISP" />
+                     </div>
+                     <div className="space-y-2 md:col-span-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Meta Description</label>
+                        <input type="text" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-sm" value={formData.branding.tagline || ''} onChange={e => setFormData({ ...formData, branding: { ...formData.branding, tagline: e.target.value } })} placeholder="Manage your internet account with Click Opticx" />
+                     </div>
                   </div>
                 </div>
               )}

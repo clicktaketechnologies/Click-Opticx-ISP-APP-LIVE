@@ -66,11 +66,11 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
 
     // AUTO-TRIGGER KYC FOR NEW USERS
     useEffect(() => {
-       if (user.kyc_status === 'pending' || !user.isKYCVerified) {
+       if (!user.isKYCSubmitted && !user.isKYCVerified) {
           const timer = setTimeout(() => setIsKYCOpen(true), 1500);
           return () => clearTimeout(timer);
        }
-    }, [user.kyc_status, user.isKYCVerified]);
+    }, [user.isKYCSubmitted, user.isKYCVerified]);
 
     const pendingTopups = useMemo(() => (state.topupRequests || []).filter(r => r.userId === user.id && r.status === 'Pending'), [state.topupRequests, user.id]);
     const currentPkg = useMemo(() => state.packages.find(p => p.id === user.packageId), [state.packages, user.packageId]);
@@ -180,7 +180,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
    ].filter(item => item.id === 'home' || isPageEnabled(item.id));
 
    return (
-      <div className="h-screen bg-slate-50 flex flex-col overflow-hidden text-slate-900 pt-12 md:pt-0">
+      <div className="h-screen bg-slate-50 flex flex-col overflow-hidden text-slate-900">
          <SmartKYCPopup 
             user={user} 
             isOpen={isKYCOpen} 
@@ -217,31 +217,34 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                 </p>
              </div>
           </Modal>
-         <header className="h-14 bg-white border-b border-slate-100 px-6 flex items-center justify-between sticky top-0 z-[200] shrink-0 shadow-sm">
-            <div className="flex items-center gap-3">
-               <div className="w-8 h-8 bg-slate-50 rounded-lg flex items-center justify-center border shadow-inner">
-                  {branding.logoSquare ? <img src={branding.logoSquare} className="w-full h-full object-contain p-1" /> : <Globe size={16} className="text-blue-600" />}
+         <header className="h-20 bg-white px-6 flex items-center justify-between sticky top-0 z-[200] shrink-0 shadow-sm border-b border-slate-100">
+            <div className="flex items-center gap-4">
+               <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-800 shadow-2xl group active:scale-90 transition-transform overflow-hidden p-0.5">
+                  {branding.logoSquare ? <img src={branding.logoSquare} className="w-full h-full object-contain rounded-xl" /> : <Globe size={24} className="text-blue-500 animate-pulse" />}
                </div>
-               <h1 className="text-xs font-black uppercase italic tracking-tighter leading-none truncate max-w-[120px]">{branding.businessName}</h1>
+               <div>
+                  <h1 className="text-sm font-black uppercase italic tracking-tighter leading-none text-slate-800">{branding.businessName}</h1>
+                  <p className="text-[7.5px] font-black text-blue-600 uppercase tracking-[0.3em] mt-1 italic opacity-60">Subscriber Core Hub</p>
+               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
                {appearance.showAICalling && (
-                  <button onClick={() => handleTabChange('ai-voice-call')} className="p-2 bg-blue-50 text-blue-600 rounded-xl relative group">
-                     <Mic size={16} className="group-hover:scale-110 transition-transform" />
-                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-white animate-pulse"></span>
+                  <button onClick={() => handleTabChange('ai-voice-call')} className="p-3 bg-blue-600 text-white rounded-2xl relative shadow-xl shadow-blue-500/20 active:scale-90 transition-all">
+                     <Mic size={18} className="animate-pulse" />
+                     <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
                   </button>
                )}
-               <button onClick={() => handleTabChange('notifs')} className="p-2 bg-slate-100 text-slate-400 rounded-xl relative">
-                  <Bell size={16} />
-                  {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full"></span>}
+               <button onClick={() => handleTabChange('notifs')} className="p-3 bg-white border border-slate-100 text-slate-400 rounded-2xl relative shadow-sm hover:text-slate-900 hover:bg-slate-50 transition-all">
+                  <Bell size={18} />
+                  {unreadCount > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-600 rounded-full shadow-lg ring-2 ring-white"></span>}
                </button>
-               <button onClick={() => handleTabChange('profile')} className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200 overflow-hidden">
-                  {user.profileImage ? <img src={user.profileImage} className="w-full h-full object-cover" /> : <User size={18} className="text-slate-400" />}
+               <button onClick={() => handleTabChange('profile')} className="w-10 h-10 rounded-2xl bg-white border border-slate-100 flex items-center justify-center shadow-sm overflow-hidden p-0.5 hover:border-blue-200 transition-all">
+                  {user.profileImage ? <img src={user.profileImage} className="w-full h-full object-cover rounded-xl" /> : <div className="w-full h-full bg-slate-50 flex items-center justify-center rounded-xl"><User size={22} className="text-slate-300" /></div>}
                </button>
             </div>
          </header>
          <main className="flex-1 overflow-y-auto p-4 pb-32 custom-scrollbar">
-            <div className="max-w-xl mx-auto h-full space-y-4">
+            <div className="max-w-xl mx-auto h-full space-y-4 pt-1">
                {/* KYC Enforcement Banner */}
                {user.kyc_status === 'pending' && (
                   <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500 shadow-sm">

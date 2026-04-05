@@ -4,7 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Click Opticx ISP System v8.6.0</title>
+    <title>Click Opticx ISP System v8.6.1 - Live</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <script>
+        // Force refresh on version mismatch
+        const LATEST_VERSION = 'v8.6.1';
+        if (localStorage.getItem('app_deployment_v') !== LATEST_VERSION) {
+            localStorage.clear(); // Clear all state for fresh start
+            localStorage.setItem('app_deployment_v', LATEST_VERSION);
+            window.location.reload(true);
+        }
+    </script>
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#1570ef">
@@ -100,12 +112,18 @@
             animation: shimmer 1.5s infinite;
         }
 
-        /* Global Modal SaaS Redesign */
+        /* Global Modal SaaS Redesign - Premium Lite */
         .modal, [data-modal] {
             background: #FFFFFF !important;
             color: #0F172A !important;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
-            border: 1px solid #E2E8F0 !important;
+            box-shadow: 0 15px 30px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1) !important;
+            border: 1px solid #F1F5F9 !important;
+            border-radius: 24px !important;
+        }
+
+        .modal-header {
+            border-bottom: 1px solid #F1F5F9 !important;
+            padding: 24px !important;
         }
 
         .modal input, 
@@ -116,12 +134,13 @@
         [data-modal] textarea {
             background: #F8FAFC !important;
             border: 1px solid #E2E8F0 !important;
-            color: #0F172A !important;
-            border-radius: 10px !important;
-            padding: 10px 12px !important;
+            color: #1E293B !important;
+            border-radius: 14px !important;
+            padding: 12px 16px !important;
             font-size: 14px !important;
             transition: all 0.2s ease-out !important;
             outline: none !important;
+            font-weight: 500 !important;
         }
 
         .modal input:focus, 

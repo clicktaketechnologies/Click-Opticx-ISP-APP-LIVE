@@ -100,65 +100,74 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
   };
 
   return (
-    <header className="h-12 bg-white border-b border-slate-200 px-3 md:px-5 flex items-center justify-between sticky top-0 z-[60] shadow-sm relative">
+    <header className="h-[68px] bg-white/70 backdrop-blur-xl border-b border-slate-100 px-6 md:px-10 flex items-center justify-between sticky top-0 z-[60] shadow-[0_8px_30px_rgb(0,0,0,0.02)] relative">
       {/* Page Transition Progress Bar */}
       {isPending && (
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-blue-500 z-[70] animate-progress-glow overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-shimmer scale-x-150"></div>
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#1570ef] z-[70] animate-progress-glow overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer scale-x-150"></div>
         </div>
       )}
 
-      <div className="flex items-center gap-2 md:gap-3 flex-1">
+      <div className="flex items-center gap-4 md:gap-8 flex-1">
         <button 
           onClick={toggleSidebar}
-          className="lg:hidden p-1 text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+          className="lg:hidden p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all active:scale-90"
         >
-          <Menu size={18} />
+          <Menu size={20} />
         </button>
 
-        <div className="flex items-center gap-2 md:pr-4 md:border-r border-slate-100 md:mr-1 group cursor-pointer">
-           <div className="w-7 h-7 bg-slate-50 rounded-lg flex items-center justify-center overflow-hidden border border-slate-100 shadow-inner group-hover:scale-105 transition-transform">
+        <div className="flex items-center gap-3 pr-6 border-r border-slate-100 group cursor-pointer transition-all">
+           <div className="w-10 h-10 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-500">
               {(branding.logo || branding.logoSquare || branding.logoLight) ? (
-                 <img src={branding.logo || branding.logoSquare || branding.logoLight} className="w-full h-full object-contain p-1" alt={branding.brandName || branding.businessName} />
+                 <img 
+                   src={branding.logoSquare || branding.logo || branding.logoLight} 
+                   className="w-full h-full object-contain p-1.5" 
+                   alt={branding.brandName || branding.businessName} 
+                   onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/favicon.png'; }}
+                 />
               ) : (
-                 <Globe size={14} className="text-blue-600" />
+                 <Globe size={18} className="text-blue-500 animate-pulse" />
               )}
            </div>
-           <div className="hidden lg:block">
-              <p className="text-[8px] font-black uppercase tracking-tighter italic text-slate-800 leading-none">{branding.brandName || branding.businessName}</p>
+           <div className="hidden xl:block">
+              <h1 className="text-sm font-black uppercase tracking-tighter italic text-slate-900 leading-none">{branding.brandName || branding.businessName}</h1>
+              <p className="text-[8px] font-black text-blue-600 uppercase tracking-[0.3em] mt-1 italic opacity-60">Control Nexus</p>
            </div>
         </div>
 
-        <div className="relative hidden md:block w-36 lg:w-48 group">
-          <Search className={`absolute left-2 top-1/2 -translate-y-1/2 transition-colors ${searchTerm ? 'text-blue-500' : 'text-slate-400'}`} size={12} />
+        <div className="relative hidden md:block w-48 lg:w-72 group">
+          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-300 ${searchTerm ? 'text-[#1570ef]' : 'text-slate-300'}`} size={16} />
           <input 
             type="text" 
             value={searchTerm}
             onChange={(e) => onSearch(e.target.value)}
-            placeholder="Registry search..." 
-            className="w-full pl-7 pr-7 py-1 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-[9px] font-bold transition-all placeholder:text-slate-300"
+            placeholder="Registry command search..." 
+            className="w-full pl-11 pr-7 py-3 bg-slate-50/50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 text-[10px] font-black transition-all placeholder:text-slate-300 uppercase tracking-widest italic"
           />
           {searchTerm && (
             <button 
               onClick={() => onSearch('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 hover:text-rose-500 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-rose-500 transition-colors"
             >
-              <X size={10} />
+              <X size={12} />
             </button>
           )}
         </div>
-        {renderConnectionBadge()}
+        
+        <div className="hidden xxl:block">
+           {renderConnectionBadge()}
+        </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-3 ml-2">
+      <div className="flex items-center gap-4 md:gap-6 ml-4">
         <div className="relative" ref={notifRef}>
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
-            className={`relative p-1 rounded-lg transition-all ${showNotifications ? 'bg-slate-100 text-green-600' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+            className={`relative p-2.5 rounded-2xl transition-all duration-300 ${showNotifications ? 'bg-slate-950 text-white shadow-xl shadow-slate-900/20' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50 border border-transparent hover:border-slate-100'}`}
           >
-            <Bell size={16} />
+            <Bell size={20} strokeWidth={showNotifications ? 3 : 2} />
             {unreadCount > 0 && (
-              <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 text-white text-[7px] flex items-center justify-center rounded-full font-bold shadow-sm ring-2 ring-white">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white text-[8px] flex items-center justify-center rounded-lg font-black shadow-lg ring-4 ring-white animate-bounce">
                 {unreadCount}
               </span>
             )}

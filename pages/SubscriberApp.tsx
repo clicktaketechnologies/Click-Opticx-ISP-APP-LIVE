@@ -80,9 +80,8 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
   const handleTabChange = (tab: SubTab) => {
     if (!isPageEnabled(tab)) return;
 
-    // KYC Enforcement for Critical Tabs
-    const criticalTabs: SubTab[] = ['wallet', 'packages', 'billing', 'cash_pay', 'online_pay', 'emergency', 'emergency-request'];
-    if (criticalTabs.includes(tab) && !user.isKYCVerified) {
+    // STRICT KYC ENFORCEMENT
+    if (!user.isKYCVerified) {
       setKycIntent(tab);
       setIsKYCOpen(true);
       return;
@@ -184,19 +183,29 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
 
   return (
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden text-slate-900 pt-12 md:pt-0">
-      <SmartKYCPopup 
-        user={user} 
-        isOpen={isKYCOpen} 
-        onClose={() => setIsKYCOpen(false)} 
-        onSuccess={() => {
-          setIsKYCOpen(false);
-          if (kycIntent) {
-            // We don't auto-navigate because KYC is still "Pending" 
-            // but we can show a toast or message.
-            setKycIntent(null);
-          }
-        }} 
-      />
+      {!user.isKYCVerified && (
+         <div className="fixed inset-0 z-[999] bg-slate-900 pointer-events-auto">
+           <SmartKYCPopup 
+             user={user} 
+             isOpen={true} 
+             onClose={() => {}} 
+             onSuccess={() => {}} 
+           />
+         </div>
+      )}
+      {user.isKYCVerified && (
+        <SmartKYCPopup 
+          user={user} 
+          isOpen={isKYCOpen} 
+          onClose={() => setIsKYCOpen(false)} 
+          onSuccess={() => {
+            setIsKYCOpen(false);
+            if (kycIntent) {
+              setKycIntent(null);
+            }
+          }} 
+        />
+      )}
       {showWelcome && <SubscriberWelcomeChecklist user={user} onComplete={() => setShowWelcome(false)} />}
       {/* VERIFICATION SUCCESS MODAL */}
       <Modal

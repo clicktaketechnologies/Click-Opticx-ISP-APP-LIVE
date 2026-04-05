@@ -204,15 +204,15 @@ const SubscriberHome: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className={`mx-4 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl transition-all duration-700 border-b-8 hover:scale-[1.02] ${user.status === UserStatus.ACTIVE && !isExpired ? 'bg-blue-600 border-blue-800 shadow-blue-200' : 'bg-rose-600 border-rose-800 shadow-rose-200'}`}>
+          <div className={`mx-4 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl transition-all duration-700 border-b-8 hover:scale-[1.02] ${user.status === UserStatus.ACTIVE && !isExpired ? 'bg-blue-600 border-blue-800 shadow-blue-200' : 'bg-slate-800 border-slate-900 shadow-slate-200'}`}>
             <div className="relative z-10 space-y-8">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <div className={`w-2.5 h-2.5 rounded-full ${!isExpired ? 'bg-green-400 animate-pulse' : 'bg-white shadow-[0_0_10px_white]'}`}></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{isExpired ? 'Service Expired' : 'Active Account'}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{isExpired ? 'Subscription Inactive' : 'Active Account'}</span>
                   </div>
-                  <h2 className="text-3xl font-black tracking-tighter uppercase italic">{currentPkg?.name || 'OFFLINE'}</h2>
+                  <h2 className="text-3xl font-black tracking-tighter uppercase italic">{currentPkg?.name || 'No Active Plan'}</h2>
                 </div>
                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-md overflow-hidden p-2 shrink-0 shadow-lg">
                   <Wifi size={24} className={!isExpired ? 'text-green-300' : 'text-white'} />
@@ -394,7 +394,7 @@ const SubscriberHome: React.FC<Props> = ({
   };
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-700 pb-32">
+    <div className="space-y-8 animate-in fade-in duration-700 pb-32">
       {sections.map(renderSection)}
       {showActivation && <SubscriberActivationFlow user={user} state={state} onClose={() => setShowActivation(false)} onSuccess={() => { setShowActivation(false); onAction('home'); }} />}
     </div>
