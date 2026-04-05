@@ -45,7 +45,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       onClose={onClose}
       title={title}
       type={danger ? 'danger' : 'confirm'}
-      icon={danger ? <Trash2 size={20} className="text-rose-400" /> : <AlertTriangle size={20} className="text-amber-400" />}
+      icon={danger ? <Trash2 size={20} className="text-rose-600" /> : <AlertTriangle size={20} className="text-amber-500" />}
       message={message}
       onConfirm={onConfirm}
       confirmLabel={confirmLabel}

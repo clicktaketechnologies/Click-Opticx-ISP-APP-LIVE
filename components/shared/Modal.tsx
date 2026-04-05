@@ -29,28 +29,28 @@ export interface ModalProps {
 
 const TYPE_CONFIG: Record<ModalType, { icon: React.ReactNode; accent: string }> = {
   confirm: {
-    icon: <AlertTriangle size={22} className="text-amber-400" />,
-    accent: 'text-amber-400',
+    icon: <AlertTriangle size={22} className="text-amber-500" />,
+    accent: 'text-amber-500',
   },
   danger: {
-    icon: <Trash2 size={22} className="text-rose-400" />,
-    accent: 'text-rose-400',
+    icon: <Trash2 size={22} className="text-rose-600" />,
+    accent: 'text-rose-600',
   },
   success: {
-    icon: <CheckCircle size={22} className="text-emerald-400" />,
-    accent: 'text-emerald-400',
+    icon: <CheckCircle size={22} className="text-emerald-600" />,
+    accent: 'text-emerald-600',
   },
   error: {
-    icon: <XCircle size={22} className="text-rose-400" />,
-    accent: 'text-rose-400',
+    icon: <XCircle size={22} className="text-rose-600" />,
+    accent: 'text-rose-600',
   },
   info: {
-    icon: <Info size={22} className="text-blue-400" />,
-    accent: 'text-blue-400',
+    icon: <Info size={22} className="text-blue-600" />,
+    accent: 'text-blue-600',
   },
   form: {
-    icon: <Shield size={22} className="text-blue-400" />,
-    accent: 'text-blue-400',
+    icon: <Shield size={22} className="text-blue-600" />,
+    accent: 'text-blue-600',
   },
 };
 
@@ -151,7 +151,7 @@ export const Modal: React.FC<ModalProps> = ({
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all disabled:opacity-30"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all disabled:opacity-30"
               >
                 <X size={18} />
               </button>
@@ -165,7 +165,7 @@ export const Modal: React.FC<ModalProps> = ({
           style={{ minHeight: 0 }}
         >
           {message && (
-            <p className="text-sm text-[#475569] leading-relaxed mb-4">{message}</p>
+            <p className="text-sm text-slate-700 leading-relaxed mb-4">{message}</p>
           )}
           {children}
         </div>
