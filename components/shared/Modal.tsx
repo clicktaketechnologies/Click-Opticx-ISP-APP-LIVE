@@ -134,16 +134,18 @@ export const Modal: React.FC<ModalProps> = ({
       >
         {/* HEADER */}
         <div
-          className="flex items-center justify-between px-6 py-5 shrink-0"
+          className="flex items-start sm:items-center justify-between px-6 py-4 sm:py-5 shrink-0 gap-4"
           style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}
         >
-          <div className="flex items-center gap-3">
-            {displayIcon}
-            <h2 className="text-sm font-black uppercase tracking-widest text-[#0F172A] leading-none">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="flex-shrink-0 flex items-center justify-center">
+              {displayIcon}
+            </div>
+            <h2 className="text-sm font-black uppercase tracking-widest text-[#0F172A] leading-tight break-words">
               {title}
             </h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4 flex-shrink-0">
             {headerRightContent}
             {!hideCloseButton && (
               <button
