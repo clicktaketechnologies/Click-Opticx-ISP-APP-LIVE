@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Role } from '../types';
 import { Bell, Search, UserCircle, Database, X, CheckCircle, Info, AlertTriangle, CloudOff, RefreshCw, CloudUpload, Menu, Globe, LogOut, Cloud, ListChecks, Zap, ShieldAlert } from 'lucide-react';
 import { db } from '../db';
@@ -17,8 +17,21 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, onLogout, searchTerm, onSearch, isPending }) => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
   const state = db.getState();
   const branding = useBranding();
+
+  // Close notification panel when clicking outside
+  useEffect(() => {
+    if (!showNotifications) return;
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showNotifications]);
   
   const userNotifications = useMemo(() => {
     // ADMIN TERMINAL FILTER: Only show admin or system audience notifications
@@ -87,7 +100,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
   };
 
   return (
-    <header className="h-12 bg-white border-b border-slate-200 px-3 md:px-5 flex items-center justify-between sticky top-0 z-[60] shadow-sm relative overflow-hidden">
+    <header className="h-12 bg-white border-b border-slate-200 px-3 md:px-5 flex items-center justify-between sticky top-0 z-[60] shadow-sm relative">
       {/* Page Transition Progress Bar */}
       {isPending && (
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-blue-500 z-[70] animate-progress-glow overflow-hidden">
@@ -138,7 +151,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
       </div>
 
       <div className="flex items-center gap-2 md:gap-3 ml-2">
-        <div className="relative">
+        <div className="relative" ref={notifRef}>
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
             className={`relative p-1 rounded-lg transition-all ${showNotifications ? 'bg-slate-100 text-green-600' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
@@ -152,7 +165,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-64 md:w-72 bg-white border border-slate-200 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-top-2 overflow-hidden">
+            <div className="absolute right-0 mt-2 w-64 md:w-80 bg-white border border-slate-200 rounded-2xl shadow-2xl z-[200] animate-in fade-in slide-in-from-top-2 overflow-hidden">
               <div className="p-3 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                 <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Activity Relay</span>
                 <div className="flex gap-2">

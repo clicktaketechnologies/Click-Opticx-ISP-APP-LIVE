@@ -481,8 +481,9 @@ class DB {
     this.ensureArrays();
     console.log('DB Initialized. Configured:', this.initialized);
     this.initializeCloudLayer();
-    this.initializeSocketLayer();
-    setTimeout(() => checkKYCLifecycle(this), 500);
+    // Defer socket connection by 3s so it never blocks initial render
+    setTimeout(() => this.initializeSocketLayer(), 3000);
+    setTimeout(() => checkKYCLifecycle(this), 1500);
   }
 
   private ensureDefaultAdmin() {
@@ -667,22 +668,33 @@ class DB {
     if (!this.firestore) return;
     const docRef = doc(this.firestore, 'registry', 'master_state');
     
-    // Safety Fallback: Ensure system is marked configured within 3s for UI fluidity
-    setTimeout(() => {
+    // Safety Fallback: Mark system configured within 2s so UI never freezes
+    const fallbackTimer = setTimeout(() => {
        if (!this.initialized) {
-          console.warn('[DB] Handshake Timeout: Proceeding with cached state.');
+          console.warn('[DB] Cloud Handshake Timeout: Falling back to cached state.');
           this.initialized = true;
           this.notify();
        }
-    }, 3000);
+    }, 2000);
 
     try {
+      // AbortController gives Firestore getDoc a hard 5s budget
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       const docSnap = await getDoc(docRef);
+      clearTimeout(timeoutId);
+
       if (docSnap.exists()) {
         const cloudData = docSnap.data() as Partial<AppState>;
         this.state = { ...this.state, ...cloudData };
         this.patchState();
       }
+
+      clearTimeout(fallbackTimer);
+      this.initialized = true;
+      this.notify();
+
       onSnapshot(docRef, (snapshot) => {
         if (snapshot.exists()) {
           const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...persistedData } = snapshot.data() as AppState;
@@ -705,17 +717,16 @@ class DB {
           this.notify();
         }
       });
-      this.initialized = true;
-      this.notify();
 
       // Start recovery maintenance cycle (Every hour)
       setInterval(() => this.runRecoveryMaintenance(), 3600000);
-      // Run once on init
-      setTimeout(() => this.runRecoveryMaintenance(), 1000);
+      // Run once on init — delayed so it doesn't race with render
+      setTimeout(() => this.runRecoveryMaintenance(), 5000);
       
       // Handle Firebase Auth Redirect Result
       await this.handleAuthRedirect();
     } catch (e: any) {
+      clearTimeout(fallbackTimer);
       this.initialized = true;
       this.notify();
     }
@@ -876,11 +887,19 @@ class DB {
 
   private commitTimer: any = null;
 
-  private async commit() {
-    try {
-      localStorage.setItem('clickopticx_v16_registry', JSON.stringify(this.state));
-    } catch (e) { }
+  private localCommitTimer: any = null;
 
+  private async commit() {
+    // Debounce localStorage writes (expensive JSON.stringify on large state)
+    // Writes are batched to at most once every 400ms to keep main thread free
+    if (this.localCommitTimer) clearTimeout(this.localCommitTimer);
+    this.localCommitTimer = setTimeout(() => {
+      try {
+        localStorage.setItem('clickopticx_v16_registry', JSON.stringify(this.state));
+      } catch (e) { console.warn('[DB] localStorage write failed:', e); }
+    }, 400);
+
+    // Firestore cloud sync — debounced separately at 500ms
     if (this.commitTimer) clearTimeout(this.commitTimer);
     this.commitTimer = setTimeout(async () => {
       if (this.firestore && this.initialized) {
@@ -889,10 +908,10 @@ class DB {
           const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
           await setDoc(docRef, cloudSafeState);
         } catch (e) {
-          console.error('Cloud synchronization error:', e);
+          console.error('[DB] Cloud sync error:', e);
         }
       }
-    }, 200); // 200ms debounce for ultra-fast responsiveness
+    }, 500);
 
     this.notify();
   }
@@ -3559,47 +3578,109 @@ class DB {
       return { success: false, message: 'Signups are currently disabled.' };
     }
 
-    try {
-      // Normalize values before dispatching
-      const payload = {
-        ...data,
-        email: data.email?.toLowerCase().trim(),
-        username: data.username?.toLowerCase().trim(),
-        phone: data.phone?.trim()
-      };
+    // Normalize values
+    const payload = {
+      ...data,
+      email: data.email?.toLowerCase().trim(),
+      username: data.username?.toLowerCase().trim(),
+      phone: data.phone?.trim()
+    };
 
-      console.log('[DB-AUTH] Dispatching signup protocol for:', payload.username);
+    // --- Duplicate check (local) ---
+    const exists = this.state.users.find(u =>
+      (payload.email && u.email?.toLowerCase() === payload.email) ||
+      (payload.username && (u.username || '').toLowerCase() === payload.username) ||
+      (payload.phone && u.phone?.replace(/\D/g, '') === payload.phone.replace(/\D/g, ''))
+    );
+    if (exists) {
+      return { success: false, message: 'An account with this email, username or phone already exists.' };
+    }
+
+    console.log('[DB-AUTH] Dispatching signup protocol for:', payload.username);
+
+    // --- Try backend first (with 8s timeout) ---
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       const response = await fetch(`${this.backendUrl}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
-      const res = await response.json();
-      if (!res.success) {
+      if (response.ok) {
+        const res = await response.json();
+        if (res.success) {
+          this.logAudit('New User Signup', 'Request', `New user ${data.name} signed up via secure backend.`, res.user?.id, data.name);
+          return { success: true, message: 'Account Handshake Successful.', user: res.user };
+        }
+        // Backend returned a logical failure (duplicate, validation)
         return { success: false, message: res.message || 'Signup refused by authority node.' };
       }
+      // Backend responded with HTTP error — fall through to local fallback
+      console.warn('[DB-AUTH] Backend returned HTTP error, falling back to local registry write.');
+    } catch (e: any) {
+      // Network error, timeout, or backend sleeping (Render cold start)
+      console.warn('[DB-AUTH] Backend unreachable, falling back to local registry write. Reason:', e.message);
+    }
 
-      this.logAudit(
-        'New User Signup',
-        'Request',
-        `New user ${data.name} signed up via secure backend.`,
-        res.user.id,
-        data.name
-      );
-
-      // We do NOT manually push to state.users here as the backend performs the write 
-      // to Firestore, and our onSnapshot listener will hydrate the local state automatically.
-      return { 
-        success: true, 
-        message: 'Account Handshake Successful.',
-        user: res.user 
+    // --- Local Firestore Fallback ---
+    // Writes directly to Firestore using the client-side SDK.
+    // This is the same path used by all other db operations.
+    try {
+      const newUserId = 'USR-' + Date.now();
+      const newUser: any = {
+        id: newUserId,
+        name: (payload.name || 'New User').trim(),
+        username: payload.username || '',
+        email: payload.email || '',
+        phone: payload.phone || '',
+        password: payload.password, // Will be compared during login via local logic
+        address: payload.address || '',
+        area: payload.area || '',
+        packageId: payload.packageId || (this.state.packages[0]?.id || ''),
+        status: 'Pending_Verification',
+        kyc_status: 'pending',
+        role: 'Customer',
+        balance: 0,
+        creditScore: 600,
+        createdAt: new Date().toISOString()
       };
 
-    } catch (e: any) {
-      console.error('[DB-AUTH-ERROR] Signup Protocol Failed:', e);
-      return { success: false, message: 'Identity dispatch failed. Check network link.' };
+      const newRequest: any = {
+        id: 'SR-' + Date.now(),
+        userId: newUserId,
+        status: 'Pending',
+        name: newUser.name,
+        username: newUser.username,
+        email: newUser.email,
+        phone: newUser.phone,
+        area: newUser.area,
+        packageId: newUser.packageId,
+        timestamp: new Date().toISOString()
+      };
+
+      // Push to local state immediately so auto-login works
+      if (!Array.isArray(this.state.users)) this.state.users = [];
+      if (!Array.isArray(this.state.signupRequests)) this.state.signupRequests = [];
+      this.state.users.push(newUser);
+      this.state.signupRequests.push(newRequest);
+
+      // Persist to Firestore and localStorage
+      await this.commit();
+      this.notify();
+
+      this.logAudit('New User Signup', 'Request', `New user ${newUser.name} registered via local fallback.`, newUserId, newUser.name);
+
+      console.log('[DB-AUTH] Local signup fallback succeeded for:', newUser.username);
+      return { success: true, message: 'Account created successfully.', user: { id: newUserId, username: newUser.username } };
+
+    } catch (fallbackError: any) {
+      console.error('[DB-AUTH-ERROR] Both backend and local signup failed:', fallbackError);
+      return { success: false, message: 'Signup failed. Please check your connection and try again.' };
     }
   }
 

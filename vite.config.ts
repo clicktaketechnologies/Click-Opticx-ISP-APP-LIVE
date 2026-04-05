@@ -18,7 +18,21 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       }
+    },
+    build: {
+      // Raise the warning threshold — large ISP apps with many lazy pages are expected
+      chunkSizeWarningLimit: 1500,
+      rollupOptions: {
+        output: {
+          // Split heavy vendor libraries into separate cached chunks
+          manualChunks(id) {
+            if (id.includes('node_modules/firebase')) return 'vendor-firebase';
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) return 'vendor-react';
+            if (id.includes('node_modules/lucide-react')) return 'vendor-icons';
+            if (id.includes('node_modules/socket.io-client')) return 'vendor-socket';
+          }
+        }
+      }
     }
   };
 });
-

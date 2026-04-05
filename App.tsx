@@ -92,16 +92,16 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
-    
+
     // Auto-recovery for dynamic import failures (ChunkLoadError)
-    const isChunkError = error.message.includes('ChunkLoadError') || 
-                        error.message.includes('Loading chunk') ||
-                        error.message.includes('Failed to fetch dynamically imported module');
-                        
+    const isChunkError = error.message.includes('ChunkLoadError') ||
+      error.message.includes('Loading chunk') ||
+      error.message.includes('Failed to fetch dynamically imported module');
+
     if (isChunkError) {
       const lastReload = sessionStorage.getItem('last-chunk-reload');
       const now = Date.now();
-      
+
       // Only auto-reload if we haven't tried in the last 10 seconds (prevent loops)
       if (!lastReload || now - parseInt(lastReload) > 10000) {
         sessionStorage.setItem('last-chunk-reload', now.toString());
@@ -113,8 +113,8 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
 
   render() {
     if (this.state.hasError) {
-      const isChunkError = this.state.error?.message.includes('ChunkLoadError') || 
-                          this.state.error?.message.includes('Failed to fetch dynamically imported module');
+      const isChunkError = this.state.error?.message.includes('ChunkLoadError') ||
+        this.state.error?.message.includes('Failed to fetch dynamically imported module');
 
       return (
         <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 text-white text-center">
@@ -123,7 +123,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
             {isChunkError ? 'Asset Synchronization' : 'System Fault Detected'}
           </h1>
           <p className="text-slate-400 max-w-md text-xs font-bold uppercase tracking-widest leading-relaxed mb-8">
-            {isChunkError 
+            {isChunkError
               ? 'A critical system update or network fluctuation has occurred. We are synchronizing your local cache with the latest server assets.'
               : 'An unexpected runtime error has occurred. Our secondary containment has isolated the issue. Detailed trace logged to console.'}
           </p>
@@ -134,7 +134,7 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
             onClick={() => window.location.reload()}
             className="px-8 py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-2"
           >
-            <RefreshCcw size={16} className={isChunkError ? 'animate-spin' : ''} /> 
+            <RefreshCcw size={16} className={isChunkError ? 'animate-spin' : ''} />
             {isChunkError ? 'Synchronizing Manifest...' : 'Re-Initialize System'}
           </button>
         </div>
@@ -163,7 +163,7 @@ const App: React.FC = () => {
       setDbState(newState);
       setAuthState(newState.currentUser);
       setIsConfigured(db.isConfigured());
-      
+
       // Global Branding Updates
       const branding = newState.settings.branding;
       document.title = branding.brandName || branding.appTitle || 'Click Opticx ISP';
@@ -182,9 +182,9 @@ const App: React.FC = () => {
 
     // Ensure state transition if already configured on mount
     if (db.isConfigured()) {
-       setIsConfigured(true);
-       const branding = db.getState().settings.branding;
-       document.title = branding.brandName || branding.appTitle || 'Click Opticx ISP';
+      setIsConfigured(true);
+      const branding = db.getState().settings.branding;
+      document.title = branding.brandName || branding.appTitle || 'Click Opticx ISP';
     }
 
     return () => unsubscribe();
@@ -294,20 +294,20 @@ const App: React.FC = () => {
               <ShieldAlert size={48} strokeWidth={2.5} />
             </div>
             <div className="space-y-4">
-               <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Access Restricted</h2>
-               <p className="text-[10px] font-black text-rose-600 uppercase tracking-[0.3em]">Identity Node Locked</p>
-               <p className="text-sm text-slate-500 font-medium leading-relaxed pt-4">
-                  Your account access has been restricted by the administration. All terminal operations and data transfers are currently suspended.
-               </p>
+              <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Access Restricted</h2>
+              <p className="text-[10px] font-black text-rose-600 uppercase tracking-[0.3em]">Identity Node Locked</p>
+              <p className="text-sm text-slate-500 font-medium leading-relaxed pt-4">
+                Your account access has been restricted by the administration. All terminal operations and data transfers are currently suspended.
+              </p>
             </div>
             <div className="pt-6">
-               <button 
-                  onClick={handleLogout}
-                  className="w-full py-4 bg-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-xl"
-                >
-                  Terminate Session
-               </button>
-               <p className="mt-6 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Protocol ID: {dbState.currentUser.id}</p>
+              <button
+                onClick={handleLogout}
+                className="w-full py-4 bg-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all active:scale-95 shadow-xl"
+              >
+                Terminate Session
+              </button>
+              <p className="mt-6 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Protocol ID: {dbState.currentUser.id}</p>
             </div>
           </div>
         </div>
@@ -349,37 +349,37 @@ const App: React.FC = () => {
             type="danger"
             icon={<ShieldAlert size={24} className="text-white" />}
             footer={
-               <button 
-                 onClick={dismissCritical} 
-                 className="w-full py-4 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-xl transition-all flex items-center justify-center gap-2"
-               >
-                 Acknowledge Alert <ShieldCheck size={16} />
-               </button>
+              <button
+                onClick={dismissCritical}
+                className="w-full py-4 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-xl transition-all flex items-center justify-center gap-2"
+              >
+                Acknowledge Alert <ShieldCheck size={16} />
+              </button>
             }
           >
-             <p className="text-sm text-slate-400 font-bold uppercase tracking-widest leading-relaxed text-center py-4">
-                {criticalAlert?.message}
-             </p>
+            <p className="text-sm text-slate-400 font-bold uppercase tracking-widest leading-relaxed text-center py-4">
+              {criticalAlert?.message}
+            </p>
           </Modal>
 
           {isSidebarOpen && <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[110] lg:hidden animate-in fade-in duration-300" onClick={() => setIsSidebarOpen(false)} />}
-          <Sidebar 
-            current={currentPage} 
-            onNavigate={navigateTo} 
-            role={authState.role} 
-            onLogout={handleLogout} 
-            isOpen={isSidebarOpen} 
+          <Sidebar
+            current={currentPage}
+            onNavigate={navigateTo}
+            role={authState.role}
+            onLogout={handleLogout}
+            isOpen={isSidebarOpen}
             isCollapsed={isCollapsed}
             onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
-            businessName={dbState.settings.branding.businessName} 
+            businessName={dbState.settings.branding.businessName}
           />
-          <div 
+          <div
             className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${isCollapsed ? 'lg:pl-[70px]' : 'lg:pl-72'}`}
           >
-            <Header 
-              user={authState as any} 
-              toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} 
-              onProfileClick={() => navigateTo('admin-profile')} 
+            <Header
+              user={authState as any}
+              toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+              onProfileClick={() => navigateTo('admin-profile')}
               onLogout={handleLogout}
               searchTerm={globalSearchTerm}
               onSearch={setGlobalSearchTerm}
