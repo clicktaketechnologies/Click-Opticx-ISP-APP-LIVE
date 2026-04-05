@@ -491,6 +491,15 @@ class DB {
     // Cloud Layer Initialization
     this.initializeCloudLayer().catch(console.error);
     
+    // 🛡️ PERSISTENCE GUARD: Force cloud sync before tab close
+    window.addEventListener('beforeunload', () => {
+      if (this.firestore && this.initialized) {
+        const docRef = doc(this.firestore, 'registry', 'master_state');
+        const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
+        setDoc(docRef, cloudSafeState);
+      }
+    });
+
     // Background Tasks
     setTimeout(() => this.initializeSocketLayer(), 3000);
     setTimeout(() => checkKYCLifecycle(this), 1500);
@@ -697,6 +706,16 @@ class DB {
 
       if (docSnap.exists()) {
         const cloudData = docSnap.data() as Partial<AppState>;
+        // --- 🛡️ CLOUD MASTER PRIORITY ---
+        // If the cloud has users or requests, we wipe the INITIAL_STATE dummy data 
+        // to prevent duplicate or phantom records after refresh.
+        if (cloudData.users && cloudData.users.length > 0) {
+           this.state.users = cloudData.users;
+        }
+        if (cloudData.signupRequests && Array.isArray(cloudData.signupRequests)) {
+           this.state.signupRequests = cloudData.signupRequests;
+        }
+        
         this.state = { ...this.state, ...cloudData };
         this.patchState();
       }
@@ -900,47 +919,54 @@ class DB {
   private localCommitTimer: any = null;
   private notifyTimer: any = null;
 
-  private async commit() {
-    // Debounce localStorage writes (expensive JSON.stringify on large state)
-    // Writes are batched to at most once every 400ms to keep main thread free
-    if (this.localCommitTimer) clearTimeout(this.localCommitTimer);
-    this.localCommitTimer = setTimeout(() => {
-      try {
-        // --- QUOTA CONTROL: Prune historical logs to stay within 5MB LocalStorage limit ---
-        if (this.state.auditLogs?.length > 100) this.state.auditLogs = this.state.auditLogs.slice(-100);
-        if (this.state.deliveryLogs?.length > 100) this.state.deliveryLogs = this.state.deliveryLogs.slice(-100);
-        if (this.state.aiLogs?.length > 100) this.state.aiLogs = this.state.aiLogs.slice(-100);
-        if (this.state.nocEvents?.length > 100) this.state.nocEvents = this.state.nocEvents.slice(-100);
-        if (this.state.ledger?.length > 300) this.state.ledger = this.state.ledger.slice(-300);
-        if (this.state.invoices?.length > 300) this.state.invoices = this.state.invoices.slice(-300);
-        if (this.state.notifications?.length > 100) this.state.notifications = this.state.notifications.slice(-100);
+  private async commit(immediate = false) {
+    // 1. LOCAL PERSISTENCE (Immediate write to handle fast refreshes)
+    try {
+      // --- QUOTA CONTROL: Prune historical logs to stay within 5MB LocalStorage limit ---
+      if (this.state.auditLogs?.length > 100) this.state.auditLogs = this.state.auditLogs.slice(-100);
+      if (this.state.deliveryLogs?.length > 100) this.state.deliveryLogs = this.state.deliveryLogs.slice(-100);
+      if (this.state.aiLogs?.length > 100) this.state.aiLogs = this.state.aiLogs.slice(-100);
+      if (this.state.nocEvents?.length > 100) this.state.nocEvents = this.state.nocEvents.slice(-100);
+      if (this.state.ledger?.length > 300) this.state.ledger = this.state.ledger.slice(-300);
+      if (this.state.invoices?.length > 300) this.state.invoices = this.state.invoices.slice(-300);
+      if (this.state.notifications?.length > 100) this.state.notifications = this.state.notifications.slice(-100);
 
-        localStorage.setItem('clickopticx_v16_registry', JSON.stringify(this.state));
-      } catch (e) { 
-        console.warn('[DB] localStorage write failed:', e); 
-        // If it still fails, wipe oldest logs aggressively
-        if (e.name === 'QuotaExceededError') {
-           this.state.auditLogs = [];
-           this.state.deliveryLogs = [];
-           this.state.aiLogs = [];
-           console.log('[DB] Emergency flush performed due to storage pressure.');
-        }
+      localStorage.setItem('clickopticx_v16_registry', JSON.stringify(this.state));
+    } catch (e: any) { 
+      console.warn('[DB] local persistence failed:', e);
+      if (e.name === 'QuotaExceededError') {
+         this.state.auditLogs = []; 
+         this.state.deliveryLogs = [];
+         console.log('[DB] Emergency local flush performed.');
       }
-    }, 400);
+    }
 
-    // Firestore cloud sync — debounced separately at 500ms
-    if (this.commitTimer) clearTimeout(this.commitTimer);
-    this.commitTimer = setTimeout(async () => {
+    // 2. CLOUD PERSISTENCE (Firestore Master Source)
+    const performCloudWrite = async () => {
       if (this.firestore && this.initialized) {
         try {
           const docRef = doc(this.firestore, 'registry', 'master_state');
           const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
           await setDoc(docRef, cloudSafeState);
+          console.log('[DB-CLOUD] Master State Synced to Firebase');
         } catch (e) {
-          console.error('[DB] Cloud sync error:', e);
+          console.error('[DB-CLOUD] Master Sync Error:', e);
+        } finally {
+          this.commitTimer = null;
+          this.notify();
         }
+      } else {
+        this.commitTimer = null;
       }
-    }, 500);
+    };
+
+    if (immediate) {
+       if (this.commitTimer) clearTimeout(this.commitTimer);
+       await performCloudWrite();
+    } else {
+      if (this.commitTimer) clearTimeout(this.commitTimer);
+      this.commitTimer = setTimeout(performCloudWrite, 800);
+    }
 
     this.notify();
   }
@@ -1463,7 +1489,7 @@ class DB {
       // INTEGRATION: Real-time status sync on any user update
       await this.syncUserStatusWithBilling(targetId);
       
-      await this.commit();
+      await this.commit(true);
       this.notify();
       return { success: true, message: `Identity ${targetId} updated successfully.` };
     }
@@ -1818,7 +1844,7 @@ class DB {
     this.state.notifications.forEach(n => {
       if ((n.targetId === targetId || n.targetId === 'all') && n.audience === audience) n.read = true;
     });
-    await this.commit();
+    this.commit();
   }
 
   async clearNotifications(targetId: string, audience: 'subscriber' | 'admin') {
@@ -1854,7 +1880,7 @@ class DB {
       if (this.state.currentUser && (this.state.currentUser.id === this.state.users[idx].id || this.state.currentUser.connectionId === this.state.users[idx].connectionId)) {
         this.state.currentUser.password = pass;
       }
-      await this.commit();
+      await this.commit(true);
       return { success: true };
     }
     return { success: false, message: 'User node not found.' };
@@ -1890,7 +1916,7 @@ class DB {
         return { success: false, message: 'Target subscriber node not found.' };
       }
     }
-    await this.commit();
+    await this.commit(true);
     this.notify();
     return { success: true, message: 'Fiscal handshake verified.' };
   }
@@ -1947,7 +1973,7 @@ class DB {
           expiryDate: this.state.users[uIdx].expiryDate
       });
 
-      await this.commit();
+      await this.commit(true);
       this.notify();
       return { success: true };
     }
@@ -1979,7 +2005,7 @@ class DB {
         method: 'Wallet'
     });
 
-    await this.commit();
+    await this.commit(true);
     return { success: true };
   }
 
@@ -2097,7 +2123,7 @@ class DB {
     }
 
     this.logAudit('KYC Submission', 'Request', `Subscriber ${user.name} submitted KYC via ${method}`, userId, user.name);
-    await this.commit();
+    await this.commit(true);
     return { success: true, message: 'KYC Dispatch Successful: Identity node is now pending verification.' };
   }
 
@@ -2206,7 +2232,7 @@ class DB {
         return { success: false, message: `System Error: Unsupported request type [${type}]` };
       }
 
-      await this.commit();
+      await this.commit(true);
       this.notify();
       return { success: true, message: `${type.toUpperCase()} request processed successfully.` };
     } catch (e: any) {
@@ -2293,7 +2319,7 @@ class DB {
       this.logActivity(user.id, 'Approval', 'Subscriber handshake approved by administrator.');
       this.logAudit('Signup Approved', 'Approval', `Signup for ${user.name} (${user.id}) approved. Access granted.`, user.id, user.name);
 
-      await this.commit();
+      await this.commit(true);
       this.notify();
       
       return { success: true, message: 'Identity Approved Successfully. Session link active.', userId: user.id };
@@ -2652,7 +2678,7 @@ class DB {
     }
 
     db.logNotification(userId, 'success', 'Fiscal Commit Successful', `Handshake verified via ${method}. Service activated.`);
-    await this.commit();
+    await this.commit(true);
     return { success: true };
   }
 
@@ -2701,7 +2727,7 @@ class DB {
       // INTEGRATION: Real-time status sync on payment
       await this.syncUserStatusWithBilling(id);
 
-      await this.commit();
+      await this.commit(true);
       this.notify();
     }
   }
@@ -2731,7 +2757,7 @@ class DB {
     // Re-sync status
     await this.syncUserStatusWithBilling(userId);
     
-    await this.commit();
+    await this.commit(true);
     this.notify();
     return { success: true };
   }
@@ -2894,7 +2920,7 @@ class DB {
        await this.syncUserStatusWithBilling(req.userId);
     }
     
-    await this.commit();
+    await this.commit(true);
     this.notify();
     return res;
   }
@@ -3072,7 +3098,7 @@ class DB {
     // Dispatch Activation alerts (async background node)
     this.dispatchActivationNotification(userId, pkgId).catch(console.error);
 
-    await this.commit();
+    await this.commit(true);
     this.notify();
     return { success: true, invoiceId: bill.id, status: finalStatus };
   }
@@ -3129,7 +3155,7 @@ class DB {
       }
     }
 
-    await this.commit();
+    await this.commit(true);
     this.notify();
     return { success: true };
   }
@@ -3189,7 +3215,7 @@ class DB {
     });
 
     if (changes > 0) {
-      await this.commit();
+      await this.commit(true);
       this.notify();
     }
     return changes;
@@ -3247,7 +3273,7 @@ class DB {
 
     this.logNotification(userId, 'success', 'Balance Updated', `Payment of Rs. ${amount} received via ${method}. Status: ${user.status}`);
     await this.syncUserStatusWithBilling(userId);
-    await this.commit();
+    await this.commit(true);
     this.notify();
     return { success: true };
   }
@@ -3294,7 +3320,7 @@ class DB {
     });
 
     await this.syncUserStatusWithBilling(userId);
-    await this.commit();
+    await this.commit(true);
     this.notify();
     return { success: true };
   }
@@ -3372,7 +3398,7 @@ class DB {
     });
 
     await this.syncUserStatusWithBilling(userId);
-    await this.commit();
+    await this.commit(true);
     this.notify();
     return { success: true };
   }
@@ -3409,7 +3435,7 @@ class DB {
       });
     }
 
-    await this.commit();
+    await this.commit(true);
     this.notify();
     return { success: true };
   }
@@ -3786,7 +3812,7 @@ class DB {
       this.state.signupRequests.push(newRequest);
 
       // Persist to Firestore and localStorage
-      await this.commit();
+      await this.commit(true);
       this.notify();
 
       this.logAudit('New User Signup', 'Request', `New user ${newUser.name} registered via local fallback.`, newUserId, newUser.name);
@@ -4713,19 +4739,24 @@ class DB {
     if (!olt) return { success: false, message: 'OLT parent missing' };
 
     try {
-      const res = await fetch(`${this.backendUrl}/api/olt/onu/password-reset`, {
+      const response = await fetch(`${this.backendUrl}/api/olt/onu/password-reset`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ olt, onu, newPassword })
       });
-      return await res.json();
+      const data = await response.json();
+      if (data.success) {
+        await this.commit(true);
+        return { success: true, message: 'ONU Security Protocol Updated: New credentials propagated to Network Node.' };
+      }
+      return data;
     } catch (e: any) {
-      return { success: false, message: 'Command failed to reach backend.' };
+      return { success: false, message: 'Command failed to reach backend node.' };
     }
   }
 
   getSyncStatus() {
-    return false;
+    return !!this.commitTimer;
   }
 
   async sendCoACommand(userId: string, action: 'Disconnect' | 'SpeedChange' | 'ACTIVATE_PACKAGE') {

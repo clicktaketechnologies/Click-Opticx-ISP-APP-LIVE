@@ -117,7 +117,8 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
         paymentMethod: u.managementMode || 'Manual',
         packageName: state.packages.find(p => p.id === u.packageId)?.name || 'Subscriber',
         timestamp: u.createdAt || new Date().toISOString(),
-        userStatus: u.status
+        userStatus: u.status,
+        approval_status: u.approval_status || (u.status === 'Active' ? 'approved' : 'pending')
       }));
     }
 
@@ -136,8 +137,9 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
       // Status Filter
       let matchesStatus = true;
       if (activeTab === 'active-users') {
-        if (statusFilter === 'Pending') matchesStatus = r.status === 'Active'; // Show active by default in this tab
-        else if (statusFilter === 'Rejected') matchesStatus = r.status === 'Blocked'; // Map Rejected filter to Blocked for users
+        if (statusFilter === 'Pending') matchesStatus = r.status === 'Suspended'; // Map Pending filter to Suspended status for users
+        else if (statusFilter === 'Approved') matchesStatus = r.status === 'Active'; // Map Approved filter to Active status for users
+        else if (statusFilter === 'Rejected') matchesStatus = r.status === 'Blocked' || r.status === 'Expired';
         else matchesStatus = statusFilter === 'All' || r.status === statusFilter;
       } else if (statusFilter !== 'All') {
         if (statusFilter === 'Pending') matchesStatus = r.status === 'Pending' || r.status === 'Duplicate';
