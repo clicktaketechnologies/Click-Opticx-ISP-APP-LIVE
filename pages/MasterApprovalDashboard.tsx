@@ -8,7 +8,7 @@ import {
   ShieldCheck, ChevronRight, Activity,
   HardDrive, AlertTriangle, Layers, Banknote, Globe, Landmark,
   ShieldAlert, RefreshCw, Search, Filter, Hash, Eye, Info,
-  Wallet, Smartphone, AlertCircle, FileText, UserCircle, X, Database
+  Wallet, Smartphone, AlertCircle, FileText, UserCircle, X, Database, MapPin, Fingerprint, Package as PackageIcon
 } from 'lucide-react';
 import { Modal } from '../components/shared/Modal';
 
@@ -40,6 +40,7 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [blockReason, setBlockReason] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
   const isPending = false; // Transition bypass
 
   const currentUserRole = state.currentUser?.role || Role.VIEWER;
@@ -167,8 +168,11 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
     const res = await db.approveUnifiedRequest(selectedRequestId.id, selectedRequestId.type);
     setIsProcessing(false);
     if (res.success) {
-      setSelectedRequestId(null);
-      // Optional: notification of success already handled by db.ts but we can add a local one if needed
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        setSelectedRequestId(null);
+      }, 1500);
     } else {
       alert((res as any).message || 'Handshake Protocol Failure: Request could not be authorized.');
     }
@@ -181,8 +185,12 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
     setIsProcessing(false);
 
     if (res.success) {
-      setSelectedRequestId(null);
-      setRejectionReason('');
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        setSelectedRequestId(null);
+        setRejectionReason('');
+      }, 1500);
     } else {
       alert((res as any).message || 'Rejection Fault: System failed to commit rejection.');
     }
@@ -456,27 +464,67 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
           </div>
         }
       >
-        {selectedRequestData && (
+        {showSuccess ? (
+          <div className="py-20 text-center animate-in zoom-in duration-500">
+             <div className="w-24 h-24 bg-green-500/10 text-green-500 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-inner border border-green-500/20">
+                <SafeIcon icon={CheckCircle} size={56} strokeWidth={3}/>
+             </div>
+             <h4 className="text-xl font-black text-slate-800 uppercase italic tracking-tighter leading-none mb-3">Protocol Executed</h4>
+             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed max-w-[200px] mx-auto">
+               Registry status has been synchronized. System link is now active.
+             </p>
+          </div>
+        ) : selectedRequestData && (
           <div className="space-y-6 py-2">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-700 pb-2">User</h4>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center border border-slate-700"><SafeIcon icon={User} size={24} className="text-slate-500" /></div>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">User Identity</h4>
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm"><SafeIcon icon={User} size={28} className="text-slate-400" /></div>
                   <div>
-                    <p className="font-black text-white uppercase text-base leading-none">{selectedRequestData.userName}</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Ref: {selectedRequestData.userId}</p>
+                    <p className="font-black text-slate-900 uppercase text-lg leading-none">{selectedRequestData.userName}</p>
+                    <p className="text-[10px] text-blue-600 font-bold uppercase mt-1 tracking-widest">{selectedRequestData.userId}</p>
                   </div>
                 </div>
               </div>
               <div className="space-y-3">
-                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-700 pb-2">Payment Details</h4>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Fiscal Record</h4>
                 <div>
-                  <p className="text-2xl font-black text-white italic">{state.settings.currency} {selectedRequestData.amount.toLocaleString()}</p>
-                  <p className="text-[10px] text-blue-400 font-black uppercase tracking-widest mt-1">Paid via {selectedRequestData.paymentMethod}</p>
+                  <p className="text-3xl font-black text-slate-900 italic tracking-tighter">{state.settings.currency} {selectedRequestData.amount.toLocaleString()}</p>
+                  <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">Instrument: {selectedRequestData.paymentMethod}</p>
                 </div>
               </div>
             </div>
+
+            {selectedRequestData.unifiedType === 'signup' && (
+              <div className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-6">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-center gap-4">
+                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-slate-200 text-slate-400"><SafeIcon icon={Fingerprint} size={20} /></div>
+                       <div>
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Identity Artifact (CNIC)</p>
+                          <p className="text-xs font-black text-slate-900 uppercase tracking-tighter">{(selectedRequestData as any).cnic || 'Not Provided'}</p>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                       <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-slate-200 text-slate-400"><SafeIcon icon={MapPin} size={20} /></div>
+                       <div>
+                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Operational Node (Location)</p>
+                          <p className="text-xs font-black text-slate-900 uppercase tracking-tighter">{(selectedRequestData as any).area || 'Central'}, {(selectedRequestData as any).address || 'Registry Address'}</p>
+                       </div>
+                    </div>
+                 </div>
+                 <div className="p-4 bg-white/50 border border-slate-200 rounded-2xl flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                       <SafeIcon icon={PackageIcon} size={16} className="text-blue-600" />
+                       <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Service Provisioning:</span>
+                    </div>
+                    <span className="text-[10px] font-black text-blue-600 uppercase italic tracking-widest bg-blue-50 px-3 py-1 rounded-lg">
+                      {state.packages.find(p => p.id === (selectedRequestData as any).packageId)?.name || 'Basic Link'}
+                    </span>
+                 </div>
+              </div>
+            )}
 
             {(selectedRequestData.unifiedType === 'kyc' || selectedRequestData.unifiedType === 'signup') && (selectedRequestData as any).kycDocuments?.length > 0 && (
               <div className="space-y-4">

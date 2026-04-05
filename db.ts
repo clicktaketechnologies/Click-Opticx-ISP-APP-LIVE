@@ -944,8 +944,28 @@ class DB {
   private notify() {
     if (this.notifyTimer) clearTimeout(this.notifyTimer);
     this.notifyTimer = setTimeout(() => {
-      this.listeners.forEach(l => l({ ...this.state }));
-    }, 50); // 50ms buffer to batch multiple rapid updates (e.g. audit log + status change)
+      // --- REACT INTEGRITY: Force fresh object references for the Entire UI Tree ---
+      // This solves issues where nested array mutations (e.g. status changes) were missed by React
+      const snapshot: AppState = { 
+        ...this.state,
+        users: [...this.state.users],
+        signupRequests: [...this.state.signupRequests],
+        packageRequests: [...this.state.packageRequests || []],
+        topupRequests: [...this.state.topupRequests || []],
+        emergencyLoads: [...this.state.emergencyLoads || []],
+        ledger: [...this.state.ledger || []],
+        invoices: [...this.state.invoices || []],
+        notifications: [...this.state.notifications || []],
+        aiLogs: [...this.state.aiLogs || []],
+        missingData: [...this.state.missingData || []],
+        staff: [...this.state.staff || []],
+        auditLogs: [...this.state.auditLogs || []],
+        nocAlerts: [...this.state.nocAlerts || []],
+        upstreamLinks: [...this.state.upstreamLinks || []]
+      };
+      
+      this.listeners.forEach(l => l(snapshot));
+    }, 50); 
   }
 
   getState(): AppState { return { ...this.state }; }
@@ -2239,8 +2259,11 @@ class DB {
            approval_status: 'approved',
            kyc_status: 'pending',
            role: Role.CUSTOMER,
+           cnic: (req as any).cnic || '',
+           address: (req as any).address || '',
+           area: (req as any).area || 'Central',
            createdAt: req.timestamp || new Date().toISOString(),
-           packageId: 'PKG-BASIC', // Default or inherit from request
+           packageId: (req as any).packageId || 'PKG-BASIC', 
            balance: 0,
            unpaidInvoices: 0,
            isKYCVerified: false,
