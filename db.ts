@@ -2019,21 +2019,36 @@ class DB {
   }
 
   async uploadMedia(path: string, base64Data: string): Promise<string> {
-    if (!this.storage) throw new Error("Cloud Storage Node disconnected.");
+    if (!this.storage) {
+      console.warn("Cloud Storage Node disconnected, falling back to base64 encoding.");
+      return base64Data;
+    }
     try {
       const storageRef = ref(this.storage, path);
-      // Determine format
       const isBase64 = base64Data.startsWith('data:');
-      if (isBase64) {
-         await uploadString(storageRef, base64Data, 'data_url');
-      } else {
-         // Should not naturally happen as all components pass base64
-         await uploadString(storageRef, base64Data, 'raw');
-      }
-      return await getDownloadURL(storageRef);
+
+      const uploadTask = async () => {
+         if (isBase64) {
+            await uploadString(storageRef, base64Data, 'data_url');
+         } else {
+            await uploadString(storageRef, base64Data, 'raw');
+         }
+         return await getDownloadURL(storageRef);
+      };
+
+      // Add a 10 second timeout fallback so it never hangs indefinitely
+      return await Promise.race([
+        uploadTask(),
+        new Promise<string>((resolve) => 
+          setTimeout(() => {
+            console.warn('[STORAGE] Upload timed out after 10s, falling back to base64');
+            resolve(base64Data);
+          }, 10000)
+        )
+      ]);
     } catch (e) {
-      console.error('[STORAGE ERROR]', e);
-      throw e;
+      console.error('[STORAGE ERROR]', e, '- Falling back to base64');
+      return base64Data;
     }
   }
 
