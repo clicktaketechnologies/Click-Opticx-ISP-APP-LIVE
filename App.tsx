@@ -174,9 +174,11 @@ const App: React.FC = () => {
 
     const unsubscribe = db.onStateChange((newState) => {
       console.log('App state updated:', newState.currentUser?.email, 'Configured:', db.isConfigured());
-      setDbState(newState);
-      setAuthState(newState.currentUser);
-      setIsConfigured(db.isConfigured());
+      startTransition(() => {
+        setDbState(newState);
+        setAuthState(newState.currentUser);
+        setIsConfigured(db.isConfigured());
+      });
 
       // Global Branding Updates
       const branding = newState.settings.branding;

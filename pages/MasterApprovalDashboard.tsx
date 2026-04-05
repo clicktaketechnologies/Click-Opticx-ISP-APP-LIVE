@@ -35,6 +35,7 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'Approved' | 'Rejected'>('Pending');
   const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearch = React.useDeferredValue(searchTerm);
   const [selectedRequestId, setSelectedRequestId] = useState<{ id: string, type: any } | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -44,63 +45,87 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
   const currentUserRole = state.currentUser?.role || Role.VIEWER;
   const canApprove = [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER].includes(currentUserRole as Role);
 
-  // Unified Request Mapper
+  // Unified Request Mapper - Optimized for Tab-Specific Loading
   const unifiedRequests = useMemo(() => {
-    const pkgs = (state.packageRequests || []).map(r => ({ ...r, unifiedType: 'package' as const }));
-    const topups = (state.topupRequests || []).map(r => ({ ...r, unifiedType: 'topup' as const }));
-    const emer = (state.emergencyLoads || []).map(l => ({
-      ...l,
-      unifiedType: 'emergency' as const,
-      packageName: l.packageId ? (state.packages.find(p => p.id === l.packageId)?.name || 'Rescue') : 'Rescue Credit',
-      paymentMethod: 'Auto-Advance',
-      status: l.status === 'Pending_Activation' ? 'Pending' : (l.status === 'Active' || l.status === 'Paid' ? 'Approved' : 'Rejected')
-    }));
-    const signups = (state.signupRequests || []).map(r => ({
-      ...r,
-      unifiedType: 'signup' as const,
-      paymentMethod: 'N/A',
-      amount: 0,
-      userId: r.userId || 'REQ',
-      userName: r.name,
-      packageName: r.status === 'Duplicate' ? 'Identity Conflict' : 'New Account Request',
-      kycDocuments: state.users.find(u => u.id === r.userId)?.kycDocuments || []
-    }));
+    // Only map the relevant slices of state based on activeTab to avoid O(N) overhead on every render
+    let pkgs: any[] = [];
+    let topups: any[] = [];
+    let emer: any[] = [];
+    let signups: any[] = [];
+    let kycRequests: any[] = [];
+    let allUsers: any[] = [];
 
-    const kycRequests = state.users
-      .filter(u => u.isKYCSubmitted && !u.isKYCVerified)
-      .map(u => ({
+    if (activeTab === 'all' || activeTab === 'package') {
+      pkgs = (state.packageRequests || []).map(r => ({ ...r, unifiedType: 'package' as const }));
+    }
+    
+    if (activeTab === 'all' || activeTab === 'topup') {
+      topups = (state.topupRequests || []).map(r => ({ ...r, unifiedType: 'topup' as const }));
+    }
+
+    if (activeTab === 'all' || activeTab === 'emergency') {
+      emer = (state.emergencyLoads || []).map(l => ({
+        ...l,
+        unifiedType: 'emergency' as const,
+        packageName: l.packageId ? (state.packages.find(p => p.id === l.packageId)?.name || 'Rescue') : 'Rescue Credit',
+        paymentMethod: 'Auto-Advance',
+        status: l.status === 'Pending_Activation' ? 'Pending' : (l.status === 'Active' || l.status === 'Paid' ? 'Approved' : 'Rejected')
+      }));
+    }
+
+    if (activeTab === 'all' || activeTab === 'signup' || activeTab === 'duplicates') {
+      signups = (state.signupRequests || []).map(r => ({
+        ...r,
+        unifiedType: 'signup' as const,
+        paymentMethod: 'N/A',
+        amount: 0,
+        userId: r.userId || 'REQ',
+        userName: r.name,
+        packageName: r.status === 'Duplicate' ? 'Identity Conflict' : 'New Account Request',
+        kycDocuments: state.users.find(u => u.id === r.userId)?.kycDocuments || []
+      }));
+    }
+
+    if (activeTab === 'all' || activeTab === 'kyc') {
+      kycRequests = state.users
+        .filter(u => u.isKYCSubmitted && !u.isKYCVerified)
+        .map(u => ({
+          id: u.id,
+          userId: u.id,
+          userName: u.name,
+          amount: 0,
+          status: (u.verificationStatus === VerificationStatus.PENDING ? 'Pending' : 'Approved') as any,
+          unifiedType: 'kyc' as const,
+          paymentMethod: 'Identity Artifacts',
+          packageName: 'KYC Verification',
+          timestamp: u.kycSubmissionDate || u.createdAt || new Date().toISOString(),
+          kycMethod: u.kycMethod,
+          kycDocuments: u.kycDocuments
+        }));
+    }
+
+    if (activeTab === 'all' || activeTab === 'active-users') {
+      // Limit list to prevent DOM bloat during large re-renders
+      allUsers = state.users.slice(0, 1000).map(u => ({
         id: u.id,
         userId: u.id,
         userName: u.name,
         amount: 0,
-        status: (u.verificationStatus === VerificationStatus.PENDING ? 'Pending' : 'Approved') as any,
-        unifiedType: 'kyc' as const,
-        paymentMethod: 'Identity Artifacts',
-        packageName: 'KYC Verification',
-        timestamp: u.kycSubmissionDate || u.createdAt || new Date().toISOString(),
-        kycMethod: u.kycMethod,
-        kycDocuments: u.kycDocuments
+        status: u.status as any,
+        unifiedType: 'active-users' as const,
+        paymentMethod: u.managementMode || 'Manual',
+        packageName: state.packages.find(p => p.id === u.packageId)?.name || 'Subscriber',
+        timestamp: u.createdAt || new Date().toISOString(),
+        userStatus: u.status
       }));
-
-    const allUsers = state.users.map(u => ({
-      id: u.id,
-      userId: u.id,
-      userName: u.name,
-      amount: 0,
-      status: u.status as any,
-      unifiedType: 'active-users' as const,
-      paymentMethod: u.managementMode || 'Manual',
-      packageName: state.packages.find(p => p.id === u.packageId)?.name || 'Subscriber',
-      timestamp: u.createdAt || new Date().toISOString(),
-      userStatus: u.status
-    }));
+    }
 
     return [...pkgs, ...topups, ...emer, ...signups, ...kycRequests, ...allUsers].sort((a, b) => {
       const timeA = a.timestamp || '';
       const timeB = b.timestamp || '';
       return timeB.localeCompare(timeA);
     });
-  }, [state.packageRequests, state.topupRequests, state.emergencyLoads, state.signupRequests, state.packages, state.users]);
+  }, [state.packageRequests, state.topupRequests, state.emergencyLoads, state.signupRequests, state.packages, state.users, activeTab]);
 
   const filteredRequests = useMemo(() => {
     return unifiedRequests.filter(r => {
@@ -118,8 +143,8 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
         else matchesStatus = r.status === statusFilter;
       }
 
-      // Search Filter
-      const term = searchTerm.toLowerCase();
+      // Search Filter - uses deferredSearch for performance
+      const term = deferredSearch.toLowerCase();
       const matchesSearch = (r.userName || '').toLowerCase().includes(term) ||
         (r.userId || '').toLowerCase().includes(term) ||
         (r as any).email?.toLowerCase().includes(term) ||
@@ -129,7 +154,7 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
 
       return matchesTab && matchesStatus && matchesSearch;
     });
-  }, [unifiedRequests, activeTab, statusFilter, searchTerm]);
+  }, [unifiedRequests, activeTab, statusFilter, deferredSearch]);
 
   const selectedRequestData = useMemo(() => {
     if (!selectedRequestId) return null;

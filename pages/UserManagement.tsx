@@ -18,6 +18,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearch = React.useDeferredValue(searchTerm);
   const [filterType, setFilterType] = useState<'All' | 'Expired' | 'Unpaid' | 'Paid' | 'Half Paid' | 'Half Data' | 'Unverified' | 'Verified'>('All');
 
   useEffect(() => {
@@ -91,7 +92,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const activeUsers = useMemo(() => state.users.filter(u => filterType === 'Deleted' ? u.deleted : !u.deleted), [state.users, filterType]);
   
   const filteredUsers = useMemo(() => {
-    const term = searchTerm.toLowerCase().trim();
+    const term = deferredSearch.toLowerCase().trim();
     let users = activeUsers;
 
     // Apply Filter Logic
@@ -120,7 +121,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       (u.pppoeId || '').toLowerCase().includes(term) ||
       (u.macIp || '').toLowerCase().includes(term)
     );
-  }, [activeUsers, searchTerm, filterType, state.packages]);
+  }, [activeUsers, deferredSearch, filterType, state.packages]);
 
   const selectedUser = useMemo(() => activeUsers.find(u => u.id === selectedUserId), [activeUsers, selectedUserId]);
 

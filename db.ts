@@ -893,6 +893,7 @@ class DB {
   private commitTimer: any = null;
 
   private localCommitTimer: any = null;
+  private notifyTimer: any = null;
 
   private async commit() {
     // Debounce localStorage writes (expensive JSON.stringify on large state)
@@ -940,7 +941,10 @@ class DB {
   }
 
   private notify() {
-    this.listeners.forEach(l => l({ ...this.state }));
+    if (this.notifyTimer) clearTimeout(this.notifyTimer);
+    this.notifyTimer = setTimeout(() => {
+      this.listeners.forEach(l => l({ ...this.state }));
+    }, 50); // 50ms buffer to batch multiple rapid updates (e.g. audit log + status change)
   }
 
   getState(): AppState { return { ...this.state }; }
