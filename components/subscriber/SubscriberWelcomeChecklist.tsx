@@ -50,9 +50,14 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
     if (!kycFile) return;
     setIsProcessing(true);
     try {
-      await db.submitKYC(user.id, kycDocType, kycFile);
-      markStepComplete('Verify Identity');
-      setActiveSubStep(null);
+      // Wrap in array as db.submitKYC expects string[]
+      const res = await db.submitKYC(user.id, kycDocType as any, [kycFile]);
+      if (res.success) {
+        markStepComplete('Verify Identity');
+        setActiveSubStep(null);
+      } else {
+        alert(res.message || "Verification Failed.");
+      }
     } catch (err) {
       alert("Verify Your Identity Failed.");
     } finally {

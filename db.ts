@@ -481,13 +481,17 @@ class DB {
       }
     } catch (e) {
       console.error('Failed to load cached state:', e);
-      // Fallback to initial state if cache load fails
       this.state = INITIAL_STATE;
     }
     this.ensureArrays();
-    console.log('DB Initialized. Configured:', this.initialized);
-    this.initializeCloudLayer();
-    // Defer socket connection by 3s so it never blocks initial render
+    
+    // Trigger initial state patch
+    this.patchState();
+    
+    // Cloud Layer Initialization
+    this.initializeCloudLayer().catch(console.error);
+    
+    // Background Tasks
     setTimeout(() => this.initializeSocketLayer(), 3000);
     setTimeout(() => checkKYCLifecycle(this), 1500);
   }
@@ -2059,8 +2063,9 @@ class DB {
   }
 
   async submitKYC(userId: string, method: KYCMethod, files: string[], notes?: string) {
-    const idx = this.state.users.findIndex(u => u.id === userId);
-    if (idx === -1) return { success: false, message: 'Identity node not found.' };
+    const cleanId = userId.trim();
+    const idx = this.state.users.findIndex(u => u.id === cleanId || u.id.toLowerCase() === cleanId.toLowerCase());
+    if (idx === -1) return { success: false, message: 'Identity node not found. Please re-authenticate and try again.' };
 
     const user = this.state.users[idx];
     const documents: KYCDocument[] = [];
@@ -2068,7 +2073,9 @@ class DB {
     for (const file of files) {
       let photoUrl = file;
       if (file.startsWith('data:')) {
-        photoUrl = await this.uploadMedia(`kyc/${userId}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`, file);
+        // --- OPTIMIZATION: Shrink image for faster infrastructure dispatch ---
+        const optimized = await this.optimizeImage(file, 800, 0.7);
+        photoUrl = await this.uploadMedia(`kyc/${cleanId}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`, optimized);
       }
       documents.push({
         type: method as any,
@@ -2112,15 +2119,9 @@ class DB {
          return await getDownloadURL(storageRef);
       };
 
-      // Add a 10 second timeout fallback so it never hangs indefinitely
       return await Promise.race([
         uploadTask(),
-        new Promise<string>((resolve) => 
-          setTimeout(() => {
-            console.warn('[STORAGE] Upload timed out after 10s, falling back to base64');
-            resolve(base64Data);
-          }, 10000)
-        )
+        new Promise<string>((_, reject) => setTimeout(() => reject(new Error("Storage node connection timeout")), 15000))
       ]);
     } catch (e) {
       console.error('[STORAGE ERROR]', e, '- Falling back to base64');
@@ -5684,6 +5685,33 @@ class DB {
     this.state.missingData = [];
     await this.commit();
     this.notify();
+  }
+  async optimizeImage(base64: string, maxWidth: number, quality: number): Promise<string> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = (maxWidth / width) * height;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+           ctx.drawImage(img, 0, 0, width, height);
+           resolve(canvas.toDataURL('image/jpeg', quality));
+        } else {
+           resolve(base64);
+        }
+      };
+      img.onerror = () => resolve(base64);
+      img.src = base64;
+    });
   }
 }
 
