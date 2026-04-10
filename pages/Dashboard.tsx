@@ -252,461 +252,271 @@ const Dashboard: React.FC<{
 
   // Admin Dashboard
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-10">
-      <ModuleGuide
-        moduleName="Operations Dashboard"
-        description="➡ See your business performance and system status in one place"
-        items={[
-          { title: "Quick Actions", description: "Use the quick action buttons to instantly add users, create invoices, or receive payments from anywhere." },
-          { title: "Dashboard Stats", description: "Real-time snapshot of active vs suspended users, outstanding bills, and overall system status." },
-          { title: "Income Overview", description: "Interactive chart showing collections vs totals. Filter by date or specific groups." }
-        ]}
-      />
-
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
-        <div className="flex items-center gap-5">
-          {logo ? (
-            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center p-2 shadow-sm border border-slate-100 overflow-hidden shrink-0">
-              <img src={logo} className="w-full h-full object-contain" alt="Brand" />
-            </div>
-          ) : (
-            <Archive className="text-blue-600 shrink-0" size={36} />
-          )}
-          <div className="space-y-1">
-            <h2 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight flex items-center gap-4 uppercase italic leading-none">
-              Business Overview
-            </h2>
-            <p className="text-slate-500 font-medium">➡ Track users, payments, and network performance</p>
-          </div>
+    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+      {/* 1. PAGE HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h1 className="dashboard-title">Dashboard</h1>
+          <p className="dashboard-subtitle">Operational summary and system performance</p>
         </div>
-
-        <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-          <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto shrink-0">
-            {[{ id: 'all', label: 'Overview' }, { id: 'users', label: 'Subscribers' }, { id: 'dealers', label: 'Dealers' }].map(f => (
-              <button key={f.id} onClick={() => setEntityFilter(f.id as any)} className={`flex-1 md:flex-none px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${entityFilter === f.id ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>{f.id === 'all' ? 'Overview' : f.id === 'users' ? 'Users' : 'Dealers'}</button>
+        
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="flex bg-white p-1 rounded-xl border border-border-main shadow-sm shrink-0">
+            {[{ id: '3d', label: '3D' }, { id: '7d', label: '7D' }, { id: '30d', label: '30D' }, { id: 'all', label: 'All' }].map(f => (
+              <button 
+                key={f.id} 
+                onClick={() => setDateFilter(f.id as any)} 
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${dateFilter === f.id ? 'bg-bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-main'}`}
+              >
+                {f.label}
+              </button>
             ))}
           </div>
-
-          <div className="flex flex-col sm:flex-row bg-white p-2 rounded-2xl border border-slate-200 shadow-sm gap-2 w-full lg:w-auto">
-            <div className="flex bg-slate-100 p-1 rounded-xl overflow-x-auto shrink-0">
-              {[{ id: '3d', label: 'Last 3 Days' }, { id: '7d', label: 'Last 7 Days' }, { id: '30d', label: 'Last 30 Days' }, { id: 'all', label: 'All Time' }].map(f => (
-                <button key={f.id} onClick={() => setDateFilter(f.id as any)} className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${dateFilter === f.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}>{f.label}</button>
-              ))}
-            </div>
-          </div>
+          <button className="btn btn-secondary btn-sm flex-1 md:flex-none">
+            <Download size={16} /> Export
+          </button>
+          <button onClick={() => onNavigate && onNavigate('users', { action: 'add-user' })} className="btn btn-primary btn-sm flex-1 md:flex-none">
+            <UserPlus size={16} /> New User
+          </button>
         </div>
       </div>
 
-      {/* Premium Quick Actions Bar */}
-      <div className="scroll-x pb-2 mb-8 bg-blue-900/5 p-4 rounded-[2rem] border border-blue-500/10 backdrop-blur-sm shadow-inner no-scrollbar">
-        <div className="flex items-center gap-2 px-3 border-r border-blue-500/10 mr-1 shrink-0">
-          <Zap size={16} className="text-blue-500 animate-pulse" />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-800">Quick Actions</span>
-        </div>
-        <button onClick={() => onNavigate && onNavigate('users', { action: 'add-user' })} className="btn btn-secondary btn-sm !rounded-2xl shrink-0">
-          <UserPlus size={16} /> + Add User
-        </button>
-        <button onClick={() => onNavigate && onNavigate('users', { action: 'receive-funds' })} className="btn btn-secondary btn-sm !rounded-2xl shrink-0 !text-green-600">
-          <Banknote size={16} /> Receive Payment
-        </button>
-        <button onClick={() => onNavigate && onNavigate('invoice-engine')} className="btn btn-secondary btn-sm !rounded-2xl shrink-0">
-          <Receipt size={16} /> Create Invoice
-        </button>
-        <button onClick={() => onNavigate && onNavigate('comm-campaigns')} className="btn btn-secondary btn-sm !rounded-2xl shrink-0 !text-purple-600">
-          <Send size={16} /> Send Message
-        </button>
-        <button onClick={() => setIsReconcileModal(true)} className="btn btn-primary btn-sm !rounded-2xl shrink-0 !bg-slate-900 !text-amber-400 border border-slate-800">
-          <DatabaseZap size={16} /> Fetch Missing Data
-        </button>
-      </div>
-
-      {/* Advanced Data Metrics Matrix */}
-      <div className="grid-cols-responsive border-b border-slate-100 pb-8 mb-8">
+      {/* 2. TOP METRIC CARDS */}
+      <div className="grid-cols-responsive">
         {[
-          { label: 'Total Users', value: globalStats.totalUsers.toLocaleString(), icon: Users, color: 'text-blue-500', bg: 'var(--info-bg)' },
-          { label: 'Active Users', value: globalStats.activeSubs.toLocaleString(), icon: Activity, color: 'text-green-500', bg: 'var(--success-bg)' },
-          { label: 'Server Online', value: globalStats.onlineUsers.toLocaleString(), icon: Globe, color: 'text-cyan-500', bg: 'rgba(6, 174, 212, 0.1)' },
-          { label: 'New Users', value: globalStats.newUsers.toLocaleString(), icon: UserPlus, color: 'text-blue-600', bg: 'var(--info-bg)' },
-          { label: 'Suspended Users', value: globalStats.expiredUsers.toLocaleString(), icon: Archive, color: 'text-rose-600', bg: 'var(--error-bg)' },
-          { label: 'Disabled Users', value: globalStats.disabledUsers.toLocaleString(), icon: ShieldCheck, color: 'text-slate-400', bg: 'var(--bg-surface-soft)' },
+          { label: 'Total Users', value: globalStats.totalUsers.toLocaleString(), trend: '+2.5%', icon: Users, color: 'text-indigo-500' },
+          { label: 'Active Subscribers', value: globalStats.activeSubs.toLocaleString(), trend: '+1.2%', icon: Activity, color: 'text-emerald-500' },
+          { label: 'Pending KYC', value: state.kycRequests.filter(r => r.status === 'Pending').length, trend: '-5%', icon: ShieldCheck, color: 'text-amber-500' },
+          { label: 'Revenue (Period)', value: `${state.settings.currency} ${globalStats.periodRevenue.toLocaleString()}`, trend: '+12%', icon: DollarSign, color: 'text-blue-500' },
         ].map((kpi, idx) => (
-          <div key={idx} className="card metric-card !items-center text-center hover:-translate-y-1 transition-all group">
-            <div 
-              className="p-4 rounded-[1.8rem] mb-3 transition-transform group-hover:scale-110 flex items-center justify-center" 
-              style={{ background: kpi.bg }}
-            >
-              <kpi.icon className={kpi.color} size={24} />
+          <div key={idx} className="card metric-card">
+            <div className="flex justify-between items-start">
+              <span className="label">{kpi.label}</span>
+              <div className={`p-2 rounded-lg bg-bg-surface-soft ${kpi.color}`}>
+                <kpi.icon size={18} />
+              </div>
             </div>
-            <h3 className="value leading-none mb-1">{kpi.value}</h3>
-            <p className="label leading-tight">{kpi.label}</p>
+            <div className="flex items-end gap-2">
+              <h3 className="value">{kpi.value}</h3>
+              <span className={`text-[10px] font-bold pb-1 ${kpi.trend.startsWith('+') ? 'text-emerald-500' : 'text-rose-500'}`}>
+                {kpi.trend.startsWith('+') ? '↑' : '↓'} {kpi.trend}
+              </span>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Expiry & Payment Insight Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <div className="p-8 rounded-[3rem] text-white shadow-xl shadow-rose-200 relative overflow-hidden group bg-gradient-to-br from-rose-500 to-rose-600">
-          <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-4">Expiring in 24 Hours</p>
-            <h4 className="text-5xl font-black italic tracking-tighter mb-2">{globalStats.expiring1d}</h4>
-            <p className="text-[11px] font-bold">➡ Users expiring tomorrow</p>
-          </div>
-          <AlertCircle size={120} className="absolute -right-6 -bottom-6 opacity-20 group-hover:scale-110 transition-transform duration-700" />
-        </div>
-
-        <div className="card flex flex-col justify-between">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600"><Calendar size={24} /></div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Upcoming Expiry</p>
-              <p className="text-xs font-bold text-slate-700">Next 3-7 Days</p>
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <p className="text-2xl font-black text-slate-800 tracking-tighter">{globalStats.expiring3d}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Expiring in 3 Days</p>
-            </div>
-            <div className="w-px h-8 bg-slate-100 self-center"></div>
-            <div className="flex-1">
-              <p className="text-2xl font-black text-slate-800 tracking-tighter">{globalStats.expiring1w}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Expiring in 7 Days</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card flex flex-col justify-between group">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 group-hover:rotate-12 transition-transform"><DollarSign size={24} /></div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">➡ Payments Overview</p>
-              <p className="text-xs font-bold text-slate-700">Payment Status</p>
-            </div>
-          </div>
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <p className="text-2xl font-black text-green-600 tracking-tighter">{globalStats.paidUsers}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Paid Users</p>
-            </div>
-            <div className="w-px h-8 bg-slate-100 self-center"></div>
-            <div className="flex-1">
-              <p className="text-2xl font-black text-rose-500 tracking-tighter">{globalStats.unpaidUsers}</p>
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Unpaid Users</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-8 rounded-[3rem] text-white shadow-2xl shadow-blue-200 relative overflow-hidden group bg-slate-900">
-          <div className="relative z-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 mb-4">Total Due</p>
-            <h4 className="text-4xl font-black italic tracking-tighter mb-2">{state.settings.currency} {globalStats.totalUnpaidAmount.toLocaleString()}</h4>
-            <div className="flex items-center gap-2 text-[11px] font-bold text-green-400">
-              <ArrowUpRight size={14} /> 12% vs last month
-            </div>
-          </div>
-          <TrendingUp size={100} className="absolute -right-6 -bottom-6 opacity-10 group-hover:scale-110 transition-transform duration-700 text-blue-400" />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white p-6 md:p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col h-[400px] md:h-[450px] relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-green-500/5 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-blue-500/5 transition-colors duration-700"></div>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 relative z-10">
-            <div>
-              <h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-3 uppercase italic leading-none"><TrendingUp size={24} className="text-blue-600" /> Income Overview</h3>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">{dateFilter === 'all' ? 'Historical' : 'Recent'} Total vs Received Analysis</p>
-            </div>
-            <div className="flex items-center gap-4 px-4 py-2 bg-slate-50 rounded-2xl border border-slate-100">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                <span className="text-[9px] font-black uppercase text-slate-500">Total</span>
+      {/* 3. MAIN GRID SECTION (CORE DASHBOARD) */}
+      <div className="dashboard-main-grid">
+        {/* LEFT: Analytics / Chart Section */}
+        <div className="card h-full min-h-[440px] flex flex-col gap-6">
+          <div className="flex justify-between items-center">
+            <h3 className="section-title">Income Overview</h3>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Total</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-[9px] font-black uppercase text-slate-500">Received</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Received</span>
               </div>
             </div>
           </div>
-          <div className="flex-1 relative z-10">
+          
+          <div className="flex-1 w-full h-full min-h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} /><stop offset="95%" stopColor="#3b82f6" stopOpacity={0} /></linearGradient>
-                  <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#32d583" stopOpacity={0.2} /><stop offset="95%" stopColor="#32d583" stopOpacity={0} /></linearGradient>
+                  <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366F1" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#6366F1" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                  </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} dy={10} />
-                <YAxis stroke="#94a3b8" fontSize={10} fontWeight="black" axisLine={false} tickLine={false} tickFormatter={(val) => `Rs.${val / 1000}k`} />
-                <Tooltip contentStyle={{ backgroundColor: '#fff', borderRadius: '1.5rem', border: '1px solid #f1f5f9', boxShadow: '0 20px 40px rgba(0,0,0,0.08)', padding: '16px', fontWeight: 'bold' }} />
-                <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#colorRev)" strokeWidth={4} activeDot={{ r: 6, strokeWidth: 0 }} />
-                <Area type="monotone" dataKey="recovery" stroke="#32d583" fillOpacity={1} fill="url(#colorRec)" strokeWidth={4} activeDot={{ r: 6, strokeWidth: 0 }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-main)" />
+                <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={10} fontWeight={600} axisLine={false} tickLine={false} dy={10} />
+                <YAxis stroke="var(--text-muted)" fontSize={10} fontWeight={600} axisLine={false} tickLine={false} tickFormatter={(val) => `${val / 1000}k`} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: 'var(--bg-surface)', borderRadius: '12px', border: '1px solid var(--border-main)', boxShadow: 'var(--shadow-lg)', fontSize: '12px', fontWeight: 'bold' }}
+                />
+                <Area type="monotone" dataKey="revenue" name="Total Revenue" stroke="#6366F1" fillOpacity={1} fill="url(#colorRev)" strokeWidth={2.5} />
+                <Area type="monotone" dataKey="recovery" name="Received" stroke="#10B981" fillOpacity={1} fill="url(#colorRec)" strokeWidth={2.5} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
+        {/* RIGHT: Quick stats / activity / Quick Actions */}
         <div className="space-y-6">
-          <div className="bg-slate-950 p-8 rounded-[3rem] text-white flex flex-col shadow-[0_20px_40px_-15px_rgba(30,41,59,0.5)] relative overflow-hidden h-[215px] group">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-green-500/10 opacity-50 group-hover:opacity-100 transition-opacity duration-700"></div>
-            <div className="relative z-10 flex-1 flex flex-col justify-between">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black flex items-center gap-3 text-white uppercase italic tracking-tighter"><ShieldCheck size={24} className="text-green-400" /> Collection Health</h3>
-                <div className="w-10 h-10 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md"><Activity size={18} className="text-green-400" /></div>
-              </div>
-              <div>
-                <div className="flex items-end gap-3 mb-4">
-                  <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-200 tracking-tighter leading-none">
-                    {globalStats.periodRevenue > 0 ? Math.round((globalStats.periodRecovery / globalStats.periodRevenue) * 100) : 0}%
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mb-1.5 leading-none">Collection Rate</span>
-                </div>
-                <div className="w-full bg-slate-800/50 h-3 rounded-full overflow-hidden border border-white/5 backdrop-blur-sm">
-                  <div className="bg-gradient-to-r from-green-500 to-teal-400 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{ width: `${globalStats.periodRevenue > 0 ? (globalStats.periodRecovery / globalStats.periodRevenue) * 100 : 0}%` }}></div>
-                </div>
-              </div>
-            </div>
-            <ShieldCheck className="absolute -right-12 -bottom-12 opacity-5 scale-[3]" size={100} />
-          </div>
-
-          <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm flex-1 h-[215px] flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-black text-slate-800 uppercase italic tracking-tight flex items-center gap-2">
-                <Bot size={18} className="text-blue-600" /> AI Assistant
-              </h3>
-              <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-xl text-[8px] font-black uppercase tracking-widest">➡ Smart system to help automate tasks and detect issues</span>
-            </div>
-            <div className="grid grid-cols-2 gap-4 mt-6">
-              <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center text-center group hover:bg-white hover:shadow-md hover:border-blue-100 transition-all">
-                <span className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1 group-hover:text-blue-500 transition-colors">Queries</span>
-                <span className="text-3xl font-black text-slate-800 tracking-tighter leading-none">{aiStats.totalCalls}</span>
-              </div>
-              <div className="p-5 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col items-center justify-center text-center group hover:bg-white hover:shadow-md hover:border-green-100 transition-all">
-                <span className="text-xs font-black uppercase text-slate-400 tracking-widest mb-1 group-hover:text-green-500 transition-colors">Resolved</span>
-                <span className="text-3xl font-black text-green-600 tracking-tighter leading-none">{Math.round(aiStats.totalCalls * 0.85)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* SEARCH RESULTS OVERLAY */}
-      <Modal
-        isOpen={!!searchTerm}
-        onClose={() => {
-            if (onClearSearch) onClearSearch();
-        }}
-        title="Global System Records"
-        icon={<Search size={24} className="text-blue-400" />}
-        message={`Searching for: "${searchTerm}"`}
-        maxWidth="max-w-4xl"
-        scrollable
-        hideCloseButton={!onClearSearch}
-        footer={
-           <div className="flex items-center justify-between w-full">
-               <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">Global System Lookup • {state.users.length + state.invoices.length} Total Records Checked</p>
-               {onClearSearch && (
-                  <button onClick={onClearSearch} className="px-8 py-3 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-md">Close Search</button>
-               )}
-           </div>
-        }
-      >
-         <div className="space-y-12 mb-4">
-            {/* Subscribers Section */}
-            <section className="space-y-6">
-              <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.4em] flex items-center gap-2 italic border-b border-slate-50 pb-3">
-                Matched Users
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {state.users.filter(u => 
-                  u.name.toLowerCase().includes(searchTerm?.toLowerCase() || '') || 
-                  u.connectionId?.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
-                  u.email?.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
-                  u.phone?.includes(searchTerm || '')
-                ).length > 0 ? (
-                  state.users.filter(u => 
-                    u.name.toLowerCase().includes(searchTerm?.toLowerCase() || '') || 
-                    u.connectionId?.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
-                    u.email?.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
-                    u.phone?.includes(searchTerm || '')
-                  ).map(u => (
-                    <div 
-                      key={u.id} 
-                      onClick={() => {
-                          if (onClearSearch) onClearSearch();
-                          onNavigate?.('profile', { userId: u.id });
-                      }}
-                      className="p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-blue-300 hover:shadow-md transition-all cursor-pointer shadow-sm"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all">
-                          <UserCircle size={20} className={u.status === UserStatus.ACTIVE ? 'text-green-500 group-hover:text-white' : 'text-slate-400 group-hover:text-white'} />
-                        </div>
-                        <div>
-                          <p className="text-xs font-black text-slate-900 uppercase leading-none mb-1">{u.name}</p>
-                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{u.connectionId || 'NEW_USER'}</p>
-                        </div>
-                      </div>
-                      <ChevronRight size={16} className="text-slate-300 group-hover:text-blue-600 transition-colors" />
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-2 py-8 text-center opacity-40 italic text-xs uppercase font-black tracking-widest border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50">No user records matched.</div>
-                )}
-              </div>
-            </section>
-
-            {/* Transactions Section */}
-            <section className="space-y-6">
-              <h4 className="text-[10px] font-black text-green-500 uppercase tracking-[0.4em] flex items-center gap-2 italic border-b border-slate-50 pb-3">
-                Payment Records
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {state.invoices.filter(i => 
-                  i.id.toLowerCase().includes(searchTerm?.toLowerCase() || '') || 
-                  i.userName.toLowerCase().includes(searchTerm?.toLowerCase() || '')
-                ).length > 0 ? (
-                  state.invoices.filter(i => 
-                    i.id.toLowerCase().includes(searchTerm?.toLowerCase() || '') || 
-                    i.userName.toLowerCase().includes(searchTerm?.toLowerCase() || '')
-                  ).map(inv => (
-                    <div key={inv.id} className="p-5 bg-white border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-green-300 hover:shadow-md transition-all shadow-sm">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border shadow-sm group-hover:bg-green-600 group-hover:text-white transition-all text-slate-400">
-                          <Banknote size={20} />
-                        </div>
-                        <div>
-                          <p className="text-xs font-black text-slate-900 uppercase leading-none mb-1">{inv.userName}</p>
-                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{inv.id}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-black text-slate-900">Rs. {inv.totalAmount}</p>
-                        <p className={`text-[9px] font-black uppercase tracking-wider ${inv.status === PaymentStatus.PAID ? 'text-green-600' : 'text-rose-600'}`}>{inv.status}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-2 py-8 text-center opacity-40 italic text-xs uppercase font-black tracking-widest border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50">No records matched.</div>
-                )}
-              </div>
-            </section>
-         </div>
-      </Modal>
-
-      {/* MISSING DATA RECONCILIATION MODAL */}
-      <Modal
-        isOpen={isReconcileModal}
-        onClose={() => setIsReconcileModal(false)}
-        title="Data Integrity Recovery"
-        icon={<DatabaseZap size={24} className="text-amber-500" />}
-        maxWidth="max-w-4xl"
-        scrollable
-      >
-        <div className="space-y-8 py-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50 p-6 rounded-3xl border border-slate-100">
-            <div className="space-y-1">
-              <h4 className="text-lg font-black text-slate-800 uppercase italic">Recovery Protocol</h4>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">Select data block to reconcile</p>
-            </div>
-            <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="card overflow-visible">
+            <h3 className="section-title mb-6">Quick Actions</h3>
+            <div className="action-list">
               {[
-                { id: 'user', label: 'Users' },
-                { id: 'billing', label: 'Billing' },
-                { id: 'package', label: 'Packages' },
-                { id: 'entire', label: 'Entire System' }
-              ].map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setReconcileType(t.id as any)}
-                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${reconcileType === t.id ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400 hover:text-slate-600'}`}
-                >
-                  {t.label}
-                </button>
+                { label: 'Receive Funds', icon: Banknote, color: 'text-emerald-500', action: () => onNavigate?.('users', { action: 'receive-funds' }) },
+                { label: 'Create Invoice', icon: Receipt, color: 'text-indigo-500', action: () => onNavigate?.('invoice-engine') },
+                { label: 'Send Message', icon: Send, color: 'text-purple-500', action: () => onNavigate?.('comm-campaigns') },
+                { label: 'Sync Registry', icon: DatabaseZap, color: 'text-amber-500', action: () => setIsReconcileModal(true) },
+              ].map((act, i) => (
+                <div key={i} onClick={act.action} className="action-item group">
+                  <div className={`action-icon group-hover:bg-indigo-500 group-hover:text-white transition-colors`}>
+                    <act.icon size={20} className={act.color + " group-hover:text-white"} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-bold text-text-main group-hover:text-bg-primary transition-colors">{act.label}</p>
+                    <p className="text-[10px] text-text-muted">Instant system utility</p>
+                  </div>
+                  <ChevronRight size={14} className="text-text-muted group-hover:text-bg-primary" />
+                </div>
               ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <button
-              onClick={async () => {
-                setIsScanning(true);
-                await db.reconcileData(reconcileType);
-                setIsScanning(false);
-              }}
-              disabled={isScanning}
-              className={`flex-1 py-6 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all flex flex-col items-center justify-center gap-3 border shadow-sm ${isScanning ? 'bg-slate-100 text-slate-400' : 'bg-white text-slate-900 hover:shadow-xl hover:-translate-y-1 hover:border-blue-500 hover:text-blue-600'}`}
-            >
-              {isScanning ? <RefreshCcw size={32} className="animate-spin" /> : <SearchCode size={32} />}
-              {isScanning ? 'Analyzing Infrastructure...' : 'Initiate Deep Scan'}
-            </button>
-
-            <button
-              onClick={async () => {
-                if (state.missingData.length === 0) return;
-                setIsFixingAll(true);
-                for (const node of state.missingData) {
-                  await db.fixMissingData(node.id);
-                }
-                setIsFixingAll(false);
-              }}
-              disabled={isFixingAll || state.missingData.length === 0}
-              className={`flex-1 py-6 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all flex flex-col items-center justify-center gap-3 border shadow-sm ${isFixingAll || state.missingData.length === 0 ? 'bg-slate-50 text-slate-300' : 'bg-green-600 text-white hover:shadow-xl hover:-translate-y-1 shadow-green-200'}`}
-            >
-              {isFixingAll ? <RefreshCcw size={32} className="animate-spin" /> : <ShieldCheck size={32} />}
-              {isFixingAll ? 'Reconstructing Nodes...' : `Auto-Heal ${state.missingData.length} Nodes`}
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] flex items-center gap-2 border-b border-slate-100 pb-2">
-              Detected Anomalies ({state.missingData.length})
-            </h5>
-            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-              {state.missingData.length > 0 ? (
-                state.missingData.map(node => (
-                  <div key={node.id} className="p-5 bg-white border border-slate-100 rounded-3xl flex items-center justify-between group hover:border-amber-400 hover:shadow-xl transition-all">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${node.severity === 'critical' ? 'bg-rose-50 text-rose-500' : node.severity === 'high' ? 'bg-orange-50 text-orange-500' : 'bg-blue-50 text-blue-500'}`}>
-                        {node.type === 'user' ? <Users size={20} /> : <Receipt size={20} />}
-                      </div>
-                      <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-black text-slate-900 uppercase italic leading-none">{node.title}</p>
-                          <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${node.severity === 'critical' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'}`}>{node.severity}</span>
-                        </div>
-                        <p className="text-[10px] text-slate-500 font-medium leading-relaxed tracking-tight">{node.description}</p>
-                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest italic flex items-center gap-1">
-                          <Zap size={8} className="text-amber-500" /> Suggested: {node.suggestedFix}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => db.fixMissingData(node.id)}
-                      disabled={node.status === 'fixing'}
-                      className={`px-6 py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all ${node.status === 'fixing' ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white hover:bg-green-600 shadow-md group-hover:bg-amber-500'}`}
-                    >
-                      {node.status === 'fixing' ? 'Healing...' : 'Fix Node'}
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div className="py-20 text-center space-y-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[3rem]">
-                   <div className="w-20 h-20 bg-white shadow-inner rounded-3xl flex items-center justify-center mx-auto text-slate-200"><ShieldCheck size={40} /></div>
-                   <div className="space-y-1">
-                     <p className="text-xs font-black text-slate-400 uppercase tracking-widest italic">No Missing Data Nodes Found</p>
-                     <p className="text-[10px] text-slate-300 font-bold">Registry consistency is currently 100% stable.</p>
-                   </div>
-                </div>
-              )}
-            </div>
+          <div className="card bg-bg-app border-dashed border-2 flex flex-col items-center justify-center p-8 text-center gap-4">
+             <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                <ShieldCheck size={28} />
+             </div>
+             <div>
+                <p className="text-xs font-bold text-text-main">System Health Healthy</p>
+                <p className="text-[10px] text-text-muted mt-1">All registry nodes are synchronized and performing optimally.</p>
+             </div>
+             <button onClick={() => setIsReconcileModal(true)} className="text-[10px] font-bold text-bg-primary uppercase tracking-widest hover:underline">Run Diagnostic</button>
           </div>
         </div>
-        <div className="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center bg-slate-900 -mx-6 -mb-6 px-8 py-6">
-           <div className="space-y-1">
-              <p className="text-[10px] font-black text-white uppercase italic tracking-tighter">System Health Matrix</p>
-              <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none">Last Render Memory Sync: {state.missingData.length > 0 ? state.missingData[0].timestamp : 'Consistent'}</p>
+      </div>
+
+      {/* 4. DATA SECTION: RECENT USERS / KYC */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+            <h3 className="section-title">Recent System Activity</h3>
+            <button onClick={() => onNavigate?.('kyc-hub')} className="text-[10px] font-bold text-bg-primary uppercase tracking-widest hover:underline">View All Records</button>
+        </div>
+        
+        <div className="table-container shadow-sm border border-border-main">
+          <table>
+            <thead>
+              <tr>
+                <th>Subscriber</th>
+                <th>Status</th>
+                <th>KYC Level</th>
+                <th>Joined</th>
+                <th>Due Amount</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {state.users.slice(0, 5).map(user => (
+                <tr key={user.id}>
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-bg-surface-soft flex items-center justify-center text-text-muted font-bold text-[10px]">
+                        {user.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-text-main">{user.name}</p>
+                        <p className="text-[10px] text-text-muted uppercase tracking-tighter">{user.connectionId}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span className={`badge ${user.status === UserStatus.ACTIVE ? 'badge-success' : 'badge-warning'}`}>
+                      {user.status}
+                    </span>
+                  </td>
+                  <td>
+                    <span className={`badge ${user.verificationStatus === VerificationStatus.VERIFIED ? 'badge-success' : user.verificationStatus === VerificationStatus.PENDING ? 'badge-warning' : 'badge-info'}`}>
+                      {user.verificationStatus}
+                    </span>
+                  </td>
+                  <td>
+                    <span className="text-[11px] font-medium text-text-muted">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
+                  </td>
+                  <td>
+                    <span className="text-sm font-bold text-text-main">
+                      {state.settings.currency} {(state.invoices.find(i => i.userId === user.email && i.status === PaymentStatus.UNPAID)?.dueAmount || 0).toLocaleString()}
+                    </span>
+                  </td>
+                  <td>
+                    <button 
+                       onClick={() => onNavigate?.('customer-360', { userId: user.id })}
+                       className="p-1.5 hover:bg-bg-surface-soft rounded-lg text-text-muted hover:text-bg-primary transition-colors"
+                    >
+                      <UserCircle size={18} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Modal
+        isOpen={!!searchTerm}
+        onClose={() => { if (onClearSearch) onClearSearch(); }}
+        title="Global System Records"
+        icon={<Search size={24} className="text-bg-primary" />}
+        maxWidth="max-w-4xl"
+        scrollable
+        footer={
+           <div className="flex items-center justify-between w-full">
+               <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest">Global Lookup • {state.users.length} Records</p>
+               <button onClick={onClearSearch} className="btn btn-primary btn-sm">Close</button>
            </div>
-           <button onClick={() => db.clearMissingData()} className="px-6 py-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all">Flush Recognition Buffer</button>
+        }
+      >
+        <div className="space-y-8 p-1">
+            <section className="space-y-4">
+              <h4 className="text-[10px] font-black text-text-primary uppercase tracking-[0.2em] border-b pb-2">Matched Subscribers</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {state.users.filter(u => 
+                  u.name.toLowerCase().includes(searchTerm?.toLowerCase() || '') || 
+                  u.connectionId?.toLowerCase().includes(searchTerm?.toLowerCase() || '')
+                ).map(u => (
+                  <div key={u.id} onClick={() => { onClearSearch?.(); onNavigate?.('customer-360', { userId: u.id }); }} className="card !p-4 flex justify-between items-center cursor-pointer hover:border-bg-primary transition-colors">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600"><UserCircle size={18}/></div>
+                        <div><p className="text-xs font-bold">{u.name}</p><p className="text-[10px] text-text-muted">{u.connectionId}</p></div>
+                    </div>
+                    <ChevronRight size={14} className="text-text-muted" />
+                  </div>
+                ))}
+              </div>
+            </section>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isReconcileModal}
+        onClose={() => setIsReconcileModal(false)}
+        title="Registry Diagnostics"
+        icon={<DatabaseZap size={24} className="text-amber-500" />}
+        maxWidth="max-w-4xl"
+        scrollable
+      >
+        <div className="space-y-6 py-2">
+           <div className="flex justify-between items-center p-6 bg-bg-app rounded-2xl border border-border-main">
+              <div><h4 className="text-sm font-bold">Diagnostic Mode</h4><p className="text-[10px] text-text-muted">Select block to analyze</p></div>
+              <div className="flex bg-white p-1 rounded-xl border">
+                 {['user', 'billing', 'entire'].map(t => (
+                   <button key={t} onClick={() => setReconcileType(t as any)} className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase ${reconcileType === t ? 'bg-bg-primary text-white' : 'text-text-muted'}`}>{t}</button>
+                 ))}
+              </div>
+           </div>
+           
+           <div className="grid grid-cols-2 gap-4">
+              <button disabled={isScanning} onClick={() => {setIsScanning(true); db.reconcileData(reconcileType).then(() => setIsScanning(false));}} className="btn btn-secondary h-24 flex-col gap-2">
+                 {isScanning ? <RefreshCcw className="animate-spin" /> : <SearchCode size={24} />}
+                 <span>Deep Scan</span>
+              </button>
+              <button disabled={isFixingAll || state.missingData.length === 0} onClick={() => {setIsFixingAll(true); Promise.all(state.missingData.map(n => db.fixMissingData(n.id))).then(() => setIsFixingAll(false));}} className="btn btn-primary h-24 flex-col gap-2 !bg-emerald-600">
+                 <ShieldCheck size={24} />
+                 <span>Auto-Heal {state.missingData.length} Nodes</span>
+              </button>
+           </div>
         </div>
       </Modal>
     </div>
@@ -714,4 +524,3 @@ const Dashboard: React.FC<{
 };
 
 export default Dashboard;
-

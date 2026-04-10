@@ -412,7 +412,7 @@ const App: React.FC = () => {
               onSearch={setGlobalSearchTerm}
               isPending={isPending}
             />
-            <main className="p-4 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
+            <main className="p-3 md:p-6 lg:p-8 flex-1 overflow-y-auto custom-scrollbar">
               <Suspense fallback={
                 <div className="h-full w-full flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-500">
                   <div className="relative flex items-center justify-center h-20">
