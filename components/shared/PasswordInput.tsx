@@ -61,7 +61,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           placeholder={placeholder}
           required={required}
           autoComplete={autoComplete}
-          className="w-full pl-12 pr-12 py-4 bg-[#F8FAFC] border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-[#0F172A] placeholder:text-slate-400"
+          className="w-full pl-14 pr-14 py-4 bg-[#F8FAFC] border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-[#0F172A] placeholder:text-slate-400"
         />
         <button
           type="button"

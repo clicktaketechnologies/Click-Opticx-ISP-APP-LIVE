@@ -239,7 +239,7 @@ const CreditScoreAdmin: React.FC<{ state: AppState }> = ({ state }) => {
          icon={<BarChart3 size={22} className="text-blue-500" />}
          confirmLabel="Authorize Adjustment"
          onConfirm={handleAdjust}
-         isConfirmDisabled={!reason || delta === 0 || isSaving}
+         isLoading={!reason || delta === 0 || isSaving}
          maxWidth="max-w-lg"
       >
          <div className="space-y-8">

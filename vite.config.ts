@@ -33,6 +33,16 @@ export default defineConfig(({ mode }) => {
           }
         }
       }
+    },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      include: ['tests/**/*.test.ts'],
+      server: {
+        deps: {
+          inline: ['firebase', '@firebase']
+        }
+      }
     }
   };
 });

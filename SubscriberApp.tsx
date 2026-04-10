@@ -66,11 +66,12 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
 
     // AUTO-TRIGGER KYC FOR NEW USERS
     useEffect(() => {
-       if (!user.isKYCSubmitted && !user.isKYCVerified) {
+       // Show if NOT verified AND (NOT submitted OR requires revision)
+       if (!user.isKYCVerified && (!user.isKYCSubmitted || user.verificationStatus === VerificationStatus.REVISION)) {
           const timer = setTimeout(() => setIsKYCOpen(true), 1500);
           return () => clearTimeout(timer);
        }
-    }, [user.isKYCSubmitted, user.isKYCVerified]);
+    }, [user.isKYCSubmitted, user.isKYCVerified, user.verificationStatus]);
 
     const pendingTopups = useMemo(() => (state.topupRequests || []).filter(r => r.userId === user.id && r.status === 'Pending'), [state.topupRequests, user.id]);
     const currentPkg = useMemo(() => state.packages.find(p => p.id === user.packageId), [state.packages, user.packageId]);
@@ -85,16 +86,17 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
    const handleTabChange = (tab: SubTab) => {
       if (!isPageEnabled(tab)) return;
 
-      // KYC Enforcement: Block EVERYTHING except home, profile, legal, support if KYC is not verified
-      const allowedWithoutKYC: SubTab[] = ['home', 'profile', 'support', 'legal', 'notifs'];
+      // KYC Enforcement: Block fiscal/network tabs if KYC is not verified
+      const allowedWithoutKYC: SubTab[] = ['home', 'profile', 'support', 'legal', 'notifs', 'namaz', 'quran', 'qibla', 'tasbih'];
       if (!allowedWithoutKYC.includes(tab) && user.kyc_status !== 'verified') {
          setKycIntent(tab);
          setIsKYCOpen(true);
+         setActiveTab('home');
          return;
       }
 
-      // Approval Enforcement: Block EVERYTHING except home, profile, support, legal if not approved
-      const allowedWithoutApproval: SubTab[] = ['home', 'profile', 'support', 'legal', 'notifs'];
+      // Approval Enforcement: Mirror KYC rules for pending approvals
+      const allowedWithoutApproval: SubTab[] = ['home', 'profile', 'support', 'legal', 'notifs', 'namaz', 'quran', 'qibla', 'tasbih'];
       if (!allowedWithoutApproval.includes(tab) && user.approval_status !== 'approved') {
          alert("Your account is pending admin approval. Some features are restricted.");
          return;
@@ -171,13 +173,16 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
       }
    };
 
-   const navItems = [
-      { id: 'home', icon: Home, label: 'Home' },
-      { id: 'ai-home', icon: Sparkles, label: 'AI' },
-      { id: 'live-usage', icon: Monitor, label: 'Live' },
-      { id: 'wallet', icon: Wallet, label: 'Wallet' },
-      { id: 'packages', icon: Wifi, label: 'Plans' },
-   ].filter(item => item.id === 'home' || isPageEnabled(item.id));
+    const navItems = [
+       { id: 'home', icon: Home, label: 'Home' },
+       { id: 'ai-home', icon: Sparkles, label: 'AI' },
+       { id: 'live-usage', icon: Monitor, label: 'Live' },
+       { id: 'wallet', icon: Wallet, label: 'Wallet' },
+       { id: 'packages', icon: Wifi, label: 'Plans' },
+    ].filter(item => {
+       if (user.kyc_status !== 'verified' && item.id !== 'home') return false;
+       return item.id === 'home' || isPageEnabled(item.id);
+    });
 
    return (
       <div className="h-screen bg-slate-50 flex flex-col overflow-hidden text-slate-900">
@@ -213,58 +218,110 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                    <CheckCircle size={44} />
                 </div>
                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed px-6">
-                   Identity node synchronized. Your security registry has been updated and all restricted features are now available.
+                   Your identity has been verified. Your account is now fully active and all features are unlocked.
                 </p>
              </div>
           </Modal>
-         <header className="h-20 bg-white px-6 flex items-center justify-between sticky top-0 z-[200] shrink-0 shadow-sm border-b border-slate-100">
-            <div className="flex items-center gap-4">
-               <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center border border-slate-800 shadow-2xl group active:scale-90 transition-transform overflow-hidden p-0.5">
-                  {branding.logoSquare ? <img src={branding.logoSquare} className="w-full h-full object-contain rounded-xl" /> : <Globe size={24} className="text-blue-500 animate-pulse" />}
-               </div>
-               <div>
-                  <h1 className="text-sm font-black uppercase italic tracking-tighter leading-none text-slate-800">{branding.businessName}</h1>
-                  <p className="text-[7.5px] font-black text-blue-600 uppercase tracking-[0.3em] mt-1 italic opacity-60">Subscriber Core Hub</p>
+         <header className="h-[72px] bg-white px-5 flex items-center justify-between sticky top-0 z-[200] shrink-0 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] border-b border-slate-50">
+            <div className="flex items-center gap-3">
+               {branding.favicon ? (
+                 <img src={branding.favicon} className="w-10 h-10 object-contain drop-shadow-sm" alt="Logo" />
+               ) : (
+                 <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                    <Globe size={20} className="animate-pulse" />
+                 </div>
+               )}
+               <div className="flex flex-col justify-center">
+                  <div className="flex items-center gap-2">
+                     <h1 className="text-[15px] font-black uppercase tracking-tighter leading-none text-slate-900">{branding.businessName}</h1>
+                     {user.isKYCVerified && (
+                        <div className="flex items-center gap-1 bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-md shadow-sm border border-blue-200">
+                           <ShieldCheck size={10} strokeWidth={3} />
+                           <span className="text-[8px] font-black uppercase tracking-widest">Verified Account</span>
+                        </div>
+                     )}
+                     {user.activationCount === 0 && !user.isKYCVerified && (
+                        <div className="hidden sm:block animate-in fade-in zoom-in slide-in-from-left-2 duration-700">
+                           <span className="text-[9px] bg-amber-100 text-amber-700 font-black px-2 py-0.5 rounded-full uppercase tracking-widest">Welcome Aboard</span>
+                        </div>
+                     )}
+                  </div>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 truncate max-w-[180px] sm:max-w-xs">{branding.tagline || 'Reliable Connectivity'}</p>
                </div>
             </div>
-            <div className="flex items-center gap-3">
+            
+            <div className="flex items-center gap-2 sm:gap-3">
                {appearance.showAICalling && (
-                  <button onClick={() => handleTabChange('ai-voice-call')} className="p-3 bg-blue-600 text-white rounded-2xl relative shadow-xl shadow-blue-500/20 active:scale-90 transition-all">
-                     <Mic size={18} className="animate-pulse" />
-                     <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
+                  <button onClick={() => handleTabChange('ai-voice-call')} className="p-2 sm:p-2.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl relative transition-colors shadow-sm">
+                     <Mic size={18} />
+                     <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>
                   </button>
                )}
-               <button onClick={() => handleTabChange('notifs')} className="p-3 bg-white border border-slate-100 text-slate-400 rounded-2xl relative shadow-sm hover:text-slate-900 hover:bg-slate-50 transition-all">
+               <button onClick={() => handleTabChange('notifs')} className="p-2 sm:p-2.5 bg-slate-50 border border-slate-100 text-slate-500 rounded-xl relative shadow-sm hover:text-slate-900 hover:bg-slate-100 transition-colors">
                   <Bell size={18} />
-                  {unreadCount > 0 && <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-600 rounded-full shadow-lg ring-2 ring-white"></span>}
+                  {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full shadow-sm border border-white"></span>}
                </button>
-               <button onClick={() => handleTabChange('profile')} className="w-10 h-10 rounded-2xl bg-white border border-slate-100 flex items-center justify-center shadow-sm overflow-hidden p-0.5 hover:border-blue-200 transition-all">
-                  {user.profileImage ? <img src={user.profileImage} className="w-full h-full object-cover rounded-xl" /> : <div className="w-full h-full bg-slate-50 flex items-center justify-center rounded-xl"><User size={22} className="text-slate-300" /></div>}
-               </button>
+               <div className="relative">
+                  {user.activationCount === 0 && (
+                     <span className="absolute -top-1 -left-1 z-10 bg-amber-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-widest shadow-sm animate-pulse">New</span>
+                  )}
+                  <button onClick={() => handleTabChange('profile')} className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border-2 border-slate-100 flex items-center justify-center shadow-sm overflow-hidden hover:border-blue-300 transition-all">
+                     {user.profileImage ? <img src={user.profileImage} className="w-full h-full object-cover" /> : <div className="w-full h-full bg-slate-100 flex items-center justify-center"><User size={20} className="text-slate-400" /></div>}
+                  </button>
+               </div>
             </div>
          </header>
          <main className="flex-1 overflow-y-auto p-4 pb-32 custom-scrollbar">
             <div className="max-w-xl mx-auto h-full space-y-4 pt-1">
-               {/* KYC Enforcement Banner */}
-               {user.kyc_status === 'pending' && (
-                  <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500 shadow-sm">
-                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
-                           <ShieldAlert size={20} />
+                {/* KYC Enforcement Banner */}
+                {user.kyc_status === 'pending' && user.verificationStatus !== VerificationStatus.REVISION && (
+                   <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500 shadow-sm">
+                      <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                            <ShieldAlert size={20} />
+                         </div>
+                         <div>
+                            <p className="text-[10px] font-black uppercase tracking-tight text-amber-900 leading-none">Verification Required</p>
+                            <p className="text-[9px] font-bold uppercase text-amber-600 mt-0.5 tracking-widest leading-none">Complete your identity verification for full access</p>
+                         </div>
+                      </div>
+                      <button 
+                         onClick={() => setIsKYCOpen(true)}
+                         className="px-4 py-2 bg-amber-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all shadow-lg active:scale-95"
+                      >
+                         Verify Now
+                      </button>
+                   </div>
+                )}
+
+                {/* KYC Revision Required Banner */}
+                {user.verificationStatus === VerificationStatus.REVISION && (
+                   <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-4 animate-in shake duration-500 shadow-md">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                              <ShieldAlert size={20} />
+                           </div>
+                           <div>
+                              <p className="text-[10px] font-black uppercase tracking-tight text-rose-900 leading-none">Action Required: Resubmission Needed</p>
+                              <p className="text-[9px] font-bold uppercase text-rose-500 mt-0.5 tracking-widest leading-none">Your documents were declined</p>
+                           </div>
                         </div>
-                        <div>
-                           <p className="text-[10px] font-black uppercase tracking-tight text-amber-900 leading-none">KYC Required</p>
-                           <p className="text-[9px] font-bold uppercase text-amber-600 mt-0.5 tracking-widest leading-none">Complete identity node for full access</p>
-                        </div>
-                     </div>
-                     <button 
-                        onClick={() => setIsKYCOpen(true)}
-                        className="px-4 py-2 bg-amber-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all shadow-lg active:scale-95"
-                     >
-                        Verify Now
-                     </button>
-                  </div>
-               )}
+                        <button 
+                           onClick={() => setIsKYCOpen(true)}
+                           className="px-4 py-2 bg-rose-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg active:scale-95"
+                        >
+                           Fix Now
+                        </button>
+                      </div>
+                      <div className="p-3 bg-white/50 border border-rose-100 rounded-xl">
+                         <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1 italic">Reason:</p>
+                        <p className="text-[11px] font-black text-rose-700 leading-tight italic">
+                           "{user.kyc_rejected_reason || 'Documents need to be clearer. Please provide higher quality photos.'}"
+                        </p>
+                      </div>
+                   </div>
+                )}
 
                {/* Approval Progress Banner */}
                {user.kyc_status === 'submitted' && user.approval_status === 'pending' && (
@@ -274,8 +331,8 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                            <History size={20} className="animate-spin-slow relative z-10" />
                         </div>
                         <div>
-                           <p className="text-[10px] font-black uppercase tracking-tight text-blue-900 leading-none">Smart Access Active</p>
-                           <p className="text-[9px] font-bold uppercase text-blue-400 mt-0.5 tracking-widest leading-none">Identity Dispatch in Progress: Priority Access Node</p>
+                           <p className="text-[10px] font-black uppercase tracking-tight text-blue-900 leading-none">Under Review</p>
+                           <p className="text-[9px] font-bold uppercase text-blue-400 mt-0.5 tracking-widest leading-none">Your documents are being reviewed by our team</p>
                         </div>
                      </div>
                      <div className="px-3 py-1 bg-blue-600/10 rounded-full border border-blue-600/20">
@@ -293,14 +350,14 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                            <Clock size={28} className="animate-pulse" />
                         </div>
                         <div className="flex-1">
-                           <h4 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-1">Final Approval Pending</h4>
-                           <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest leading-relaxed">Your KYC is VERIFIED. Please wait for the final administrator signature.</p>
+                           <h4 className="text-lg sm:text-xl font-black text-white uppercase italic tracking-tighter leading-none mb-1">Approval in Progress</h4>
+                           <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest leading-relaxed">Your documents are verified. We are finalizing your account activation.</p>
                         </div>
                      </div>
                      <div className="space-y-4 pt-2 relative z-10">
                         <div className="flex items-center justify-between text-[8px] font-black uppercase text-slate-500 tracking-widest">
-                           <span>Verification Node</span>
-                           <span className="text-blue-400">95% Synchronized</span>
+                           <span>Account Setup</span>
+                           <span className="text-blue-400">95% Complete</span>
                         </div>
                         <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
                            <div className="h-full bg-blue-600 animate-pulse w-[95%]"></div>
@@ -330,12 +387,14 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
          </nav>
 
          {/* Quick Actions Floating Core */}
-         <button
-            onClick={() => setShowQuickActions(true)}
-            className="fixed bottom-20 right-6 w-14 h-14 bg-blue-600 text-white rounded-2xl shadow-2xl z-[500] flex items-center justify-center hover:scale-110 active:scale-95 transition-all border-b-4 border-blue-800"
-         >
-            <Zap size={28} fill="currentColor" />
-         </button>
+         {user.kyc_status === 'verified' && (
+            <button
+               onClick={() => setShowQuickActions(true)}
+               className="fixed bottom-20 right-6 w-14 h-14 bg-blue-600 text-white rounded-2xl shadow-2xl z-[500] flex items-center justify-center hover:scale-110 active:scale-95 transition-all border-b-4 border-blue-800"
+            >
+               <Zap size={28} fill="currentColor" />
+            </button>
+         )}
 
          {showQuickActions && (
             <SubscriberQuickActions

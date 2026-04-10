@@ -1,5 +1,14 @@
 
-import { db } from '../db';
+// Lazy-import db to break circular dependency: db.ts → NotificationManager → db.ts
+// Using a getter pattern so db is resolved at call time, never at module evaluation time.
+let _db: any = null;
+const getDb = () => {
+    if (!_db) {
+        // Dynamic require to avoid circular import at module evaluation
+        _db = require('../db').db;
+    }
+    return _db;
+};
 
 export interface EmailPayload {
     to: string;
@@ -27,7 +36,7 @@ class NotificationManager {
      * Uses the global configuration stored in settings.
      */
     async sendEmail(payload: EmailPayload): Promise<{ success: boolean; message: string }> {
-        const state = db.getState();
+        const state = getDb().getState();
         const config = state.settings.commConfig;
         const defaultSender = config.senderIdentities.find(i => i.isDefault) || config.senderIdentities[0];
 
@@ -52,14 +61,14 @@ class NotificationManager {
 
             const result = await response.json();
             if (result.success) {
-                db.logNotification('all', 'success', 'Email Sent', `Message "${payload.subject}" successfully sent to ${payload.to}`);
+                getDb().logNotification('all', 'success', 'Email Sent', `Message "${payload.subject}" successfully sent to ${payload.to}`);
                 return { success: true, message: 'Email Sent Successfully' };
             } else {
                 throw new Error(result.message || 'Email delivery failed.');
             }
         } catch (error: any) {
             console.error('[NotificationManager] Email Error:', error);
-            db.logNotification('all', 'error', 'Email Failed', `Failed to send to ${payload.to}: ${error.message}`);
+            getDb().logNotification('all', 'error', 'Email Failed', `Failed to send to ${payload.to}: ${error.message}`);
             return { success: false, message: error.message };
         }
     }

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ISPUser, Invoice, SystemSettings, Package } from '../../types';
-import { CheckCircle, ShieldCheck, Zap, Wallet, MapPin, Phone, Mail, Globe, Hash, Calendar, DollarSign, Award, CreditCard, Activity, User, Wifi } from 'lucide-react';
+import { CheckCircle, ShieldCheck, Zap, Wallet, MapPin, Phone, Mail, Globe, Hash, Calendar, DollarSign, Award, CreditCard, Activity, User, Wifi, Smartphone } from 'lucide-react';
 
 export type InvoiceTheme = 'ModernSaaS' | 'Minimal' | 'PremiumGradient' | 'Corporate';
 
@@ -26,160 +26,156 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ user, invoice,
   );
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow-2xl border border-slate-100 rounded-[2.5rem] overflow-hidden text-slate-900">
-      
-      {/* Header Section */}
-      <div className="p-10 md:p-14 bg-slate-50/50 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start gap-8 box-border">
-         <div className="space-y-6">
-            <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-               {settings.branding.logoSquare ? (
-                 <img src={settings.branding.logoSquare} className="w-10 h-10 object-contain brightness-0 invert" alt="Logo" />
-               ) : (
-                 <Globe size={32} className="text-white" />
-               )}
-            </div>
+    <div className="font-sans bg-slate-100 p-8 min-h-screen flex items-center justify-center">
+      <div className="max-w-3xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-200">
+        
+        {/* HEADER - SaaS Gradient */}
+        <div className="bg-gradient-to-r from-slate-950 via-blue-700 to-blue-600 p-8 md:p-12 text-white relative h-48 md:h-56 flex flex-col justify-end">
+          <div className="flex justify-between items-end">
             <div>
-               <h1 className="text-4xl font-black text-slate-900 tracking-tighter leading-none italic uppercase">Click Opticx</h1>
-               <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.3em] mt-2 italic">Premium ISP Services</p>
+              <h1 className="text-4xl md:text-5xl font-black italic tracking-tighter uppercase leading-none mb-1">Click Opticx</h1>
+              <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] opacity-60 italic">Powered by ClickTake Technologies</p>
             </div>
-         </div>
-         <div className="text-left md:text-right w-full md:w-auto">
-            <h2 className="text-4xl font-black text-slate-200 tracking-tighter uppercase italic leading-none mb-4">Invoice</h2>
-            <div className="space-y-1">
-               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Document Ref</p>
-               <p className="text-sm font-black text-slate-900 italic tracking-widest">{invoice.id}</p>
-            </div>
-            <div className="space-y-1 mt-4">
-               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Issue Date</p>
-               <p className="text-sm font-black text-slate-900 italic tracking-widest">{new Date(invoice.createdAt).toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-            </div>
-            <div className="mt-6 w-48 ml-auto">
-              {renderStatusBadge()}
-            </div>
-         </div>
-      </div>
-
-      {/* Identity Section */}
-      <div className="p-10 md:p-14 grid grid-cols-1 md:grid-cols-2 gap-12 border-b border-slate-100 bg-white">
-         <div className="space-y-5">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] italic flex items-center gap-2">
-               <User size={14} className="text-blue-600" /> Billed To
-            </p>
-            <div className="space-y-2 border-l-4 border-blue-600 pl-5">
-               <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight italic">{user.name}</h3>
-               <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">ID: {user.id}</p>
-            </div>
-            <div className="space-y-2.5 pt-2 pl-6 text-xs font-bold text-slate-500">
-               <p className="flex items-center gap-3"><MapPin size={14} className="text-slate-400" /> {user.address || 'Address Restricted'}</p>
-               <p className="flex items-center gap-3"><Phone size={14} className="text-slate-400" /> {user.phone}</p>
-               <p className="flex items-center gap-3"><Mail size={14} className="text-slate-400" /> {user.email || 'N/A'}</p>
-            </div>
-         </div>
-
-         <div className="space-y-5">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] italic flex items-center gap-2">
-               <Activity size={14} className="text-emerald-500" /> Active Subscription
-            </p>
-            <div className="p-6 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-5">
-               <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-slate-200 shadow-sm">
-                  <Wifi size={24} className="text-blue-600" />
-               </div>
-               <div>
-                  <h4 className="text-lg font-black text-slate-900 uppercase italic tracking-tight">{pkg?.name || invoice.packageName}</h4>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">Fiber Link Connection</p>
-               </div>
-            </div>
-            {user.isKYCVerified && (
-               <div className="px-4 py-3 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 flex items-center gap-3">
-                  <ShieldCheck size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Identity Verified Node</span>
-               </div>
+            {settings.branding.logoSquare && (
+              <img src={settings.branding.logoSquare} className="h-16 md:h-20 object-contain brightness-0 invert opacity-90 drop-shadow-lg" alt="Logo" />
             )}
-         </div>
-      </div>
+          </div>
+          <div className="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none overflow-hidden">
+             <div className="absolute -top-10 -right-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+          </div>
+        </div>
 
-      {/* Invoice Items Table */}
-      <div className="p-10 md:p-14">
-        <div className="overflow-x-auto rounded-2xl border border-slate-100">
-           <table className="w-full text-left bg-white">
-              <thead className="bg-slate-50 border-b border-slate-100">
-                 <tr>
-                    <th className="py-5 px-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Service Description</th>
-                    <th className="py-5 px-6 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Billing Cycle</th>
-                    <th className="py-5 px-6 text-right text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Amount</th>
-                 </tr>
+        {/* BODY */}
+        <div className="p-8 md:p-12 space-y-10">
+          
+          {/* Invoice Info Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div className="space-y-4">
+               <div>
+                  <h2 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter mb-4">Invoice</h2>
+                  <div className="space-y-1 text-xs font-bold text-slate-500 uppercase tracking-widest leading-loose">
+                     <p className="flex justify-between"><span>ID:</span> <span className="font-black text-slate-900 italic">#{invoice.id}</span></p>
+                     <p className="flex justify-between"><span>Date:</span> <span className="font-black text-slate-900 italic">{new Date(invoice.createdAt).toLocaleDateString()}</span></p>
+                     <p className="flex justify-between"><span>Status:</span> <span className={`font-black italic ${invoice.status === 'Paid' ? 'text-emerald-600' : 'text-rose-600'}`}>{invoice.status}</span></p>
+                  </div>
+               </div>
+            </div>
+            <div className="md:text-right space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-100 h-full flex flex-col justify-center">
+                <div className="space-y-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                   <p>Activation: <span className="text-slate-700 italic">Fiber Connection</span></p>
+                   <p>Billing Cycle: <span className="text-slate-700 italic">Monthly Protocol</span></p>
+                </div>
+            </div>
+          </div>
+
+          <hr className="border-slate-100" />
+
+          {/* Identity & Service Details */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="space-y-4">
+               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest italic flex items-center gap-2">
+                  <User size={14} className="text-blue-600" /> Customer Details
+               </h3>
+               <div className="space-y-1">
+                  <p className="text-xl font-black text-slate-900 uppercase italic">{user.name}</p>
+                  <p className="text-xs font-bold text-slate-500 lowercase tracking-tight">{user.email}</p>
+                  <p className="text-xs font-bold text-slate-500">{user.phone}</p>
+                  <p className="text-xs font-bold text-slate-500 italic mt-2 opacity-60 leading-relaxed">{user.address || 'Standard Service Location'}</p>
+               </div>
+            </div>
+            <div className="space-y-4">
+               <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest italic flex items-center gap-2">
+                  <Wifi size={14} className="text-blue-600" /> Service Details
+               </h3>
+               <div className="space-y-1">
+                  <p className="text-xl font-black text-slate-900 uppercase italic">Package: {pkg?.name || invoice.packageName}</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Speed: {pkg?.speed || 'High Speed'}</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Start: {user.activationDate ? new Date(user.activationDate).toLocaleDateString() : 'N/A'}</p>
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Expiry: {user.expiryDate ? new Date(user.expiryDate).toLocaleDateString() : 'N/A'}</p>
+               </div>
+            </div>
+          </div>
+
+          {/* Secondary Metrics */}
+          <div className="flex flex-col sm:flex-row gap-4">
+             <div className="flex-1 bg-slate-50 p-6 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div className="space-y-1">
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Credit Score</p>
+                   <h2 className="text-2xl font-black text-blue-600 italic leading-none">850 / 999</h2>
+                </div>
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                   <Award size={20} />
+                </div>
+             </div>
+             <div className="flex-1 bg-slate-50 p-6 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div className="space-y-1">
+                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Verification</p>
+                   <h3 className="text-xl font-black text-emerald-600 italic leading-none">✔ Verified</h3>
+                </div>
+                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+                   <ShieldCheck size={20} />
+                </div>
+             </div>
+          </div>
+
+          {/* BILLING TABLE */}
+          <div className="rounded-2xl border border-slate-100 overflow-hidden mt-4 shadow-sm">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100">
+                  <th className="p-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-left">Line Item Description</th>
+                  <th className="p-5 text-[10px] font-black text-slate-500 uppercase tracking-widest text-right">Amount</th>
+                </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                 <tr>
-                    <td className="py-6 px-6">
-                       <p className="text-sm font-black text-slate-900 uppercase italic tracking-tight">{invoice.packageName} Subscription</p>
-                       <p className="text-[10px] text-slate-500 font-bold uppercase mt-1">High-Speed Internet Access</p>
+                <tr>
+                  <td className="p-5 text-sm font-black text-slate-900 uppercase italic tracking-tight">Base Package Subscription Cost</td>
+                  <td className="p-5 text-right font-black text-slate-900 text-lg italic tracking-tighter">
+                    <span className="text-xs text-slate-400 mr-1">{settings.currency}</span>
+                    {(invoice.amount + (invoice.discountAmount || 0)).toLocaleString()}
+                  </td>
+                </tr>
+                {invoice.discountAmount > 0 && (
+                  <tr className="bg-emerald-50/20">
+                    <td className="p-5">
+                       <p className="text-sm font-black text-emerald-600 uppercase italic tracking-tight">System Discount / Loyalty Bonus</p>
+                       <p className="text-[10px] font-bold text-emerald-500/60 uppercase">Applied Automatically</p>
                     </td>
-                    <td className="py-6 px-6 text-center">
-                       <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-blue-100">Monthly</span>
+                    <td className="p-5 text-right font-black text-emerald-600 text-lg italic tracking-tighter">
+                      -<span className="text-xs text-emerald-500/60 mr-1">{settings.currency}</span>
+                      {invoice.discountAmount.toLocaleString()}
                     </td>
-                    <td className="py-6 px-6 text-right font-black text-slate-900 text-lg">
-                       <span className="text-sm text-slate-400 mr-1">{settings.currency}</span>{invoice.amount.toLocaleString()}
-                    </td>
-                 </tr>
-                 {invoice.discountAmount > 0 && (
-                    <tr className="bg-emerald-50/30">
-                       <td className="py-6 px-6">
-                          <p className="text-sm font-black text-emerald-600 uppercase italic tracking-tight">Trust/Loyalty Credit</p>
-                          <p className="text-[10px] text-emerald-600/70 font-bold uppercase mt-1">Automatic reduction applied</p>
-                       </td>
-                       <td className="py-6 px-6 text-center">
-                          <span className="px-3 py-1 bg-emerald-100 text-emerald-600 rounded-lg text-[9px] font-black uppercase tracking-widest">Applied</span>
-                       </td>
-                       <td className="py-6 px-6 text-right font-black text-emerald-600 text-lg">
-                          -<span className="text-sm text-emerald-500/70 mr-1">{settings.currency}</span>{invoice.discountAmount.toLocaleString()}
-                       </td>
-                    </tr>
-                 )}
+                  </tr>
+                )}
+                <tr className="bg-slate-900 text-white shadow-xl relative overflow-hidden">
+                  <td className="p-6">
+                    <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-1">Final Settlement</p>
+                    <span className="text-xl font-black uppercase italic tracking-tighter">Total Payable Total</span>
+                  </td>
+                  <td className="p-6 text-right">
+                    <p className="text-4xl font-black italic tracking-tighter">
+                      <span className="text-sm text-blue-400 mr-2">{settings.currency}</span>
+                      {invoice.amount.toLocaleString()}
+                    </p>
+                  </td>
+                  <div className="absolute top-0 right-0 w-24 h-full bg-blue-600/10 skew-x-12 translate-x-12"></div>
+                </tr>
               </tbody>
-           </table>
-        </div>
+            </table>
+          </div>
 
-        {/* Totals Section */}
-        <div className="flex flex-col md:flex-row justify-end mt-8">
-           <div className="w-full md:w-80 space-y-4 bg-slate-50 p-8 rounded-3xl border border-slate-100">
-              <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                 <span>Subtotal</span>
-                 <span className="font-black text-slate-900 text-sm">{settings.currency} {(invoice.amount + (invoice.discountAmount || 0)).toLocaleString()}</span>
-              </div>
-              {invoice.discountAmount > 0 && (
-                <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                   <span>Discounts</span>
-                   <span className="font-black text-emerald-600 text-sm">- {settings.currency} {(invoice.discountAmount || 0).toLocaleString()}</span>
-                </div>
-              )}
-              <div className="pt-4 border-t border-slate-200 flex justify-between items-end">
-                 <div className="space-y-1">
-                    <p className="text-xs font-black text-blue-600 uppercase tracking-widest">Total Due</p>
-                 </div>
-                 <p className="text-3xl font-black text-slate-900 italic tracking-tighter">
-                   <span className="text-lg text-slate-400 mr-1">{settings.currency}</span>
-                   {(invoice.amount).toLocaleString()}
-                 </p>
-              </div>
-           </div>
-        </div>
-      </div>
+          {/* FOOTER */}
+          <div className="pt-8 text-center space-y-4">
+            <p className="text-xs font-bold text-slate-400 leading-relaxed max-w-sm mx-auto">
+              Thank you for choosesing <span className="text-blue-600 font-black italic uppercase">Click Opticx</span>. We appreciate your partnership in building a connected future.
+            </p>
+            <div className="flex items-center justify-center gap-6 text-[10px] font-black text-slate-500 uppercase tracking-widest italic">
+               <span className="flex items-center gap-1"><Mail size={12} className="text-blue-600"/> support@clickopticx.com</span>
+               <span className="flex items-center gap-1"><Smartphone size={12} className="text-blue-600"/> Support Desk Active</span>
+            </div>
+          </div>
 
-      {/* Footer Branding */}
-      <div className="bg-slate-900 p-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-         <div className="space-y-1">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] italic">Powered by ClickTake Technologies</h4>
-            <p className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Next-Gen ISP Infrastructure & BSS System</p>
-         </div>
-         <div className="flex gap-4">
-            <div className="flex items-center gap-2 text-[8px] font-black text-slate-500 uppercase tracking-widest">
-               <ShieldCheck size={12} className="text-blue-500" /> SSL Secured
-            </div>
-            <div className="flex items-center gap-2 text-[8px] font-black text-slate-500 uppercase tracking-widest">
-               <CheckCircle size={12} className="text-emerald-500" /> System Verified
-            </div>
-         </div>
+        </div>
       </div>
     </div>
   );

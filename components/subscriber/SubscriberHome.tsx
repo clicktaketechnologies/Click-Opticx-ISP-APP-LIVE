@@ -9,7 +9,7 @@ import {
   AlertTriangle, Clock, X, ShieldAlert, Sun, Bot, CheckCircle, BarChart3, RefreshCw,
   CreditCard, LayoutGrid, Smartphone, MapPin, MessageSquare, Headphones,
   Bell, History, Gift, User, FileText, Network, Compass, Fingerprint, Loader2,
-  Info, Home, Monitor, Key, Book, HelpCircle, UserCheck, Shield, HardDrive,
+  Info, Home, Monitor, Key, Lock, Book, HelpCircle, UserCheck, Shield, HardDrive,
   Cpu, Megaphone, Mic, PhoneCall, Moon, Box, Heart, ChevronDown, ChevronUp
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -93,47 +93,7 @@ const SubscriberHome: React.FC<Props> = ({
         <div key="status" className="space-y-6">
           <SubscriberQuickStatus user={user} currentPkg={currentPkg} />
 
-          {/* KYC Status Banners - THE ONLY SOURCE OF VERIFICATION TRUTH */}
-          {!user.isKYCVerified && !user.isKYCSubmitted && (
-            <div className="mx-4 p-6 bg-amber-50 border-2 border-amber-200 rounded-[2.5rem] flex items-center justify-between shadow-xl animate-in slide-in-from-top-4 duration-500 overflow-hidden relative group">
-              <div className="flex items-center gap-5 relative z-10">
-                <div className="w-14 h-14 bg-amber-500 text-white rounded-2xl flex-shrink-0 flex items-center justify-center shadow-lg shadow-amber-200">
-                  <ShieldAlert size={28} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-amber-900 uppercase tracking-widest leading-none mb-1">Identity Required</p>
-                  <h4 className="text-sm font-black text-amber-950 uppercase italic tracking-tight italic">Verify Your Identity</h4>
-                  <p className="text-[9px] text-amber-700 font-bold uppercase mt-1 tracking-tight leading-none italic">Complete KYC to unlock full network features.</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => onAction('packages')} 
-                className="px-6 py-3 bg-amber-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-amber-200 hover:bg-amber-700 active:scale-95 transition-all relative z-10 flex-shrink-0"
-              >
-                Verify Now
-              </button>
-            </div>
-          )}
-
-          {user.isKYCSubmitted && !user.isKYCVerified && (
-            <div className="mx-4 p-6 bg-blue-50 border-2 border-blue-200 rounded-[2.5rem] flex items-center justify-between shadow-xl animate-in slide-in-from-top-4 duration-500 overflow-hidden relative group">
-              <div className="flex items-center gap-5 relative z-10">
-                <div className="w-14 h-14 bg-blue-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200 animate-pulse">
-                  <Clock size={28} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-blue-900 uppercase tracking-widest leading-none mb-1">Identity Received</p>
-                  <h4 className="text-sm font-black text-blue-950 uppercase italic tracking-tight italic">Verification Pending</h4>
-                  <p className="text-[9px] text-blue-700 font-bold uppercase mt-1 tracking-tight leading-none italic">Our team is reviewing your artifacts.</p>
-                </div>
-              </div>
-              <div className="px-4 py-2 bg-blue-100/50 rounded-xl border border-blue-100 flex items-center gap-2 relative z-10">
-                  <Activity size={12} className="text-blue-500 animate-pulse" />
-                  <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest leading-none">Scanning...</span>
-              </div>
-              <Fingerprint className="absolute -right-4 -bottom-4 opacity-5 text-blue-500 pointer-events-none group-hover:scale-125 transition-transform duration-700" size={100} />
-            </div>
-          )}
+          {/* Legacy KYC Banners removed to favor global identity shield in SubscriberApp */}
 
           {/* Transaction Heartbeat Node - Orange Card */}
           {pendingPkgReq && (
@@ -204,23 +164,40 @@ const SubscriberHome: React.FC<Props> = ({
             </div>
           </div>
 
-          <div className={`mx-4 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl transition-all duration-700 border-b-8 hover:scale-[1.02] ${user.status === UserStatus.ACTIVE && !isExpired ? 'bg-blue-600 border-blue-800 shadow-blue-200' : 'bg-slate-800 border-slate-900 shadow-slate-200'}`}>
-            <div className="relative z-10 space-y-8">
+          <div className={`mx-4 rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden shadow-2xl transition-all duration-700 border-b-8 hover:scale-[1.02] ${user.status === UserStatus.ACTIVE && !isExpired && currentPkg ? 'bg-blue-600 border-blue-800 shadow-blue-200' : 'bg-slate-800 border-slate-900 shadow-slate-200'}`}>
+            <div className="relative z-10 space-y-6">
               <div className="flex justify-between items-start">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <div className={`w-2.5 h-2.5 rounded-full ${!isExpired ? 'bg-green-400 animate-pulse' : 'bg-white shadow-[0_0_10px_white]'}`}></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{isExpired ? 'Subscription Inactive' : 'Active Account'}</span>
+                    <div className={`w-2.5 h-2.5 rounded-full ${!isExpired && currentPkg && user.approval_status === 'approved' ? 'bg-green-400 animate-pulse' : 'bg-white shadow-[0_0_10px_white]'}`}></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{!currentPkg || isExpired ? 'No Active Plan' : 'Active Account'}</span>
                   </div>
-                  <h2 className="text-3xl font-black tracking-tighter uppercase italic">{currentPkg?.name || 'No Active Plan'}</h2>
+                  <h2 className="text-2xl sm:text-3xl font-black tracking-tighter uppercase italic">
+                    {currentPkg && user.approval_status === 'approved' ? currentPkg.name : 'Select a Plan'}
+                  </h2>
+                  {(!currentPkg || user.approval_status !== 'approved') && (
+                    <p className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Browse plans and activate your connection</p>
+                  )}
                 </div>
                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 backdrop-blur-md overflow-hidden p-2 shrink-0 shadow-lg">
-                  <Wifi size={24} className={!isExpired ? 'text-green-300' : 'text-white'} />
+                  <Wifi size={24} className={!isExpired && currentPkg ? 'text-green-300' : 'text-white'} />
                 </div>
               </div>
 
+              <div className="flex justify-between items-end mb-4">
+                <div className="space-y-1">
+                  <p className="text-[8px] font-black uppercase text-white/60 tracking-widest">Fluidity Reserve</p>
+                  <p className="text-xl font-black italic tracking-tighter">{state.settings.currency} {user.balance.toLocaleString()}</p>
+                </div>
+                {!isPaid && (
+                  <div className="px-3 py-1 bg-rose-500 rounded-full text-[8px] font-black uppercase animate-pulse border border-rose-400">
+                    Settlement Due
+                  </div>
+                )}
+              </div>
+
               {pendingPkgReq ? (
-                <div className="p-6 bg-white/10 border border-white/20 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in">
+                <div className="p-4 sm:p-6 bg-white/10 border border-white/20 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center text-white shadow-lg animate-pulse"><Clock size={18} /></div>
                     <div className="text-left">
@@ -230,12 +207,12 @@ const SubscriberHome: React.FC<Props> = ({
                   </div>
                 </div>
               ) : (
-                <div className="flex gap-3">
-                  <button onClick={() => setShowActivation(true)} className="flex-1 py-5 bg-white text-slate-900 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 border-b-4 border-slate-200">
-                    <Zap size={16} fill="currentColor" /> {isExpired ? 'Renew Account' : 'Change Plan'}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button onClick={() => setShowActivation(true)} className="flex-1 py-4 bg-white text-slate-900 rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 border-b-4 border-slate-200">
+                    <Zap size={16} fill="currentColor" /> {!currentPkg || isExpired ? 'Get Started' : 'Change Plan'}
                   </button>
-                  <button onClick={() => onAction('packages')} className="px-8 py-5 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95 transition-all border-b-4 border-white/5">
-                    My Plans
+                  <button onClick={() => onAction('wallet')} className="flex-1 py-4 bg-blue-500 text-white rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 border-b-4 border-blue-700">
+                    <CreditCard size={16} /> Load Credit
                   </button>
                 </div>
               )}
@@ -299,11 +276,28 @@ const SubscriberHome: React.FC<Props> = ({
 
     if (section.id === 'fiscal-summary' && appearance.showWallet) {
       return (
-        <div key="fiscal-summary" className="bg-white rounded-3xl border-b-8 border-slate-100 shadow-xl overflow-hidden flex flex-col mx-4 animate-in fade-in duration-700 hover:shadow-2xl transition-all hover:-translate-y-1">
-          <div className="p-6 bg-slate-50/50 border-b border-slate-50 flex items-center justify-between">
+        <div key="fiscal-summary" className="bg-white rounded-3xl border-b-8 border-slate-100 shadow-xl overflow-hidden flex flex-col mx-4 animate-in fade-in duration-700 hover:shadow-2xl transition-all hover:-translate-y-1 relative group">
+          {!user.isKYCVerified && (
+             <div className="absolute inset-0 z-20 bg-slate-50/10 backdrop-blur-[2px] flex items-center justify-center p-6 text-center select-none cursor-not-allowed group-hover:backdrop-blur-md transition-all">
+                <div className="bg-white/90 p-6 rounded-3xl shadow-2xl border border-slate-200 space-y-3 transform scale-90 group-hover:scale-100 transition-transform">
+                   <div className="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-amber-200">
+                      <Lock size={24} />
+                   </div>
+                   <h4 className="text-[11px] font-black text-slate-800 uppercase tracking-widest italic leading-none">Fiscal Hub Restricted</h4>
+                   <p className="text-[8px] text-slate-500 font-bold uppercase tracking-tight max-w-[150px] mx-auto">Verify your identity to unlock wallet & billing nodes.</p>
+                   <button 
+                     onClick={(e) => { e.stopPropagation(); onAction('packages'); }}
+                     className="px-4 py-2 bg-slate-900 text-white rounded-xl text-[8px] font-black uppercase tracking-widest shadow-xl active:scale-95"
+                   >
+                     Verify Now
+                   </button>
+                </div>
+             </div>
+          )}
+          <div className={`p-6 bg-slate-50/50 border-b border-slate-50 flex items-center justify-between ${!user.isKYCVerified ? 'opacity-20 pointer-events-none grayscale' : ''}`}>
             <h3 className="text-[12px] font-black text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2"><Wallet size={16} className="text-blue-600" /> Account Balance</h3>
           </div>
-          <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className={`p-8 grid grid-cols-1 md:grid-cols-2 gap-8 ${!user.isKYCVerified ? 'opacity-10 pointer-events-none grayscale' : ''}`}>
             <div className="space-y-4">
               <div className="flex justify-between items-end"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Plan Expiry</p><p className={`text-xs font-black uppercase tracking-tight ${isExpired ? 'text-red-600' : 'text-slate-900'}`}>{user.expiryDate ? new Date(user.expiryDate).toLocaleDateString() : 'OFFLINE'}</p></div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden shadow-inner"><div className={`h-full transition-all duration-1000 ${isExpired ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: isExpired ? '100%' : '65%' }}></div></div>

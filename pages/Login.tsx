@@ -8,7 +8,7 @@ import {
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
 import { useBranding } from '../hooks/useBranding';
-import { Modal } from '../components/shared/Modal';
+import Modal from '../components/shared/Modal';
 import FaceScanner from '../components/shared/FaceScanner';
 
 interface LoginProps {

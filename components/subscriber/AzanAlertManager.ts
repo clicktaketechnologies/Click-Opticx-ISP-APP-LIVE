@@ -5,7 +5,8 @@ export interface PrayerAlertSettings {
 }
 
 class AzanAlertManager {
-  private audio: HTMLAudioElement | null = null;
+  // SAFE: audio is lazily created on first play, never in constructor
+  private audio: any = null;
   private lastAlertedPrayer: string | null = null;
 
   private sounds = {
@@ -15,23 +16,29 @@ class AzanAlertManager {
 
   async playAzan(type: 'default' | 'short' | 'silent') {
     if (type === 'silent') return;
-    
-    if (this.audio) {
-      this.audio.pause();
-    }
 
-    this.audio = new Audio(this.sounds[type]);
     try {
+      if (this.audio) {
+        this.audio.pause();
+        this.audio = null;
+      }
+      // Safe guard: Audio may not be constructable in all PWA/iframe contexts
+      if (typeof Audio === 'undefined') return;
+      this.audio = new Audio(this.sounds[type]);
       await this.audio.play();
     } catch (e) {
-      console.warn("Azan playback blocked by browser protocol.", e);
+      console.warn("[AzanManager] Audio playback blocked by browser security policy.", e);
     }
   }
 
   stopAzan() {
-    if (this.audio) {
-      this.audio.pause();
-      this.audio = null;
+    try {
+      if (this.audio) {
+        this.audio.pause();
+        this.audio = null;
+      }
+    } catch (e) {
+      // Silently ignore
     }
   }
 
@@ -39,10 +46,10 @@ class AzanAlertManager {
     if (!settings.enabled) return;
 
     const now = new Date();
-    const currentTimeStr = now.toLocaleTimeString('en-US', { 
-      hour12: false, 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    const currentTimeStr = now.toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit'
     });
 
     for (const [name, time] of Object.entries(prayers)) {
@@ -50,7 +57,8 @@ class AzanAlertManager {
         this.lastAlertedPrayer = name;
         this.triggerNotification(name);
         await this.playAzan(settings.sound);
-        
+
+
         // Reset after a minute to allow next day
         setTimeout(() => {
           this.lastAlertedPrayer = null;
@@ -60,21 +68,45 @@ class AzanAlertManager {
   }
 
   private triggerNotification(prayerName: string) {
-    if (!("Notification" in window)) return;
+    try {
+      // Guard: Notification API is not available in all environments
+      if (typeof window === 'undefined' || !('Notification' in window)) return;
+      if (Notification.permission !== 'granted') return;
 
-    if (Notification.permission === "granted") {
-      new Notification(`Time for ${prayerName}`, {
-        body: `It's time for the ${prayerName} prayer.`,
-        icon: '/favicon.ico'
-      });
+      // Use ServiceWorker notification if available (avoids Illegal constructor in PWA standalone)
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification(`Time for ${prayerName}`, {
+            body: `It's time for the ${prayerName} prayer.`,
+            icon: '/favicon.ico'
+          });
+        }).catch(() => {});
+      }
+    } catch (e) {
+      console.warn('[AzanManager] Notification blocked by browser security policy.', e);
     }
   }
 
   async requestPermission() {
-    if (!("Notification" in window)) return false;
-    const permission = await Notification.requestPermission();
-    return permission === "granted";
+    try {
+      if (typeof window === 'undefined' || !('Notification' in window)) return false;
+      const permission = await Notification.requestPermission();
+      return permission === 'granted';
+    } catch (e) {
+      return false;
+    }
   }
 }
 
-export const azanManager = new AzanAlertManager();
+// SAFE: Lazy singleton — only instantiated when first accessed, never at module evaluation
+let _azanManagerInstance: AzanAlertManager | null = null;
+
+export const azanManager = new Proxy({} as AzanAlertManager, {
+  get(_target, prop) {
+    if (!_azanManagerInstance) {
+      _azanManagerInstance = new AzanAlertManager();
+    }
+    const value = (_azanManagerInstance as any)[prop];
+    return typeof value === 'function' ? value.bind(_azanManagerInstance) : value;
+  }
+});

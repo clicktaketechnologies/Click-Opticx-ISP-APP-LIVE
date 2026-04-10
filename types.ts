@@ -176,7 +176,20 @@ export enum TicketPriority {
 }
 
 export type PaymentMethodUsage = 'packages' | 'wallet' | 'emergency' | 'invoices';
-export type PaymentMethod = 'Cash' | 'Online' | 'Bank' | 'Home Collection' | 'Dealer Load' | 'Stripe' | 'PayPal' | 'PayFast' | 'EasyPaisa' | 'JazzCash' | 'Emergency Load' | 'Top-Up Balance';
+export enum PaymentMethod {
+  CASH = 'Cash',
+  ONLINE = 'Online',
+  BANK_TRANSFER = 'Bank Transfer',
+  HOME_COLLECTION = 'Home Collection',
+  DEALER_LOAD = 'Dealer Load',
+  STRIPE = 'Stripe',
+  PAYPAL = 'PayPal',
+  PAYFAST = 'PayFast',
+  EASYPAISA = 'EasyPaisa',
+  JAZZCASH = 'JazzCash',
+  EMERGENCY_LOAD = 'Emergency Load',
+  TOPUP_BALANCE = 'Top-Up Balance'
+}
 
 export type NotificationAudience = 'subscriber' | 'admin' | 'staff' | 'system';
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'critical';
@@ -269,7 +282,7 @@ export interface AuditLog {
   adminId?: string;
   adminName?: string;
   details: string;
-  type: 'Request' | 'Approval' | 'Rejection' | 'View' | 'System' | 'Login';
+  type: 'Request' | 'Approval' | 'Rejection' | 'View' | 'System' | 'Login' | 'Update' | 'Record';
   metadata?: any;
 }
 
@@ -432,7 +445,9 @@ export interface ISPUser {
     email: boolean;
     phone: boolean;
     identity: boolean;
-  };
+  } | any;
+  dataUsed?: number;
+  dataLimit?: number;
   profileImage?: string;
   email?: string;
   cnic?: string;
@@ -490,16 +505,24 @@ export interface ISPUser {
   isActive?: boolean;
   daily_usage?: number;
   monthly_usage?: number;
-  kyc_status: 'pending' | 'submitted' | 'verified' | 'rejected';
-  approval_status: 'pending' | 'approved' | 'rejected';
+  kyc_status?: 'pending' | 'submitted' | 'verified' | 'rejected';
+  approval_status?: 'pending' | 'rejected' | 'approved' | 'revision';
+  faceData?: string; 
+  kyc_history?: any[]; 
+  kyc_rejected_reason?: string; 
+  kyc_attempt_count?: number;
+  lastKYCUpdate?: string;
+  requiredRevisionDocs?: number;
 }
 
 
 
 export interface KYCDocument {
-  type: 'CNIC' | 'Passport' | 'Driving License';
+  type: 'CNIC' | 'Passport' | 'Driving License' | 'Face Scan';
   fileUrl: string;
   submittedAt: string;
+  status: 'Pending' | 'Verified' | 'Rejected';
+  adminNotes?: string;
 }
 
 export interface NetworkMapping {
@@ -684,6 +707,8 @@ export interface PaymentGateway {
   priority: number;
   sandbox: boolean;
   config: any;
+  merchantName?: string;
+  merchantId?: string;
   instructions?: string;
   allowedFor: PaymentMethodUsage[];
 }
@@ -917,6 +942,7 @@ export interface AppState {
   isImpersonating?: boolean;
   passwordRequests: PasswordResetRequest[];
   networkNodes: NetworkNode[];
+  kycRequests: KYCRequest[];
 
   networkMappings: NetworkMapping[];
   aiCallLogs: AICallLog[];
@@ -1055,6 +1081,21 @@ export interface TopupRequest {
   timestamp: string;
   paymentCommitmentDate?: string;
   paymentCommitmentTime?: string;
+  paymentProof?: string; 
+  externalUrl?: string; 
+  localPurged?: boolean; 
+  rejectionReason?: string;
+}
+
+export interface KYCRequest {
+  id: string;
+  userId: string;
+  userName: string;
+  documents: KYCDocument[];
+  faceData?: string;
+  status: 'Pending' | 'Approved' | 'Rejected';
+  timestamp: string;
+  rejectionReason?: string;
 }
 
 export interface BusinessProfile {
@@ -1237,6 +1278,26 @@ export interface PushConfig {
   marketingAlerts: boolean;
 }
 
+export interface CloudStorageConfig {
+  provider: 'Google Drive' | 'PCloud' | 'Dropbox';
+  isEnabled: boolean;
+  lastSync: string;
+  providers: string[];
+  authMode: 'OAuth' | 'ServiceAccount';
+  oauthToken?: string;
+  serviceAccountJson?: string;
+  folderId?: string;
+}
+
+export interface SystemTerminology {
+  nodeName: string;
+  gatewayName: string;
+  handshakeName: string;
+  fiscalName: string;
+  artifactName: string;
+  userName: string;
+}
+
 export interface SystemSettings {
   branding: BrandingConfig;
   profile: BusinessProfile;
@@ -1271,9 +1332,14 @@ export interface SystemSettings {
   authSettings: AuthSettings;
   technicalKeys: TechnicalKeys;
   pushConfig: PushConfig;
+  cloudStorage: CloudStorageConfig;
+  terminology: SystemTerminology;
   signupRequests: SignupRequest[];
   auditLogs: AuditLog[];
   lastGlobalWipe?: string;
+  aiAgentEnabled: boolean;
+  autoCloudSync: boolean;
+  requiredKycDocs: number;
 }
 
 export interface CreditScoreLog {
@@ -1297,6 +1363,7 @@ export interface PackageRequest {
   status: 'Pending' | 'Approved' | 'Rejected';
   paymentMethod: string;
   timestamp: string;
+  rejectionReason?: string;
 }
 
 export interface NetworkNode {

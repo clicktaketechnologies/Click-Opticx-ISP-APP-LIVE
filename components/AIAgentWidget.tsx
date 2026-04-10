@@ -80,10 +80,10 @@ const AIAgentWidget: React.FC<{ state: AppState }> = ({ state }) => {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         title={killSwitch ? "SYSTEM_HALTED" : "AI Agent v8.5"}
-        type={killSwitch ? "danger" : "info"}
+        type={killSwitch ? "error" : "info"}
         icon={killSwitch ? <Power size={24} className="text-white" /> : <Bot size={24} className="text-white" />}
         maxWidth="max-w-lg"
-        headerActions={
+        headerRightContent={
            isAdmin && (
              <button 
                onClick={handleToggleUserVisibility}

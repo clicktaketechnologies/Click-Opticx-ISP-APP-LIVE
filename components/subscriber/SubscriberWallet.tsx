@@ -8,6 +8,7 @@ import {
    Zap, ShieldAlert
 } from 'lucide-react';
 import SubscriberActivationFlow from './SubscriberActivationFlow';
+import PaymentHubModal from './PaymentHubModal';
 
 interface Props {
    user: ISPUser;
@@ -16,8 +17,10 @@ interface Props {
 }
 
 const SubscriberWallet: React.FC<Props> = ({ user, state, pendingTopups }) => {
+   const [activeTab, setActiveTab] = useState<'personal' | 'security' | 'connection' | 'registry' | 'audit'>('personal');
    const [showFlow, setShowFlow] = useState(false);
    const [flowMode, setFlowMode] = useState<'topup' | 'repay' | 'emergency'>('topup');
+   const [showManualTopup, setShowManualTopup] = useState(false);
 
    const activeEL = state.emergencyLoads.find(l => l.userId === user.id && !l.repaid);
    const isBalanceLow = user.balance < 500 && !activeEL;
@@ -66,10 +69,10 @@ const SubscriberWallet: React.FC<Props> = ({ user, state, pendingTopups }) => {
                   ) : (
                      <>
                         <button
-                           onClick={() => handleOpenFlow('topup')}
+                           onClick={() => setShowManualTopup(true)}
                            className="flex-1 py-5 bg-white text-slate-900 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
                         >
-                           <Plus size={18} strokeWidth={4} /> Add Balance
+                           <Plus size={18} strokeWidth={4} /> Load Credit
                         </button>
                         {!activeEL && (
                            <button
@@ -147,6 +150,14 @@ const SubscriberWallet: React.FC<Props> = ({ user, state, pendingTopups }) => {
                onSuccess={() => setShowFlow(false)}
             />
          )}
+
+         <PaymentHubModal
+            user={user}
+            state={state}
+            isOpen={showManualTopup}
+            onClose={() => setShowManualTopup(false)}
+            onSuccess={() => setShowManualTopup(false)}
+         />
       </div>
    );
 };

@@ -237,7 +237,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                <div className="space-y-6">
                   <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8">
                      <div className="flex justify-between items-center mb-8">
-                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><User size={18} className="text-blue-600" /> Identity Dossier</h3>
+                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><User size={18} className="text-blue-600" /> Account Profile</h3>
                         {!isEditing ? (
                            <button onClick={() => setIsEditing(true)} className="p-3 bg-slate-50 text-blue-600 rounded-xl hover:bg-blue-50 transition-all"><Edit3 size={18} /></button>
                         ) : (
@@ -253,10 +253,10 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {[
                            { label: 'Display Name', key: 'name', icon: User, readOnly: false },
-                           { label: 'Email Relay', key: 'email', icon: Mail, readOnly: false },
-                           { label: 'Phone Registry', key: 'phone', icon: Smartphone, readOnly: false },
-                           { label: 'CNIC Token', key: 'cnic', icon: CreditCard, readOnly: true },
-                           { label: 'Physical Node Address', key: 'address', icon: MapPin, colSpan: true, readOnly: false }
+                           { label: 'Email Address', key: 'email', icon: Mail, readOnly: false },
+                           { label: 'Phone Number', key: 'phone', icon: Smartphone, readOnly: false },
+                           { label: 'ID Number (CNIC)', key: 'cnic', icon: CreditCard, readOnly: true },
+                           { label: 'Full Physical Address', key: 'address', icon: MapPin, colSpan: true, readOnly: false }
                         ].map(field => (
                            <div key={field.key} className={`${field.colSpan ? 'md:col-span-2' : ''} space-y-2`}>
                               <div className="flex justify-between items-center ml-1">
@@ -367,8 +367,8 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 space-y-8">
                   <div className="flex justify-between items-start">
                      <div className="space-y-1">
-                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><Wifi size={18} className="text-blue-600" /> Link Parameters</h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active infrastructure mapping</p>
+                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center gap-2"><Wifi size={18} className="text-blue-600" /> Connection Details</h3>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Active account parameters</p>
                      </div>
                      <div className="px-4 py-2 bg-slate-900 text-green-400 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg">
                         {user.connectionType} LINK
@@ -396,7 +396,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                   <div className="p-8 border-b bg-slate-950 text-white flex items-center justify-between">
                      <div className="flex items-center gap-3">
                         <History size={20} className="text-blue-400" />
-                        <h3 className="text-sm font-black uppercase tracking-widest italic">Security Pulse Log</h3>
+                        <h3 className="text-sm font-black uppercase tracking-widest italic">Activity & Security Logs</h3>
                      </div>
                      <span className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black uppercase text-blue-300 border border-white/5">
                         {securityLogs.length} Events

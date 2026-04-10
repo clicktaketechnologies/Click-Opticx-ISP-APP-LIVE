@@ -123,6 +123,15 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
         { id: 'users', label: 'All Users', icon: Users },
         { id: 'customer-360', label: 'Find Users', icon: Search },
         {
+          id: 'group-crm', label: 'Subscriber Relations', icon: Users,
+          items: [
+            { id: 'admin-users', label: 'Subscriber Accounts', icon: UserCircle },
+            { id: 'admin-approvals', label: 'Service Approvals', icon: UserCheck, badge: pendingApprovals },
+            { id: 'admin-packages', label: 'Resource Packages', icon: Package },
+            { id: 'support-tickets', label: 'Support Queue', icon: LifeBuoy, badge: pendingTickets },
+          ]
+        },
+        {
           id: 'group-approvals', label: 'Approvals', icon: ShieldCheck, badge: pendingApprovals > 0 ? pendingApprovals : undefined,
           items: [
              { id: 'approval-desk', label: 'Approval Requests', icon: ShieldCheck, badge: pendingApprovals > 0 ? pendingApprovals : undefined },
@@ -178,6 +187,18 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       ]
     },
     {
+      title: 'Compliance & Identity',
+      items: [
+        { 
+          id: 'kyc-hub', 
+          label: 'KYC Hub', 
+          icon: ShieldCheck, 
+          badge: db.getPendingKYCCount() || undefined 
+        },
+        { id: 'cloud-storage', label: 'Multi-Cloud Sync', icon: HardDrive },
+      ]
+    },
+    {
       title: 'System Configuration',
       items: [
         {
@@ -196,7 +217,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
         }
       ]
     }
-  ], [state.signupRequests, state.topupRequests, state.packageRequests, state.tickets]);
+  ], [pendingApprovals, pendingTickets, role, state.settings.appearance, state.users]);
 
   const hasAccess = (id: string) => {
     if (role === Role.SUPER_ADMIN) return true;
@@ -382,37 +403,39 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
     <>
       {/* Mobile Overlay Background with Blur */}
       <div 
-        className={`fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[110] lg:hidden transition-all duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} 
+        className={`fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[110] lg:hidden transition-all duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} 
       ></div>
 
       {/* Main Sidebar */}
       <aside 
-         className={`fixed inset-y-0 left-0 z-[120] bg-gradient-to-b from-[#0F172A] to-[#020617] flex flex-col h-screen shrink-0 border-r border-[#1E293B] transition-[width,transform] duration-[250ms] ease-out will-change-[width,transform] shadow-[0_4px_12px_rgba(0,0,0,0.2)] ${
+         className={`fixed inset-y-0 left-0 z-[120] bg-slate-900 flex flex-col h-screen shrink-0 border-r border-slate-800 transition-[width,transform] duration-[250ms] ease-out will-change-[width,transform] shadow-xl ${
             isOpen ? 'translate-x-0' : '-translate-x-full'
-         } lg:translate-x-0 ${isCollapsed ? 'w-[70px]' : 'w-[240px] max-w-[80vw]'}`}
+         } lg:translate-x-0 ${isCollapsed ? 'w-[72px]' : 'w-[260px] max-w-[80vw]'}`}
       >
         {/* Header / Logo Area */}
-        <div className="h-[70px] flex items-center justify-between px-5 border-b border-[rgba(255,255,255,0.05)] shrink-0 relative overflow-hidden backdrop-blur-md">
-          <div className="flex items-center gap-[12px] overflow-hidden w-full transition-all">
-            <div className="w-10 h-10 flex items-center justify-center shrink-0 group transition-colors">
+        <div className="h-[72px] flex items-center justify-between px-5 border-b border-white/5 shrink-0 relative overflow-hidden">
+          <div className="flex items-center gap-3 overflow-hidden w-full transition-all">
+            <div className="w-10 h-10 flex items-center justify-center shrink-0 group transition-colors bg-white/5 rounded-xl border border-white/10">
               {branding.logo || branding.logoDark || branding.logoSquare ? (
                 <img 
                   src={branding.logo || branding.logoDark || branding.logoSquare} 
-                  className="w-full h-full object-contain p-1" 
+                  className="w-full h-full object-contain p-1.5" 
                   alt="Logo"
                   onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/favicon.png'; }}
                 />
               ) : (
-                <img src="/favicon.png" className="w-[80%] h-[80%] object-contain p-0.5 group-hover:scale-110 transition-transform duration-[200ms] ease-out" alt="Logo" />
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shadow-lg">
+                  <Monitor size={16} className="text-white" />
+                </div>
               )}
             </div>
             {!isCollapsed && (
               <div className="flex flex-col transform transition-all duration-300 origin-left">
-                <h4 className="text-[14px] text-white font-bold tracking-tight leading-tight">
-                    {branding.brandName || branding.appTitle || "Click Opticx"}
+                <h4 className="text-sm text-white font-bold tracking-tight leading-tight truncate max-w-[140px]">
+                    {branding.brandName || branding.appTitle || "ClickOptix"}
                 </h4>
-                <p className="text-[9px] text-[#94A3B8] font-bold uppercase tracking-[0.2em] mt-0.5">
-                    Workspace
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 opacity-60">
+                    Administrator
                 </p>
               </div>
             )}
@@ -421,28 +444,25 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
           {/* Desktop Toggle Button */}
           <button 
              onClick={onToggleCollapse}
-             className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 w-6 h-10 bg-[#1E293B] hover:bg-[#3B82F6] hover:text-white text-[#94A3B8] items-center justify-center rounded-l-md transition-colors duration-[150ms] shadow-sm border-y border-l border-[rgba(255,255,255,0.05)] z-50 translate-x-1/2 hover:translate-x-0 cursor-pointer"
+             className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 w-7 h-12 bg-slate-800 hover:bg-blue-600 hover:text-white text-slate-400 items-center justify-center rounded-l-xl transition-all duration-200 shadow-xl border-y border-l border-white/5 z-50 translate-x-1/2 hover:translate-x-0"
              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
           >
-             {isCollapsed ? <PanelLeft size={14} /> : <PanelLeftClose size={14} />}
+             {isCollapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
           </button>
         </div>
         
         {/* Search Area */}
-        <div className={`p-[16px] shrink-0 transition-all duration-[250ms] ease-out ${isCollapsed ? 'h-[72px] flex justify-center' : 'h-[72px]'}`}>
+        <div className={`p-4 shrink-0 transition-all duration-250 ${isCollapsed ? 'h-auto flex justify-center' : 'h-auto'}`}>
            {isCollapsed ? (
               <button 
                 onClick={() => { onToggleCollapse(); setTimeout(() => document.getElementById('sidebar-search')?.focus(), 250); }}
-                className="w-[44px] h-[44px] rounded-lg hover:bg-[#1E293B] flex items-center justify-center text-[#94A3B8] hover:text-white transition-colors duration-[150ms] group relative"
+                className="btn btn-icon btn-secondary !bg-white/5 !border-white/10 !text-slate-400 hover:!text-white hover:!bg-white/10"
               >
-                 <Search size={18} className="group-hover:scale-105 transition-transform duration-[150ms]" />
-                 <div className="absolute left-[55px] top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-md opacity-0 translate-y-[2px] invisible group-hover:opacity-100 group-hover:translate-y-[-50%] group-hover:visible transition-all duration-[150ms] whitespace-nowrap z-[200] shadow-xl pointer-events-none before:content-[''] before:absolute before:right-full before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-transparent before:border-r-slate-800">
-                    Search Menu
-                 </div>
+                 <Search size={18} />
               </button>
            ) : (
              <div className="relative group animate-in fade-in duration-200">
-                <Search className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-[200ms] ${isSearchFocused ? 'text-[#3B82F6]' : 'text-[#94A3B8]'}`} size={16} />
+                <Search className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${isSearchFocused ? 'text-blue-400' : 'text-slate-500'}`} size={16} />
                 <input 
                    id="sidebar-search"
                    type="text" 
@@ -451,54 +471,54 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
                    onChange={(e) => setSearchQuery(e.target.value)}
                    onFocus={() => setIsSearchFocused(true)}
                    onBlur={() => setIsSearchFocused(false)}
-                   className="w-full bg-[rgba(0,0,0,0.2)] border border-[#1E293B] rounded-lg h-[44px] pl-[36px] pr-4 text-[13px] text-white placeholder:text-[#94A3B8] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6] transition-all duration-[150ms] shadow-inner"
+                   className="w-full bg-black/20 border border-white/5 rounded-xl h-12 pl-12 pr-4 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all"
                 />
              </div>
            )}
         </div>
 
         {/* Navigation List */}
-        <nav className="flex-1 px-[16px] pb-3 overflow-y-auto custom-scrollbar sidebar-nav">
+        <nav className="flex-1 px-4 pb-4 overflow-y-auto custom-scrollbar">
           <div className="pt-2">
             {sections.map(renderSection)}
           </div>
         </nav>
         
         {/* Footer Area */}
-        <div className="p-[16px] border-t border-[rgba(255,255,255,0.05)] shrink-0 relative overflow-hidden transition-all duration-[250ms] ease-out">
+        <div className="p-4 border-t border-white/5 shrink-0 relative overflow-hidden">
           {!isCollapsed ? (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-[12px]">
-                 <div className="w-[36px] h-[36px] rounded-full bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center text-white font-bold shadow-lg shrink-0 border border-[rgba(255,255,255,0.1)]">
-                    {(state.currentUser?.name || "Administrator").charAt(0)}
+            <div className="flex items-center justify-between p-2 rounded-2xl bg-white/5 border border-white/5">
+              <div className="flex items-center gap-3">
+                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center text-white font-bold shadow-lg border border-white/10">
+                    {(state.currentUser?.name || "A").charAt(0)}
                  </div>
                  <div className="overflow-hidden">
-                   <p className="text-[13px] font-bold text-white truncate max-w-[120px]">{state.currentUser?.name || "Administrator"}</p>
-                   <p className="text-[10.5px] text-[#3B82F6] font-bold uppercase truncate">{role}</p>
+                   <p className="text-sm font-bold text-white truncate max-w-[100px]">{state.currentUser?.name || "Admin"}</p>
+                   <p className="text-[10px] text-blue-400 font-bold uppercase truncate opacity-70 tracking-tighter">{role}</p>
                  </div>
               </div>
               <button 
                  onClick={onLogout} 
-                 className="w-8 h-8 flex items-center justify-center text-[#94A3B8] hover:text-white hover:bg-rose-500 rounded-lg transition-all duration-[150ms] active:scale-95 group"
+                 className="p-2 text-slate-400 hover:text-white hover:bg-rose-500/20 rounded-lg transition-all active:scale-95 group"
                  title="Logout"
               >
-                 <LogOut size={16} className="group-hover:scale-105 transition-transform" />
+                 <LogOut size={16} className="group-hover:scale-110" />
               </button>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center gap-4">
-               <div className="w-[36px] h-[36px] rounded-full bg-gradient-to-br from-[#3B82F6] to-[#60A5FA] flex items-center justify-center text-white font-bold shadow-lg border border-[rgba(255,255,255,0.1)] group relative cursor-pointer">
-                  {(state.currentUser?.name || "Administrator").charAt(0)}
-                  <div className="absolute left-[55px] top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-md opacity-0 translate-y-[2px] invisible group-hover:opacity-100 group-hover:translate-y-[-50%] group-hover:visible transition-all duration-[150ms] whitespace-nowrap z-[200] shadow-xl pointer-events-none before:content-[''] before:absolute before:right-full before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-transparent before:border-r-slate-800">
-                     {role} Profile
+            <div className="flex flex-col items-center gap-4">
+               <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold shadow-lg border border-white/10 group relative cursor-pointer">
+                  {(state.currentUser?.name || "A").charAt(0)}
+                  <div className="absolute left-16 top-1/2 -translate-y-1/2 px-3 py-2 bg-slate-800 text-white text-xs font-bold rounded-lg opacity-0 translate-x-2 invisible group-hover:opacity-100 group-hover:translate-x-0 group-hover:visible transition-all whitespace-nowrap z-[200] shadow-2xl">
+                     {state.currentUser?.name || "Admin"} ({role})
                   </div>
                </div>
                <button 
                   onClick={onLogout} 
-                  className="w-[36px] h-[36px] flex items-center justify-center text-[#94A3B8] hover:text-white hover:bg-rose-500 rounded-lg transition-all duration-[150ms] group relative active:scale-95"
+                  className="btn btn-icon !bg-rose-500/10 !text-rose-500 hover:!bg-rose-500 hover:!text-white group relative"
                >
-                  <LogOut size={18} className="group-hover:scale-105 transition-transform" />
-                  <div className="absolute left-[55px] top-1/2 -translate-y-1/2 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-md opacity-0 translate-y-[2px] invisible group-hover:opacity-100 group-hover:translate-y-[-50%] group-hover:visible transition-all duration-[150ms] whitespace-nowrap z-[200] shadow-xl pointer-events-none before:content-[''] before:absolute before:right-full before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-transparent before:border-r-rose-600">
+                  <LogOut size={18} />
+                  <div className="absolute left-16 top-1/2 -translate-y-1/2 px-3 py-2 bg-rose-600 text-white text-xs font-bold rounded-lg opacity-0 translate-x-2 invisible group-hover:opacity-100 group-hover:translate-x-0 group-hover:visible transition-all whitespace-nowrap z-[200] shadow-2xl">
                      Logout System
                   </div>
                </button>

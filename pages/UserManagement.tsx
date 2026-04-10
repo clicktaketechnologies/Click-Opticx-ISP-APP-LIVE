@@ -19,7 +19,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearch = React.useDeferredValue(searchTerm);
-  const [filterType, setFilterType] = useState<'All' | 'Expired' | 'Unpaid' | 'Paid' | 'Half Paid' | 'Half Data' | 'Unverified' | 'Verified'>('All');
+  const [filterType, setFilterType] = useState<'All' | 'Expired' | 'Unpaid' | 'Paid' | 'Half Paid' | 'Half Data' | 'Unverified' | 'Verified' | 'Deleted'>('All');
 
   useEffect(() => {
     if (globalSearchTerm !== undefined) {
@@ -89,7 +89,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [editUserData, setEditUserData] = useState<Partial<ISPUser>>(initialUserForm);
   const [newUserData, setNewUserData] = useState<Partial<ISPUser>>(initialUserForm);
   
-  const activeUsers = useMemo(() => state.users.filter(u => filterType === 'Deleted' ? u.deleted : !u.deleted), [state.users, filterType]);
+  const activeUsers = useMemo(() => state.users.filter(u => filterType === 'Deleted' ? !!u.deleted : !u.deleted), [state.users, filterType]);
   
   const filteredUsers = useMemo(() => {
     const term = deferredSearch.toLowerCase().trim();
@@ -104,7 +104,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
           case 'Unpaid': return u.balance > 0;
           case 'Paid': return u.balance <= 0 && u.packageId;
           case 'Half Paid': return pkg && u.balance > 0 && u.balance < pkg.price;
-          case 'Half Data': return u.dataUsed && u.dataLimit && (u.dataUsed / u.dataLimit) >= 0.5;
+          case 'Half Data': return (u.dataUsed ?? 0) && (u.dataLimit ?? 0) && ((u.dataUsed ?? 0) / (u.dataLimit ?? 0)) >= 0.5;
           case 'Unverified': return u.verificationStatus === VerificationStatus.UNVERIFIED || u.verificationStatus === VerificationStatus.PENDING || u.status === UserStatus.PENDING_VERIFICATION;
           case 'Verified': return u.verificationStatus === VerificationStatus.VERIFIED;
           default: return true;
@@ -154,7 +154,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     setSelectedIds(next);
   };
 
-  const handleAction = (user: ISPUser, action: string) => {
+  const handleAction = async (user: ISPUser, action: string) => {
     setSelectedUserId(user.id);
     setEditUserData({ ...user });
     setNewAuthSecret('');
@@ -167,6 +167,28 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     setIsGraceActive(true);
     setPaymentDate(new Date().toISOString().split('T')[0]);
     setSelectedPkgId(user.packageId || '');
+
+    if (action === 'unverify') {
+      const confirmUnverify = window.confirm(`Are you sure you want to unverify ${user.name}? This will restrict their access to "Limited Mode".`);
+      if (confirmUnverify) {
+        setIsProcessing(true);
+        const res = await db.unverifyUser(user.id);
+        setIsProcessing(false);
+        if (!res.success) alert(res.message);
+      }
+      return;
+    } 
+    
+    if (action === 'verify') {
+      const confirmVerify = window.confirm(`Manually verify ${user.name}? This grants full access immediately.`);
+      if (confirmVerify) {
+        setIsProcessing(true);
+        const res = await db.adminVerifyUser(user.id);
+        setIsProcessing(false);
+        if (!res.success) alert(res.message);
+      }
+      return;
+    }
 
     switch(action) {
       case 'edit': setIsEditUserModal(true); break;
@@ -321,7 +343,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     <button 
       onClick={onClick}
       disabled={disabled}
-      title={label}
+      aria-label={label}
       className={`p-2.5 rounded-xl transition-all border group relative ${
         disabled 
           ? 'bg-slate-50 text-slate-200 border-slate-50 grayscale cursor-not-allowed opacity-20' 
@@ -337,7 +359,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       {/* Header Zone */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-1 shrink-0">
         <div className="space-y-1">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight uppercase italic leading-none">Users & System</h2>
+          <h2 className="text-xl sm:text-3xl font-black text-slate-800 tracking-tight uppercase italic leading-none">Users & System</h2>
           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">User Records</p>
         </div>
         <button 
@@ -350,27 +372,27 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       </div>
 
       {/* Global Filter Bar */}
-      <div className="bg-white p-4 sm:p-5 rounded-[2rem] border border-slate-100 shadow-sm shrink-0">
+      <div className="card !p-4 sm:!p-6 shrink-0">
         <div className="flex flex-col gap-4">
           <div className="relative">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               type="text" 
               placeholder="Search by Name, User ID, or Phone Number" 
-              className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 text-base font-black placeholder:text-slate-300 transition-all shadow-inner" 
+              className="w-full pl-14 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 text-sm font-bold text-slate-900 placeholder:text-slate-400 transition-all transition-duration-150" 
               value={searchTerm} 
               onChange={e => setSearchTerm(e.target.value)} 
             />
           </div>
-          <div className="flex overflow-x-auto no-scrollbar gap-2 pb-1">
+          <div className="scroll-x no-scrollbar pb-1">
             {(['All', 'Expired', 'Unpaid', 'Paid', 'Half Paid', 'Half Data', 'Unverified', 'Verified', 'Deleted'] as const).map(f => (
               <button
                 key={f}
                 onClick={() => setFilterType(f)}
-                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-tight shadow-sm transition-all border ${
+                className={`btn btn-sm !rounded-xl !tracking-normal ${
                   filterType === f 
-                    ? 'bg-blue-600 text-white border-blue-600' 
-                    : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300'
+                    ? 'btn-primary' 
+                    : 'btn-secondary'
                 }`}
               >
                 {f}
@@ -382,15 +404,15 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
 
       {/* Bulk Action Top Bar - UPDATED COLORS */}
       {selectedIds.size > 0 && (
-        <div className="bg-slate-900 text-white p-4 rounded-[1.5rem] shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in slide-in-from-top-2 border border-white/5 shrink-0">
-           <div className="flex items-center gap-4 border-r-0 sm:border-r border-white/10 pr-0 sm:pr-6 shrink-0">
+        <div className="bg-slate-900 text-white p-4 rounded-[1.5rem] shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 animate-in slide-in-from-top-2 border border-white/5 shrink-0">
+           <div className="flex items-center justify-center md:justify-start gap-4 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-6 shrink-0">
               <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg animate-pulse"><Layers size={20} /></div>
               <div>
                  <p className="text-sm font-black italic tracking-tighter leading-none">{selectedIds.size} Linked Accounts</p>
                  <p className="text-[8px] text-blue-400 font-black uppercase mt-1 tracking-widest italic">Batch Network Ready</p>
               </div>
            </div>
-           <div className="flex items-center gap-2 flex-wrap justify-center">
+           <div className="grid grid-cols-2 md:flex md:items-center gap-2 flex-wrap justify-center w-full md:w-auto">
               <button onClick={() => setIsBulkGraceModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl transition-all border border-blue-500/20">
                  <Clock size={16}/><span className="text-[9px] font-black uppercase">Extra Time</span>
               </button>
@@ -518,36 +540,37 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                   </div>
                </div>
            </div>
-           <button onClick={() => setSelectedIds(new Set())} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-slate-500 hover:text-white transition-all"><X size={18} /></button>
+           <button onClick={() => setSelectedIds(new Set())} className="p-3 bg-white/10 hover:bg-white/20 rounded-xl text-slate-300 hover:text-white transition-all mx-auto sm:mx-0"><X size={18} /></button>
         </div>
       )}
 
       {/* Main User Table */}
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex-1 flex flex-col relative">
-        <div className="flex flex-wrap items-center gap-3 py-4 px-8 border-b border-slate-50 bg-slate-50/50 shrink-0">
-          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.status === UserStatus.EXPIRED || (u.expiryDate && new Date(u.expiryDate) < new Date())).map(u => u.id)))} className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-[10px] font-black uppercase tracking-tighter border border-rose-100 hover:bg-rose-100 transition-all shadow-sm">Select Expired</button>
-          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.balance > 0).map(u => u.id)))} className="px-4 py-2 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-black uppercase tracking-tighter border border-amber-100 hover:bg-amber-100 transition-all shadow-sm">Select Unpaid</button>
-          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => !u.packageId).map(u => u.id)))} className="px-4 py-2 bg-slate-100 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-tighter border border-slate-200 hover:bg-slate-200 transition-all shadow-sm">Select N/A</button>
-          <div className="h-4 w-px bg-slate-200 mx-2"></div>
-          <button onClick={() => setSelectedIds(new Set())} className="px-4 py-2 text-slate-400 hover:text-rose-600 text-[10px] font-black uppercase tracking-tighter transition-all">Clear All</button>
+      <div className="flex-1 flex flex-col relative w-full overflow-hidden">
+        <div className="scroll-x items-center gap-3 py-4 px-4 sm:px-8 border-b border-slate-50 bg-slate-50/50 shrink-0 no-scrollbar">
+          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.status === UserStatus.EXPIRED || (u.expiryDate && new Date(u.expiryDate) < new Date())).map(u => u.id)))} className="btn btn-secondary btn-sm !text-rose-600 !bg-rose-50 !border-rose-100">Select Expired</button>
+          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.balance > 0).map(u => u.id)))} className="btn btn-secondary btn-sm !text-amber-600 !bg-amber-50 !border-amber-100">Select Unpaid</button>
+          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => !u.packageId).map(u => u.id)))} className="btn btn-secondary btn-sm">Select N/A</button>
+          <div className="h-4 w-px bg-slate-200 shrink-0"></div>
+          <button onClick={() => setSelectedIds(new Set())} className="btn btn-secondary btn-sm border-none !bg-transparent">Clear All</button>
         </div>
-        <div className="overflow-x-auto flex-1 custom-scrollbar">
-          <table className="w-full text-left min-w-[1150px] border-collapse">
-            <thead className="sticky top-0 bg-slate-50 z-30 border-b border-slate-100">
+        
+        <div className="table-container flex-1">
+          <table>
+            <thead>
               <tr>
-                <th className="px-6 py-5 w-10">
+                <th className="w-10">
                    <button onClick={toggleSelectAll} className="p-1 text-slate-300 hover:text-blue-600 transition-colors">
                       {selectedIds.size === filteredUsers.length && filteredUsers.length > 0 ? <CheckSquare size={22} className="text-blue-600" /> : <Square size={22} />}
                    </button>
                 </th>
-                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">User Name</th>
-                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">User ID</th>
-                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                <th className="px-4 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Due Balance</th>
-                <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Connection Status</th>
+                <th>User Identity</th>
+                <th className="text-center">Connection ID</th>
+                <th>Status</th>
+                <th className="text-right">Balance</th>
+                <th className="text-right">Actions Management</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody>
               {filteredUsers.length === 0 ? (
                 <tr>
                    <td colSpan={6} className="py-20 text-center">
@@ -559,44 +582,48 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                 </tr>
               ) : (
                 filteredUsers.map((user) => (
-                  <tr key={user.id} className={`hover:bg-slate-50 transition-colors group ${selectedIds.has(user.id) ? 'bg-blue-50/40' : ''}`}>
-                    <td className="px-6 py-5">
+                  <tr key={user.id} className={`${selectedIds.has(user.id) ? 'bg-blue-50/40' : ''}`}>
+                    <td>
                        <button onClick={() => toggleSelect(user.id)} className={`p-1 transition-all ${selectedIds.has(user.id) ? 'text-blue-600 scale-110' : 'text-slate-200 hover:text-slate-400'}`}>
                           {selectedIds.has(user.id) ? <CheckSquare size={20} /> : <Square size={20} />}
                        </button>
                     </td>
-                    <td className="px-4 py-5">
+                    <td>
                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-all shrink-0 ${selectedIds.has(user.id) ? 'bg-blue-600 text-white border-blue-500 shadow-lg' : 'bg-white border-slate-100 text-slate-400 shadow-sm'}`}>
+                          <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${selectedIds.has(user.id) ? 'bg-blue-600 text-white border-blue-500 shadow-lg' : 'bg-white border-slate-100 text-slate-400'}`}>
                              <UserCircle size={22}/>
                           </div>
                           <div className="min-w-0">
-                             <div className="font-black text-slate-900 uppercase italic text-sm group-hover:text-blue-600 transition-colors leading-none mb-1 truncate flex items-center gap-1">{user.name} {user.verifiedStatus?.identity && <ShieldCheck size={14} className="text-green-500" title="Verified User" />}</div>
-                             <p className="text-[9px] text-slate-400 font-bold uppercase truncate">{user.phone}</p>
+                             <div className="font-bold text-slate-900 text-sm truncate flex items-center gap-1">{user.name} {user.verifiedStatus?.identity && <ShieldCheck size={14} className="text-green-500" />}</div>
+                             <p className="text-[10px] text-slate-500 font-medium truncate">{user.phone}</p>
                           </div>
                        </div>
                     </td>
-                    <td className="px-4 py-5 text-center">
-                      <span className="px-3 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-xl text-[10px] font-black uppercase italic shadow-sm">{user.connectionId}</span>
+                    <td className="text-center">
+                      <span className="badge badge-info">{user.connectionId}</span>
                     </td>
-                    <td className="px-4 py-5">
+                    <td>
                       <div className="flex items-center gap-2">
-                         <div className={`w-2 h-2 rounded-full shrink-0 ${user.status === UserStatus.ACTIVE ? 'bg-green-500 animate-pulse' : user.status === UserStatus.GRACE_PERIOD ? 'bg-amber-500' : 'bg-rose-500'}`}></div>
-                         <span className="text-[10px] font-black uppercase text-slate-600 italic tracking-tight whitespace-nowrap">{user.status}</span>
+                         <div className={`w-2 h-2 rounded-full shrink-0 ${user.status === UserStatus.ACTIVE ? 'bg-green-500' : user.status === UserStatus.GRACE_PERIOD ? 'bg-amber-500' : 'bg-rose-500'}`}></div>
+                         <span className="text-[10px] font-bold uppercase text-slate-600 whitespace-nowrap">{user.status}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-5 text-right font-black text-base text-slate-900 italic tracking-tighter">
+                    <td className="text-right font-black text-slate-900">
                       Rs. {user.balance.toLocaleString()}
                     </td>
-                    <td className="px-6 py-5 text-right">
-                      <div className="flex flex-wrap items-center justify-end gap-1.5 transition-all max-w-[180px] ml-auto">
-                        <ActionIcon icon={Pencil} color="text-blue-600" label="Edit User" onClick={() => handleAction(user, 'edit')} disabled={!canPerformAction} />
-                        <ActionIcon icon={LockKeyhole} color="text-orange-600" label="Change Password" onClick={() => handleAction(user, 'reset')} disabled={!canPerformAction} />
-                        <ActionIcon icon={PackageIcon} color="text-blue-600" label="Setup Connection" onClick={() => handleAction(user, 'package')} disabled={!canPerformAction} />
-                        <ActionIcon icon={Banknote} color="text-green-600" label="Receive Payment" onClick={() => handleAction(user, 'payment')} disabled={!canPerformAction} />
-                        <ActionIcon icon={Eye} color="text-slate-600" label="View Profile" onClick={() => handleAction(user, 'view')} />
-                        <ActionIcon icon={Ban} color="text-rose-600" label="Suspend User" onClick={() => handleAction(user, 'suspend')} disabled={!isAdmin} />
-                        <ActionIcon icon={RefreshCw} color="text-purple-600" label="Restart Connection" onClick={() => handleAction(user, 'reconnect')} disabled={!isAdmin} />
+                    <td>
+                      <div className="flex flex-wrap items-center justify-end gap-2 max-w-[200px] ml-auto">
+                        {!user.isKYCVerified ? (
+                           <button onClick={() => handleAction(user, 'verify')} className="btn btn-icon btn-sm btn-secondary" title="Verify Identity"><ShieldCheck size={16} /></button>
+                        ) : (
+                           <button onClick={() => handleAction(user, 'unverify')} className="btn btn-icon btn-sm btn-danger !bg-rose-50 border-rose-100 !text-rose-600" title="Unverify"><ShieldAlert size={16} /></button>
+                        )}
+                        <button onClick={() => handleAction(user, 'edit')} className="btn btn-icon btn-sm btn-secondary" title="Edit Profile"><Pencil size={16} /></button>
+                        <button onClick={() => handleAction(user, 'reset')} className="btn btn-icon btn-sm btn-secondary" title="Reset Secret"><LockKeyhole size={16} /></button>
+                        <button onClick={() => handleAction(user, 'package')} className="btn btn-icon btn-sm btn-primary" title="Setup Connection"><PackageIcon size={16} /></button>
+                        <button onClick={() => handleAction(user, 'payment')} className="btn btn-icon btn-sm !bg-green-600 !text-white" title="Collect Cash"><Banknote size={16} /></button>
+                        <button onClick={() => handleAction(user, 'view')} className="btn btn-icon btn-sm btn-secondary" title="Full Profile"><Eye size={16} /></button>
+                        <button onClick={() => handleAction(user, 'suspend')} className="btn btn-icon btn-sm btn-danger" title="Suspend"><Ban size={16} /></button>
                       </div>
                     </td>
                   </tr>
@@ -627,7 +654,21 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
              {onboardingStep < 5 ? (
                <button onClick={() => setOnboardingStep(onboardingStep + 1)} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/30 flex items-center gap-2 transition-all active:scale-95">Next Step <ChevronRight size={14}/></button>
              ) : (
-               <button onClick={async () => { setIsProcessing(true); await db.addUser(newUserData); setIsProcessing(false); setIsNewUserModal(false); setIsSuccessModal(true); }} className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-green-900/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50" disabled={isProcessing}>
+               <button 
+                onClick={async () => { 
+                  setIsProcessing(true); 
+                  const res = await db.addUser(newUserData); 
+                  setIsProcessing(false); 
+                  if (res.success) {
+                    setIsNewUserModal(false); 
+                    setIsSuccessModal(true); 
+                  } else {
+                    alert(res.message);
+                  }
+                }} 
+                className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-green-900/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50" 
+                disabled={isProcessing}
+               >
                   {isProcessing ? <Loader2 className="animate-spin" size={14}/> : <ShieldCheck size={14}/>} Save User
                </button>
              )}
@@ -803,7 +844,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                <span className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 font-black text-2xl">Rs.</span>
                <input 
                  type="number" 
-                 className="w-full pl-16 pr-6 py-6 bg-transparent border-none rounded-[2.5rem] font-black text-4xl sm:text-5xl outline-none text-green-400 text-center transition-all" 
+                 className="w-full pl-20 pr-6 py-6 bg-transparent border-none rounded-[2.5rem] font-black text-4xl sm:text-5xl outline-none text-green-400 text-center transition-all" 
                  value={collectAmount} 
                  onChange={e => setCollectAmount(Number(e.target.value))} 
                />
@@ -1108,7 +1149,8 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
              setIsProcessing(false);
         }}
         confirmLabel={flashMonths === -1 ? 'INITIALIZE HARD FULL WIPE' : 'EXECUTE SELECTIVE FLASH'}
-        danger
+        type="danger"
+        confirmDanger
         isLoading={isProcessing || flashConfirmText.toUpperCase() !== 'FLASH RESET'}
       >
          <div className="space-y-8 mb-4">

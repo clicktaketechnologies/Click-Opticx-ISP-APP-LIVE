@@ -19,8 +19,8 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
    const [searchTerm, setSearchTerm] = useState('');
 
    const [formData, setFormData] = useState<Partial<NASConfig>>({
-      name: '', ip: '', secret: '', type: 'MikroTik', apiUsername: '', apiPassword: '',
-      apiPort: 8728, coaEnabled: true, coaPort: 3799, location: ''
+      name: '', ip: '', radiusSecret: '', hardwareModel: 'GENERIC', apiUsername: '', apiPassword: '',
+      apiPort: 8728, coaEnabled: true, coaPort: 3799, location: '', hotspotUrlMode: 'IP', nasEnabled: true, accountingPort: 1813, authPort: 1812
    });
 
    const filteredNodes = state.nas.filter(n => 
@@ -32,7 +32,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
    const handleAdd = async () => {
       await db.addNAS(formData);
       setIsAddModal(false);
-      setFormData({ name: '', ip: '', secret: '', type: 'MikroTik', apiUsername: '', apiPassword: '', apiPort: 8728, coaEnabled: true, coaPort: 3799, location: '' });
+      setFormData({ name: '', ip: '', radiusSecret: '', hardwareModel: 'GENERIC', apiUsername: '', apiPassword: '', apiPort: 8728, coaEnabled: true, coaPort: 3799, location: '', hotspotUrlMode: 'IP', nasEnabled: true, accountingPort: 1813, authPort: 1812 });
    };
 
    const handleUpdate = async () => {
@@ -148,7 +148,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         </div>
                         <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100/50">
                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">API Port</p>
-                           <p className="text-sm font-black text-slate-700">{nas.apiPort} <span className="text-[10px] text-slate-300 font-normal ml-1">/ {nas.type}</span></p>
+                           <p className="text-sm font-black text-slate-700">{nas.apiPort} <span className="text-[10px] text-slate-300 font-normal ml-1">/ {nas.hardwareModel}</span></p>
                         </div>
                         <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100/50">
                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Hardware</p>
@@ -227,7 +227,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
                </div>
                <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Radius Secret</label>
-                  <input type="password" value={formData.secret} onChange={e => setFormData({...formData, secret: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 text-slate-900 placeholder:text-slate-400" />
+                  <input type="password" value={formData.radiusSecret} onChange={e => setFormData({...formData, radiusSecret: e.target.value})} className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 text-slate-900 placeholder:text-slate-400" />
                </div>
                <div className="space-y-1.5">
                   <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Hardware Model</label>
@@ -302,7 +302,6 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
             confirmLabel={isChecking ? 'CHECKING STATUS...' : 'Confirm Status'}
             onConfirm={() => setIsHealthCheckModal(false)}
             hideCloseButton={isChecking}
-            disableConfirm={isChecking}
          >
             {!isChecking && (
                <div className="grid grid-cols-3 gap-3 pt-4">

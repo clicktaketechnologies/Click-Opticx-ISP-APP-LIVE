@@ -16,8 +16,8 @@ const UserManagement = lazy(() => import('./pages/UserManagement'));
 const Recovery = lazy(() => import('./pages/Recovery'));
 const RecoveryDashboard = lazy(() => import('./pages/RecoveryDashboard'));
 const AccountingLedger = lazy(() => import('./pages/AccountingLedger'));
-const Sidebar = lazy(() => import('./components/Sidebar'));
-const Header = lazy(() => import('./components/Header'));
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
 const PackagesPage = lazy(() => import('./pages/PackagesPage'));
 const ArchivePage = lazy(() => import('./pages/ArchivePage'));
 const AccessControlPage = lazy(() => import('./pages/AccessControlPage'));
@@ -69,6 +69,7 @@ const SystemReadiness = lazy(() => import('./pages/SystemReadiness'));
 const SpeedTestPage = lazy(() => import('./pages/SpeedTestPage'));
 const HotspotManager = lazy(() => import('./pages/HotspotManager'));
 const PastRecords = lazy(() => import('./pages/PastRecords'));
+const KYCManagement = lazy(() => import('./pages/KYCManagement'));
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 
 interface EBProps {
@@ -128,8 +129,16 @@ class ErrorBoundary extends React.Component<EBProps, EBState> {
               ? 'A critical system update or network fluctuation has occurred. We are synchronizing your local cache with the latest server assets.'
               : 'An unexpected runtime error has occurred. Our secondary containment has isolated the issue. Detailed trace logged to console.'}
           </p>
-          <div className="bg-white/5 p-4 rounded-2xl border border-white/10 mb-8 max-w-lg overflow-auto">
-            <code className="text-rose-400 text-[10px] break-all">{this.state.error?.message}</code>
+          <div className="bg-white/5 p-4 rounded-2xl border border-white/10 mb-8 max-w-lg overflow-auto text-left max-h-[200px]">
+             <p className="text-[9px] font-black uppercase text-rose-500 mb-2 tracking-widest leading-none underline decoration-rose-500/30 underline-offset-4">Crash Signature Envelope:</p>
+             <code className="text-rose-400 text-[10px] break-all leading-tight italic">
+               {this.state.error?.message}
+               {!isChunkError && this.state.error?.stack && (
+                 <div className="mt-4 pt-4 border-t border-white/10 opacity-50 whitespace-pre-wrap font-mono select-all">
+                   {this.state.error.stack}
+                 </div>
+               )}
+             </code>
           </div>
           <button
             onClick={() => window.location.reload()}
@@ -173,10 +182,12 @@ const App: React.FC = () => {
 
     const unsubscribe = db.onStateChange((newState) => {
       console.log('App state updated:', newState.currentUser?.email, 'Configured:', db.isConfigured());
+      // Update dbState inside transition for smooth page renders,
+      // but update authState OUTSIDE transition to prevent login flash
+      setAuthState(newState.currentUser);
+      setIsConfigured(db.isConfigured());
       startTransition(() => {
         setDbState(newState);
-        setAuthState(newState.currentUser);
-        setIsConfigured(db.isConfigured());
       });
 
       // Global Branding Updates
@@ -279,7 +290,7 @@ const App: React.FC = () => {
             </div>
             <div className="flex items-center justify-center gap-3">
               <Mini5GMicroLoader size={24} />
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">System Synchronizing</span>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Handshaking with Cloud Registry</span>
             </div>
           </div>
         </div>
@@ -329,6 +340,16 @@ const App: React.FC = () => {
       );
     }
 
+    // Guard: if dbState hasn't caught up yet from the transition, show a minimal loader instead of crashing
+    if (!dbState.currentUser) {
+      return (
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
+          <Mini5GMicroLoader size={40} />
+          <p className="mt-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Synchronizing Session...</p>
+        </div>
+      );
+    }
+
     if (authState.role === Role.CUSTOMER) {
       console.log('Rendering Customer Portal');
       return (
@@ -347,7 +368,7 @@ const App: React.FC = () => {
     console.log('Rendering Admin Layout, Page:', currentPage);
     return (
       <div className="flex min-h-screen bg-slate-50 overflow-hidden">
-        <Suspense fallback={<div className="h-screen w-screen flex items-center justify-center bg-slate-950"><Mini5GMicroLoader size={48} /></div>}>
+        <>
           <Modal
             isOpen={!!criticalAlert}
             onClose={dismissCritical}
@@ -461,6 +482,8 @@ const App: React.FC = () => {
                     case 'comm-identities':
                       return <EmailControlCenter state={dbState} activePage={currentPage} />;
                     case 'admin-reminders': return <AdminReminders state={dbState} onNavigate={navigateTo} />;
+                    case 'kyc-hub': return <KYCManagement state={dbState} />;
+                    case 'cloud-storage': return <KYCManagement state={dbState} />;
                     case 'nas-management': return <NASManagement state={dbState} />;
                     case 'olt-management': return <OLTManagement state={dbState} />;
                     case 'hotspot-tokens': return <HotspotManager state={dbState} />;
@@ -473,7 +496,7 @@ const App: React.FC = () => {
               </Suspense>
             </main>
           </div>
-        </Suspense>
+        </>
       </div>
     );
   };

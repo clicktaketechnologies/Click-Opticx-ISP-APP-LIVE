@@ -377,7 +377,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                                     <p className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-1">Active ONUs</p>
                                     <div className="flex items-baseline gap-1">
                                        <span className="text-lg font-black text-green-400">
-                                          {state.onus.filter(o => o.oltNode === olt.id && o.status === 'Online').length}
+                                          {state.onus.filter(o => o.oltId === olt.id && o.status === 'Online').length}
                                        </span>
                                        <span className="text-[8px] font-black opacity-20">REGISTERED</span>
                                     </div>
@@ -386,7 +386,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                                     <p className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-1">Faults</p>
                                     <div className="flex items-baseline gap-1 justify-end">
                                        <span className="text-lg font-black text-rose-500">
-                                          {state.onus.filter(o => o.oltNode === olt.id && o.status !== 'Online').length}
+                                          {state.onus.filter(o => o.oltId === olt.id && o.status !== 'Online').length}
                                        </span>
                                        <span className="text-[8px] font-black opacity-20 text-rose-500/40">OFFLINE</span>
                                     </div>

@@ -100,7 +100,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
             }
 
             let matchesDate = true;
-            const refDate = u.expiry ? new Date(u.expiry) : null;
+            const refDate = u.expiryDate ? new Date(u.expiryDate) : null;
             if (refDate && dateFilter !== 'All') {
                 const diffMs = now.getTime() - refDate.getTime();
                 const diffDays = diffMs / (1000 * 60 * 60 * 24);
@@ -1129,7 +1129,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         isOpen={isAdvancedModalOpen && !!activeUser}
         onClose={() => setIsAdvancedModalOpen(false)}
         title="Advanced Override"
-        type="warning"
+        type="info"
         icon={<Zap size={24} className="text-white" />}
         maxWidth="max-w-2xl"
         footer={
@@ -1314,7 +1314,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         isOpen={isBulkUnpaidModalOpen}
         onClose={() => setIsBulkUnpaidModalOpen(false)}
         title="Fiscal Arrears Protocol"
-        type="warning"
+        type="error"
         icon={<BadgeDollarSign size={24} className="text-white" />}
         maxWidth="max-w-2xl"
         footer={
@@ -1490,7 +1490,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         isOpen={isBulkPromiseModalOpen}
         onClose={() => setIsBulkPromiseModalOpen(false)}
         title="Batch Promise Registry"
-        type="warning"
+        type="confirm"
         icon={<Clock size={24} className="text-white" />}
         maxWidth="max-w-xl"
         footer={

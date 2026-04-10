@@ -2,10 +2,11 @@ import React, { useState, useRef } from 'react';
 import { 
   ShieldCheck, Camera, Upload, CheckCircle, AlertCircle, X, 
   ChevronRight, ArrowLeft, Loader2, Smartphone, FileText, 
-  UserSquare, Eye, Fingerprint, Zap, RefreshCw
+  UserSquare, Eye, Fingerprint, Zap, RefreshCw, Cloud, HardDrive, Lock, Shield,
+  Clock
 } from 'lucide-react';
 import { db } from '../../db';
-import { ISPUser, KYCMethod } from '../../types';
+import { ISPUser, KYCMethod, VerificationStatus } from '../../types';
 import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 import Modal from '../shared/Modal';
 import FaceScanner from '../shared/FaceScanner';
@@ -18,7 +19,9 @@ interface SmartKYCPopupProps {
 }
 
 const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, onSuccess }) => {
-  const [step, setStep] = useState<'methods' | 'upload' | 'success' | 'processing'>('methods');
+  const [step, setStep] = useState<'methods' | 'upload' | 'success' | 'processing' | 'pending_review'>(
+    (user.isKYCSubmitted && user.verificationStatus === VerificationStatus.PENDING) ? 'pending_review' : 'methods'
+  );
   const [method, setMethod] = useState<KYCMethod | null>(null);
   const [files, setFiles] = useState<{ front?: string; back?: string; selfie?: string; document?: string }>({});
   const [error, setError] = useState<string | null>(null);
@@ -69,12 +72,21 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
     setStep('processing');
 
     try {
+      // PHASE 1: Cloud Handshake Simulation
+      await new Promise(resolve => setTimeout(resolve, 2500)); // Visual pause for the animation
+
       const fileArray = Object.values(files).filter(Boolean) as string[];
-      const res = await db.submitKYC(user.id, method, fileArray);
+      // If method is LIVE_SCAN, pass files.selfie as the dedicated faceData argument
+      const res = await db.submitKYC(
+        user.id, 
+        method, 
+        fileArray, 
+        undefined, 
+        method === KYCMethod.LIVE_SCAN ? files.selfie : undefined
+      );
       
       if (res.success) {
         setStep('success');
-        if (onSuccess) onSuccess();
       } else {
         setError(res.message || "Failed to submit KYC.");
         setStep('upload');
@@ -91,10 +103,10 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="grid grid-cols-1 gap-4">
         {[
-          { id: KYCMethod.CNIC, label: 'National ID (CNIC)', icon: UserSquare, desc: 'Scan front and back of your ID card', color: 'blue' },
-          { id: KYCMethod.PASSPORT, label: 'Passport', icon: Smartphone, desc: 'Upload passport bio-data page', color: 'amber' },
-          { id: KYCMethod.LIVE_SCAN, label: 'Live Face Scan', icon: Camera, desc: 'Instant biometric verification', color: 'green' },
-          { id: KYCMethod.MANUAL, label: 'Other Document', icon: FileText, desc: 'Driving license or utility bills', color: 'slate' },
+          { id: KYCMethod.CNIC, label: 'National ID (CNIC)', icon: UserSquare, desc: 'Take photos of front & back of your CNIC', color: 'blue' },
+          { id: KYCMethod.PASSPORT, label: 'Passport', icon: Smartphone, desc: 'Upload a photo of your passport page', color: 'amber' },
+          { id: KYCMethod.LIVE_SCAN, label: 'Selfie Verification', icon: Camera, desc: 'Take a quick selfie to verify yourself', color: 'green' },
+          { id: KYCMethod.MANUAL, label: 'Other Document', icon: FileText, desc: 'Driving license, utility bill, etc.', color: 'slate' },
         ].map((m) => (
           <button
             key={m.id}
@@ -111,7 +123,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
             </div>
             <div className="text-left">
               <p className="font-black text-slate-900 uppercase italic tracking-tighter leading-none">{m.label}</p>
-              <p className="text-[10px] text-slate-400 font-bold uppercase mt-1 tracking-widest leading-none">{m.desc}</p>
+              <p className="text-[10px] text-slate-400 font-bold mt-1 tracking-wide leading-none">{m.desc}</p>
             </div>
             <ChevronRight className="ml-auto text-slate-300 group-hover:text-blue-500 transition-all" size={24} />
           </button>
@@ -251,26 +263,85 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
             method === KYCMethod.LIVE_SCAN ? !files.selfie :
             !files.document
           )}
-          className={`flex-[2] py-5 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-2 ${isSubmitting ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-950 hover:shadow-blue-500/10'}`}
+          className={`flex-[2] py-4 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-2 ${isSubmitting ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-950 hover:shadow-blue-500/10'}`}
         >
-          {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Transmitting...</> : 'Process Identity'}
+          {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Verifying Node & Uploading...</> : 'Process Identity'}
         </button>
       </div>
     </div>
   );
 
   const renderProcessing = () => (
-    <div className="py-20 flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-500">
+    <div className="py-12 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in-95 duration-500">
       <div className="relative">
-        <div className="w-32 h-32 bg-blue-600/10 rounded-full flex items-center justify-center blur-2xl absolute inset-0 animate-pulse"></div>
-        <div className="w-32 h-32 bg-white rounded-[3rem] border border-slate-100 shadow-2xl flex items-center justify-center relative">
-          <Mini5GMicroLoader size={48} />
+        <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full scale-150 animate-pulse" />
+        <div className="relative w-24 h-24 bg-slate-900 rounded-[2.5rem] border-2 border-blue-500/30 flex items-center justify-center overflow-hidden">
+           <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
         </div>
       </div>
-      <div className="text-center space-y-2">
-        <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">Analyzing Matrix</h3>
-        <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em]">Just a second...</p>
+
+      <div className="space-y-4 max-w-md mx-auto">
+        <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Uploading Your Documents</h3>
+        
+        <div className="space-y-3">
+          <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-600">
+              <Lock size={20} />
+            </div>
+            <div className="text-left flex-1">
+              <div className="text-[10px] font-black uppercase tracking-widest text-blue-600">Step 1: Securing</div>
+              <div className="text-xs text-slate-500 font-bold">Encrypting your documents...</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600">
+              <Cloud size={20} />
+            </div>
+            <div className="text-left flex-1">
+              <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Step 2: Uploading</div>
+              <div className="text-xs text-slate-500 font-bold">Saving to secure storage...</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-600">
+              <Shield size={20} />
+            </div>
+            <div className="text-left flex-1">
+              <div className="text-[10px] font-black uppercase tracking-widest text-purple-600">Step 3: Confirming</div>
+              <div className="text-xs text-slate-500 font-bold">Almost done...</div>
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+  );
+
+  const renderPendingReview = () => (
+    <div className="py-12 flex flex-col items-center justify-center space-y-10 animate-in zoom-in-50 duration-500">
+      <div className="relative">
+        <div className="absolute inset-0 bg-amber-500/20 blur-2xl rounded-full scale-150 animate-pulse" />
+        <div className="w-24 h-24 bg-amber-50 text-amber-600 rounded-[2.5rem] flex items-center justify-center shadow-lg border-2 border-amber-100 relative">
+          <Clock size={48} className="animate-spin-slow" />
+        </div>
+      </div>
+      <div className="text-center space-y-3">
+        <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">We are Verifying</h3>
+        <p className="text-sm text-slate-500 font-bold leading-relaxed max-w-[280px] mx-auto px-4">
+          Your identity artifacts have been received. Our human verification agents are currently reviewing your workspace.
+        </p>
+      </div>
+      <div className="p-4 bg-slate-900 text-amber-400 rounded-3xl border border-white/10 flex items-center gap-3 shadow-2xl">
+         <ShieldCheck size={18} />
+         <span className="text-[10px] font-black uppercase tracking-widest leading-none">Security Node Secure</span>
+      </div>
+      <button
+        onClick={onClose}
+        className="w-full py-5 bg-slate-100 text-slate-400 rounded-3xl font-black text-[10px] uppercase tracking-widest hover:text-slate-600 transition-all border border-slate-200 shadow-sm"
+      >
+        Waiting for Approval...
+      </button>
     </div>
   );
 
@@ -280,9 +351,9 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
         <CheckCircle size={56} strokeWidth={3} />
       </div>
       <div className="text-center space-y-3">
-        <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">All Set!</h3>
-        <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest leading-relaxed max-w-[250px] mx-auto">
-          We've received your documents! After verification you can use our app. This usually takes just a few hours.
+        <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">Documents Submitted!</h3>
+        <p className="text-sm text-slate-500 font-bold leading-relaxed max-w-[280px] mx-auto">
+          We've received your documents. Our team will review them shortly. You'll get a notification once approved.
         </p>
       </div>
       <button
@@ -297,11 +368,12 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
-      title="Let's Get You Verified"
+      onClose={(user.verificationStatus === VerificationStatus.REVISION || !user.isKYCSubmitted) ? () => {} : onClose}
+      title="Verify Your Identity"
       type="info"
-      icon={<Fingerprint size={24} className="text-white" />}
+      icon={<Fingerprint size={24} className="text-blue-600" />}
       maxWidth="max-w-lg"
+      hideCloseButton={user.verificationStatus === VerificationStatus.REVISION || !user.isKYCSubmitted}
       footer={
         <div className="flex items-center justify-between w-full">
            <div className="flex items-center gap-2">
@@ -313,15 +385,33 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
       }
     >
       <div className="space-y-6">
-        <div className="text-center space-y-1">
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] opacity-80">One last step to unlock your account</p>
+        <div className="text-center space-y-2">
+          {user.verificationStatus === VerificationStatus.REVISION ? (
+            <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl space-y-2 text-left animate-in shake duration-500">
+               <div className="flex items-center gap-2 text-rose-600">
+                  <AlertCircle size={16} />
+                  <p className="text-[10px] font-black uppercase tracking-widest leading-none">Correction Required</p>
+               </div>
+               <p className="text-xs font-bold text-slate-600 leading-relaxed italic">
+                 "{user.kyc_rejected_reason || 'Sensitive data artifacts did not meet resolution standards. Please resubmit clear photos.'}"
+               </p>
+               {user.requiredRevisionDocs && (
+                 <div className="mt-2 text-[10px] font-black text-rose-500 uppercase tracking-widest bg-rose-100/50 p-2 rounded-lg inline-block border border-rose-200">
+                   Required Resubmissions: {user.requiredRevisionDocs} Documents
+                 </div>
+               )}
+            </div>
+          ) : (
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] opacity-80">One last step to unlock your account</p>
+          )}
         </div>
 
-        <div className="min-h-[300px]">
+        <div className="min-h-[200px]">
           {step === 'methods' && renderMethods()}
           {step === 'upload' && renderUpload()}
           {step === 'processing' && renderProcessing()}
           {step === 'success' && renderSuccess()}
+          {step === 'pending_review' && renderPendingReview()}
         </div>
 
         <input 

@@ -298,49 +298,54 @@ const Dashboard: React.FC<{
       </div>
 
       {/* Premium Quick Actions Bar */}
-      <div className="flex flex-wrap items-center gap-3 mb-8 bg-blue-900/5 p-3 rounded-3xl border border-blue-500/10 backdrop-blur-sm shadow-inner">
-        <div className="flex items-center gap-2 px-3 border-r border-blue-500/10 mr-1">
+      <div className="scroll-x pb-2 mb-8 bg-blue-900/5 p-4 rounded-[2rem] border border-blue-500/10 backdrop-blur-sm shadow-inner no-scrollbar">
+        <div className="flex items-center gap-2 px-3 border-r border-blue-500/10 mr-1 shrink-0">
           <Zap size={16} className="text-blue-500 animate-pulse" />
           <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-800">Quick Actions</span>
         </div>
-        <button onClick={() => onNavigate && onNavigate('users', { action: 'add-user' })} className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-blue-200">
+        <button onClick={() => onNavigate && onNavigate('users', { action: 'add-user' })} className="btn btn-secondary btn-sm !rounded-2xl shrink-0">
           <UserPlus size={16} /> + Add User
         </button>
-        <button onClick={() => onNavigate && onNavigate('users', { action: 'receive-funds' })} className="flex items-center gap-2 px-5 py-2.5 bg-white text-green-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-green-200">
+        <button onClick={() => onNavigate && onNavigate('users', { action: 'receive-funds' })} className="btn btn-secondary btn-sm !rounded-2xl shrink-0 !text-green-600">
           <Banknote size={16} /> Receive Payment
         </button>
-        <button onClick={() => onNavigate && onNavigate('invoice-engine')} className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-blue-200">
+        <button onClick={() => onNavigate && onNavigate('invoice-engine')} className="btn btn-secondary btn-sm !rounded-2xl shrink-0">
           <Receipt size={16} /> Create Invoice
         </button>
-        <button onClick={() => onNavigate && onNavigate('comm-campaigns')} className="flex items-center gap-2 px-5 py-2.5 bg-white text-purple-700 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-100 hover:border-purple-200">
+        <button onClick={() => onNavigate && onNavigate('comm-campaigns')} className="btn btn-secondary btn-sm !rounded-2xl shrink-0 !text-purple-600">
           <Send size={16} /> Send Message
         </button>
-        <button onClick={() => setIsReconcileModal(true)} className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-amber-400 rounded-2xl font-black text-[10px] uppercase shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all border border-slate-800">
+        <button onClick={() => setIsReconcileModal(true)} className="btn btn-primary btn-sm !rounded-2xl shrink-0 !bg-slate-900 !text-amber-400 border border-slate-800">
           <DatabaseZap size={16} /> Fetch Missing Data
         </button>
       </div>
 
       {/* Advanced Data Metrics Matrix */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 border-b border-slate-100 pb-8 mb-8">
+      <div className="grid-cols-responsive border-b border-slate-100 pb-8 mb-8">
         {[
-          { label: 'Total Users', value: globalStats.totalUsers.toLocaleString(), icon: Users, color: 'text-slate-600', bg: 'bg-slate-50' },
-          { label: 'Active Users', value: globalStats.activeSubs.toLocaleString(), icon: Activity, color: 'text-green-600', bg: 'bg-green-50' },
-          { label: 'Server Online', value: globalStats.onlineUsers.toLocaleString(), icon: Globe, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'New Users', value: globalStats.newUsers.toLocaleString(), icon: UserPlus, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Suspended Users', value: globalStats.expiredUsers.toLocaleString(), icon: Archive, color: 'text-rose-600', bg: 'bg-rose-50' },
-          { label: 'Disabled Users', value: globalStats.disabledUsers.toLocaleString(), icon: ShieldCheck, color: 'text-slate-400', bg: 'bg-slate-50' },
+          { label: 'Total Users', value: globalStats.totalUsers.toLocaleString(), icon: Users, color: 'text-blue-500', bg: 'var(--info-bg)' },
+          { label: 'Active Users', value: globalStats.activeSubs.toLocaleString(), icon: Activity, color: 'text-green-500', bg: 'var(--success-bg)' },
+          { label: 'Server Online', value: globalStats.onlineUsers.toLocaleString(), icon: Globe, color: 'text-cyan-500', bg: 'rgba(6, 174, 212, 0.1)' },
+          { label: 'New Users', value: globalStats.newUsers.toLocaleString(), icon: UserPlus, color: 'text-blue-600', bg: 'var(--info-bg)' },
+          { label: 'Suspended Users', value: globalStats.expiredUsers.toLocaleString(), icon: Archive, color: 'text-rose-600', bg: 'var(--error-bg)' },
+          { label: 'Disabled Users', value: globalStats.disabledUsers.toLocaleString(), icon: ShieldCheck, color: 'text-slate-400', bg: 'var(--bg-surface-soft)' },
         ].map((kpi, idx) => (
-          <div key={idx} className="bg-white p-5 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group overflow-hidden relative flex flex-col items-center text-center">
-            <div className={`p-4 rounded-[1.8rem] mb-3 transition-transform group-hover:scale-110 ${kpi.bg}`}><kpi.icon className={kpi.color} size={24} /></div>
-            <h3 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight relative z-10 leading-none mb-1">{kpi.value}</h3>
-            <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.2em] relative z-10 leading-tight">{kpi.label}</p>
+          <div key={idx} className="card metric-card !items-center text-center hover:-translate-y-1 transition-all group">
+            <div 
+              className="p-4 rounded-[1.8rem] mb-3 transition-transform group-hover:scale-110 flex items-center justify-center" 
+              style={{ background: kpi.bg }}
+            >
+              <kpi.icon className={kpi.color} size={24} />
+            </div>
+            <h3 className="value leading-none mb-1">{kpi.value}</h3>
+            <p className="label leading-tight">{kpi.label}</p>
           </div>
         ))}
       </div>
 
       {/* Expiry & Payment Insight Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <div className="bg-gradient-to-br from-rose-500 to-rose-600 p-8 rounded-[3rem] text-white shadow-xl shadow-rose-200 relative overflow-hidden group">
+        <div className="p-8 rounded-[3rem] text-white shadow-xl shadow-rose-200 relative overflow-hidden group bg-gradient-to-br from-rose-500 to-rose-600">
           <div className="relative z-10">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80 mb-4">Expiring in 24 Hours</p>
             <h4 className="text-5xl font-black italic tracking-tighter mb-2">{globalStats.expiring1d}</h4>
@@ -349,7 +354,7 @@ const Dashboard: React.FC<{
           <AlertCircle size={120} className="absolute -right-6 -bottom-6 opacity-20 group-hover:scale-110 transition-transform duration-700" />
         </div>
 
-        <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col justify-between">
+        <div className="card flex flex-col justify-between">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600"><Calendar size={24} /></div>
             <div>
@@ -370,7 +375,7 @@ const Dashboard: React.FC<{
           </div>
         </div>
 
-        <div className="bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col justify-between group">
+        <div className="card flex flex-col justify-between group">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 group-hover:rotate-12 transition-transform"><DollarSign size={24} /></div>
             <div>
@@ -391,7 +396,7 @@ const Dashboard: React.FC<{
           </div>
         </div>
 
-        <div className="bg-slate-900 p-8 rounded-[3rem] text-white shadow-2xl shadow-blue-200 relative overflow-hidden group">
+        <div className="p-8 rounded-[3rem] text-white shadow-2xl shadow-blue-200 relative overflow-hidden group bg-slate-900">
           <div className="relative z-10">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 mb-4">Total Due</p>
             <h4 className="text-4xl font-black italic tracking-tighter mb-2">{state.settings.currency} {globalStats.totalUnpaidAmount.toLocaleString()}</h4>

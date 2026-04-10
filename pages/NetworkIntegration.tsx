@@ -302,7 +302,7 @@ const NetworkIntegration: React.FC<{ state: AppState }> = ({ state }) => {
             message="Hardware Deployment"
             icon={<Plus size={28} className="text-blue-500" />}
             confirmLabel="Initialize Deployment"
-            onConfirm={handleAddNode}
+            onConfirm={() => handleAddNode({ preventDefault: () => {} } as React.FormEvent)}
             maxWidth="max-w-2xl"
             hideCloseButton={false}
          >

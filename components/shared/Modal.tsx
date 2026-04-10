@@ -125,12 +125,12 @@ export const Modal: React.FC<ModalProps> = ({
         className={`modal relative w-full ${maxWidth} rounded-[2rem] flex flex-col shadow-2xl transition-all duration-200 overflow-hidden bg-white border border-slate-100`}
         style={{
           animation: 'modalIn 0.2s ease-out',
-          maxHeight: '90vh'
+          maxHeight: 'calc(100vh - 2rem)'
         }}
       >
         {/* HEADER */}
         <div
-          className="flex items-center justify-between px-8 py-6 shrink-0 gap-6 border-b border-slate-50"
+          className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-6 shrink-0 gap-4 border-b border-slate-50"
         >
           <div className="flex items-center gap-4 min-w-0 flex-1">
             <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 shadow-sm">
@@ -148,7 +148,7 @@ export const Modal: React.FC<ModalProps> = ({
                 disabled={isLoading}
                 className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all disabled:opacity-30 border border-transparent hover:border-slate-100"
               >
-                <X size={20} alt="Close Modal" />
+                <X size={20} />
               </button>
             )}
           </div>
@@ -156,7 +156,7 @@ export const Modal: React.FC<ModalProps> = ({
 
         {/* BODY */}
         <div
-          className={`${noPadding ? '' : 'px-8 py-6'} ${scrollable ? 'overflow-y-auto custom-scrollbar' : ''} flex-1`}
+          className={`${noPadding ? '' : 'px-5 sm:px-8 py-4 sm:py-6'} overflow-y-auto custom-scrollbar flex-1`}
           style={{ minHeight: 0 }}
         >
           {message && (
@@ -168,7 +168,7 @@ export const Modal: React.FC<ModalProps> = ({
         {/* FOOTER */}
         {(footer || showDefaultFooter) && (
           <div
-            className="px-8 py-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0 border-t border-slate-50 bg-slate-50/30"
+            className="px-5 sm:px-8 py-4 sm:py-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 shrink-0 border-t border-slate-50 bg-slate-50/30"
           >
             {footer ? (
               footer

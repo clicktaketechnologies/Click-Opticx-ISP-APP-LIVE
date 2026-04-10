@@ -9,7 +9,7 @@ import {
 import Modal from '../components/shared/Modal';
 
 const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
-  const [activeTab, setActiveTab] = useState<'collections' | 'approvals' | 'team' | 'dealers'>('approvals');
+  const [activeTab, setActiveTab] = useState<'collections' | 'approvals' | 'approvals_history' | 'team' | 'dealers'>('approvals');
   const [paymentModal, setPaymentModal] = useState<string | null>(null);
   const [amount, setAmount] = useState(0);
   const [method, setMethod] = useState<PaymentMethod>('Cash');

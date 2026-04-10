@@ -56,12 +56,22 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
     const isAdmin = [Role.SUPER_ADMIN, Role.ADMIN].includes(state.currentUser?.role as Role);
 
     if (editingStaff) {
-      await db.updateStaff(editingStaff.email, formData);
-      db.logNotification('all', 'info', 'Personnel Update', `Identity ${formData.name} modified by ${state.currentUser?.name}.`);
+      const res = await db.updateStaff(editingStaff.email, formData);
+      if (res.success) {
+        db.logNotification('all', 'info', 'Personnel Update', `Identity ${formData.name} modified by ${state.currentUser?.name}.`);
+      } else {
+        alert(res.message);
+        return;
+      }
     } else {
       if (isAdmin) {
-        await db.addStaff(formData);
-        db.logNotification('all', 'success', 'Personnel Provisioned', `New identity ${formData.name} authorized by ${state.currentUser?.name}.`);
+        const res = await db.addStaff(formData);
+        if (res.success) {
+          db.logNotification('all', 'success', 'Personnel Provisioned', `New identity ${formData.name} authorized by ${state.currentUser?.name}.`);
+        } else {
+          alert(res.message);
+          return;
+        }
       } else {
         await db.submitApprovalRequest(
           'Staff_Addition',

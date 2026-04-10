@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Role } from '../types';
-import { Bell, Search, UserCircle, Database, X, CheckCircle, Info, AlertTriangle, CloudOff, RefreshCw, CloudUpload, Menu, Globe, LogOut, Cloud, ListChecks, Zap, ShieldAlert } from 'lucide-react';
+import { Bell, Search, UserCircle, Database, X, CheckCircle, Info, AlertTriangle, CloudOff, RefreshCw, CloudUpload, Menu, Globe, LogOut, Cloud, ListChecks, Zap, ShieldAlert, Moon, Sun } from 'lucide-react';
 import { db } from '../db';
 import { useBranding } from '../hooks/useBranding';
 
@@ -85,22 +85,20 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
              <span className="text-[8px] font-black uppercase tracking-widest leading-none">Synced</span>
           </button>
         );
-      default:
-        return (
-          <button 
-            onClick={() => db.forceSync()}
-            title="Attempt Cloud Reconnection"
-            className="flex items-center gap-1.5 px-2 py-0.5 bg-red-50 text-red-600 rounded-lg border border-red-100 whitespace-nowrap hover:bg-red-100 transition-all active:scale-95"
-          >
-             <CloudOff size={10} />
-             <span className="text-[8px] font-black uppercase tracking-widest leading-none">Local</span>
-          </button>
-        );
     }
+  };
+  
+  const [theme, setTheme] = useState(() => localStorage.getItem('click_opticx_theme') || 'light');
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('click_opticx_theme', newTheme);
   };
 
   return (
-    <header className="h-[68px] bg-white/70 backdrop-blur-xl border-b border-slate-100 px-6 md:px-10 flex items-center justify-between sticky top-0 z-[60] shadow-[0_8px_30px_rgb(0,0,0,0.02)] relative">
+    <header className="h-[70px] bg-surface/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 flex items-center justify-between sticky top-0 z-[60] shadow-sm">
       {/* Page Transition Progress Bar */}
       {isPending && (
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#1570ef] z-[70] animate-progress-glow overflow-hidden">
@@ -135,21 +133,21 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
            </div>
         </div>
 
-        <div className="relative hidden md:block w-48 lg:w-72 group">
-          <Search className={`absolute left-3 top-1/2 -translate-y-1/2 transition-colors duration-300 ${searchTerm ? 'text-[#1570ef]' : 'text-slate-300'}`} size={16} />
+        <div className="relative hidden lg:block w-72 group">
+          <Search className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${searchTerm ? 'text-blue-500' : 'text-slate-400'}`} size={16} />
           <input 
             type="text" 
             value={searchTerm}
             onChange={(e) => onSearch(e.target.value)}
-            placeholder="Registry command search..." 
-            className="w-full pl-11 pr-7 py-3 bg-slate-50/50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/10 text-[10px] font-black transition-all placeholder:text-slate-300 uppercase tracking-widest italic"
+            placeholder="Search connections..." 
+            className="w-full pl-12 pr-10 py-2.5 bg-slate-100/50 dark:bg-slate-800/50 border border-transparent focus:border-blue-500/50 rounded-2xl outline-none text-sm font-medium transition-all"
           />
           {searchTerm && (
             <button 
               onClick={() => onSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-rose-500 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 transition-colors"
             >
-              <X size={12} />
+              <X size={14} />
             </button>
           )}
         </div>
@@ -159,7 +157,14 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
         </div>
       </div>
 
-      <div className="flex items-center gap-4 md:gap-6 ml-4">
+      <div className="flex items-center gap-3 md:gap-4 ml-4">
+        <button 
+          onClick={toggleTheme}
+          className="p-2.5 rounded-2xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
+          title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+        >
+          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+        </button>
         <div className="relative" ref={notifRef}>
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
@@ -220,24 +225,25 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
 
         <button 
           onClick={onLogout}
-          className="p-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+          className="btn btn-icon btn-sm btn-secondary !p-2"
+          title="Logout"
         >
-          <LogOut size={16} />
+          <LogOut size={18} />
         </button>
         
         <button 
           onClick={onProfileClick}
-          className="flex items-center gap-2 md:gap-3 border-l pl-2 md:pl-4 border-slate-200 group transition-all"
+          className="flex items-center gap-3 border-l border-white/10 pl-4 group transition-all"
         >
           <div className="text-right hidden sm:block">
-            <p className="text-[10px] font-black text-slate-800 tracking-tight leading-none">{user.name.split(' ')[0]}</p>
-            <p className="text-[7px] text-green-600 font-black uppercase tracking-widest mt-0.5 leading-none">{user.role}</p>
+            <p className="text-[11px] font-bold text-slate-900 dark:text-white leading-none mb-1">{user.name}</p>
+            <p className="badge badge-success !text-[8px] !py-0.5">{user.role}</p>
           </div>
-          <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center border border-slate-200 shadow-inner overflow-hidden shrink-0 group-hover:border-blue-200 group-hover:bg-blue-50 transition-all">
+          <div className="w-9 h-9 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-white/5 overflow-hidden shrink-0 group-hover:scale-105 transition-all">
             {user.profileImage ? (
               <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
             ) : (
-              <UserCircle size={20} className="text-slate-400 group-hover:text-blue-400" />
+              <UserCircle size={24} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
             )}
           </div>
         </button>
