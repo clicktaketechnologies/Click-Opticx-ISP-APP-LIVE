@@ -17,6 +17,10 @@ const telemetryController = require('./controllers/telemetryController');
 const logger = require('./utils/logger');
 const oltRealRoutes = require('./routes/oltRealRoutes');
 const mikrotikRoutes = require('./routes/mikrotikRoutes');
+const automationRoutes = require('./routes/automationRoutes');
+const authRoutes = require('./routes/auth');
+const livePoller = require('./jobs/livePoller');
+const notificationEngine = require('./services/notificationEngine');
 const kycRoutes = require('./routes/kyc');
 const cloudRoutes = require('./routes/cloud');
 
