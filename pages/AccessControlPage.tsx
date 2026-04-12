@@ -7,7 +7,7 @@ import {
   Shield, Unlock, Lock,
   ShieldAlert, Circle, Clock, Eye, EyeOff, Key,
   Users, ShieldCheck, Settings, Mail, Fingerprint,
-  Check, Ban, Pencil, Trash2, Activity, LayoutDashboard, Brain, Mic, FileAudio, FileText, Terminal, Bell, Monitor, Server, Map, UserCircle, Smartphone, Briefcase, Receipt, CreditCard, Flame, Wallet, Landmark, Zap, Layers, FileInput, Archive, UserCheck, Globe, Headphones, RefreshCw, ChevronRight, Sparkles, ClipboardList
+  Check, Ban, Pencil, Trash2, Activity, LayoutDashboard, Brain, Mic, FileAudio, FileText, Terminal, Bell, Monitor, Server, Map, UserCircle, Smartphone, Briefcase, Receipt, CreditCard, Flame, Wallet, Landmark, Zap, Layers, FileInput, Archive, UserCheck, Globe, Headphones, RefreshCw, ChevronRight, Sparkles, ClipboardList, Info
 } from 'lucide-react';
 import { Modal } from '../components/shared/Modal';
 

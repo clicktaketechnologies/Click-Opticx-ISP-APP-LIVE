@@ -52,7 +52,7 @@ const MODULE_METADATA: Record<string, { label: string; icon: any }> = {
   'archive': { label: 'Vault Archives', icon: Archive },
   'staff': { label: 'Personnel Registry', icon: UserCheck },
   'permissions': { label: 'Matrix Governance', icon: ShieldAlert },
-  'business-settings': { label: 'Core Identity', Globe },
+  'business-settings': { label: 'Core Identity', icon: Globe },
   'about-us': { label: 'Brand Story', icon: Info },
   'tasks': { label: 'Mission Control', icon: ClipboardList },
   'tickets': { label: 'Support Handlers', icon: Headphones },
