@@ -276,6 +276,7 @@ const Dashboard: React.FC<{
           { label: 'Total Users', value: globalStats.totalUsers.toLocaleString(), trend: '+2.5%', icon: Users, grad: 'var(--grad-primary)', sub: 'Cumulative Growth' },
           { label: 'Active Subscribers', value: globalStats.activeSubs.toLocaleString(), trend: '+1.2%', icon: Activity, grad: 'var(--grad-success)', sub: 'Live Connections' },
           { label: 'Revenue (Period)', value: `${state.settings.currency} ${globalStats.periodRevenue.toLocaleString()}`, trend: '+12%', icon: DollarSign, grad: 'var(--grad-info)', sub: 'Gross Invoiced' },
+          { label: 'Operational Profit', value: `${state.settings.currency} ${globalStats.periodProfit.toLocaleString()}`, trend: `${((globalStats.periodProfit / (globalStats.periodRevenue || 1)) * 100).toFixed(1)}%`, icon: Banknote, grad: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', sub: 'Reseller Chain Income' },
           { label: 'Pending KYC', value: state.kycRequests.filter(r => r.status === 'Pending').length, trend: '-5%', icon: ShieldCheck, grad: 'var(--grad-violet)', sub: 'Verification Queue' },
         ].map((kpi, idx) => (
           <div key={idx} className="card relative transition-all overflow-hidden border-none shadow-2xl hover:scale-[1.02] active:scale-95 group" style={{ backgroundImage: kpi.grad }}>

@@ -5137,8 +5137,14 @@ class DB {
         return d >= start && d <= end && i.type === 'Activation';
       })
       .reduce((acc, i) => acc + i.totalAmount, 0);
+    const periodProfit = this.state.ledger
+      .filter(l => {
+        const d = new Date(l.timestamp);
+        return d >= start && d <= end && l.id.endsWith('-PROFIT');
+      })
+      .reduce((acc, l) => acc + l.amount, 0);
 
-    return { todayCollection, periodCollection, totalUnpaidBalance, activationRevenue };
+    return { todayCollection, periodCollection, totalUnpaidBalance, activationRevenue, periodProfit };
   }
 
   async bulkSetAccountStatus(userIds: string[], status: UserStatus, note: string, expiryDate?: string, onProgress?: (current: number, total: number, itemName: string) => void) {
