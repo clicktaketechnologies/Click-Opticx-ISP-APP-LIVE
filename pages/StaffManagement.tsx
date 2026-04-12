@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { AppState, Role, StaffUser } from '../types';
 import { db } from '../db';
-import { UserCheck, Plus, Shield, Search, X, Edit, Power, ShieldAlert, Users, Lock, UserPlus, Key, BadgeCheck } from 'lucide-react';
+import { UserCheck, Plus, Shield, Search, X, Edit, Power, ShieldAlert, Users, Lock, UserPlus, Key, BadgeCheck, Activity } from 'lucide-react';
 import { Modal } from '../components/shared/Modal';
 
 const StaffManagement: React.FC<{ state: AppState }> = ({ state }) => {

@@ -1,6 +1,8 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
+const path = require('path');
+const fs = require('fs');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -19,15 +21,30 @@ const automationRoutes = require('./routes/automationRoutes');
 const authRoutes = require('./routes/auth');
 const livePoller = require('./jobs/livePoller');
 const notificationEngine = require('./services/notificationEngine');
+const connectDB = require('./utils/mongoDb');
+const kycRoutes = require('./routes/kyc');
+const cloudRoutes = require('./routes/cloud');
 
 const app = express();
 const server = http.createServer(app);
+
+// Initialize Directories
+const uploadDir = path.join(__dirname, 'uploads/kyc');
+if (!fs.existsSync(uploadDir)){
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
 const io = socketIo(server, {
     cors: {
         origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
         methods: ['GET', 'POST']
     }
 });
+
+// Initialize MongoDB
+connectDB();
+
+// Make io accessible in req
+app.set('socketio', io);
 
 // --- Firebase Admin Initialization ---
 try {
@@ -97,6 +114,8 @@ app.use('/api/automation', automationRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/health-monitor', healthRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/kyc', kycRoutes);
+app.use('/api/cloud', cloudRoutes);
 
 // --- Push Notification API ---
 app.post('/api/push-notify', async (req, res) => {

@@ -152,7 +152,9 @@ export enum Role {
   FIELD_AGENT = 'FieldAgent',
   TEAM_MEMBER = 'TeamMember',
   VIEWER = 'Viewer',
+  FRANCHISE = 'Franchise',
   DEALER = 'Dealer',
+  SUB_DEALER = 'SubDealer',
   SUPPORT_EXECUTIVE = 'SupportExecutive',
   CASHIER = 'CASHIER',
   CUSTOMER = 'Customer'
@@ -524,8 +526,8 @@ export interface ISPUser {
   kyc_attempt_count?: number;
   lastKYCUpdate?: string;
   requiredRevisionDocs?: number;
+  resellerEmail?: string; // Email of the direct reseller (Franchise/Dealer/SubDealer) who manages this user
 }
-
 
 
 export interface KYCDocument {
@@ -978,11 +980,28 @@ export interface AppState {
   passwordRequests: PasswordResetRequest[];
   networkNodes: NetworkNode[];
   kycRequests: KYCRequest[];
+  kycFiles: KYCFile[];
+  cloudAccounts: CloudAccount[];
+  cloudTransferLogs: CloudTransferLog[];
 
   networkMappings: NetworkMapping[];
   aiCallLogs: AICallLog[];
   aiCallRules: AICallRule[];
   hotspotTokens: HotspotToken[];
+
+  // System & Infrastructure
+  systemSnapshots: SystemSnapshot[];
+  deploymentLogs: DeploymentLog[];
+  maintenanceMode: boolean;
+  systemVersion: number;
+  lastUpdateDate: string;
+  requiredKycDocs: number;
+  autoCloudSync: boolean;
+  aiAgentEnabled: boolean;
+  lastGlobalWipe?: string;
+  activeProvider: AuthProvider | null;
+  authProviders: AuthProvider[];
+  authLogs: AuthLog[];
 
   // Communication Hub
   emailCampaigns: EmailCampaign[];
@@ -1008,11 +1027,22 @@ export interface AppState {
   flashLogs: FlashLog[];
   speedTestHistory: SpeedTestResult[];
   missingData: MissingDataNode[];
-  authProviders: AuthProvider[];
-  authLogs: AuthLog[];
+}
+
+export interface ResellerPackageConfig {
+  packageId: string;
+  // The price at which THIS reseller sells DOWN to the next tier (or to subscribers if bottom tier).
+  // Each tier sets this independently — prices CAN increase as you go down the chain.
+  // e.g. Admin→Franchise: 1400 | Franchise→Dealer: 1600 | Dealer→SubDealer: 1800 | Customer pays: 1800
+  resalePrice: number;
+  // The commission this tier retains when their downstream activates this package.
+  // wholesaleCost (paid to upline) = resalePrice - profitMargin
+  // e.g. profitMargin=200, resalePrice=1600 → pays 1400 up, keeps 200
+  profitMargin: number;
 }
 
 export interface StaffUser {
+  id?: string;
   email: string;
   name: string;
   role: Role;
@@ -1021,6 +1051,9 @@ export interface StaffUser {
   balance?: number;
   dealerCode?: string;
   lastActive?: string;
+  parentId?: string; // Links Dealer -> Franchise, SubDealer -> Dealer
+  creatorAdminId?: string; // SuperAdmin or whoever originally created them
+  packageConfigs?: ResellerPackageConfig[]; // The prices/profits set for this specific reseller
 }
 
 export interface PaymentRecord {
@@ -1444,44 +1477,6 @@ export interface CloudTransferLog {
   error?: string;
 }
 
-export interface AppState {
-  // ... existing fields ...
-  currentUser: StaffUser | null;
-  originalAdminUser: StaffUser | null;
-  isImpersonating: boolean;
-  connectionStatus: string;
-  activeProvider: AuthProvider | null;
-  authProviders: AuthProvider[];
-  authLogs: AuthLog[];
-  kycRequests: KYCRequest[];
-  topupRequests: TopupRequest[];
-  packageRequests: PackageRequest[];
-  billingLogs: BillingLog[];
-  systemLogs: SystemLog[];
-  notifications: AppNotification[];
-  users: (User | StaffUser)[];
-  staff: StaffUser[];
-  roles: any[];
-  settings: SystemSettings;
-  packages: ISPPackage[];
-  tickets: SupportTicket[];
-  tasks: Task[];
-  archive: ArchiveRecord[];
-  signupRequests: SignupRequest[];
-  auditLogs: AuditLog[];
-  lastGlobalWipe?: string;
-  aiAgentEnabled: boolean;
-  autoCloudSync: boolean;
-  requiredKycDocs: number;
-  systemVersion: number;
-  lastUpdateDate: string;
-  systemSnapshots: SystemSnapshot[];
-  deploymentLogs: DeploymentLog[];
-  maintenanceMode: boolean;
-  cloudAccounts: CloudAccount[];
-  cloudTransferLogs: CloudTransferLog[];
-  kycFiles: KYCFile[];
-}
 
 export interface SystemSnapshot {
   id: string;
@@ -1561,6 +1556,7 @@ export interface NASConfig {
   activeUsers?: number;
   hardwareModel: 'MIKROTIK_HEX_GR3' | 'MIKROTIK_OTHER' | 'OLT_1PON' | 'OLT_OTHER' | 'GENERIC';
   maxCapacity: number;
+  apiEnabled: boolean;       // Field 4: API On/Off — enable to see user graphs & disconnect via API
   hotspotUrlMode: 'IP' | 'DOMAIN';
   customHotspotUrl?: string;
   hotspotPort?: number;

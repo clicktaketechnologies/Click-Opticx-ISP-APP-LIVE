@@ -31,7 +31,7 @@ const Dashboard: React.FC<{
   const [entityFilter, setEntityFilter] = useState<'all' | 'users' | 'dealers'>('all');
 
   const currentUser = state.currentUser;
-  const isDealer = currentUser?.role === Role.DEALER;
+  const isReseller = [Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(currentUser?.role as Role);
 
   const branding = state?.settings?.branding;
   const logo = branding?.logoLight || branding?.logoSquare;
@@ -60,12 +60,12 @@ const Dashboard: React.FC<{
       startDate = new Date(d.setDate(d.getDate() - filterDays));
     }
 
-    const dealerEmails = new Set(state.staff.filter(s => s.role === Role.DEALER).map(s => s.email));
+    const resellerEmails = new Set(state.staff.filter(s => [Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(s.role as Role)).map(s => s.email));
 
     const periodInvoices = state.invoices.filter(i => {
       const d = new Date(i.createdAt);
       const dateMatch = d >= startDate && d <= endDate;
-      const isDlr = dealerEmails.has(String(i.userId));
+      const isDlr = resellerEmails.has(String(i.userId));
       const entityMatch = entityFilter === 'all' ||
         (entityFilter === 'users' && !isDlr) ||
         (entityFilter === 'dealers' && isDlr);
@@ -75,7 +75,7 @@ const Dashboard: React.FC<{
     const periodPayments = state.payments.filter(p => {
       const d = new Date(p.timestamp);
       const dateMatch = d >= startDate && d <= endDate;
-      const isDlr = dealerEmails.has(p.userId);
+      const isDlr = resellerEmails.has(p.userId);
       const collectorMatch = collectorFilter === 'All' || p.collectorEmail === collectorFilter;
       const entityMatch = entityFilter === 'all' ||
         (entityFilter === 'users' && !isDlr) ||
@@ -97,7 +97,7 @@ const Dashboard: React.FC<{
       expiring1d: dashboardMetrics.expiring1d,
       expiring3d: dashboardMetrics.expiring3d,
       expiring1w: dashboardMetrics.expiring1w,
-      activeDealers: entityFilter === 'users' ? 0 : state.staff.filter(s => s.role === Role.DEALER && s.status === 'Active').length,
+      activeDealers: entityFilter === 'users' ? 0 : state.staff.filter(s => [Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(s.role as Role) && s.status === 'Active').length,
       periodRevenue: periodInvoices.reduce((acc, i) => acc + i.totalAmount, 0),
       periodRecovery: periodPayments.reduce((acc, p) => acc + p.amount, 0),
       ...db.getFiscalSummary(startDate, endDate)
@@ -121,7 +121,7 @@ const Dashboard: React.FC<{
     }
 
     const data = [];
-    const dealerEmails = new Set(state.staff.filter(s => s.role === Role.DEALER).map(s => s.email));
+    const resellerEmails = new Set(state.staff.filter(s => [Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(s.role as Role)).map(s => s.email));
 
     for (let i = 0; i < diffDays; i++) {
       const d = new Date(startDate);
@@ -130,14 +130,14 @@ const Dashboard: React.FC<{
 
       const dayInv = state.invoices.filter(inv => {
         const dateMatch = inv.createdAt.startsWith(dayStr);
-        const isDlr = dealerEmails.has(inv.userId);
+        const isDlr = resellerEmails.has(inv.userId);
         const entityMatch = entityFilter === 'all' || (entityFilter === 'users' && !isDlr) || (entityFilter === 'dealers' && isDlr);
         return dateMatch && entityMatch;
       }).reduce((acc, inv) => acc + inv.totalAmount, 0);
 
       const dayRec = state.payments.filter(p => {
         const dateMatch = p.timestamp.startsWith(dayStr);
-        const isDlr = dealerEmails.has(p.userId);
+        const isDlr = resellerEmails.has(p.userId);
         const collectorMatch = collectorFilter === 'All' || p.collectorEmail === collectorFilter;
         const entityMatch = entityFilter === 'all' || (entityFilter === 'users' && !isDlr) || (entityFilter === 'dealers' && isDlr);
         return dateMatch && collectorMatch && entityMatch && p.status === 'Approved';
@@ -152,9 +152,9 @@ const Dashboard: React.FC<{
     return data;
   }, [state.invoices, state.staff, state.payments, dateFilter, customStartDate, customEndDate, collectorFilter, entityFilter]);
 
-  if (isDealer) {
-    const dealerUser = currentUser as StaffUser;
-    const personalInvoices = state.invoices.filter(i => i.userId === dealerUser.email).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  if (isReseller) {
+    const resellerUser = currentUser as StaffUser;
+    const personalInvoices = state.invoices.filter(i => i.userId === resellerUser.email).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return (
       <div className="space-y-8 animate-in fade-in duration-500 pb-12">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -176,7 +176,7 @@ const Dashboard: React.FC<{
           <div className="flex gap-4 p-4 bg-white rounded-3xl border border-slate-100 shadow-sm">
             <div className="text-right">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Partner Account Code</p>
-              <p className="text-lg font-black text-purple-600 uppercase italic">{dealerUser.dealerCode || 'N/A'}</p>
+              <p className="text-lg font-black text-purple-600 uppercase italic">{resellerUser.dealerCode || 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -189,7 +189,7 @@ const Dashboard: React.FC<{
                 Available Balance
               </p>
               <h3 className="text-5xl font-black text-green-400 tracking-tighter">
-                {state.settings.currency} {(dealerUser.balance || 0).toLocaleString()}
+                {state.settings.currency} {(resellerUser.balance || 0).toLocaleString()}
               </h3>
               <div className="pt-6 border-t border-white/5 flex justify-between items-center">
                 <div>

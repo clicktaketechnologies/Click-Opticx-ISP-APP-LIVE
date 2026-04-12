@@ -8,6 +8,17 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       host: 'localhost',
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5001',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/socket.io': {
+            target: 'http://localhost:5001',
+            ws: true,
+        },
+      }
     },
     plugins: [react()],
     define: {

@@ -13,11 +13,15 @@ import {
 } from 'recharts';
 import { Modal } from '../components/shared/Modal';
 
-const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
+const ResellerManagement: React.FC<{ state: AppState }> = ({ state }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoadModalOpen, setIsLoadModalOpen] = useState(false);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [selectedDealer, setSelectedDealer] = useState<StaffUser | null>(null);
+  const [modifyingPackageId, setModifyingPackageId] = useState('');
+  const [modifyingPrice, setModifyingPrice] = useState(0);
+  const [modifyingProfit, setModifyingProfit] = useState(0);
   
   // Filtering state
   const [timeFilter, setTimeFilter] = useState<'this_month' | 'last_month' | 'all'>('this_month');
@@ -37,14 +41,9 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
     dueDate: ''
   });
 
-  const dealers = useMemo(() => {
-    return state.staff.filter(s => s.role === Role.DEALER && 
-      (s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-       s.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       (s.dealerCode && s.dealerCode.toLowerCase().includes(searchTerm.toLowerCase()))));
-  }, [state.staff, searchTerm]);
+  const dealers = useMemo(() => { return state.staff.filter(s => { if (state.currentUser?.role === Role.SUPER_ADMIN || state.currentUser?.role === Role.ADMIN) { return [Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(s.role as Role); } return s.parentId === state.currentUser?.id; }).filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.email.toLowerCase().includes(searchTerm.toLowerCase()) || (s.dealerCode && s.dealerCode.toLowerCase().includes(searchTerm.toLowerCase()))); }, [state.staff, searchTerm, state.currentUser]);
 
-  const dealerEmails = useMemo(() => new Set(state.staff.filter(s => s.role === Role.DEALER).map(s => s.email)), [state.staff]);
+  const dealerEmails = useMemo(() => new Set(dealers.map(s => s.email)), [dealers]);
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -113,7 +112,11 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
       email: newDealer.email,
       name: newDealer.name,
       password: newDealer.password || 'superpass',
-      role: Role.DEALER,
+      role: state.currentUser?.role === Role.FRANCHISE ? Role.DEALER : state.currentUser?.role === Role.DEALER ? Role.SUB_DEALER : (state.currentUser?.role === Role.SUPER_ADMIN ? Role.FRANCHISE : Role.DEALER),
+
+      parentId: state.currentUser?.id,
+
+      creatorAdminId: state.currentUser?.id,
       status: 'Active',
       dealerCode: newDealer.dealerCode,
       balance: 0
@@ -125,10 +128,25 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
   const handleApplyLoad = async () => {
     if (!selectedDealer || loadData.amount <= 0) return;
-    await db.addDealerLoad(selectedDealer.email, loadData.amount, loadData.mode, loadData.dueDate);
+    const actorEmail = state.currentUser?.email || '';
+    await db.addResellerLoad(actorEmail, selectedDealer.email, loadData.amount, loadData.mode, loadData.dueDate);
     setIsLoadModalOpen(false);
     setLoadData({ amount: 0, mode: 'paid', dueDate: '' });
     setSelectedDealer(null);
+  };
+
+  const handleSavePackageConfig = async () => {
+    if (!selectedDealer || !modifyingPackageId) return;
+    await db.updateResellerPackageConfig(
+      selectedDealer.email,
+      modifyingPackageId,
+      modifyingPrice,
+      modifyingProfit
+    );
+    setIsPricingModalOpen(false);
+    setModifyingPackageId('');
+    setModifyingPrice(0);
+    setModifyingProfit(0);
   };
 
   return (
@@ -139,7 +157,7 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
             <Building2 className="text-purple-600" size={32} />
             Distribution Network
           </h2>
-          <p className="text-slate-500 font-medium">Manage authorized dealers, provision bandwidth credit, and track distributor balances.</p>
+          <p className="text-slate-500 font-medium">Manage authorized dealers, provision bandwidth credit, && track distributor balances.</p>
         </div>
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
           <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm overflow-x-auto shrink-0">
@@ -259,12 +277,22 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
             {dealers.map(dealer => (
               <div key={dealer.email} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-8 hover:shadow-md transition-all group overflow-hidden relative">
                 <div className="flex justify-between items-start mb-6 relative z-10">
-                    <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center border border-purple-100">
-                      <Briefcase size={28} />
+                    <div className="flex flex-col gap-2">
+                      <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center border border-purple-100">
+                        <Briefcase size={28} />
+                      </div>
+                      <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full self-start ${
+                        dealer.role === Role.FRANCHISE ? 'bg-purple-100 text-purple-700' :
+                        dealer.role === Role.DEALER ? 'bg-blue-100 text-blue-700' :
+                        'bg-teal-100 text-teal-700'
+                      }`}>
+                        {dealer.role === Role.FRANCHISE ? '★ Franchise' : dealer.role === Role.DEALER ? '◆ Dealer' : '● Sub-Dealer'}
+                      </span>
                     </div>
                     <div className="text-right">
                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Available Wallet</p>
                       <p className="text-2xl font-black text-green-600">Rs. {(dealer.balance || 0).toLocaleString()}</p>
+                      <p className="text-[9px] text-slate-400 font-bold mt-1">{(dealer.packageConfigs?.length || 0)} pkg configs</p>
                     </div>
                 </div>
 
@@ -278,6 +306,9 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         className="flex-1 py-3 bg-purple-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-purple-700 transition-all active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-purple-200"
                       >
                         <Zap size={14} /> Add Load
+                      </button>
+                      <button onClick={() => { setSelectedDealer(dealer); setIsPricingModalOpen(true); }} className="px-4 py-3 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 transition-all flex items-center gap-1 shadow-lg shadow-blue-200 active:scale-95">
+                        <TrendingUp size={14} /> Pricing
                       </button>
                       <button className="px-4 py-3 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all">
                         <History size={16} />
@@ -417,8 +448,104 @@ const DealerManagement: React.FC<{ state: AppState }> = ({ state }) => {
           </div>
         </div>
       </Modal>
+
+      {/* Pricing Configuration Modal */}
+      <Modal
+        isOpen={isPricingModalOpen && !!selectedDealer}
+        onClose={() => { setIsPricingModalOpen(false); setSelectedDealer(null); }}
+        title={`Set Package Pricing — ${selectedDealer?.name || ''}`}
+        type="form"
+        maxWidth="max-w-lg"
+        scrollable
+        onConfirm={handleSavePackageConfig}
+        confirmLabel="Save Pricing"
+        cancelLabel="Discard"
+      >
+        <div className="space-y-6 py-2">
+           <div className="space-y-1.5">
+             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Select Plan/Package</label>
+             <select 
+                className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-white outline-none focus:ring-2 focus:ring-blue-500/30"
+                value={modifyingPackageId}
+                onChange={e => {
+                   setModifyingPackageId(e.target.value);
+                   const existingConfig = selectedDealer?.packageConfigs?.find(c => c.packageId === e.target.value);
+                   if (existingConfig) {
+                      setModifyingPrice(existingConfig.resalePrice);
+                      setModifyingProfit(existingConfig.profitMargin);
+                   } else {
+                      const sysPkg = state.packages.find(p => p.id === e.target.value);
+                      setModifyingPrice(sysPkg ? sysPkg.price : 0);
+                      setModifyingProfit(0);
+                   }
+                }}
+             >
+                <option value="">-- Choose Package --</option>
+                {state.packages.map(pkg => (
+                   <option key={pkg.id} value={pkg.id}>{pkg.name} | Rs. {pkg.price} Base</option>
+                ))}
+             </select>
+           </div>
+           
+           {modifyingPackageId && (
+              <>
+                {/* Resale Price */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Resale Price — What <span className="text-white">{selectedDealer?.name}</span> charges to their customer/tier below
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-green-400 text-lg outline-none focus:ring-2 focus:ring-green-500/30"
+                    placeholder="e.g. 1800"
+                    value={modifyingPrice}
+                    onChange={e => setModifyingPrice(Number(e.target.value))}
+                  />
+                  <p className="text-[9px] text-slate-500 font-bold uppercase">This is the price the customer or tier below pays.</p>
+                </div>
+
+                {/* Profit Margin */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Commission — Profit <span className="text-white">{selectedDealer?.name}</span> keeps per activation
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full p-4 bg-slate-800/80 border border-slate-700 rounded-xl font-bold text-blue-400 text-lg outline-none focus:ring-2 focus:ring-blue-500/30"
+                    placeholder="e.g. 200"
+                    value={modifyingProfit}
+                    onChange={e => setModifyingProfit(Number(e.target.value))}
+                  />
+                </div>
+
+                {/* Live Breakdown */}
+                <div className="bg-slate-800/80 border border-slate-700 rounded-2xl p-5 space-y-3">
+                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-3">Activation Breakdown</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Customer / Tier Below Pays</span>
+                    <span className="text-sm font-black text-green-400">Rs. {modifyingPrice.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">Commission Kept by {selectedDealer?.name?.split(' ')[0]}</span>
+                    <span className="text-sm font-black text-blue-400">− Rs. {modifyingProfit.toLocaleString()}</span>
+                  </div>
+                  <div className="border-t border-slate-700 pt-3 flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-300 uppercase">Paid to Upline / Admin</span>
+                    <span className="text-lg font-black text-white">Rs. {Math.max(0, modifyingPrice - modifyingProfit).toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {modifyingProfit > modifyingPrice && (
+                  <div className="p-3 bg-rose-950/40 border border-rose-700/50 rounded-xl">
+                    <p className="text-[9px] font-black text-rose-400 uppercase">⚠ Commission cannot exceed the resale price. Adjust values.</p>
+                  </div>
+                )}
+              </>
+           )}
+        </div>
+      </Modal>
     </div>
   );
 };
 
-export default DealerManagement;
+export default ResellerManagement;

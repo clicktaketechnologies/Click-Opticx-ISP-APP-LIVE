@@ -326,6 +326,17 @@ const INITIAL_STATE: AppState = {
     { id: 'KF-001', user_id: 'USR-REC-1', userName: 'Ali', kyc_id: 'KYC123', file_name: 'CNIC.jpg', temp_path: '/temp/cnic_ali.jpg', status: 'TEMP', file_type: 'image/jpeg', size: 1024 * 500, created_at: new Date().toISOString() },
     { id: 'KF-002', user_id: 'USR-REC-2', userName: 'Ahmed', kyc_id: 'KYC124', file_name: 'Bill.pdf', temp_path: '/temp/bill_ahmed.pdf', status: 'TEMP', file_type: 'application/pdf', size: 1024 * 1200, created_at: new Date().toISOString() },
   ],
+  cloudAccounts: [],
+  cloudTransferLogs: [],
+  systemSnapshots: [],
+  deploymentLogs: [],
+  maintenanceMode: false,
+  systemVersion: 900,
+  lastUpdateDate: new Date().toISOString(),
+  requiredKycDocs: 10,
+  autoCloudSync: false,
+  aiAgentEnabled: false,
+  activeProvider: null,
   users: [
     { 
       id: 'USR-REC-1', 
@@ -987,7 +998,6 @@ class DB {
             this.state.discoveredOnus.unshift({ ...data, detectedAt: new Date().toISOString() });
         }
 
-        if (!this.state.nocAlerts) this.state.nocAlerts = [];
         this.state.nocAlerts.unshift({
           id: `DSC-${Date.now()}`,
           title: 'Plug & Play: New ONU',
@@ -997,6 +1007,19 @@ class DB {
           category: 'Network',
           metadata: data
         });
+        this.notify();
+      });
+
+      this.socket.on('kyc_uploaded', (newKyc: any) => {
+        if (!this.state.kycFiles) this.state.kycFiles = [];
+        this.state.kycFiles.unshift(newKyc);
+        this.notify();
+      });
+
+      this.socket.on('file_moved', (updatedKyc: any) => {
+        if (this.state.kycFiles) {
+          this.state.kycFiles = this.state.kycFiles.map(f => f.id === updatedKyc.id ? updatedKyc : f);
+        }
         this.notify();
       });
 
@@ -2528,6 +2551,31 @@ class DB {
          this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) + totalCost;
       }
 
+      // =====================================================
+      // RESELLER PROFIT DISTRIBUTION ENGINE
+      // Fires when a user has a managing reseller (resellerEmail or dealerId)
+      // =====================================================
+      if (pkg) {
+        const user = this.state.users[uIdx];
+        const resellerEmail = user.resellerEmail;
+        
+        if (resellerEmail) {
+          // PROFIT ENGINE — fire-and-forget, non-blocking
+          // Each reseller tier independently uses its own packageConfig:
+          //   resalePrice = what this tier charges DOWN the chain (retail to the level below)
+          //   profitMargin = what this tier KEEPS
+          //   wholesaleCost = resalePrice - profitMargin = what this tier pays UP to its parent
+          // Example:
+          //   Admin sets Franchise: resalePrice=1400, profitMargin=200 → Franchise pays 1200 to Admin
+          //   Franchise sets Dealer: resalePrice=1600, profitMargin=200 → Dealer pays 1400 to Franchise
+          //   Dealer sets SubDealer: resalePrice=1800, profitMargin=200 → SubDealer pays 1600 to Dealer
+          //   Customer pays SubDealer: 1800
+          this.distributeResellerProfit(resellerEmail, pkgId, user.name).catch(e => {
+            console.error('[PROFIT-ENGINE] Distribution failed:', e);
+          });
+        }
+      }
+
       // NAS Simulation Intercept
       if (this.state.settings.nasSystemEnabled && this.state.users[uIdx].managementMode === 'NAS_Controlled') {
         if (this.state.users[uIdx].routerId) {
@@ -2984,6 +3032,204 @@ class DB {
   }
 
   async reorderTasks(t: any[]) { this.state.tasks = t; await this.commit(); return { success: true }; }
+
+  // =====================================================
+  // RESELLER PROFIT DISTRIBUTION ENGINE
+  // Recursively walks UP the parent chain from a reseller.
+  //
+  // PRICING MODEL (Independent per tier):
+  //   Each tier sets their OWN packageConfig independently:
+  //   - resalePrice = what this tier charges to the level below them
+  //   - profitMargin = what this tier retains as commission
+  //   - wholesaleCost = resalePrice - profitMargin = what this tier pays to their parent
+  //
+  //   Example flow for a 3-level chain:
+  //   Admin sets Franchise:    resalePrice=1400, profitMargin=200 → Franchise pays 1200 to Admin
+  //   Franchise sets Dealer:   resalePrice=1600, profitMargin=200 → Dealer pays 1400 to Franchise
+  //   Dealer sets SubDealer:   resalePrice=1800, profitMargin=200 → SubDealer pays 1600 to Dealer
+  //   Customer pays SubDealer: 1800 (retail price)
+  //
+  //   The parent at each level uses THEIR OWN config, NOT what the child paid.
+  //   This is what allows prices to increase down the chain.
+  // =====================================================
+  async distributeResellerProfit(resellerEmail: string, pkgId: string, subscriberName: string, depth: number = 0): Promise<void> {
+    if (depth > 10) {
+      console.warn('[PROFIT-ENGINE] Max depth reached. Stopping chain.');
+      return;
+    }
+
+    const resellerIdx = this.state.staff.findIndex(s => s.email === resellerEmail);
+    if (resellerIdx === -1) {
+      console.log(`[PROFIT-ENGINE] Reseller ${resellerEmail} not found. Chain end.`);
+      return;
+    }
+
+    const reseller = this.state.staff[resellerIdx];
+    // Each tier uses THEIR OWN config — independent of what the tier below paid
+    const config = reseller.packageConfigs?.find(c => c.packageId === pkgId);
+
+    const timestamp = new Date().toISOString();
+    const txId = `PROFIT-${Date.now()}-${depth}`;
+
+    if (config) {
+      // wholesaleCost = what THIS tier pays UP to its parent
+      // profit        = what THIS tier retains
+      const wholesaleCost = config.resalePrice - config.profitMargin;
+      const profit = config.profitMargin;
+
+      // 1. Deduct what this tier owes to its upline
+      this.state.staff[resellerIdx].balance = (reseller.balance || 0) - wholesaleCost;
+      this.state.ledger.push({
+        id: txId + '-DEBIT',
+        userId: resellerEmail,
+        amount: wholesaleCost,
+        type: LedgerType.DEBIT,
+        timestamp,
+        description: `Upline Remittance — ${subscriberName} pkg activation (paid Rs.${wholesaleCost} up)`,
+        balanceAfter: this.state.staff[resellerIdx].balance,
+        method: 'Reseller Chain'
+      });
+
+      // 2. Credit this tier's commission (retained profit)
+      if (profit > 0) {
+        this.state.staff[resellerIdx].balance = (this.state.staff[resellerIdx].balance || 0) + profit;
+        this.state.ledger.push({
+          id: txId + '-PROFIT',
+          userId: resellerEmail,
+          amount: profit,
+          type: LedgerType.CREDIT,
+          timestamp,
+          description: `Commission Earned — ${subscriberName} | Retail Rs.${config.resalePrice} − Upline Rs.${wholesaleCost} = Profit Rs.${profit}`,
+          balanceAfter: this.state.staff[resellerIdx].balance,
+          method: 'Reseller Chain'
+        });
+      }
+
+      this.logNotification(resellerEmail, 'success', 'Activation Commission Credited',
+        `Rs. ${profit} earned from ${subscriberName}'s activation. Retail: Rs.${config.resalePrice} | Upline cost: Rs.${wholesaleCost}.`);
+
+      console.log(`[PROFIT-ENGINE] L${depth} | ${reseller.name} (${reseller.role}) | Retail: Rs.${config.resalePrice} | Profit: Rs.${profit} | Paid up: Rs.${wholesaleCost}`);
+
+      // 3. Recurse to parent — parent uses THEIR OWN config (not wholesaleCost)
+      if (reseller.parentId) {
+        const parentReseller = this.state.staff.find(s => s.id === reseller.parentId);
+        if (parentReseller) {
+          await this.distributeResellerProfit(parentReseller.email, pkgId, subscriberName, depth + 1);
+        }
+      }
+    } else {
+      // No config at this tier — skip profit/deduction, just recurse up
+      console.log(`[PROFIT-ENGINE] L${depth} | ${reseller.name} has no config for pkg ${pkgId}. Skipping, recurse up.`);
+      if (reseller.parentId) {
+        const parentReseller = this.state.staff.find(s => s.id === reseller.parentId);
+        if (parentReseller) {
+          await this.distributeResellerProfit(parentReseller.email, pkgId, subscriberName, depth + 1);
+        }
+      }
+    }
+  }
+
+  // =====================================================
+  // UPDATE RESELLER PACKAGE PRICING CONFIG
+  // Properly saves resalePrice + profitMargin for a package
+  // to a specific reseller's profile, persisting to Firestore.
+  // =====================================================
+  async updateResellerPackageConfig(resellerEmail: string, packageId: string, resalePrice: number, profitMargin: number) {
+    const idx = this.state.staff.findIndex(s => s.email === resellerEmail);
+    if (idx === -1) return { success: false, message: 'Reseller not found.' };
+
+    const currentConfigs = this.state.staff[idx].packageConfigs || [];
+    const filtered = currentConfigs.filter(c => c.packageId !== packageId);
+    filtered.push({ packageId, resalePrice, profitMargin });
+    this.state.staff[idx].packageConfigs = filtered;
+
+    // Notify reseller
+    this.logNotification(resellerEmail, 'info', 'Package Price Updated',
+      `Package plan pricing has been updated — Retail: Rs.${resalePrice}, Profit: Rs.${profitMargin}.`);
+
+    await this.commit(true);
+    this.notify();
+    return { success: true, message: 'Package pricing configuration saved.' };
+  }
+
+  // =====================================================
+  // ADD RESELLER LOAD (Balance Transfer)
+  // Admin or Parent Reseller tops up a child reseller's balance.
+  // If the actor is a Reseller (not Admin), their own balance is DEDUCTED.
+  // This enforces the financial integrity of the hierarchy.
+  // =====================================================
+  async addResellerLoad(actorEmail: string, targetEmail: string, amount: number, mode: 'paid' | 'credit' | 'pay_later', dueDate?: string) {
+    const targetIdx = this.state.staff.findIndex(s => s.email === targetEmail);
+    if (targetIdx === -1) return { success: false, message: 'Target reseller not found.' };
+
+    const actorIdx = this.state.staff.findIndex(s => s.email === actorEmail);
+    const isResellerActor = actorIdx !== -1 && [Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(this.state.staff[actorIdx].role as Role);
+
+    const timestamp = new Date().toISOString();
+    const loadId = 'RLOAD-' + Date.now();
+
+    // If actor is a reseller (not admin), deduct from their balance
+    if (isResellerActor && mode === 'paid') {
+      const actorBalance = this.state.staff[actorIdx].balance || 0;
+      if (actorBalance < amount) {
+        return { success: false, message: `Insufficient balance. Actor balance: Rs.${actorBalance}, Required: Rs.${amount}.` };
+      }
+      this.state.staff[actorIdx].balance = actorBalance - amount;
+      this.state.ledger.push({
+        id: loadId + '-ACTOR-DEBIT',
+        userId: actorEmail,
+        amount,
+        type: LedgerType.DEBIT,
+        timestamp,
+        description: `Balance Transfer to ${this.state.staff[targetIdx].name}`,
+        balanceAfter: this.state.staff[actorIdx].balance,
+        method: 'Reseller Transfer'
+      });
+    }
+
+    // Credit target reseller's balance
+    this.state.staff[targetIdx].balance = (this.state.staff[targetIdx].balance || 0) + amount;
+    this.state.ledger.push({
+      id: loadId + '-TARGET-CREDIT',
+      userId: targetEmail,
+      amount,
+      type: LedgerType.CREDIT,
+      timestamp,
+      description: `Balance Load from ${isResellerActor ? this.state.staff[actorIdx].name : 'Admin'} — ${mode.toUpperCase()}`,
+      balanceAfter: this.state.staff[targetIdx].balance,
+      method: 'Reseller Transfer'
+    });
+
+    // Log as invoice for audit trail
+    const inv: Invoice = {
+      id: loadId,
+      userId: targetEmail,
+      userName: this.state.staff[targetIdx].name,
+      packageId: 'RESELLER_LOAD',
+      packageName: 'Reseller Balance Top-Up',
+      items: [{ id: 'SVC-RLOAD', description: `Balance Load: ${mode.toUpperCase()} from ${isResellerActor ? actorEmail : 'Admin'}`, quantity: 1, unitPrice: amount, total: amount, category: 'Service' }],
+      subtotal: amount,
+      taxRate: 0,
+      taxAmount: 0,
+      discountAmount: 0,
+      totalAmount: amount,
+      paidAmount: mode === 'paid' ? amount : 0,
+      dueAmount: mode === 'paid' ? 0 : amount,
+      status: mode === 'paid' ? PaymentStatus.PAID : (PaymentStatus.UNPAID as any),
+      createdAt: timestamp,
+      dueDate: dueDate || timestamp,
+      notes: `Reseller Load: ${mode} | From: ${actorEmail}`
+    };
+    this.state.invoices.push(inv);
+
+    this.logNotification(targetEmail, 'success', 'Balance Credited',
+      `Rs. ${amount} has been loaded into your wallet by ${isResellerActor ? this.state.staff[actorIdx].name : 'System Admin'}.`);
+
+    await this.commit(true);
+    this.notify();
+    return { success: true, message: `Rs. ${amount} successfully loaded to ${this.state.staff[targetIdx].name}.` };
+  }
+
   async addDealerLoad(email: string, amount: number, mode: 'paid' | 'credit' | 'pay_later', dueDate?: string) {
     const staff = this.state.staff.find(s => s.email === email);
     if (!staff) return { success: false, message: 'Distributor not found.' };
@@ -5773,6 +6019,7 @@ class DB {
       lastCheck: new Date().toISOString(),
       hardwareModel: node.hardwareModel || 'GENERIC',
       maxCapacity: node.maxCapacity || 200,
+      apiEnabled: node.apiEnabled ?? false,
       hotspotUrlMode: node.hotspotUrlMode || 'IP',
       customHotspotUrl: node.customHotspotUrl || '',
       ...node

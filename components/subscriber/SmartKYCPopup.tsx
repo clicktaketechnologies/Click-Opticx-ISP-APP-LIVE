@@ -23,7 +23,8 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
     (user.isKYCSubmitted && user.verificationStatus === VerificationStatus.PENDING) ? 'pending_review' : 'methods'
   );
   const [method, setMethod] = useState<KYCMethod | null>(null);
-  const [files, setFiles] = useState<{ front?: string; back?: string; selfie?: string; document?: string }>({});
+  const [files, setFiles] = useState<{ front?: File; back?: File; selfie?: File; document?: File }>({});
+  const [previews, setPreviews] = useState<{ front?: string; back?: string; selfie?: string; document?: string }>({});
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,9 +38,13 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && activeSide) {
+      // Store the actual file object for real upload
+      setFiles(prev => ({ ...prev, [activeSide]: file }));
+      
+      // Also generate a preview for the UI
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFiles(prev => ({ ...prev, [activeSide]: reader.result as string }));
+        setPreviews(prev => ({ ...prev, [activeSide]: reader.result as string }));
         setActiveSide(null);
       };
       reader.readAsDataURL(file);
@@ -72,23 +77,32 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
     setStep('processing');
 
     try {
-      // PHASE 1: Cloud Handshake Simulation
-      await new Promise(resolve => setTimeout(resolve, 2500)); // Visual pause for the animation
+      const formData = new FormData();
+      formData.append('userId', user.id);
+      formData.append('userName', user.name);
+      formData.append('method', method);
 
-      const fileArray = Object.values(files).filter(Boolean) as string[];
-      // If method is LIVE_SCAN, pass files.selfie as the dedicated faceData argument
-      const res = await db.submitKYC(
-        user.id, 
-        method, 
-        fileArray, 
-        undefined, 
-        method === KYCMethod.LIVE_SCAN ? files.selfie : undefined
-      );
+      if (files.front) formData.append('files', files.front);
+      if (files.back) formData.append('files', files.back);
+      if (files.document) formData.append('files', files.document);
+      if (files.selfie) formData.append('files', files.selfie);
+
+      const res = await fetch('/api/kyc/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
       
-      if (res.success) {
+      if (data.success) {
+        await db.updateUser(user.id, {
+          isKYCSubmitted: true,
+          kyc_status: 'submitted',
+          verificationStatus: VerificationStatus.PENDING
+        });
         setStep('success');
+        if (onSuccess) onSuccess();
       } else {
-        setError(res.message || "Failed to submit KYC.");
+        setError(data.message || "Failed to submit KYC.");
         setStep('upload');
       }
     } catch (err: any) {
@@ -146,9 +160,9 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
                   <p className="text-xs font-bold text-slate-600">Please complete the face scan to verify your identity.</p>
                </div>
             </div>
-            {files.selfie ? (
+            {previews.selfie ? (
                <div className="relative aspect-video rounded-[2.5rem] overflow-hidden border-4 border-white shadow-2xl group">
-                  <img src={files.selfie} className="w-full h-full object-cover" />
+                  <img src={previews.selfie} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
                      <button 
                       onClick={() => setFiles(prev => ({ ...prev, selfie: undefined }))}
@@ -160,7 +174,17 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
                </div>
             ) : (
                <FaceScanner 
-                onCapture={(img) => setFiles(prev => ({ ...prev, selfie: img }))}
+                onCapture={(img) => {
+                  setPreviews(prev => ({ ...prev, selfie: img }));
+                  
+                  // Convert base64 to File object
+                  fetch(img)
+                    .then(res => res.blob())
+                    .then(blob => {
+                      const file = new File([blob], "selfie.png", { type: "image/png" });
+                      setFiles(prev => ({ ...prev, selfie: file }));
+                    });
+                }}
                 onCancel={() => { setMethod(null); setStep('methods'); }}
                />
             )}
@@ -172,12 +196,12 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
                 <div 
                   onClick={() => triggerUpload('front')}
                   className={`aspect-[1.6/1] rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all cursor-pointer overflow-hidden relative group ${
-                    files.front ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:border-blue-500 hover:bg-blue-50'
+                    previews.front ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:border-blue-500 hover:bg-blue-50'
                   }`}
                 >
-                  {files.front ? (
+                  {previews.front ? (
                     <>
-                      <img src={files.front} className="w-full h-full object-cover" />
+                      <img src={previews.front} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <RefreshCw className="text-white animate-spin" size={32} />
                       </div>
@@ -192,12 +216,12 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
                 <div 
                   onClick={() => triggerUpload('back')}
                   className={`aspect-[1.6/1] rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all cursor-pointer overflow-hidden relative group ${
-                    files.back ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:border-blue-500 hover:bg-blue-50'
+                    previews.back ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:border-blue-500 hover:bg-blue-50'
                   }`}
                 >
-                  {files.back ? (
+                  {previews.back ? (
                     <>
-                      <img src={files.back} className="w-full h-full object-cover" />
+                      <img src={previews.back} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <RefreshCw className="text-white animate-spin" size={32} />
                       </div>
@@ -216,12 +240,12 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
               <div 
                 onClick={() => triggerUpload('document')}
                 className={`aspect-[1.6/1] w-full rounded-[2.5rem] border-2 border-dashed flex flex-col items-center justify-center gap-6 transition-all cursor-pointer overflow-hidden relative group ${
-                  files.document ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:border-blue-500 hover:bg-blue-50'
+                  previews.document ? 'border-green-500 bg-green-50' : 'border-slate-200 hover:border-blue-500 hover:bg-blue-50'
                 }`}
               >
-                {files.document ? (
+                {previews.document ? (
                   <>
-                    <img src={files.document} className="w-full h-full object-cover" />
+                    <img src={previews.document} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <RefreshCw className="text-white animate-spin" size={32} />
                     </div>

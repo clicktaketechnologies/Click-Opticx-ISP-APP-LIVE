@@ -21,7 +21,7 @@ import Header from './components/Header';
 const PackagesPage = lazy(() => import('./pages/PackagesPage'));
 const ArchivePage = lazy(() => import('./pages/ArchivePage'));
 const AccessControlPage = lazy(() => import('./pages/AccessControlPage'));
-const DealerManagement = lazy(() => import('./pages/DealerManagement'));
+const ResellerManagement = lazy(() => import('./pages/ResellerManagement'));
 const PermissionsPage = lazy(() => import('./pages/PermissionsPage'));
 const DataImportPage = lazy(() => import('./pages/DataImportPage'));
 const DatabaseMonitor = lazy(() => import('./pages/DatabaseMonitor'));
@@ -446,6 +446,7 @@ const App: React.FC = () => {
                     case 'system-flash': return <SystemFlash state={dbState} />;
                     case 'system-config': return <SystemConfig />;
                     case 'system-readiness': return <SystemReadiness />;
+                    case 'reseller-management': return <ResellerManagement state={dbState} />;
                     case 'permissions': return <PermissionsPage state={dbState} />;
                     case 'import': return <DataImportPage state={dbState} />;
                     case 'monitor': return <DatabaseMonitor state={dbState} />;
@@ -467,7 +468,7 @@ const App: React.FC = () => {
                     case 'customer-360': return <CustomerPortal state={dbState} />;
                     case 'user-app': return <UserAppManagement state={dbState} />;
                     case 'wallet': return <WalletManagement state={dbState} />;
-                    case 'dealers': return <DealerManagement state={dbState} />;
+                    case 'dealers': return <ResellerManagement state={dbState} />;
                     case 'emergency-load': return <EmergencyLoadAdmin state={dbState} />;
                     case 'connection-setup': return <ConnectionSetupAdmin state={dbState} />;
                     case 'tickets': return <TicketManagementAdmin state={dbState} />;

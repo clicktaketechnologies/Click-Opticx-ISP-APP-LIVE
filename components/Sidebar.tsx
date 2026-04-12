@@ -149,7 +149,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
         {
           id: 'group-partners', label: 'Partners', icon: Building2,
           items: [
-            { id: 'dealers', label: 'Dealers / Partners', icon: Building2 }
+            { id: 'reseller-management', label: 'Reseller Network', icon: Building2 }
           ]
         }
       ]
@@ -242,6 +242,8 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
     if (role === Role.FINANCE_ADMIN && ['approval-desk', 'wallet', 'recovery', 'accounting', 'invoice-engine', 'invoice-management', 'gateway-settings', 'emergency-load'].includes(id)) return true;
     if (role === Role.SUPPORT_ADMIN && ['approval-desk', 'customer-360', 'user-app', 'tickets', 'about-us', 'admin-password-requests', 'notification-control', 'comm-templates', 'admin-user-devices'].includes(id)) return true;
     if (role === Role.NETWORK_ADMIN && ['admin-live-monitoring', 'admin-devices', 'admin-device-mapping', 'connection-setup', 'about-us', 'system-readiness', 'noc-dashboard', 'olt-management', 'nas-management', 'system-config'].includes(id)) return true;
+    if ([Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(role as Role) && ['dashboard', 'users', 'customer-360', 'packages', 'tickets', 'wallet', 'accounting', 'invoice-management', 'reseller-management'].includes(id)) return true;
+    
     if (['tasks', 'about-us'].includes(id)) return true;
     return false;
   };

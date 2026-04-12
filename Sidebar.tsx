@@ -108,7 +108,8 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       items: [
         { id: 'packages', label: 'Connectivity Catalog', icon: Layers, roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
         { id: 'auth-control', label: 'Security Gate', icon: Lock, roles: [Role.SUPER_ADMIN, Role.ADMIN] },
-        { id: 'staff', label: 'Personnel Registry', icon: ShieldAlert, roles: [Role.SUPER_ADMIN] },
+        { id: 'permissions', label: 'Matrix Governance', icon: ShieldAlert, roles: [Role.SUPER_ADMIN] },
+        { id: 'staff', label: 'Personnel Registry', icon: UserCheck, roles: [Role.SUPER_ADMIN] },
         { id: 'business-settings', label: 'Core Config', icon: Globe, roles: [Role.SUPER_ADMIN, Role.BUSINESS_ADMIN] },
       ]
     }

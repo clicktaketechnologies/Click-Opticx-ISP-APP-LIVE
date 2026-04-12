@@ -147,12 +147,12 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     try {
       const res = await db.healUserRegistry();
       if (res.success) {
-         notificationManager.success('Registry Integrity Pulse Complete', res.message);
+         db.logNotification('all', 'success', 'Registry Integrity Pulse Complete', `Successfully audited registry. ${res.recovered} ghost user nodes recovered.`);
       } else {
-         notificationManager.error('Integrity Protocol Error', res.message);
+         db.logNotification('all', 'error', 'Integrity Protocol Error', 'IRS Handshake failed or returned invalid state.');
       }
     } catch (err: any) {
-      notificationManager.error('System Fault', err.message || 'IRS Handshake failed.');
+      db.logNotification('all', 'error', 'System Fault', err.message || 'Critical failure in integrity protocol.');
     } finally {
       setIsRepairing(false);
     }
@@ -539,11 +539,12 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
             <thead>
               <tr className="!bg-slate-50 !border-b-2 !border-slate-100">
                 <th className="w-16 p-6"></th>
-                <th>Subscriber Identity</th>
-                <th className="text-center">Engine Access</th>
-                <th>Validation</th>
-                <th className="text-right">Ledger Status</th>
-                <th className="text-center pr-6">Mission Control</th>
+                <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Name / Username</th>
+                <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Package</th>
+                <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Seller</th>
+                <th className="text-right py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Balance</th>
+                <th className="text-center py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Expiry</th>
+                <th className="text-center py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -558,66 +559,72 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                    </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
-                  <tr key={user.id} className={`group transition-all ${selectedIds.has(user.id) ? 'bg-indigo-50/50' : 'hover:bg-slate-50/50'}`}>
+                filteredUsers.map((user) => (                  <tr key={user.id} className={`group transition-all ${selectedIds.has(user.id) ? 'bg-indigo-50/50' : 'hover:bg-slate-50/50'}`}>
                     <td className="p-6">
                        <button onClick={() => toggleSelect(user.id)} className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all ${selectedIds.has(user.id) ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'border-slate-100 text-slate-100 hover:border-slate-300'}`}>
                           {selectedIds.has(user.id) ? <CheckSquare size={16} /> : <div className="w-2 h-2 rounded-full bg-slate-100" />}
                        </button>
                     </td>
-                    <td>
+                    <td className="px-6 py-4">
                        <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm group-hover:scale-110 transition-all ${selectedIds.has(user.id) ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-600'}`}>
+                          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-xs group-hover:scale-110 transition-all ${selectedIds.has(user.id) ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-600'}`}>
                              {user.name.charAt(0)}
                           </div>
                           <div>
                              <p className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase italic">{user.name}</p>
-                             <p className="text-[9px] text-slate-400 font-black uppercase tracking-tighter mt-0.5">{user.phone} • {user.pppoeId || 'LNK_INTERNAL'}</p>
+                             <p className="text-[9px] text-slate-400 font-black uppercase tracking-tighter mt-0.5">@{user.username || 'N/A'}</p>
                           </div>
                        </div>
                     </td>
-                    <td className="text-center">
-                       <div className="flex flex-col items-center gap-1">
-                          <span className="text-[10px] font-black text-slate-900 uppercase italic tracking-tighter">{user.connectionId || 'N/A'}</span>
-                          <span className={`inline-flex items-center gap-1 text-[7px] font-black uppercase px-2 py-0.5 rounded-lg ${user.status === UserStatus.ACTIVE ? 'bg-emerald-50 text-emerald-600' : user.status === UserStatus.EXPIRED ? 'bg-rose-50 text-rose-600' : user.status === UserStatus.NO_PLAN ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-600'}`}>
-                              {user.status === UserStatus.ACTIVE ? <Circle size={6} fill="currentColor" className="animate-pulse" /> : user.status === UserStatus.EXPIRED ? <Ban size={8} /> : user.status === UserStatus.NO_PLAN ? <SearchCode size={8} /> : <Clock size={8} />}
-                              {user.status}
-                           </span>
-                          {user.expiryDate ? (
-                            <span className={`text-[7px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${new Date(user.expiryDate) < new Date() ? 'bg-rose-50 text-rose-500' : 'bg-sky-50 text-sky-600'}`}>
-                              {new Date(user.expiryDate) < new Date() ? '⚠ ' : '✓ '}
-                              {new Date(user.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}
-                            </span>
-                          ) : (
-                            <span className="text-[7px] font-bold text-slate-300 uppercase">No Expiry</span>
-                          )}
-                       </div>
+                    <td className="px-6 py-4">
+                       {(() => {
+                         const pkg = state.packages.find(p => p.id === user.packageId);
+                         return (
+                           <div className="flex flex-col">
+                              <span className="text-[11px] font-black text-slate-900 uppercase italic leading-none">{pkg?.name || 'No Plan'}</span>
+                              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter mt-1">{pkg?.speed || '0 Mbps'}</span>
+                           </div>
+                         );
+                       })()}
                     </td>
-                    <td>
-                       <div className="flex items-center gap-2">
-                          {user.verificationStatus === VerificationStatus.VERIFIED ? (
-                             <div className="flex items-center gap-2 font-black text-[9px] uppercase tracking-widest text-emerald-500">
-                                <ShieldCheck size={16} /> Secured
-                             </div>
-                          ) : (
-                             <div className="flex items-center gap-2 font-black text-[9px] uppercase tracking-widest text-amber-500">
-                                <ShieldAlert size={16} /> Audit
-                             </div>
-                          )}
-                       </div>
+                    <td className="px-6 py-4">
+                       {(() => {
+                         const seller = state.staff.find(s => s.email === user.dealerId || s.dealerCode === user.dealerId);
+                         return (
+                           <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center">
+                                 <User size={12} className="text-slate-400" />
+                              </div>
+                              <span className="text-[10px] font-black text-slate-600 uppercase italic">{seller?.name || user.dealerId || 'System'}</span>
+                           </div>
+                         );
+                       })()}
                     </td>
-                    <td className="text-right">
+                    <td className="px-6 py-4 text-right">
                        <p className={`text-sm font-black tabular-nums ${user.balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>Rs. {user.balance.toLocaleString()}</p>
-                       <p className={`text-[8px] font-black uppercase mt-1 tracking-widest ${user.balance > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{user.balance > 0 ? 'Pending Balance' : 'Cleared'}</p>
-                       {user.lastPaymentDate && <p className="text-[7px] font-bold text-slate-300 mt-0.5">Last: {new Date(user.lastPaymentDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</p>}
+                       <span className={`inline-flex items-center gap-1 text-[7px] font-black uppercase px-2 py-0.5 rounded-lg ${user.status === UserStatus.ACTIVE ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                          {user.status}
+                       </span>
                     </td>
-                    <td className="text-center pr-6">
+                    <td className="px-6 py-4 text-center">
+                        {user.expiryDate ? (
+                          <div className="flex flex-col items-center">
+                             <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-xl shadow-sm ${new Date(user.expiryDate) < new Date() ? 'bg-rose-50 text-rose-500 border border-rose-100' : 'bg-sky-50 text-sky-600 border border-sky-100'}`}>
+                               {new Date(user.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                             </span>
+                             <span className="text-[7px] font-bold text-slate-300 uppercase mt-1">{new Date(user.expiryDate).toLocaleDateString('en-GB', { year: 'numeric' })}</span>
+                          </div>
+                        ) : (
+                          <span className="text-[9px] font-black text-slate-300 uppercase italic">Infinite</span>
+                        )}
+                    </td>
+                    <td className="px-6 py-4 text-center">
                        <div className="flex items-center justify-center gap-1.5">
-                          <button onClick={() => handleAction(user, 'view')} className="p-2.5 bg-blue-100 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm" title="Full 360 View"><Eye size={16}/></button>
-                          <button onClick={() => handleAction(user, 'edit')} className="p-2.5 bg-amber-100 hover:bg-amber-600 text-amber-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm" title="Dossier Edit"><Pencil size={16}/></button>
-                          <button onClick={() => handleAction(user, 'package')} className="p-2.5 bg-violet-100 hover:bg-violet-600 text-violet-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm" title="Service Provisioning"><PackageIcon size={16}/></button>
-                          <button onClick={() => handleAction(user, 'payment')} className="p-2.5 bg-emerald-100 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm" title="Collect Payment"><Banknote size={16}/></button>
-                          <button onClick={() => handleAction(user, 'emergency_auth')} className="p-2.5 bg-rose-100 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm" title="Emergency Auth Reset"><ShieldCheck size={16}/></button>
+                          <button onClick={() => handleAction(user, 'view')} className="p-2.5 bg-blue-100/50 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-blue-100" title="Full 360 View"><Eye size={14}/></button>
+                          <button onClick={() => handleAction(user, 'edit')} className="p-2.5 bg-amber-100/50 hover:bg-amber-600 text-amber-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-amber-100" title="Dossier Edit"><Pencil size={14}/></button>
+                          <button onClick={() => handleAction(user, 'package')} className="p-2.5 bg-violet-100/50 hover:bg-violet-600 text-violet-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-violet-100" title="Service Provisioning"><PackageIcon size={14}/></button>
+                          <button onClick={() => handleAction(user, 'payment')} className="p-2.5 bg-emerald-100/50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-emerald-100" title="Collect Payment"><Banknote size={14}/></button>
+                          <button onClick={() => handleAction(user, 'emergency_auth')} className="p-2.5 bg-rose-100/50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-rose-100" title="Emergency Auth Reset"><LockKeyhole size={14}/></button>
                        </div>
                     </td>
                   </tr>
@@ -675,10 +682,26 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                 <div className="space-y-6 mb-4">
                    <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">1. Your Basic Information</h4>
                    <div className="space-y-4">
-                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Full Name</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.name} onChange={e => setNewUserData({...newUserData, name: e.target.value})} /></div>
+                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Full Name</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.name} onChange={e => setNewUserData({...newUserData, name: e.target.value})} placeholder="e.g. John Doe" /></div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">CNIC Number</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.cnic} onChange={e => setNewUserData({...newUserData, cnic: e.target.value})} /></div>
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.phone} onChange={e => setNewUserData({...newUserData, phone: e.target.value})} /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">CNIC Number</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.cnic} onChange={e => setNewUserData({...newUserData, cnic: e.target.value})} placeholder="35201-0000000-0" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.phone} onChange={e => setNewUserData({...newUserData, phone: e.target.value})} placeholder="03XXXXXXXXX" /></div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Email Address</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.email} onChange={e => setNewUserData({...newUserData, email: e.target.value})} placeholder="john@example.com" /></div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Assigned Seller / Dealer</label>
+                          <select 
+                            className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900 appearance-none"
+                            value={newUserData.dealerId || ''}
+                            onChange={e => setNewUserData({...newUserData, dealerId: e.target.value})}
+                          >
+                            <option value="">System Default</option>
+                            {state.staff.filter(s => s.role === Role.DEALER || s.role === Role.ADMIN).map(s => (
+                              <option key={s.email} value={s.dealerCode || s.email}>{s.name} ({s.role})</option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                    </div>
                 </div>
@@ -701,12 +724,19 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
               );
               case 3: return (
                 <div className="space-y-6 mb-4">
-                   <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">3. Network Details</h4>
-                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">PPPoE Link ID</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.pppoeId} onChange={e => setNewUserData({...newUserData, pppoeId: e.target.value})} /></div>
-                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">NAS Identity</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.nasId} onChange={e => setNewUserData({...newUserData, nasId: e.target.value})} /></div>
-                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Network Station (OLT)</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.oltNode} onChange={e => setNewUserData({...newUserData, oltNode: e.target.value})} /></div>
-                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">VLAN Index</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.vlanId} onChange={e => setNewUserData({...newUserData, vlanId: e.target.value})} /></div>
+                   <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">3. Network & Location</h4>
+                   <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Area / Sector</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.area} onChange={e => setNewUserData({...newUserData, area: e.target.value})} placeholder="Main Sector" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Subarea / Block</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.subarea} onChange={e => setNewUserData({...newUserData, subarea: e.target.value})} placeholder="Block A" /></div>
+                      </div>
+                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Physical Address</label><textarea className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900 h-20" value={newUserData.address || ''} onChange={e => setNewUserData({...newUserData, address: e.target.value})} placeholder="House #, Street, etc." /></div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">PPPoE Link ID</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.pppoeId} onChange={e => setNewUserData({...newUserData, pppoeId: e.target.value})} /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">NAS Identity</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.nasId} onChange={e => setNewUserData({...newUserData, nasId: e.target.value})} /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Network Station (OLT)</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.oltNode} onChange={e => setNewUserData({...newUserData, oltNode: e.target.value})} /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">VLAN Index</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.vlanId} onChange={e => setNewUserData({...newUserData, vlanId: e.target.value})} /></div>
+                      </div>
                    </div>
                 </div>
               );
@@ -888,7 +918,6 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
         isLoading={isProcessing}
       >
          <div className="space-y-5 mb-4">
-            {/* Row 1: Identity */}
             <div>
                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 flex items-center gap-2"><UserCircle size={12}/> Identity</p>
                <div className="grid grid-cols-2 gap-3">
@@ -896,16 +925,29 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                   <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.phone} onChange={e => setEditUserData({...editUserData, phone: e.target.value})} /></div>
                   <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CNIC</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.cnic} onChange={e => setEditUserData({...editUserData, cnic: e.target.value})} /></div>
                   <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label><input type="email" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.email || ''} onChange={e => setEditUserData({...editUserData, email: e.target.value})} /></div>
+                  <div className="space-y-1 col-span-2">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Seller / Dealer</label>
+                     <select 
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 focus:border-indigo-400 outline-none transition-all appearance-none"
+                        value={editUserData.dealerId || ''}
+                        onChange={e => setEditUserData({...editUserData, dealerId: e.target.value})}
+                     >
+                        <option value="">System Default</option>
+                        {state.staff.filter(s => s.role === Role.DEALER || s.role === Role.ADMIN || s.role === Role.MANAGER).map(s => (
+                           <option key={s.email} value={s.dealerCode || s.email}>{s.name} ({s.role})</option>
+                        ))}
+                     </select>
+                  </div>
                </div>
             </div>
 
-            {/* Row 2: Network */}
             <div className="border-t border-slate-100 pt-5">
                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 flex items-center gap-2"><Zap size={12}/> Network Config</p>
                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Connection ID</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 font-mono focus:border-violet-400 outline-none transition-all" value={editUserData.connectionId || ''} onChange={e => setEditUserData({...editUserData, connectionId: e.target.value})} /></div>
                   <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PPPoE Username</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 font-mono focus:border-violet-400 outline-none transition-all" value={editUserData.pppoeId || ''} onChange={e => setEditUserData({...editUserData, pppoeId: e.target.value})} /></div>
-                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Area</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-violet-400 outline-none transition-all" value={editUserData.area || ''} onChange={e => setEditUserData({...editUserData, area: e.target.value})} /></div>
+                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Area / Sector</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-violet-400 outline-none transition-all" value={editUserData.area || ''} onChange={e => setEditUserData({...editUserData, area: e.target.value})} /></div>
+                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Subarea / Block</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-violet-400 outline-none transition-all" value={editUserData.subarea || ''} onChange={e => setEditUserData({...editUserData, subarea: e.target.value})} /></div>
                   <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Login Username</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-violet-400 outline-none transition-all" value={editUserData.username || ''} onChange={e => setEditUserData({...editUserData, username: e.target.value})} /></div>
                </div>
             </div>
@@ -1106,8 +1148,20 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                <div className="space-y-4">
                   <div className="flex items-center gap-3"><Smartphone size={16} className="text-slate-300"/><span className="text-xs font-bold text-slate-800">{selectedUser?.phone}</span></div>
                   <div className="flex items-center gap-3"><Mail size={16} className="text-slate-300"/><span className="text-xs font-bold lowercase text-slate-800">{selectedUser?.email || 'No email'}</span></div>
-                  <div className="flex items-center gap-3"><MapPin size={16} className="text-slate-300"/><span className="text-xs font-bold uppercase text-slate-800">{selectedUser?.area}</span></div>
+                  <div className="flex items-center gap-3"><MapPin size={16} className="text-slate-300"/><span className="text-xs font-bold uppercase text-slate-800">{selectedUser?.area} {selectedUser?.subarea ? `• ${selectedUser.subarea}` : ''}</span></div>
                   <div className="flex items-center gap-3"><CreditCard size={16} className="text-slate-300"/><span className="text-xs font-bold text-slate-800">{selectedUser?.cnic || 'Not provided'}</span></div>
+                  {(() => {
+                    const seller = state.staff.find(s => s.email === selectedUser?.dealerId || s.dealerCode === selectedUser?.dealerId);
+                    return (
+                      <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-xl mt-4">
+                        <User size={16} className="text-indigo-400"/>
+                        <div>
+                          <p className="text-[8px] font-black text-indigo-400 uppercase">Assigned Seller</p>
+                          <p className="text-[10px] font-black text-indigo-900 uppercase italic leading-none mt-1">{seller?.name || selectedUser?.dealerId || 'System Default'}</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
                </div>
             </div>
 

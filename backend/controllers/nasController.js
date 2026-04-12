@@ -36,6 +36,9 @@ exports.syncSubscriber = async (req, res) => {
 
     let api;
     try {
+        if (nas.apiEnabled === false) {
+            return res.status(400).json({ success: false, message: 'API is disabled for this NAS node. Please enable API in Router Settings.' });
+        }
         api = await openMikrotikApi(nas);
 
         if (connectionType === 'PPPoE') {
@@ -135,6 +138,9 @@ exports.executeCoA = async (req, res) => {
 
     let api;
     try {
+        if (nas.apiEnabled === false) {
+            return res.status(400).json({ success: false, message: 'API is disabled for this NAS node. Disconnect command requires API access.' });
+        }
         api = await openMikrotikApi(nas);
 
         const username = user.username || user.connectionId;
@@ -187,6 +193,9 @@ exports.getNasStats = async (req, res) => {
 
     let api;
     try {
+        if (req.query.apiEnabled === 'false') {
+             return res.status(400).json({ success: false, message: 'API is disabled' });
+        }
         api = await openMikrotikApi({
             ip,
             apiPort: port || 8728,
@@ -248,21 +257,26 @@ exports.checkHealth = async (req, res) => {
     let coaStatus = nas.coaEnabled ? 'Enabled' : 'Disabled';
 
     try {
-        api = await openMikrotikApi(nas);
-
-        // Get identity to confirm API works
-        await api.write('/system/identity/print');
-        apiStatus = 'Connected';
-
-        // Check RADIUS client config
-        const radiusClients = await api.write('/radius/print').catch(() => null);
-        if (radiusClients && radiusClients.length > 0) {
-            radiusStatus = 'Connected';
+        if (nas.apiEnabled === false) {
+            apiStatus = 'Disabled';
+            radiusStatus = 'Disabled (Needs API)';
         } else {
-            radiusStatus = 'Not Configured';
-        }
+            api = await openMikrotikApi(nas);
 
-        await closeApi(api);
+            // Get identity to confirm API works
+            await api.write('/system/identity/print');
+            apiStatus = 'Connected';
+
+            // Check RADIUS client config
+            const radiusClients = await api.write('/radius/print').catch(() => null);
+            if (radiusClients && radiusClients.length > 0) {
+                radiusStatus = 'Connected';
+            } else {
+                radiusStatus = 'Not Configured';
+            }
+
+            await closeApi(api);
+        }
 
         logger.info(`[HEALTH CHECK] ${nas.name} (${nas.ip}) - API: ${apiStatus}, RADIUS: ${radiusStatus}`);
 
