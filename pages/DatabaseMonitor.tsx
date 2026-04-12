@@ -359,7 +359,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
         onClose={() => setShowKeyVault(false)}
         title="Security Vault"
         type="info"
-        icon={<Key size={24} className="text-white" />}
+        icon={<Key size={24} className="text-blue-500" />}
         maxWidth="max-w-lg"
         footer={
           <div className="flex gap-4 w-full">
@@ -425,7 +425,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
         onClose={() => setShowConfigModal(false)}
         title="Registry Strategy"
         type="info"
-        icon={<Layers size={24} className="text-white" />}
+        icon={<Layers size={24} className="text-blue-500" />}
         maxWidth="max-w-lg"
         footer={
           <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-start gap-4 w-full">
@@ -448,18 +448,18 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                 alert(`Handshaking with ${provider.label}...`);
                 setShowConfigModal(false);
               }}
-              className={`w-full p-5 rounded-2xl border transition-all text-left flex items-center justify-between group ${provider.active ? 'border-blue-500 bg-blue-500/5 shadow-lg' : 'border-slate-800 bg-slate-900/50 hover:border-slate-700'}`}
+              className={`w-full p-5 rounded-2xl border transition-all text-left flex items-center justify-between group ${provider.active ? 'border-blue-500 bg-blue-50 shadow-md ring-2 ring-blue-500/20' : 'border-slate-200 bg-slate-50 hover:border-blue-300 hover:bg-white'}`}
             >
               <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-slate-800 ${provider.bg} ${provider.color}`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shadow-inner ${provider.active ? 'bg-white border-blue-200' : 'bg-white border-slate-200'} ${provider.color}`}>
                   <provider.icon size={20} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-black uppercase text-white leading-none mb-1">{provider.label}</h4>
+                  <h4 className={`text-xs font-black uppercase leading-none mb-1 ${provider.active ? 'text-blue-900' : 'text-slate-700'}`}>{provider.label}</h4>
                   <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">{provider.desc}</p>
                 </div>
               </div>
-              {provider.active && <CheckCircle2 size={18} className="text-blue-500" />}
+              {provider.active && <CheckCircle2 size={18} className="text-blue-500 drop-shadow-sm" />}
             </button>
           ))}
         </div>

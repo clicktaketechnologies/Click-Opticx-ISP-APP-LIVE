@@ -31,7 +31,7 @@ const QiblaLocationSelector: React.FC<Props> = ({ onClose, onSelect }) => {
       onClose={onClose}
       title="Regional Node"
       type="info"
-      icon={<Globe size={24} className="text-white" />}
+      icon={<Globe size={24} className="text-blue-500" />}
       maxWidth="max-w-md"
       footer={
         <p className="text-[9px] text-slate-400 font-bold leading-relaxed uppercase text-center w-full">

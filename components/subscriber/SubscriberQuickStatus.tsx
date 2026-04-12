@@ -16,17 +16,7 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
 
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700 mt-6">
-      <div className="px-4 flex justify-between items-end">
-        <div>
-           <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Welcome</h3>
-           <p className="text-[10px] text-slate-500 font-bold">Here’s a quick overview of your internet account and services.</p>
-        </div>
-        {isNewUser && (
-          <div className="flex items-center gap-1.5 text-[9px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-lg border border-green-100 uppercase animate-pulse">
-            <Sparkles size={10} /> New Account
-          </div>
-        )}
-      </div>
+
 
       <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8 group hover:shadow-xl transition-all duration-500">
         <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left flex-1">
@@ -52,15 +42,15 @@ const SubscriberQuickStatus: React.FC<Props> = ({ user, currentPkg }) => {
               </h4>
             </div>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-1">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-600 rounded-xl border border-green-100">
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${currentPkg ? 'bg-green-50 text-green-600 border-green-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
                 <PackageIcon size={14} />
                 <span className="text-[9px] font-black uppercase tracking-widest">
-                  Plan: {currentPkg?.name || 'Active'}
+                  Plan: {currentPkg?.name || 'No Active Plan'}
                 </span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-100">
-                <Wifi size={14} className={isNewUser ? '' : 'animate-pulse'} />
-                <span className="text-[9px] font-black uppercase tracking-widest">Connection Status: Online</span>
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border ${currentPkg ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-50 text-slate-500 border-slate-200'}`}>
+                <Wifi size={14} className={currentPkg ? 'animate-pulse' : ''} />
+                <span className="text-[9px] font-black uppercase tracking-widest">Connection: {currentPkg ? 'Online' : 'Offline'}</span>
               </div>
             </div>
           </div>

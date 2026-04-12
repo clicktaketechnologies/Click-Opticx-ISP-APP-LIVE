@@ -12,7 +12,7 @@ import {
   ExternalLink, MoreVertical, Ban, RefreshCw, Layers,
   Settings, Hash, Box, Package, Calculator, ShieldAlert,
   Archive, TrendingUp, Sparkles, UserCircle, Plus, Users,
-  Square, CheckSquare, Send, X, Building2
+  Square, CheckSquare, Send, X, Building2, PieChart
 } from 'lucide-react';
 import SubscriberInvoiceViewer from '../components/subscriber/SubscriberInvoiceViewer';
 import ModuleGuide from '../components/shared/ModuleGuide';
@@ -121,10 +121,19 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
 
   const getStatusStyle = (status: PaymentStatus) => {
     switch (status) {
-      case PaymentStatus.PAID: return 'bg-green-50 text-green-600 border-green-100';
-      case PaymentStatus.OVERDUE: return 'bg-rose-50 text-rose-600 border-rose-100 animate-pulse';
-      case PaymentStatus.PARTIAL: return 'bg-blue-50 text-blue-600 border-blue-100';
-      default: return 'bg-amber-50 text-amber-600 border-amber-100';
+      case PaymentStatus.PAID: return 'bg-emerald-50 text-emerald-600 border-emerald-200';
+      case PaymentStatus.OVERDUE: return 'bg-rose-50 text-rose-600 border-rose-200 animate-pulse';
+      case PaymentStatus.PARTIAL: return 'bg-blue-50 text-blue-600 border-blue-200';
+      default: return 'bg-amber-50 text-amber-600 border-amber-200';
+    }
+  };
+
+  const getStatusIcon = (status: PaymentStatus) => {
+    switch (status) {
+      case PaymentStatus.PAID: return <DollarSign size={12} />;
+      case PaymentStatus.OVERDUE: return <AlertTriangle size={12} />;
+      case PaymentStatus.PARTIAL: return <PieChart size={12} />;
+      default: return <Clock size={12} />;
     }
   };
 
@@ -147,7 +156,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
           </h2>
           <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">System Billing Management</p>
         </div>
-        <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
           <button
             onClick={() => setActiveView('invoices')}
             className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeView === 'invoices' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
@@ -171,7 +180,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
           { label: 'Total Unpaid', value: stats.totalPending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
           { label: 'Unpaid Dues', value: stats.totalOverdue, icon: AlertTriangle, color: 'text-rose-600', bg: 'bg-rose-50' },
         ].map((kpi, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+          <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden group hover:shadow-md transition-all">
             <div className="relative z-10 flex justify-between items-start mb-4">
               <div className={`${kpi.bg} p-3 rounded-xl`}>
                 <kpi.icon className={kpi.color} size={20} />
@@ -188,7 +197,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
 
       {/* Brand Header Section for Invoices View */}
       {activeView === 'invoices' && (
-        <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white flex flex-col md:flex-row items-center justify-between shadow-2xl relative overflow-hidden border border-white/5">
+        <div className="bg-slate-900 rounded-xl p-6 text-white flex flex-col md:flex-row items-center justify-between shadow-sm relative overflow-hidden border border-slate-800">
           <div className="relative z-10 flex items-center gap-8">
             <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center p-3 shadow-2xl border border-white/10 overflow-hidden shrink-0">
               {state.settings.branding.logoLight ? (
@@ -230,7 +239,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
 
       {/* Bulk Action Bar */}
       {selectedIds.size > 0 && activeView === 'invoices' && (
-        <div className="bg-slate-900 text-white p-6 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6 animate-in slide-in-from-top-4 shadow-2xl sticky top-20 z-[110]">
+        <div className="bg-slate-900 text-white p-6 rounded-xl flex flex-col md:flex-row items-center justify-between gap-6 animate-in slide-in-from-top-4 shadow-xl sticky top-20 z-[110]">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg animate-pulse">
               <Layers size={24} />
@@ -267,7 +276,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
       )}
 
       {/* Filter & Search Bar */}
-      <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col lg:flex-row gap-4 items-center">
+      <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col lg:flex-row gap-4 items-center">
         <div className="relative flex-1 w-full">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
@@ -300,8 +309,8 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
       </div>
 
       {/* Main Content Area */}
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col">
-        <div className="overflow-x-auto custom-scrollbar">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full">
+        <div className="overflow-x-auto w-full min-w-full custom-scrollbar">
           {activeView === 'invoices' ? (
             <table className="w-full text-left min-w-[1100px]">
               <thead className="bg-slate-50 border-b border-slate-100">
@@ -360,7 +369,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
                         </td>
                         <td className="px-8 py-6">
                           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-widest shadow-sm ${getStatusStyle(inv.status)}`}>
-                            {inv.status === PaymentStatus.PAID ? <CheckCircle size={12} /> : <Clock size={12} />}
+                            {getStatusIcon(inv.status)}
                             {inv.status}
                           </div>
                         </td>

@@ -24,7 +24,7 @@ const SpeedTestModal: React.FC<Props> = ({ onClose }) => {
         </button>
         
         <div className="max-h-[90vh] overflow-y-auto no-scrollbar">
-           <PremiumSpeedTest className="!bg-white border-slate-200 shadow-xl shadow-slate-200/50" />
+           <PremiumSpeedTest className="!bg-white border-slate-200 shadow-xl shadow-slate-200/50" onClose={onClose} />
         </div>
       </div>
     </div>

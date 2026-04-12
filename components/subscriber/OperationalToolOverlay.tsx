@@ -18,7 +18,7 @@ const OperationalToolOverlay: React.FC<Props> = ({ onClose, onAction }) => {
       onClose={onClose}
       title="Operational Core"
       type="info"
-      icon={<Zap size={24} className="text-white" fill="currentColor" />}
+      icon={<Zap size={24} className="text-blue-500" fill="currentColor" />}
       maxWidth="max-w-xl"
       footer={
         <div className="bg-slate-900 w-full p-8 rounded-[2.5rem] text-white flex items-center justify-between relative overflow-hidden">

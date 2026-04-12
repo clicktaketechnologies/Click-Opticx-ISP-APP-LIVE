@@ -136,7 +136,7 @@ const SubscriberActivationFlow: React.FC<Props> = ({ user, state, packageId, isR
               <div className="grid grid-cols-1 gap-3">
                  {!isRepayment && appearance.showWallet && (
                    <button 
-                    onClick={() => handleMethodSelect('Top-Up Balance')} 
+                    onClick={() => handleMethodSelect(PaymentMethod.TOPUP_BALANCE)} 
                     disabled={user.balance < total}
                     className={`w-full p-6 border-2 transition-all flex items-center justify-between group rounded-3xl shrink-0 shadow-sm ${user.balance >= total ? 'bg-green-50 border-transparent hover:border-green-500' : 'bg-slate-50 border-transparent grayscale opacity-50 cursor-not-allowed'}`}
                    >
@@ -149,7 +149,7 @@ const SubscriberActivationFlow: React.FC<Props> = ({ user, state, packageId, isR
                  )}
 
                  {canUseEmergency && appearance.showEmergencyLoad && (
-                   <button onClick={() => handleMethodSelect('Emergency Load')} className="w-full p-6 bg-rose-50 border-2 border-transparent hover:border-rose-500 rounded-3xl flex items-center justify-between group transition-all shrink-0 shadow-sm">
+                   <button onClick={() => handleMethodSelect(PaymentMethod.EMERGENCY_LOAD)} className="w-full p-6 bg-rose-50 border-2 border-transparent hover:border-rose-500 rounded-3xl flex items-center justify-between group transition-all shrink-0 shadow-sm">
                       <div className="flex items-center gap-4">
                          <div className={`w-12 h-12 bg-rose-600 text-white rounded-2xl flex items-center justify-center shadow-lg`}><Zap size={24} fill="currentColor"/></div>
                          <div className="text-left"><p className="text-xs font-black uppercase text-rose-900 italic">Emergency Load (Rescue)</p><p className="text-[9px] text-rose-400 font-bold uppercase">Instant Credit Handshake</p></div>

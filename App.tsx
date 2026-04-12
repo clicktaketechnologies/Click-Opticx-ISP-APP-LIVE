@@ -48,6 +48,8 @@ const ReferralAdmin = lazy(() => import('./pages/ReferralAdmin'));
 const ConnectionSetupAdmin = lazy(() => import('./pages/ConnectionSetupAdmin'));
 const TicketManagementAdmin = lazy(() => import('./pages/TicketManagementAdmin'));
 const TaskManagement = lazy(() => import('./pages/TaskManagement'));
+const MultiCloudSync = lazy(() => import('./pages/MultiCloudSync'));
+const SystemDeploymentCenter = lazy(() => import('./pages/SystemDeploymentCenter'));
 const AboutUs = lazy(() => import('./pages/AboutUs'));
 const AdminLiveMonitoring = lazy(() => import('./pages/AdminLiveMonitoring'));
 const AdminPasswordRequests = lazy(() => import('./pages/AdminPasswordRequests'));
@@ -343,9 +345,13 @@ const App: React.FC = () => {
     // Guard: if dbState hasn't caught up yet from the transition, show a minimal loader instead of crashing
     if (!dbState.currentUser) {
       return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center">
-          <Mini5GMicroLoader size={40} />
-          <p className="mt-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Synchronizing Session...</p>
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-12 text-center animate-in fade-in duration-500">
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full"></div>
+            <Mini5GMicroLoader size={48} />
+          </div>
+          <h2 className="text-xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">Establishing Node Context</h2>
+          <p className="mt-4 text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] max-w-[200px] leading-relaxed">Please wait while the security manifold synchronizes your session...</p>
         </div>
       );
     }
@@ -399,6 +405,7 @@ const App: React.FC = () => {
             isCollapsed={isCollapsed}
             onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
             businessName={dbState.settings.branding.businessName}
+            state={dbState}
           />
           <div
             className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${isCollapsed ? 'lg:pl-[70px]' : 'lg:pl-72'}`}
@@ -445,6 +452,7 @@ const App: React.FC = () => {
                     case 'cache': return <CacheManagement state={dbState} />;
                     case 'business-settings': return <BusinessSettings state={dbState} />;
                     case 'auth-control': return <AuthControlCenter state={dbState} />;
+                    case 'system-deployment': return <SystemDeploymentCenter state={dbState} />;
                     case 'gateway-settings': return <PaymentMethodsIndex state={dbState} onNavigate={navigateTo} />;
                     case 'gateway-stripe': return <StripeSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
                     case 'gateway-cash': return <CashSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
@@ -483,7 +491,7 @@ const App: React.FC = () => {
                       return <EmailControlCenter state={dbState} activePage={currentPage} />;
                     case 'admin-reminders': return <AdminReminders state={dbState} onNavigate={navigateTo} />;
                     case 'kyc-hub': return <KYCManagement state={dbState} />;
-                    case 'cloud-storage': return <KYCManagement state={dbState} />;
+                    case 'cloud-storage': return <MultiCloudSync state={dbState} />;
                     case 'nas-management': return <NASManagement state={dbState} />;
                     case 'olt-management': return <OLTManagement state={dbState} />;
                     case 'hotspot-tokens': return <HotspotManager state={dbState} />;

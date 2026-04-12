@@ -146,9 +146,9 @@ export const Modal: React.FC<ModalProps> = ({
               <button
                 onClick={onClose}
                 disabled={isLoading}
-                className="w-10 h-10 flex items-center justify-center rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all disabled:opacity-30 border border-transparent hover:border-slate-100"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-rose-50 text-rose-500 hover:text-white hover:bg-rose-600 transition-all disabled:opacity-30 border border-rose-100 hover:border-transparent shadow-sm"
               >
-                <X size={20} />
+                <X size={20} strokeWidth={3} />
               </button>
             )}
           </div>

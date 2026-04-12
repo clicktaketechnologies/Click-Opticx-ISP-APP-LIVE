@@ -111,7 +111,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
         <div className="xl:col-span-1 space-y-6">
-          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-4 flex flex-col gap-1.5 sticky top-24">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-3 flex flex-col gap-1 sticky top-24">
             {tabs.map(tab => (
               <button
                 key={tab.id}
@@ -126,7 +126,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
         </div>
 
         <div className="xl:col-span-3">
-          <div className="bg-white rounded-[3rem] border border-slate-100 shadow-2xl min-h-[650px] overflow-hidden flex flex-col">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm min-h-[500px] overflow-hidden flex flex-col">
             <div className="p-10 space-y-12 flex-1 overflow-y-auto custom-scrollbar bg-white">
 
               {/* BRANDING TAB */}
@@ -695,7 +695,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
 
             </div>
 
-            <div className="p-10 bg-slate-50 border-t flex gap-4 shrink-0">
+            <div className="p-5 bg-slate-50 border-t border-slate-200 flex gap-4 shrink-0">
               <button onClick={handleSave} disabled={isSaving} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-4 disabled:opacity-50">
                 {isSaving ? <Mini5GMicroLoader size={24} /> : <ShieldCheck size={24} />}
                 {isSaving ? 'Saving...' : 'Save and Apply Settings'}

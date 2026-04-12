@@ -84,7 +84,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
           { label: 'Bug Alerts', value: state.aiEvents.filter(e => e.isError).length, icon: ShieldAlert, color: 'text-rose-500', bg: 'bg-rose-500/10' },
           { label: 'Active Rules', value: state.commAutomationRules.length.toString(), icon: Code2, color: 'text-blue-500', bg: 'bg-blue-500/10' },
         ].map((kpi, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
+          <div key={idx} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
              <div className={`${kpi.bg} ${kpi.color} w-10 h-10 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}><kpi.icon size={20}/></div>
              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{kpi.label}</p>
              <h3 className="text-2xl font-black text-slate-900 mt-1 italic tracking-tighter">{kpi.value}</h3>
@@ -143,7 +143,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
   );
 
   const renderConfidence = () => (
-    <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm p-10 space-y-12 animate-in slide-in-from-right-4 duration-500">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 space-y-10 animate-in slide-in-from-right-4 duration-500">
        <div className="space-y-2">
           <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Confidence Scoring Architecture</h3>
           <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Protocol: Decision Gating v4.0</p>
@@ -201,7 +201,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
   );
 
   const renderRules = () => (
-    <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm p-10 space-y-10 animate-in slide-in-from-right-4 duration-500">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 space-y-8 animate-in slide-in-from-right-4 duration-500">
        <div className="flex justify-between items-end">
           <div className="space-y-2">
             <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Heuristic Rulebook (DSL)</h3>
@@ -340,7 +340,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
   );
 
   const renderLogs = () => (
-    <div className="bg-slate-950 rounded-[3rem] border border-white/5 shadow-2xl flex flex-col h-[750px] overflow-hidden animate-in slide-in-from-right-4 duration-500">
+    <div className="bg-slate-950 rounded-xl border border-slate-800 shadow-sm flex flex-col min-h-[500px] animate-in slide-in-from-right-4 duration-500">
        <div className="p-8 bg-slate-900/50 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 sticky top-0 z-20 backdrop-blur-md">
           <div className="flex items-center gap-4">
              <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
@@ -500,7 +500,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
   );
 
   return (
-    <div className="h-full flex flex-col gap-8 pb-32">
+    <div className="min-h-screen overflow-y-auto space-y-6 pb-20 animate-in fade-in duration-500">
        {/* Global Sub-Nav */}
        <div className="flex bg-white p-1.5 rounded-[1.5rem] border border-slate-200 shadow-sm overflow-x-auto no-scrollbar gap-1 shrink-0">
           {[
@@ -525,7 +525,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
        </div>
 
        {/* View Renderer */}
-       <div className="flex-1">
+       <div className="flex-1 min-h-0">
           {activeView === 'dashboard' && renderDashboard()}
           {activeView === 'confidence' && renderConfidence()}
           {activeView === 'rules' && renderRules()}

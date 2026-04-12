@@ -348,7 +348,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
       onClose={onComplete}
       title="Access Protocol"
       type="info"
-      icon={<ShieldCheck size={24} className="text-white" />}
+      icon={<ShieldCheck size={24} className="text-blue-500" />}
       maxWidth="max-w-lg"
       footer={
         <div className="w-full flex flex-col gap-4">

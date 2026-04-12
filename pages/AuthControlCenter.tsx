@@ -33,6 +33,7 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
   const [isTesting, setIsTesting] = useState(false);
   const [testLog, setTestLog] = useState<any[]>([]);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyingProviderId, setVerifyingProviderId] = useState<string | null>(null);
 
   useEffect(() => {
     setSettings(state.settings.authSettings || DEFAULT_AUTH_SETTINGS);
@@ -43,6 +44,17 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
     await db.updateSettings({ ...state.settings, authSettings: settings });
     setIsSaving(false);
     alert('Authentication Settings Saved Successfully!');
+  };
+
+  const handleVerifyProvider = async (providerId: string) => {
+    setVerifyingProviderId(providerId);
+    const res = await db.verifyAuthProvider(providerId);
+    if (res.success) {
+      alert(`✅ Handshake Success!\n\n${res.message}`);
+    } else {
+      alert(`❌ Handshake Failed!\n\n${res.message}`);
+    }
+    setVerifyingProviderId(null);
   };
 
   const runTester = async () => {
@@ -119,6 +131,8 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
               { id: 'security', icon: ShieldCheck, label: 'Security & Limits' },
               { id: 'forgot', icon: Key, label: 'Password Recovery' },
               { id: 'postSignup', icon: MessageSquare, label: 'Post-Signup' },
+              { id: 'csae', icon: Activity, label: 'Smart Auth (CSAE)' },
+              { id: 'auth-logs', icon: Terminal, label: 'Auth Health Logs' },
               { id: 'comm', icon: MessageSquare, label: 'Comm Gateway' },
               { id: 'tester', icon: Activity, label: 'System Tester' }
             ].map(tab => (
@@ -192,6 +206,148 @@ const AuthControlCenter: React.FC<Props> = ({ state }) => {
                       <ToggleItem label="Require Email Verification" value={settings.requireEmailVerification} onChange={v => updateSetting('requireEmailVerification', v)} />
                       <ToggleItem label="Require Phone SMS OTP" value={settings.requirePhoneOTP} onChange={v => updateSetting('requirePhoneOTP', v)} />
                       <ToggleItem label="Enforce CNIC Field" value={settings.requireCNIC} onChange={v => updateSetting('requireCNIC', v)} />
+                   </div>
+                </div>
+             )}
+
+             {activeTab === 'csae' && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                   <div className="flex items-center justify-between border-b pb-4">
+                      <div>
+                        <h2 className="text-lg font-black uppercase italic tracking-widest text-slate-800">Smart Auth Engine (CSAE)</h2>
+                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Multi-Provider Intelligent Failover Routing</p>
+                      </div>
+                      <div className="px-3 py-1 bg-green-50 text-green-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-green-100 flex items-center gap-2">
+                         <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Multi-Link Active
+                      </div>
+                   </div>
+
+                   <div className="grid grid-cols-1 gap-4">
+                      {(state.authProviders || []).sort((a,b) => a.priority - b.priority).map((provider) => (
+                         <div key={provider.id} className="p-5 bg-slate-50 rounded-2xl border border-slate-100 group transition-all hover:bg-white hover:shadow-lg hover:shadow-slate-200/50">
+                            <div className="flex items-center justify-between mb-4">
+                               <div className="flex items-center gap-4">
+                                  <div className={`p-3 rounded-xl ${
+                                     provider.status === 'Active' ? 'bg-blue-600 text-white' : 
+                                     provider.status === 'Standby' ? 'bg-orange-100 text-orange-600' : 
+                                     'bg-slate-200 text-slate-500'
+                                  }`}>
+                                     {provider.name === 'Firebase' ? <ShieldCheck size={20} /> : <MessageSquare size={20} />}
+                                  </div>
+                                  <div>
+                                     <h3 className="text-sm font-black uppercase text-slate-800">{provider.name} <span className="text-[10px] text-slate-400 normal-case font-bold h-fit ml-2 px-2 py-0.5 border rounded-full">Priority {provider.priority}</span></h3>
+                                     <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{provider.type} Protocol</p>
+                                  </div>
+                               </div>
+                               <div className="flex items-center gap-2">
+                                  <select 
+                                     className="p-2 bg-white border border-slate-200 rounded-lg text-[10px] font-black outline-none focus:border-blue-500"
+                                     value={provider.status}
+                                     onChange={async (e) => await db.updateAuthProvider({ id: provider.id, status: e.target.value as any })}
+                                  >
+                                     <option value="Active">Active</option>
+                                     <option value="Standby">Standby</option>
+                                     <option value="Inactive">Inactive</option>
+                                  </select>
+                                  <div onClick={async () => await db.updateAuthProvider({ id: provider.id, status: provider.status === 'Active' ? 'Inactive' : 'Active' })}>
+                                     {provider.status === 'Active' ? <ToggleRight className="text-blue-600 cursor-pointer" size={24} /> : <ToggleLeft className="text-slate-300 cursor-pointer" size={24} />}
+                                  </div>
+                               </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-200/50">
+                               <div className="space-y-1">
+                                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Interface API Key / Secret</label>
+                                  <div className="relative">
+                                     <input 
+                                        type="password"
+                                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-mono pr-10 outline-none focus:border-blue-500"
+                                        value={provider.apiKey || ''} 
+                                        onChange={async (e) => await db.updateAuthProvider({ id: provider.id, apiKey: e.target.value })}
+                                        placeholder={`Enter ${provider.name} Key...`}
+                                      />
+                                     <Key size={12} className="absolute right-3 top-3 text-slate-300" />
+                                  </div>
+                               </div>
+                               <div className="flex items-end gap-2">
+                                  <div className="flex-1 space-y-1">
+                                     <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Execution Priority (Lower = Earlier)</label>
+                                     <input 
+                                        type="number"
+                                        className="w-full p-2.5 bg-white border border-slate-200 rounded-lg text-xs font-bold outline-none focus:border-blue-500"
+                                        value={provider.priority}
+                                        onChange={async (e) => await db.updateAuthProvider({ id: provider.id, priority: parseInt(e.target.value) || 1 })}
+                                     />
+                                  </div>
+                                  <button 
+                                      onClick={() => handleVerifyProvider(provider.id)}
+                                      disabled={verifyingProviderId === provider.id}
+                                      className={`p-2.5 rounded-lg border transition-all shadow-sm flex items-center gap-2 text-[9px] font-black uppercase tracking-widest ${
+                                         verifyingProviderId === provider.id 
+                                         ? 'bg-slate-100 text-slate-400 border-slate-200' 
+                                         : 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-600 hover:text-white'
+                                      }`}
+                                   >
+                                      {verifyingProviderId === provider.id ? <Activity className="animate-spin" size={10} /> : <Play size={10} />} 
+                                      {verifyingProviderId === provider.id ? 'Handshaking...' : 'Test Connection'}
+                                   </button>
+                               </div>
+                            </div>
+                         </div>
+                      ))}
+                   </div>
+                </div>
+             )}
+
+             {activeTab === 'auth-logs' && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                   <div className="flex items-center justify-between border-b pb-4">
+                      <div>
+                        <h2 className="text-lg font-black uppercase italic tracking-widest text-slate-800">Auth Health & Handshake Logs</h2>
+                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Real-time tracking of smart auth routing logs</p>
+                      </div>
+                      <button onClick={() => db.logAuthActivity({ provider: 'System', action: 'Login_Attempt', result: 'Success', latency: 45, timestamp: new Date().toISOString() })} className="text-[9px] font-black uppercase tracking-widest text-blue-600 hover:underline">Flush Diagnostics</button>
+                   </div>
+
+                   <div className="overflow-hidden border border-slate-100 rounded-2xl shadow-sm">
+                      <table className="w-full text-left border-collapse">
+                         <thead>
+                            <tr className="bg-slate-50 border-b">
+                               <th className="px-4 py-3 text-[9px] font-black uppercase text-slate-500 tracking-widest">Timestamp</th>
+                               <th className="px-4 py-3 text-[9px] font-black uppercase text-slate-500 tracking-widest">Provider</th>
+                               <th className="px-4 py-3 text-[9px] font-black uppercase text-slate-500 tracking-widest">Action</th>
+                               <th className="px-4 py-3 text-[9px] font-black uppercase text-slate-500 tracking-widest">Latency</th>
+                               <th className="px-4 py-3 text-[9px] font-black uppercase text-slate-500 tracking-widest text-right">Result</th>
+                            </tr>
+                         </thead>
+                         <tbody className="divide-y text-[10px] font-bold">
+                            {(state.authLogs || []).map((log) => (
+                               <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                                  <td className="px-4 py-3 text-slate-400">{new Date(log.timestamp).toLocaleTimeString()}</td>
+                                  <td className="px-4 py-3 text-slate-800">
+                                     <div className="flex items-center gap-2">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${log.result === 'Success' ? 'bg-green-500' : 'bg-rose-500'}`}></div>
+                                        {log.provider}
+                                     </div>
+                                  </td>
+                                  <td className="px-4 py-3 text-slate-600 font-mono tracking-tighter">{log.action.replace('_', ' ')}</td>
+                                  <td className="px-4 py-3 text-slate-500 font-mono">{log.latency}ms</td>
+                                  <td className="px-4 py-3 text-right">
+                                     <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
+                                        log.result === 'Success' ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-rose-50 text-rose-600 border border-rose-100'
+                                     }`}>
+                                        {log.result}
+                                     </span>
+                                  </td>
+                               </tr>
+                            ))}
+                            {(!state.authLogs || state.authLogs.length === 0) && (
+                               <tr>
+                                  <td colSpan={5} className="px-4 py-12 text-center text-slate-400 italic">No auth handshakes recorded in this cycle.</td>
+                               </tr>
+                            )}
+                         </tbody>
+                      </table>
                    </div>
                 </div>
              )}

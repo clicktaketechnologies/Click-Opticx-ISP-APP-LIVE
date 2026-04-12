@@ -323,7 +323,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
       )}
 
       {activeTab === 'logs' && (
-        <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[750px] animate-in slide-in-from-right-4">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[500px] animate-in slide-in-from-right-4">
            <div className="p-8 border-b bg-slate-50 flex justify-between items-center sticky top-0 z-20">
               <div className="flex items-center gap-4">
                  <History size={24} className="text-blue-600" />
@@ -385,7 +385,7 @@ const AICallingAdmin: React.FC<{ state: AppState }> = ({ state }) => {
         onClose={() => setTakeoverSession(null)}
         title="Live Intervention"
         type="info"
-        icon={<Headphones size={24} className="text-white" />}
+        icon={<Headphones size={24} className="text-blue-500" />}
         maxWidth="max-w-xl"
         footer={
           <div className="flex gap-4 w-full">

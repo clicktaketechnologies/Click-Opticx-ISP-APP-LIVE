@@ -102,13 +102,13 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black text-slate-950 tracking-tight flex items-center gap-3 italic leading-none">
+          <h2 className="text-[clamp(1.5rem,5vw,2.5rem)] font-black text-slate-900 tracking-tighter flex items-center gap-3 italic leading-none">
             <LifeBuoy className="text-blue-600" size={32} />
             Support Tickets
           </h2>
-          <p className="text-slate-600 font-medium uppercase text-[10px] tracking-widest">Manage customer support requests and network alerts</p>
+          <p className="text-slate-400 font-black uppercase text-[clamp(0.6rem,1.5vw,0.7rem)] tracking-[0.4em] mt-2">Manage customer support requests and network alerts</p>
         </div>
-        <div className="flex bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
            <button 
              onClick={() => setActiveTab('tickets')}
              className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'tickets' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
@@ -127,7 +127,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
       {activeTab === 'tickets' ? (
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           <div className="xl:col-span-1 space-y-6">
-            <div className="bg-white p-6 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-4">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
@@ -177,7 +177,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
               </button>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[650px]">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[400px]">
                <div className="p-6 bg-slate-950 border-b border-white/5 flex items-center justify-between">
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ticket List</h3>
                   <span className="text-[9px] font-black text-blue-400 bg-white/5 px-2 py-0.5 rounded uppercase">Live</span>
@@ -224,7 +224,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
           <div className="xl:col-span-2">
             {!selectedTicket ? (
-              <div className="bg-white rounded-[3rem] border-4 border-dashed border-slate-200 h-full min-h-[600px] flex flex-col items-center justify-center text-center p-20">
+              <div className="bg-white rounded-xl border-2 border-dashed border-slate-200 min-h-[400px] flex flex-col items-center justify-center text-center p-12">
                  <LifeBuoy className="text-slate-100 mb-8" size={80} />
                  <h3 className="text-2xl font-black text-slate-950 uppercase tracking-tighter italic">Select a Ticket</h3>
                  <p className="text-slate-600 font-bold uppercase tracking-widest text-[10px] max-w-xs mt-2 leading-relaxed">
@@ -232,7 +232,7 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                  </p>
               </div>
             ) : (
-              <div className="bg-white rounded-[3rem] border border-slate-200 shadow-2xl flex flex-col h-[750px] overflow-hidden animate-in slide-in-from-right-4 duration-500">
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-[500px] overflow-hidden animate-in slide-in-from-right-4 duration-500">
                  <div className="p-8 bg-slate-950 text-white flex justify-between items-start shrink-0">
                     <div className="space-y-4 flex-1">
                        <div className="flex items-center gap-3">

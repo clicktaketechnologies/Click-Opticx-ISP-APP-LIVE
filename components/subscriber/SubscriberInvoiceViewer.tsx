@@ -142,7 +142,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
          onClose={onClose}
          title="Fiscal Artifact"
          type="info"
-         icon={<Receipt size={24} className="text-white" />}
+         icon={<Receipt size={24} className="text-blue-500" />}
          maxWidth="max-w-5xl"
          footer={
             invoice.status !== PaymentStatus.PAID && activeView === 'invoice' ? (
@@ -261,33 +261,39 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                            </div>
                         </div>
 
-                        {/* Items Table - Minimal Version for Modal */}
                         <div className="space-y-4">
-                           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Line Items</h4>
-                           <div className="space-y-2">
+                           <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-3 italic border-b border-slate-100 pb-3">
+                              <ShoppingBag size={14} className="text-blue-500" /> Authorized Line Items
+                           </h4>
+                           <div className="space-y-3">
                               {invoice.items.map(item => (
-                                 <div key={item.id} className="p-4 bg-white border border-slate-100 rounded-2xl flex justify-between items-center group hover:bg-slate-50 transition-colors">
-                                    <div className="flex items-center gap-3">
-                                       <div className="w-8 h-8 bg-slate-100 rounded-xl flex items-center justify-center text-slate-400"><ShoppingBag size={14} /></div>
+                                 <div key={item.id} className="p-5 bg-white border border-slate-100 rounded-[2rem] flex items-center justify-between group hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/5 transition-all">
+                                    <div className="flex items-center gap-5">
+                                       <div className="w-12 h-12 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl flex items-center justify-center text-slate-500 shadow-inner group-hover:text-blue-600 transition-all">
+                                          <Zap size={18} className="group-hover:scale-110 transition-transform" />
+                                       </div>
                                        <div>
-                                          <p className="text-xs font-black text-slate-900 uppercase italic tracking-tighter">{item.description}</p>
-                                          <p className="text-[8px] text-slate-400 font-bold uppercase">{item.category}</p>
+                                          <p className="text-sm font-black text-slate-900 uppercase tracking-tighter italic">{item.description}</p>
+                                          <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1 bg-slate-50 w-fit px-2 py-1 rounded-md border border-slate-100">{item.category}</p>
                                        </div>
                                     </div>
-                                    <p className="text-sm font-black italic text-slate-900">{curr} {item.total.toLocaleString()}</p>
+                                    <div className="text-right">
+                                       <p className="text-xl font-black italic text-slate-900 tracking-tighter tabular-nums">{curr} {item.total.toLocaleString()}</p>
+                                       <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1">Subtotal</p>
+                                    </div>
                                  </div>
                               ))}
                            </div>
                         </div>
 
-                        {/* Calculation Total */}
-                        <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex justify-between items-center">
-                           <div>
-                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aggregate Registry Total</p>
-                              <p className="text-xs text-slate-500 font-bold uppercase mt-1">Including all applicable taxes and node fees</p>
+                        <div className="p-10 bg-gradient-to-br from-slate-950 to-indigo-950 rounded-[2.5rem] flex justify-between items-center shadow-2xl relative overflow-hidden">
+                           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
+                           <div className="relative z-10">
+                              <p className="text-[10px] font-black text-indigo-300 uppercase tracking-[0.3em]">Aggregate Registry Total</p>
+                              <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Including all applicable taxes and node fees</p>
                            </div>
-                           <div className="text-right">
-                              <p className="text-4xl font-black italic tracking-tighter text-slate-950">{curr} {invoice.totalAmount.toLocaleString()}</p>
+                           <div className="text-right relative z-10">
+                              <p className="text-4xl md:text-5xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 drop-shadow-lg">{curr} {invoice.totalAmount.toLocaleString()}</p>
                            </div>
                         </div>
                      </div>

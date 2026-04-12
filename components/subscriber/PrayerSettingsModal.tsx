@@ -23,7 +23,7 @@ const PrayerSettingsModal: React.FC<Props> = ({ onClose, settings, onUpdate }) =
       onClose={onClose}
       title="Prayer Settings"
       type="info"
-      icon={<Settings2 size={24} className="text-white" />}
+      icon={<Settings2 size={24} className="text-blue-500" />}
       maxWidth="max-w-md"
       footer={
         <button 

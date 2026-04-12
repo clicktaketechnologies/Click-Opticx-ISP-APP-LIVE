@@ -17,7 +17,7 @@ import { db } from '../../db';
 import { Modal } from '../../components/shared/Modal';
 import { ConfirmDialog } from '../../components/shared/ConfirmDialog';
 import { useBranding } from '../../hooks/useBranding';
-import { EmailTemplate, CommunicationLog, CommunicationAutomationRule, AppState } from '../../types';
+import { EmailTemplate, CommunicationLog, CommunicationAutomationRule, AppState, CommunicationSettings } from '../../types';
 
 interface EmailControlCenterProps {
   state: AppState;
@@ -99,7 +99,7 @@ const EmailControlCenter: React.FC<EmailControlCenterProps> = ({ state, activePa
    const handleToggle = async (key: string, value: boolean) => {
     const currentToggles = config.toggles || {};
     const newConfig = { ...config, toggles: { ...currentToggles, [key]: value } };
-    await db.updateCommConfig(newConfig);
+    await db.updateCommConfig(newConfig as CommunicationSettings);
   };
 
   const handleMonthlyCycle = async () => {
@@ -627,7 +627,7 @@ const EmailControlCenter: React.FC<EmailControlCenterProps> = ({ state, activePa
         onClose={() => { setIsAddingTemplate(false); setEditingTemplate(null); }}
         title={editingTemplate ? "Refine Protocol: Template Edit" : "Provision New: Email Template"}
         type="info"
-        icon={<Layout size={20} className="text-white" />}
+        icon={<Layout size={20} className="text-blue-500" />}
         maxWidth="max-w-3xl"
       >
         <TemplateForm 

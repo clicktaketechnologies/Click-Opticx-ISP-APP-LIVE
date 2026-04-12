@@ -44,6 +44,12 @@
   --bg-danger: #EF4444;
   --bg-warning: #F59E0B;
   --bg-info: #3B82F6;
+  --bg-violet: #8B5CF6;
+  --bg-cyan: #06B6D4;
+  --bg-rose: #F43F5E;
+  --bg-amber: #F59E0B;
+  --bg-fuchsia: #D946EF;
+  --bg-emerald: #10B981;
 
   --text-main: #111827;
   --text-muted: #6B7280;
@@ -63,12 +69,21 @@
   --info: #3B82F6;
   --info-bg: #EFF6FF;
 
+  /* Premium Gradients */
+  --grad-primary: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  --grad-success: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  --grad-warning: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  --grad-error: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  --grad-info: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  --grad-violet: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  --grad-cyan: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%);
+
   /* Button System */
-  --btn-height: 40px;
-  --btn-padding: 0 16px;
-  --btn-radius: 8px;
-  --btn-font-size: 14px;
-  --btn-font-weight: 600;
+  --btn-height: 44px;
+  --btn-padding: 0 20px;
+  --btn-radius: 12px;
+  --btn-font-size: 13px;
+  --btn-font-weight: 700;
 }
 
 [data-theme='dark'] {
@@ -219,15 +234,16 @@ body {
   border: 1px solid var(--border-main);
   border-radius: var(--radius-xl);
   padding: var(--space-xl);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 10px 15px -5px rgba(0,0,0,0.03);
   overflow: hidden;
   position: relative;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
 .card:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-xl);
   border-color: var(--bg-primary);
+  transform: translateY(-2px);
 }
 
 .metric-card {

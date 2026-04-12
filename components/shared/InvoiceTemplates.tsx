@@ -132,7 +132,7 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ user, invoice,
                   <td className="p-5 text-sm font-black text-slate-900 uppercase italic tracking-tight">Base Package Subscription Cost</td>
                   <td className="p-5 text-right font-black text-slate-900 text-lg italic tracking-tighter">
                     <span className="text-xs text-slate-400 mr-1">{settings.currency}</span>
-                    {(invoice.amount + (invoice.discountAmount || 0)).toLocaleString()}
+                    {(invoice.totalAmount + (invoice.discountAmount || 0)).toLocaleString()}
                   </td>
                 </tr>
                 {invoice.discountAmount > 0 && (
@@ -155,7 +155,7 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ user, invoice,
                   <td className="p-6 text-right">
                     <p className="text-4xl font-black italic tracking-tighter">
                       <span className="text-sm text-blue-400 mr-2">{settings.currency}</span>
-                      {invoice.amount.toLocaleString()}
+                      {invoice.totalAmount.toLocaleString()}
                     </p>
                   </td>
                   <div className="absolute top-0 right-0 w-24 h-full bg-blue-600/10 skew-x-12 translate-x-12"></div>

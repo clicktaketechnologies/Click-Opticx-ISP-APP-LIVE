@@ -10,7 +10,8 @@ export enum UserStatus {
   BLOCKED = 'Blocked',
   PENDING_VERIFICATION = 'Verification Pending',
   ACTIVE_UNPAID = 'Active - Unpaid',
-  EMERGENCY_ACTIVE = 'Emergency Active'
+  EMERGENCY_ACTIVE = 'Emergency Active',
+  NO_PLAN = 'No Active Plan'
 }
 
 export enum VerificationStatus {
@@ -98,6 +99,16 @@ export interface CommStats {
     smtp: number;
     backup: number;
   }
+}
+
+export interface CommunicationAlertToggle {
+  welcomeEmail: boolean;
+  otpEmail: boolean;
+  invoiceEmail: boolean;
+  expiryReminder: boolean;
+  lowBalanceAlert: boolean;
+  adminAlerts: boolean;
+  autoDispatcher?: boolean;
 }
 
 export enum ReminderStatus {
@@ -838,6 +849,10 @@ export interface CommunicationSettings {
   };
   otpEmail?: string;
   reminderEmail?: string;
+  toggles: CommunicationAlertToggle;
+  failoverEnabled: boolean;
+  trackingEnabled: boolean;
+  backupProvider: string;
   senderIdentities: SenderIdentity[];
   smsProvider?: 'Twilio' | 'Infobip' | 'Vonage' | 'Clickatell' | 'Custom';
   smsConfig?: { apiKey: string; apiSecret?: string; from: string };
@@ -866,17 +881,7 @@ export interface CommunicationSettings {
   enableActivationSMS?: boolean;
   activationSMSTemplate?: string;
   activationEmailTemplateId?: string;
-  backupProvider: 'FIREBASE_REST' | 'SENDGRID' | 'MAILGUN';
-  failoverEnabled: boolean;
-  trackingEnabled: boolean;
-  toggles: {
-    welcomeEmail: boolean;
-    otpEmail: boolean;
-    invoiceEmail: boolean;
-    expiryReminder: boolean;
-    lowBalanceAlert: boolean;
-    adminAlerts: boolean;
-  };
+
 }
 
 export interface InfrastructureConfig {
@@ -906,6 +911,36 @@ export interface SpeedTestResult {
   ip: string;
   isp: string;
   timestamp: string;
+}
+
+export interface AuthProvider {
+  id: string;
+  name: 'Firebase' | 'SendGrid' | 'Resend' | 'Infobip';
+  type: 'Email' | 'SMS' | 'Provider';
+  priority: number;
+  status: 'Active' | 'Inactive' | 'Standby';
+  apiKey: string;
+  apiSecret?: string;
+  metadata?: {
+    templateId?: string;
+    fromEmail?: string;
+    fromName?: string;
+    senderId?: string;
+    whatsappPhone?: string;
+  };
+}
+
+export interface AuthLog {
+  id: string;
+  timestamp: string;
+  userId?: string;
+  userEmail?: string;
+  provider: string;
+  action: 'Password_Reset' | 'OTP_Send' | 'Login_Attempt';
+  result: 'Success' | 'Failed';
+  latency: number;
+  error?: string;
+  ip?: string;
 }
 
 export interface AppState {
@@ -973,6 +1008,8 @@ export interface AppState {
   flashLogs: FlashLog[];
   speedTestHistory: SpeedTestResult[];
   missingData: MissingDataNode[];
+  authProviders: AuthProvider[];
+  authLogs: AuthLog[];
 }
 
 export interface StaffUser {
@@ -1096,6 +1133,29 @@ export interface KYCRequest {
   status: 'Pending' | 'Approved' | 'Rejected';
   timestamp: string;
   rejectionReason?: string;
+  cloudStorage?: Record<string, string>; // Maps provider ID to secure cloud URL
+  syncReport?: {
+     isRedundant: boolean; // True if stored on >1 cloud
+     primaryProvider?: string;
+     backupProvider?: string;
+     lastVerified?: string;
+     integrityHash?: string;
+  };
+}
+
+export interface KYCFile {
+  id: string;
+  user_id: string;
+  userName: string;
+  kyc_id: string;
+  file_name: string;
+  temp_path: string;
+  file_url?: string;
+  provider?: string;
+  status: 'TEMP' | 'MOVED' | 'FAILED';
+  file_type: string;
+  size: number;
+  created_at: string;
 }
 
 export interface BusinessProfile {
@@ -1340,6 +1400,107 @@ export interface SystemSettings {
   aiAgentEnabled: boolean;
   autoCloudSync: boolean;
   requiredKycDocs: number;
+  systemVersion: number;
+  lastUpdateDate: string;
+  systemSnapshots: SystemSnapshot[];
+  deploymentLogs: DeploymentLog[];
+  maintenanceMode: boolean;
+}
+
+export interface CloudAccount {
+  id: string;
+  provider: 'Google Drive' | 'OneDrive' | 'pCloud' | 'Firebase' | 'Supabase' | 'Cloudinary' | 'Appwrite';
+  email: string;
+  loginMethod?: 'OAuth' | 'API Key' | 'Magic Link' | 'Email/Password';
+  status: 'Connected' | 'Disconnected' | 'Expired';
+  accessToken: string;
+  refreshToken: string;
+  expiry: string;
+  quota: { used: number; total: number };
+  connectedAt: string;
+  isPrimary?: boolean;
+  isBackup?: boolean;
+  autoSyncEnabled?: boolean;
+}
+
+export interface CloudFile {
+  id: string;
+  name: string;
+  type: 'file' | 'folder';
+  size: number;
+  mimeType: string;
+  lastModified: string;
+  path: string;
+}
+
+export interface CloudTransferLog {
+  id: string;
+  fileName: string;
+  source: string;
+  destination: string;
+  status: 'In Progress' | 'Completed' | 'Failed';
+  progress: number;
+  timestamp: string;
+  error?: string;
+}
+
+export interface AppState {
+  // ... existing fields ...
+  currentUser: StaffUser | null;
+  originalAdminUser: StaffUser | null;
+  isImpersonating: boolean;
+  connectionStatus: string;
+  activeProvider: AuthProvider | null;
+  authProviders: AuthProvider[];
+  authLogs: AuthLog[];
+  kycRequests: KYCRequest[];
+  topupRequests: TopupRequest[];
+  packageRequests: PackageRequest[];
+  billingLogs: BillingLog[];
+  systemLogs: SystemLog[];
+  notifications: AppNotification[];
+  users: (User | StaffUser)[];
+  staff: StaffUser[];
+  roles: any[];
+  settings: SystemSettings;
+  packages: ISPPackage[];
+  tickets: SupportTicket[];
+  tasks: Task[];
+  archive: ArchiveRecord[];
+  signupRequests: SignupRequest[];
+  auditLogs: AuditLog[];
+  lastGlobalWipe?: string;
+  aiAgentEnabled: boolean;
+  autoCloudSync: boolean;
+  requiredKycDocs: number;
+  systemVersion: number;
+  lastUpdateDate: string;
+  systemSnapshots: SystemSnapshot[];
+  deploymentLogs: DeploymentLog[];
+  maintenanceMode: boolean;
+  cloudAccounts: CloudAccount[];
+  cloudTransferLogs: CloudTransferLog[];
+  kycFiles: KYCFile[];
+}
+
+export interface SystemSnapshot {
+  id: string;
+  timestamp: string;
+  build: number;
+  label: string;
+  reason: string;
+  performedBy: string;
+  state: any; // Entire cloudSafeState
+  isRestorePoint: boolean;
+}
+
+export interface DeploymentLog {
+  id: string;
+  timestamp: string;
+  fromBuild: number;
+  toBuild: number;
+  status: 'Success' | 'Fail' | 'Rollback';
+  migrationsRun: string[];
 }
 
 export interface CreditScoreLog {

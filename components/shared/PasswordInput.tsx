@@ -53,7 +53,7 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
         )}
       </div>
       <div className="relative group">
-        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors" size={18} />
+        <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors pointer-events-none" size={18} />
         <input
           type={show ? "text" : "password"}
           value={value}
@@ -61,7 +61,8 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           placeholder={placeholder}
           required={required}
           autoComplete={autoComplete}
-          className="w-full pl-14 pr-14 py-4 bg-[#F8FAFC] border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-[#0F172A] placeholder:text-slate-400"
+          className="w-full pl-12 pr-14 py-4 bg-[#F8FAFC] border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-[#0F172A] placeholder:text-slate-400"
+          style={{ paddingLeft: '3.5rem' }}
         />
         <button
           type="button"

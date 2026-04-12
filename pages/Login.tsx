@@ -58,7 +58,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setIsProcessing(false);
 
       if (!res.success) {
-         setError(res.message || 'Login failed. Please check your credentials.');
+         setError((res as any).message || 'Login failed. Please check your credentials.');
       }
    };
 
@@ -141,28 +141,19 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       }
    };
 
-     const handleResetRequest = async (e: React.FormEvent) => {
+    const handleResetRequest = async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
       setIsProcessing(true);
 
-      // Attempt Native Firebase Reset first (High reliability)
-      const res = await db.sendPasswordReset(resetIdentifier);
+      const res = await db.sendSmartPasswordReset(resetIdentifier);
       
+      setIsProcessing(false);
       if (res.success) {
-         setIsProcessing(false);
-         alert(`🔐 Recovery protocol initiated.\n\n[CLOUD DISPATCH]\nPlease check your registered email for the reset link. If not found, check your spam folder.`);
+         alert(`🔐 CSAE DISPATCH SUCCESS\n\nRecovery protocol initiated via ${res.provider}.\n\nPlease check your ${res.provider === 'Infobip' ? 'WhatsApp' : 'registered Email'} for the reset link.\n\nNote: Link expires in 1 hour.`);
          setView('login');
       } else {
-         // FALLBACK: Offer manual request
-         const manualRes = await db.submitManualPasswordRequest(resetIdentifier);
-         setIsProcessing(false);
-         if (manualRes.success) {
-            alert(`⚠️ Automated Reset Offline\n\nA manual recovery request has been dispatched to our network administrators for ${resetIdentifier}. Please wait for a contact or check back later.`);
-            setView('login');
-         } else {
-            setError(manualRes.message || "Recovery Protocol Fault: Handshake failed.");
-         }
+         setError(res.message || "Recovery Protocol Fault: Handshake failed.");
       }
     };
 
@@ -733,7 +724,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         onClose={() => setShowLegalModal(null)}
         title={showLegalModal === 'terms' ? 'Terms of Use' : 'Service Agreement'}
         type="info"
-        icon={<Scale size={24} className="text-white" />}
+        icon={<Scale size={24} className="text-blue-500" />}
         maxWidth="max-w-lg"
         footer={
           <button 

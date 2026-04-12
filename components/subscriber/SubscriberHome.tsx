@@ -170,7 +170,7 @@ const SubscriberHome: React.FC<Props> = ({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <div className={`w-2.5 h-2.5 rounded-full ${!isExpired && currentPkg && user.approval_status === 'approved' ? 'bg-green-400 animate-pulse' : 'bg-white shadow-[0_0_10px_white]'}`}></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{!currentPkg || isExpired ? 'No Active Plan' : 'Active Account'}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">{!currentPkg || isExpired ? 'No Active Package' : 'Active Account'}</span>
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-black tracking-tighter uppercase italic">
                     {currentPkg && user.approval_status === 'approved' ? currentPkg.name : 'Select a Plan'}
@@ -207,13 +207,18 @@ const SubscriberHome: React.FC<Props> = ({
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <button onClick={() => setShowActivation(true)} className="flex-1 py-4 bg-white text-slate-900 rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 border-b-4 border-slate-200">
-                    <Zap size={16} fill="currentColor" /> {!currentPkg || isExpired ? 'Get Started' : 'Change Plan'}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <button onClick={() => onAction('packages')} className="py-4 bg-white text-slate-900 rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 border-b-4 border-slate-200 hover:bg-slate-50">
+                    <Zap size={16} fill="currentColor" /> {!currentPkg || isExpired ? 'Activate Plan' : 'Change Plan'}
                   </button>
-                  <button onClick={() => onAction('wallet')} className="flex-1 py-4 bg-blue-500 text-white rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 border-b-4 border-blue-700">
+                  <button onClick={() => onAction('wallet')} className="py-4 bg-blue-500 text-white rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 border-b-4 border-blue-700 hover:bg-blue-400">
                     <CreditCard size={16} /> Load Credit
                   </button>
+                  {(!currentPkg || isExpired) && (
+                    <button onClick={() => onAction('emergency')} className="py-4 bg-amber-500 text-white rounded-2xl font-black text-[10px] sm:text-[11px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2 border-b-4 border-amber-700 hover:bg-amber-400 sm:col-span-1">
+                      <ShieldAlert size={16} /> Emergency Load
+                    </button>
+                  )}
                 </div>
               )}
             </div>

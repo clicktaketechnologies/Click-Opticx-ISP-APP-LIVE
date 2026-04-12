@@ -50,14 +50,10 @@ const PaymentHubModal: React.FC<Props> = ({ user, state, isOpen, onClose, onSucc
     
     setIsSubmitting(true);
     try {
-      const res = await db.submitTopupRequest(user.id, amount, selectedMethod, proof);
-      if (res.success) {
-        db.logNotification(user.id, 'success', 'Request Received', `Your payment load request for Rs. ${amount} has been logged for verification.`, 'user');
-        if (onSuccess) onSuccess();
-        onClose();
-      } else {
-        alert(res.message);
-      }
+      await db.submitTopupRequest({ userId: user.id, userName: user.name, amount, paymentMethod: selectedMethod, proof });
+      db.logNotification(user.id, 'success', 'Request Received', `Your payment load request for Rs. ${amount} has been logged for verification.`);
+      if (onSuccess) onSuccess();
+      onClose();
     } catch (err) {
       console.error('Payment Submission Error:', err);
       alert('Failed to submit request. Please try again.');
@@ -108,7 +104,7 @@ const PaymentHubModal: React.FC<Props> = ({ user, state, isOpen, onClose, onSucc
       onClose={onClose}
       title="Request Credit Load"
       type="info"
-      icon={<Banknote size={24} className="text-white" />}
+      icon={<Banknote size={24} className="text-blue-500" />}
     >
       <div className="py-4 space-y-6">
         {/* Step Indicator */}

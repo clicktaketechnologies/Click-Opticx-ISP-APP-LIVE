@@ -26,7 +26,7 @@ const SubscriberQuickActions: React.FC<Props> = ({ onClose, onAction }) => {
       onClose={onClose}
       title="Command Override"
       type="info"
-      icon={<Zap size={24} fill="currentColor" className="text-white" />}
+      icon={<Zap size={24} fill="currentColor" className="text-blue-500" />}
       maxWidth="max-w-xl"
       footer={
         <div className="bg-slate-900 p-6 rounded-[2rem] text-white flex items-center justify-between w-full relative overflow-hidden">

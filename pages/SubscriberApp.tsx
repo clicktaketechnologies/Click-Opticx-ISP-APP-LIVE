@@ -214,7 +214,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
         onClose={acknowledgeVerification}
         title="Node Verified"
         type="success"
-        icon={<CheckCircle size={24} className="text-white" />}
+        icon={<CheckCircle size={24} className="text-blue-500" />}
         maxWidth="max-w-md"
         footer={
           <button 

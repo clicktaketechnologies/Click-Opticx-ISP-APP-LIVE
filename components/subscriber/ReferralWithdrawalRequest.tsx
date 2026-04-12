@@ -35,7 +35,7 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
       onClose={onClose}
       title="Withdrawal Protocol"
       type="info"
-      icon={<Wallet size={24} className="text-white" />}
+      icon={<Wallet size={24} className="text-blue-500" />}
       maxWidth="max-w-lg"
       footer={
         step === 'form' ? (

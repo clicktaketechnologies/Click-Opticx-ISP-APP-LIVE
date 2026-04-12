@@ -158,7 +158,7 @@ const ReferralAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                </div>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[750px]">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col min-h-[400px]">
                <div className="p-8 border-b bg-slate-50 flex items-center justify-between sticky top-0 z-20">
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                      <Globe size={14} className="text-blue-500" /> Operational Link Registry

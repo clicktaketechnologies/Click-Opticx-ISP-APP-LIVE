@@ -6,7 +6,7 @@ import { db } from '../db';
 import { useBranding } from '../hooks/useBranding';
 
 interface HeaderProps {
-  user: { id?: string; email: string; role: Role; name: string };
+  user: { id?: string; email: string; role: Role; name: string; profileImage?: string };
   toggleSidebar: () => void;
   onProfileClick: () => void;
   onLogout: () => void;

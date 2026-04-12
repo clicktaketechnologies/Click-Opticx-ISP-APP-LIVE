@@ -23,9 +23,7 @@ const SubscriberSupport: React.FC = () => {
     description: ''
   });
 
-  const userTickets = useMemo(() => 
-    state.tickets.filter(t => t.userId === user.id).sort((a,b) => b.createdAt.localeCompare(a.createdAt)),
-  [state.tickets, user.id]);
+  const userTickets = state.tickets.filter(t => t.userId === user.id).sort((a,b) => b.createdAt.localeCompare(a.createdAt));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,7 +134,7 @@ const SubscriberSupport: React.FC = () => {
         onClose={() => setShowTicketForm(false)}
         title="Open Ticket"
         type="form"
-        icon={<Plus size={24} className="text-white" />}
+        icon={<Plus size={24} className="text-blue-500" />}
         footer={
            <div className="flex gap-4 w-full">
               <button 

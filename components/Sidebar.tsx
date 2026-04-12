@@ -16,6 +16,7 @@ interface SidebarItem {
   label: string;
   icon: any;
   badge?: number;
+  badgeColor?: 'red' | 'yellow' | 'green';
   items?: SidebarItem[]; 
 }
 
@@ -49,11 +50,18 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
   const safeLower = (val: any) => (val || "").toString().toLowerCase();
 
   // Calculate badges
-  const pendingApprovals = (state.signupRequests || []).filter(r => r.status === 'Pending').length + 
-                           (state.topupRequests || []).filter(r => r.status === 'Pending').length + 
-                           (state.packageRequests || []).filter(r => r.status === 'Pending').length;
-                           
-  const pendingTickets = (state.tickets || []).filter(t => t.status === 'Open').length;
+  const newSignupsCount = (state.signupRequests || []).filter(r => r.status === 'Pending').length;
+  const kycPendingCount = (state.users || []).filter(u => u.kyc_status === 'pending' || (u.isKYCSubmitted && !u.isKYCVerified)).length;
+  const packageRequestsCount = (state.packageRequests || []).filter(r => r.status === 'Pending').length;
+  const topupRequestsCount = (state.topupRequests || []).filter(r => r.status === 'Pending').length;
+  const anyApprovalCount = ((state.approvalRequests || []) as any[]).filter(r => r.status === 'Pending').length;
+  
+  const pendingApprovals = newSignupsCount + kycPendingCount + packageRequestsCount + topupRequestsCount + anyApprovalCount;
+
+  const pendingTicketsCount = (state.tickets || []).filter(t => t.status === 'Open').length;
+  const emergencyCount = (state.emergencyLoads || []).filter(l => l.status === 'Pending_Activation' || l.status === 'Pending').length;
+  const offlineUsersCount = (state.users || []).filter(u => ['Offline', 'Expired', 'Suspended'].includes(u.status)).length;
+  const invoicePendingCount = (state.invoices || []).filter(i => i.status === 'Unpaid' || i.status === 'Overdue').length;
 
   const sections: SidebarSection[] = useMemo(() => [
     {
@@ -90,9 +98,9 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       title: 'Network Management',
       items: [
         {
-          id: 'group-monitoring', label: 'Monitoring', icon: Activity,
+          id: 'group-monitoring', label: 'Monitoring', icon: Activity, badge: offlineUsersCount > 0 ? offlineUsersCount : undefined, badgeColor: 'red',
           items: [
-            { id: 'admin-live-monitoring', label: 'Network Monitor', icon: Monitor },
+            { id: 'admin-live-monitoring', label: 'Network Monitor', icon: Monitor, badge: offlineUsersCount > 0 ? offlineUsersCount : undefined, badgeColor: 'red' },
             { id: 'speed-test', label: 'Speed Test', icon: Gauge },
             { id: 'system-readiness', label: 'System Diagnostics', icon: Activity },
           ]
@@ -120,21 +128,21 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
     {
       title: 'Users & Access',
       items: [
-        { id: 'users', label: 'All Users', icon: Users },
+        { id: 'users', label: 'All Users', icon: Users, badge: offlineUsersCount > 0 ? offlineUsersCount : undefined, badgeColor: 'red' },
         { id: 'customer-360', label: 'Find Users', icon: Search },
         {
           id: 'group-crm', label: 'Subscriber Relations', icon: Users,
           items: [
-            { id: 'admin-users', label: 'Subscriber Accounts', icon: UserCircle },
-            { id: 'admin-approvals', label: 'Service Approvals', icon: UserCheck, badge: pendingApprovals },
-            { id: 'admin-packages', label: 'Resource Packages', icon: Package },
-            { id: 'support-tickets', label: 'Support Queue', icon: LifeBuoy, badge: pendingTickets },
+            { id: 'users', label: 'Subscriber Accounts', icon: UserCircle, badge: offlineUsersCount > 0 ? offlineUsersCount : undefined, badgeColor: 'red' },
+            { id: 'approval-desk', label: 'Service Approvals', icon: UserCheck, badge: pendingApprovals > 0 ? pendingApprovals : undefined, badgeColor: 'yellow' },
+            { id: 'packages', label: 'Resource Packages', icon: Package },
+            { id: 'tickets', label: 'Support Queue', icon: LifeBuoy, badge: pendingTicketsCount > 0 ? pendingTicketsCount : undefined, badgeColor: 'yellow' },
           ]
         },
         {
-          id: 'group-approvals', label: 'Approvals', icon: ShieldCheck, badge: pendingApprovals > 0 ? pendingApprovals : undefined,
+          id: 'group-approvals', label: 'Approvals', icon: ShieldCheck, badge: pendingApprovals > 0 ? pendingApprovals : undefined, badgeColor: 'yellow',
           items: [
-             { id: 'approval-desk', label: 'Approval Requests', icon: ShieldCheck, badge: pendingApprovals > 0 ? pendingApprovals : undefined },
+             { id: 'approval-desk', label: 'Approval Requests', icon: ShieldCheck, badge: pendingApprovals > 0 ? pendingApprovals : undefined, badgeColor: 'yellow' },
              { id: 'admin-password-requests', label: 'Password Reset Requests', icon: Key },
           ]
         },
@@ -150,15 +158,15 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
        title: 'Billing & Finance',
        items: [
          { id: 'invoice-engine', label: 'Billing System', icon: Calculator },
-         { id: 'invoice-management', label: 'Invoices', icon: ClipboardList },
+         { id: 'invoice-management', label: 'Invoices', icon: ClipboardList, badge: invoicePendingCount > 0 ? invoicePendingCount : undefined, badgeColor: 'yellow' },
          { id: 'gateway-settings', label: 'Payment Methods', icon: CreditCard },
          { id: 'accounting', label: 'Transaction History', icon: History },
          {
-           id: 'group-advanced-finance', label: 'Advanced', icon: Wallet,
+           id: 'group-advanced-finance', label: 'Advanced', icon: Wallet, badge: emergencyCount > 0 ? emergencyCount : undefined, badgeColor: 'red',
            items: [
              { id: 'recovery', label: 'Payment Recovery', icon: Receipt },
              { id: 'wallet', label: 'Wallet & Balance', icon: Wallet },
-             { id: 'emergency-load', label: 'Emergency Balance', icon: Zap },
+             { id: 'emergency-load', label: 'Emergency Balance', icon: Zap, badge: emergencyCount > 0 ? emergencyCount : undefined, badgeColor: 'red' },
              { id: 'admin-reminders', label: 'Admin Alerts', icon: BellRing },
            ]
          }
@@ -175,7 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
     {
       title: 'Support & Tasks',
       items: [
-        { id: 'tickets', label: 'Support Tickets', icon: LifeBuoy, badge: pendingTickets > 0 ? pendingTickets : undefined },
+        { id: 'tickets', label: 'Support Tickets', icon: LifeBuoy, badge: pendingTicketsCount > 0 ? pendingTicketsCount : undefined, badgeColor: 'yellow' },
         { id: 'tasks', label: 'Tasks', icon: ListTodo },
       ]
     },
@@ -213,11 +221,13 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
            id: 'group-system-tools', label: 'System Tools', icon: DatabaseZap,
            items: [
              { id: 'system-flash', label: 'System Flash', icon: Zap },
+             { id: 'auth-control', label: 'Smart Auth (CSAE)', icon: ShieldCheck },
+             { id: 'system-deployment', label: 'Deployment Hub', icon: ShieldCheck },
            ]
         }
       ]
     }
-  ], [pendingApprovals, pendingTickets, role, state.settings.appearance, state.users]);
+  ], [pendingApprovals, pendingTicketsCount, role, state.settings.appearance, state.users, state.permissions]);
 
   const hasAccess = (id: string) => {
     if (role === Role.SUPER_ADMIN) return true;
@@ -344,9 +354,9 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
            <div className="flex items-center gap-[12px] w-full">
              <div className="relative shrink-0 flex items-center justify-center">
                  <item.icon size={20} style={{ transitionDuration: '150ms' }} className={`transition-transform delay-75 group-hover:scale-105 group-hover:text-white ${isActive ? 'text-[#3B82F6]' : 'text-[#94A3B8]'}`} />
-                 {item.badge && isCollapsed && (
-                    <span className="absolute -top-1.5 -right-2 w-3.5 h-3.5 bg-rose-500 rounded-full border-2 border-[#0F172A] shadow-sm"></span>
-                 )}
+                 {item.badge ? isCollapsed && (
+                    <span className={`absolute -top-1.5 -right-2 w-3.5 h-3.5 rounded-full border-2 border-[#0F172A] shadow-sm ${item.badgeColor === 'red' ? 'bg-rose-500' : item.badgeColor === 'green' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                 ) : null}
              </div>
              {!isCollapsed && (
                <span className={`font-semibold text-[13px] tracking-wide transition-colors duration-[150ms] whitespace-nowrap overflow-hidden text-ellipsis ${isActive ? 'text-white' : 'text-[#94A3B8] group-hover:text-white'}`}>
@@ -356,7 +366,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
            </div>
            {!isCollapsed && (
              <div className="flex items-center shrink-0">
-                 {item.badge && <span className={`${isActive ? 'bg-[#3B82F6] text-white' : 'bg-rose-500 text-white'} shadow-sm text-[10px] font-bold px-1.5 py-0.5 rounded-md`}>{item.badge}</span>}
+                 {item.badge ? <span className={`${item.badgeColor === 'red' ? 'bg-rose-500' : item.badgeColor === 'green' ? 'bg-emerald-500' : 'bg-amber-500'} text-white shadow-sm text-[10px] font-bold px-1.5 py-0.5 rounded-md`}>{item.badge}</span> : null}
              </div>
            )}
          </button>

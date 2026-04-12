@@ -238,48 +238,48 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
       )}
 
       {phase === 'active' && (
-        <div className="flex-1 flex flex-col space-y-6 h-full animate-in slide-in-from-right duration-500">
-          <div className="bg-slate-950 rounded-[2.5rem] p-6 text-white flex items-center justify-between shadow-2xl relative overflow-hidden">
-            <div className="flex items-center gap-4 relative z-10">
-              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/10 backdrop-blur-md">
-                <UserIcon size={24} />
+        <div className="flex-1 flex flex-col space-y-4 sm:space-y-6 h-full animate-in slide-in-from-right duration-500 overflow-y-auto no-scrollbar pb-6">
+          <div className="bg-slate-950 rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 text-white flex flex-col sm:flex-row sm:items-center justify-between shadow-2xl relative overflow-hidden gap-4">
+            <div className="flex items-center gap-4 relative z-10 w-full sm:w-auto overflow-hidden">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/10 backdrop-blur-md shrink-0">
+                <UserIcon size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <h4 className="font-black uppercase italic tracking-tighter">{user.name}</h4>
-                <p className="text-[8px] text-slate-500 font-black uppercase tracking-widest">Active Connection • {user.connectionId}</p>
+              <div className="min-w-0 flex-1">
+                <h4 className="font-black uppercase italic tracking-tighter truncate">{user.name}</h4>
+                <p className="text-[7px] sm:text-[8px] text-slate-500 font-black uppercase tracking-widest truncate">Active Connection • {user.connectionId}</p>
               </div>
             </div>
-            <div className="text-right relative z-10">
-              <p className="text-xl font-black text-green-400 italic tabular-nums">{formatTime(duration)}</p>
+            <div className="text-left sm:text-right relative z-10 pl-14 sm:pl-0">
+              <p className="text-lg sm:text-xl font-black text-green-400 italic tabular-nums leading-none">{formatTime(duration)}</p>
             </div>
-            <Activity className="absolute -right-8 -bottom-8 opacity-5 scale-150" size={140} />
+            <Activity className="absolute -right-8 -bottom-8 opacity-5 scale-150 pointer-events-none" size={140} />
           </div>
 
-          <div className="flex-1 bg-white rounded-[3.5rem] border border-slate-100 shadow-sm p-10 flex flex-col items-center justify-center text-center space-y-10 relative overflow-hidden">
+          <div className="flex-1 bg-white rounded-[2.5rem] sm:rounded-[3.5rem] border border-slate-100 shadow-sm p-6 sm:p-10 flex flex-col items-center justify-center text-center space-y-8 sm:space-y-10 relative overflow-hidden min-h-[300px]">
             <div className="relative z-10">
-              <div className={`w-32 h-32 rounded-[3rem] flex items-center justify-center mx-auto transition-all duration-500 ${aiIsSpeaking ? 'bg-blue-600 text-white scale-110 shadow-2xl shadow-blue-100' : 'bg-slate-50 text-slate-300'}`}>
-                {aiIsSpeaking ? <Volume2 size={56} className="animate-pulse" /> : <Bot size={56} />}
+              <div className={`w-24 h-24 sm:w-32 sm:h-32 rounded-[2rem] sm:rounded-[3rem] flex items-center justify-center mx-auto transition-all duration-500 ${aiIsSpeaking ? 'bg-blue-600 text-white scale-110 shadow-2xl shadow-blue-100' : 'bg-slate-50 text-slate-300'}`}>
+                {aiIsSpeaking ? <Volume2 size={48} className="sm:w-14 sm:h-14 animate-pulse" /> : <Bot size={48} className="sm:w-14 sm:h-14" />}
               </div>
-              <p className={`text-[10px] font-black uppercase tracking-[0.3em] mt-6 transition-colors ${aiIsSpeaking ? 'text-blue-600' : 'text-slate-400'}`}>
+              <p className={`text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] mt-6 transition-colors ${aiIsSpeaking ? 'text-blue-600' : 'text-slate-400'}`}>
                 {aiIsSpeaking ? 'AI Responding' : 'Listening...'}
               </p>
             </div>
 
-            <div className="flex items-end gap-2 h-32">
+            <div className="flex items-end justify-center gap-1.5 sm:gap-2 h-24 sm:h-32">
               {visualizerBars.map((h, i) => (
-                <div key={i} className={`w-2 rounded-full transition-all duration-150 ${aiIsSpeaking ? 'bg-blue-500/20' : 'bg-blue-600 shadow-[0_0_8px_rgba(79,70,229,0.5)]'}`} style={{ height: `${h}%` }}></div>
+                <div key={i} className={`w-1.5 sm:w-2 rounded-full transition-all duration-150 ${aiIsSpeaking ? 'bg-blue-500/20' : 'bg-blue-600 shadow-[0_0_8px_rgba(79,70,229,0.5)]'}`} style={{ height: `${h}%` }}></div>
               ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pb-4">
-            <button onClick={() => setIsMuted(!isMuted)} className={`flex flex-col items-center justify-center gap-2 py-6 rounded-[2.5rem] transition-all border-2 ${isMuted ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-white border-slate-100 text-slate-400'}`}>
-              {isMuted ? <MicOff size={28} /> : <Mic size={28} />}
-              <span className="text-[9px] font-black uppercase tracking-widest">{isMuted ? 'Mic Muted' : 'Mic Active'}</span>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 pb-2 shrink-0">
+            <button onClick={() => setIsMuted(!isMuted)} className={`flex flex-col items-center justify-center gap-2 py-5 sm:py-6 rounded-[2rem] sm:rounded-[2.5rem] transition-all border-2 ${isMuted ? 'bg-rose-50 border-rose-500 text-rose-600' : 'bg-white border-slate-100 text-slate-400'}`}>
+              {isMuted ? <MicOff size={24} className="sm:w-7 sm:h-7" /> : <Mic size={24} className="sm:w-7 sm:h-7" />}
+              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest">{isMuted ? 'Mic Muted' : 'Mic Active'}</span>
             </button>
-            <button onClick={endCall} className="flex flex-col items-center justify-center gap-2 py-6 bg-rose-600 text-white rounded-[2.5rem] shadow-xl active:scale-95 transition-all">
-              <PhoneOff size={28} fill="currentColor" />
-              <span className="text-[9px] font-black uppercase tracking-widest">End Call</span>
+            <button onClick={endCall} className="flex flex-col items-center justify-center gap-2 py-5 sm:py-6 bg-rose-600 text-white rounded-[2rem] sm:rounded-[2.5rem] shadow-xl active:scale-95 transition-all">
+              <PhoneOff size={24} className="sm:w-7 sm:h-7" fill="currentColor" />
+              <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-widest">End Call</span>
             </button>
           </div>
         </div>
@@ -291,7 +291,7 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
         onClose={onBack}
         title="Session Complete"
         type="success"
-        icon={<CheckCircle size={24} className="text-white" />}
+        icon={<CheckCircle size={24} className="text-blue-500" />}
         maxWidth="max-w-md"
         footer={
           <button 

@@ -5,9 +5,9 @@ import {
   ChevronLeft, Pencil, Save, Info, Network, MapPin, HardDrive, 
   CheckCircle, AlertCircle, Clock, ShieldCheck, DollarSign, Wallet, CreditCard, Home, Ban, Flame,
   Square, CheckSquare, Layers, AlertTriangle, Key, Cpu, Zap, Calendar, Banknote, Globe, Loader2, XCircle, RefreshCw, Lock, LogOut, Eye, UserCircle, Fingerprint, Map as MapIcon, Smartphone, Bell, ListChecks,
-  User, Hash, MessageSquare, Package as PackageIcon, LockKeyhole, ArrowRight, MousePointer2, Settings2, Power,
+  User, Users, Hash, MessageSquare, Package as PackageIcon, LockKeyhole, ArrowRight, MousePointer2, Settings2, Power,
   SearchCode, EyeOff, ExternalLink, ArrowUpRight, ArrowDownLeft,
-  Mail, Wifi, FileText, MoreHorizontal, Play, FileInput
+  Mail, Wifi, FileText, MoreHorizontal, Play, FileInput, Circle
 } from 'lucide-react';
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
@@ -44,6 +44,8 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [isNewUserModal, setIsNewUserModal] = useState(false);
   const [isEditUserModal, setIsEditUserModal] = useState(false);
   const [isResetPassModal, setIsResetPassModal] = useState(false);
+  const [isEmergencyAuthModal, setIsEmergencyAuthModal] = useState(false);
+  const [emergencyAuthMode, setEmergencyAuthMode] = useState<'Link' | 'TempPassword'>('Link');
   const [isViewUserModal, setIsViewUserModal] = useState(false);
   const [isSuspendModal, setIsSuspendModal] = useState(false);
   const [isReconnectModal, setIsReconnectModal] = useState(false);
@@ -61,10 +63,11 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   // Form States
   const [selectedPkgId, setSelectedPkgId] = useState<string>('');
   const [paymentStatus, setPaymentStatus] = useState<'Paid' | 'Unpaid'>('Paid');
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('Cash');
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [collectAmount, setCollectAmount] = useState<number>(0);
   const [shouldActivatePkg, setShouldActivatePkg] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isRepairing, setIsRepairing] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
   const [newAuthSecret, setNewAuthSecret] = useState('');
   
@@ -139,6 +142,22 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const isAdmin = [Role.SUPER_ADMIN, Role.ADMIN].includes(currentUserRole as Role);
   const canPerformAction = [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER, Role.FINANCE_ADMIN].includes(currentUserRole as Role);
 
+  const handleRepairIntegrity = async () => {
+    setIsRepairing(true);
+    try {
+      const res = await db.healUserRegistry();
+      if (res.success) {
+         notificationManager.success('Registry Integrity Pulse Complete', res.message);
+      } else {
+         notificationManager.error('Integrity Protocol Error', res.message);
+      }
+    } catch (err: any) {
+      notificationManager.error('System Fault', err.message || 'IRS Handshake failed.');
+    } finally {
+      setIsRepairing(false);
+    }
+  };
+
   const toggleSelectAll = () => {
     if (selectedIds.size === filteredUsers.length && filteredUsers.length > 0) {
         setSelectedIds(new Set());
@@ -162,7 +181,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     // Reset Defaults
     setProvisioningStep(1);
     setPaymentStatus('Paid');
-    setSelectedMethod('Cash');
+    setSelectedMethod(PaymentMethod.CASH);
     setCollectAmount(user.balance || 0);
     setIsGraceActive(true);
     setPaymentDate(new Date().toISOString().split('T')[0]);
@@ -193,6 +212,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     switch(action) {
       case 'edit': setIsEditUserModal(true); break;
       case 'reset': setIsResetPassModal(true); break;
+      case 'emergency_auth': setIsEmergencyAuthModal(true); break;
       case 'package': setIsActivationModal(true); break;
       case 'payment': setIsCollectPaymentModal(true); break;
       case 'view': setIsViewUserModal(true); break;
@@ -355,71 +375,121 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   );
 
   return (
-    <div className="flex h-full flex-col gap-4 overflow-hidden relative pb-4">
-      {/* Header Zone */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 px-1 shrink-0">
-        <div className="space-y-1">
-          <h2 className="text-xl sm:text-3xl font-black text-slate-800 tracking-tight uppercase italic leading-none">Users & System</h2>
-          <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">User Records</p>
+    <div className="min-h-screen overflow-y-auto space-y-6 pb-12">
+      {/* 1. Header Zone */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
+        <div>
+          <h2 className="text-[clamp(1.5rem,5vw,2.5rem)] font-black text-slate-900 tracking-tighter uppercase italic leading-none">Subscribers Hub</h2>
+          <p className="text-[clamp(0.6rem,2vw,0.75rem)] text-slate-400 font-black uppercase tracking-[0.4em] mt-3">Advanced Registry & Lifecycle Engine</p>
         </div>
-        <button 
-          onClick={() => { setOnboardingStep(1); setIsNewUserModal(true); }}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-black shadow-2xl active:scale-95 transition-all"
-        >
-          <UserPlus size={18} />
-          <span>+ Add New User</span>
-        </button>
+        <div className="flex gap-3 w-full md:w-auto">
+          <button 
+             onClick={() => setIsImportUsersModal(true)}
+             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3.5 bg-white border border-slate-200 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
+          >
+             <FileInput size={16} /> Import
+          </button>
+          {isAdmin && (
+             <button 
+               onClick={handleRepairIntegrity}
+               disabled={isRepairing}
+               className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm border ${
+                 isRepairing 
+                   ? 'bg-slate-50 text-slate-400 border-slate-100' 
+                   : 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100'
+               }`}
+             >
+               {isRepairing ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
+               <span>{isRepairing ? 'Healing...' : 'Repair Integrity'}</span>
+             </button>
+          )}
+          <button 
+            onClick={() => { setOnboardingStep(1); setIsNewUserModal(true); }}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3.5 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-600 shadow-2xl active:scale-95 transition-all"
+          >
+            <UserPlus size={18} />
+            <span>+ Add New User</span>
+          </button>
+        </div>
       </div>
 
-      {/* Global Filter Bar */}
-      <div className="card !p-4 sm:!p-6 shrink-0">
-        <div className="flex flex-col gap-4">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+      {/* 2. Subscriber Metrics Row */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 shrink-0">
+        {[
+          { label: 'Total Base', count: state.users.length, icon: Users, grad: 'var(--grad-primary)', sub: 'Database Total' },
+          { label: 'Payments Due', count: state.users.filter(u => u.balance > 0).length, icon: DollarSign, grad: 'var(--grad-error)', sub: 'Arrears Pipeline' },
+          { label: 'Expired Link', count: state.users.filter(u => u.status === UserStatus.EXPIRED).length, icon: Activity, grad: 'var(--grad-warning)', sub: 'Inactive Nodes' },
+          { label: 'Registry Queue', count: state.users.filter(u => u.verificationStatus !== VerificationStatus.VERIFIED).length, icon: ShieldAlert, grad: 'var(--grad-violet)', sub: 'Verification' },
+        ].map((kpi, idx) => (
+          <div key={idx} className="card relative overflow-hidden border-none shadow-2xl p-6 group transition-all hover:scale-[1.02]" style={{ backgroundImage: kpi.grad }}>
+             <div className="absolute top-0 right-0 w-24 h-24 bg-white/20 blur-2xl -mr-12 -mt-12 rounded-full group-hover:scale-150 transition-transform duration-700" />
+             <div className="relative z-10 text-white flex flex-col gap-4">
+                <div className="flex justify-between items-start">
+                   <p className="text-[10px] font-black uppercase tracking-widest opacity-90">{kpi.label}</p>
+                   <div className="p-2 rounded-xl bg-white/25 backdrop-blur-md">
+                      <kpi.icon size={18} strokeWidth={2.5} />
+                   </div>
+                </div>
+                <h3 className="text-[clamp(1.5rem,4vw,2.25rem)] font-black italic tracking-tighter leading-none">{kpi.count}</h3>
+                <p className="text-[9px] font-black uppercase opacity-70 mt-1 tracking-widest">{kpi.sub}</p>
+             </div>
+          </div>
+        ))}
+      </div>
+
+      {/* 3. Global Filter Bar */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 shrink-0">
+        <div className="flex flex-col gap-6">
+          <div className="relative group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
             <input 
               type="text" 
-              placeholder="Search by Name, User ID, or Phone Number" 
-              className="w-full pl-14 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-4 focus:ring-blue-500/10 text-sm font-bold text-slate-900 placeholder:text-slate-400 transition-all transition-duration-150" 
+              placeholder="Search by Name, ID, Phone..." 
+              className="w-full pl-16 pr-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-3xl outline-none focus:border-indigo-500 focus:bg-white text-[clamp(0.85rem,2vw,1rem)] font-black text-slate-900 placeholder:text-slate-400 placeholder:font-bold transition-all shadow-inner" 
               value={searchTerm} 
               onChange={e => setSearchTerm(e.target.value)} 
             />
           </div>
-          <div className="scroll-x no-scrollbar pb-1">
-            {(['All', 'Expired', 'Unpaid', 'Paid', 'Half Paid', 'Half Data', 'Unverified', 'Verified', 'Deleted'] as const).map(f => (
-              <button
-                key={f}
-                onClick={() => setFilterType(f)}
-                className={`btn btn-sm !rounded-xl !tracking-normal ${
-                  filterType === f 
-                    ? 'btn-primary' 
-                    : 'btn-secondary'
-                }`}
-              >
-                {f}
-              </button>
-            ))}
+          <div className="flex items-center justify-between gap-4">
+             <div className="scroll-x no-scrollbar flex-1">
+               {(['All', 'Expired', 'Unpaid', 'Paid', 'Half Paid', 'Half Data', 'Unverified', 'Verified', 'Deleted'] as const).map(f => (
+                 <button
+                   key={f}
+                   onClick={() => setFilterType(f)}
+                   className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                     filterType === f 
+                       ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' 
+                       : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
+                   }`}
+                 >
+                   {f}
+                 </button>
+               ))}
+             </div>
+             <button onClick={() => setSearchTerm('')} className="p-2.5 text-slate-300 hover:text-rose-500 transition-colors"><RefreshCw size={18} /></button>
           </div>
         </div>
       </div>
 
-      {/* Bulk Action Top Bar - UPDATED COLORS */}
+      {/* 4. Bulk Action Top Bar */}
       {selectedIds.size > 0 && (
-        <div className="bg-slate-900 text-white p-4 rounded-[1.5rem] shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 animate-in slide-in-from-top-2 border border-white/5 shrink-0">
-           <div className="flex items-center justify-center md:justify-start gap-4 border-b md:border-b-0 md:border-r border-white/10 pb-4 md:pb-0 md:pr-6 shrink-0">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg animate-pulse"><Layers size={20} /></div>
+        <div className="bg-slate-900 text-white p-6 rounded-[2.5rem] shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-6 animate-in slide-in-from-top-4 border border-white/5 shrink-0">
+           <div className="flex items-center gap-6 border-b xl:border-b-0 xl:border-r border-white/10 pb-4 xl:pb-0 xl:pr-8 w-full xl:w-auto">
+              <div className="w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-600/20"><Layers size={28} /></div>
               <div>
-                 <p className="text-sm font-black italic tracking-tighter leading-none">{selectedIds.size} Linked Accounts</p>
-                 <p className="text-[8px] text-blue-400 font-black uppercase mt-1 tracking-widest italic">Batch Network Ready</p>
+                 <p className="text-xl font-black italic tracking-tighter leading-none">{selectedIds.size} Accounts</p>
+                 <p className="text-[9px] text-indigo-400 font-black uppercase mt-2 tracking-[0.3em] italic">Batch Sector Active</p>
               </div>
            </div>
-           <div className="grid grid-cols-2 md:flex md:items-center gap-2 flex-wrap justify-center w-full md:w-auto">
-              <button onClick={() => setIsBulkGraceModal(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl transition-all border border-blue-500/20">
-                 <Clock size={16}/><span className="text-[9px] font-black uppercase">Extra Time</span>
+           
+           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 w-full xl:w-auto">
+              <button onClick={() => setIsBulkGraceModal(true)} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+                 <Clock size={16} className="text-blue-400"/><span className="text-white">Extension</span>
               </button>
-              <button onClick={() => { setSelectedPkgId(''); setIsBulkPackageModal(true); }} className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-xl transition-all border border-blue-500/20">
-                 <PackageIcon size={16}/><span className="text-[9px] font-black uppercase">Bulk Actions</span>
+              <button onClick={() => { setSelectedPkgId(''); setIsBulkPackageModal(true); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+                 <PackageIcon size={16} className="text-violet-400"/><span className="text-white">Plans</span>
               </button>
-               <button onClick={async () => { 
+              <button onClick={async () => { 
                 if(confirm(`Reset passwords for ${selectedIds.size} users?`)) {
                   setIsProcessing(true);
                   await db.bulkForcePasswordReset(Array.from(selectedIds)); 
@@ -427,204 +497,128 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                   setIsProcessing(false);
                   setIsSuccessModal(true);
                 }
-              }} className="flex items-center gap-2 px-4 py-2 bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 rounded-xl transition-all border border-orange-500/20">
-                 <Key size={16}/><span className="text-[9px] font-black uppercase">Reset Password</span>
+              }} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+                 <Lock size={16} className="text-amber-400"/><span className="text-white">Security</span>
               </button>
-              <button 
-                  onClick={async () => {
-                    if(confirm(`Send payment reminders to ${selectedIds.size} users?`)) {
-                      setIsProcessing(true);
-                      for(const id of Array.from(selectedIds)) {
-                         await db.sendRecoveryReminder(id as string, 'SMS');
-                      }
-                      setSelectedIds(new Set());
-                      setIsProcessing(false);
-                      setIsSuccessModal(true);
-                    }
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-500 rounded-xl transition-all border border-green-500/20"
-               >
-                  <MessageSquare size={16}/><span className="text-[9px] font-black uppercase">Send Message</span>
-               </button>
-               <button 
-                  onClick={async () => {
-                    if(confirm(`Suspend ${selectedIds.size} users?`)) {
-                      setIsProcessing(true);
-                      await db.bulkSetAccountStatus(Array.from(selectedIds), UserStatus.SUSPENDED, 'Manual Batch Suspension');
-                      setSelectedIds(new Set());
-                      setIsProcessing(false);
-                      setIsSuccessModal(true);
-                    }
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 rounded-xl transition-all border border-rose-500/20"
-               >
-                  <Ban size={16}/><span className="text-[9px] font-black uppercase">Suspend User</span>
-               </button>
-               <button onClick={() => { if(confirm(`Are you sure you want to delete ${selectedIds.size} users?`)) executeBulkPurge(); }} className="flex items-center gap-2 px-4 py-2 bg-slate-500/10 hover:bg-slate-500/20 text-slate-400 rounded-xl transition-all border border-slate-500/20">
-                  <Trash2 size={16}/><span className="text-[9px] font-black uppercase">Delete User</span>
-               </button>
-
-               <div className="relative group/dropdown">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-slate-500/10 hover:bg-slate-500/20 text-slate-300 rounded-xl transition-all border border-slate-500/20">
-                     <MoreHorizontal size={16}/><span className="text-[9px] font-black uppercase">More Actions</span>
-                  </button>
-                  <div className="absolute right-0 mt-2 w-56 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl opacity-0 invisible group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all z-50 py-2">
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-green-400 hover:bg-green-500/10" onClick={async () => { await db.bulkVerifyUsers(Array.from(selectedIds), true); setSelectedIds(new Set()); }}>Verify (KYC)</button>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-rose-400 hover:bg-rose-500/10" onClick={async () => { await db.bulkVerifyUsers(Array.from(selectedIds), false); setSelectedIds(new Set()); }}>Unverify (Remove KYC)</button>
-                     <div className="h-px bg-slate-800 my-1"></div>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-amber-500 hover:bg-amber-500/10" onClick={() => {
-                          setFlashConfirmText('');
-                          setFlashMonths(1);
-                          setIsBulkFlashModal(true);
-                      }}>Flash Reset</button>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => { setSelectedPkgId(''); setIsBulkPackageModal(true); }}>Assign / Change Plan</button>
-                     <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => setIsBulkGraceModal(true)}>Extend Plan</button>
-                     <div className="h-px bg-slate-800 my-1"></div>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10 flex justify-between items-center" onClick={async () => {
-                        setIsProcessing(true);
-                        await db.bulkSetAccountStatus(Array.from(selectedIds), UserStatus.SUSPENDED, "Bulk Pause by Admin");
-                        db.logNotification('all', 'success', 'Bulk Action', `Suspended ${selectedIds.size} accounts.`);
-                        setIsProcessing(false);
-                        setSelectedIds(new Set());
-                      }}>Pause Service <Clock size={12}/></button>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10 flex justify-between items-center" onClick={async () => {
-                        setIsProcessing(true);
-                        await db.bulkSetAccountStatus(Array.from(selectedIds), UserStatus.ACTIVE, "Bulk Resume by Admin");
-                        db.logNotification('all', 'success', 'Bulk Action', `Activated ${selectedIds.size} accounts.`);
-                        setIsProcessing(false);
-                        setSelectedIds(new Set());
-                      }}>Resume Service <Play size={12}/></button>
-                      <div className="h-px bg-slate-800 my-1"></div>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-green-400 hover:bg-green-500/10" onClick={async () => {
-                        const amt = prompt("Enter amount to ADD to each selected user balance:", "0");
-                        if (!amt) return;
-                        setIsProcessing(true);
-                        await db.bulkBalanceUpdate(Array.from(selectedIds), parseFloat(amt), true);
-                        db.logNotification('all', 'success', 'Bulk Balance', `Added ${amt} to ${selectedIds.size} accounts.`);
-                        setIsProcessing(false);
-                        setSelectedIds(new Set());
-                      }}>Add Balance</button>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-rose-400 hover:bg-rose-500/10" onClick={async () => {
-                        const amt = prompt("Enter amount to DEDUCT from each selected user balance:", "0");
-                        if (!amt) return;
-                        setIsProcessing(true);
-                        await db.bulkBalanceUpdate(Array.from(selectedIds), parseFloat(amt), false);
-                        db.logNotification('all', 'success', 'Bulk Balance', `Deducted ${amt} from ${selectedIds.size} accounts.`);
-                        setIsProcessing(false);
-                        setSelectedIds(new Set());
-                      }}>Deduct Balance</button>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-blue-400 hover:bg-blue-500/10" onClick={() => setIsApplyDiscountModal(true)}>Apply Discount</button>
-                      <div className="h-px bg-slate-800 my-1"></div>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => {
-                        setBulkTagInput('');
-                        setIsBulkTagModal(true);
-                      }}>Add Tag (VIP, Late...)</button>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => {
-                        setBulkTagInput('');
-                        setIsBulkTagModal(true);
-                      }}>Remove Tag</button>
-                      <div className="h-px bg-slate-800 my-1"></div>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => {
-                        const data = state.users.filter(u => selectedIds.has(u.id));
-                        const csv = "ID,Name,Phone,Package,Balance\n" + data.map(u => `${u.id},${u.name},${u.phone},${u.packageId},${u.balance}`).join("\n");
-                        const blob = new Blob([csv], { type: 'text/csv' });
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = `ClickOpticx_BulkExport_${new Date().toISOString().split('T')[0]}.csv`;
-                        a.click();
-                        setSelectedIds(new Set());
-                      }}>Export Users</button>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => setIsImportUsersModal(true)}>Import Users</button>
-                      <button className="w-full text-left px-4 py-2 text-[10px] font-black uppercase text-slate-300 hover:bg-slate-500/10" onClick={() => window.print()}>Download List</button>
-                  </div>
-               </div>
+              <button onClick={() => setIsApplyDiscountModal(true)} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+                 <Zap size={16} className="text-emerald-400"/><span className="text-white">Bonus</span>
+              </button>
+              <button onClick={() => { setBulkTagInput(''); setIsBulkTagModal(true); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+                 <Smartphone size={16} className="text-sky-400"/><span className="text-white">Mapping</span>
+              </button>
+              <button onClick={() => { if(confirm(`Confirm permanent erasure of ${selectedIds.size} accounts?`)) executeBulkPurge(); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 rounded-xl text-[9px] font-black uppercase tracking-widest border border-rose-500/20 text-rose-400 transition-all">
+                 <Trash2 size={16}/><span className="text-rose-400">Purge</span>
+              </button>
            </div>
-           <button onClick={() => setSelectedIds(new Set())} className="p-3 bg-white/10 hover:bg-white/20 rounded-xl text-slate-300 hover:text-white transition-all mx-auto sm:mx-0"><X size={18} /></button>
+           
+           <button onClick={() => setSelectedIds(new Set())} className="p-4 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all"><X size={20} /></button>
         </div>
       )}
 
-      {/* Main User Table */}
-      <div className="flex-1 flex flex-col relative w-full overflow-hidden">
-        <div className="scroll-x items-center gap-3 py-4 px-4 sm:px-8 border-b border-slate-50 bg-slate-50/50 shrink-0 no-scrollbar">
-          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.status === UserStatus.EXPIRED || (u.expiryDate && new Date(u.expiryDate) < new Date())).map(u => u.id)))} className="btn btn-secondary btn-sm !text-rose-600 !bg-rose-50 !border-rose-100">Select Expired</button>
-          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.balance > 0).map(u => u.id)))} className="btn btn-secondary btn-sm !text-amber-600 !bg-amber-50 !border-amber-100">Select Unpaid</button>
-          <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => !u.packageId).map(u => u.id)))} className="btn btn-secondary btn-sm">Select N/A</button>
-          <div className="h-4 w-px bg-slate-200 shrink-0"></div>
-          <button onClick={() => setSelectedIds(new Set())} className="btn btn-secondary btn-sm border-none !bg-transparent">Clear All</button>
+      {/* 5. Subscriber Data Registry */}
+      <div className="flex-1 flex flex-col relative w-full space-y-4">
+        <div className="flex items-center justify-between px-2 shrink-0">
+           <div className="flex items-center gap-6">
+              <button onClick={toggleSelectAll} className="flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-all">
+                 <div className="w-5 h-5 rounded-lg border-2 border-slate-200 flex items-center justify-center">
+                    {selectedIds.size === filteredUsers.length && filteredUsers.length > 0 && <CheckSquare size={16} className="text-indigo-600" />}
+                 </div>
+                 Select All ({filteredUsers.length})
+              </button>
+              <div className="h-4 w-px bg-slate-200"></div>
+              <div className="flex items-center gap-3">
+                 <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.status === UserStatus.EXPIRED).map(u => u.id)))} className="text-[9px] font-black text-rose-400 uppercase tracking-tighter hover:underline">Select Expired</button>
+                 <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.balance > 0).map(u => u.id)))} className="text-[9px] font-black text-amber-500 uppercase tracking-tighter hover:underline">Select Overdue</button>
+              </div>
+           </div>
+           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] italic">ClickOptix Registry Core • v4.0</p>
         </div>
         
-        <div className="table-container flex-1">
-          <table>
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full min-w-full">
+          <table className="w-full text-sm">
             <thead>
-              <tr>
-                <th className="w-10">
-                   <button onClick={toggleSelectAll} className="p-1 text-slate-300 hover:text-blue-600 transition-colors">
-                      {selectedIds.size === filteredUsers.length && filteredUsers.length > 0 ? <CheckSquare size={22} className="text-blue-600" /> : <Square size={22} />}
-                   </button>
-                </th>
-                <th>User Identity</th>
-                <th className="text-center">Connection ID</th>
-                <th>Status</th>
-                <th className="text-right">Balance</th>
-                <th className="text-right">Actions Management</th>
+              <tr className="!bg-slate-50 !border-b-2 !border-slate-100">
+                <th className="w-16 p-6"></th>
+                <th>Subscriber Identity</th>
+                <th className="text-center">Engine Access</th>
+                <th>Validation</th>
+                <th className="text-right">Ledger Status</th>
+                <th className="text-center pr-6">Mission Control</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-50">
               {filteredUsers.length === 0 ? (
                 <tr>
-                   <td colSpan={6} className="py-20 text-center">
-                      <div className="flex flex-col items-center justify-center opacity-30">
-                         <SearchCode size={64} className="mb-4" />
-                         <p className="text-sm font-black uppercase tracking-widest">No users found in current search</p>
+                   <td colSpan={6} className="py-32 text-center">
+                      <div className="flex flex-col items-center justify-center opacity-20">
+                         <SearchCode size={80} className="mb-6 text-indigo-500" />
+                         <p className="text-lg font-black uppercase tracking-[0.3em] text-slate-900">No Matched Records</p>
+                         <p className="text-xs font-bold text-slate-400 mt-2 uppercase">Adjust filters to broaden registry lookup</p>
                       </div>
                    </td>
                 </tr>
               ) : (
                 filteredUsers.map((user) => (
-                  <tr key={user.id} className={`${selectedIds.has(user.id) ? 'bg-blue-50/40' : ''}`}>
-                    <td>
-                       <button onClick={() => toggleSelect(user.id)} className={`p-1 transition-all ${selectedIds.has(user.id) ? 'text-blue-600 scale-110' : 'text-slate-200 hover:text-slate-400'}`}>
-                          {selectedIds.has(user.id) ? <CheckSquare size={20} /> : <Square size={20} />}
+                  <tr key={user.id} className={`group transition-all ${selectedIds.has(user.id) ? 'bg-indigo-50/50' : 'hover:bg-slate-50/50'}`}>
+                    <td className="p-6">
+                       <button onClick={() => toggleSelect(user.id)} className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all ${selectedIds.has(user.id) ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'border-slate-100 text-slate-100 hover:border-slate-300'}`}>
+                          {selectedIds.has(user.id) ? <CheckSquare size={16} /> : <div className="w-2 h-2 rounded-full bg-slate-100" />}
                        </button>
                     </td>
                     <td>
-                       <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${selectedIds.has(user.id) ? 'bg-blue-600 text-white border-blue-500 shadow-lg' : 'bg-white border-slate-100 text-slate-400'}`}>
-                             <UserCircle size={22}/>
+                       <div className="flex items-center gap-4">
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm group-hover:scale-110 transition-all ${selectedIds.has(user.id) ? 'bg-indigo-600 text-white' : 'bg-indigo-50 text-indigo-600'}`}>
+                             {user.name.charAt(0)}
                           </div>
-                          <div className="min-w-0">
-                             <div className="font-bold text-slate-900 text-sm truncate flex items-center gap-1">{user.name} {user.verifiedStatus?.identity && <ShieldCheck size={14} className="text-green-500" />}</div>
-                             <p className="text-[10px] text-slate-500 font-medium truncate">{user.phone}</p>
+                          <div>
+                             <p className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase italic">{user.name}</p>
+                             <p className="text-[9px] text-slate-400 font-black uppercase tracking-tighter mt-0.5">{user.phone} • {user.pppoeId || 'LNK_INTERNAL'}</p>
                           </div>
                        </div>
                     </td>
                     <td className="text-center">
-                      <span className="badge badge-info">{user.connectionId}</span>
+                       <div className="flex flex-col items-center gap-1">
+                          <span className="text-[10px] font-black text-slate-900 uppercase italic tracking-tighter">{user.connectionId || 'N/A'}</span>
+                          <span className={`inline-flex items-center gap-1 text-[7px] font-black uppercase px-2 py-0.5 rounded-lg ${user.status === UserStatus.ACTIVE ? 'bg-emerald-50 text-emerald-600' : user.status === UserStatus.EXPIRED ? 'bg-rose-50 text-rose-600' : user.status === UserStatus.NO_PLAN ? 'bg-slate-100 text-slate-500' : 'bg-amber-50 text-amber-600'}`}>
+                              {user.status === UserStatus.ACTIVE ? <Circle size={6} fill="currentColor" className="animate-pulse" /> : user.status === UserStatus.EXPIRED ? <Ban size={8} /> : user.status === UserStatus.NO_PLAN ? <SearchCode size={8} /> : <Clock size={8} />}
+                              {user.status}
+                           </span>
+                          {user.expiryDate ? (
+                            <span className={`text-[7px] font-black uppercase tracking-wider px-2 py-0.5 rounded-lg ${new Date(user.expiryDate) < new Date() ? 'bg-rose-50 text-rose-500' : 'bg-sky-50 text-sky-600'}`}>
+                              {new Date(user.expiryDate) < new Date() ? '⚠ ' : '✓ '}
+                              {new Date(user.expiryDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}
+                            </span>
+                          ) : (
+                            <span className="text-[7px] font-bold text-slate-300 uppercase">No Expiry</span>
+                          )}
+                       </div>
                     </td>
                     <td>
-                      <div className="flex items-center gap-2">
-                         <div className={`w-2 h-2 rounded-full shrink-0 ${user.status === UserStatus.ACTIVE ? 'bg-green-500' : user.status === UserStatus.GRACE_PERIOD ? 'bg-amber-500' : 'bg-rose-500'}`}></div>
-                         <span className="text-[10px] font-bold uppercase text-slate-600 whitespace-nowrap">{user.status}</span>
-                      </div>
+                       <div className="flex items-center gap-2">
+                          {user.verificationStatus === VerificationStatus.VERIFIED ? (
+                             <div className="flex items-center gap-2 font-black text-[9px] uppercase tracking-widest text-emerald-500">
+                                <ShieldCheck size={16} /> Secured
+                             </div>
+                          ) : (
+                             <div className="flex items-center gap-2 font-black text-[9px] uppercase tracking-widest text-amber-500">
+                                <ShieldAlert size={16} /> Audit
+                             </div>
+                          )}
+                       </div>
                     </td>
-                    <td className="text-right font-black text-slate-900">
-                      Rs. {user.balance.toLocaleString()}
+                    <td className="text-right">
+                       <p className={`text-sm font-black tabular-nums ${user.balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>Rs. {user.balance.toLocaleString()}</p>
+                       <p className={`text-[8px] font-black uppercase mt-1 tracking-widest ${user.balance > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{user.balance > 0 ? 'Pending Balance' : 'Cleared'}</p>
+                       {user.lastPaymentDate && <p className="text-[7px] font-bold text-slate-300 mt-0.5">Last: {new Date(user.lastPaymentDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</p>}
                     </td>
-                    <td>
-                      <div className="flex flex-wrap items-center justify-end gap-2 max-w-[200px] ml-auto">
-                        {!user.isKYCVerified ? (
-                           <button onClick={() => handleAction(user, 'verify')} className="btn btn-icon btn-sm btn-secondary" title="Verify Identity"><ShieldCheck size={16} /></button>
-                        ) : (
-                           <button onClick={() => handleAction(user, 'unverify')} className="btn btn-icon btn-sm btn-danger !bg-rose-50 border-rose-100 !text-rose-600" title="Unverify"><ShieldAlert size={16} /></button>
-                        )}
-                        <button onClick={() => handleAction(user, 'edit')} className="btn btn-icon btn-sm btn-secondary" title="Edit Profile"><Pencil size={16} /></button>
-                        <button onClick={() => handleAction(user, 'reset')} className="btn btn-icon btn-sm btn-secondary" title="Reset Secret"><LockKeyhole size={16} /></button>
-                        <button onClick={() => handleAction(user, 'package')} className="btn btn-icon btn-sm btn-primary" title="Setup Connection"><PackageIcon size={16} /></button>
-                        <button onClick={() => handleAction(user, 'payment')} className="btn btn-icon btn-sm !bg-green-600 !text-white" title="Collect Cash"><Banknote size={16} /></button>
-                        <button onClick={() => handleAction(user, 'view')} className="btn btn-icon btn-sm btn-secondary" title="Full Profile"><Eye size={16} /></button>
-                        <button onClick={() => handleAction(user, 'suspend')} className="btn btn-icon btn-sm btn-danger" title="Suspend"><Ban size={16} /></button>
-                      </div>
+                    <td className="text-center pr-6">
+                       <div className="flex items-center justify-center gap-1.5">
+                          <button onClick={() => handleAction(user, 'view')} className="p-2.5 bg-blue-100 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm" title="Full 360 View"><Eye size={16}/></button>
+                          <button onClick={() => handleAction(user, 'edit')} className="p-2.5 bg-amber-100 hover:bg-amber-600 text-amber-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm" title="Dossier Edit"><Pencil size={16}/></button>
+                          <button onClick={() => handleAction(user, 'package')} className="p-2.5 bg-violet-100 hover:bg-violet-600 text-violet-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm" title="Service Provisioning"><PackageIcon size={16}/></button>
+                          <button onClick={() => handleAction(user, 'payment')} className="p-2.5 bg-emerald-100 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm" title="Collect Payment"><Banknote size={16}/></button>
+                          <button onClick={() => handleAction(user, 'emergency_auth')} className="p-2.5 bg-rose-100 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm" title="Emergency Auth Reset"><ShieldCheck size={16}/></button>
+                       </div>
                     </td>
                   </tr>
                 ))
@@ -793,7 +787,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                 <div className="space-y-4 animate-in slide-in-from-top-2">
                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Payment Method</label>
                    <div className="grid grid-cols-4 gap-2">
-                      {['Cash', 'Bank', 'Stripe', 'EasyPaisa'].map(m => (
+                      {[PaymentMethod.CASH, 'Bank', 'Stripe', 'EasyPaisa'].map(m => (
                         <button key={m} onClick={() => setSelectedMethod(m as any)} className={`py-4 rounded-xl border-2 text-[9px] font-black uppercase tracking-widest transition-all ${selectedMethod === m ? 'bg-green-600 border-green-600 text-white shadow-lg' : 'bg-slate-50 border-transparent text-slate-500'}`}>{m}</button>
                       ))}
                    </div>
@@ -866,7 +860,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
          <div className="space-y-4 mb-6">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Payment Method</label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-               {['Cash', 'Bank', 'EasyPaisa', 'JazzCash'].map(m => (
+               {[PaymentMethod.CASH, 'Bank', 'EasyPaisa', 'JazzCash'].map(m => (
                  <button key={m} onClick={() => setSelectedMethod(m as any)} className={`py-4 rounded-2xl border-2 font-black text-[10px] uppercase transition-all ${selectedMethod === m ? 'bg-green-600 border-green-600 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'}`}>{m}</button>
                ))}
             </div>
@@ -893,13 +887,57 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
         confirmLabel="Save Changes"
         isLoading={isProcessing}
       >
-         <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Identity Name</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.name} onChange={e => setEditUserData({...editUserData, name: e.target.value})} /></div>
-            <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.phone} onChange={e => setEditUserData({...editUserData, phone: e.target.value})} /></div>
-            <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CNIC</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.cnic} onChange={e => setEditUserData({...editUserData, cnic: e.target.value})} /></div>
-            <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Login Username</label><input className="w-full p-4 bg-slate-50 border rounded-xl font-bold" value={editUserData.username} onChange={e => setEditUserData({...editUserData, username: e.target.value})} /></div>
+         <div className="space-y-5 mb-4">
+            {/* Row 1: Identity */}
+            <div>
+               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 flex items-center gap-2"><UserCircle size={12}/> Identity</p>
+               <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.name} onChange={e => setEditUserData({...editUserData, name: e.target.value})} /></div>
+                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.phone} onChange={e => setEditUserData({...editUserData, phone: e.target.value})} /></div>
+                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CNIC</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.cnic} onChange={e => setEditUserData({...editUserData, cnic: e.target.value})} /></div>
+                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label><input type="email" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.email || ''} onChange={e => setEditUserData({...editUserData, email: e.target.value})} /></div>
+               </div>
+            </div>
+
+            {/* Row 2: Network */}
+            <div className="border-t border-slate-100 pt-5">
+               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 flex items-center gap-2"><Zap size={12}/> Network Config</p>
+               <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Connection ID</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 font-mono focus:border-violet-400 outline-none transition-all" value={editUserData.connectionId || ''} onChange={e => setEditUserData({...editUserData, connectionId: e.target.value})} /></div>
+                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PPPoE Username</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 font-mono focus:border-violet-400 outline-none transition-all" value={editUserData.pppoeId || ''} onChange={e => setEditUserData({...editUserData, pppoeId: e.target.value})} /></div>
+                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Area</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-violet-400 outline-none transition-all" value={editUserData.area || ''} onChange={e => setEditUserData({...editUserData, area: e.target.value})} /></div>
+                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Login Username</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-violet-400 outline-none transition-all" value={editUserData.username || ''} onChange={e => setEditUserData({...editUserData, username: e.target.value})} /></div>
+               </div>
+            </div>
+
+            {/* Row 3: Status & Billing */}
+            <div className="border-t border-slate-100 pt-5">
+               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 flex items-center gap-2"><Calendar size={12}/> Status & Billing</p>
+               <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Account Status</label>
+                     <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 focus:border-rose-400 outline-none transition-all text-sm" value={editUserData.status} onChange={e => setEditUserData({...editUserData, status: e.target.value as UserStatus})}>
+                        {Object.values(UserStatus).map(s => <option key={s} value={s}>{s}</option>)}
+                     </select>
+                  </div>
+                  <div className="space-y-1">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Expiry Date</label>
+                     <input type="date" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 focus:border-rose-400 outline-none transition-all" value={editUserData.expiryDate ? editUserData.expiryDate.split('T')[0] : ''} onChange={e => setEditUserData({...editUserData, expiryDate: e.target.value})} />
+                  </div>
+               </div>
+            </div>
+
+            {/* Row 4: Address */}
+            <div className="border-t border-slate-100 pt-5">
+               <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Address</label><textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold h-20 text-slate-900 focus:border-indigo-400 outline-none transition-all resize-none" value={editUserData.address} onChange={e => setEditUserData({...editUserData, address: e.target.value})} /></div>
+            </div>
+
+            {/* Row 5: Internal Notes */}
+            <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
+               <label className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-2 block flex items-center gap-1"><Info size={10}/> Internal Admin Notes</label>
+               <textarea className="w-full p-3 bg-white border border-amber-100 rounded-xl font-bold text-sm text-slate-900 h-16 outline-none focus:border-amber-400 transition-all resize-none" placeholder="Private notes visible only to admins..." value={editUserData.internalNotes || ''} onChange={e => setEditUserData({...editUserData, internalNotes: e.target.value})} />
+            </div>
          </div>
-         <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Address</label><textarea className="w-full p-4 bg-slate-50 border rounded-xl font-bold h-24" value={editUserData.address} onChange={e => setEditUserData({...editUserData, address: e.target.value})} /></div>
       </Modal>
 
       {/* 5. AUTH RESET MODAL */}
@@ -927,6 +965,85 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                   {showNewPass ? <EyeOff size={24}/> : <Eye size={24}/>}
                </button>
             </div>
+         </div>
+      </Modal>
+      
+      {/* 5A. EMERGENCY AUTH RESET MODAL (CSAE) */}
+      <Modal
+        isOpen={isEmergencyAuthModal && !!selectedUser}
+        onClose={() => setIsEmergencyAuthModal(false)}
+        title="Emergency Auth Reset"
+        icon={<LockKeyhole size={22} className="text-rose-500" />}
+        maxWidth="max-w-md"
+        onConfirm={async () => {
+           setIsProcessing(true);
+           const res = await db.adminEmergencyAuthReset(selectedUserId!, emergencyAuthMode, emergencyAuthMode === 'TempPassword' ? newAuthSecret : undefined);
+           setIsProcessing(false);
+           if (res.success) {
+              setIsEmergencyAuthModal(false);
+              setNewAuthSecret('');
+              setIsSuccessModal(true);
+           } else {
+              alert(res.message);
+           }
+        }}
+        confirmLabel={emergencyAuthMode === 'Link' ? "Dispatch Smart Link" : "Establish Force Password"}
+        isLoading={isProcessing || (emergencyAuthMode === 'TempPassword' && !newAuthSecret)}
+      >
+         <div className="space-y-6">
+            <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+               <div className="flex items-center gap-3 mb-2">
+                  <ShieldAlert className="text-rose-600" size={18} />
+                  <h4 className="text-[10px] font-black text-rose-900 uppercase tracking-widest leading-none">Emergency Override Active</h4>
+               </div>
+               <p className="text-[9px] font-bold text-rose-500 uppercase leading-relaxed italic">Administrative reset for {selectedUser?.name}. All active sessions will be invalidated upon protocol completion.</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+               <button 
+                  onClick={() => setEmergencyAuthMode('Link')}
+                  className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${emergencyAuthMode === 'Link' ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-slate-50 border-slate-100 text-slate-500'}`}
+               >
+                  <Cpu size={20} />
+                  <span className="text-[9px] font-black uppercase">CSAE Smart Link</span>
+               </button>
+               <button 
+                  onClick={() => setEmergencyAuthMode('TempPassword')}
+                  className={`p-4 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${emergencyAuthMode === 'TempPassword' ? 'bg-rose-600 border-rose-600 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-50 border-slate-100 text-slate-500'}`}
+               >
+                  <Key size={20} />
+                  <span className="text-[9px] font-black uppercase">Force Password</span>
+               </button>
+            </div>
+
+            {emergencyAuthMode === 'Link' ? (
+               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
+                  <p className="text-[10px] font-black text-slate-700 uppercase tracking-widest">Protocol Detail:</p>
+                  <p className="text-[9px] font-medium text-slate-500 leading-relaxed uppercase">Dispatches a secure, one-time reset link via optimal provider (Firebase/Email/WhatsApp) based on real-time delivery health.</p>
+               </div>
+            ) : (
+               <div className="space-y-4">
+                  <div className="space-y-2">
+                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Set Force Password</label>
+                     <div className="relative">
+                        <input 
+                           type={showNewPass ? 'text' : 'password'}
+                           className="w-full p-5 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-2xl outline-none focus:border-rose-500 transition-all text-center"
+                           value={newAuthSecret}
+                           onChange={e => setNewAuthSecret(e.target.value)}
+                           placeholder="••••••••"
+                        />
+                        <button onClick={() => setShowNewPass(!showNewPass)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors">
+                           {showNewPass ? <EyeOff size={24}/> : <Eye size={24}/>}
+                        </button>
+                     </div>
+                  </div>
+                  <div className="p-3 bg-amber-50 text-amber-700 rounded-xl flex items-center gap-2">
+                     <AlertCircle size={14} />
+                     <p className="text-[8px] font-black uppercase tracking-widest">User will be forced to rotate at next login.</p>
+                  </div>
+               </div>
+            )}
          </div>
       </Modal>
 
@@ -984,7 +1101,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       >
          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
             {/* Subscriber Identity */}
-            <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-6">
                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><User size={14} className="text-blue-500"/> Contact Details</h4>
                <div className="space-y-4">
                   <div className="flex items-center gap-3"><Smartphone size={16} className="text-slate-300"/><span className="text-xs font-bold text-slate-800">{selectedUser?.phone}</span></div>
@@ -995,7 +1112,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
             </div>
 
             {/* Fiscal Record */}
-            <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-6">
                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><DollarSign size={14} className="text-green-500"/> Billing Summary</h4>
                <div className="space-y-6">
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
@@ -1010,7 +1127,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
             </div>
 
             {/* Network Link Layer */}
-            <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-6">
                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 border-b border-slate-50 pb-4 italic"><Wifi size={14} className="text-blue-500"/> Link Layer</h4>
                <div className="space-y-4">
                   <div className="flex justify-between items-center">
@@ -1031,7 +1148,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
 
          {/* History Panels */}
          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-4">
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[400px]">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col min-h-[400px]">
                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 italic"><FileText size={16} className="text-blue-500"/> Invoice History</h4>
                </div>
@@ -1046,7 +1163,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                </div>
             </div>
 
-            <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[400px]">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col min-h-[400px]">
                <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 italic"><Layers size={16} className="text-blue-500"/> Payment History</h4>
                </div>

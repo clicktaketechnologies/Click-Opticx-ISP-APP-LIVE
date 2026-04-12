@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { AppState, Role, PaymentMethod, PaymentStatus, PaymentRecord, StaffUser, UserStatus } from '../types';
 import { db } from '../db';
 import {
-  CheckCircle, Clock, Plus, Wallet, ShieldCheck, X, Filter, Search, Info,
+  CheckCircle, Clock, Plus, Wallet, ShieldCheck, X, Filter, Search, Info, AlertTriangle,
   Users, UserCheck, ShieldAlert, BadgeDollarSign, ArrowRightLeft, Landmark, HandCoins, Building2, History, ChevronRight, UserCircle, ExternalLink, Activity, CreditCard, Zap, TrendingUp, XCircle, Shield
 } from 'lucide-react';
 import Modal from '../components/shared/Modal';
@@ -12,7 +12,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
   const [activeTab, setActiveTab] = useState<'collections' | 'approvals' | 'approvals_history' | 'team' | 'dealers'>('approvals');
   const [paymentModal, setPaymentModal] = useState<string | null>(null);
   const [amount, setAmount] = useState(0);
-  const [method, setMethod] = useState<PaymentMethod>('Cash');
+  const [method, setMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [selectedStaff, setSelectedStaff] = useState<StaffUser | null>(null);
@@ -72,7 +72,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
           <Clock className="text-blue-500" size={14} />
           Incoming Validation Queue
         </h3>
-        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[300px]">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-[300px]">
           {pendingPayments.length === 0 ? (
             <div className="p-20 text-center flex flex-col items-center">
               <ShieldCheck size={56} className="text-slate-100 mb-6" />
@@ -125,7 +125,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
           <span className="text-[10px] font-black text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase">{filteredUnpaidInvoices.length} Dues</span>
         </div>
 
-        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[300px]">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col min-h-[300px]">
           <div className="p-6 bg-slate-50/50 border-b border-slate-100 flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -163,8 +163,9 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                       <p className="font-black text-slate-900 uppercase tracking-tight text-lg leading-none mb-1">{inv.userName}</p>
                       <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">{inv.packageName}</p>
                       <div className="flex items-center gap-3 mt-3">
-                        <p className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${inv.status === PaymentStatus.OVERDUE ? 'bg-red-50 text-red-600' : 'bg-orange-50 text-orange-600'}`}>
-                          Rs. {(inv.totalAmount - inv.paidAmount).toLocaleString()} {inv.status}
+                        <p className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${inv.status === PaymentStatus.OVERDUE ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'}`}>
+                          {inv.status === PaymentStatus.OVERDUE ? <AlertTriangle size={11} /> : <Clock size={11} />}
+                          Rs. {(inv.totalAmount - inv.paidAmount).toLocaleString()} · {inv.status}
                         </p>
                       </div>
                     </div>
@@ -211,7 +212,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {pendingRequests.map(req => (
-              <div key={req.id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col">
+              <div key={req.id} className="bg-white rounded-xl shadow-sm border border-slate-200 hover:shadow-md transition-all flex flex-col overflow-hidden">
                 <div className="p-8 flex justify-between items-start">
                   <div className="flex items-center gap-5">
                     <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${
@@ -297,7 +298,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
           { label: 'Total O/S', value: db.getFiscalSummary(new Date(0), new Date()).totalUnpaidBalance, icon: ShieldAlert, color: 'bg-rose-600' },
           { label: 'Active Plans', value: state.users.filter(u => u.status === UserStatus.ACTIVE).length, icon: Zap, color: 'bg-blue-600' }
         ].map((s, idx) => (
-          <div key={idx} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
+          <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
             <div>
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
               <p className="text-xl font-black text-slate-900 mt-1">{typeof s.value === 'number' ? `Rs. ${s.value.toLocaleString()}` : s.value}</p>
@@ -354,7 +355,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
               </div>
            </div>
            
-           <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden min-h-[400px]">
+           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full min-w-full">
               <table className="w-full text-left">
                  <thead className="bg-slate-50 border-b">
                     <tr>
@@ -418,7 +419,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
       {activeTab === 'team' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {teamRecovery.map(member => (
-            <div key={member.email} className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-sm group hover:shadow-xl transition-all relative overflow-hidden">
+            <div key={member.email} className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 group hover:shadow-md transition-all relative overflow-hidden">
               <div className="flex justify-between items-start mb-8 relative z-10">
                 <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 border border-slate-100 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
                   <UserCircle size={32} />
@@ -472,7 +473,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
         onClose={() => setSelectedStaff(null)}
         title={selectedStaff?.name || 'Staff Audit'}
         type="info"
-        icon={<History size={24} className="text-white" />}
+        icon={<History size={24} className="text-blue-500" />}
         maxWidth="max-w-2xl"
         footer={
           canSettle && selectedStaff && settlementStats[selectedStaff.email]?.pending > 0 ? (
@@ -488,11 +489,11 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
       >
         <div className="space-y-10">
           <div className="grid grid-cols-2 gap-6">
-            <div className="bg-slate-950 p-8 rounded-[2rem] border border-slate-800 shadow-inner group">
+            <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 shadow-inner group">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Unsettled Cash</p>
               <p className="text-3xl font-black text-rose-500 tracking-tighter">Rs. {selectedStaff ? (settlementStats[selectedStaff.email]?.pending.toLocaleString() || 0) : 0}</p>
             </div>
-            <div className="bg-slate-950 p-8 rounded-[2rem] border border-slate-800 shadow-inner group">
+            <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 shadow-inner group">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Total Attributed</p>
               <p className="text-3xl font-black text-green-500 tracking-tighter">Rs. {selectedStaff ? (settlementStats[selectedStaff.email]?.total.toLocaleString() || 0) : 0}</p>
             </div>
@@ -553,7 +554,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
         onClose={() => setPaymentModal(null)}
         title="Log Collection"
         type="success"
-        icon={<HandCoins size={24} className="text-white" />}
+        icon={<HandCoins size={24} className="text-blue-500" />}
         maxWidth="max-w-lg"
         footer={
           <button 
@@ -572,7 +573,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                  <span className="absolute left-8 top-1/2 -translate-y-1/2 text-slate-500 font-black text-2xl">{state.settings.currency}</span>
                  <input
                    type="number"
-                   className="w-full pl-20 pr-8 py-8 bg-slate-950 border border-slate-800 rounded-[2.5rem] font-black text-4xl outline-none focus:border-green-500 transition-all text-white shadow-inner"
+                   className="w-full pl-20 pr-5 py-5 bg-slate-950 border border-slate-800 rounded-xl font-bold text-4xl outline-none focus:border-green-500 transition-all text-white shadow-inner"
                    value={amount}
                    onChange={(e) => setAmount(Number(e.target.value))}
                  />
@@ -582,7 +583,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block ml-1 italic">Payment Protocol</label>
               <div className="grid grid-cols-2 gap-3">
                  {[
-                   { id: 'Cash', label: 'Cash Entry', icon: Landmark },
+                   { id: PaymentMethod.CASH, label: 'Cash Entry', icon: Landmark },
                    { id: 'Online', label: 'Digital Transfer', icon: CreditCard },
                    { id: 'Bank', label: 'Bank Direct', icon: Landmark },
                    { id: 'Home Collection', label: 'Field Pickup', icon: HandCoins }

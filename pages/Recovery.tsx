@@ -29,7 +29,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [activeUser, setActiveUser] = useState<ISPUser | null>(null);
     const [paymentAmount, setPaymentAmount] = useState(0);
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Cash');
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
     const [paymentType, setPaymentType] = useState<'Full' | 'Half' | 'Custom'>('Full');
     const [promiseDate, setPromiseDate] = useState('');
     const [paymentStatus, setPaymentStatus] = useState<'Paid' | 'Unpaid' | 'Half' | 'Emergency'>('Paid');
@@ -938,7 +938,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         onClose={() => setIsSuspendModalOpen(false)}
         title="Isolation Protocol"
         type="error"
-        icon={<Lock size={24} className="text-white" />}
+        icon={<Lock size={24} className="text-blue-500" />}
         maxWidth="max-w-xl"
         footer={
           <div className="flex gap-4 w-full">
@@ -983,7 +983,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         onClose={() => setIsPaymentModalOpen(false)}
         title="Collection Protocol"
         type="info"
-        icon={<Receipt size={24} className="text-white" />}
+        icon={<Receipt size={24} className="text-blue-500" />}
         maxWidth="max-w-5xl"
         footer={
           <div className="flex gap-4 w-full">
@@ -1130,7 +1130,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         onClose={() => setIsAdvancedModalOpen(false)}
         title="Advanced Override"
         type="info"
-        icon={<Zap size={24} className="text-white" />}
+        icon={<Zap size={24} className="text-blue-500" />}
         maxWidth="max-w-2xl"
         footer={
           <button 
@@ -1218,7 +1218,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         onClose={() => setIsAuditModalOpen(false)}
         title="Identity Audit"
         type="info"
-        icon={<FileText size={24} className="text-white" />}
+        icon={<FileText size={24} className="text-blue-500" />}
         maxWidth="max-w-5xl"
         footer={
           <div className="flex gap-4 w-full">
@@ -1315,7 +1315,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         onClose={() => setIsBulkUnpaidModalOpen(false)}
         title="Fiscal Arrears Protocol"
         type="error"
-        icon={<BadgeDollarSign size={24} className="text-white" />}
+        icon={<BadgeDollarSign size={24} className="text-blue-500" />}
         maxWidth="max-w-2xl"
         footer={
           <button 
@@ -1409,7 +1409,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         onClose={() => setIsBulkActivateModalOpen(false)}
         title="Activation Command"
         type="success"
-        icon={<Zap size={24} className="text-white" />}
+        icon={<Zap size={24} className="text-blue-500" />}
         maxWidth="max-w-2xl"
         footer={
           <button 
@@ -1491,7 +1491,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         onClose={() => setIsBulkPromiseModalOpen(false)}
         title="Batch Promise Registry"
         type="confirm"
-        icon={<Clock size={24} className="text-white" />}
+        icon={<Clock size={24} className="text-blue-500" />}
         maxWidth="max-w-xl"
         footer={
           <button 
@@ -1527,7 +1527,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         onClose={() => setIsBulkFlashModalOpen(false)}
         title="Account Flash Reset"
         type="error"
-        icon={<Zap size={24} className="text-white" />}
+        icon={<Zap size={24} className="text-blue-500" />}
         maxWidth="max-w-xl"
         footer={
           <button 
@@ -1589,7 +1589,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
         onClose={() => setIsAssignCollectorModalOpen(false)}
         title="Assign Team Member"
         type="info"
-        icon={<UserCheck size={24} className="text-white" />}
+        icon={<UserCheck size={24} className="text-blue-500" />}
         maxWidth="max-w-lg"
         footer={
           <button 

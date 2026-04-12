@@ -18,11 +18,12 @@ import {
 
 interface Props {
   onComplete?: (results: any) => void;
+  onClose?: () => void;
   className?: string;
   isModal?: boolean;
 }
 
-const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) => {
+const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isModal }) => {
   const [isTesting, setIsTesting] = useState(false);
   const [phase, setPhase] = useState<'idle' | 'ping' | 'download' | 'upload' | 'completed'>('idle');
   const [statusText, setStatusText] = useState('Network Ready');
@@ -38,6 +39,7 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
     packetLoss: 0
   });
 
+  const [history, setHistory] = useState<any[]>([]);
   const [graphData, setGraphData] = useState<any[]>([]);
   const graphTick = useRef(0);
 
@@ -91,6 +93,7 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
       // Finalize
       setPhase('completed');
       setStatusText('Test Finalized');
+      setHistory(prev => [{ id: Date.now(), dl: dlRes, ul: ulRes, ping: pingResults.ping }, ...prev]);
       
       if (onComplete) {
         try {
@@ -126,7 +129,7 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
   const currentSpeed = phase === 'upload' ? results.ul : results.dl;
 
   return (
-    <div className={`speedtest-modal w-full bg-white text-[#0F172A] rounded-[2rem] border-2 border-slate-100 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col ${isModal ? 'max-h-[85vh] overflow-y-auto' : ''} ${className}`} style={{ backgroundColor: '#FFFFFF', color: '#0F172A' }}>
+    <div className={`speedtest-modal w-full bg-white text-[#0F172A] rounded-[2rem] border-2 border-slate-100 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col lg:flex-row ${isModal ? 'max-h-[85vh] overflow-y-auto lg:overflow-hidden' : ''} ${className}`} style={{ backgroundColor: '#FFFFFF', color: '#0F172A' }}>
       
       {/* Visual Identity Strip */}
       <div className="h-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 absolute top-0 left-0 right-0 z-50"></div>
@@ -269,15 +272,23 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
         {/* Footer Hardware & Result Bar */}
         <div className="flex flex-col md:flex-row gap-5 items-stretch md:items-center pt-6 border-t border-slate-100">
            
-           <div className="flex-1">
+           <div className="flex-1 flex flex-col sm:flex-row gap-3">
               <button 
                 onClick={phase === 'completed' ? reset : startTest}
                 disabled={isTesting}
-                className={`w-full py-5 ${phase === 'completed' ? 'bg-indigo-600 shadow-indigo-200' : 'bg-blue-600 shadow-blue-200'} text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] italic shadow-2xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-50`}
+                className={`flex-1 py-5 ${phase === 'completed' ? 'bg-indigo-600 shadow-indigo-200' : 'bg-blue-600 shadow-blue-200'} text-white rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-[0.3em] italic shadow-2xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-50`}
               >
                  {isTesting ? <MiniLoader /> : phase === 'completed' ? <RefreshCw size={20} /> : <Play size={20} fill="currentColor" />}
-                 {isTesting ? 'Initializing Diagnostics' : phase === 'completed' ? 'Restart Diagnostic Engine' : 'Start Diagnostic Engine'}
+                 {isTesting ? 'Initializing' : phase === 'completed' ? 'Restart Test' : 'Start Engine'}
               </button>
+              {phase === 'completed' && onClose && (
+                <button 
+                  onClick={onClose}
+                  className="flex-1 py-5 bg-slate-950 text-white rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-[0.3em] italic shadow-2xl hover:bg-slate-900 active:scale-[0.98] transition-all flex items-center justify-center gap-4"
+                >
+                  <CheckCircle2 size={20} /> Close Test
+                </button>
+              )}
            </div>
 
            {insight && (
@@ -298,7 +309,40 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, className, isModal }) =
            <div className="flex items-center gap-2"><Cpu size={10} /> Hardware Layer v3.2.1</div>
            <div className="flex items-center gap-2"><Lock size={10} /> Secure Encryption</div>
         </div>
+        </div>
+
+      {/* History Sidebar */}
+      <div className="lg:w-80 bg-slate-50 border-t lg:border-t-0 lg:border-l border-slate-100 p-6 flex flex-col shrink-0 lg:max-h-[85vh] overflow-hidden">
+          <h4 className="text-sm font-black uppercase text-slate-800 tracking-tighter mb-6 flex items-center gap-2"><HistoryIcon size={18} className="text-blue-500"/> Test History</h4>
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+            {history.length === 0 ? (
+                <div className="text-center py-10 opacity-50 space-y-2">
+                    <Activity size={32} className="mx-auto text-slate-400"/>
+                    <p className="text-[10px] uppercase font-black tracking-widest text-slate-500">No Records Found</p>
+                </div>
+            ) : history.map(item => (
+                <div key={item.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group">
+                    <div className="flex justify-between items-center mb-3">
+                        <span className="text-[9px] font-black uppercase text-slate-400">{new Date(item.id).toLocaleTimeString()}</span>
+                        <div className="flex items-center gap-1 text-[9px] font-black text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md">
+                            <Zap size={10}/> {item.ping}ms
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                         <div className="flex flex-col">
+                            <span className="text-[8px] font-bold uppercase text-slate-400 mb-0.5">Download</span>
+                            <div className="flex items-center gap-1.5"><ArrowDownCircle size={16} className="text-blue-500"/> <span className="font-black text-lg text-slate-800 italic leading-none">{item.dl.toFixed(1)}</span></div>
+                         </div>
+                         <div className="flex flex-col items-end">
+                            <span className="text-[8px] font-bold uppercase text-slate-400 mb-0.5">Upload</span>
+                            <div className="flex items-center gap-1.5"><ArrowUpCircle size={16} className="text-emerald-500"/> <span className="font-black text-lg text-slate-800 italic leading-none">{item.ul.toFixed(1)}</span></div>
+                         </div>
+                    </div>
+                </div>
+            ))}
+          </div>
       </div>
+
     </div>
   );
 };
