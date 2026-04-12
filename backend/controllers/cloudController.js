@@ -1,5 +1,4 @@
-const CloudAccount = require('../models/CloudAccount');
-const KYC = require('../models/KYC');
+const admin = require('firebase-admin');
 const googleDriveService = require('../services/googleDriveService');
 const cloudinaryService = require('../services/cloudinaryService');
 const supabaseService = require('../services/supabaseService');
@@ -17,20 +16,38 @@ exports.googleCallback = async (req, res) => {
         const tokens = await googleDriveService.getTokens(code);
         
         const email = 'admin@clickopticx.com'; 
+        const db = admin.firestore();
+        
+        const querySnapshot = await db.collection('cloud_accounts')
+            .where('provider', '==', 'Google Drive')
+            .where('email', '==', email)
+            .limit(1)
+            .get();
 
-        const account = await CloudAccount.findOneAndUpdate(
-            { provider: 'Google Drive', email },
-            { 
-                access_token: tokens.access_token,
-                refresh_token: tokens.refresh_token,
-                expiry_date: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
-                status: 'VERIFIED',
-                loginMethod: 'OAuth',
-                last_tested: new Date()
-            },
-            { upsert: true, new: true }
-        );
+        const accountData = { 
+            provider: 'Google Drive',
+            email,
+            access_token: tokens.access_token,
+            refresh_token: tokens.refresh_token,
+            expiry_date: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+            status: 'VERIFIED',
+            loginMethod: 'OAuth',
+            last_tested: admin.firestore.FieldValue.serverTimestamp()
+        };
 
+        let accountId;
+        if (!querySnapshot.empty) {
+            accountId = querySnapshot.docs[0].id;
+            await db.collection('cloud_accounts').doc(accountId).update(accountData);
+        } else {
+            const docRef = await db.collection('cloud_accounts').add({
+                ...accountData,
+                created_at: admin.firestore.FieldValue.serverTimestamp()
+            });
+            accountId = docRef.id;
+        }
+
+        const account = { id: accountId, ...accountData };
         const io = req.app.get('socketio');
         io.emit('account_updated', account);
 
@@ -44,18 +61,21 @@ exports.googleCallback = async (req, res) => {
 exports.saveAccount = async (req, res) => {
     try {
         const { provider, loginMethod, email, api_key, secret, endpoint } = req.body;
+        const db = admin.firestore();
         
-        const account = new CloudAccount({
+        const accountData = {
             provider,
             loginMethod,
             email,
             api_key,
             secret,
             endpoint,
-            status: 'Connected'
-        });
+            status: 'Connected',
+            created_at: admin.firestore.FieldValue.serverTimestamp()
+        };
 
-        await account.save();
+        const docRef = await db.collection('cloud_accounts').add(accountData);
+        const account = { id: docRef.id, ...accountData };
         
         const io = req.app.get('socketio');
         io.emit('account_updated', account);
@@ -70,8 +90,11 @@ exports.updateAccount = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
+        const db = admin.firestore();
         
-        const account = await CloudAccount.findByIdAndUpdate(id, updates, { new: true });
+        await db.collection('cloud_accounts').doc(id).update(updates);
+        const doc = await db.collection('cloud_accounts').doc(id).get();
+        const account = { id: doc.id, ...doc.data() };
         
         const io = req.app.get('socketio');
         io.emit('account_updated', account);
@@ -85,7 +108,8 @@ exports.updateAccount = async (req, res) => {
 exports.deleteAccount = async (req, res) => {
     try {
         const { id } = req.params;
-        await CloudAccount.findByIdAndDelete(id);
+        const db = admin.firestore();
+        await db.collection('cloud_accounts').doc(id).delete();
         
         const io = req.app.get('socketio');
         io.emit('account_deleted', { id });
@@ -99,8 +123,11 @@ exports.deleteAccount = async (req, res) => {
 exports.testConnection = async (req, res) => {
     try {
         const { id } = req.body;
-        const account = await CloudAccount.findById(id);
-        if (!account) return res.status(404).json({ success: false, message: 'Account not found' });
+        const db = admin.firestore();
+        const doc = await db.collection('cloud_accounts').doc(id).get();
+        
+        if (!doc.exists) return res.status(404).json({ success: false, message: 'Account not found' });
+        const account = { id: doc.id, ...doc.data() };
 
         let testResult = { success: false, status: 'FAILED' };
 
@@ -109,7 +136,6 @@ exports.testConnection = async (req, res) => {
                 access_token: account.access_token,
                 refresh_token: account.refresh_token
             });
-            // Try list files
             try {
                 const drive = googleDriveService.getDrive();
                 await drive.files.list({ pageSize: 1 });
@@ -125,14 +151,18 @@ exports.testConnection = async (req, res) => {
             testResult = await supabaseService.testConnection();
         }
 
-        account.status = testResult.status;
-        account.last_tested = new Date();
-        await account.save();
+        const updateData = {
+            status: testResult.status,
+            last_tested: admin.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await db.collection('cloud_accounts').doc(id).update(updateData);
+        const updatedAccount = { ...account, ...updateData };
 
         const io = req.app.get('socketio');
-        io.emit('account_updated', account);
+        io.emit('account_updated', updatedAccount);
 
-        res.json({ success: true, status: account.status, message: testResult.message });
+        res.json({ success: true, status: updatedAccount.status, message: testResult.message });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -141,11 +171,12 @@ exports.testConnection = async (req, res) => {
 exports.syncAccount = async (req, res) => {
     try {
         const { id } = req.body;
-        const account = await CloudAccount.findById(id);
-        if (!account) return res.status(404).json({ success: false, message: 'Account not found' });
+        const db = admin.firestore();
+        const doc = await db.collection('cloud_accounts').doc(id).get();
+        if (!doc.exists) return res.status(404).json({ success: false, message: 'Account not found' });
+        const account = { id: doc.id, ...doc.data() };
 
-        // Simulate or fetch real quota
-        let quota = { used: 0, total: 15 * 1024 * 1024 * 1024 }; // Default 15GB
+        let quota = { used: 0, total: 15 * 1024 * 1024 * 1024 }; 
 
         if (account.provider === 'Google Drive') {
             googleDriveService.setCredentials({ access_token: account.access_token, refresh_token: account.refresh_token });
@@ -161,11 +192,11 @@ exports.syncAccount = async (req, res) => {
             }
         }
 
-        account.quota = quota;
-        await account.save();
+        await db.collection('cloud_accounts').doc(id).update({ quota });
+        const updatedAccount = { ...account, quota };
 
         const io = req.app.get('socketio');
-        io.emit('account_updated', account);
+        io.emit('account_updated', updatedAccount);
 
         res.json({ success: true, quota });
     } catch (error) {
@@ -176,11 +207,19 @@ exports.syncAccount = async (req, res) => {
 exports.setDefaultAccount = async (req, res) => {
     try {
         const { id } = req.body;
+        const db = admin.firestore();
         
-        // Unset all primary
-        await CloudAccount.updateMany({}, { isPrimary: false });
+        const batch = db.batch();
+        const snapshot = await db.collection('cloud_accounts').where('isPrimary', '==', true).get();
+        snapshot.docs.forEach(doc => {
+            batch.update(doc.ref, { isPrimary: false });
+        });
         
-        const account = await CloudAccount.findByIdAndUpdate(id, { isPrimary: true }, { new: true });
+        batch.update(db.collection('cloud_accounts').doc(id), { isPrimary: true });
+        await batch.commit();
+        
+        const doc = await db.collection('cloud_accounts').doc(id).get();
+        const account = { id: doc.id, ...doc.data() };
         
         const io = req.app.get('socketio');
         io.emit('account_updated', account);
@@ -193,7 +232,9 @@ exports.setDefaultAccount = async (req, res) => {
 
 exports.getCloudAccounts = async (req, res) => {
     try {
-        const accounts = await CloudAccount.find();
+        const db = admin.firestore();
+        const snapshot = await db.collection('cloud_accounts').get();
+        const accounts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         res.json({ success: true, accounts });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -203,11 +244,16 @@ exports.getCloudAccounts = async (req, res) => {
 exports.moveToCloud = async (req, res) => {
     try {
         const { kycId, accountId } = req.body;
-        const kyc = await KYC.findById(kycId);
-        if (!kyc) return res.status(404).json({ success: false, message: 'KYC not found' });
+        const db = admin.firestore();
+        
+        const kycDoc = await db.collection('kyc_requests').doc(kycId).get();
+        if (!kycDoc.exists) return res.status(404).json({ success: false, message: 'KYC not found' });
+        const kyc = { id: kycDoc.id, ...kycDoc.data() };
 
-        const account = await CloudAccount.findById(accountId);
-        if (!account || (account.status !== 'Connected' && account.status !== 'VERIFIED')) {
+        const accDoc = await db.collection('cloud_accounts').doc(accountId).get();
+        const account = { id: accDoc.id, ...accDoc.data() };
+
+        if (!accDoc.exists || (account.status !== 'Connected' && account.status !== 'VERIFIED')) {
             return res.status(400).json({ success: false, message: 'Cloud node not healthy' });
         }
 
@@ -230,19 +276,24 @@ exports.moveToCloud = async (req, res) => {
         }
 
         if (uploadResult && uploadResult.url) {
-            kyc.status = 'MOVED';
-            kyc.provider = account.provider;
-            kyc.file_url = uploadResult.url;
-            await kyc.save();
+            const updateData = {
+                status: 'MOVED',
+                provider: account.provider,
+                file_url: uploadResult.url,
+                moved_at: admin.firestore.FieldValue.serverTimestamp()
+            };
+            
+            await db.collection('kyc_requests').doc(kycId).update(updateData);
+            const updatedKyc = { ...kyc, ...updateData };
 
             if (fs.existsSync(kyc.temp_path)) {
                 fs.unlinkSync(kyc.temp_path);
             }
 
             const io = req.app.get('socketio');
-            io.emit('file_moved', kyc);
+            io.emit('file_moved', updatedKyc);
 
-            res.json({ success: true, kyc });
+            res.json({ success: true, kyc: updatedKyc });
         } else {
             throw new Error('Upload failed to return URL');
         }

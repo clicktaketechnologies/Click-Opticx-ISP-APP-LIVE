@@ -17,11 +17,6 @@ const telemetryController = require('./controllers/telemetryController');
 const logger = require('./utils/logger');
 const oltRealRoutes = require('./routes/oltRealRoutes');
 const mikrotikRoutes = require('./routes/mikrotikRoutes');
-const automationRoutes = require('./routes/automationRoutes');
-const authRoutes = require('./routes/auth');
-const livePoller = require('./jobs/livePoller');
-const notificationEngine = require('./services/notificationEngine');
-const connectDB = require('./utils/mongoDb');
 const kycRoutes = require('./routes/kyc');
 const cloudRoutes = require('./routes/cloud');
 
@@ -40,8 +35,11 @@ const io = socketIo(server, {
     }
 });
 
-// Initialize MongoDB
-connectDB();
+// REMOVED INITIALIZE MONGODB
+// connectDB();
+
+// Setup Firestore Database Reference
+let db;
 
 // Make io accessible in req
 app.set('socketio', io);
@@ -58,9 +56,10 @@ try {
                 ? admin.credential.cert(serviceAccount) 
                 : admin.credential.applicationDefault()
         });
-        logger.info('🔥 Firebase Admin: Initialized for Push Notifications');
+        db = admin.firestore();
+        logger.info('🔥 Firebase Admin: Initialized for Firestore and Push Notifications');
     } else {
-        logger.warn('⚠️ Firebase Admin: Service account not provided. Push notifications are disabled.');
+        logger.warn('⚠️ Firebase Admin: Credentials not provided. Backend running in restricted mode.');
     }
 } catch (error) {
     logger.error(`❌ Firebase Admin Init Failed: ${error.message}`);
@@ -336,4 +335,4 @@ server.listen(PORT, HOST, () => {
 });
 
 
-module.exports = { app, io };
+module.exports = { app, io, db };

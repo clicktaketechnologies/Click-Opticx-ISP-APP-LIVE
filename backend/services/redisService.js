@@ -50,9 +50,12 @@ function switchToMemory() {
 }
 
 try {
-  const ioredisClient = new Redis({
+  const redisConfig = process.env.REDIS_URL || {
     host: process.env.REDIS_HOST || '127.0.0.1',
     port: process.env.REDIS_PORT || 6379,
+  };
+
+  const ioredisClient = new Redis(redisConfig, {
     maxRetriesPerRequest: 1,
     retryStrategy: (times) => {
       if (times > 2) {
