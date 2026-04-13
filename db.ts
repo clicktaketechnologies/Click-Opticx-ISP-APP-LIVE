@@ -632,7 +632,7 @@ class DB {
   private socket: Socket | null = null;
   private backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
     ? 'http://localhost:5001'
-    : 'https://click-opticx-backend.onrender.com';
+    : 'https://click-opticx-isp-app-live.onrender.com';
 
   constructor() {
     this.state = INITIAL_STATE;
