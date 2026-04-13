@@ -91,8 +91,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
       // cannot proxy /api/* to the external Render backend — relative paths
       // hit the SPA catch-all rewrite and return index.html, which causes the
       // "Unexpected token '<'" JSON parse error).
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com';
-      const res = await fetch(`${backendUrl}/api/kyc/upload`, {
+      const res = await fetch(`${db.getBackendUrl()}/api/kyc/upload`, {
         method: 'POST',
         body: formData
       });

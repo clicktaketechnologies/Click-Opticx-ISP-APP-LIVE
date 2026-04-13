@@ -634,6 +634,10 @@ class DB {
     ? 'http://localhost:5001'
     : 'https://click-opticx-isp-app-live.onrender.com';
 
+  public getBackendUrl() {
+    return this.backendUrl;
+  }
+
   constructor() {
     this.state = INITIAL_STATE;
     try {

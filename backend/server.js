@@ -72,16 +72,28 @@ try {
 // --- CORS must come BEFORE helmet and rate-limiter so that OPTIONS
 //     preflight requests (sent by browsers for multipart file uploads)
 //     are answered immediately with the correct headers.
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',')
-    : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5001'];
+const allowedOrigins = [
+    'https://isp-click-opticx.web.app',
+    'https://isp-click-opticx.firebaseapp.com',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5001',
+    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [])
+];
 
 const corsOptions = {
     origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) return callback(null, true);
-        callback(new Error(`CORS: Origin '${origin}' is not allowed`));
+        
+        const isAllowed = allowedOrigins.some(ao => ao === origin || ao === origin + '/');
+        
+        if (isAllowed) {
+            return callback(null, true);
+        } else {
+            logger.warn(`[CORS] Rejected Origin: ${origin}`);
+            callback(new Error(`CORS: Origin '${origin}' is not allowed`));
+        }
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
