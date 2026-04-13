@@ -1427,7 +1427,8 @@ class DB {
         try {
           const docRef = doc(this.firestore, 'registry', 'master_state');
           const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
-          await setDoc(docRef, cloudSafeState);
+          const sanitizedState = JSON.parse(JSON.stringify(cloudSafeState));
+          await setDoc(docRef, sanitizedState);
           console.log('[DB-CLOUD] Master State Synced to Firebase');
         } catch (e) {
           console.error('[DB-CLOUD] Master Sync Error:', e);
