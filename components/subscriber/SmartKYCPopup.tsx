@@ -87,10 +87,23 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
       if (files.document) formData.append('files', files.document);
       if (files.selfie) formData.append('files', files.selfie);
 
-      const res = await fetch('/api/kyc/upload', {
+      // Use absolute backend URL so this works in production (Firebase Hosting
+      // cannot proxy /api/* to the external Render backend — relative paths
+      // hit the SPA catch-all rewrite and return index.html, which causes the
+      // "Unexpected token '<'" JSON parse error).
+      const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:5001';
+      const res = await fetch(`${backendUrl}/api/kyc/upload`, {
         method: 'POST',
         body: formData
       });
+
+      // Guard against HTML error pages (404/500) before parsing JSON
+      if (!res.ok) {
+        const text = await res.text();
+        const detail = text.startsWith('<') ? `Server returned HTTP ${res.status}` : text;
+        throw new Error(detail);
+      }
+
       const data = await res.json();
       
       if (data.success) {

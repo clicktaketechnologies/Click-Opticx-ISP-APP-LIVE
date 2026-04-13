@@ -69,18 +69,41 @@ try {
     logger.error(`❌ Firebase Admin Init Failed: ${error.message}`);
 }
 
-// Middleware
-app.use(helmet());
-app.use(cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || '*'
-}));
+// --- CORS must come BEFORE helmet and rate-limiter so that OPTIONS
+//     preflight requests (sent by browsers for multipart file uploads)
+//     are answered immediately with the correct headers.
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5001'];
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) return callback(null, true);
+        callback(new Error(`CORS: Origin '${origin}' is not allowed`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true,
+    optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+};
+
+// Apply CORS globally (handles OPTIONS preflight automatically)
+app.use(cors(corsOptions));
+// Explicitly respond to all OPTIONS preflight requests before any other middleware
+app.options('*', cors(corsOptions));
+
+// Helmet (security headers) — after CORS so it doesn't interfere with preflight
+app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(express.json());
 
-// Rate limiting
+// Rate limiting — after CORS so preflight OPTIONS requests are never rate-limited
 const limiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 900000,
     max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-    message: 'Too many requests from this IP, please try again later.'
+    message: 'Too many requests from this IP, please try again later.',
+    skip: (req) => req.method === 'OPTIONS' // Never rate-limit preflight
 });
 app.use('/api/', limiter);
 
