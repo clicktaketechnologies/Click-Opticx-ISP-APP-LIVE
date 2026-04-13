@@ -142,10 +142,16 @@ exports.login = async (req, res) => {
             return res.status(403).json({ success: false, message: `Access Restricted: Status is ${user.status}` });
         }
 
-        // Bcrypt match check
-        const isMatch = await bcrypt.compare(password, user.password);
+        // Bcrypt match check with fallback for legacy unhashed passwords
+        let isMatch = false;
+        if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'))) {
+            isMatch = await bcrypt.compare(password, user.password);
+        } else {
+            isMatch = (password === user.password);
+        }
+
         if (!isMatch) {
-            logger.warn(`[LOGIN] Credential mismatch for: ${user.username}`);
+            logger.warn(`[LOGIN] Credential mismatch for: ${user.username || user.email}`);
             return res.status(401).json({ success: false, message: 'Invalid password' });
         }
 
