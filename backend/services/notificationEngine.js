@@ -1,6 +1,7 @@
 const firebaseService = require('./firebaseService');
 const smsService = require('./smsService');
 const logger = require('../utils/logger');
+const emailRouter = require('../modules/email/email-router');
 
 /**
  * Smart Notification Engine
@@ -13,6 +14,8 @@ const logger = require('../utils/logger');
  * @param {string} params.event - Event trigger (e.g., 'PACKAGE_ACTIVATED')
  * @param {string} params.title - Notification title
  * @param {string} params.body - Notification body/message
+ * @param {string} params.email - Recipient email (for Email)
+ * @param {string} params.html - HTML body (optional for Email)
  * @param {object} params.config - Global CommunicationSettings
  * @param {object} params.data - Extra data for push payload
  * @returns {Promise<object>} - Delivery report
@@ -24,6 +27,8 @@ async function dispatchNotification({
     event,
     title,
     body,
+    email,
+    html,
     config,
     data = {}
 }) {
@@ -105,6 +110,19 @@ async function dispatchNotification({
                     return report;
                 }
             }
+        }
+
+        // Mode 5: Email Only (Phase 1 Addition)
+        if (notificationMode === 'Email_Only' || (email && !fcmToken && !userPhone)) {
+            const res = await emailRouter.sendEmail({
+                to: email,
+                subject: title,
+                html: html || `<p>${body}</p>`
+            });
+            report.gatewayUsed = 'Email (' + (res.provider || 'unknown') + ')';
+            report.status = res.success ? 'Delivered' : 'Failed';
+            report.messageId = res.messageId;
+            return report;
         }
 
         throw new Error(`Invalid notification mode: ${notificationMode}`);

@@ -4672,21 +4672,17 @@ class DB {
     // Wrap body in professional shell
     const htmlOutput = this.generateProfessionalHTML(body, subject);
 
-    if (!config.simulationMode && config.smtpConfig?.host) {
+    if (!config.simulationMode) {
       try {
         const start = Date.now();
-        const res = await fetch(`${this.backendUrl}/api/communicate`, {
+        const res = await fetch(`${this.backendUrl}/api/email/send`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            config: config.smtpConfig,
-            payload: {
-              to,
-              subject,
-              html: htmlOutput,
-              from: config.reminderEmail || config.smtpConfig.username,
-              senderName: this.state.settings.branding.businessName
-            }
+            to,
+            subject,
+            html: htmlOutput,
+            category: triggerSource === 'Automation' ? 'System' : 'Manual'
           })
         });
         const data = await res.json();
@@ -5206,7 +5202,7 @@ class DB {
       if (user) {
         // Dispatch based on channel
         if (channel === 'Email' && user.email) {
-            await this.dispatchEmail(user.email, 'Payment Reminder', `Dear ${user.name}, you have an outstanding balance of Rs. ${user.balance}.`);
+            this.enqueueEmail(user.email, 'Payment Reminder', templateId || 'TMP-1', {}, 'Critical').catch(() => {});
         } else if (channel === 'WhatsApp' && user.phone) {
             await this.dispatchSMS(user.phone, `[CLICK OPTICX] Reminder: Outstanding balance Rs. ${user.balance}. Please clear to avoid suspension.`);
         }
@@ -5850,6 +5846,29 @@ class DB {
     // 2. Dispatch Logic
     const timestamp = new Date().toISOString();
     const config = this.state.settings.commConfig;
+    
+    // ── PHASE 1: PREFER BACKGROUND QUEUE ──
+    try {
+      const enqueued = await this.enqueueEmail(to, subject, templateId, customData);
+      if (enqueued.success) {
+        this.addLog({
+          id: 'LOG-' + Date.now(),
+          type: 'Email',
+          recipient: to,
+          userName: user?.name || 'Customer',
+          subject,
+          status: 'Pending',
+          templateId,
+          provider: 'BullMQ Queue',
+          sentAt: timestamp
+        });
+        this.notify();
+        return { success: true, message: 'Email queued for delivery' };
+      }
+    } catch (e) {
+      console.warn('[DB] Failed to enqueue email, falling back to legacy socket...', e);
+    }
+
     let providerUsed = 'SMTP';
     let status: 'Sent' | 'Failed' | 'Pending' = 'Sent';
     let error: string | undefined = undefined;
@@ -5912,6 +5931,39 @@ class DB {
 
   async getCommAnalytics() {
     return this.state.commStats;
+  }
+
+  async enqueueEmail(to: string, subject: string, templateId: string, customData: any = {}, category: string = 'System') {
+    const template = this.state.emailTemplates.find(t => t.id === templateId);
+    if (!template) throw new Error('Template not found');
+
+    const user = this.state.users.find(u => u.email === to);
+    
+    // Merge data
+    const mergeData = {
+      user: {
+        name: user?.name || 'Customer',
+        email: to,
+        balance: user?.balance || 0,
+        expiryDate: user?.expiryDate || 'N/A',
+        id: user?.id || 'N/A'
+      },
+      ...customData
+    };
+
+    let html = template.content;
+    Object.keys(mergeData.user).forEach(key => {
+      const regex = new RegExp(`{{user.${key}}}`, 'g');
+      html = html.replace(regex, (mergeData.user as any)[key]);
+    });
+
+    const res = await fetch(`${this.backendUrl}/api/email/queue`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, subject, html, category })
+    });
+    
+    return res.json();
   }
 
   // ── BULK ASSIGN COLLECTOR ────────────────────────────────────────────────────

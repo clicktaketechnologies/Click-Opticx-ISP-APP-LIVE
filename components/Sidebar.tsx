@@ -223,6 +223,8 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
              { id: 'system-flash', label: 'System Flash', icon: Zap },
              { id: 'auth-control', label: 'Smart Auth (CSAE)', icon: ShieldCheck },
              { id: 'system-deployment', label: 'Deployment Hub', icon: ShieldCheck },
+             { id: 'provider-config', label: 'Provider Config', icon: Settings },
+             { id: 'migration-dashboard', label: 'Migration Health', icon: Shield },
            ]
         }
       ]

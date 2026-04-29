@@ -2,186 +2,135 @@ const admin = require('firebase-admin');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
+const supabaseAuth = require('../modules/auth/supabase-auth');
+const roleSync = require('../modules/auth/role-sync');
+const configManager = require('../services/config-manager');
+const emailWorker = require('../modules/email/worker');
 
-// Helper to fetch the common registry state
-async function getRegistry() {
-    if (!admin.apps.length) {
-        logger.error('Firebase Admin not initialized');
-        throw new Error('Service Unavailable');
-    }
-    const db = admin.firestore();
-    const doc = await db.collection('registry').doc('master_state').get();
-    if (!doc.exists) {
-        return { users: [], signupRequests: [], settings: {} };
-    }
-    return doc.data();
-}
-
-// Helper to update the common registry state
-async function updateRegistry(data) {
-    const db = admin.firestore();
-    await db.collection('registry').doc('master_state').update(data);
-}
+// Helper to determine if we should write to Firebase
+const isFirebaseWriteEnabled = () => process.env.FIREBASE_MODE !== 'readonly';
 
 exports.signup = async (req, res) => {
     try {
         const { name, username, email, phone, password, role = 'Customer', ...otherData } = req.body;
+        const supabase = configManager.getSupabaseClient();
         
-        logger.info(`[SIGNUP] Attempt for: ${email || username || 'unknown'}`);
+        logger.info(`[SIGNUP] Attempt for: ${email || username}`);
         
-        // Validation
-        if (!password) return res.status(400).json({ success: false, message: 'Password is required' });
-        if (!username && !email && !phone) return res.status(400).json({ success: false, message: 'Identity identifier (username/email/phone) required' });
+        // 1. Supabase Check (Primary)
+        const { data: existingUser } = await supabase
+            .from('users')
+            .select('id')
+            .or(`email.eq.${email},username.eq.${username}`)
+            .single();
 
-        const state = await getRegistry();
-        const users = state.users || [];
-        const signupRequests = state.signupRequests || [];
-
-        // Normalize
-        const normalizedEmail = email ? email.toLowerCase().trim() : '';
-        const normalizedUsername = username ? username.toLowerCase().trim() : '';
-        const normalizedPhone = phone ? phone.replace(/\D/g, '') : '';
-
-        // Duplicate Check
-        const exists = users.find(u => 
-            (normalizedEmail && u.email === normalizedEmail) ||
-            (normalizedUsername && u.username === normalizedUsername) ||
-            (normalizedPhone && u.phone?.replace(/\D/g, '') === normalizedPhone)
-        );
-
-        if (exists) {
-            logger.warn(`[SIGNUP] Duplicate identity detected: ${normalizedEmail || normalizedUsername}`);
-            return res.status(400).json({ success: false, message: 'Identity already registered in the system' });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: 'User already exists' });
         }
 
-        // Hash Password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
+        const userId = 'USR-' + Date.now();
 
         const newUser = {
-            id: 'USR-' + Date.now(),
-            name: (name || 'New User').trim(),
-            username: normalizedUsername,
-            email: normalizedEmail,
-            phone: normalizedPhone,
+            id: userId,
+            name: name,
+            username: username,
+            email: email,
+            phone: phone,
             password: hashedPassword,
-            status: 'Active',
-            kyc_status: 'pending',
-            approval_status: 'pending',
             role: role,
-            createdAt: new Date().toISOString(),
-            ...otherData
+            status: 'Active',
+            created_at: new Date().toISOString()
         };
 
-        const newRequest = {
-            id: 'SR-' + Date.now(),
-            userId: newUser.id,
-            status: 'Pending',
-            name: newUser.name,
-            username: normalizedUsername,
-            email: normalizedEmail,
-            phone: normalizedPhone,
-            timestamp: new Date().toISOString()
-        };
+        // 2. Supabase Primary Write
+        const { error: sbError } = await supabase.from('users').insert([newUser]);
+        if (sbError) throw sbError;
 
-        users.push(newUser);
-        signupRequests.push(newRequest);
+        // 3. Supabase Auth Registration
+        if (email) {
+            await supabaseAuth.signUp({
+                email,
+                password,
+                metadata: { id: userId, role }
+            });
+        }
 
-        await updateRegistry({ users, signupRequests });
+        // 4. Firebase Mirror (Only if enabled)
+        if (isFirebaseWriteEnabled()) {
+            try {
+                const db = admin.firestore();
+                const doc = await db.collection('registry').doc('master_state').get();
+                const state = doc.exists ? doc.data() : { users: [] };
+                state.users.push(newUser);
+                await db.collection('registry').doc('master_state').update({ users: state.users });
+            } catch (fbErr) {
+                logger.warn(`[MIRROR] Firebase update skipped/failed: ${fbErr.message}`);
+            }
+        }
 
-        logger.info(`[SIGNUP] Success: ${newUser.id} (${newUser.username})`);
-        
-        res.status(201).json({
-            success: true,
-            message: 'User registered successfully with secure hashing.',
-            user: { id: newUser.id, username: newUser.username }
-        });
-
+        res.status(201).json({ success: true, userId });
     } catch (error) {
-        logger.error(`[SIGNUP] Critical Error: ${error.message}`);
-        res.status(500).json({ success: false, message: 'Server synchronization failed', error: error.message });
+        logger.error(`[SIGNUP] Error: ${error.message}`);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
 exports.login = async (req, res) => {
     try {
         const { identifier, password } = req.body;
+        const supabase = configManager.getSupabaseClient();
 
-        if (!identifier) return res.status(400).json({ success: false, message: 'Email/Phone/Username required' });
-        if (!password) return res.status(400).json({ success: false, message: 'Password required' });
+        // Primary Lookup: Supabase
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('*')
+            .or(`email.eq.${identifier},username.eq.${identifier},phone.eq.${identifier}`)
+            .single();
 
-        const input = identifier.toLowerCase().trim();
-        const inputDigits = identifier.replace(/\D/g, '');
-
-        logger.info(`[LOGIN] Search attempt for identifier: ${input}`);
-
-        const state = await getRegistry();
-        const users = state.users || [];
-        const staff = state.staff || [];
-
-        // Comprehensive identity lookup in both staff and users
-        let user = staff.find(s => s.email?.toLowerCase() === input);
-        let userType = 'staff';
-
-        if (!user) {
-            user = users.find(u => 
-                (u.email?.toLowerCase() === input) ||
-                (u.username?.toLowerCase() === input) ||
-                (u.phone?.replace(/\D/g, '') === inputDigits && inputDigits.length >= 10)
-            );
-            userType = 'user';
+        if (!user || error) {
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        if (!user) {
-            logger.warn(`[LOGIN] User not found for: ${input}`);
-            return res.status(404).json({ success: false, message: 'User not found in system' });
-        }
-
-        // Status Validation
-        if (user.status === 'Disabled' || user.status === 'Blocked') {
-            return res.status(403).json({ success: false, message: `Access Restricted: Status is ${user.status}` });
-        }
-
-        // Bcrypt match check with fallback for legacy unhashed passwords
-        let isMatch = false;
-        if (user.password && (user.password.startsWith('$2a$') || user.password.startsWith('$2b$'))) {
-            isMatch = await bcrypt.compare(password, user.password);
-        } else {
-            isMatch = (password === user.password);
-        }
-
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            logger.warn(`[LOGIN] Credential mismatch for: ${user.username || user.email}`);
-            return res.status(401).json({ success: false, message: 'Invalid password' });
+            return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
 
-        // JWT Generation
         const token = jwt.sign(
-            { 
-              id: user.id, 
-              username: user.username || user.email, 
-              role: user.role,
-              type: userType
-            },
-            process.env.JWT_SECRET || 'clickopticx-backend-key-24',
+            { id: user.id, role: user.role },
+            process.env.JWT_SECRET || 'secret',
             { expiresIn: '7d' }
         );
 
-        logger.info(`[LOGIN] Protocol satisfied. Authentication granted for ${user.id} (${userType})`);
-
-        // Return clean user object (no password)
-        const userResponse = { ...user };
-        delete userResponse.password;
-
-        res.json({
-            success: true,
-            token,
-            type: userType,
-            user: userResponse
-        });
-
+        res.json({ success: true, token, user });
     } catch (error) {
         logger.error(`[LOGIN] Error: ${error.message}`);
-        res.status(500).json({ success: false, message: 'Internal authentication error' });
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const supabase = configManager.getSupabaseClient();
+
+        const { data: user } = await supabase.from('users').select('id, name').eq('email', email).single();
+        if (!user) return res.status(404).json({ success: false, message: 'Email not found' });
+
+        const resetToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+
+        // Send via new Email Infrastructure
+        await emailWorker.queueEmail({
+            to: email,
+            subject: 'Password Reset Request',
+            html: `<h3>Hello ${user.name}</h3><p>Click the link to reset your password: <a href="${resetLink}">${resetLink}</a></p>`
+        });
+
+        res.json({ success: true, message: 'Reset link sent to your email.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
 };

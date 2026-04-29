@@ -72,7 +72,10 @@ const SpeedTestPage = lazy(() => import('./pages/SpeedTestPage'));
 const HotspotManager = lazy(() => import('./pages/HotspotManager'));
 const PastRecords = lazy(() => import('./pages/PastRecords'));
 const KYCManagement = lazy(() => import('./pages/KYCManagement'));
+const ProviderConfigPage = lazy(() => import('./pages/ProviderConfigPage'));
+const MigrationDashboard = lazy(() => import('./pages/MigrationDashboard'));
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
+import { initDualWrite } from './lib/db-adapter';
 
 interface EBProps {
   children: React.ReactNode;
@@ -207,6 +210,9 @@ const App: React.FC = () => {
         if (criticals.length > 0) setCriticalAlert(criticals[0]);
       }
     });
+
+    // Phase 0: Initialize Supabase dual-write adapter
+    initDualWrite();
 
     // Ensure state transition if already configured on mount
     if (db.isConfigured()) {
@@ -454,6 +460,8 @@ const App: React.FC = () => {
                     case 'business-settings': return <BusinessSettings state={dbState} />;
                     case 'auth-control': return <AuthControlCenter state={dbState} />;
                     case 'system-deployment': return <SystemDeploymentCenter state={dbState} />;
+                    case 'provider-config': return <ProviderConfigPage state={dbState} />;
+                    case 'migration-dashboard': return <MigrationDashboard state={dbState} />;
                     case 'gateway-settings': return <PaymentMethodsIndex state={dbState} onNavigate={navigateTo} />;
                     case 'gateway-stripe': return <StripeSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
                     case 'gateway-cash': return <CashSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;

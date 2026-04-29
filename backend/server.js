@@ -8,6 +8,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const admin = require('firebase-admin');
 require('dotenv').config();
+const cron = require('node-cron');
+const { exec } = require('child_process');
 
 const nasRoutes = require('./routes/nas');
 const oltRoutes = require('./routes/olt');
@@ -23,6 +25,12 @@ const livePoller = require('./jobs/livePoller');
 const notificationEngine = require('./services/notificationEngine');
 const kycRoutes = require('./routes/kyc');
 const cloudRoutes = require('./routes/cloud');
+const configRoutes = require('./routes/config');
+const emailRoutes = require('./routes/email');
+const storageRoutes = require('./routes/storage');
+const migrationRoutes = require('./routes/migration');
+const configManager = require('./services/config-manager');
+const emailWorker = require('./modules/email/worker');
 
 const app = express();
 const server = http.createServer(app);
@@ -68,6 +76,29 @@ try {
 } catch (error) {
     logger.error(`❌ Firebase Admin Init Failed: ${error.message}`);
 }
+
+// --- Supabase Config Manager Init ---
+configManager.init().then(() => {
+    logger.info('🗄️  Supabase Config Manager: Online — Runtime config loaded');
+    
+    // --- Phase 1: Email Worker Init ---
+    try {
+        emailWorker.initWorker();
+    } catch (e) {
+        logger.error(`[EMAIL-WORKER] Failed to start: ${e.message}`);
+    }
+
+    // --- Phase 2: Nightly Validator (3 AM) ---
+    cron.schedule('0 3 * * *', () => {
+        logger.info('🕒 [SCHEDULER] Triggering Nightly Migration Validation...');
+        exec('node scripts/validate-sync.js', (err, stdout, stderr) => {
+            if (err) logger.error(`[VALIDATOR] Nightly run failed: ${err.message}`);
+            else logger.info('[VALIDATOR] Nightly run completed successfully');
+        });
+    });
+}).catch(err => {
+    logger.warn(`⚠️ Supabase Config Manager: ${err.message}`);
+});
 
 // --- CORS must come BEFORE helmet and rate-limiter so that OPTIONS
 //     preflight requests (sent by browsers for multipart file uploads)
@@ -154,6 +185,10 @@ app.use('/api/health-monitor', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/kyc', kycRoutes);
 app.use('/api/cloud', cloudRoutes);
+app.use('/api/config', configRoutes);
+app.use('/api/email', emailRoutes);
+app.use('/api/storage', storageRoutes);
+app.use('/api/migration', migrationRoutes);
 
 // --- Push Notification API ---
 app.post('/api/push-notify', async (req, res) => {
