@@ -44,7 +44,7 @@ const AIAutomationV2: React.FC<{ state: AppState }> = ({ state }) => {
                 <V2Badge label="OPTIMIZED" color="blue" variant="solid" icon={ShieldCheck} />
             </div>
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Autonomous Yield</p>
-            <h4 className="text-2xl font-black italic tracking-tighter">{stats.autonomousActions.toLocaleString()} Actions</h4>
+            <h4 className="text-2xl font-black italic tracking-tighter">{(stats.autonomousActions || 0).toLocaleString()} Actions</h4>
         </V2Card>
         <MiniAIStat label="Operational Success" value={stats.successRate} sub="Aggregate Precision" color="emerald" icon={CheckCircle2} />
         <MiniAIStat label="Neural Threads" value={stats.activeThreads} sub="Concurrent Agents" color="indigo" icon={Activity} />

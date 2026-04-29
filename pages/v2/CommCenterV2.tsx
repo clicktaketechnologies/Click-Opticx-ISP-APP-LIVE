@@ -42,7 +42,7 @@ const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
                 <V2Badge label="Live" color="emerald" variant="solid" icon={ShieldCheck} />
             </div>
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Transmission</p>
-            <h4 className="text-2xl font-black italic tracking-tighter">{stats.totalSent.toLocaleString()} Dispatches</h4>
+            <h4 className="text-2xl font-black italic tracking-tighter">{(stats.totalSent || 0).toLocaleString()} Dispatches</h4>
         </V2Card>
         <MiniCommStat label="Delivery Success" value={stats.healthRate} sub="Aggregate Yield" color="emerald" icon={CheckCircle2} />
         <MiniCommStat label="Active Nodes" value={stats.activeProviders} sub="Infrastructure Relays" color="blue" icon={Database} />

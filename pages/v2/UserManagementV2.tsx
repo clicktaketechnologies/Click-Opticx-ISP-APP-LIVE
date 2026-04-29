@@ -115,7 +115,7 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
                </div>
             </V2TableCell>
             <V2TableCell>
-               <p className="text-sm font-black text-slate-900 italic">PKR {user.walletBalance.toLocaleString()}</p>
+               <p className="text-sm font-black text-slate-900 italic">PKR {(user.walletBalance || 0).toLocaleString()}</p>
             </V2TableCell>
             <V2TableCell>
                <div className="flex gap-2">
@@ -160,7 +160,7 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
                 <div className="grid grid-cols-2 gap-6">
                     <InfoCard icon={Mail} label="Neural Relay" value={selectedUser.email} />
                     <InfoCard icon={Phone} label="Voice Link" value={selectedUser.phone} />
-                    <InfoCard icon={Wallet} label="Fiscal Balance" value={`PKR ${selectedUser.walletBalance.toLocaleString()}`} />
+                    <InfoCard icon={Wallet} label="Fiscal Balance" value={`PKR ${(selectedUser.walletBalance || 0).toLocaleString()}`} />
                     <InfoCard icon={MapPin} label="Geographic Node" value={selectedUser.address || 'N/A'} />
                 </div>
 
