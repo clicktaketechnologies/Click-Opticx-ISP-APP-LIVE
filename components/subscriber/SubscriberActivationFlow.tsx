@@ -142,7 +142,7 @@ const SubscriberActivationFlow: React.FC<Props> = ({ user, state, packageId, isR
                    >
                       <div className="flex items-center gap-4">
                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${user.balance >= total ? 'bg-green-600 text-white' : 'bg-slate-300 text-white'}`}><Wallet size={24}/></div>
-                         <div className="text-left"><p className="text-xs font-black uppercase text-slate-900">Wallet Balance</p><p className="text-[9px] text-slate-400 font-bold uppercase">Available: Rs. {user.balance.toLocaleString()}</p></div>
+                         <div className="text-left"><p className="text-xs font-black uppercase text-slate-900">Wallet Balance</p><p className="text-[9px] text-slate-400 font-bold uppercase">Available: Rs. {(user.balance || 0).toLocaleString()}</p></div>
                       </div>
                       {user.balance >= total && <ChevronRight size={18} className="text-green-300 group-hover:translate-x-1 transition-transform" />}
                    </button>

@@ -491,11 +491,11 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
           <div className="grid grid-cols-2 gap-6">
             <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 shadow-inner group">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Unsettled Cash</p>
-              <p className="text-3xl font-black text-rose-500 tracking-tighter">Rs. {selectedStaff ? (settlementStats[selectedStaff.email]?.pending.toLocaleString() || 0) : 0}</p>
+              <p className="text-3xl font-black text-rose-500 tracking-tighter">Rs. {selectedStaff ? ((settlementStats[selectedStaff.email]?.pending || 0).toLocaleString()) : 0}</p>
             </div>
             <div className="bg-slate-950 p-5 rounded-xl border border-slate-800 shadow-inner group">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Total Attributed</p>
-              <p className="text-3xl font-black text-green-500 tracking-tighter">Rs. {selectedStaff ? (settlementStats[selectedStaff.email]?.total.toLocaleString() || 0) : 0}</p>
+              <p className="text-3xl font-black text-green-500 tracking-tighter">Rs. {selectedStaff ? ((settlementStats[selectedStaff.email]?.total || 0).toLocaleString()) : 0}</p>
             </div>
           </div>
 

@@ -38,7 +38,7 @@ const SubscriberWallet: React.FC<Props> = ({ user, state, pendingTopups }) => {
                <div className="flex justify-between items-start">
                   <div className="space-y-2">
                      <p className="text-[11px] font-black text-white/50 uppercase tracking-[0.4em]">Available Balance</p>
-                     <h3 className="text-6xl font-black italic tracking-tighter">Rs. {user.balance.toLocaleString()}</h3>
+                     <h3 className="text-6xl font-black italic tracking-tighter">Rs. {(user.balance || 0).toLocaleString()}</h3>
                   </div>
                   <div className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20 backdrop-blur-md`}>
                      {activeEL ? 'Advance Active' : isBalanceLow ? 'Topup Needed' : 'Account Verified'}

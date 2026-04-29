@@ -1021,7 +1021,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Outstanding</p>
-                  <p className="text-2xl font-black text-rose-500">Rs. {activeUser.balance.toLocaleString()}</p>
+                  <p className="text-2xl font-black text-rose-500">Rs. {(activeUser.balance || 0).toLocaleString()}</p>
                 </div>
                 <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800">
                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Last Payment</p>

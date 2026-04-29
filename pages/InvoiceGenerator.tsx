@@ -207,7 +207,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                  <div className="flex items-center gap-4">
                     <div className="text-right hidden sm:block">
                        <p className="text-[9px] font-black text-slate-400 uppercase">Balance</p>
-                       <p className={`text-xs font-black ${user.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>Rs. {user.balance.toLocaleString()}</p>
+                       <p className={`text-xs font-black ${user.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>Rs. {(user.balance || 0).toLocaleString()}</p>
                     </div>
                     <ChevronRight className="text-slate-200 group-hover:text-green-500 transition-transform group-hover:translate-x-1" />
                  </div>

@@ -276,7 +276,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                  </div>
                                  <div className="text-right">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Balance</p>
-                                    <p className={`text-xl font-black ${u.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>{state.settings.currency} {u.balance.toLocaleString()}</p>
+                                    <p className={`text-xl font-black ${u.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>{state.settings.currency} {(u.balance || 0).toLocaleString()}</p>
                                  </div>
                               </div>
                               <div>

@@ -187,7 +187,7 @@ const SubscriberHome: React.FC<Props> = ({
               <div className="flex justify-between items-end mb-4">
                 <div className="space-y-1">
                   <p className="text-[8px] font-black uppercase text-white/60 tracking-widest">Fluidity Reserve</p>
-                  <p className="text-xl font-black italic tracking-tighter">{state.settings.currency} {user.balance.toLocaleString()}</p>
+                  <p className="text-xl font-black italic tracking-tighter">{state.settings.currency} {(user.balance || 0).toLocaleString()}</p>
                 </div>
                 {!isPaid && (
                   <div className="px-3 py-1 bg-rose-500 rounded-full text-[8px] font-black uppercase animate-pulse border border-rose-400">
@@ -309,7 +309,7 @@ const SubscriberHome: React.FC<Props> = ({
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Unpaid Dues</p><p className="text-lg font-black text-slate-900">{activeUnpaidCount}</p></div>
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Wallet Balance</p><p className={`text-lg font-black ${user.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>Rs. {user.balance.toLocaleString()}</p></div>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm"><p className="text-[8px] font-black text-slate-400 uppercase mb-1">Wallet Balance</p><p className={`text-lg font-black ${user.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>Rs. {(user.balance || 0).toLocaleString()}</p></div>
             </div>
           </div>
         </div>

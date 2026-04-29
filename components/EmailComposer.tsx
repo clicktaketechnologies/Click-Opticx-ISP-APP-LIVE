@@ -50,7 +50,7 @@ const EmailComposer: React.FC<Props> = ({
                 let content = template.content;
                 // Inject variables
                 content = content.replace(/\{\{user.name\}\}/g, user.name);
-                content = content.replace(/\{\{user.balance\}\}/g, `${state.settings.currency} ${user.balance.toLocaleString()}`);
+                content = content.replace(/\{\{user.balance\}\}/g, `${state.settings.currency} ${(user.balance || 0).toLocaleString()}`);
                 content = content.replace(/\{\{user.expiryDate\}\}/g, user.expiryDate ? new Date(user.expiryDate).toLocaleDateString() : 'N/A');
                 content = content.replace(/\{\{user.connectionId\}\}/g, user.connectionId);
 

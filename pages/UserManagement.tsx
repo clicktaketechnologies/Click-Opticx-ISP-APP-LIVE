@@ -601,7 +601,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                        })()}
                     </td>
                     <td className="px-6 py-4 text-right">
-                       <p className={`text-sm font-black tabular-nums ${user.balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>Rs. {user.balance.toLocaleString()}</p>
+                       <p className={`text-sm font-black tabular-nums ${user.balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>Rs. {(user.balance || 0).toLocaleString()}</p>
                        <span className={`inline-flex items-center gap-1 text-[7px] font-black uppercase px-2 py-0.5 rounded-lg ${user.status === UserStatus.ACTIVE ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
                           {user.status}
                        </span>
@@ -1171,7 +1171,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                <div className="space-y-6">
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                      <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Outstanding Balance</p>
-                     <p className={`text-2xl font-black ${selectedUser && selectedUser.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>Rs. {selectedUser?.balance.toLocaleString()}</p>
+                     <p className={`text-2xl font-black ${selectedUser && selectedUser.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>Rs. {(selectedUser?.balance || 0).toLocaleString()}</p>
                   </div>
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                      <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Credit Score</p>

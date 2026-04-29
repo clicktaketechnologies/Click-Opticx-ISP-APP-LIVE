@@ -450,7 +450,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
                       </td>
                       <td className="px-8 py-6 text-right">
                         <span className={`text-sm font-black italic tracking-tighter ${u.balance > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {state.settings.currency} {u.balance.toLocaleString()}
+                          {state.settings.currency} {(u.balance || 0).toLocaleString()}
                         </span>
                       </td>
                       <td className="px-8 py-6 text-right">
