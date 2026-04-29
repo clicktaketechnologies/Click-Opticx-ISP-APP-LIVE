@@ -188,7 +188,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
             </div>
             <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest relative z-10">{kpi.label}</p>
             <h3 className="text-2xl font-black text-slate-900 mt-1 italic relative z-10">
-              {state.settings.currency} {kpi.value.toLocaleString()}
+              {state.settings.currency} {(kpi.value || 0).toLocaleString()}
             </h3>
             <TrendingUp className="absolute -right-4 -bottom-4 opacity-[0.03] scale-150 text-slate-900" size={100} />
           </div>
@@ -364,7 +364,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
                         </td>
                         <td className="px-8 py-6 text-right">
                           <span className="text-sm font-black text-slate-900 italic tracking-tighter">
-                            {state.settings.currency} {inv.totalAmount.toLocaleString()}
+                            {state.settings.currency} {(inv.totalAmount || 0).toLocaleString()}
                           </span>
                         </td>
                         <td className="px-8 py-6">

@@ -1040,7 +1040,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                           <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{new Date(inv.createdAt).toLocaleDateString()}</p>
                         </div>
                         <div className="flex items-center gap-3">
-                          <p className="text-[10px] font-black text-white">Rs. {inv.totalAmount.toLocaleString()}</p>
+                          <p className="text-[10px] font-black text-white">Rs. {(inv.totalAmount || 0).toLocaleString()}</p>
                           <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${inv.status === PaymentStatus.PAID ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}`}>{inv.status}</span>
                         </div>
                       </div>
@@ -1296,7 +1296,7 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
                           <div className="flex items-center gap-4">
                               <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-green-500 border border-slate-800"><HandCoins size={18} /></div>
                               <div>
-                                  <p className="font-black text-white text-lg leading-none mb-1">Rs. {pay.amount.toLocaleString()}</p>
+                                  <p className="font-black text-white text-lg leading-none mb-1">Rs. {(pay.amount || 0).toLocaleString()}</p>
                                   <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest">{pay.method} • {new Date(pay.timestamp).toLocaleDateString()}</p>
                               </div>
                           </div>

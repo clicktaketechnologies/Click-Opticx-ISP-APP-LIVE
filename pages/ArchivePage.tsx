@@ -179,15 +179,15 @@ const ArchivePage: React.FC<{ state: AppState }> = ({ state }) => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Billed</p>
-                            <h5 className="text-xl font-black">Rs. {archiveSummary?.totalBilled.toLocaleString()}</h5>
+                            <h5 className="text-xl font-black">Rs. {(archiveSummary?.totalBilled || 0).toLocaleString()}</h5>
                           </div>
                           <div className="bg-green-50 p-6 rounded-2xl border border-green-100">
                             <p className="text-[10px] font-black text-green-600/60 uppercase tracking-widest mb-1">Total Collected</p>
-                            <h5 className="text-xl font-black text-green-700">Rs. {archiveSummary?.totalRecovered.toLocaleString()}</h5>
+                            <h5 className="text-xl font-black text-green-700">Rs. {(archiveSummary?.totalRecovered || 0).toLocaleString()}</h5>
                           </div>
                           <div className="bg-orange-50 p-6 rounded-2xl border border-orange-100">
                             <p className="text-[10px] font-black text-orange-600/60 uppercase tracking-widest mb-1">Pending Approval</p>
-                            <h5 className="text-xl font-black text-orange-700">Rs. {archiveSummary?.totalPending.toLocaleString()}</h5>
+                            <h5 className="text-xl font-black text-orange-700">Rs. {(archiveSummary?.totalPending || 0).toLocaleString()}</h5>
                           </div>
                         </div>
                         <div className="p-6 bg-blue-50 border border-blue-100 rounded-2xl flex flex-col md:flex-row items-start gap-4">

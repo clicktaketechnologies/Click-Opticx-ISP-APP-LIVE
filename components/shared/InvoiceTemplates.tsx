@@ -143,7 +143,7 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ user, invoice,
                     </td>
                     <td className="p-5 text-right font-black text-emerald-600 text-lg italic tracking-tighter">
                       -<span className="text-xs text-emerald-500/60 mr-1">{settings.currency}</span>
-                      {invoice.discountAmount.toLocaleString()}
+                      {(invoice.discountAmount || 0).toLocaleString()}
                     </td>
                   </tr>
                 )}
@@ -155,7 +155,7 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ user, invoice,
                   <td className="p-6 text-right">
                     <p className="text-4xl font-black italic tracking-tighter">
                       <span className="text-sm text-blue-400 mr-2">{settings.currency}</span>
-                      {invoice.totalAmount.toLocaleString()}
+                      {(invoice.totalAmount || 0).toLocaleString()}
                     </p>
                   </td>
                   <div className="absolute top-0 right-0 w-24 h-full bg-blue-600/10 skew-x-12 translate-x-12"></div>

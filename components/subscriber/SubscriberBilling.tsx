@@ -58,7 +58,7 @@ const SubscriberBilling: React.FC<Props> = ({ user, state, onViewInvoice }) => {
                   </div>
                   <div className="flex items-center gap-4">
                      <div className="text-right">
-                        <p className="text-lg font-black italic text-slate-900 tracking-tighter">Rs. {inv.totalAmount.toLocaleString()}</p>
+                        <p className="text-lg font-black italic text-slate-900 tracking-tighter">Rs. {(inv.totalAmount || 0).toLocaleString()}</p>
                         <p className="text-[8px] font-bold text-slate-400 uppercase">Grand Total</p>
                      </div>
                      <ChevronRight size={18} className="text-slate-200 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />

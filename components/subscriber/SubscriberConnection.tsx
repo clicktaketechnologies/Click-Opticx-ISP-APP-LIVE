@@ -110,7 +110,7 @@ const SubscriberConnection: React.FC<{ user: ISPUser, state: AppState }> = ({ us
                             <h4 className="text-sm font-black text-slate-900 uppercase tracking-tight">{item.value}</h4>
                          </div>
                       </div>
-                      <p className="text-sm font-black text-slate-900 italic tracking-tighter">Rs. {item.price.toLocaleString()}</p>
+                      <p className="text-sm font-black text-slate-900 italic tracking-tighter">Rs. {(item.price || 0).toLocaleString()}</p>
                    </div>
                  ))
                )}

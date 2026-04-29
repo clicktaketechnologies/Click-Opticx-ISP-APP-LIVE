@@ -233,7 +233,7 @@ export const ProvisioningDesk: React.FC<Props> = ({ state }) => {
                                 </div>
                                 <div className="space-y-2">
                                    <p className="text-3xl font-black uppercase italic leading-none">{selectedRequest.packageName}</p>
-                                   <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest italic">{state.settings.currency} {selectedRequest.amount.toLocaleString()} / Cycle</p>
+                                   <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest italic">{state.settings.currency} {(selectedRequest.amount || 0).toLocaleString()} / Cycle</p>
                                 </div>
                              </div>
                              <div className="absolute -right-10 -bottom-10 opacity-10 group-hover:scale-110 transition-transform duration-700 pointer-events-none">

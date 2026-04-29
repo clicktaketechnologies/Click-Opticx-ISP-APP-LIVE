@@ -152,7 +152,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                         <Wallet size={18} className="text-blue-600" /> Payment Required
                      </p>
                      <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1">
-                        Amount Due: <span className="text-rose-600">{curr} {invoice.dueAmount.toLocaleString()}</span>
+                        Amount Due: <span className="text-rose-600">{curr} {(invoice.dueAmount || 0).toLocaleString()}</span>
                      </p>
                   </div>
                   <div className="flex gap-3 w-full md:w-auto">
@@ -278,7 +278,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                        </div>
                                     </div>
                                     <div className="text-right">
-                                       <p className="text-xl font-black italic text-slate-900 tracking-tighter tabular-nums">{curr} {item.total.toLocaleString()}</p>
+                                       <p className="text-xl font-black italic text-slate-900 tracking-tighter tabular-nums">{curr} {(item.total || 0).toLocaleString()}</p>
                                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1">Subtotal</p>
                                     </div>
                                  </div>
@@ -293,7 +293,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                               <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">Including all applicable taxes and node fees</p>
                            </div>
                            <div className="text-right relative z-10">
-                              <p className="text-4xl md:text-5xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 drop-shadow-lg">{curr} {invoice.totalAmount.toLocaleString()}</p>
+                              <p className="text-4xl md:text-5xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 drop-shadow-lg">{curr} {(invoice.totalAmount || 0).toLocaleString()}</p>
                            </div>
                         </div>
                      </div>
@@ -318,7 +318,7 @@ const SubscriberInvoiceViewer: React.FC<Props> = ({ invoice, state, onClose, onP
                                  </div>
                               </div>
                               <p className={`text-xl font-black italic tracking-tighter ${l.type === LedgerType.DEBIT ? 'text-red-600' : 'text-green-600'}`}>
-                                 {l.type === LedgerType.DEBIT ? '-' : '+'} {curr} {l.amount.toLocaleString()}
+                                 {l.type === LedgerType.DEBIT ? '-' : '+'} {curr} {(l.amount || 0).toLocaleString()}
                               </p>
                            </div>
                         ))
