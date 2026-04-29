@@ -347,7 +347,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
                        <div>
                           <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Active Balance</p>
                           <p className={`text-2xl font-black ${selectedUser.balance > 0 ? 'text-rose-400' : 'text-green-400'}`}>
-                            {state.settings.currency} {selectedUser.balance.toLocaleString()}
+                            {state.settings.currency} {( || 0).toLocaleString()}
                           </p>
                        </div>
                     </div>
@@ -381,7 +381,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
            <div className="grid grid-cols-2 gap-4">
               <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:bg-white hover:shadow-xl transition-all">
                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Final Amount</p>
-                 <p className="text-3xl font-black text-slate-900">{state.settings.currency} {generatedInv.totalAmount.toLocaleString()}</p>
+                 <p className="text-3xl font-black text-slate-900">{state.settings.currency} {( || 0).toLocaleString()}</p>
               </div>
               <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:bg-white hover:shadow-xl transition-all">
                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Target Node</p>

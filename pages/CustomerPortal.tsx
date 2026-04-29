@@ -286,7 +286,7 @@ const CustomerPortal: React.FC<{ state: AppState }> = ({ state }) => {
                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Net Liabilities</p>
                               <div className="flex items-end gap-2">
                                  <p className={`text-4xl font-black italic tracking-tighter ${selectedUser.balance > 0 ? 'text-rose-600' : 'text-green-600'}`}>
-                                    {state.settings.currency} {selectedUser.balance.toLocaleString()}
+                                    {state.settings.currency} {( || 0).toLocaleString()}
                                  </p>
                                  <div className="mb-2">
                                     {selectedUser.balance > 0 ? <AlertTriangle size={16} className="text-rose-500 animate-bounce" /> : <ShieldCheck size={16} className="text-green-500" />}
@@ -378,7 +378,7 @@ const CustomerPortal: React.FC<{ state: AppState }> = ({ state }) => {
                                                 </span>
                                              </td>
                                              <td className="px-8 py-6 text-right font-black text-slate-950 text-base italic tracking-tighter">
-                                                {state.settings.currency}{inv.totalAmount.toLocaleString()}
+                                                {state.settings.currency}{( || 0).toLocaleString()}
                                              </td>
                                           </tr>
                                        ))}
@@ -413,7 +413,7 @@ const CustomerPortal: React.FC<{ state: AppState }> = ({ state }) => {
                                        </div>
                                        <div className="text-right relative z-10">
                                           <p className={`text-xl font-black italic tracking-tighter ${entry.type === LedgerType.DEBIT ? 'text-rose-600' : 'text-green-600'}`}>
-                                             {entry.type === LedgerType.DEBIT ? '-' : '+'} {state.settings.currency}{entry.amount.toLocaleString()}
+                                             {entry.type === LedgerType.DEBIT ? '-' : '+'} {state.settings.currency}{( || 0).toLocaleString()}
                                           </p>
                                           <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1">Balance Post: {state.settings.currency}{entry.balanceAfter.toLocaleString()}</p>
                                        </div>

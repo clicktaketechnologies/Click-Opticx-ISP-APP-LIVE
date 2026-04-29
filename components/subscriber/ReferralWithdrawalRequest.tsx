@@ -59,7 +59,7 @@ const ReferralWithdrawalRequest: React.FC<Props> = ({ onClose, onWithdraw }) => 
                <div className="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100 shadow-inner">
                   <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mb-4">Payout Value</p>
                   <h2 className="text-5xl font-black text-slate-900 tracking-tighter italic">Rs. {(user.referralPoints * 0.01).toLocaleString()}</h2>
-                  <p className="text-[10px] text-blue-600 font-black uppercase mt-3 tracking-widest">Points: {user.referralPoints.toLocaleString()}</p>
+                  <p className="text-[10px] text-blue-600 font-black uppercase mt-3 tracking-widest">Points: {( || 0).toLocaleString()}</p>
                </div>
                
                <div className="grid grid-cols-1 gap-4">

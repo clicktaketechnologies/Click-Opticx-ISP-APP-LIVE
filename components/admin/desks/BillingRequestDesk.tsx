@@ -127,7 +127,7 @@ export const BillingRequestDesk: React.FC<Props> = ({ state }) => {
                       </div>
                       <div className="overflow-hidden">
                         <p className="text-sm font-black text-slate-900 uppercase italic leading-none truncate max-w-[120px]">{req.userName}</p>
-                        <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest mt-2">{state.settings.currency} {req.amount.toLocaleString()}</p>
+                        <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest mt-2">{state.settings.currency} {( || 0).toLocaleString()}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
@@ -165,7 +165,7 @@ export const BillingRequestDesk: React.FC<Props> = ({ state }) => {
                        </div>
                        <div>
                           <p className="text-[11px] font-black text-blue-400 uppercase tracking-[0.4em] mb-3 leading-none italic italic">Fiscal Handshake Active</p>
-                          <h3 className="text-5xl font-black uppercase italic tracking-tighter leading-none">{state.settings.currency} {selectedRequest.amount.toLocaleString()}</h3>
+                          <h3 className="text-5xl font-black uppercase italic tracking-tighter leading-none">{state.settings.currency} {( || 0).toLocaleString()}</h3>
                           <div className="flex items-center gap-4 mt-5">
                              <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-slate-400 group-hover:text-white transition-colors">
                                 <UserCircle size={14} className="text-blue-500" />

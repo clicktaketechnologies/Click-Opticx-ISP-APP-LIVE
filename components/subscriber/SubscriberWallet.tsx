@@ -49,7 +49,7 @@ const SubscriberWallet: React.FC<Props> = ({ user, state, pendingTopups }) => {
                   <div className="p-6 bg-black/20 rounded-3xl border border-white/10 space-y-3 animate-in slide-in-from-bottom-2">
                      <div className="flex justify-between items-center">
                         <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Emergency Advance</p>
-                        <span className="text-sm font-black italic">Rs. {activeEL.amount.toLocaleString()}</span>
+                        <span className="text-sm font-black italic">Rs. {( || 0).toLocaleString()}</span>
                      </div>
                      <div className="flex justify-between items-center pt-3 border-t border-white/10">
                         <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Due Date</p>

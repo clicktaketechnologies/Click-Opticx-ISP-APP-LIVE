@@ -197,7 +197,7 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
                 </div>
                 <div className="text-right">
                   <p className={`text-lg font-black italic ${log.type === LedgerType.DEBIT ? 'text-red-400' : 'text-green-400'}`}>
-                    {log.type === LedgerType.DEBIT ? '-' : '+'} Rs. {log.amount.toLocaleString()}
+                    {log.type === LedgerType.DEBIT ? '-' : '+'} Rs. {( || 0).toLocaleString()}
                   </p>
                 </div>
               </div>

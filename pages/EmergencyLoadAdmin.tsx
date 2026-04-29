@@ -162,7 +162,7 @@ const EmergencyLoadAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Threshold Node</p>
                          </div>
                       </td>
-                      <td className="px-8 py-5 font-black text-slate-900 text-right">Rs. {load.amount.toLocaleString()}</td>
+                      <td className="px-8 py-5 font-black text-slate-900 text-right">Rs. {( || 0).toLocaleString()}</td>
                       <td className="px-8 py-5 text-right">
                          <div className="flex justify-end gap-1.5 pr-6">
                             <button 
