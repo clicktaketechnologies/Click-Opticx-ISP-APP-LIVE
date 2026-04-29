@@ -27,10 +27,14 @@ const kycRoutes = require('./routes/kyc');
 const cloudRoutes = require('./routes/cloud');
 const configRoutes = require('./routes/config');
 const emailRoutes = require('./routes/email');
+const providerManagementRoutes = require('./routes/provider-management');
 const storageRoutes = require('./routes/storage');
 const migrationRoutes = require('./routes/migration');
 const configManager = require('./services/config-manager');
 const emailWorker = require('./modules/email/worker');
+const paymentRouter = require('./modules/payments/payment-router');
+const emailRouter = require('./modules/email/email-router');
+const responseMapper = require('./services/response-mapper');
 
 const app = express();
 const server = http.createServer(app);
@@ -78,9 +82,19 @@ try {
 }
 
 // --- Supabase Config Manager Init ---
-configManager.init().then(() => {
+configManager.init().then(async () => {
     logger.info('🗄️  Supabase Config Manager: Online — Runtime config loaded');
     
+    // --- Phase 1 Foundation: Initialize Routers & Mappers ---
+    try {
+        await paymentRouter.init();
+        await emailRouter.init();
+        await responseMapper.init();
+        logger.info('🛰️  Payment, Email Routers & Response Mapper: Online');
+    } catch (e) {
+        logger.error(`[FOUNDATION-INIT] Failed: ${e.message}`);
+    }
+
     // --- Phase 1: Email Worker Init ---
     try {
         emailWorker.initWorker();
@@ -189,6 +203,7 @@ app.use('/api/config', configRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/storage', storageRoutes);
 app.use('/api/migration', migrationRoutes);
+app.use('/api/provider-mgmt', providerManagementRoutes);
 
 // --- Push Notification API ---
 app.post('/api/push-notify', async (req, res) => {

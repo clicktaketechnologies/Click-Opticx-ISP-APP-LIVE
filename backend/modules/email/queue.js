@@ -54,4 +54,44 @@ async function getQueueMetrics() {
   return { waiting, active, completed, failed, delayed };
 }
 
-module.exports = { addEmailToQueue, getQueueMetrics, emailQueue };
+/**
+ * Get jobs by status
+ */
+async function getJobs(status = 'waiting') {
+  const jobs = await emailQueue.getJobs([status]);
+  return jobs.map(j => ({
+    id: j.id,
+    data: j.data,
+    status: status,
+    timestamp: j.timestamp,
+    processedOn: j.processedOn,
+    failedReason: j.failedReason,
+    attemptsMade: j.attemptsMade
+  }));
+}
+
+/**
+ * Retry a failed job
+ */
+async function retryJob(jobId) {
+  const job = await emailQueue.getJob(jobId);
+  if (job && (await job.isFailed())) {
+    await job.retry();
+    return { success: true };
+  }
+  return { success: false, message: 'Job not found or not in failed state' };
+}
+
+/**
+ * Cancel/Remove a job
+ */
+async function cancelJob(jobId) {
+  const job = await emailQueue.getJob(jobId);
+  if (job) {
+    await job.remove();
+    return { success: true };
+  }
+  return { success: false, message: 'Job not found' };
+}
+
+module.exports = { addEmailToQueue, getQueueMetrics, emailQueue, getJobs, retryJob, cancelJob };

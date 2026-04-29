@@ -160,12 +160,14 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
        items: [
          { id: 'invoice-engine', label: 'Billing System', icon: Calculator },
          { id: 'invoice-management', label: 'Invoices', icon: ClipboardList, badge: invoicePendingCount > 0 ? invoicePendingCount : undefined, badgeColor: 'yellow' },
-         { id: 'gateway-settings', label: 'Payment Methods', icon: CreditCard },
+         { id: 'gateway-settings', label: 'Fiscal Gateways', icon: CreditCard },
+         { id: 'fiscal-monitor', label: 'Fiscal Pulse', icon: Activity },
          { id: 'accounting', label: 'Transaction History', icon: History },
          {
            id: 'group-advanced-finance', label: 'Advanced', icon: Wallet, badge: emergencyCount > 0 ? emergencyCount : undefined, badgeColor: 'red',
            items: [
              { id: 'recovery', label: 'Payment Recovery', icon: Receipt },
+             { id: 'response-mapper', label: 'Response Normalizer', icon: Layers },
              { id: 'wallet', label: 'Wallet & Balance', icon: Wallet },
              { id: 'emergency-load', label: 'Emergency Balance', icon: Zap, badge: emergencyCount > 0 ? emergencyCount : undefined, badgeColor: 'red' },
              { id: 'admin-reminders', label: 'Admin Alerts', icon: BellRing },

@@ -1,158 +1,180 @@
-const logger = require('../../utils/logger');
-const configManager = require('../../services/config-manager');
-const resend = require('./providers/resend');
-const brevo = require('./providers/brevo');
-const mailgun = require('./providers/mailgun');
-const smtp = require('./providers/smtp');
-
-const providers = {
-  resend,
-  brevo,
-  mailgun,
-  gmail: smtp, // Mapped to SMTP provider
-  smtp
-};
-
-// Circuit breaker state
-const circuitBreakers = {};
-const FAILURE_THRESHOLD = 5;
-const RESET_TIMEOUT_MS = 300000; // 5 minutes
-
 /**
- * Email Router
- * Handles priority-based failover for email delivery
+ * email-router.js
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Simplified Email Orchestrator
+ *
+ * Handles:
+ * 1. Multi-provider priority chain (Gmail -> Resend -> Brevo)
+ * 2. Automatic failover on provider failure
+ * 3. Rate-limit awareness
+ * 4. Delivery status logging
  */
-async function sendEmail({ to, subject, html, category = 'System' }) {
-  const config = configManager.getConfig('email_providers');
-  if (!config) {
-    logger.warn('[EMAIL-ROUTER] No configuration found. Falling back to primary only.');
-    // Fallback to basic SMTP if config missing
-    return smtp.send({ to, subject, html, from: process.env.GMAIL_USER, fromName: 'Click Opticx' });
+
+const configManager = require('../../services/config-manager');
+const SmtpAdapter = require('./adapters/smtp-adapter');
+const ResendAdapter = require('./adapters/resend-adapter');
+const logger = require('../../utils/logger');
+
+class EmailRouter {
+  constructor() {
+    this.providers = [];
+    this.adapters = {}; // { providerId: AdapterInstance }
+    this.initialized = false;
   }
 
-  const sortedProviders = [...(config.providers || [])]
-    .filter(p => p.enabled)
-    .sort((a, b) => a.priority - b.priority);
-
-  if (sortedProviders.length === 0) {
-    throw new Error('No enabled email providers found in configuration');
-  }
-
-  // Check for quiet hours
-  if (config.quiet_hours?.enabled && category !== 'Critical') {
-    const now = new Date();
-    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const { start, end } = config.quiet_hours;
+  async init() {
+    await this.refreshProviders();
     
-    // Simple time comparison
-    const isQuiet = start < end 
-      ? (currentTime >= start && currentTime <= end)
-      : (currentTime >= start || currentTime <= end);
-
-    if (isQuiet) {
-      logger.info(`[EMAIL-ROUTER] Suppressing non-critical email to ${to} during quiet hours (${currentTime})`);
-      return { success: false, status: 'Suppressed', reason: 'Quiet Hours' };
-    }
-  }
-
-  let lastError = null;
-
-  for (const providerConfig of sortedProviders) {
-    const providerId = providerConfig.id;
-    const provider = providers[providerId];
-
-    if (!provider) {
-      logger.warn(`[EMAIL-ROUTER] Provider ${providerId} not implemented. Skipping.`);
-      continue;
-    }
-
-    // Check circuit breaker
-    if (isCircuitOpen(providerId)) {
-      logger.warn(`[EMAIL-ROUTER] Circuit open for ${providerId}. Skipping.`);
-      continue;
-    }
-
-    try {
-      logger.info(`[EMAIL-ROUTER] Attempting delivery via ${providerId} to ${to}`);
-      
-      const result = await provider.send({
-        to,
-        subject,
-        html,
-        from: config.from_address || process.env.GMAIL_USER,
-        fromName: config.from_name || 'Click Opticx'
-      });
-
-      // Reset circuit breaker on success
-      resetCircuit(providerId);
-
-      // Log success to Supabase email_logs if available
-      logEmailDelivery(to, subject, providerId, 'Delivered').catch(() => {});
-
-      return result;
-    } catch (error) {
-      logger.error(`[EMAIL-ROUTER] ${providerId} failed: ${error.message}`);
-      lastError = error;
-      recordFailure(providerId);
-      
-      // Continue to next provider in priority chain
-    }
-  }
-
-  // If all failed
-  logEmailDelivery(to, subject, 'None', 'Failed', lastError?.message).catch(() => {});
-  throw new Error(`All email providers failed. Last error: ${lastError?.message}`);
-}
-
-// ─── Circuit Breaker Helpers ──────────────────────────────────────────────────
-
-function isCircuitOpen(providerId) {
-  const cb = circuitBreakers[providerId];
-  if (!cb) return false;
-  if (cb.status === 'OPEN' && Date.now() - cb.lastFailureTime > RESET_TIMEOUT_MS) {
-    cb.status = 'HALF_OPEN';
-    return false;
-  }
-  return cb.status === 'OPEN';
-}
-
-function recordFailure(providerId) {
-  if (!circuitBreakers[providerId]) {
-    circuitBreakers[providerId] = { failures: 0, lastFailureTime: 0, status: 'CLOSED' };
-  }
-  const cb = circuitBreakers[providerId];
-  cb.failures++;
-  cb.lastFailureTime = Date.now();
-  if (cb.failures >= FAILURE_THRESHOLD) {
-    cb.status = 'OPEN';
-    logger.warn(`[EMAIL-ROUTER] Circuit OPENed for ${providerId}`);
-  }
-}
-
-function resetCircuit(providerId) {
-  if (circuitBreakers[providerId]) {
-    circuitBreakers[providerId] = { failures: 0, lastFailureTime: 0, status: 'CLOSED' };
-  }
-}
-
-// ─── Logging Helper ───────────────────────────────────────────────────────────
-
-async function logEmailDelivery(to, subject, provider, status, error = null) {
-  const supabase = configManager.getSupabaseClient();
-  if (!supabase) return;
-
-  try {
-    await supabase.from('email_logs').insert({
-      email: to,
-      subject,
-      provider_used: provider,
-      status,
-      error_message: error,
-      created_at: new Date().toISOString()
+    // 1. Listen to Config Manager for generic triggers
+    configManager.onConfigChange('*', (key) => {
+      if (key === 'email_providers' || key.includes('email')) {
+        this.refreshProviders();
+      }
     });
-  } catch (e) {
-    // Silent fail
+
+    // 2. Direct Supabase Realtime for granular provider updates
+    const supabase = configManager.getSupabaseClient();
+    if (supabase) {
+      supabase
+        .channel('email_provider_watch')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'email_providers' }, () => {
+          this.refreshProviders();
+        })
+        .subscribe();
+    }
+
+    this.initialized = true;
+  }
+
+  async refreshProviders() {
+    const supabase = configManager.getSupabaseClient();
+    if (!supabase) return;
+
+    const { data, error } = await supabase
+      .from('email_providers')
+      .select('*')
+      .order('priority', { ascending: true });
+
+    if (!error && data) {
+      this.providers = data;
+
+      // Instantiate/Refresh Adapters
+      for (const p of data) {
+        if (p.enabled && !this.adapters[p.id]) {
+            try {
+                let adapter = null;
+                if (p.id === 'gmail_smtp' || p.id.includes('smtp')) adapter = new SmtpAdapter(p.config);
+                if (p.id === 'resend') adapter = new ResendAdapter(p.config);
+                
+                if (adapter) {
+                    await adapter.init();
+                    this.adapters[p.id] = adapter;
+                }
+            } catch (e) {
+                logger.error(`[EMAIL-ROUTER] Failed to init adapter for ${p.id}: ${e.message}`);
+            }
+        }
+      }
+
+      console.log(`[EMAIL-ROUTER] Refreshed ${this.providers.length} email providers, ${Object.keys(this.adapters).length} adapters online`);
+    }
+  }
+
+  /** Get healthy providers */
+  getHealthyProviders() {
+    return this.providers.filter(p => p.enabled && p.status === 'Healthy');
+  }
+
+  /**
+   * Send an email with automatic failover
+   * @param {Object} options - { to, subject, body, templateId, userId }
+   */
+  async sendEmail(options) {
+    const healthy = this.getHealthyProviders();
+    
+    if (healthy.length === 0) {
+      return { success: false, error: 'No healthy email providers configured' };
+    }
+
+    let lastError = null;
+    let successfulProvider = null;
+
+    for (const provider of healthy) {
+      // Check daily limit
+      if (provider.usage_today >= provider.daily_limit) {
+        console.warn(`[EMAIL-ROUTER] Provider ${provider.name} reached daily limit. Skipping...`);
+        continue;
+      }
+
+      try {
+        console.log(`[EMAIL-ROUTER] Dispatching email via: ${provider.name}`);
+        
+        // Placeholder for actual provider logic (Nodemailer, Resend SDK, etc.)
+        const result = await this.executeSendAction(provider, options);
+
+        if (result.success) {
+          successfulProvider = provider.id;
+          await this.logSuccess(provider.id, options);
+          return { success: true, provider: provider.id };
+        } else {
+          lastError = result.error;
+          await this.logFailure(provider.id, options, lastError);
+        }
+      } catch (e) {
+        lastError = e.message;
+        await this.logFailure(provider.id, options, lastError);
+      }
+    }
+
+    return { 
+      success: false, 
+      error: 'All providers failed to deliver. Last error: ' + lastError 
+    };
+  }
+
+  async executeSendAction(provider, options) {
+    const adapter = this.adapters[provider.id];
+    if (!adapter) {
+        return { success: false, error: `No active adapter for ${provider.id}` };
+    }
+    return await adapter.send(options);
+  }
+
+  async logSuccess(providerId, options) {
+    const supabase = configManager.getSupabaseClient();
+    if (!supabase) return;
+
+    // Increment usage
+    await supabase.rpc('increment_provider_usage', { p_id: providerId });
+
+    // Log to email_logs
+    await supabase.from('email_logs').insert({
+      user_id: options.userId || null,
+      email: options.to,
+      subject: options.subject,
+      provider_used: providerId,
+      status: 'Sent',
+      template_id: options.templateId || 'manual'
+    });
+  }
+
+  async logFailure(providerId, options, error) {
+    const supabase = configManager.getSupabaseClient();
+    if (!supabase) return;
+
+    await supabase.from('email_logs').insert({
+      user_id: options.userId || null,
+      email: options.to,
+      subject: options.subject,
+      provider_used: providerId,
+      status: 'Failed',
+      error_message: error,
+      template_id: options.templateId || 'manual'
+    });
+
+    // Optionally mark provider as unhealthy if errors persist
+    // (Circuit breaker logic here)
   }
 }
 
-module.exports = { sendEmail };
+module.exports = new EmailRouter();

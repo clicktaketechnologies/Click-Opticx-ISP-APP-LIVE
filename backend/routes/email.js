@@ -41,12 +41,37 @@ router.post('/queue', async (req, res) => {
 });
 
 /**
- * Queue Status/Metrics
+ * Get jobs by status
  */
-router.get('/queue-status', async (req, res) => {
+router.get('/jobs', async (req, res) => {
+  const { status } = req.query;
   try {
-    const metrics = await emailQueue.getQueueMetrics();
-    res.json({ success: true, metrics });
+    const jobs = await emailQueue.getJobs(status);
+    res.json({ success: true, jobs });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * Retry a job
+ */
+router.post('/jobs/:id/retry', async (req, res) => {
+  try {
+    const result = await emailQueue.retryJob(req.params.id);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * Cancel a job
+ */
+router.delete('/jobs/:id', async (req, res) => {
+  try {
+    const result = await emailQueue.cancelJob(req.params.id);
+    res.json(result);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

@@ -718,8 +718,16 @@ export interface PaymentGateway {
   type: 'online' | 'wallet' | 'offline';
   enabled: boolean;
   priority: number;
-  sandbox: boolean;
+  sandbox: boolean; // Legacy: Maps to mode === 'sandbox'
+  mode?: 'sandbox' | 'live';
+  status?: 'Connected' | 'Disconnected' | 'Error';
+  last_check_at?: string;
   config: any;
+  webhook_url?: string;
+  signature_secret?: string;
+  daily_limit?: number;
+  usage_today?: number;
+  reputation_score?: number;
   merchantName?: string;
   merchantId?: string;
   instructions?: string;
