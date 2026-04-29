@@ -163,7 +163,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                  <p className="text-[8px] text-slate-400 font-bold uppercase">{new Date(log.timestamp).toLocaleDateString()}</p>
                               </div>
                               <p className={`text-sm font-black italic ${log.type === LedgerType.CREDIT ? 'text-green-600' : 'text-rose-600'}`}>
-                                 {log.type === LedgerType.CREDIT ? '+' : '-'}{( || 0).toLocaleString()}
+                                 {log.type === LedgerType.CREDIT ? '+' : '-'}{log.amount.toLocaleString()}
                               </p>
                            </div>
                         ))}
@@ -194,7 +194,7 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            </div>
                         </div>
                         <div className="text-center md:text-right">
-                           <p className="text-2xl font-black text-slate-900 tracking-tighter">{state.settings.currency}{( || 0).toLocaleString()}</p>
+                           <p className="text-2xl font-black text-slate-900 tracking-tighter">{state.settings.currency}{req.amount.toLocaleString()}</p>
                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Subscriber Initiated</p>
                         </div>
                         <div className="flex gap-3">

@@ -87,7 +87,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                       <HandCoins size={28} />
                     </div>
                     <div>
-                      <p className="text-2xl font-black text-slate-900 tracking-tighter">Rs. {( || 0).toLocaleString()}</p>
+                      <p className="text-2xl font-black text-slate-900 tracking-tighter">Rs. {p.amount.toLocaleString()}</p>
                       <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">{p.userName} • {p.method}</p>
                       <div className="flex items-center gap-1.5 mt-2">
                         <Activity size={10} className="text-blue-500" />
@@ -242,7 +242,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="text-right">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Action Impact</p>
-                    <p className="text-2xl font-black text-slate-900 tracking-tighter">Rs. {( || 0).toLocaleString()}</p>
+                    <p className="text-2xl font-black text-slate-900 tracking-tighter">Rs. {req.amount.toLocaleString()}</p>
                   </div>
                 </div>
 
@@ -301,7 +301,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
           <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
             <div>
               <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
-              <p className="text-xl font-black text-slate-900 mt-1">{typeof s.value === 'number' ? `Rs. ${( || 0).toLocaleString()}` : s.value}</p>
+              <p className="text-xl font-black text-slate-900 mt-1">{typeof s.value === 'number' ? `Rs. ${s.value.toLocaleString()}` : s.value}</p>
             </div>
             <div className={`w-10 h-10 ${s.color} text-white rounded-xl flex items-center justify-center shadow-lg`}><s.icon size={18} /></div>
           </div>
@@ -388,7 +388,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                               }`}>{req.type.replace('_', ' ')}</span>
                            </td>
                            <td className="px-8 py-5 text-right">
-                              <p className="text-xs font-black text-slate-900 tracking-tighter italic">Rs. {( || 0).toLocaleString()}</p>
+                              <p className="text-xs font-black text-slate-900 tracking-tighter italic">Rs. {req.amount.toLocaleString()}</p>
                               <p className="text-[8px] text-slate-400 font-bold uppercase">{req.requestedBy}</p>
                            </td>
                            <td className="px-8 py-5 text-right">
@@ -427,7 +427,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                 <div className="text-right">
                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Team Balance</p>
                   <p className={`text-3xl font-black ${member.stats.pending > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                    Rs. {member.( || 0).toLocaleString()}
+                    Rs. {member.stats.pending.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -438,7 +438,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                 <div className="grid grid-cols-2 gap-4 py-6 border-y border-slate-50">
                   <div>
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Lifetime</p>
-                    <p className="text-xs font-black text-slate-700">Rs. {member.( || 0).toLocaleString()}</p>
+                    <p className="text-xs font-black text-slate-700">Rs. {member.stats.total.toLocaleString()}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Receipts</p>
@@ -522,7 +522,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="font-black text-slate-100 text-lg tracking-tighter">Rs. {( || 0).toLocaleString()}</p>
+                        <p className="font-black text-slate-100 text-lg tracking-tighter">Rs. {p.amount.toLocaleString()}</p>
                         <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${p.isCleared ? 'bg-green-500/10 text-green-400' : 'bg-rose-500/10 text-rose-400'}`}>
                           {p.isCleared ? 'Registry Settled' : 'In Team Hand'}
                         </span>

@@ -217,7 +217,7 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
                                <ArrowDownLeft size={14} className="text-rose-500" />
                              </div>
                              <div className="flex flex-col items-end">
-                               <span className="text-sm font-black text-rose-600 tabular-nums">-{state.settings.currency}{( || 0).toLocaleString()}</span>
+                               <span className="text-sm font-black text-rose-600 tabular-nums">-{state.settings.currency}{entry.amount.toLocaleString()}</span>
                                <span className="text-[8px] font-bold text-rose-300 uppercase italic">Debit</span>
                              </div>
                            </div>
@@ -227,7 +227,7 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
                                <ArrowUpRight size={14} className="text-emerald-500" />
                              </div>
                              <div className="flex flex-col items-end">
-                               <span className="text-sm font-black text-emerald-600 tabular-nums">+{state.settings.currency}{( || 0).toLocaleString()}</span>
+                               <span className="text-sm font-black text-emerald-600 tabular-nums">+{state.settings.currency}{entry.amount.toLocaleString()}</span>
                                <span className="text-[8px] font-bold text-emerald-300 uppercase italic">Credit</span>
                              </div>
                            </div>

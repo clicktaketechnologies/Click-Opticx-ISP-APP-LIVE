@@ -75,7 +75,7 @@ const ReferralPointsHistory: React.FC<Props> = ({ onClose }) => {
                       </div>
                    </div>
                    <p className={`text-lg font-black italic tracking-tighter ${log.amount > 0 ? 'text-green-600' : 'text-rose-600'}`}>
-                      {log.amount > 0 ? '+' : ''}{( || 0).toLocaleString()}
+                      {log.amount > 0 ? '+' : ''}{log.amount.toLocaleString()}
                    </p>
                 </div>
               ))

@@ -146,7 +146,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
                <div className="flex flex-col">
                   {hasDiscount && !isActive && (
                     <span className="text-sm font-black text-slate-300 line-through tracking-tighter decoration-rose-400/50">
-                      {currency} {( || 0).toLocaleString()}
+                      {currency} {pkg.price.toLocaleString()}
                     </span>
                   )}
                   <div className="flex items-baseline gap-1">

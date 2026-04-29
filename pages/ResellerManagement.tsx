@@ -195,7 +195,7 @@ const ResellerManagement: React.FC<{ state: AppState }> = ({ state }) => {
                <span className="text-[10px] font-black text-blue-500 bg-blue-50 px-3 py-1 rounded-full uppercase">Distributed</span>
             </div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest relative z-10">Total Bandwidth Credit</p>
-            <h3 className="text-3xl font-black text-slate-900 mt-2 tracking-tight relative z-10">Rs. {( || 0).toLocaleString()}</h3>
+            <h3 className="text-3xl font-black text-slate-900 mt-2 tracking-tight relative z-10">Rs. {stats.distributed.toLocaleString()}</h3>
             <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform">
                <Zap size={120} />
             </div>
@@ -209,7 +209,7 @@ const ResellerManagement: React.FC<{ state: AppState }> = ({ state }) => {
                <span className="text-[10px] font-black text-green-500 bg-green-50 px-3 py-1 rounded-full uppercase">Settled</span>
             </div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest relative z-10">Paid Balance Received</p>
-            <h3 className="text-3xl font-black text-green-600 mt-2 tracking-tight relative z-10">Rs. {( || 0).toLocaleString()}</h3>
+            <h3 className="text-3xl font-black text-green-600 mt-2 tracking-tight relative z-10">Rs. {stats.paid.toLocaleString()}</h3>
             <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform text-green-500">
                <CheckCircle size={120} />
             </div>
@@ -223,7 +223,7 @@ const ResellerManagement: React.FC<{ state: AppState }> = ({ state }) => {
                <span className="text-[10px] font-black text-orange-500 bg-orange-50 px-3 py-1 rounded-full uppercase">In Market</span>
             </div>
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest relative z-10">Pending Recovery</p>
-            <h3 className="text-3xl font-black text-orange-600 mt-2 tracking-tight relative z-10">Rs. {( || 0).toLocaleString()}</h3>
+            <h3 className="text-3xl font-black text-orange-600 mt-2 tracking-tight relative z-10">Rs. {stats.pending.toLocaleString()}</h3>
             <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform text-orange-500">
                <History size={120} />
             </div>

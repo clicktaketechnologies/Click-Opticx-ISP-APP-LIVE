@@ -223,7 +223,7 @@ const Dashboard: React.FC<{
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-black text-slate-900">Rs. {( || 0).toLocaleString()}</p>
+                      <p className="text-lg font-black text-slate-900">Rs. {inv.totalAmount.toLocaleString()}</p>
                       <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${inv.status === PaymentStatus.PAID ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{inv.status}</span>
                     </div>
                   </div>
