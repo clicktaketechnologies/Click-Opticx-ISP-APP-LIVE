@@ -56,7 +56,7 @@ const MultiCloudSync: React.FC<Props> = ({ state }) => {
          if (data.success) setKycFiles(data.list);
       } else {
          // Fallback to local DB reference for demo
-         const allFiles = Object.values(db.files || {});
+         const allFiles = Object.values(db.getState().kycFiles || {});
          setKycFiles(allFiles);
       }
     } catch (err) {
@@ -224,15 +224,19 @@ const MultiCloudSync: React.FC<Props> = ({ state }) => {
         setTimeout(async () => {
            addTelemetry(`[SIMULATION] Simulated success for ${provider}. Connect a real account for production usage.`);
            
-           // Mock saving it locally
+            // Mock saving it locally
            setCloudAccounts(prev => [...prev, {
               id: Date.now().toString(),
-              provider,
+              provider: provider as any,
               email: method === 'Email Password' ? manageForm.email : `admin@${provider.toLowerCase()}.com`,
               status: 'Connected',
               quota: { used: 0, total: 15 * 1024 * 1024 * 1024 },
-              loginMethod: method,
-              isPrimary: prev.length === 0
+              loginMethod: method as any,
+              isPrimary: prev.length === 0,
+              accessToken: '',
+              refreshToken: '',
+              expiry: '',
+              connectedAt: new Date().toISOString()
            }]);
 
            setShowPortal(null);

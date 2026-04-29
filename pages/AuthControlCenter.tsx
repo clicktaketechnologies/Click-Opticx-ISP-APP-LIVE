@@ -29,7 +29,7 @@ interface Props {
 const AuthControlCenter: React.FC<Props> = ({ state }) => {
   const [settings, setSettings] = useState<AuthSettings>(state.settings.authSettings || DEFAULT_AUTH_SETTINGS);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'global' | 'universal' | 'signup' | 'duplicate' | 'security' | 'forgot' | 'postSignup' | 'comm' | 'tester'>('global');
+  const [activeTab, setActiveTab] = useState<string>('global');
   const [isTesting, setIsTesting] = useState(false);
   const [testLog, setTestLog] = useState<any[]>([]);
   const [isVerifying, setIsVerifying] = useState(false);

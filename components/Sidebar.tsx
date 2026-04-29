@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Role } from '../types';
+import { Role, AppState } from '../types';
 import { db } from '../db';
 import {
   LayoutDashboard, Users, Package,
@@ -7,7 +7,7 @@ import {
   Wifi, Building2, FileText, Search, FileInput, ShieldAlert, Server, Smartphone, Zap, CreditCard, BarChart3, Trophy, ChevronRight, Network,
   ClipboardList, LifeBuoy, ListTodo, Info, Database, Monitor, Key, HardDrive, Map, Cpu, Sparkles, Calculator, History, Activity, Mic,
   Mail, Send, ListChecks, BellRing, Settings, UserCheck, ChevronDown, ChevronUp, UserCircle, RefreshCcw, DatabaseZap, PanelLeftClose, PanelLeft, Gauge,
-  Ticket, Archive
+  Ticket, Archive, RotateCcw, Box, AlertTriangle, Shield
 } from 'lucide-react';
 import { useBranding } from '../hooks/useBranding';
 
@@ -34,6 +34,7 @@ interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   businessName: string;
+  state: AppState;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, isOpen, isCollapsed, onToggleCollapse, businessName }) => {
@@ -59,9 +60,9 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
   const pendingApprovals = newSignupsCount + kycPendingCount + packageRequestsCount + topupRequestsCount + anyApprovalCount;
 
   const pendingTicketsCount = (state.tickets || []).filter(t => t.status === 'Open').length;
-  const emergencyCount = (state.emergencyLoads || []).filter(l => l.status === 'Pending_Activation' || l.status === 'Pending').length;
-  const offlineUsersCount = (state.users || []).filter(u => ['Offline', 'Expired', 'Suspended'].includes(u.status)).length;
-  const invoicePendingCount = (state.invoices || []).filter(i => i.status === 'Unpaid' || i.status === 'Overdue').length;
+  const emergencyCount = ((state.emergencyLoads || []) as any[]).filter(l => l.status === 'Pending_Activation' || l.status === 'Pending').length;
+  const offlineUsersCount = ((state.users || []) as any[]).filter(u => ['Offline', 'Expired', 'Suspended'].includes(u.status)).length;
+  const invoicePendingCount = ((state.invoices || []) as any[]).filter(i => i.status === 'Unpaid' || i.status === 'Overdue').length;
 
   const sections: SidebarSection[] = useMemo(() => [
     {

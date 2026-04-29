@@ -938,8 +938,8 @@ export interface AuthLog {
   userId?: string;
   userEmail?: string;
   provider: string;
-  action: 'Password_Reset' | 'OTP_Send' | 'Login_Attempt';
-  result: 'Success' | 'Failed';
+  action: 'Password_Reset' | 'OTP_Send' | 'Login_Attempt' | 'Health_Check_Handshake' | 'System_Sync';
+  result: 'Success' | 'Failed' | 'Fail';
   latency: number;
   error?: string;
   ip?: string;
@@ -1445,9 +1445,10 @@ export interface CloudAccount {
   provider: 'Google Drive' | 'OneDrive' | 'pCloud' | 'Firebase' | 'Supabase' | 'Cloudinary' | 'Appwrite';
   email: string;
   loginMethod?: 'OAuth' | 'API Key' | 'Magic Link' | 'Email/Password';
-  status: 'Connected' | 'Disconnected' | 'Expired';
+  status: 'Connected' | 'Disconnected' | 'Expired' | 'VERIFIED';
   accessToken: string;
   refreshToken: string;
+  endpoint?: string;
   expiry: string;
   quota: { used: number; total: number };
   connectedAt: string;

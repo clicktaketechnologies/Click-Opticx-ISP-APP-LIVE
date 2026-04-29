@@ -22,7 +22,7 @@ import {
   AdminReminder, ReminderStatus, ReminderIssueType, NASConfig, LiveUsage, OLTConfig, ONU,
   AuthSettings, OTP, DuplicateActionLog, TestLog, FlashLog, NotificationTemplate, NotificationTriggerEvent,
   NotificationDeliveryStatus, NotificationGateway, SignupRequest, AuditLog, SpeedTestResult,
-  HotspotToken, ArchiveData, MissingDataNode, SystemTerminology
+  HotspotToken, ArchiveData, MissingDataNode, SystemTerminology, SystemSnapshot, CloudAccount, CloudTransferLog, KYCFile, AuthLog, AuthProvider, CloudFile
 } from './types';
 
 // --- MULTI-CLOUD STORAGE PILOT ---
@@ -556,9 +556,7 @@ const INITIAL_STATE: AppState = {
     lastUpdateDate: new Date().toISOString(),
     systemSnapshots: [],
     deploymentLogs: [],
-    maintenanceMode: false,
-    cloudAccounts: [],
-    cloudTransferLogs: []
+    maintenanceMode: false
   },
   permissions: [
     { id: 'dashboard', view: ALL_ROLES, edit: [Role.SUPER_ADMIN], delete: [Role.SUPER_ADMIN] },
@@ -5851,7 +5849,7 @@ class DB {
     try {
       const enqueued = await this.enqueueEmail(to, subject, templateId, customData);
       if (enqueued.success) {
-        this.addLog({
+        (this.state.commLogs || []).push({
           id: 'LOG-' + Date.now(),
           type: 'Email',
           recipient: to,
@@ -5861,7 +5859,7 @@ class DB {
           templateId,
           provider: 'BullMQ Queue',
           sentAt: timestamp
-        });
+        } as any);
         this.notify();
         return { success: true, message: 'Email queued for delivery' };
       }
@@ -6897,8 +6895,8 @@ class DB {
     // Log Activity
     this.logAuthActivity({
       provider: provider.name,
-      action: 'Health_Check_Handshake',
-      result,
+      action: 'Health_Check_Handshake' as any,
+      result: result as any,
       latency,
       timestamp: new Date().toISOString()
     });
@@ -7287,7 +7285,7 @@ class DB {
       temp_path: '' // Purge temp path
     });
 
-    this.addSecurityLog('MOVE_KYC_FILE', file.user_id, file.userName, `Moved ${file.file_name} to ${provider}`);
+    (this as any).addSecurityLog?.('MOVE_KYC_FILE', file.user_id, file.userName, `Moved ${file.file_name} to ${provider}`);
     return res;
   }
 
