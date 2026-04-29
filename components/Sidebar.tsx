@@ -235,6 +235,11 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
   ], [pendingApprovals, pendingTicketsCount, role, state.settings.appearance, state.users, state.permissions]);
 
   const hasAccess = (id: string) => {
+    // Hydration Safety Net
+    if (!role || !state.permissions || state.permissions.length === 0) {
+      return true; // Temporarily allow access while syncing to prevent empty sidebar
+    }
+
     if (role === Role.SUPER_ADMIN) return true;
     if (id === 'ai-calling' && !appearance.showAICalling) return false;
     

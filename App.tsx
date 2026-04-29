@@ -86,6 +86,20 @@ const NetworkPlaneV2 = lazy(() => import('./pages/v2/NetworkPlaneV2'));
 const CommCenterV2 = lazy(() => import('./pages/v2/CommCenterV2'));
 const AIAutomationV2 = lazy(() => import('./pages/v2/AIAutomationV2'));
 
+const NotificationControl = lazy(() => import('./pages/admin/NotificationControl'));
+const AdminUserDevices = lazy(() => import('./pages/admin/AdminUserDevices'));
+const NotificationAnalytics = lazy(() => import('./pages/admin/NotificationAnalytics'));
+
+const SafeStub = ({ name, route }: { name: string, route: string }) => (
+  <div className="p-10 text-center animate-in fade-in h-full flex flex-col items-center justify-center">
+    <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-4"><Zap size={24} /></div>
+    <h2 className="text-2xl font-black text-slate-900 mb-2">{name}</h2>
+    <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Route: {route} • Status: Awaiting Implementation</p>
+  </div>
+);
+
+const AdminDevicesStub = lazy(() => Promise.resolve({ default: () => <SafeStub name="OLT Devices" route="/admin-devices" /> }));
+
 // Error Boundary
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
   state = { hasError: false };
@@ -204,6 +218,17 @@ const App: React.FC = () => {
       case 'archive-records': return <PastRecords state={dbState} />;
       case 'noc-dashboard': return <NOCDashboard state={dbState} />;
       case 'speed-test': return <SpeedTestPage />;
+      case 'notification-control': return <NotificationControl state={dbState} />;
+      case 'admin-user-devices': return <AdminUserDevices state={dbState} />;
+      case 'comm-logs': return <NotificationAnalytics state={dbState} />;
+      case 'admin-devices': return <AdminDevicesStub />;
+      case 'comm-templates': 
+      case 'comm-campaigns': 
+      case 'comm-push': 
+      case 'comm-rules': 
+      case 'comm-segments': 
+      case 'comm-settings': 
+        return <EmailControlCenter state={dbState} activePage={p} />;
       default: return <Dashboard state={dbState} onNavigate={navigateTo} onClearSearch={() => setGlobalSearchTerm('')} />;
     }
   };
@@ -213,7 +238,7 @@ const App: React.FC = () => {
     if (authState.role === 'Subscriber') return <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />;
 
     const v2Pref = localStorage.getItem('v2_enabled');
-    const isV2 = v2Pref === null ? true : v2Pref === 'true' || import.meta.env.VITE_ADMIN_V2_ENABLED === 'true';
+    const isV2 = v2Pref === 'true' || import.meta.env.VITE_ADMIN_V2_ENABLED === 'true';
     const adminV2Enabled = isV2 && authState.role !== 'Subscriber';
 
     if (adminV2Enabled) {
@@ -279,6 +304,21 @@ const App: React.FC = () => {
         >
             <p className="text-sm text-slate-400 font-bold uppercase tracking-widest leading-relaxed text-center py-4">{criticalAlert?.message}</p>
         </Modal>
+
+        {new URLSearchParams(window.location.search).get('debug') === 'sidebar' && (
+          <div className="fixed bottom-4 left-4 z-[999] bg-slate-900 text-white p-4 rounded-xl shadow-2xl border border-rose-500/30 text-xs w-80 font-mono">
+            <div className="flex justify-between items-center mb-2 border-b border-white/10 pb-2">
+              <strong className="text-rose-400">SIDEBAR DIAGNOSTICS</strong>
+              <button onClick={() => window.history.replaceState({}, '', window.location.pathname)}><X size={14}/></button>
+            </div>
+            <p>Auth Role: <span className="text-emerald-400">{authState.role || 'UNDEFINED'}</span></p>
+            <p>Permissions Loaded: <span className="text-emerald-400">{dbState.permissions?.length || 0}</span></p>
+            <p>Active Route ID: <span className="text-blue-400">{currentPage}</span></p>
+            <div className="mt-2 pt-2 border-t border-white/10">
+               <p className="text-[9px] text-slate-400">If items are missing, check console or App.tsx routing map.</p>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
