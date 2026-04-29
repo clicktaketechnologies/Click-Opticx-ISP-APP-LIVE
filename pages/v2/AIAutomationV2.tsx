@@ -6,7 +6,7 @@ import {
   ArrowRight, Sparkles, Activity, Clock,
   CheckCircle2, XCircle, AlertTriangle, Filter,
   PhoneCall, Mic2, FileText, ChevronDown,
-  Repeat, Database, Target, Layers
+  Repeat, Database, Target, Layers as LayersIcon, Plus, Edit3
 } from 'lucide-react';
 import { AppState } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
@@ -55,7 +55,7 @@ const AIAutomationV2: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex justify-center">
          <div className="flex gap-2 p-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm">
             {[
-                { id: 'modules', label: 'Neural Matrix', icon: Layers },
+                { id: 'modules', label: 'Neural Matrix', icon: LayersIcon },
                 { id: 'campaigns', label: 'AI Campaigns', icon: Target },
                 { id: 'logs', label: 'Call Telemetry', icon: Mic2 }
             ].map(tab => (

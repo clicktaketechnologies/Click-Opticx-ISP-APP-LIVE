@@ -616,6 +616,26 @@ const INITIAL_STATE: AppState = {
     { id: 'PROV-4', name: 'Resend', type: 'Email', priority: 4, status: 'Standby', apiKey: '', metadata: { fromEmail: 'auth@opticx.com' } },
   ],
   authLogs: [],
+  auth: { isLoggedIn: false },
+  view: 'login',
+  stats: {
+    monthlyRevenue: 0,
+    activeUsers: 0,
+    pendingInvoices: 0,
+    growthRate: 0
+  },
+  kycStats: {
+    pending: 0,
+    verified: 0,
+    rejected: 0
+  },
+  networkStats: {
+    avgLoad: 0,
+    uptime: 100,
+    latency: 0
+  },
+  emergencyCount: 0,
+  revenueData: []
 };
 
 class DB {
@@ -1401,7 +1421,10 @@ class DB {
   private localCommitTimer: any = null;
   private notifyTimer: any = null;
 
-  private async commit(immediate = false) {
+  public async commit(patch?: Partial<AppState>, immediate = false) {
+    if (patch) {
+      this.state = { ...this.state, ...patch };
+    }
     // 1. LOCAL PERSISTENCE (Immediate write to handle fast refreshes)
     try {
       // --- QUOTA CONTROL: Prune historical logs to stay within 5MB LocalStorage limit ---

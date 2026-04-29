@@ -2,27 +2,29 @@ import { useMemo } from 'react';
 import { AppState, Role } from '../types';
 
 export const useRoleAccess = (state: AppState) => {
-    const role = state.user?.role as Role;
-    const permissions = state.user?.permissions || [];
+    const roleRaw = state.auth?.role as string;
+    const role = (roleRaw || '').toLowerCase();
+    const permissions = (state.auth as any)?.permissions || [];
 
     const canAccess = (module: string) => {
-        if (role === 'SuperAdmin' || role === 'Owner') return true;
+        const m = module.toLowerCase();
+        if (role === 'superadmin' || role === 'owner') return true;
         
         // Define module mapping
         const moduleMap: Record<string, string[]> = {
-            'finance': ['FinanceAdmin', 'AccountsManager', 'BillingAgent'],
-            'network': ['NetworkAdmin', 'NOCEngineer', 'TechnicalLead'],
-            'support': ['SupportHead', 'SupportAgent', 'TicketingAdmin'],
-            'kyc': ['KYCManager', 'VerificationOfficer'],
-            'admin': ['SuperAdmin', 'Owner', 'OperationsLead']
+            'finance': ['financeadmin', 'accountsmanager', 'billingagent'],
+            'network': ['networkadmin', 'nocengineer', 'technicallead'],
+            'support': ['supporthead', 'supportagent', 'ticketingadmin'],
+            'kyc': ['kycmanager', 'verificationofficer'],
+            'admin': ['superadmin', 'owner', 'operationslead', 'admin']
         };
 
-        const allowedRoles = moduleMap[module] || [];
-        return allowedRoles.includes(role) || permissions.includes(module);
+        const allowedRoles = moduleMap[m] || [];
+        return allowedRoles.includes(role) || permissions.includes(m);
     };
 
     const isInternal = useMemo(() => {
-        return ['SuperAdmin', 'Owner', 'OperationsLead', 'FinanceAdmin', 'NetworkAdmin'].includes(role);
+        return ['superadmin', 'owner', 'operationslead', 'financeadmin', 'networkadmin', 'admin'].includes(role);
     }, [role]);
 
     return { role, canAccess, isInternal };

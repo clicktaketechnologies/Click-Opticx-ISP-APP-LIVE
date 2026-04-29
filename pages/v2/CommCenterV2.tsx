@@ -19,14 +19,14 @@ const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
   const [activeTab, setActiveTab] = useState<'infrastructure' | 'campaigns' | 'queue'>('campaigns');
 
   // 1. Data Aggregation
-  const providers = state.emailProviders || [];
-  const campaigns = state.campaigns || [];
-  const jobs = state.emailJobs || [];
+  const providers = state.authProviders?.filter(p => p.type === 'Email') || [];
+  const campaigns = state.emailCampaigns || [];
+  const jobs = state.deliveryLogs || [];
 
   const stats = {
     totalSent: 14500, // Mocked for now
     healthRate: '98.5%',
-    activeProviders: providers.filter(p => p.enabled).length,
+    activeProviders: providers.filter(p => p.status === 'Active').length,
     queuedJobs: jobs.length
   };
 
@@ -141,10 +141,10 @@ const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${
                             p.enabled ? 'bg-blue-600 shadow-blue-500/20' : 'bg-slate-300'
                         }`}>
-                            {p.id === 'resend' ? <Zap size={24} /> : <Mail size={24} />}
+                            {p.name === 'Resend' ? <Zap size={24} /> : <Mail size={24} />}
                         </div>
                         <div className="flex items-center gap-2">
-                            {p.enabled ? (
+                            {p.status === 'Active' ? (
                                 <V2Badge label="Healthy" color="emerald" icon={ShieldCheck} />
                             ) : (
                                 <V2Badge label="Inactive" color="rose" icon={XCircle} />
@@ -198,10 +198,10 @@ const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
                     <V2TableRow key={j.id}>
                         <V2TableCell>
                             <p className="text-sm font-black text-slate-900 italic leading-none mb-1">#{j.id}</p>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{j.name}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{j.recipientName || 'Subscriber'}</p>
                         </V2TableCell>
                         <V2TableCell>
-                            <p className="text-[11px] font-black text-slate-500 italic">{j.data.to}</p>
+                            <p className="text-[11px] font-black text-slate-500 italic">{j.target || 'N/A'}</p>
                         </V2TableCell>
                         <V2TableCell>
                             <V2Badge label={`${j.attemptsMade || 0} Attempts`} color="amber" variant="ghost" />

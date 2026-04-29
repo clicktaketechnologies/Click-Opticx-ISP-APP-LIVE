@@ -8,7 +8,7 @@ import {
    ExternalLink, Ban, CheckCircle, X,
    Clock, Filter, Search, UserPlus, Fingerprint, Activity, Zap, RefreshCw,
    ShieldCheck, ArrowRight, UserCircle, History, Shield, AtSign, ArrowUpRight, Contact,
-   User, SmartphoneIcon, Globe, MapPin, MoreVertical, AlertTriangle, AlertCircle, Lock, Info, Pencil, MessageSquare, ChevronRight, LogOut, Power, CheckSquare, Square, Layers, SearchCode,
+   User, SmartphoneIcon, Globe, MapPin, MoreVertical, AlertTriangle, AlertCircle, Lock, Info, Pencil, MessageSquare, ChevronRight, LogOut, Power, CheckSquare, Square, Layers as LayersIcon, SearchCode,
    ShieldEllipsis, LayoutGrid, GripVertical, Eye, EyeOff, Settings, ChevronUp, ChevronDown, FileText, Image as ImageIcon,
    Compass, Book, Trophy, Megaphone, Gauge, Monitor, Wallet, HeartPulse, Sparkles, Home, Wifi, Bell, Headphones, Target, XCircle, Mic, Palette, Sliders, Sun
 } from 'lucide-react';
@@ -237,7 +237,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            <div key={section.id} className={`p-6 rounded-[2.5rem] border-2 transition-all flex items-center justify-between group ${section.enabled ? 'border-blue-100 bg-white' : 'border-slate-50 bg-slate-50 opacity-60 grayscale'}`}>
                               <div className="flex items-center gap-4">
                                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shadow-inner ${section.enabled ? 'bg-blue-50 text-blue-600' : 'bg-white text-slate-300'}`}>
-                                    <Layers size={24} />
+                                    <LayersIcon size={24} />
                                  </div>
                                  <div>
                                     <h4 className="font-black text-slate-900 uppercase text-sm leading-none mb-1">{section.label}</h4>
@@ -392,7 +392,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         <p className="text-[9px] text-slate-400 font-black uppercase mt-1 tracking-widest">Directory & Permissions Layer</p>
                      </div>
                      <div className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-xl border border-blue-100 flex items-center gap-2">
-                        <Layers size={14} />
+                        <LayersIcon size={14} />
                         <span className="text-[10px] font-black">{appPages.length} Registered</span>
                      </div>
                   </div>

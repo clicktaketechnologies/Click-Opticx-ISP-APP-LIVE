@@ -7,7 +7,7 @@ import {
   Cpu, HardDrive, Thermometer,
   Cloud, Globe, Wifi, Radio,
   ChevronRight, ArrowUpRight, ArrowDownRight,
-  Monitor, Play, Power, HelpCircle
+  Monitor, Play, Power, HelpCircle, XCircle, Clock
 } from 'lucide-react';
 import { AppState, NAS, OLT } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
@@ -21,11 +21,11 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
   // 1. Data Consolidation
   const allNodes = useMemo(() => {
     const nodes = [
-      ...state.nas.map(n => ({ ...n, type: 'NAS' as const })),
-      ...state.olts.map(o => ({ ...o, type: 'OLT' as const }))
+      ...(state.nas || []).map(n => ({ ...n, type: 'NAS' as const })),
+      ...(state.oltNodes || []).map(o => ({ ...o, type: 'OLT' as const }))
     ];
     return nodes.filter(n => nodeType === 'all' || n.type === nodeType);
-  }, [state.nas, state.olts, nodeType]);
+  }, [state.nas, state.oltNodes, nodeType]);
 
   const stats = {
     online: allNodes.filter(n => n.status === 'Connected' || n.status === 'Active').length,

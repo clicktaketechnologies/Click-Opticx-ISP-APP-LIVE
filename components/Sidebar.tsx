@@ -7,7 +7,7 @@ import {
   Wifi, Building2, FileText, Search, FileInput, ShieldAlert, Server, Smartphone, Zap, CreditCard, BarChart3, Trophy, ChevronRight, Network,
   ClipboardList, LifeBuoy, ListTodo, Info, Database, Monitor, Key, HardDrive, Map, Cpu, Sparkles, Calculator, History, Activity, Mic,
   Mail, Send, ListChecks, BellRing, Settings, UserCheck, ChevronDown, ChevronUp, UserCircle, RefreshCcw, DatabaseZap, PanelLeftClose, PanelLeft, Gauge,
-  Ticket, Archive, RotateCcw, Box, AlertTriangle, Shield
+  Ticket, Archive, RotateCcw, Box, AlertTriangle, Shield, Layers as LayersIcon
 } from 'lucide-react';
 import { useBranding } from '../hooks/useBranding';
 
@@ -167,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
            id: 'group-advanced-finance', label: 'Advanced', icon: Wallet, badge: emergencyCount > 0 ? emergencyCount : undefined, badgeColor: 'red',
            items: [
              { id: 'recovery', label: 'Payment Recovery', icon: Receipt },
-             { id: 'response-mapper', label: 'Response Normalizer', icon: Layers },
+             { id: 'response-mapper', label: 'Response Normalizer', icon: LayersIcon },
              { id: 'wallet', label: 'Wallet & Balance', icon: Wallet },
              { id: 'emergency-load', label: 'Emergency Balance', icon: Zap, badge: emergencyCount > 0 ? emergencyCount : undefined, badgeColor: 'red' },
              { id: 'admin-reminders', label: 'Admin Alerts', icon: BellRing },

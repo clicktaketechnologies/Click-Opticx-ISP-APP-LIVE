@@ -6,7 +6,7 @@ import {
   CheckCircle2, XCircle, Clock, AlertTriangle,
   CreditCard, BarChart3, Repeat, FileText,
   ChevronRight, ArrowUpRight, ArrowDownRight,
-  ShieldCheck, Zap, History
+  ShieldCheck, Zap, History, User, Calendar
 } from 'lucide-react';
 import { AppState, Invoice, User as UserType } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
@@ -32,7 +32,7 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
   }, [state.invoices, state.users, searchQuery, filterStatus]);
 
   const stats = {
-    revenue: state.stats.monthlyRevenue,
+    revenue: state.stats?.monthlyRevenue || 0,
     unpaidCount: state.invoices.filter(i => i.status === 'Unpaid').length,
     overdueCount: state.invoices.filter(i => i.status === 'Overdue').length,
     recoveryRate: '92.4%'

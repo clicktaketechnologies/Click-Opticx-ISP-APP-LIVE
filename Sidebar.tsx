@@ -6,7 +6,7 @@ import {
   Wifi, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap,
   Lock, Zap, Mail, Briefcase, Activity, BarChart3, Globe, Landmark,
   Smartphone, MessageSquare, Bell, ClipboardList, HardDrive, Cpu, 
-  ChevronDown, Key, FileText, Headphones, Monitor, UserCircle, Layers, CreditCard
+  ChevronDown, Key, FileText, Headphones, Monitor, UserCircle, Layers as LayersIcon, CreditCard
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -106,7 +106,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       label: 'System Admin',
       icon: Settings,
       items: [
-        { id: 'packages', label: 'Connectivity Catalog', icon: Layers, roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
+        { id: 'packages', label: 'Connectivity Catalog', icon: LayersIcon, roles: [Role.SUPER_ADMIN, Role.ADMIN, Role.MANAGER] },
         { id: 'auth-control', label: 'Security Gate', icon: Lock, roles: [Role.SUPER_ADMIN, Role.ADMIN] },
         { id: 'permissions', label: 'Matrix Governance', icon: ShieldAlert, roles: [Role.SUPER_ADMIN] },
         { id: 'staff', label: 'Personnel Registry', icon: UserCheck, roles: [Role.SUPER_ADMIN] },

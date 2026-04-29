@@ -19,7 +19,7 @@ const DashboardV2: React.FC<{ state: AppState }> = ({ state }) => {
   const metrics = useMemo(() => [
     { 
       label: 'Monthly Revenue', 
-      value: `PKR ${(state.stats.monthlyRevenue || 0).toLocaleString()}`, 
+      value: `PKR ${(state.stats?.monthlyRevenue || 0).toLocaleString()}`, 
       trend: '+12.4%', 
       icon: TrendingUp, 
       color: 'blue',
@@ -27,7 +27,7 @@ const DashboardV2: React.FC<{ state: AppState }> = ({ state }) => {
     },
     { 
       label: 'Active Matrix', 
-      value: (state.stats.activeUsers || 0).toLocaleString(), 
+      value: (state.stats?.activeUsers || 0).toLocaleString(), 
       trend: '+45', 
       icon: Users, 
       color: 'indigo',
@@ -43,7 +43,7 @@ const DashboardV2: React.FC<{ state: AppState }> = ({ state }) => {
     },
     { 
       label: 'Emergency Alerts', 
-      value: state.emergencyCount.toString(), 
+      value: (state.emergencyCount || 0).toString(), 
       trend: 'CRITICAL', 
       icon: ShieldAlert, 
       color: 'rose',

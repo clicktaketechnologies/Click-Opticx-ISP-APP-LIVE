@@ -1035,6 +1035,34 @@ export interface AppState {
   flashLogs: FlashLog[];
   speedTestHistory: SpeedTestResult[];
   missingData: MissingDataNode[];
+  auth: { 
+    isLoggedIn: boolean; 
+    role?: Role | 'Subscriber'; 
+    id?: string; 
+    email?: string;
+    name?: string;
+  };
+  view: 'login' | 'admin' | 'portal';
+  
+  // V2 Dashboard & Operational Metrics
+  stats: {
+    monthlyRevenue: number;
+    activeUsers: number;
+    pendingInvoices: number;
+    growthRate: number;
+  };
+  kycStats: {
+    pending: number;
+    verified: number;
+    rejected: number;
+  };
+  networkStats: {
+    avgLoad: number;
+    uptime: number;
+    latency: number;
+  };
+  emergencyCount: number;
+  revenueData: { date: string; amount: number }[];
 }
 
 export interface ResellerPackageConfig {

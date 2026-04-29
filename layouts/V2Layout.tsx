@@ -3,7 +3,7 @@ import {
   Search, Bell, User, LayoutDashboard, Users, 
   Wallet, Network, MessageSquare, Zap, Settings, 
   ChevronLeft, ChevronRight, LogOut, Shield,
-  Database, BarChart3, Globe, Layers, Mail,
+  Database, BarChart3, Globe, Mail,
   Smartphone, Activity, Command, Menu, X,
   ShieldAlert, BellRing, UserCheck, HardDrive
 } from 'lucide-react';
@@ -26,11 +26,11 @@ const V2Layout: React.FC<Props> = ({ state, children, activePage, onNavigate, on
 
   const menuItems = [
     { id: 'dashboard', label: 'Mission Control', icon: LayoutDashboard, group: 'Core' },
-    { id: 'users', label: 'User Matrix', icon: Users, group: 'Core', badge: state.stats.activeUsers },
+    { id: 'users', label: 'User Matrix', icon: Users, group: 'Core', badge: state.stats?.activeUsers },
     
     { id: 'finance', label: 'Fiscal Hub', icon: Wallet, group: 'Operations', access: 'finance' },
     { id: 'network', label: 'Network Plane', icon: Network, group: 'Operations', access: 'network' },
-    { id: 'kyc', label: 'Identity/KYC', icon: UserCheck, group: 'Operations', access: 'kyc', badge: state.kycStats.pending },
+    { id: 'kyc', label: 'Identity/KYC', icon: UserCheck, group: 'Operations', access: 'kyc', badge: state.kycStats?.pending },
     
     { id: 'comm-center', label: 'Comms Plane', icon: Mail, group: 'Matrix', access: 'admin' },
     { id: 'automation', label: 'Neural/AI', icon: Zap, group: 'Matrix', access: 'admin' },
@@ -144,12 +144,12 @@ const V2Layout: React.FC<Props> = ({ state, children, activePage, onNavigate, on
             </div>
 
             <div className="flex items-center gap-4 lg:gap-8 ml-8">
-               <div className="hidden md:flex items-center gap-3">
-                  <V2Badge label={role} color="indigo" variant="solid" icon={Shield} />
-                  {state.emergencyCount > 0 && (
-                    <V2Badge label={`${state.emergencyCount} ALERTS`} color="rose" icon={ShieldAlert} />
-                  )}
-               </div>
+                <div className="hidden md:flex items-center gap-3">
+                   <V2Badge label={role} color="indigo" variant="solid" icon={Shield} />
+                   {(state.emergencyCount || 0) > 0 && (
+                     <V2Badge label={`${state.emergencyCount} ALERTS`} color="rose" icon={ShieldAlert} />
+                   )}
+                </div>
 
                <div className="flex items-center gap-2 lg:gap-4 border-l border-slate-100 pl-4 lg:pl-8">
                   <button className="p-3.5 bg-slate-50 text-slate-500 hover:bg-slate-950 hover:text-white rounded-2xl transition-all relative shadow-inner hover:shadow-xl hover:scale-105 active:scale-95">
@@ -160,10 +160,10 @@ const V2Layout: React.FC<Props> = ({ state, children, activePage, onNavigate, on
                      <div className="w-10 h-10 rounded-full bg-slate-950 flex items-center justify-center text-white shadow-xl group-hover:scale-105 transition-transform overflow-hidden">
                         <User size={20} />
                      </div>
-                     <div className="hidden sm:block text-left">
-                        <p className="text-[10px] font-black text-slate-900 uppercase italic leading-none">{state.user?.name || 'Operator'}</p>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {state.user?.id?.slice(0, 8)}</p>
-                     </div>
+                      <div className="hidden sm:block text-left">
+                         <p className="text-[10px] font-black text-slate-900 uppercase italic leading-none">{state.auth?.name || 'Operator'}</p>
+                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">ID: {state.auth?.id?.slice(0, 8) || 'N/A'}</p>
+                      </div>
                   </button>
                </div>
             </div>

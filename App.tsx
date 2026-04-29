@@ -113,8 +113,21 @@ const App: React.FC = () => {
     });
   }, []);
 
-  const handleLogin = (user: any) => {
-    db.commit({ auth: { ...user, isLoggedIn: true }, view: 'admin' });
+  const handleLogin = async (credential: string, pass: string) => {
+    const res = await db.login(credential, pass);
+    if (res.success) {
+      db.commit({ 
+        auth: { 
+          isLoggedIn: true,
+          role: res.user.role,
+          id: res.user.id,
+          email: res.user.email,
+          name: res.user.name
+        }, 
+        view: res.type === 'customer' ? 'portal' : 'admin' 
+      });
+    }
+    return res;
   };
 
   const handleLogout = () => {
@@ -199,7 +212,8 @@ const App: React.FC = () => {
     if (dbState.view === 'login') return <Login onLogin={handleLogin} />;
     if (authState.role === 'Subscriber') return <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />;
 
-    const isV2 = localStorage.getItem('v2_enabled') === 'true' || import.meta.env.VITE_ADMIN_V2_ENABLED === 'true';
+    const v2Pref = localStorage.getItem('v2_enabled');
+    const isV2 = v2Pref === null ? true : v2Pref === 'true' || import.meta.env.VITE_ADMIN_V2_ENABLED === 'true';
     const adminV2Enabled = isV2 && authState.role !== 'Subscriber';
 
     if (adminV2Enabled) {
