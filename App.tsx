@@ -235,11 +235,11 @@ const App: React.FC = () => {
 
   const renderApp = () => {
     if (dbState.view === 'login') return <Login onLogin={handleLogin} />;
-    if (authState.role === 'Subscriber') return <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />;
+    if (authState.role === 'Subscriber' || authState.role === 'Customer') return <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />;
 
     const v2Pref = localStorage.getItem('v2_enabled');
     const isV2 = v2Pref === 'true' || import.meta.env.VITE_ADMIN_V2_ENABLED === 'true';
-    const adminV2Enabled = isV2 && authState.role !== 'Subscriber';
+    const adminV2Enabled = isV2 && authState.role !== 'Subscriber' && authState.role !== 'Customer';
 
     if (adminV2Enabled) {
       return (
