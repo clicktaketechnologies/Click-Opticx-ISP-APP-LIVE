@@ -30,11 +30,13 @@ const emailRoutes = require('./routes/email');
 const providerManagementRoutes = require('./routes/provider-management');
 const storageRoutes = require('./routes/storage');
 const migrationRoutes = require('./routes/migration');
+const emailV2Router = require('./routes/email-v2');
 const configManager = require('./services/config-manager');
 const emailWorker = require('./modules/email/worker');
 const paymentRouter = require('./modules/payments/payment-router');
 const emailRouter = require('./modules/email/email-router');
 const responseMapper = require('./services/response-mapper');
+const HealthMonitor = require('./services/health-monitor');
 
 const app = express();
 const server = http.createServer(app);
@@ -59,6 +61,7 @@ let db;
 
 // Make io accessible in req
 app.set('socketio', io);
+logger.streamToSocket(io);
 
 // --- Firebase Admin Initialization ---
 try {
@@ -110,6 +113,14 @@ configManager.init().then(async () => {
             else logger.info('[VALIDATOR] Nightly run completed successfully');
         });
     });
+    // --- Phase 3: Health Monitor (Real-time) ---
+    try {
+        const healthMonitor = new HealthMonitor(io);
+        healthMonitor.start();
+        app.set('healthMonitor', healthMonitor);
+    } catch (e) {
+        logger.error(`[HEALTH-MONITOR] Failed to start: ${e.message}`);
+    }
 }).catch(err => {
     logger.warn(`⚠️ Supabase Config Manager: ${err.message}`);
 });
@@ -203,6 +214,7 @@ app.use('/api/config', configRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/storage', storageRoutes);
 app.use('/api/migration', migrationRoutes);
+app.use('/api/email/v2', emailV2Router);
 app.use('/api/provider-mgmt', providerManagementRoutes);
 
 // --- Push Notification API ---

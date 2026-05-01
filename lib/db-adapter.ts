@@ -47,6 +47,11 @@ export function initDualWrite() {
     scheduleDualWrite();
   });
 
+  // Hook into Audit Logs (Phase 2 Mirroring)
+  db.onAuditLog((log) => {
+    mirrorAuditLog(log).catch(() => {});
+  });
+
   // Process retry queue every 30 seconds
   setInterval(processRetryQueue, 30000);
 

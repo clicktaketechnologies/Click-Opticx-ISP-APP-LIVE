@@ -30,4 +30,15 @@ const logger = winston.createLogger({
     ]
 });
 
+logger.streamToSocket = (io) => {
+    logger.on('data', (log) => {
+        io.to('health-monitor').emit('logs:stream', {
+            timestamp: log.timestamp,
+            level: log.level,
+            message: log.message,
+            service: log.service || 'system'
+        });
+    });
+};
+
 module.exports = logger;

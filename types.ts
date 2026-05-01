@@ -953,6 +953,49 @@ export interface AuthLog {
   ip?: string;
 }
 
+export interface EmailProvider {
+  id: string;
+  name: string;
+  type: 'SMTP' | 'API';
+  host?: string;
+  port?: number;
+  username?: string;
+  apiKey?: string;
+  enabled: boolean;
+  priority: number;
+  status?: 'Connected' | 'Disconnected' | 'Error';
+  usage_today?: number;
+  daily_limit?: number;
+  reputation_score?: number;
+  last_check_at?: string;
+}
+
+export interface Campaign {
+  id: string;
+  name: string;
+  type: 'One-Time' | 'Scheduled' | 'Automated';
+  status: 'Draft' | 'Scheduled' | 'Sending' | 'Completed' | 'Failed';
+  targetCount: number;
+  sentCount: number;
+  openRate: number;
+  createdAt: string;
+  scheduledAt?: string;
+  templateId?: string;
+  segmentId?: string;
+}
+
+export interface EmailJob {
+  id: string;
+  to: string;
+  subject: string;
+  status: 'waiting' | 'active' | 'completed' | 'failed' | 'delayed';
+  attemptsMade: number;
+  timestamp: string;
+  data: any;
+  recipientName?: string;
+  target?: string;
+}
+
 export interface AppState {
   staff: StaffUser[];
   users: ISPUser[];

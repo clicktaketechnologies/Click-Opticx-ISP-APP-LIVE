@@ -8,7 +8,7 @@ import {
   ChevronRight, ArrowUpRight, ArrowDownRight,
   ShieldCheck, Zap, History, User, Calendar
 } from 'lucide-react';
-import { AppState, Invoice, User as UserType } from '../../types';
+import { AppState, Invoice, ISPUser as UserType } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
 
@@ -125,7 +125,7 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
                  <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{new Date(inv.createdAt).toLocaleDateString()}</p>
               </V2TableCell>
               <V2TableCell>
-                 <p className="text-sm font-black text-slate-900 italic">PKR {(inv.total || 0).toLocaleString()}</p>
+                 <p className="text-sm font-black text-slate-900 italic">PKR {(inv.totalAmount || 0).toLocaleString()}</p>
               </V2TableCell>
               <V2TableCell>
                  {inv.status !== 'Paid' ? (
@@ -146,7 +146,7 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
         isOpen={isDetailOpen && !!selectedInvoice}
         onClose={() => setIsDetailOpen(false)}
         title={`Invoice Node: #${selectedInvoice?.id.slice(-6).toUpperCase()}`}
-        subtitle={`Total Ingestion: PKR ${(selectedInvoice?.total || 0).toLocaleString()}`}
+        subtitle={`Total Ingestion: PKR ${(selectedInvoice?.totalAmount || 0).toLocaleString()}`}
         footer={
             <div className="flex gap-4">
                 <V2Button label="Mark as Settled" variant="primary" className="flex-1" icon={CheckCircle2} />
@@ -183,7 +183,7 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
                     <InfoCard icon={User} label="Subscriber" value={state.users.find(u => u.id === selectedInvoice.userId)?.name} />
                     <InfoCard icon={Calendar} label="Generation Date" value={new Date(selectedInvoice.createdAt).toLocaleString()} />
                     <InfoCard icon={FileText} label="Due Horizon" value={selectedInvoice.dueDate || 'Immediate'} />
-                    <InfoCard icon={Wallet} label="Total Amount" value={`PKR ${(selectedInvoice.total || 0).toLocaleString()}`} />
+                    <InfoCard icon={Wallet} label="Total Amount" value={`PKR ${(selectedInvoice.totalAmount || 0).toLocaleString()}`} />
                 </div>
 
                 {/* Recovery Actions (If Unpaid/Overdue) */}

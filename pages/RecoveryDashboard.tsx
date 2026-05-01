@@ -10,7 +10,7 @@ import Modal from '../components/shared/Modal';
 
 const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
   const [activeTab, setActiveTab] = useState<'collections' | 'approvals' | 'approvals_history' | 'team' | 'dealers'>('approvals');
-  const [paymentModal, setPaymentModal] = useState<string | null>(null);
+  const [paymentModal, setPaymentModal] = useState<{userId: string, invId: string} | null>(null);
   const [amount, setAmount] = useState(0);
   const [method, setMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
   const [searchTerm, setSearchTerm] = useState('');
@@ -52,7 +52,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 
   const handleManualPayment = async () => {
     if (!paymentModal || amount <= 0) return;
-    await db.addManualPayment(paymentModal, amount, method);
+    await db.addManualPayment(paymentModal.userId, amount, method, { invoiceId: paymentModal.invId });
     setPaymentModal(null);
     setAmount(0);
   };
@@ -172,7 +172,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => { setPaymentModal(inv.id); setAmount(inv.totalAmount - inv.paidAmount); }}
+                      onClick={() => { setPaymentModal({ userId: inv.userId, invId: inv.id }); setAmount(inv.totalAmount - inv.paidAmount); }}
                       className="flex items-center justify-center gap-2 px-6 py-3.5 bg-green-600 text-white text-[11px] font-black rounded-2xl hover:bg-green-700 transition-all shadow-xl shadow-green-100 active:scale-95 uppercase tracking-widest whitespace-nowrap"
                     >
                       <HandCoins size={16} />

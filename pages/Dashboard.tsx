@@ -273,11 +273,11 @@ const Dashboard: React.FC<{
       {/* 2. TOP METRIC CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Total Users', value: globalStats.totalUsers.toLocaleString(), trend: '+2.5%', icon: Users, grad: 'var(--grad-primary)', sub: 'Cumulative Growth' },
-          { label: 'Active Subscribers', value: globalStats.activeSubs.toLocaleString(), trend: '+1.2%', icon: Activity, grad: 'var(--grad-success)', sub: 'Live Connections' },
-          { label: 'Revenue (Period)', value: `${state.settings.currency} ${globalStats.periodRevenue.toLocaleString()}`, trend: '+12%', icon: DollarSign, grad: 'var(--grad-info)', sub: 'Gross Invoiced' },
-          { label: 'Operational Profit', value: `${state.settings.currency} ${globalStats.periodProfit.toLocaleString()}`, trend: `${((globalStats.periodProfit / (globalStats.periodRevenue || 1)) * 100).toFixed(1)}%`, icon: Banknote, grad: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', sub: 'Reseller Chain Income' },
-          { label: 'Pending KYC', value: state.kycRequests.filter(r => r.status === 'Pending').length, trend: '-5%', icon: ShieldCheck, grad: 'var(--grad-violet)', sub: 'Verification Queue' },
+          { label: 'Total Users', value: (globalStats.totalUsers || 0).toLocaleString(), trend: '+2.5%', icon: Users, grad: 'var(--grad-primary)', sub: 'Cumulative Growth' },
+          { label: 'Active Subscribers', value: (globalStats.activeSubs || 0).toLocaleString(), trend: '+1.2%', icon: Activity, grad: 'var(--grad-success)', sub: 'Live Connections' },
+          { label: 'Revenue (Period)', value: `${state.settings.currency} ${(globalStats.periodRevenue || 0).toLocaleString()}`, trend: '+12%', icon: DollarSign, grad: 'var(--grad-info)', sub: 'Gross Invoiced' },
+          { label: 'Operational Profit', value: `${state.settings.currency} ${(globalStats.periodProfit || 0).toLocaleString()}`, trend: `${(((globalStats.periodProfit || 0) / (globalStats.periodRevenue || 1)) * 100).toFixed(1)}%`, icon: Banknote, grad: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', sub: 'Reseller Chain Income' },
+          { label: 'Pending KYC', value: (state.kycRequests || []).filter(r => r.status === 'Pending').length, trend: '-5%', icon: ShieldCheck, grad: 'var(--grad-violet)', sub: 'Verification Queue' },
         ].map((kpi, idx) => (
           <div key={idx} className="card relative transition-all overflow-hidden border-none shadow-2xl hover:scale-[1.02] active:scale-95 group" style={{ backgroundImage: kpi.grad }}>
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-3xl -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-700" />
@@ -634,13 +634,13 @@ const Dashboard: React.FC<{
                     <p className="text-[10px] text-slate-500 font-semibold uppercase mt-1">Cross-check all registry nodes</p>
                  </div>
               </button>
-              <button disabled={isFixingAll || state.missingData.length === 0} onClick={() => {setIsFixingAll(true); Promise.all(state.missingData.map(n => db.fixMissingData(n.id))).then(() => setIsFixingAll(false));}} className="flex flex-col items-center justify-center gap-4 p-10 rounded-[3rem] bg-emerald-50 border border-emerald-100 hover:border-emerald-500 hover:bg-white transition-all group">
+              <button disabled={isFixingAll || (state.missingData || []).length === 0} onClick={() => {setIsFixingAll(true); Promise.all((state.missingData || []).map(n => db.fixMissingData(n.id))).then(() => setIsFixingAll(false));}} className="flex flex-col items-center justify-center gap-4 p-10 rounded-[3rem] bg-emerald-50 border border-emerald-100 hover:border-emerald-500 hover:bg-white transition-all group">
                  <div className="w-16 h-16 rounded-[2rem] bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all">
                     <ShieldCheck size={32} />
                  </div>
                  <div className="text-center">
                     <p className="text-sm font-black text-emerald-900 uppercase italic">Auto-Heal Protocol</p>
-                    <p className="text-[10px] text-emerald-600 font-semibold uppercase mt-1">Synchronize {state.missingData.length} Missing Nodes</p>
+                    <p className="text-[10px] text-emerald-600 font-semibold uppercase mt-1">Synchronize {(state.missingData || []).length} Missing Nodes</p>
                  </div>
               </button>
            </div>

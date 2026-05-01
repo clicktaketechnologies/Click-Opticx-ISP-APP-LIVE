@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   BarChart3, Play, Activity, Globe, Wifi, 
@@ -6,7 +5,7 @@ import {
   History as HistoryIcon, Server, Zap, AlertTriangle, 
   CheckCircle2, Gauge, RefreshCw, ChevronDown, 
   MapPin, Radio, Signal, Cpu, Network, X, ArrowRight,
-  Lock
+  Lock, CloudLightning, MousePointer2
 } from 'lucide-react';
 import { 
   AreaChart, Area, ResponsiveContainer 
@@ -15,6 +14,7 @@ import {
   runPingTest, runDownloadTest, runUploadTest, 
   fetchPublicIP, NetworkInfo, SPEED_TEST_SERVERS 
 } from '../../utils/speedtest';
+import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 
 interface Props {
   onComplete?: (results: any) => void;
@@ -24,9 +24,9 @@ interface Props {
 }
 
 const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isModal }) => {
-  const [isTesting, setIsTesting] = useState(false);
-  const [phase, setPhase] = useState<'idle' | 'ping' | 'download' | 'upload' | 'completed'>('idle');
-  const [statusText, setStatusText] = useState('Network Ready');
+  const [testState, setTestState] = useState<'IDLE' | 'TESTING' | 'SUCCESS' | 'ERROR'>('IDLE');
+  const [phase, setPhase] = useState<'none' | 'ping' | 'download' | 'upload'>('none');
+  const [statusText, setStatusText] = useState('System Ready');
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
   const [activeServer, setActiveServer] = useState(SPEED_TEST_SERVERS[0]);
   const [showServerList, setShowServerList] = useState(false);
@@ -57,10 +57,10 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isM
   };
 
   const startTest = async () => {
-    if (isTesting) return;
+    if (testState === 'TESTING') return;
     
     try {
-      setIsTesting(true);
+      setTestState('TESTING');
       resetGraph();
       setResults({ dl: 0, ul: 0, ping: 0, jitter: 0, packetLoss: 0 });
       
@@ -91,84 +91,69 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isM
       setResults(prev => ({ ...prev, ul: ulRes }));
 
       // Finalize
-      setPhase('completed');
-      setStatusText('Test Finalized');
+      setTestState('SUCCESS');
+      setPhase('none');
+      setStatusText('Handshake Complete');
       setHistory(prev => [{ id: Date.now(), dl: dlRes, ul: ulRes, ping: pingResults.ping }, ...prev]);
       
       if (onComplete) {
-        try {
-          onComplete({ ...results, dl: dlRes, ul: ulRes, ...pingResults });
-        } catch (e) {
-          console.warn("[SPEEDTEST] onComplete callback error:", e);
-        }
+        onComplete({ ...results, dl: dlRes, ul: ulRes, ...pingResults });
       }
     } catch (err) {
       console.error('[DIAGNOSTIC ERROR]', err);
-      setStatusText('Verification Error: Try Again');
-      setPhase('idle');
-    } finally {
-      setIsTesting(false);
+      setStatusText('Network Fault Detected');
+      setTestState('ERROR');
     }
   };
 
   const reset = () => {
-    setPhase('idle');
-    setStatusText('Network Ready');
+    setTestState('IDLE');
+    setPhase('none');
+    setStatusText('System Ready');
     setResults({ dl: 0, ul: 0, ping: 0, jitter: 0, packetLoss: 0 });
     resetGraph();
   };
 
-  const insight = useMemo(() => {
-    if (phase !== 'completed') return null;
-    if (results.dl > 50 && results.ping < 30) return { text: "Ultra Fast Connection Node", color: "text-blue-600", bg: "bg-blue-50" };
-    if (results.dl > 20) return { text: "Optimal Business Stability", color: "text-emerald-600", bg: "bg-emerald-50" };
-    if (results.packetLoss > 5) return { text: "High Packet Fragmentation", color: "text-rose-600", bg: "bg-rose-50" };
-    return { text: "Limited Bandwidth Detected", color: "text-orange-600", bg: "bg-orange-50" };
-  }, [results, phase]);
-
   const currentSpeed = phase === 'upload' ? results.ul : results.dl;
 
   return (
-    <div className={`speedtest-modal w-full bg-white text-[#0F172A] rounded-[2rem] border-2 border-slate-100 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col lg:flex-row ${isModal ? 'max-h-[85vh] overflow-y-auto lg:overflow-hidden' : ''} ${className}`} style={{ backgroundColor: '#FFFFFF', color: '#0F172A' }}>
+    <div className={`w-full bg-white text-[#0F172A] rounded-[3rem] border-2 border-slate-100 shadow-2xl relative overflow-hidden transition-all duration-500 flex flex-col xl:flex-row ${isModal ? 'max-h-[90vh] overflow-y-auto' : ''} ${className}`}>
       
-      {/* Visual Identity Strip */}
       <div className="h-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 absolute top-0 left-0 right-0 z-50"></div>
 
-      <div className="p-4 sm:p-6 md:p-10 space-y-6 md:space-y-8 flex-1">
+      <div className="p-6 md:p-12 space-y-10 flex-1">
         
-        {/* Header: Infrastructure Check */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
-          <div className="flex items-center gap-3 sm:gap-4">
-             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner border border-blue-100">
-                <Globe size={24} />
+        {/* Header Infrastructure */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+          <div className="flex items-center gap-4">
+             <div className="w-16 h-16 rounded-[2rem] bg-slate-900 text-blue-500 flex items-center justify-center shadow-2xl">
+                <Globe size={28} />
              </div>
              <div>
-                <h3 className="text-slate-900 font-bold text-[10px] sm:text-sm uppercase italic tracking-tighter">ISP Provider</h3>
-                <p className="text-slate-400 text-[8px] sm:text-[10px] font-black uppercase tracking-widest leading-none mt-1">{networkInfo?.isp || 'Syncing Connection...'}</p>
+                <h3 className="text-slate-900 font-black text-xs uppercase italic tracking-tight">Access Point Verification</h3>
+                <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-1">{networkInfo?.isp || 'Resolving ISP Matrix...'}</p>
              </div>
           </div>
 
-          <div className="relative group w-full sm:w-auto">
+          <div className="relative group">
              <button 
                onClick={() => setShowServerList(!showServerList)}
-               className="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-3 px-4 py-2.5 sm:px-5 sm:py-3 bg-slate-50 border border-slate-100 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-white hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm"
+               className="flex items-center gap-4 px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-white hover:border-blue-500 transition-all shadow-sm"
              >
-                <div className="flex items-center gap-2">
-                   <Server size={14} className="text-blue-500" />
-                   {activeServer.name}
-                </div>
-                <ChevronDown size={14} className={`transition-transform duration-300 ${showServerList ? 'rotate-180' : ''}`} />
+                <Server size={16} className="text-blue-500" />
+                {activeServer.name}
+                <ChevronDown size={16} className={`transition-transform duration-300 ${showServerList ? 'rotate-180' : ''}`} />
              </button>
              {showServerList && (
-               <div className="absolute top-full right-0 mt-3 w-full sm:w-64 bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-2xl z-[100] animate-in zoom-in-95 duration-200">
-                  <div className="p-3 bg-slate-50 border-b border-slate-100"><p className="text-[9px] font-black uppercase text-slate-400">Available Test Servers</p></div>
+               <div className="absolute top-full right-0 mt-4 w-72 bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.1)] z-[100] animate-in zoom-in-95 duration-200">
+                  <div className="p-4 bg-slate-50 border-b border-slate-100"><p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Select Signal Node</p></div>
                   {SPEED_TEST_SERVERS.map(s => (
                     <button 
                       key={s.id} 
                       onClick={() => { setActiveServer(s); setShowServerList(false); }}
-                      className="w-full px-5 py-4 text-left text-[11px] font-bold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all border-b border-slate-50 last:border-0 flex items-center justify-between"
+                      className="w-full px-6 py-5 text-left text-xs font-black text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-all border-b border-slate-50 last:border-0 flex items-center justify-between uppercase italic"
                     >
-                      <span>{s.name}</span> <span className="text-[9px] text-slate-400 font-black italic">{s.distance}</span>
+                      <span>{s.name}</span> <span className="text-[9px] text-slate-400 font-bold">{s.distance}</span>
                     </button>
                   ))}
                </div>
@@ -176,192 +161,152 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isM
           </div>
         </div>
 
-        {/* Diagnostic Core: Gauge & Signal */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
-           
-           {/* Speed Gauge Section */}
-           <div className="lg:col-span-12 xl:col-span-5 flex flex-col items-center">
-              <div className="relative w-full max-w-[280px] sm:max-w-[340px] aspect-square flex items-center justify-center">
-                 {/* Gauge Background Track */}
-                 <svg className="absolute inset-0 w-full h-full -rotate-90 scale-95 sm:scale-100">
+        {/* Core Gauge */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 items-center">
+           <div className="xl:col-span-5 flex flex-col items-center">
+              <div className="relative w-full max-w-[340px] aspect-square flex items-center justify-center">
+                 <svg className="absolute inset-0 w-full h-full -rotate-90">
+                    <circle cx="50%" cy="50%" r="42%" fill="none" stroke="#F1F5F9" strokeWidth="14" />
                     <circle 
                       cx="50%" cy="50%" r="42%" 
-                      fill="none" stroke="#F8FAFC" strokeWidth="12" 
-                    />
-                 </svg>
-                 {/* Live Speed Arc */}
-                 <svg className="absolute inset-0 w-full h-full -rotate-90 scale-95 sm:scale-100">
-                    <circle 
-                      cx="50%" cy="50%" r="42%" 
-                      fill="none" stroke="url(#co-speed-gradient)" strokeWidth="12" strokeLinecap="round"
+                      fill="none" stroke="url(#co-speed-gradient)" strokeWidth="14" strokeLinecap="round"
                       style={{ 
                         strokeDasharray: '264', 
                         strokeDashoffset: 264 - (264 * (Math.min(currentSpeed, 100) / 100)),
-                        transition: 'stroke-dashoffset 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                        transition: 'stroke-dashoffset 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
                       }}
                     />
                     <defs>
                        <linearGradient id="co-speed-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#3B82F6" />
+                          <stop offset="0%" stopColor="#2563EB" />
                           <stop offset="100%" stopColor="#10B981" />
                        </linearGradient>
                     </defs>
                  </svg>
 
-                 <div className="flex flex-col items-center text-center px-4">
-                    <div className="flex items-baseline justify-center">
-                       <span className="text-5xl sm:text-7xl font-black text-slate-900 italic tracking-tighter leading-none transition-all">
-                          {currentSpeed.toFixed(1)}
-                       </span>
-                    </div>
-                    <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-3 leading-none">
-                      {phase === 'upload' ? 'Upload' : 'Download'} <span className="text-slate-900 font-extrabold italic">Mbps</span>
+                 <div className="flex flex-col items-center text-center">
+                    <span className="text-7xl md:text-8xl font-black text-slate-900 italic tracking-tighter leading-none">
+                       {currentSpeed.toFixed(1)}
+                    </span>
+                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] mt-4">
+                       {phase.toUpperCase() || 'IDLE'} <span className="text-slate-900 italic">Mbps</span>
                     </span>
                  </div>
 
-                 {/* Absolute Status Anchor (LITE COLOR) */}
-                 <div className="absolute -bottom-2 sm:bottom-2 flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-full shadow-md border border-blue-100 scale-90 sm:scale-100">
-                    <div className={`w-1.5 h-1.5 rounded-full ${isTesting ? 'bg-blue-600 animate-pulse' : 'bg-slate-400'}`}></div>
-                    <span className="text-[8px] sm:text-[9px] font-black uppercase italic tracking-widest">{statusText}</span>
+                 <div className="absolute -bottom-4 flex items-center gap-3 px-6 py-3 bg-white text-slate-900 rounded-full shadow-2xl border border-slate-100">
+                    <div className={`w-2 h-2 rounded-full ${testState === 'TESTING' ? 'bg-blue-600 animate-pulse' : 'bg-slate-300'}`}></div>
+                    <span className="text-[10px] font-black uppercase italic tracking-widest">{statusText}</span>
                  </div>
               </div>
            </div>
 
-           {/* Signal Path Analysis (Graph) */}
-           <div className="lg:col-span-7 h-48 sm:h-64 lg:h-72 w-full bg-slate-50 rounded-[2.5rem] border-2 border-slate-100 p-6 sm:p-8 relative overflow-hidden">
-              <div className="absolute top-6 left-8 flex items-center gap-2 z-10">
-                 <Radio size={16} className="text-blue-600 animate-pulse" />
-                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] italic">Real-Time Stability</span>
+           <div className="xl:col-span-7 h-64 md:h-80 w-full bg-slate-950 rounded-[3rem] border-2 border-slate-900 p-8 relative overflow-hidden">
+              <div className="absolute top-8 left-8 flex items-center gap-3 z-10">
+                 <CloudLightning size={20} className="text-blue-500 animate-pulse" />
+                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Stability Matrix</span>
               </div>
               <ResponsiveContainer width="100%" height="100%">
                  <AreaChart data={graphData}>
                     <defs>
                        <linearGradient id="co-graph-fill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.1}/>
+                          <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.2}/>
                           <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
                        </linearGradient>
                     </defs>
                     <Area 
                       type="monotone" 
                       dataKey="value" 
-                      stroke="#2563EB" 
-                      strokeWidth={4}
+                      stroke="#3B82F6" 
+                      strokeWidth={5}
                       fillOpacity={1} 
                       fill="url(#co-graph-fill)" 
-                      animationDuration={400}
+                      animationDuration={500}
                     />
                  </AreaChart>
               </ResponsiveContainer>
-              {!isTesting && phase === 'idle' && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8 bg-slate-50/50 backdrop-blur-[2px]">
-                   <Activity size={48} className="text-slate-200 mb-4" />
-                   <p className="text-[11px] font-black text-slate-300 uppercase tracking-[0.3em]">Ignition Sequence Pending</p>
+              {testState === 'IDLE' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-slate-950/80 backdrop-blur-sm">
+                   <Activity size={56} className="text-slate-800 mb-6" />
+                   <p className="text-xs font-black text-slate-600 uppercase tracking-[0.5em]">Waiting for Protocol Ignition</p>
                 </div>
               )}
            </div>
         </div>
 
-        {/* Transmission Grid: Secondary Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-           <DiagnosticMetric label="Latency (Ping)" value={`${results.ping} ms`} icon={Zap} color="text-amber-600" bg="bg-amber-100" />
-           <DiagnosticMetric label="Jitter Score" value={`${results.jitter} ms`} icon={RefreshCw} color="text-blue-600" bg="bg-blue-100" />
-           <DiagnosticMetric label="Packet Integrity" value={`${100 - results.packetLoss}%`} icon={ShieldCheck} color="text-emerald-600" bg="bg-emerald-100" />
-           <DiagnosticMetric label="Signal Path" value="-19 dBm" icon={Signal} color="text-indigo-600" bg="bg-indigo-100" />
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+           <DiagnosticMetric label="Latency" value={`${results.ping} ms`} icon={Zap} color="text-blue-500" />
+           <DiagnosticMetric label="Jitter" value={`${results.jitter} ms`} icon={RefreshCw} color="text-amber-500" />
+           <DiagnosticMetric label="Integrity" value={`${100 - results.packetLoss}%`} icon={ShieldCheck} color="text-emerald-500" />
+           <DiagnosticMetric label="Signal" value="-18 dBm" icon={Signal} color="text-indigo-500" />
         </div>
 
-        {/* Footer Hardware & Result Bar */}
-        <div className="flex flex-col md:flex-row gap-5 items-stretch md:items-center pt-6 border-t border-slate-100">
+        {/* Footer Actions */}
+        <div className="flex flex-col md:flex-row gap-6 pt-10 border-t border-slate-100">
+           <button 
+             onClick={testState === 'SUCCESS' || testState === 'ERROR' ? reset : startTest}
+             disabled={testState === 'TESTING'}
+             className={`flex-[2] py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] italic shadow-2xl transition-all flex items-center justify-center gap-5 active:scale-95 disabled:opacity-50 ${
+                testState === 'SUCCESS' ? 'bg-slate-900 text-white' : 
+                testState === 'ERROR' ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'
+             }`}
+           >
+              {testState === 'TESTING' ? <Mini5GMicroLoader size={24} color="white" /> : <Play size={24} fill="currentColor" />}
+              {testState === 'TESTING' ? 'Sampling Node' : testState === 'SUCCESS' ? 'Reset Interface' : testState === 'ERROR' ? 'Retry Protocol' : 'Initialize Engine'}
+           </button>
            
-           <div className="flex-1 flex flex-col sm:flex-row gap-3">
-              <button 
-                onClick={phase === 'completed' ? reset : startTest}
-                disabled={isTesting}
-                className={`flex-1 py-5 ${phase === 'completed' ? 'bg-indigo-600 shadow-indigo-200' : 'bg-blue-600 shadow-blue-200'} text-white rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-[0.3em] italic shadow-2xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-4 disabled:opacity-50`}
-              >
-                 {isTesting ? <MiniLoader /> : phase === 'completed' ? <RefreshCw size={20} /> : <Play size={20} fill="currentColor" />}
-                 {isTesting ? 'Initializing' : phase === 'completed' ? 'Restart Test' : 'Start Engine'}
-              </button>
-              {phase === 'completed' && onClose && (
-                <button 
-                  onClick={onClose}
-                  className="flex-1 py-5 bg-slate-950 text-white rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-[0.3em] italic shadow-2xl hover:bg-slate-900 active:scale-[0.98] transition-all flex items-center justify-center gap-4"
-                >
-                  <CheckCircle2 size={20} /> Close Test
-                </button>
-              )}
-           </div>
-
-           {insight && (
-              <div className={`flex-1 flex items-center gap-4 px-6 py-5 rounded-2xl border border-dashed border-current transition-all animate-in zoom-in-95 duration-500 bg-white ${insight.color}`}>
-                 <div className="p-2 bg-current opacity-10 rounded-xl">
-                    <Zap size={24} className="text-current" />
-                 </div>
-                 <div>
-                    <h5 className="text-[10px] font-black uppercase tracking-widest leading-none mb-1">CO Diagnostic Insight</h5>
-                    <p className="text-xs font-bold leading-tight">{insight.text}</p>
-                 </div>
-              </div>
+           {testState === 'SUCCESS' && onClose && (
+             <button onClick={onClose} className="flex-1 py-6 bg-slate-100 text-slate-900 rounded-[2rem] font-black text-xs uppercase tracking-[0.4em] italic shadow-xl hover:bg-slate-200 transition-all flex items-center justify-center gap-4">
+               <CheckCircle2 size={24} className="text-emerald-500" /> Commit Results
+             </button>
            )}
         </div>
-
-        <div className="flex flex-wrap justify-center gap-y-4 gap-x-8 opacity-40 text-[9px] font-black text-slate-400 uppercase tracking-[0.5em] pt-4">
-           <div className="flex items-center gap-2"><MapPin size={10} /> Localized Server Verification</div>
-           <div className="flex items-center gap-2"><Cpu size={10} /> Hardware Layer v3.2.1</div>
-           <div className="flex items-center gap-2"><Lock size={10} /> Secure Encryption</div>
-        </div>
-        </div>
+      </div>
 
       {/* History Sidebar */}
-      <div className="lg:w-80 bg-slate-50 border-t lg:border-t-0 lg:border-l border-slate-100 p-6 flex flex-col shrink-0 lg:max-h-[85vh] overflow-hidden">
-          <h4 className="text-sm font-black uppercase text-slate-800 tracking-tighter mb-6 flex items-center gap-2"><HistoryIcon size={18} className="text-blue-500"/> Test History</h4>
-          <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+      <div className="xl:w-96 bg-slate-50 border-t xl:border-t-0 xl:border-l border-slate-100 p-10 flex flex-col shrink-0">
+          <h4 className="text-lg font-black uppercase text-slate-900 tracking-tighter mb-10 flex items-center gap-3 italic">
+            <HistoryIcon size={24} className="text-blue-500"/> Sequence Log
+          </h4>
+          <div className="space-y-4 overflow-y-auto max-h-[500px] xl:max-h-none pr-4 custom-scrollbar">
             {history.length === 0 ? (
-                <div className="text-center py-10 opacity-50 space-y-2">
-                    <Activity size={32} className="mx-auto text-slate-400"/>
-                    <p className="text-[10px] uppercase font-black tracking-widest text-slate-500">No Records Found</p>
+                <div className="text-center py-20 opacity-30 space-y-4">
+                    <Database size={48} className="mx-auto" />
+                    <p className="text-[10px] uppercase font-black tracking-widest">No Historical Telemetry</p>
                 </div>
             ) : history.map(item => (
-                <div key={item.id} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all group">
-                    <div className="flex justify-between items-center mb-3">
-                        <span className="text-[9px] font-black uppercase text-slate-400">{new Date(item.id).toLocaleTimeString()}</span>
-                        <div className="flex items-center gap-1 text-[9px] font-black text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md">
-                            <Zap size={10}/> {item.ping}ms
+                <div key={item.id} className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-xl transition-all group">
+                    <div className="flex justify-between items-center mb-5">
+                        <span className="text-[10px] font-black uppercase text-slate-400">{new Date(item.id).toLocaleTimeString()}</span>
+                        <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                            <Zap size={12}/> {item.ping}ms
                         </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                         <div className="flex flex-col">
-                            <span className="text-[8px] font-bold uppercase text-slate-400 mb-0.5">Download</span>
-                            <div className="flex items-center gap-1.5"><ArrowDownCircle size={16} className="text-blue-500"/> <span className="font-black text-lg text-slate-800 italic leading-none">{item.dl.toFixed(1)}</span></div>
+                    <div className="grid grid-cols-2 gap-4">
+                         <div>
+                            <span className="text-[9px] font-black uppercase text-slate-400 block mb-2">Downlink</span>
+                            <div className="flex items-center gap-2"><ArrowDownCircle size={18} className="text-blue-500"/> <span className="font-black text-2xl text-slate-900 italic tracking-tighter">{item.dl.toFixed(1)}</span></div>
                          </div>
-                         <div className="flex flex-col items-end">
-                            <span className="text-[8px] font-bold uppercase text-slate-400 mb-0.5">Upload</span>
-                            <div className="flex items-center gap-1.5"><ArrowUpCircle size={16} className="text-emerald-500"/> <span className="font-black text-lg text-slate-800 italic leading-none">{item.ul.toFixed(1)}</span></div>
+                         <div className="text-right">
+                            <span className="text-[9px] font-black uppercase text-slate-400 block mb-2">Uplink</span>
+                            <div className="flex items-center justify-end gap-2"><ArrowUpCircle size={18} className="text-emerald-500"/> <span className="font-black text-2xl text-slate-900 italic tracking-tighter">{item.ul.toFixed(1)}</span></div>
                          </div>
                     </div>
                 </div>
             ))}
           </div>
       </div>
-
     </div>
   );
 };
 
-const DiagnosticMetric = ({ label, value, icon: Icon, color, bg }: any) => (
-  <div className="bg-slate-50 border border-slate-100 p-4 sm:p-5 rounded-[1.5rem] sm:rounded-[2.5rem] flex flex-col items-center text-center transition-all hover:bg-white hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10 group cursor-default">
-     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 transition-all group-hover:rotate-[360deg] duration-700 ${bg} ${color} shadow-sm`}>
-        <Icon size={18} />
+const DiagnosticMetric = ({ label, value, icon: Icon, color }: any) => (
+  <div className="bg-slate-50 border border-slate-100 p-6 rounded-[2.5rem] flex flex-col items-center text-center transition-all hover:bg-white hover:border-blue-500 hover:shadow-2xl hover:shadow-blue-500/10 group">
+     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-all group-hover:scale-110 duration-500 bg-white shadow-sm ${color}`}>
+        <Icon size={20} />
      </div>
-     <span className="text-[8px] sm:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 sm:mb-1.5 leading-none">{label}</span>
-     <span className="text-lg sm:text-xl font-black text-[#0F172A] italic tracking-tight leading-none">{value}</span>
-  </div>
-);
-
-const MiniLoader = () => (
-  <div className="flex gap-1 items-center">
-    {[1, 2, 3].map(i => (
-      <div key={i} className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" style={{ animationDelay: `${i * 0.1}s` }} />
-    ))}
+     <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{label}</span>
+     <span className="text-xl font-black text-slate-900 italic tracking-tight">{value}</span>
   </div>
 );
 

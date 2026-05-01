@@ -16,7 +16,8 @@ module.exports = (io) => {
       
       if (role === 'admin') {
         socket.join('admin_dashboard');
-        logger.info(`Socket ${socket.id} joined Admin Dashboard`);
+        socket.join('health-monitor'); // Join real-time health stream
+        logger.info(`Socket ${socket.id} joined Admin Dashboard & Health Monitor`);
       } else if (role === 'user' && onuId) {
         socket.join(onuId);
         logger.info(`Socket ${socket.id} joined User ONU Room: ${onuId}`);

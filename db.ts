@@ -640,7 +640,8 @@ const INITIAL_STATE: AppState = {
 
 class DB {
   private state: AppState;
-  private listeners: ((state: AppState) => void)[] = [];
+  private listeners: Array<(state: AppState) => void> = [];
+  private auditHooks: Array<(log: AuditLog) => void> = [];
   private initialized = false;
   private firestore: Firestore | null = null;
   private auth: Auth | null = null;
@@ -655,6 +656,11 @@ class DB {
   public getBackendUrl() {
     return this.backendUrl;
   }
+
+  public getSocket() {
+    return this.socket;
+  }
+
 
   constructor() {
     this.state = INITIAL_STATE;
@@ -1547,13 +1553,20 @@ class DB {
     };
     if (!this.state.auditLogs) this.state.auditLogs = [];
     this.state.auditLogs.unshift(log); // Newest first
+    
+    // Trigger Audit Hooks (Phase 2 Mirroring)
+    this.auditHooks.forEach(h => h(log));
+    
     await this.commit();
   }
 
-  onStateChange(cb: (state: AppState) => void) {
-    this.listeners.push(cb);
-    cb(this.getState());
-    return () => { this.listeners = this.listeners.filter(l => l !== cb); };
+  onStateChange(l: (state: AppState) => void) {
+    this.listeners.push(l);
+    return () => { this.listeners = this.listeners.filter(x => x !== l); };
+  }
+
+  onAuditLog(hook: (log: AuditLog) => void) {
+    this.auditHooks.push(hook);
   }
 
   /**
@@ -3351,7 +3364,55 @@ class DB {
   async approvePayment(id: string) {
     const idx = this.state.payments.findIndex(p => p.id === id);
     if (idx !== -1) {
-      this.state.payments[idx].status = 'Approved';
+      const p = this.state.payments[idx];
+      if (p.status === 'Pending') {
+        p.status = 'Approved';
+        
+        // Process financial impact
+        const user = this.findUserNode(p.userId);
+        if (user) {
+          user.balance -= p.amount;
+          user.lastPaymentDate = new Date().toISOString();
+
+          // Sync with Invoice
+          if (p.invoiceId && p.invoiceId !== 'MANUAL') {
+            const invoice = this.state.invoices.find(i => i.id === p.invoiceId);
+            if (invoice) {
+              invoice.paidAmount += p.amount;
+              invoice.dueAmount = Math.max(0, invoice.totalAmount - invoice.paidAmount);
+              if (invoice.dueAmount <= 0) {
+                invoice.status = PaymentStatus.PAID;
+                invoice.paidAt = new Date().toISOString();
+                invoice.paymentMethod = p.method;
+              } else {
+                invoice.status = PaymentStatus.PARTIAL;
+              }
+            }
+          }
+          
+          this.state.ledger.push({
+            id: 'LGR-' + Date.now(),
+            userId: p.userId,
+            userName: user.name,
+            amount: p.amount,
+            type: 'CREDIT',
+            description: `Payment Approved: ${p.method} - Ref: ${p.id}`,
+            timestamp: new Date().toISOString()
+          });
+          
+          // Auto-update user status if balance is cleared
+          if (user.balance <= 0 && user.status === UserStatus.SUSPENDED) {
+             user.status = UserStatus.ACTIVE;
+             this.logNotification(user.id, 'success', 'Account Reactivated', 'Your payment has been verified and service has been restored.');
+          }
+          
+          // Re-sync user state
+          await this.syncUserStatusWithBilling(user.id);
+        }
+      } else {
+        p.status = 'Approved'; // Fallback for other states
+      }
+      
       await this.commit();
       this.notify();
     }
@@ -3387,15 +3448,17 @@ class DB {
     const user = this.findUserNode(id);
     if (user) {
       const admin = this.state.currentUser;
+      const paymentId = 'PAY_' + Date.now();
+      
       this.state.payments.push({
-        id: 'PAY_' + Date.now(),
+        id: paymentId,
         userId: id,
         userName: user.name,
         amount,
         status: 'Approved',
         method,
         timestamp: new Date().toISOString(),
-        collectorEmail: admin?.email || 'admin@opticx.com',
+        collectorEmail: admin?.email || 'admin@clickopticx.com',
         collectorName: details?.collectorName || admin?.name || 'System',
         invoiceId: details?.invoiceId || 'MANUAL',
         collectionDate: details?.collectionDate || new Date().toISOString().split('T')[0],
@@ -3405,6 +3468,22 @@ class DB {
       });
       user.balance -= amount;
       user.lastPaymentDate = new Date().toISOString();
+
+      // Update Invoice if exists
+      if (details?.invoiceId && details.invoiceId !== 'MANUAL') {
+        const invoice = this.state.invoices.find(i => i.id === details.invoiceId);
+        if (invoice) {
+          invoice.paidAmount += amount;
+          invoice.dueAmount = Math.max(0, invoice.totalAmount - invoice.paidAmount);
+          if (invoice.dueAmount <= 0) {
+            invoice.status = PaymentStatus.PAID;
+            invoice.paidAt = new Date().toISOString();
+            invoice.paymentMethod = method;
+          } else {
+            invoice.status = PaymentStatus.PARTIAL;
+          }
+        }
+      }
 
       // Payment is a CREDIT event (Emerald/Good) for the user's ledger
       this.state.ledger.push({
@@ -3976,7 +4055,30 @@ class DB {
   }
   async updateConnectionDetails(id: string, d: any) { const idx = this.findUserIndex(id); if (idx !== -1) { this.state.users[idx] = { ...this.state.users[idx], ...d }; await this.commit(); return { success: true }; } return { success: false }; }
   async updateModulePermission(id: string, d: any) { const idx = this.state.permissions.findIndex(p => p.id === id); if (idx !== -1) { this.state.permissions[idx] = { ...this.state.permissions[idx], ...d }; await this.commit(); } }
-  async auditOverdueLoads() { }
+  async auditOverdueLoads() {
+    let hasChanges = false;
+    const now = new Date().toISOString();
+    
+    this.state.emergencyLoads.forEach(load => {
+      if (load.status === 'Active' && load.expiryTimestamp < now) {
+        load.status = 'Overdue';
+        hasChanges = true;
+        
+        // Penalize credit score
+        const user = this.findUserNode(load.userId);
+        if (user) {
+          user.creditScore = Math.max(0, (user.creditScore || 700) - 50);
+          this.logAudit('Automatic Penalty', 'System', `Emergency credit overdue for ${load.userName}. Score reduced by 50 pts.`, load.userId, load.userName);
+          this.logNotification(load.userId, 'error', 'Credit Overdue', 'Your emergency credit has expired. A penalty has been applied to your trust score.', 'user');
+        }
+      }
+    });
+
+    if (hasChanges) {
+      await this.commit();
+      this.notify();
+    }
+  }
 
   async convertPointsToWallet(id: string) { return { success: true, amount: 100, message: 'Points successfully provisioned to wallet.' }; }
 
@@ -4002,6 +4104,41 @@ class DB {
     user.balance -= amount;
     user.lastPaymentDate = new Date().toISOString();
     user.isRecoveryMode = false;
+
+    // Sync with Invoices
+    let remainingAmount = amount;
+    const unpaidInvoices = this.state.invoices
+      .filter(i => i.userId === userId && i.status !== PaymentStatus.PAID)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+
+    for (const inv of unpaidInvoices) {
+      if (remainingAmount <= 0) break;
+      const due = inv.dueAmount || (inv.totalAmount - inv.paidAmount);
+      const payment = Math.min(remainingAmount, due);
+      inv.paidAmount += payment;
+      inv.dueAmount = Math.max(0, inv.totalAmount - inv.paidAmount);
+      remainingAmount -= payment;
+      
+      if (inv.dueAmount <= 0) {
+        inv.status = PaymentStatus.PAID;
+        inv.paidAt = new Date().toISOString();
+        inv.paymentMethod = method;
+      } else {
+        inv.status = PaymentStatus.PARTIAL;
+      }
+    }
+
+    // Ledger Entry
+    this.state.ledger.push({
+      id: 'REC_' + Date.now(),
+      userId,
+      amount,
+      type: LedgerType.CREDIT,
+      timestamp: new Date().toISOString(),
+      description: `Recovery Payment: ${method}`,
+      balanceAfter: user.balance,
+      method
+    });
 
     // Auto Activate logic
     if (amount >= (pkg.price / 2)) {
@@ -6398,16 +6535,16 @@ class DB {
 
       this.state.users.forEach(u => {
         const totalDue = this.state.invoices
-          .filter(i => (i.userId === u.id || i.userId === u.email) && i.status === PaymentStatus.UNPAID)
-          .reduce((acc, i) => acc + i.totalAmount, 0);
+          .filter(i => (i.userId === u.id || i.userId === u.email) && i.status !== PaymentStatus.PAID)
+          .reduce((acc, i) => acc + (i.dueAmount || (i.totalAmount - i.paidAmount) || 0), 0);
         
-        if (Math.abs(u.balance - totalDue) > 1) { 
+        if (Math.abs((u.balance || 0) - totalDue) > 1) { 
            newMissing.push({
              id: `MIS_BAL_${u.id}`,
              type: 'billing',
              severity: 'high',
              title: 'Balance/Invoice Mismatch',
-             description: `User ${u.name} balance (${u.balance}) does not match unpaid invoices (${totalDue}).`,
+             description: `User ${u.name} balance (${u.balance || 0}) does not match unpaid/partial invoices (${totalDue}).`,
              targetId: u.id,
              suggestedFix: 'Re-calculate Balance',
              timestamp,

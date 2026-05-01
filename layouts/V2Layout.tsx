@@ -37,6 +37,7 @@ const V2Layout: React.FC<Props> = ({ state, children, activePage, onNavigate, on
     { id: 'cloud-storage', label: 'Cloud Vault', icon: HardDrive, group: 'Matrix', access: 'admin' },
     
     { id: 'setup', label: 'System Opts', icon: Settings, group: 'Protocol', access: 'admin' },
+    { id: 'migration-dashboard', label: 'Migration Matrix', icon: Shield, group: 'Protocol', access: 'admin' },
     { id: 'database-monitor', label: 'Kernel Logs', icon: Database, group: 'Protocol', access: 'admin' },
   ];
 

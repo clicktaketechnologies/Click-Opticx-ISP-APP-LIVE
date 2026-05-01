@@ -1,360 +1,304 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Mail, Settings, History, Layout, Zap, 
-  Plus, Search, Filter, Shield, 
+  Plus, Search, Filter, Shield, ShieldAlert,
   Send, AlertCircle, CheckCircle2, 
   Clock, Server, Globe as GlobeIcon, 
   ArrowRight, MoreVertical, Trash2, 
   Edit3, Copy, Eye, Power,
   BarChart3, User, Database,
   Repeat, Bell, Smartphone, Users,
-  TrendingUp, Activity, Key, 
+  TrendingUp, Activity, Key, Settings2,
   ChevronRight, ArrowUpRight, ArrowDownRight,
   Monitor, TrendingUp as TrendingIcon,
-  HardDrive, ShieldCheck, RefreshCw, XCircle, PlayCircle
+  HardDrive, ShieldCheck, RefreshCw, XCircle, PlayCircle, 
+  MessageSquare, Share2, Sparkles, Command, Smartphone as Mobile,
+  MousePointer2, ListChecks, Layers, Link2, ListFilter, Sliders
 } from 'lucide-react';
 import { db } from '../../db';
 import { Modal } from '../../components/shared/Modal';
 import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
-import { AppState, EmailTemplate, EmailProvider, Role } from '../../types';
+import { AppState, EmailTemplate, EmailProvider } from '../../types';
 
 interface Props {
   state: AppState;
-  activePage?: string;
 }
 
-const EmailControlCenter: React.FC<Props> = ({ state, activePage }) => {
-  const [activeTab, setActiveTab] = useState<'dashboard'|'infrastructure'|'queue'|'templates'|'automation'|'audiences'|'setup'>('dashboard');
-  const [providers, setProviders] = useState<EmailProvider[]>([]);
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [jobStatus, setJobStatus] = useState<'waiting'|'active'|'completed'|'failed'|'delayed'>('waiting');
+const EmailControlCenter: React.FC<Props> = ({ state }) => {
+  const [activeTab, setActiveTab] = useState<'monitor'|'master'|'templates'|'campaigns'|'push'|'dispatch'|'automation'|'audiences'|'logs'|'setup'>('monitor');
+  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [providers, setProviders] = useState<EmailProvider[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [selectedProvider, setSelectedProvider] = useState<EmailProvider | null>(null);
-  const [isProviderModalOpen, setIsProviderModalOpen] = useState(false);
-
-  useEffect(() => {
-    if (activeTab === 'infrastructure') fetchProviders();
-    if (activeTab === 'queue') fetchJobs();
-  }, [activeTab, jobStatus]);
+  // ─── Data Fetching ──────────────────────────────────────────────────────────
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/v2/stats`);
+        const data = await res.json();
+        if (data.success) {
+            setStats(data.stats);
+            setLogs(data.stats.recent_logs || []);
+        }
+    } catch (e) {
+        console.error('Failed to fetch stats');
+    } finally {
+        setLoading(false);
+    }
+  };
 
   const fetchProviders = async () => {
-    setLoading(true);
     try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/provider-mgmt/email-providers`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await response.json();
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/v2/providers`);
+        const data = await res.json();
         if (data.success) setProviders(data.providers);
-    } catch (e) {
-        console.error('Failed to fetch providers');
-    } finally {
-        setLoading(false);
-    }
+    } catch (e) {}
   };
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/jobs?status=${jobStatus}`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await response.json();
-        if (data.success) setJobs(data.jobs);
-    } catch (e) {
-        console.error('Failed to fetch jobs');
-    } finally {
-        setLoading(false);
-    }
-  };
+  useEffect(() => {
+    fetchDashboardData();
+    fetchProviders();
+  }, []);
 
-  const handleRetryJob = async (id: string) => {
-    try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/jobs/${id}/retry`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await res.json();
-        if (data.success) fetchJobs();
-    } catch (e) {
-        alert('Retry failed');
-    }
-  };
-
-  const handleCancelJob = async (id: string) => {
-    try {
-        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/jobs/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await res.json();
-        if (data.success) fetchJobs();
-    } catch (e) {
-        alert('Cancel failed');
-    }
-  };
-
+  // ─── Tabs Configuration ───────────────────────────────────────────────────────
   const tabs = [
-    { id: 'dashboard', label: 'Monitor', icon: BarChart3 },
-    { id: 'infrastructure', label: 'Infrastructure', icon: HardDrive },
-    { id: 'queue', label: 'Manual Queue', icon: Clock },
-    { id: 'templates', label: 'Templates', icon: Layout },
-    { id: 'automation', label: 'Automation', icon: Zap },
-    { id: 'audiences', label: 'Audiences', icon: Users },
-    { id: 'setup', label: 'Setup', icon: Settings },
+    { id: 'monitor', label: 'Dashboard', icon: BarChart3, desc: 'Real-time telemetry' },
+    { id: 'master', label: 'Notification Master', icon: Sparkles, desc: 'Omni-channel hub' },
+    { id: 'templates', label: 'Smart Templates', icon: Layout, desc: 'WYSIWYG builder' },
+    { id: 'campaigns', label: 'Campaigns', icon: TrendingUp, desc: 'Mass dispatch' },
+    { id: 'push', label: 'Push Devices', icon: Mobile, desc: 'FCM management' },
+    { id: 'dispatch', label: 'Manual Dispatch', icon: Send, desc: 'One-click audience' },
+    { id: 'automation', label: 'Auto-Actions', icon: Zap, desc: 'Rule builder' },
+    { id: 'audiences', label: 'Audiences', icon: Users, desc: 'Segment filters' },
+    { id: 'logs', label: 'Gateway Logs', icon: Database, desc: 'Real-time stream' },
+    { id: 'setup', label: 'Comms Setup', icon: Settings, desc: 'Node config' },
   ];
 
   return (
-    <div className="p-4 lg:p-8 max-w-[1600px] mx-auto animate-in fade-in duration-500 pb-20">
+    <div className="p-4 lg:p-8 max-w-[1600px] mx-auto animate-in fade-in duration-500 pb-24">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8 mb-12">
         <div className="space-y-1">
-          <div className="flex items-center gap-3">
-             <div className="w-12 h-12 rounded-2xl bg-slate-950 flex items-center justify-center shadow-2xl">
-                <Mail className="text-blue-500" size={24} />
+          <div className="flex items-center gap-4">
+             <div className="w-14 h-14 rounded-3xl bg-slate-900 flex items-center justify-center shadow-2xl border border-white/10">
+                <Mail className="text-blue-500" size={28} />
              </div>
-             <h1 className="text-3xl font-black text-slate-900 tracking-tight italic">Comms Control Plane</h1>
+             <div>
+                <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic uppercase leading-none">Comms Control Plane</h1>
+                <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.4em] mt-2">v2.0 Orchestrator • Global Relay Protocol</p>
+             </div>
           </div>
-          <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.3em] ml-[60px]">Global Relay Protocol • Hot-Swappable Nodes</p>
         </div>
         
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-[2rem] border border-slate-200">
+        {/* Responsive Tab Bar */}
+        <div className="flex flex-wrap items-center gap-2 bg-slate-100 p-2 rounded-[2.5rem] border border-slate-200">
            {tabs.map(tab => (
              <button
                key={tab.id}
                onClick={() => setActiveTab(tab.id as any)}
-               className={`flex items-center gap-2 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+               className={`flex items-center gap-2 px-6 py-4 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
                  activeTab === tab.id 
                  ? 'bg-slate-950 text-white shadow-xl scale-105' 
                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200'
                }`}
              >
-               <tab.icon size={14} />
+               <tab.icon size={16} />
                {tab.label}
              </button>
            ))}
         </div>
       </div>
 
-      {/* Conditional Content */}
-      {activeTab === 'dashboard' && (
+      {/* ─── Page 1: Monitor Dashboard ────────────────────────────────────────── */}
+      {activeTab === 'monitor' && (
         <div className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                <StatCard title="Total Transmissions" value={state.commStats.totalSent} sub="Last 30 Days" icon={Send} color="blue" />
-                <StatCard title="Handshake Success" value={`${((state.commStats.delivered/state.commStats.totalSent)*100).toFixed(1)}%`} sub="Delivery Rate" icon={CheckCircle2} color="emerald" />
-                <StatCard title="Failover Count" value={state.commStats.providerUsage.backup} sub="Auto-Rerouted" icon={ShieldAlert} color="amber" />
-                <StatCard title="Global Reputation" value="98.2%" sub="Sender Trust" icon={Activity} color="indigo" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <StatCard title="Transmissions" value={stats?.total_sent || 0} sub="Last 24h" icon={Send} color="blue" />
+                <StatCard title="Success Rate" value={`${(stats?.success_rate || 0).toFixed(1)}%`} sub="Delivery" icon={CheckCircle2} color="emerald" />
+                <StatCard title="Active Nodes" value={stats?.active_nodes || 0} sub="Infrastructure" icon={Server} color="amber" />
+                <StatCard title="Reputation" value="99.2%" sub="Global Score" icon={ShieldCheck} color="indigo" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm relative overflow-hidden">
-                    <div className="flex items-center justify-between mb-8">
-                        <div>
-                            <h3 className="text-lg font-black text-slate-800 uppercase tracking-tight italic">Relay Infrastructure Status</h3>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active nodes in the communication matrix</p>
-                        </div>
-                        <span className="flex items-center gap-2 px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[9px] font-black uppercase tracking-widest border border-emerald-100">
-                           <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                           Operational
-                        </span>
+                <div className="lg:col-span-2 bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm">
+                    <div className="flex items-center justify-between mb-10">
+                        <h3 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">Infrastructure Pulse</h3>
+                        <button onClick={fetchDashboardData} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100"><RefreshCw size={18} /></button>
                     </div>
                     <div className="space-y-6">
-                        <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg"><Server size={20}/></div>
-                                <div>
-                                    <h4 className="font-black text-slate-900 uppercase italic">Primary SMTP Node</h4>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">relay.clickopticx.com</p>
+                        {providers.map(p => (
+                            <div key={p.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between group hover:bg-white hover:shadow-xl transition-all">
+                                <div className="flex items-center gap-5">
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-colors ${p.enabled ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-400'}`}>
+                                        <Server size={24}/>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-lg font-black text-slate-900 uppercase italic leading-none mb-1">{p.name}</h4>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{p.host || 'Cloud API'}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-8">
+                                    <div className="text-right">
+                                        <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Reputation</p>
+                                        <p className="text-sm font-black text-emerald-600 uppercase">Excellent</p>
+                                    </div>
+                                    <div className={`w-3 h-3 rounded-full ${p.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}`} />
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <p className="text-xs font-black text-slate-900">{state.commStats.providerUsage.smtp} Dispatches</p>
-                                <div className="w-32 h-1.5 bg-slate-200 rounded-full mt-2 overflow-hidden">
-                                    <div className="h-full bg-blue-600 w-3/4"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between opacity-60">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-slate-400 text-white flex items-center justify-center shadow-lg"><GlobeIcon size={20}/></div>
-                                <div>
-                                    <h4 className="font-black text-slate-900 uppercase italic">Cloud Failover Node</h4>
-                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Resend API (Backup)</p>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-xs font-black text-slate-900">{state.commStats.providerUsage.backup} Dispatches</p>
-                                <div className="w-32 h-1.5 bg-slate-200 rounded-full mt-2 overflow-hidden">
-                                    <div className="h-full bg-slate-400 w-1/4"></div>
-                                </div>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
 
-                <div className="bg-slate-900 rounded-[3rem] p-10 text-white shadow-2xl flex flex-col justify-between">
-                    <div>
-                        <h3 className="text-lg font-black uppercase tracking-tight italic mb-8">Node Policies</h3>
-                        <div className="space-y-6">
-                            <PolicyToggle label="Auto-Dispatcher" active />
-                            <PolicyToggle label="Failover Protocol" active />
-                            <PolicyToggle label="Strict SPF/DKIM" active />
-                            <PolicyToggle label="Visual Rate-Limit" active />
-                        </div>
-                    </div>
-                    <button className="w-full mt-10 py-4 bg-white/10 hover:bg-blue-600 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all border border-white/10 active:scale-95">
-                        Launch Global Handshake Test
-                    </button>
-                </div>
-            </div>
-        </div>
-      )}
-
-      {activeTab === 'infrastructure' && (
-        <div className="space-y-8">
-            <div className="flex justify-between items-center">
-                <h3 className="text-xl font-black text-slate-800 uppercase italic">Managed Provider Registry</h3>
-                <button className="px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20">
-                    <Plus size={16}/> Provision Node
-                </button>
-            </div>
-            {loading ? (
-                <div className="h-64 flex flex-col items-center justify-center gap-4">
-                    <Mini5GMicroLoader size={40} />
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Syncing Provider Nodes...</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {providers.map(p => (
-                        <div key={p.id} className={`bg-white rounded-[2.5rem] border-2 p-8 transition-all hover:shadow-2xl group relative overflow-hidden flex flex-col ${p.enabled ? 'border-blue-100 shadow-blue-50 shadow-lg' : 'border-slate-50 grayscale opacity-70'}`}>
-                            <div className="flex justify-between items-start mb-8 relative z-10">
-                                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${p.type === 'SMTP' ? 'bg-blue-600' : 'bg-indigo-600'}`}>
-                                    {p.type === 'SMTP' ? <Server size={24}/> : <GlobeIcon size={24}/>}
+                <div className="space-y-6">
+                    <div className="bg-slate-900 rounded-[3rem] p-8 text-white shadow-2xl relative overflow-hidden">
+                        <h3 className="text-lg font-black uppercase tracking-tight italic mb-8 relative z-10">Real-Time Queue</h3>
+                        <div className="space-y-4 relative z-10">
+                            {[1,2,3].map(i => (
+                                <div key={i} className="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl">
+                                    <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                                    <div className="flex-1">
+                                        <p className="text-[10px] font-black uppercase tracking-tighter">Package Renewal #{i*124}</p>
+                                        <p className="text-[8px] text-slate-500 uppercase tracking-widest">Waiting for Handshake...</p>
+                                    </div>
+                                    <Clock size={14} className="text-slate-600" />
                                 </div>
-                                <div className="flex items-center gap-3">
-                                    <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${p.priority === 1 ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'}`}>
-                                        {p.priority === 1 ? 'Primary' : 'Backup'}
-                                    </span>
-                                    <button className={`w-10 h-5 rounded-full relative transition-all ${p.enabled ? 'bg-green-500' : 'bg-slate-300'}`}>
-                                        <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${p.enabled ? 'left-5.5' : 'left-0.5'}`}></div>
-                                    </button>
-                                </div>
-                            </div>
-                            <div className="mb-6 relative z-10">
-                                <h4 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter leading-none mb-2">{p.name}</h4>
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                                    <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{p.host || 'Cloud API Endpoint'}</p>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4 mb-8 bg-slate-50 p-4 rounded-2xl border border-slate-100 relative z-10">
-                                <div>
-                                    <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Reputation</p>
-                                    <p className="text-sm font-black text-green-600 italic">99.9%</p>
-                                </div>
-                                <div>
-                                    <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Today Usage</p>
-                                    <p className="text-sm font-black text-slate-900 italic">{p.usage_today || 0} Emails</p>
-                                </div>
-                            </div>
-                            <button className="w-full py-4 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2 relative z-10 shadow-xl">
-                                <Settings2 size={14}/> Configure Node <ChevronRight size={14}/>
-                            </button>
-                            <ShieldCheck className="absolute -right-8 -bottom-8 opacity-[0.03] scale-150 pointer-events-none group-hover:scale-[1.8] transition-transform duration-1000" size={180} />
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-      )}
-
-      {activeTab === 'queue' && (
-        <div className="space-y-8 animate-in slide-in-from-bottom-4">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-                <div className="flex items-center gap-4">
-                    {['waiting', 'active', 'failed', 'completed'].map(status => (
-                        <button 
-                            key={status}
-                            onClick={() => setJobStatus(status as any)}
-                            className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${jobStatus === status ? 'bg-slate-950 text-white shadow-xl' : 'bg-slate-50 text-slate-400 hover:text-slate-600'}`}
-                        >
-                            {status} ({jobs.length})
-                        </button>
-                    ))}
-                </div>
-                <button onClick={fetchJobs} className="p-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 transition-all">
-                    <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
-                </button>
-            </div>
-
-            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-xl overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead className="bg-slate-50 border-b border-slate-100">
-                            <tr>
-                                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Job ID & Timestamp</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Recipient & Payload</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Retry Count</th>
-                                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Emergency Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            {jobs.length === 0 ? (
-                                <tr>
-                                    <td colSpan={4} className="px-10 py-20 text-center text-slate-300 font-black uppercase tracking-[0.3em] italic">No pending jobs in the {jobStatus} matrix</td>
-                                </tr>
-                            ) : jobs.map(job => (
-                                <tr key={job.id} className="hover:bg-slate-50 transition-colors group">
-                                    <td className="px-10 py-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
-                                                <Database size={18}/>
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-black text-slate-900 uppercase">#JOB-{job.id}</p>
-                                                <p className="text-[9px] text-slate-400 font-bold uppercase">{new Date(job.timestamp).toLocaleString()}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-6">
-                                        <p className="text-sm font-black text-slate-800 italic">{job.data.to}</p>
-                                        <p className="text-[10px] text-slate-500 font-bold truncate max-w-xs">{job.data.subject}</p>
-                                    </td>
-                                    <td className="px-10 py-6">
-                                        <div className="flex items-center gap-2">
-                                            <Repeat size={14} className="text-blue-500" />
-                                            <span className="text-xs font-black text-slate-900">{job.attemptsMade} / 3</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-10 py-6 text-right space-x-2">
-                                        {jobStatus === 'failed' && (
-                                            <button 
-                                                onClick={() => handleRetryJob(job.id)}
-                                                className="p-3 bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-                                            >
-                                                <PlayCircle size={18}/>
-                                            </button>
-                                        )}
-                                        <button 
-                                            onClick={() => handleCancelJob(job.id)}
-                                            className="p-3 bg-rose-50 text-rose-500 rounded-xl hover:bg-rose-500 hover:text-white transition-all shadow-sm"
-                                        >
-                                            <XCircle size={18}/>
-                                        </button>
-                                    </td>
-                                </tr>
                             ))}
-                        </tbody>
-                    </table>
+                        </div>
+                        <Activity className="absolute -right-10 -bottom-10 opacity-[0.03] scale-[2.5]" size={200} />
+                    </div>
+
+                    <div className="bg-white rounded-[3rem] p-8 border border-slate-100 shadow-xl">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Security & Limits</h3>
+                        <div className="space-y-5">
+                            <div className="flex justify-between items-center text-[11px] font-black uppercase">
+                                <span className="text-slate-500">Daily Cap</span>
+                                <span className="text-slate-900">5,000 / 10,000</span>
+                            </div>
+                            <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                                <div className="bg-blue-600 h-full w-1/2"></div>
+                            </div>
+                            <div className="flex justify-between items-center text-[11px] font-black uppercase mt-4">
+                                <span className="text-slate-500">Encryption Layer</span>
+                                <span className="text-emerald-500 flex items-center gap-2">
+                                    <ShieldCheck size={14}/> TLS 1.3
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
       )}
 
-      {/* Templates, Automation, etc. would go here (already implemented in original, just keeping it organized) */}
-      
+      {/* ─── Page 2: Notification Master ────────────────────────────────────────── */}
+      {activeTab === 'master' && (
+        <div className="space-y-8">
+            <div className="bg-white rounded-[3rem] p-10 border border-slate-100 shadow-sm">
+                <div className="flex justify-between items-start mb-10">
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Omni-Channel Orchestrator</h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Synchronized Delivery across all end-points</p>
+                    </div>
+                    <button className="px-8 py-4 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl">New Broadcast</button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {[
+                        { id: 'email', label: 'Email Relay', icon: Mail, color: 'blue' },
+                        { id: 'sms', label: 'SMS Gateway', icon: MessageSquare, color: 'emerald' },
+                        { id: 'push', label: 'Push Hub', icon: Smartphone, color: 'indigo' },
+                        { id: 'wa', label: 'WhatsApp Link', icon: Share2, color: 'green' },
+                        { id: 'voice', label: 'Voice Node', icon: Bell, color: 'amber' },
+                        { id: 'internal', label: 'App Portal', icon: Layout, color: 'rose' }
+                    ].map(ch => (
+                        <div key={ch.id} className="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] group hover:bg-slate-900 hover:text-white transition-all cursor-pointer">
+                            <div className="flex justify-between items-start mb-6">
+                                <div className={`w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform ${ch.color === 'blue' ? 'text-blue-600' : 'text-slate-900'}`}>
+                                    <ch.icon size={28}/>
+                                </div>
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                            </div>
+                            <h4 className="text-lg font-black uppercase italic tracking-tighter mb-2">{ch.label}</h4>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-slate-500">Active • 99% Success</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+      )}
+
+      {/* ─── Page 10: Comms Setup (Provider Config) ────────────────────────────── */}
+      {activeTab === 'setup' && (
+        <div className="space-y-8 animate-in slide-in-from-bottom-4">
+            <div className="flex justify-between items-end">
+                <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Global Node Registry</h3>
+                <button className="flex items-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-200">
+                    <Plus size={18}/> Provision New Provider
+                </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {providers.map(p => (
+                    <div key={p.id} className="bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm relative group overflow-hidden">
+                        <div className="flex justify-between items-start mb-10 relative z-10">
+                            <div className="flex items-center gap-6">
+                                <div className={`w-16 h-16 rounded-[2rem] flex items-center justify-center shadow-2xl transition-all group-hover:scale-110 ${p.enabled ? 'bg-slate-900 text-blue-500' : 'bg-slate-100 text-slate-400'}`}>
+                                    {p.id.includes('gmail') ? <GlobeIcon size={32}/> : <Server size={32}/>}
+                                </div>
+                                <div>
+                                    <h4 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter leading-none mb-1">{p.name}</h4>
+                                    <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{p.type} • PRIORITY {p.priority}</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-3">
+                                <button className={`w-12 h-6 rounded-full relative p-1 transition-all ${p.enabled ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : 'bg-slate-200'}`}>
+                                    <div className={`w-4 h-4 bg-white rounded-full absolute transition-all ${p.enabled ? 'right-1' : 'left-1'}`}></div>
+                                </button>
+                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{p.enabled ? 'Operational' : 'Hibernating'}</span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 relative z-10">
+                            <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Host Endpoint</p>
+                                <p className="text-xs font-black text-slate-800">{p.host || 'Dynamic API'}</p>
+                            </div>
+                            <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Auth Profile</p>
+                                <p className="text-xs font-black text-slate-800 flex items-center gap-2">
+                                    <Key size={14} className="text-amber-500" /> Secure Key Vault
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 flex gap-4 relative z-10">
+                            <button className="flex-1 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-600 hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
+                                <Sliders size={14}/> Parameters
+                            </button>
+                            <button className="flex-1 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-600 hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
+                                <Activity size={14}/> Telemetry
+                            </button>
+                        </div>
+                        <Shield className="absolute -right-12 -bottom-12 opacity-[0.01] scale-150" size={200} />
+                    </div>
+                ))}
+            </div>
+        </div>
+      )}
+
+      {/* Pages 3-9: Placeholder logic with premium aesthetics */}
+      {['templates', 'campaigns', 'push', 'dispatch', 'automation', 'audiences', 'logs'].includes(activeTab) && (
+        <div className="flex flex-col items-center justify-center h-[50vh] animate-in zoom-in-95">
+            <div className="w-24 h-24 rounded-3xl bg-blue-500/10 flex items-center justify-center text-blue-500 animate-pulse mb-8">
+                <Command size={48} />
+            </div>
+            <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">{activeTab.replace('_', ' ')} Module</h3>
+            <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.4em] mt-2">Provisioning in Progress • Phase 2 Deploy</p>
+            <button onClick={() => setActiveTab('monitor')} className="mt-8 px-8 py-3 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest">Back to Control Plane</button>
+        </div>
+      )}
     </div>
   );
 };
@@ -367,7 +311,7 @@ const StatCard = ({ title, value, sub, icon: Icon, color }: any) => {
       indigo: 'bg-indigo-600 text-white shadow-indigo-500/20',
     };
     return (
-      <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm group hover:shadow-xl transition-all relative overflow-hidden">
+      <div className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm group hover:shadow-2xl transition-all relative overflow-hidden">
          <div className={`w-14 h-14 rounded-2xl mb-6 flex items-center justify-center transition-transform group-hover:scale-110 duration-500 relative z-10 ${colors[color]}`}>
             <Icon size={24} />
          </div>
@@ -382,14 +326,5 @@ const StatCard = ({ title, value, sub, icon: Icon, color }: any) => {
       </div>
     );
 };
-
-const PolicyToggle = ({ label, active }: { label: string, active?: boolean }) => (
-    <div className="flex items-center justify-between group">
-        <span className="text-xs font-bold text-slate-400 group-hover:text-blue-400 transition-colors uppercase tracking-widest">{label}</span>
-        <div className={`w-10 h-5 rounded-full relative p-1 transition-all ${active ? 'bg-blue-600 shadow-lg shadow-blue-500/20' : 'bg-slate-800'}`}>
-            <div className={`w-3 h-3 bg-white rounded-full absolute transition-all ${active ? 'right-1' : 'left-1'}`}></div>
-        </div>
-    </div>
-);
 
 export default EmailControlCenter;

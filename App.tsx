@@ -101,11 +101,80 @@ const SafeStub = ({ name, route }: { name: string, route: string }) => (
 const AdminDevicesStub = lazy(() => Promise.resolve({ default: () => <SafeStub name="OLT Devices" route="/admin-devices" /> }));
 
 // Error Boundary
-class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
-  state = { hasError: false };
-  static getDerivedStateFromError() { return { hasError: true }; }
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("[SYSTEM-FAULT]", error, errorInfo);
+    db.logAudit('System Fault', 'ERROR', `UI Crash detected: ${error.message}`, 'SYSTEM', 'UI_ENGINE');
+  }
+
+  handleReset = () => {
+    localStorage.clear();
+    window.location.href = '/';
+  };
+
   render() {
-    if (this.state.hasError) return <div className="p-20 text-center"><h1>System Fault Detected</h1><button onClick={() => window.location.reload()}>Reboot Protocol</button></div>;
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-8 font-sans">
+           <div className="max-w-2xl w-full bg-slate-900 rounded-[3rem] p-12 border border-slate-800 text-center shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent animate-pulse" />
+              
+              <div className="relative z-10">
+                <div className="w-24 h-24 bg-rose-500/10 rounded-[2rem] flex items-center justify-center mx-auto mb-8 border border-rose-500/20 shadow-inner">
+                  <ShieldAlert className="text-rose-500 animate-pulse" size={48} />
+                </div>
+                
+                <h1 className="text-4xl font-black text-white italic tracking-tighter mb-4 leading-none">System Fault Detected</h1>
+                <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-8">ISP Admin Protocol V2 • Emergency Halt</p>
+                
+                <div className="bg-slate-950 rounded-3xl p-6 border border-slate-800 mb-10 text-left">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-2 h-2 bg-rose-500 rounded-full" />
+                    <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">Diagnostic Kernel Trace</p>
+                  </div>
+                  <code className="text-xs text-slate-500 font-mono break-all leading-relaxed">
+                    {this.state.error?.stack?.split('\n').slice(0, 3).join('\n') || 'Stack trace unavailable'}
+                  </code>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button 
+                    onClick={() => window.location.reload()}
+                    className="flex items-center justify-center gap-3 py-5 bg-slate-800 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-750 transition-all active:scale-95 border border-slate-700"
+                  >
+                    <RefreshCw size={16} />
+                    Reboot Protocol
+                  </button>
+                  <button 
+                    onClick={this.handleReset}
+                    className="flex items-center justify-center gap-3 py-5 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-rose-900/40 hover:bg-rose-700 transition-all active:scale-95"
+                  >
+                    <Zap size={16} />
+                    Factory Reset
+                  </button>
+                </div>
+                
+                <p className="mt-8 text-[9px] text-slate-600 font-bold uppercase tracking-widest italic">
+                  Critical Error logged to NOC audit stream. If issue persists, contact DevOps.
+                </p>
+              </div>
+              
+              <div className="absolute -right-20 -bottom-20 opacity-[0.03] rotate-12 scale-150 pointer-events-none">
+                <ShieldAlert size={300} />
+              </div>
+           </div>
+        </div>
+      );
+    }
     return this.props.children;
   }
 }
@@ -121,10 +190,30 @@ const App: React.FC = () => {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
-    return db.onStateChange((state) => {
+    // 1. Subscribe to State Updates
+    const unsubscribe = db.onStateChange((state) => {
       setDbState(state);
       setAuthState(state.auth);
     });
+
+    // 2. Initial Background Audit
+    db.auditOverdueLoads();
+    db.reconcileData('entire');
+
+    // 3. System Cron Job (Runs every 5 minutes)
+    const systemCron = setInterval(() => {
+      console.log("[SYSTEM] Executing Background Maintenance...");
+      db.auditOverdueLoads();
+      db.reconcileData('entire');
+    }, 5 * 60 * 1000);
+
+    // 4. Initialize Dual-Write Adapter (Phase 1-2)
+    initDualWrite();
+
+    return () => {
+      unsubscribe();
+      clearInterval(systemCron);
+    };
   }, []);
 
   const handleLogin = async (credential: string, pass: string) => {
