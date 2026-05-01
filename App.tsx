@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { PWAPrompt } from './components/PWAPrompt';
 import Modal from './components/shared/Modal';
+import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 
 // Helper to handle chunk loading errors (force reload on new deployments)
 const lazyWithRetry = (componentImport: () => Promise<any>) => 
