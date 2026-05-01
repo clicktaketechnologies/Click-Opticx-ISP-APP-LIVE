@@ -24,16 +24,18 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
    const isSuperAdmin = currentUser?.role === Role.SUPER_ADMIN;
 
    const filteredStaff = useMemo(() => {
-      return state.staff.filter(s =>
-         s.email !== currentUser.email &&
-         (s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.email.toLowerCase().includes(searchTerm.toLowerCase()))
+      const term = (searchTerm || '').toLowerCase();
+      return (state.staff || []).filter(s =>
+         s.email !== currentUser?.email &&
+         ((s.name || '').toLowerCase().includes(term) || (s.email || '').toLowerCase().includes(term))
       );
    }, [state.staff, currentUser, searchTerm]);
 
    const filteredUsers = useMemo(() => {
-      return state.users.filter(u =>
+      const term = (searchTerm || '').toLowerCase();
+      return (state.users || []).filter(u =>
          !u.deleted &&
-         (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.connectionId.toLowerCase().includes(searchTerm.toLowerCase()))
+         ((u.name || '').toLowerCase().includes(term) || (u.connectionId || '').toLowerCase().includes(term))
       );
    }, [state.users, searchTerm]);
 

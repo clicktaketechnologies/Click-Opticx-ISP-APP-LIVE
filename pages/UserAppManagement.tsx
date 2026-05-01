@@ -28,9 +28,13 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
    }, [state.settings.appearance.sections]);
 
    const filteredUsers = useMemo(() => {
-      return state.users.filter(u =>
-         !u.deleted && (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.connectionId.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
+      const term = (searchTerm || '').toLowerCase();
+      return (state.users || []).filter(u => {
+         if (!u || u.deleted) return false;
+         const name = (u.name || '').toLowerCase();
+         const connectionId = (u.connectionId || '').toLowerCase();
+         return name.includes(term) || connectionId.includes(term);
+      });
    }, [state.users, searchTerm]);
 
    const signupRequests = useMemo(() => {

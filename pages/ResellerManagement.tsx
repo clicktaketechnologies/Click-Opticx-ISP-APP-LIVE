@@ -41,7 +41,19 @@ const ResellerManagement: React.FC<{ state: AppState }> = ({ state }) => {
     dueDate: ''
   });
 
-  const dealers = useMemo(() => { return state.staff.filter(s => { if (state.currentUser?.role === Role.SUPER_ADMIN || state.currentUser?.role === Role.ADMIN) { return [Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(s.role as Role); } return s.parentId === state.currentUser?.id; }).filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.email.toLowerCase().includes(searchTerm.toLowerCase()) || (s.dealerCode && s.dealerCode.toLowerCase().includes(searchTerm.toLowerCase()))); }, [state.staff, searchTerm, state.currentUser]);
+  const dealers = useMemo(() => {
+    const term = (searchTerm || '').toLowerCase();
+    return (state.staff || []).filter(s => {
+      if (state.currentUser?.role === Role.SUPER_ADMIN || state.currentUser?.role === Role.ADMIN) {
+        return [Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(s.role as Role);
+      }
+      return s.parentId === state.currentUser?.id;
+    }).filter(s => 
+      (s.name || '').toLowerCase().includes(term) || 
+      (s.email || '').toLowerCase().includes(term) || 
+      (s.dealerCode && (s.dealerCode || '').toLowerCase().includes(term))
+    );
+  }, [state.staff, searchTerm, state.currentUser]);
 
   const dealerEmails = useMemo(() => new Set(dealers.map(s => s.email)), [dealers]);
 
@@ -328,7 +340,7 @@ const ResellerManagement: React.FC<{ state: AppState }> = ({ state }) => {
               <div className="relative z-10 space-y-6">
                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-500">System Activity</h3>
                  <div className="space-y-4">
-                    {state.notifications.filter(n => n.message.toLowerCase().includes('dealer')).slice(0, 5).map(notif => (
+                    {state.notifications.filter(n => (n.message || '').toLowerCase().includes('dealer')).slice(0, 5).map(notif => (
                        <div key={notif.id} className="flex gap-3 items-start border-l-2 border-slate-700 pl-4 py-1">
                           <div>
                              <p className="text-[10px] font-black uppercase text-green-400">{notif.title}</p>
@@ -336,7 +348,7 @@ const ResellerManagement: React.FC<{ state: AppState }> = ({ state }) => {
                           </div>
                        </div>
                     ))}
-                    {state.notifications.filter(n => n.message.toLowerCase().includes('dealer')).length === 0 && (
+                    {state.notifications.filter(n => (n.message || '').toLowerCase().includes('dealer')).length === 0 && (
                       <p className="text-[10px] text-slate-600 italic">No recent dealer logs.</p>
                     )}
                  </div>

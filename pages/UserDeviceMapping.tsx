@@ -23,7 +23,13 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
     configured: false
   });
 
-  const activeUsers = state.users.filter(u => !u.deleted && (u.name.toLowerCase().includes(searchTerm.toLowerCase()) || u.connectionId.toLowerCase().includes(searchTerm.toLowerCase())));
+  const activeUsers = (state.users || []).filter(u => {
+    if (!u || u.deleted) return false;
+    const term = (searchTerm || '').toLowerCase();
+    const name = (u.name || '').toLowerCase();
+    const connectionId = (u.connectionId || '').toLowerCase();
+    return name.includes(term) || connectionId.includes(term);
+  });
   const selectedUser = useMemo(() => state.users.find(u => u.id === selectedUserId), [state.users, selectedUserId]);
 
   const handleSelectUser = (user: ISPUser) => {
