@@ -9,6 +9,7 @@ import {
 import { PWAPrompt } from './components/PWAPrompt';
 import Modal from './components/shared/Modal';
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
+import { initDualWrite } from './lib/db-adapter';
 
 // Helper to handle chunk loading errors (force reload on new deployments)
 const lazyWithRetry = (componentImport: () => Promise<any>) => 
