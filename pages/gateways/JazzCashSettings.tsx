@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { AppState, PaymentGateway } from '../../types';
 import { db } from '../../db';
 import { 
-  Smartphone, ArrowLeft, Save, ShieldCheck, RefreshCw, 
+  Smartphone, ArrowLeft, Save, ShieldCheck, RotateCw, 
   SmartphoneIcon, Lock, Key, Eye, EyeOff, Activity, CheckCircle, ShieldAlert
 } from 'lucide-react';
 

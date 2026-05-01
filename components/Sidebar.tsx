@@ -109,7 +109,6 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
         {
           id: 'group-infra', label: 'Infrastructure', icon: HardDrive,
           items: [
-            { id: 'admin-devices', label: 'OLT Devices', icon: HardDrive },
             { id: 'olt-management', label: 'OLT Infrastructure', icon: Cpu },
             { id: 'nas-management', label: 'Router Settings', icon: Server },
             { id: 'system-config', label: 'System Gateway', icon: Settings },

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { AppState, PaymentGateway } from '../../types';
 import { db } from '../../db';
 import { 
-  Landmark, ArrowLeft, Save, ShieldCheck, RefreshCw, 
+  Landmark, ArrowLeft, Save, ShieldCheck, RotateCw, 
   CreditCard, Hash, User, Globe, ShieldAlert, AlertCircle
 } from 'lucide-react';
 

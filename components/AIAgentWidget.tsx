@@ -3,7 +3,7 @@ import { db } from '../db';
 import { 
   Bot, Sparkles, X, ChevronRight, Activity, 
   ShieldAlert, Zap, HeartPulse, ShieldCheck, 
-  Settings, RefreshCw, BarChart3, TrendingUp, Power, Eye, EyeOff, Lock
+  Settings, RotateCw, BarChart3, TrendingUp, Power, Eye, EyeOff, Lock
 } from 'lucide-react';
 import { AppState, AISuggestion, Role, AIConfig } from '../types';
 import Modal from './shared/Modal';

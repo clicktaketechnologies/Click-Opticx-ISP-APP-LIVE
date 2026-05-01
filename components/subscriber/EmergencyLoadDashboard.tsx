@@ -4,7 +4,7 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { ISPUser, AppState, EmergencyLoad } from '../../types';
 import { db } from '../../db';
 // Added missing Activity and Info icons to imports
-import { Zap, ShieldAlert, Clock, ArrowRight, History, CreditCard, AlertTriangle, CheckCircle, Smartphone, RefreshCw, BarChart3, Activity, Info } from 'lucide-react';
+import { Zap, ShieldAlert, Clock, ArrowRight, History, CreditCard, AlertTriangle, CheckCircle, Smartphone, RotateCw, BarChart3, Activity, Info } from 'lucide-react';
 
 interface Props {
   user: ISPUser;

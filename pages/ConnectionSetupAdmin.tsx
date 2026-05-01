@@ -5,7 +5,7 @@ import { AppState, ISPUser, ConnectionStatus, Role, TechnicalConfig } from '../t
 import { db } from '../db';
 import { 
   Network, Search, UserCircle, ChevronRight, HardDrive, 
-  Cpu, Save, RefreshCw, Layers, ShieldCheck, Globe, 
+  Cpu, Save, RotateCw, Layers, ShieldCheck, Globe, 
   Wifi, Flame, Info, CheckCircle, Smartphone,
   Plus, Trash2, Settings2, Database, Zap, ListPlus, Box,
   ArrowRight, DollarSign, BarChart3, Activity, PieChart,
@@ -808,7 +808,7 @@ const ConnectionSetupAdmin: React.FC<{ state: AppState }> = ({ state }) => {
         <div className="bg-white rounded-[3rem] border border-slate-100 shadow-sm p-10 space-y-8 animate-in slide-in-from-right-4 duration-500">
            <div className="flex justify-between items-center mb-4">
               <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-800">Operational Audit</h3>
-              <button onClick={() => runAudit()} className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 hover:underline"><RefreshCw size={14}/> Refresh Pulse</button>
+              <button onClick={() => runAudit()} className="flex items-center gap-2 text-[10px] font-black uppercase text-blue-600 hover:underline"><RotateCw size={14}/> Refresh Pulse</button>
            </div>
            
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

@@ -4,7 +4,7 @@ import { AppState, StaffUser } from '../types';
 import { db } from '../db';
 import { 
   User, Mail, Lock, Eye, EyeOff, Save, Camera, 
-  ShieldCheck, RefreshCw, CheckCircle, AlertCircle,
+  ShieldCheck, RotateCw, CheckCircle, AlertCircle,
   Key, Activity, UserCircle, ArrowLeft, LogOut, Info
 } from 'lucide-react';
 
@@ -136,7 +136,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
 
           <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-6">
              <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-widest flex items-center gap-2">
-                <RefreshCw size={14} className="animate-spin-slow" /> Local Memory Node
+                <RotateCw size={14} className="animate-spin-slow" /> Local Memory Node
              </h4>
              <div className="space-y-4">
                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">

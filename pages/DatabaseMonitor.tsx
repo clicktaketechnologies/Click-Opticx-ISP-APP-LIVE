@@ -4,7 +4,7 @@ import { AppState } from '../types';
 import { db } from '../db';
 import { 
   Database, Activity, Server, ShieldCheck, 
-  Terminal, AlertTriangle, RefreshCw, Loader2,
+  Terminal, AlertTriangle, RotateCw, Loader2,
   Settings, Download, Upload, X, Eye, EyeOff, Globe, DatabaseZap, Flame,
   CheckCircle2, HardDrive, FileJson, Monitor, Save, Key, Wifi, WifiOff, XCircle, Code2, Cpu, Zap, Search, ShieldAlert, AlertCircle, CloudLightning, Github, Play, Box, ChevronRight, ExternalLink, ListChecks, Layers, Link2, Sparkles, Command, Send, CreditCard, Clock
 } from 'lucide-react';
@@ -150,7 +150,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
             <Settings size={18} className="text-blue-500" /> Strategy
           </button>
           <button onClick={runAudit} disabled={isAuditing} className="flex items-center gap-3 px-6 py-3 bg-blue-600 text-white rounded-2xl font-black text-[10px] hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 uppercase tracking-widest disabled:opacity-50">
-            {isAuditing ? <RefreshCw className="animate-spin" size={18} /> : <Search size={18} />}
+            {isAuditing ? <RotateCw className="animate-spin" size={18} /> : <Search size={18} />}
             {isAuditing ? 'Auditing Link...' : 'Audit Grid'}
           </button>
         </div>
@@ -175,7 +175,7 @@ const DatabaseMonitor: React.FC<{ state: AppState }> = ({ state }) => {
                      <p className="text-lg font-black text-white">{healthData?.latency_ms || '--'}ms</p>
                   </div>
                   <button onClick={() => db.getSocket()?.emit('health:request')} className="p-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-2xl transition-all">
-                    <RefreshCw size={20} className={isAuditing ? 'animate-spin' : ''} />
+                    <RotateCw size={20} className={isAuditing ? 'animate-spin' : ''} />
                   </button>
                </div>
             </div>

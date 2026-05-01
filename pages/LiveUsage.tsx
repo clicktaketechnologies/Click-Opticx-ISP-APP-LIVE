@@ -4,7 +4,7 @@ import { db } from '../db';
 import { ISPUser } from '../types';
 import { 
   TrendingUp, Download, Upload, Activity, 
-  RefreshCw, Globe, ArrowUpRight, ArrowDownLeft, Gauge,
+  RotateCw, Globe, ArrowUpRight, ArrowDownLeft, Gauge,
   ShieldAlert, HardDrive, Clock, Pause, Play
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';

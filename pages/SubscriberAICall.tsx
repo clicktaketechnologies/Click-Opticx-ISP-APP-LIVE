@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { db } from '../db';
 import { ISPUser, AppState } from '../types';
 import {
-  Mic, MicOff, PhoneOff, ArrowLeft, RefreshCw,
+  Mic, MicOff, PhoneOff, ArrowLeft, RotateCw,
   Activity, Headphones, Volume2, Globe, Zap,
   CheckCircle, User as UserIcon, X, Phone,
   AlertCircle, Bot, Loader2, ShieldCheck

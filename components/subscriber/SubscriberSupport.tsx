@@ -5,7 +5,7 @@ import { db } from '../../db';
 import { TicketPriority, TicketStatus } from '../../types';
 import { 
   Headphones, MessageSquare, Plus, ChevronRight, Phone, Mail, Globe, 
-  ShieldCheck, Activity, LifeBuoy, X, Send, Clock, AlertTriangle, RefreshCw
+  ShieldCheck, Activity, LifeBuoy, X, Send, Clock, AlertTriangle, RotateCw
 } from 'lucide-react';
 import Modal from '../shared/Modal';
 

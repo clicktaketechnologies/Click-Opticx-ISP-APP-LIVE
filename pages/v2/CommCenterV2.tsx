@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   MessageSquare, Mail, Zap, ShieldCheck, 
-  ShieldAlert, Search, Plus, RefreshCw, 
+  ShieldAlert, Search, Plus, RotateCw, 
   BarChart3, ArrowRight, Settings, 
   Send, Users, Layout, Smartphone,
   Globe, Clock, CheckCircle2, XCircle,
@@ -12,8 +12,10 @@ import {
 import { AppState, EmailProvider, Campaign, EmailJob } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
+import { usePermissions } from '../../src/hooks/usePermissions';
 
 const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
+  const { canView, canEdit } = usePermissions(state);
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'infrastructure' | 'campaigns' | 'queue'>('campaigns');
@@ -53,10 +55,10 @@ const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex justify-center">
          <div className="flex gap-2 p-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm">
             {[
-                { id: 'campaigns', label: 'Campaign Matrix', icon: Layout },
-                { id: 'infrastructure', label: 'Infra Hub', icon: HardDrive },
-                { id: 'queue', label: 'Manual Queue', icon: Database }
-            ].map(tab => (
+                { id: 'campaigns', label: 'Campaign Matrix', icon: Layout, perm: 'comm-campaigns' },
+                { id: 'infrastructure', label: 'Infra Hub', icon: HardDrive, perm: 'comm-settings' },
+                { id: 'queue', label: 'Manual Queue', icon: Database, perm: 'comm-logs' }
+            ].filter(t => canView(t.perm)).map(tab => (
                 <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
@@ -88,7 +90,7 @@ const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
                         />
                      </div>
                   </div>
-                  <V2Button label="Initialize Campaign" icon={Plus} />
+                  {canEdit('comm-campaigns') && <V2Button label="Initialize Campaign" icon={Plus} />}
                </div>
 
                <V2SmartTable headers={['Campaign Node', 'Transmission Plan', 'Target Audience', 'Yield Status', 'Control']}>
@@ -184,7 +186,7 @@ const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="flex gap-3">
                      <V2Button label="Purge Failed" variant="danger" icon={Trash2} />
-                     <V2Button label="Resume Matrix" variant="secondary" icon={RefreshCw} />
+                     <V2Button label="Resume Matrix" variant="secondary" icon={RotateCw} />
                   </div>
                </div>
                <V2SmartTable headers={['Job ID', 'Recipient Relay', 'Attempt Node', 'Fiscal Pulse', 'Actions']}>

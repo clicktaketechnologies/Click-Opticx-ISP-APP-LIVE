@@ -11,8 +11,10 @@ import {
 import { AppState, ISPUser as UserType, Role, Package } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
+import { usePermissions } from '../../src/hooks/usePermissions';
 
 const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
+  const { canView, canEdit } = usePermissions(state);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -76,7 +78,7 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
               ))}
            </div>
         </div>
-        <V2Button label="Onboard User" icon={Plus} />
+        {canEdit('users') && <V2Button label="Onboard User" icon={Plus} />}
       </div>
 
       {/* Main Table */}
@@ -134,10 +136,12 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
         title={selectedUser?.name || ''}
         subtitle={`Subscriber Matrix Node: ${selectedUser?.id}`}
         footer={
-            <div className="flex gap-4">
-                <V2Button label="Renew Account" variant="primary" className="flex-1" icon={Zap} />
-                <V2Button label="Suspend Node" variant="danger" className="flex-1" icon={XCircle} />
-            </div>
+            canEdit('users') ? (
+                <div className="flex gap-4">
+                    <V2Button label="Renew Account" variant="primary" className="flex-1" icon={Zap} />
+                    <V2Button label="Suspend Node" variant="danger" className="flex-1" icon={XCircle} />
+                </div>
+            ) : undefined
         }
       >
         {selectedUser && (

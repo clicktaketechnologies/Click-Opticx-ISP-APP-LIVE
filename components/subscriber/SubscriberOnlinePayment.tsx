@@ -5,7 +5,7 @@ import { db } from '../../db';
 import {
    Globe, CreditCard, ShieldCheck, Zap, ArrowRight, Loader2,
    Smartphone, Landmark, CheckCircle, AlertTriangle, AlertCircle,
-   RefreshCw, ShieldAlert, ArrowLeft, ExternalLink, Info, Banknote
+   RotateCw, ShieldAlert, ArrowLeft, ExternalLink, Info, Banknote
 } from 'lucide-react';
 
 interface Props {
@@ -109,7 +109,7 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
                <div className="relative w-32 h-32 flex items-center justify-center">
                   <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
                   <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-                  <RefreshCw size={48} className="text-blue-600 animate-pulse" />
+                  <RotateCw size={48} className="text-blue-600 animate-pulse" />
                </div>
                <div className="space-y-2">
                   <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900">Digital Handshake</h3>
@@ -174,7 +174,7 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
                                  onClick={handleInstantPay}
                                  className="w-full py-3 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg flex items-center justify-center gap-2"
                               >
-                                 <RefreshCw size={14} /> Retry Transaction
+                                 <RotateCw size={14} /> Retry Transaction
                               </button>
                            )}
                         </div>

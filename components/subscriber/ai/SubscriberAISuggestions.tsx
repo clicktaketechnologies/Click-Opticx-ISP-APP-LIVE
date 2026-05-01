@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { AppState, ISPUser } from '../../../types';
-import { ArrowLeft, Sparkles, Zap, Wallet, Trophy, ArrowRight, ChevronRight, Package, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Sparkles, Zap, Wallet, Trophy, ArrowRight, ChevronRight, Package, RotateCw } from 'lucide-react';
 
 interface Props {
   user: ISPUser;
@@ -86,7 +86,7 @@ const SubscriberAISuggestions: React.FC<Props> = ({ user, state, onBack, onActio
 
       <div className="p-10 bg-slate-900 rounded-[3rem] text-white flex flex-col items-center text-center space-y-4 relative overflow-hidden">
          <div className="relative z-10 w-16 h-16 bg-white/10 rounded-[2rem] flex items-center justify-center border border-white/10 mb-2">
-            <RefreshCw size={28} className="text-blue-400" />
+            <RotateCw size={28} className="text-blue-400" />
          </div>
          <h4 className="relative z-10 text-xl font-black uppercase italic tracking-tight">Real-time Recalibration</h4>
          <p className="relative z-10 text-[9px] text-slate-500 font-bold uppercase leading-relaxed max-w-xs">AI suggestions refresh every 6 hours based on your node's physical and fiscal handshake data.</p>

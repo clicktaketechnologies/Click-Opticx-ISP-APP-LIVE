@@ -8,7 +8,7 @@ import {
     ChevronRight, Filter, Search, ShieldAlert,
     Archive, Trash2, Ban, Hammer, DollarSign,
     Package, LayoutDashboard, MoreVertical,
-    X, RefreshCw, Layers, ExternalLink
+    X, RotateCw, Layers, ExternalLink
 } from 'lucide-react';
 
 interface Props {
@@ -131,7 +131,7 @@ const AdminReminders: React.FC<Props> = ({ state, onNavigate }) => {
                         onClick={() => db.generateAdminReminders()}
                         className="px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-slate-50 flex items-center gap-2 text-blue-600"
                     >
-                        <RefreshCw size={14} /> Force Re-Scan
+                        <RotateCw size={14} /> Force Re-Scan
                     </button>
                 </div>
             </div>

@@ -677,6 +677,29 @@ class DB {
         }
         this.state = { ...INITIAL_STATE, ...parsed };
 
+        // --- SECURITY HARDENING: Session Expiry Check ---
+        if (this.state.auth?.isLoggedIn && this.state.auth.lastLoginAt) {
+          const lastLogin = new Date(this.state.auth.lastLoginAt).getTime();
+          const now = Date.now();
+          const sessionTimeout = 24 * 60 * 60 * 1000; // 24 Hours
+          
+          if (now - lastLogin > sessionTimeout) {
+            console.warn('[SECURITY] Session expired. Force logout triggered.');
+            this.state.auth = { isLoggedIn: false };
+            this.state.currentUser = undefined;
+            this.state.view = 'login';
+          }
+        } else if (this.state.auth?.isLoggedIn && !this.state.auth.lastLoginAt) {
+          // Legacy session without timestamp - force login for safety
+          this.state.auth = { isLoggedIn: false };
+          this.state.view = 'login';
+        }
+        
+        // If not logged in, always show login view regardless of cached view
+        if (!this.state.auth?.isLoggedIn) {
+          this.state.view = 'login';
+        }
+
         // Deep-merge settings so new defaults (like authSettings) are always present
         this.state.settings = { ...INITIAL_STATE.settings, ...this.state.settings };
         if (!this.state.settings.authSettings) {
@@ -1075,9 +1098,26 @@ class DB {
         }
       });
 
+      this.socket.on('global-wipe', (data: any) => {
+        console.warn('[SECURITY] Global Wipe Protocol Received via Socket:', data.timestamp);
+        this.executeLocalWipe();
+      });
+
     } catch (e) {
       console.error('Socket init failed:', e);
     }
+  }
+
+  private executeLocalWipe() {
+    localStorage.clear();
+    sessionStorage.clear();
+    this.state.auth = { isLoggedIn: false };
+    this.state.currentUser = undefined;
+    this.state.view = 'login';
+    this.notify();
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
   }
 
   private authenticateSocket() {
@@ -1893,9 +1933,16 @@ class DB {
       
       // Update local session state
       this.state.currentUser = authenticatedEntity;
+      this.state.auth = {
+        isLoggedIn: true,
+        role: res.userType === 'customer' ? Role.CUSTOMER : authenticatedEntity.role,
+        id: authenticatedEntity.id,
+        email: authenticatedEntity.email,
+        name: authenticatedEntity.name,
+        lastLoginAt: new Date().toISOString()
+      };
+      this.state.view = res.userType === 'customer' ? 'portal' : 'admin';
       
-      // If it's a staff member, we use the role from their object
-      // If it's a user, we ensure role is CUSTOMER for frontend logic
       if (res.userType === 'customer') {
           this.state.currentUser.role = Role.CUSTOMER;
           
@@ -1983,6 +2030,31 @@ class DB {
     }
   }
 
+  async impersonateUser(userId: string) {
+    const user = this.state.users.find(u => u.id === userId);
+    if (!user) {
+      console.warn('[DB] User impersonation failed: User not found in local registry.', userId);
+      return { success: false, message: 'User not found' };
+    }
+    
+    this.logAudit('User Impersonation', 'Login', `Admin impersonated subscriber: ${user.name} (${user.connectionId})`, this.state.currentUser?.id, this.state.currentUser?.name);
+
+    this.state.currentUser = { ...user, role: Role.CUSTOMER };
+    this.state.isImpersonating = true;
+    
+    this.state.auth = {
+      isLoggedIn: true,
+      role: Role.CUSTOMER,
+      id: user.id,
+      email: user.email,
+      name: user.name
+    };
+    this.state.view = 'portal';
+
+    await this.commit();
+    this.notify();
+    return { success: true, user: this.state.currentUser };
+  }
 
   async logout() {
     console.log('[DB] Protocol: Terminating session and clearing persistent buffers.');
@@ -1993,6 +2065,8 @@ class DB {
     // 1. Clear State
     this.state.currentUser = undefined;
     this.state.isImpersonating = false;
+    this.state.auth = { isLoggedIn: false };
+    this.state.view = 'login';
     
     // 2. Clear Auth Tokens & Persistent Buffers
     localStorage.removeItem('clickopticx_auth_token');
@@ -2013,24 +2087,10 @@ class DB {
 
   async triggerGlobalWipe() {
     console.warn('[DB] EXECUTING GLOBAL WORKSPACE WIPE PROTOCOL');
-    localStorage.clear();
-    sessionStorage.clear();
     if (this.socket) {
-      this.socket.emit('logout');
+      this.socket.emit('trigger-global-wipe');
     }
-    // Delete service workers
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let registration of registrations) {
-          registration.unregister();
-        }
-      });
-    }
-    this.state.settings.lastGlobalWipe = new Date().toISOString();
-    this.logNotification('all', 'error', 'Global Registry Wipe', 'System parameters have been forcefully reset. Reconnect required.');
-    setTimeout(() => {
-      window.location.reload();
-    }, 2000);
+    this.executeLocalWipe();
   }
 
   async updateAIKeys(keys: any) {
@@ -3014,7 +3074,7 @@ class DB {
   }
 
   async auditInfrastructure(): Promise<ConnectionAudit> { return { success: true, checks: [{ name: 'Firewall Registry', details: 'All gateways verified', passed: true }, { name: 'Ledger Node', details: 'Double-entry synced', passed: true }, { name: 'AI Core', details: 'Heuristic Pulse Active', passed: true }] }; }
-  async impersonateUser(id: string) { this.state.isImpersonating = true; const user = this.findUserNode(id); if (user) this.state.currentUser = { ...user, role: Role.CUSTOMER }; this.notify(); }
+
 
   async saveMapping(m: any) {
     const idx = this.state.networkMappings.findIndex(x => x.userId === m.userId);

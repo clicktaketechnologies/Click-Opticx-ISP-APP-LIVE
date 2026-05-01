@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
    Activity, Shield, Server, Monitor, Wifi, Zap, AlertCircle, 
    CheckCircle2, ArrowUpRight, ArrowDownRight, Users, Globe, 
-   Clock, Bell, Search, Filter, MoreVertical, RefreshCw, 
+   Clock, Bell, Search, Filter, MoreVertical, RotateCw, 
    HardDrive, Network, MapPin, Database, Cpu, PieChart, Info,
    PlayCircle, AlertTriangle, MessageSquare, Trash2, CheckCircle, Sparkles, History
 } from 'lucide-react';
@@ -174,7 +174,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                      <Zap size={24} className="text-white" />
                      <h3 className="text-sm font-black uppercase tracking-widest text-white/70 italic">Real-time Speed</h3>
                   </div>
-                  {isPulseSyncing && <RefreshCw size={14} className="text-white animate-spin opacity-40" />}
+                  {isPulseSyncing && <RotateCw size={14} className="text-white animate-spin opacity-40" />}
                </div>
                <div className="text-5xl font-black italic tracking-tighter text-white relative z-10">{pulseData.speed}</div>
                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-[40px] rounded-full -m-16 animate-pulse" />
@@ -585,7 +585,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   </h2>
                   <div className="grid grid-cols-2 gap-4">
                      {[
-                        { label: 'Diagnostic', icon: RefreshCw, color: 'bg-blue-500' },
+                        { label: 'Diagnostic', icon: RotateCw, color: 'bg-blue-500' },
                         { label: 'Broadcast', icon: MessageSquare, color: 'bg-blue-500' },
                         { label: 'Flush DNS', icon: Trash2, color: 'bg-slate-500' },
                         { label: 'Kick All', icon: Zap, color: 'bg-rose-500' },

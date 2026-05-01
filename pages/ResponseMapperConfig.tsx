@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Zap, Code, Database, ChevronRight, Save, 
-  Trash2, Plus, Terminal, RefreshCw, Layers, 
+  Trash2, Plus, Terminal, RotateCw, Layers, 
   Globe, Smartphone, CreditCard, ShieldCheck,
   Eye, Play, CheckCircle2, AlertTriangle, X
 } from 'lucide-react';
@@ -163,7 +163,7 @@ const ResponseMapperConfig: React.FC<{ state: AppState }> = ({ state }) => {
                     onClick={() => handleSaveMapping(selectedMapping)}
                     className="px-10 py-3 bg-blue-600 text-white font-black rounded-xl hover:bg-blue-700 transition-all uppercase tracking-widest text-xs shadow-xl active:scale-95 flex items-center gap-2"
                 >
-                    {isProcessing ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />} Commit Changes
+                    {isProcessing ? <RotateCw size={14} className="animate-spin" /> : <Save size={14} />} Commit Changes
                 </button>
             </div>
         }

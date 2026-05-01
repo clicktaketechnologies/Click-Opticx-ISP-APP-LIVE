@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   ShieldCheck, ShieldAlert, Eye, CheckCircle, XCircle, 
-  RefreshCw, Clock, User, Fingerprint, Camera, FileText, 
+  RotateCw, Clock, User, Fingerprint, Camera, FileText, 
   Search, Filter, ChevronRight, Activity, Database, Lock,
   Maximize2, ZoomIn, Info, AlertCircle, X, UserCircle, UserCheck, Smartphone
 } from 'lucide-react';
@@ -304,7 +304,7 @@ export const KYCReviewDesk: React.FC<Props> = ({ state }) => {
                            disabled={!rejectionReason || isProcessing}
                            className="flex-1 py-5 bg-white text-rose-600 border border-rose-100 rounded-[2.5rem] font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-rose-50 transition-all disabled:opacity-40 shadow-sm"
                          >
-                            <RefreshCw size={18} /> Request Identity Refresh
+                            <RotateCw size={18} /> Request Identity Refresh
                          </button>
                          <button 
                            onClick={() => handleApprove(selectedUser.id)}

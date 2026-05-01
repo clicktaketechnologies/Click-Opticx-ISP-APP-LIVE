@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { 
   Zap, Brain, MessageSquare, Smartphone, 
-  Settings, Play, Pause, RefreshCw,
+  Settings, Play, Pause, RotateCw,
   Search, ShieldCheck, ShieldAlert, BarChart3,
   ArrowRight, Sparkles, Activity, Clock,
   CheckCircle2, XCircle, AlertTriangle, Filter,
@@ -11,8 +11,10 @@ import {
 import { AppState } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
+import { usePermissions } from '../../src/hooks/usePermissions';
 
 const AIAutomationV2: React.FC<{ state: AppState }> = ({ state }) => {
+  const { canView, canEdit } = usePermissions(state);
   const [activeTab, setActiveTab] = useState<'modules' | 'campaigns' | 'logs'>('modules');
   const [selectedCall, setSelectedCall] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -55,10 +57,10 @@ const AIAutomationV2: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex justify-center">
          <div className="flex gap-2 p-2 bg-white rounded-[2rem] border border-slate-100 shadow-sm">
             {[
-                { id: 'modules', label: 'Neural Matrix', icon: LayersIcon },
-                { id: 'campaigns', label: 'AI Campaigns', icon: Target },
-                { id: 'logs', label: 'Call Telemetry', icon: Mic2 }
-            ].map(tab => (
+                { id: 'modules', label: 'Neural Matrix', icon: LayersIcon, perm: 'ai-control' },
+                { id: 'campaigns', label: 'AI Campaigns', icon: Target, perm: 'ai-calling' },
+                { id: 'logs', label: 'Call Telemetry', icon: Mic2, perm: 'ai-call-logs' }
+            ].filter(t => canView(t.perm)).map(tab => (
                 <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
@@ -135,7 +137,7 @@ const AIAutomationV2: React.FC<{ state: AppState }> = ({ state }) => {
                         />
                      </div>
                   </div>
-                  <V2Button label="Initialize AI Agent" icon={Plus} />
+                  {canEdit('ai-calling') && <V2Button label="Initialize AI Agent" icon={Plus} />}
                </div>
                
                <V2SmartTable headers={['Agent Protocol', 'Objective Plane', 'Status Yield', 'Actions']}>
@@ -211,10 +213,12 @@ const AIAutomationV2: React.FC<{ state: AppState }> = ({ state }) => {
         title={`Neural Interaction Telemetry`}
         subtitle={`Session ID: NC-${selectedCall?.id || 0}99X`}
         footer={
-            <div className="flex gap-4">
-                <V2Button label="Manual Review" variant="secondary" className="flex-1" icon={Edit3} />
-                <V2Button label="Confirm Resolution" variant="primary" className="flex-1" icon={CheckCircle2} />
-            </div>
+            canEdit('ai-call-logs') ? (
+                <div className="flex gap-4">
+                    <V2Button label="Manual Review" variant="secondary" className="flex-1" icon={Edit3} />
+                    <V2Button label="Confirm Resolution" variant="primary" className="flex-1" icon={CheckCircle2} />
+                </div>
+            ) : undefined
         }
       >
         {selectedCall && (

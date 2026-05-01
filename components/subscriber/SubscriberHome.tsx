@@ -6,7 +6,7 @@ import { db } from '../../db';
 import {
   Wifi, Zap, Globe, Timer, Target, BookOpen, Gauge,
   ArrowRight, Receipt, Cloud, Sparkles, Activity, ShieldCheck, Wallet, ChevronRight,
-  AlertTriangle, Clock, X, ShieldAlert, Sun, Bot, CheckCircle, BarChart3, RefreshCw,
+  AlertTriangle, Clock, X, ShieldAlert, Sun, Bot, CheckCircle, BarChart3, RotateCw,
   CreditCard, LayoutGrid, Smartphone, MapPin, MessageSquare, Headphones,
   Bell, History, Gift, User, FileText, Network, Compass, Fingerprint, Loader2,
   Info, Home, Monitor, Key, Lock, Book, HelpCircle, UserCheck, Shield, HardDrive,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, CheckCircle2, AlertCircle, RefreshCw, Database, Cloud, Activity, List, ChevronDown, ChevronUp, Zap, AlertTriangle, ArrowLeftRight, Download, RotateCcw, Rocket } from 'lucide-react';
+import { Shield, CheckCircle2, AlertCircle, RotateCw, Database, Cloud, Activity, List, ChevronDown, ChevronUp, Zap, AlertTriangle, ArrowLeftRight, Download, RotateCcw, Rocket } from 'lucide-react';
 import { AppState } from '../types';
 import { getDualWriteStatus, switchMigrationMode, MigrationMode } from '../lib/db-adapter';
 
@@ -61,7 +61,7 @@ const MigrationDashboard: React.FC<Props> = ({ state }) => {
 
   if (loading) return (
     <div className="flex flex-col items-center justify-center h-[60vh] gap-4">
-      <RefreshCw className="text-blue-500 animate-spin" size={32} />
+      <RotateCw className="text-blue-500 animate-spin" size={32} />
       <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Loading Migration Control Plane...</p>
     </div>
   );
@@ -103,7 +103,7 @@ const MigrationDashboard: React.FC<Props> = ({ state }) => {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-3 mb-8">
-            <OpButton label="Validate Now" icon={RefreshCw} running={opRunning === 'validate'} onClick={() => runOp('validate')} />
+            <OpButton label="Validate Now" icon={RotateCw} running={opRunning === 'validate'} onClick={() => runOp('validate')} />
             <OpButton label="Export Backup" icon={Download} running={opRunning === 'backup'} onClick={() => runOp('backup')} />
             <OpButton label="Force Sync" icon={ArrowLeftRight} running={opRunning === 'force-sync'} onClick={() => runOp('force-sync')} variant="warning" />
           </div>

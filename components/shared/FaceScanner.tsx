@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Camera, RefreshCw, Scan, X } from 'lucide-react';
+import { Camera, RotateCw, Scan, X } from 'lucide-react';
 
 interface FaceScannerProps {
   onCapture: (base64Image: string) => void;
@@ -153,7 +153,7 @@ const FaceScanner: React.FC<FaceScannerProps> = ({ onCapture, onCancel }) => {
               <div className="space-y-4">
                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2 text-blue-400 font-black text-[10px] uppercase tracking-widest">
-                       <RefreshCw size={14} className="animate-spin" />
+                       <RotateCw size={14} className="animate-spin" />
                        Analyzing Matrix...
                     </div>
                     <span className="text-blue-400 font-bold text-xs">{scanProgress}%</span>

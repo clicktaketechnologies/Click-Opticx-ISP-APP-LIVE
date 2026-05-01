@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { AppState, DeliveryLog } from '../../types';
 import { 
   BarChart3, PieChart, Activity, TrendingUp, TrendingDown,
-  CheckCircle, XCircle, RefreshCw, Smartphone, MessageSquare,
+  CheckCircle, XCircle, RotateCw, Smartphone, MessageSquare,
   Clock, Zap, Layout, ShieldCheck, Filter, Download
 } from 'lucide-react';
 
@@ -59,7 +59,7 @@ const NotificationAnalytics: React.FC<{ state: AppState }> = ({ state }) => {
           { label: 'Push Success', val: `${stats.pushSuccess}%`, icon: Smartphone, color: 'text-blue-500', bg: 'bg-blue-50' },
           { label: 'SMS Success', val: `${stats.smsSuccess}%`, icon: MessageSquare, color: 'text-green-500', bg: 'bg-green-50' },
           { label: 'Failed Count', val: stats.failed, icon: XCircle, color: 'text-rose-500', bg: 'bg-rose-50' },
-          { label: 'Retry Count', val: stats.retried, icon: RefreshCw, color: 'text-amber-500', bg: 'bg-amber-50' },
+          { label: 'Retry Count', val: stats.retried, icon: RotateCw, color: 'text-amber-500', bg: 'bg-amber-50' },
         ].map((kpi) => (
           <div key={kpi.label} className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col justify-between group hover:shadow-xl hover:-translate-y-1 transition-all">
             <div className={`w-12 h-12 rounded-2xl ${kpi.bg} ${kpi.color} flex items-center justify-center mb-6 shadow-inner`}>

@@ -4,7 +4,7 @@ import { MasterApprovalDashboard } from './pages/MasterApprovalDashboard';
 import { Role, AppState, SystemNotification, UserStatus } from './types';
 import {
   Receipt, Wallet, ShieldCheck, LogOut,
-  Wifi, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap, Loader2, Cloud, X, Zap, RefreshCcw, CheckCircle
+  Wifi, Database, UserCheck, FileInput, ShieldAlert, Settings, Server, ChevronRight, DatabaseZap, Loader2, Cloud, X, Zap, RotateCw, RefreshCcw, CheckCircle
 } from 'lucide-react';
 import { PWAPrompt } from './components/PWAPrompt';
 import Modal from './components/shared/Modal';
@@ -78,6 +78,7 @@ const ProviderConfigPage = lazy(() => import('./pages/ProviderConfigPage'));
 const MigrationDashboard = lazy(() => import('./pages/MigrationDashboard'));
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 import { initDualWrite } from './lib/db-adapter';
+import V3Layout from './src/layouts/V3Layout';
 import V2Layout from './layouts/V2Layout';
 const DashboardV2 = lazy(() => import('./pages/v2/DashboardV2'));
 const UserManagementV2 = lazy(() => import('./pages/v2/UserManagementV2'));
@@ -151,7 +152,7 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
                     onClick={() => window.location.reload()}
                     className="flex items-center justify-center gap-3 py-5 bg-slate-800 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-750 transition-all active:scale-95 border border-slate-700"
                   >
-                    <RefreshCw size={16} />
+                    <RotateCw size={16} />
                     Reboot Protocol
                   </button>
                   <button 
@@ -217,20 +218,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleLogin = async (credential: string, pass: string) => {
-    const res = await db.login(credential, pass);
-    if (res.success) {
-      db.commit({ 
-        auth: { 
-          isLoggedIn: true,
-          role: res.user.role,
-          id: res.user.id,
-          email: res.user.email,
-          name: res.user.name
-        }, 
-        view: res.type === 'customer' ? 'portal' : 'admin' 
-      });
-    }
-    return res;
+    return await db.login(credential, pass);
   };
 
   const handleLogout = () => {
@@ -326,15 +314,16 @@ const App: React.FC = () => {
     if (dbState.view === 'login') return <Login onLogin={handleLogin} />;
     if (authState.role === 'Subscriber' || authState.role === 'Customer') return <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />;
 
-    const v2Pref = localStorage.getItem('v2_enabled');
-    const isV2 = v2Pref === 'true' || import.meta.env.VITE_ADMIN_V2_ENABLED === 'true';
-    const adminV2Enabled = isV2 && authState.role !== 'Subscriber' && authState.role !== 'Customer';
+    // V2 Layout is now the DEFAULT admin experience
+    // V3 layout available via ?layout=v3 URL param
+    const forceV3 = new URLSearchParams(window.location.search).get('layout') === 'v3';
 
-    if (adminV2Enabled) {
+    if (forceV3) {
       return (
-        <V2Layout state={dbState} activePage={currentPage} onNavigate={navigateTo} onLogout={handleLogout}>
+        <V3Layout state={dbState} activePage={currentPage} onNavigate={navigateTo} onLogout={handleLogout}>
           <Suspense fallback={<Mini5GMicroLoader size={60} />}>
             {(() => {
+              // Route to new V2 dashboards if available, else fallback to legacy components
               switch (currentPage) {
                 case 'dashboard': return <DashboardV2 state={dbState} />;
                 case 'users': return <UserManagementV2 state={dbState} />;
@@ -346,7 +335,7 @@ const App: React.FC = () => {
               }
             })()}
           </Suspense>
-        </V2Layout>
+        </V3Layout>
       );
     }
 
@@ -363,6 +352,13 @@ const App: React.FC = () => {
           businessName={dbState.settings.branding.businessName}
           state={dbState}
         />
+        {/* Mobile overlay to capture clicks and close sidebar */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 z-[119] bg-black/30 lg:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
         <div className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${isCollapsed ? 'lg:pl-[70px]' : 'lg:pl-72'}`}>
           <Header
             user={authState as any}

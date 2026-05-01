@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { AppState, PaymentGateway } from '../../types';
 import { db } from '../../db';
 import { 
-  Landmark, ArrowLeft, Save, ShieldCheck, RefreshCw, 
+  Landmark, ArrowLeft, Save, ShieldCheck, RotateCw, 
   MapPin, DollarSign, ListChecks, Smartphone, Globe, AlertCircle
 } from 'lucide-react';
 
@@ -117,7 +117,7 @@ const HomeCollectionSettings: React.FC<Props> = ({ state, onBack }) => {
                      {[
                        { label: 'Area Specific Fee', icon: MapPin },
                        { label: 'Agent Verification', icon: ListChecks },
-                       { label: 'Immediate Ledger Update', icon: RefreshCw }
+                       { label: 'Immediate Ledger Update', icon: RotateCw }
                      ].map(r => (
                        <li key={r.label} className="flex items-center gap-4 text-slate-400">
                           <r.icon size={16} />

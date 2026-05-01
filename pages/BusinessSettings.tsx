@@ -6,7 +6,7 @@ import { db } from '../db';
 import {
   Building2, Image as ImageIcon, Headphones, Smartphone, Bell,
   Save, Eye, Globe, MessageSquare, ShieldCheck,
-  Trash2, Plus, X, ArrowRight, Zap, CheckCircle, Flame, RefreshCw,
+  Trash2, Plus, X, ArrowRight, Zap, CheckCircle, Flame, RotateCw,
   FileText, Share2, Type, Palette, MapPin, Clock, Phone, Mail,
   SmartphoneIcon, Facebook, Instagram, Twitter, Linkedin, Youtube,
   FileSignature, AlertTriangle, Shield, CheckSquare, Info, Upload,
@@ -490,7 +490,7 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
 
                   <div className="p-8 bg-slate-900 rounded-[2.5rem] space-y-6">
                     <div className="flex items-center gap-3">
-                      <RefreshCw className="text-blue-400 animate-spin-slow" size={24} />
+                      <RotateCw className="text-blue-400 animate-spin-slow" size={24} />
                       <h4 className="text-xs font-black uppercase text-blue-400 italic tracking-[0.2em]">System Loading Architecture</h4>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

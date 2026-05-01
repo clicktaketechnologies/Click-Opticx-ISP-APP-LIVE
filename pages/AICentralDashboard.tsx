@@ -6,7 +6,7 @@ import { db } from '../db';
 import { 
   Cpu, Activity, ShieldAlert, Zap, Globe, ShieldCheck, 
   Terminal, ArrowRight, BarChart3, TrendingUp, Search, 
-  RefreshCw, Layers, Brain, Filter, HardDrive, 
+  RotateCw, Layers, Brain, Filter, HardDrive, 
   Wifi, Flame, Settings, CheckCircle, Info, Ban, Send,
   Lock, ArrowUpRight, Gauge, AlertCircle, FileText, Smartphone,
   UserCircle, CheckSquare, Square, Eye, MoreHorizontal,
@@ -124,7 +124,7 @@ const AICentralDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                        </div>
                        <div className="flex gap-4">
                           <button onClick={refreshAI} disabled={isSyncing} className="p-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-xl transition-all active:scale-95 disabled:opacity-50">
-                             {isSyncing ? <Mini5GMicroLoader size={24} /> : <RefreshCw size={24}/>}
+                             {isSyncing ? <Mini5GMicroLoader size={24} /> : <RotateCw size={24}/>}
                           </button>
                           <div className="p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
                              <p className="text-[9px] font-black text-slate-500 uppercase">Network Latency</p>

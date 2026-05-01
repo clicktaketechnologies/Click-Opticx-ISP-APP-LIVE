@@ -11,7 +11,7 @@ import {
   TrendingUp, Activity, Key, Settings2,
   ChevronRight, ArrowUpRight, ArrowDownRight,
   Monitor, TrendingUp as TrendingIcon,
-  HardDrive, ShieldCheck, RefreshCw, XCircle, PlayCircle, 
+  HardDrive, ShieldCheck, RotateCw, XCircle, PlayCircle, 
   MessageSquare, Share2, Sparkles, Command, Smartphone as Mobile,
   MousePointer2, ListChecks, Layers, Link2, ListFilter, Sliders
 } from 'lucide-react';
@@ -125,7 +125,7 @@ const EmailControlCenter: React.FC<Props> = ({ state }) => {
                 <div className="lg:col-span-2 bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm">
                     <div className="flex items-center justify-between mb-10">
                         <h3 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">Infrastructure Pulse</h3>
-                        <button onClick={fetchDashboardData} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100"><RefreshCw size={18} /></button>
+                        <button onClick={fetchDashboardData} className="p-3 bg-slate-50 text-slate-400 rounded-2xl hover:bg-slate-100"><RotateCw size={18} /></button>
                     </div>
                     <div className="space-y-6">
                         {providers.map(p => (

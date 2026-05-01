@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { 
-  X, Zap, Gauge, Headphones, RefreshCw, 
+  X, Zap, Gauge, Headphones, RotateCw, 
   ShieldAlert, Globe, Activity, Smartphone, Wifi 
 } from 'lucide-react';
 import Modal from '../shared/Modal';
@@ -47,7 +47,7 @@ const OperationalToolOverlay: React.FC<Props> = ({ onClose, onAction }) => {
               className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 hover:bg-white hover:shadow-xl hover:border-blue-500 transition-all text-left group"
               onClick={() => { alert("Router Restart Signal - Payment Dueed to Node MAC..."); onClose(); }}
             >
-               <RefreshCw size={28} className="text-blue-500 mb-4 group-hover:rotate-180 transition-transform duration-700" />
+               <RotateCw size={28} className="text-blue-500 mb-4 group-hover:rotate-180 transition-transform duration-700" />
                <h4 className="text-[11px] font-black uppercase tracking-widest leading-none">Node Reset</h4>
                <p className="text-[8px] font-bold text-slate-400 mt-2 uppercase">Cold Boot Protocol</p>
             </button>

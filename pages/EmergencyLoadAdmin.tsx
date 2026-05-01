@@ -5,7 +5,7 @@ import { db } from '../db';
 import { 
   ShieldAlert, Zap, History, UserCircle, Search, Clock, 
   BadgeCheck, XCircle, AlertCircle, CheckCircle, Trash2,
-  RefreshCw, Filter, DollarSign, Activity, TrendingUp, HandCoins,
+  RotateCw, Filter, DollarSign, Activity, TrendingUp, HandCoins,
   Pencil, Save, X, Layers, Box, Settings2, Calendar, ArrowUpRight
 } from 'lucide-react';
 import { Modal } from '../components/shared/Modal';

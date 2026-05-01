@@ -5,7 +5,7 @@ import { AppState, PaymentGateway } from '../../types';
 import { db } from '../../db';
 import { 
   Globe, ArrowLeft, Save, ShieldCheck, Eye, EyeOff, 
-  RefreshCw, Layers, ShieldAlert, Zap, Globe2, CreditCard, AlertCircle
+  RotateCw, Layers, ShieldAlert, Zap, Globe2, CreditCard, AlertCircle
 } from 'lucide-react';
 
 interface Props {

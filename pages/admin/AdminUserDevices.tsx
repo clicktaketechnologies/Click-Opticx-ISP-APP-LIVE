@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { AppState, ISPUser } from '../../types';
 import { db } from '../../db';
 import { 
-  Smartphone, Search, Fingerprint, Activity, Info, AlertTriangle, XCircle, Layout, Bell, Monitor, RefreshCw
+  Smartphone, Search, Fingerprint, Activity, Info, AlertTriangle, XCircle, Layout, Bell, Monitor, RotateCw
 } from 'lucide-react';
 import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
@@ -69,7 +69,7 @@ const AdminUserDevices: React.FC<{ state: AppState }> = ({ state }) => {
           disabled={isRefreshing}
           className="px-8 py-5 bg-slate-900 text-white rounded-3xl font-black text-[11px] uppercase tracking-[0.2em] shadow-2xl hover:bg-blue-600 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-3 group"
         >
-          {isRefreshing ? <Mini5GMicroLoader size={18} /> : <RefreshCw size={18} className="group-hover:rotate-180 transition-transform duration-700" />}
+          {isRefreshing ? <Mini5GMicroLoader size={18} /> : <RotateCw size={18} className="group-hover:rotate-180 transition-transform duration-700" />}
           Sync Token Registry
         </button>
       </div>

@@ -7,7 +7,7 @@ import {
   UserCircle, ChevronRight, Activity, ShieldCheck, 
   Calendar, Download, X, Eye, FileText, ArrowUpRight,
   TrendingUp, TrendingDown, Info, ShieldAlert, Sparkles,
-  RefreshCw, Hash
+  RotateCw, Hash
 } from 'lucide-react';
 import { Modal } from '../components/shared/Modal';
 

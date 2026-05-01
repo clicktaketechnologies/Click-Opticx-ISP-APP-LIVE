@@ -6,7 +6,7 @@ import { db } from '../db';
 import {
     Mail, Settings, ShieldCheck, Server, Send, Plus, Trash2,
     CheckCircle, AlertCircle, Loader2, Globe, Lock, Info,
-    Zap, Heart, Activity, Sliders, Save, RefreshCw, Bell, Key
+    Zap, Heart, Activity, Sliders, Save, RotateCw, Bell, Key
 } from 'lucide-react';
 
 interface Props {
@@ -491,7 +491,7 @@ const EmailConfig: React.FC<Props> = ({ state }) => {
                                 disabled={isTesting}
                                 className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                             >
-                                {isTesting ? <Mini5GMicroLoader size={16} /> : <RefreshCw size={16} />}
+                                {isTesting ? <Mini5GMicroLoader size={16} /> : <RotateCw size={16} />}
                                 Execute Handshake
                             </button>
                             <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-3">

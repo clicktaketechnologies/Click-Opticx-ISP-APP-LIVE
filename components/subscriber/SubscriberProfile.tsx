@@ -8,7 +8,7 @@ import {
    Camera, CheckCircle, Mail, Smartphone, MapPin,
    CreditCard, Info, Save, X, Edit3, Lock, Eye, EyeOff,
    Activity, ArrowRight, Zap, Layers, Globe, Fingerprint, LockIcon,
-   ShieldAlert, Cpu, Hash, Monitor, SmartphoneIcon, Clock, RefreshCw, Server,
+   ShieldAlert, Cpu, Hash, Monitor, SmartphoneIcon, Clock, RotateCw, Server,
    ShieldCheck
 } from 'lucide-react';
 import PasswordInput from '../shared/PasswordInput';
@@ -299,7 +299,7 @@ const SubscriberProfile: React.FC<Props> = ({ user, onLogout }) => {
                      <div className="mt-6 pt-6 border-t border-slate-50 flex flex-col sm:flex-row items-center gap-6 justify-between">
                         <div className="flex items-center gap-4 text-left">
                            <div className="w-12 h-12 rounded-2xl flex items-center justify-center border bg-amber-50 text-amber-600 border-amber-100 italic font-black shadow-inner">
-                              <RefreshCw size={24} className="animate-spin-slow" />
+                              <RotateCw size={24} className="animate-spin-slow" />
                            </div>
                            <div className="text-left">
                               <h4 className="text-xs font-black uppercase text-slate-900 leading-none mb-1 text-left">State Registry Refresh</h4>

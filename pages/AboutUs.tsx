@@ -6,7 +6,7 @@ import { db } from '../db';
 import { 
   Info, Sparkles, Target, History, Zap, ShieldCheck, 
   Save, Edit3, X, Plus, Trash2, Globe, Building2, 
-  Activity, Star, Layers, RefreshCw, Bookmark, Award, Clock, ArrowRight,
+  Activity, Star, Layers, RotateCw, Bookmark, Award, Clock, ArrowRight,
   Upload, Image as ImageIcon, Type, Palette, Smartphone, Network,
   CheckCircle, ShieldAlert, Hash, Landmark, Monitor, Server
 } from 'lucide-react';

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { AppState } from '../types';
 import { db } from '../db';
 import {
-    RefreshCw, Trash2, ShieldAlert, Cpu,
+    RotateCw, Trash2, ShieldAlert, Cpu,
     HardDrive, Monitor, Zap, CheckCircle2,
     XCircle, Loader2, AlertTriangle, ShieldCheck,
     DatabaseZap
@@ -118,7 +118,7 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                 disabled={isClearingWorkers}
                                 className="px-8 py-5 bg-slate-900 text-white rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all flex items-center gap-3 shadow-xl active:scale-95 disabled:opacity-50"
                             >
-                                {isClearingWorkers ? <Mini5GMicroLoader size={18} /> : <RefreshCw size={18} />}
+                                {isClearingWorkers ? <Mini5GMicroLoader size={18} /> : <RotateCw size={18} />}
                                 Reset Service Workers
                             </button>
                         </div>

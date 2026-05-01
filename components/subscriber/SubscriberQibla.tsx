@@ -1,6 +1,6 @@
 import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Compass, ShieldCheck, MapPin, RefreshCw, AlertTriangle, Settings2, Globe } from 'lucide-react';
+import { Compass, ShieldCheck, MapPin, RotateCw, AlertTriangle, Settings2, Globe } from 'lucide-react';
 import QiblaCompass from './QiblaCompass';
 import QiblaLocationSelector from './QiblaLocationSelector';
 

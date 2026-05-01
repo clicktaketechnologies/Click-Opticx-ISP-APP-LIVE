@@ -5,7 +5,7 @@ import { AppState, ISPUser, EmailTemplate } from '../types';
 import { db } from '../db';
 import {
     X, Send, Mail, Type, FileText,
-    Sparkles, Paperclip, AlertCircle, RefreshCw,
+    Sparkles, Paperclip, AlertCircle, RotateCw,
     CheckCircle, ChevronDown, Lock
 } from 'lucide-react';
 import Modal from './shared/Modal';

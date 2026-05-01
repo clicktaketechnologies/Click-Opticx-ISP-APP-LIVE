@@ -3,7 +3,7 @@ import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   Timer, MapPin, Sun, Moon, CloudSun, Sunset, CloudMoon, 
-  Clock, Bell, Settings2, RefreshCw, Loader2, Volume2, VolumeX, ShieldCheck, AlertTriangle
+  Clock, Bell, Settings2, RotateCw, Loader2, Volume2, VolumeX, ShieldCheck, AlertTriangle
 } from 'lucide-react';
 import PrayerSettingsModal from './PrayerSettingsModal';
 import { azanManager, PrayerAlertSettings } from './AzanAlertManager';
@@ -161,7 +161,7 @@ const SubscriberNamaz: React.FC = () => {
              onClick={() => fetchTimes()}
              className="w-full py-4 bg-rose-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all flex items-center justify-center gap-3"
            >
-              <RefreshCw size={16} /> Re-Sync
+              <RotateCw size={16} /> Re-Sync
            </button>
         </div>
       ) : (

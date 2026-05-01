@@ -11,8 +11,10 @@ import {
 import { AppState, Invoice, ISPUser as UserType } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
+import { usePermissions } from '../../src/hooks/usePermissions';
 
 const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
+  const { canEdit, canExport } = usePermissions(state);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -85,8 +87,8 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
            </div>
         </div>
         <div className="flex gap-3">
-            <V2Button label="Export Ledger" variant="secondary" icon={Download} />
-            <V2Button label="New Dispatch" icon={Plus} />
+            {canExport('invoice-management') && <V2Button label="Export Ledger" variant="secondary" icon={Download} />}
+            {canEdit('invoice-management') && <V2Button label="New Dispatch" icon={Plus} />}
         </div>
       </div>
 
@@ -148,10 +150,12 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
         title={`Invoice Node: #${selectedInvoice?.id.slice(-6).toUpperCase()}`}
         subtitle={`Total Ingestion: PKR ${(selectedInvoice?.totalAmount || 0).toLocaleString()}`}
         footer={
-            <div className="flex gap-4">
-                <V2Button label="Mark as Settled" variant="primary" className="flex-1" icon={CheckCircle2} />
-                <V2Button label="Void Dispatch" variant="danger" className="flex-1" icon={XCircle} />
-            </div>
+            canEdit('invoice-management') ? (
+                <div className="flex gap-4">
+                    <V2Button label="Mark as Settled" variant="primary" className="flex-1" icon={CheckCircle2} />
+                    <V2Button label="Void Dispatch" variant="danger" className="flex-1" icon={XCircle} />
+                </div>
+            ) : undefined
         }
       >
         {selectedInvoice && (

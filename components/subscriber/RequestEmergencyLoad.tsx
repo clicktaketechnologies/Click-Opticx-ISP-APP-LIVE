@@ -2,8 +2,8 @@
 import React, { useState, useMemo } from 'react';
 import { ISPUser, AppState } from '../../types';
 import { db } from '../../db';
-// Added missing ChevronRight and RefreshCw icons to imports
-import { Zap, ShieldCheck, AlertTriangle, ArrowRight, ArrowLeft, Loader2, Sparkles, CheckCircle, Info, Activity, ShieldAlert, Smartphone, ChevronRight, RefreshCw } from 'lucide-react';
+// Added missing ChevronRight and RotateCw icons to imports
+import { Zap, ShieldCheck, AlertTriangle, ArrowRight, ArrowLeft, Loader2, Sparkles, CheckCircle, Info, Activity, ShieldAlert, Smartphone, ChevronRight, RotateCw } from 'lucide-react';
 
 interface Props {
   user: ISPUser;
@@ -154,8 +154,8 @@ const RequestEmergencyLoad: React.FC<Props> = ({ user, state, onBack, onFinish }
            <div className="relative w-32 h-32 flex items-center justify-center">
               <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
               <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-              {/* RefreshCw icon fixed */}
-              <RefreshCw size={48} className="text-blue-600 animate-pulse" />
+              {/* RotateCw icon fixed */}
+              <RotateCw size={48} className="text-blue-600 animate-pulse" />
            </div>
            <div className="space-y-2">
               <h3 className="text-2xl font-black uppercase italic tracking-tighter text-slate-900">Synchronizing Node</h3>

@@ -160,6 +160,15 @@ export enum Role {
   CUSTOMER = 'Customer'
 }
 
+export interface RolePermission {
+  role_id: string;
+  page_id: string;
+  can_view: boolean;
+  can_edit: boolean;
+  can_delete: boolean;
+  can_export: boolean;
+}
+
 export enum PaymentStatus {
   PAID = 'Paid',
   PARTIAL = 'Partially Paid',
@@ -1015,7 +1024,7 @@ export interface AppState {
   currentUser?: any;
   originalAdminUser?: any;
   connectionStatus: 'online' | 'offline' | 'maintenance';
-  permissions: any[];
+  permissions: RolePermission[];
   notifications: SystemNotification[];
   roles: string[];
   archives: ArchiveRecord[];
@@ -1084,6 +1093,7 @@ export interface AppState {
     id?: string; 
     email?: string;
     name?: string;
+    lastLoginAt?: string;
   };
   view: 'login' | 'admin' | 'portal';
   

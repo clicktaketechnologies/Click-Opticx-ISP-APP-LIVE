@@ -6,7 +6,7 @@ import {
   CheckCircle, XCircle, Clock, Zap, 
   User, ShieldCheck, ChevronRight, Activity, 
   HardDrive, AlertTriangle, Layers, Banknote, Globe, Landmark,
-  ShieldAlert, RefreshCw
+  ShieldAlert, RotateCw
 } from 'lucide-react';
 
 const UserPackageRequests: React.FC<{ state: AppState }> = ({ state }) => {

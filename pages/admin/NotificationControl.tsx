@@ -3,7 +3,7 @@ import { AppState, NotificationMasterMode } from '../../types';
 import { db } from '../../db';
 import { 
   Bell, Smartphone, MessageSquare, ShieldCheck, Zap, 
-  Settings, Save, Activity, RefreshCw, AlertTriangle,
+  Settings, Save, Activity, RotateCw, AlertTriangle,
   ToggleLeft, ToggleRight, Layout, Filter, Gauge, Info, Clock
 } from 'lucide-react';
 import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
@@ -30,7 +30,7 @@ const NotificationControl: React.FC<{ state: AppState }> = ({ state }) => {
     { id: 'Push_Only', label: 'Push Only', icon: Smartphone, color: 'text-blue-500', desc: 'Firebase Primary - Zero Cost' },
     { id: 'SMS_Only', label: 'SMS Only', icon: MessageSquare, color: 'text-green-500', desc: 'Gateway Direct - High Delivery' },
     { id: 'Push_And_SMS', label: 'Push + SMS', icon: Zap, color: 'text-purple-500', desc: 'Dual Channel - Maximum Impact' },
-    { id: 'Auto_Fallback', label: 'Auto Fallback', icon: RefreshCw, color: 'text-amber-500', desc: 'Push First -> SMS if Failed' },
+    { id: 'Auto_Fallback', label: 'Auto Fallback', icon: RotateCw, color: 'text-amber-500', desc: 'Push First -> SMS if Failed' },
   ];
 
   return (
@@ -106,7 +106,7 @@ const NotificationControl: React.FC<{ state: AppState }> = ({ state }) => {
             {formData.notificationMode === 'Auto_Fallback' && (
                 <div className="p-10 bg-white rounded-[3rem] border-2 border-slate-100 shadow-xl space-y-8 animate-in zoom-in duration-500">
                     <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
-                        <RefreshCw className="text-amber-500 animate-spin-slow" size={28} />
+                        <RotateCw className="text-amber-500 animate-spin-slow" size={28} />
                         <div>
                             <h4 className="text-xl font-black uppercase italic tracking-tighter text-slate-800">Fallback Logic Config</h4>
                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Automatic rerouting parameters</p>

@@ -4,7 +4,7 @@ import { db } from '../db';
 import { AppState, UserStatus, ConnectionStatus } from '../types';
 import { 
   Monitor, Activity, Globe, Download, Upload, 
-  Search, Filter, ChevronRight, UserCircle, RefreshCw, 
+  Search, Filter, ChevronRight, UserCircle, RotateCw, 
   Smartphone, HardDrive, Wifi, ShieldCheck, AlertCircle
 } from 'lucide-react';
 
@@ -52,7 +52,7 @@ const AdminLiveMonitoring: React.FC<{ state: AppState }> = ({ state }) => {
             />
          </div>
          <button className="p-4 bg-slate-900 text-white rounded-2xl hover:bg-black transition-all">
-            <RefreshCw size={24} />
+            <RotateCw size={24} />
          </button>
       </div>
 

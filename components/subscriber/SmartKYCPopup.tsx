@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { 
   ShieldCheck, Camera, Upload, CheckCircle, AlertCircle, X, 
   ChevronRight, ArrowLeft, Loader2, Smartphone, FileText, 
-  UserSquare, Eye, Fingerprint, Zap, RefreshCw, Cloud, HardDrive, Lock, Shield,
+  UserSquare, Eye, Fingerprint, Zap, RotateCw, Cloud, HardDrive, Lock, Shield,
   Clock
 } from 'lucide-react';
 import { db } from '../../db';
@@ -215,7 +215,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
                     <>
                       <img src={previews.front} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <RefreshCw className="text-white animate-spin" size={32} />
+                        <RotateCw className="text-white animate-spin" size={32} />
                       </div>
                     </>
                   ) : (
@@ -235,7 +235,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
                     <>
                       <img src={previews.back} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <RefreshCw className="text-white animate-spin" size={32} />
+                        <RotateCw className="text-white animate-spin" size={32} />
                       </div>
                     </>
                   ) : (
@@ -259,7 +259,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
                   <>
                     <img src={previews.document} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <RefreshCw className="text-white animate-spin" size={32} />
+                      <RotateCw className="text-white animate-spin" size={32} />
                     </div>
                   </>
                 ) : (
@@ -404,12 +404,11 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
   return (
     <Modal
       isOpen={isOpen}
-      onClose={(user.verificationStatus === VerificationStatus.REVISION || !user.isKYCSubmitted) ? () => {} : onClose}
+      onClose={onClose}
       title="Verify Your Identity"
       type="info"
       icon={<Fingerprint size={24} className="text-blue-600" />}
       maxWidth="max-w-lg"
-      hideCloseButton={user.verificationStatus === VerificationStatus.REVISION || !user.isKYCSubmitted}
       footer={
         <div className="flex items-center justify-between w-full">
            <div className="flex items-center gap-2">

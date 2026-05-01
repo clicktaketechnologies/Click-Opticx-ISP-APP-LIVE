@@ -85,6 +85,10 @@ module.exports = (io) => {
         livePoller.removeUserFromPoll(username);
         // Note: Disconnect already logged in server.js, no need to log twice excessively
       });
+    // --- GLOBAL CACHE CONTROL ---
+    socket.on('trigger-global-wipe', () => {
+      logger.warn(`[SYSTEM] Global Registry Wipe triggered by ${socket.id}`);
+      io.emit('global-wipe', { timestamp: new Date().toISOString() });
     });
 
   });

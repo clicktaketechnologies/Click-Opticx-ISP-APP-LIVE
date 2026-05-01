@@ -4,7 +4,7 @@ import { AppState, ISPUser, CreditScoreLog, Role } from '../types';
 import { db } from '../db';
 import { 
   BarChart3, Search, UserCircle, ShieldCheck, ShieldAlert, History, 
-  RefreshCw, TrendingUp, TrendingDown, ArrowRight, X, Save, Shield, Lock, AlertTriangle 
+  RotateCw, TrendingUp, TrendingDown, ArrowRight, X, Save, Shield, Lock, AlertTriangle 
 } from 'lucide-react';
 import Modal from '../components/shared/Modal';
 

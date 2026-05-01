@@ -3,7 +3,7 @@ import { AppState } from '../types';
 import { getConfig, setConfig, getConfigHistory, initConfigLoader } from '../lib/config-loader';
 import {
   Settings, Mail, HardDrive, Wifi, Brain, Shield, CheckCircle, XCircle,
-  AlertTriangle, RefreshCw, Save, RotateCcw, ChevronDown, ChevronUp,
+  AlertTriangle, RotateCw, Save, RotateCcw, ChevronDown, ChevronUp,
   Eye, EyeOff, Loader, Zap, Clock, Activity, Info
 } from 'lucide-react';
 

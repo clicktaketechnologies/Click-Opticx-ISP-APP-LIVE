@@ -5,7 +5,7 @@ import { db } from '../db';
 import { 
   Trophy, Search, Settings2, ShieldCheck, Zap, 
   Users, UserCircle, HandCoins, Activity, History, 
-  RefreshCw, Layers, ShieldAlert, CheckCircle, XCircle,
+  RotateCw, Layers, ShieldAlert, CheckCircle, XCircle,
   BarChart3, Globe, Sparkles, Filter, ChevronRight
 } from 'lucide-react';
 

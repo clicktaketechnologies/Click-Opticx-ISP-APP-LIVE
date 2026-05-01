@@ -5,7 +5,7 @@ import { db } from '../db';
 import { AppState, NetworkNode } from '../types';
 import {
    Link2, Server, Settings, Activity, ShieldCheck,
-   Plus, Search, RefreshCw, Layers, HardDrive,
+   Plus, Search, RotateCw, Layers, HardDrive,
    Cpu, Globe, Terminal, ShieldAlert, X, Save,
    CheckCircle, XCircle, Loader2, Wifi, Zap,
    Key, Shield, Settings2, Power, AlertCircle, Clock

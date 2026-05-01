@@ -5,7 +5,7 @@ import { AppState, PasswordResetRequest } from '../types';
 import { 
   Key, Clock, CheckCircle, XCircle, User, 
   Monitor, ShieldAlert, History, ShieldCheck, 
-  ArrowRight, Activity, Search, Filter, Ban, RefreshCw
+  ArrowRight, Activity, Search, Filter, Ban, RotateCw
 } from 'lucide-react';
 
 const AdminPasswordRequests: React.FC<{ state: AppState }> = ({ state }) => {

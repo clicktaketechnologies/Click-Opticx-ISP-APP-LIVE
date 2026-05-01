@@ -1,7 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { 
-  X, Zap, Gauge, Headphones, RefreshCw, 
+  X, Zap, Gauge, Headphones, RotateCw, 
   ShieldAlert, Globe, Activity, Smartphone, Wifi, Wallet, MessageSquare, Cpu
 } from 'lucide-react';
 import { Role } from '../../types';

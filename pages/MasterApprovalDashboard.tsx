@@ -6,13 +6,14 @@ import {
   CheckCircle, XCircle, Clock, Zap, User,
   ShieldCheck, ChevronRight, Activity,
   HardDrive, AlertTriangle, Layers, Banknote, Globe, Landmark,
-  ShieldAlert, RefreshCw, Search, Filter, Hash, Eye, Info,
+  ShieldAlert, RotateCw, Search, Filter, Hash, Eye, Info,
   Wallet, Smartphone, AlertCircle, FileText, UserCircle, X, Database, MapPin, Fingerprint, Package as PackageIcon
 } from 'lucide-react';
 import { Modal } from '../components/shared/Modal';
 import { KYCReviewDesk } from '../components/admin/desks/KYCReviewDesk';
 import { BillingRequestDesk } from '../components/admin/desks/BillingRequestDesk';
 import { ProvisioningDesk } from '../components/admin/desks/ProvisioningDesk';
+import { usePermissions } from '../src/hooks/usePermissions';
 
 // Safe Icon Wrapper
 const SafeIcon: React.FC<{ icon: any; size?: number; className?: string; strokeWidth?: number }> = ({ icon: Icon, size = 18, className = '', strokeWidth }) => {
@@ -28,18 +29,20 @@ interface Props {
 }
 
 export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = 'kyc' }) => {
+  const { canView, role } = usePermissions(state);
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [isProcessing, setIsProcessing] = useState(false);
 
+  // Map internal tabs to permission page IDs
   const tabs = [
-    { id: 'kyc', label: 'KYC Hub', icon: ShieldCheck },
-    { id: 'billing', label: 'Billing Desk', icon: Banknote },
-    { id: 'provisioning', label: 'Provisioning', icon: Zap },
-    { id: 'signup', label: 'Signups', icon: Fingerprint },
-    { id: 'login', label: 'Logins', icon: ShieldAlert },
-    { id: 'audit', label: 'Audit Vault', icon: Activity },
-    { id: 'settings', label: 'System Config', icon: Hash }
-  ];
+    { id: 'kyc', label: 'KYC Hub', icon: ShieldCheck, perm: 'kyc-hub' },
+    { id: 'billing', label: 'Billing Desk', icon: Banknote, perm: 'accounting' },
+    { id: 'provisioning', label: 'Provisioning', icon: Zap, perm: 'connection-setup' },
+    { id: 'signup', label: 'Signups', icon: Fingerprint, perm: 'users' },
+    { id: 'login', label: 'Logins', icon: ShieldAlert, perm: 'auth-control' },
+    { id: 'audit', label: 'Audit Vault', icon: Activity, perm: 'archive' },
+    { id: 'settings', label: 'System Config', icon: Hash, perm: 'system-config' }
+  ].filter(t => canView(t.perm));
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">

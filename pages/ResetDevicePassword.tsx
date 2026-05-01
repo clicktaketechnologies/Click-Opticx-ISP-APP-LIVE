@@ -3,7 +3,7 @@ import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useState, useMemo } from 'react';
 import { db } from '../db';
 import { ISPUser, ConnectionStatus } from '../types';
-import { Lock, Key, ShieldCheck, RefreshCw, X, Eye, EyeOff, Info, AlertTriangle, Zap, CheckCircle, Wifi, ShieldAlert } from 'lucide-react';
+import { Lock, Key, ShieldCheck, RotateCw, X, Eye, EyeOff, Info, AlertTriangle, Zap, CheckCircle, Wifi, ShieldAlert } from 'lucide-react';
 
 const ResetDevicePassword: React.FC<{ user: ISPUser }> = ({ user }) => {
   const [newPass, setNewPass] = useState('');

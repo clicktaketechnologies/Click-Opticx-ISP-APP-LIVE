@@ -8,7 +8,7 @@ import {
    Wallet, Banknote, Landmark, ArrowUpRight, ArrowDownLeft,
    Search, UserCircle, HandCoins, History, Clock, ShieldCheck, X,
    Plus, DollarSign, Activity, Globe, Smartphone, ArrowRight,
-   CheckCircle, XCircle, RefreshCw, Zap, Sparkles
+   CheckCircle, XCircle, RotateCw, Zap, Sparkles
 } from 'lucide-react';
 
 const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {

@@ -5,7 +5,7 @@ import { AppState, Role, AIConfig, AIActionLog, UserStatus } from '../types';
 import { db } from '../db';
 import { 
   Cpu, ShieldAlert, Zap, Layers, Terminal, Activity, 
-  Settings, RefreshCw, BarChart3, TrendingUp, Search,
+  Settings, RotateCw, BarChart3, TrendingUp, Search,
   Lock, ShieldCheck, Play, Box, Info, X, ChevronRight,
   Database, Eye, EyeOff, Bot, Sparkles, Sliders, ListChecks,
   AlertTriangle, History, Power, Scale, Briefcase, FileSearch,
@@ -333,7 +333,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Revert AI state nodes to a known clean timestamp.</p>
           </div>
           <button className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all flex items-center gap-3">
-             <RefreshCw size={18} /> Revert AI State v8.4.2
+             <RotateCw size={18} /> Revert AI State v8.4.2
           </button>
        </div>
     </div>

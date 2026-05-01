@@ -4,7 +4,7 @@ import {
   Search, UserPlus, ShieldAlert, ChevronRight, X, Activity, Trash2, 
   ChevronLeft, Pencil, Save, Info, Network, MapPin, HardDrive, 
   CheckCircle, AlertCircle, Clock, ShieldCheck, DollarSign, Wallet, CreditCard, Home, Ban, Flame,
-  Square, CheckSquare, Layers, AlertTriangle, Key, Cpu, Zap, Calendar, Banknote, Globe, Loader2, XCircle, RefreshCw, Lock, LogOut, Eye, UserCircle, Fingerprint, Map as MapIcon, Smartphone, Bell, ListChecks,
+  Square, CheckSquare, Layers, AlertTriangle, Key, Cpu, Zap, Calendar, Banknote, Globe, Loader2, XCircle, RotateCw, Lock, LogOut, Eye, UserCircle, Fingerprint, Map as MapIcon, Smartphone, Bell, ListChecks,
   User, Users, Hash, MessageSquare, Package as PackageIcon, LockKeyhole, ArrowRight, MousePointer2, Settings2, Power,
   SearchCode, EyeOff, ExternalLink, ArrowUpRight, ArrowDownLeft,
   Mail, Wifi, FileText, MoreHorizontal, Play, FileInput, Circle
@@ -51,6 +51,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [isReconnectModal, setIsReconnectModal] = useState(false);
   const [isActivationModal, setIsActivationModal] = useState(false);
   const [isCollectPaymentModal, setIsCollectPaymentModal] = useState(false);
+  const [isManualUnpaidModal, setIsManualUnpaidModal] = useState(false);
 
   // Bulk States
   const [isBulkGraceModal, setIsBulkGraceModal] = useState(false);
@@ -81,6 +82,8 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   
   const [isGraceActive, setIsGraceActive] = useState(true); 
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [manualExpiryDate, setManualExpiryDate] = useState(new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]);
+  const [manualUnpaidAmount, setManualUnpaidAmount] = useState<number>(0);
 
   const initialUserForm: Partial<ISPUser> = {
     name: '', username: '', password: '', packageId: '', connectionType: 'Fiber',
@@ -218,6 +221,11 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       case 'view': setIsViewUserModal(true); break;
       case 'suspend': setIsSuspendModal(true); break;
       case 'reconnect': setIsReconnectModal(true); break;
+      case 'unpaid_amount': 
+         setManualExpiryDate(new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]);
+         setManualUnpaidAmount(user.balance || 0);
+         setIsManualUnpaidModal(true); 
+         break;
     }
   };
 
@@ -312,6 +320,32 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
 
     setIsProcessing(false);
     setIsCollectPaymentModal(false);
+    setIsSuccessModal(true);
+  };
+
+  const handleExecuteManualUnpaid = async () => {
+    if (!selectedUserId || !selectedPkgId) return;
+    setIsProcessing(true);
+    
+    const pkg = state.packages.find(p => p.id === selectedPkgId);
+    if (!pkg) { setIsProcessing(false); return; }
+
+    if (pkg.price > manualUnpaidAmount) {
+         const paidAmount = pkg.price - manualUnpaidAmount;
+         await db.processTopup('Admin', selectedUserId, 'user', paidAmount);
+         await db.addManualPayment(selectedUserId, paidAmount, PaymentMethod.CASH);
+    }
+    
+    await db.activatePackage(selectedUserId, selectedPkgId);
+    
+    await db.updateUser(selectedUserId, {
+        balance: manualUnpaidAmount,
+        expiryDate: new Date(manualExpiryDate).toISOString(),
+        status: manualUnpaidAmount > 0 ? UserStatus.ACTIVE_UNPAID : UserStatus.ACTIVE
+    });
+
+    setIsProcessing(false);
+    setIsManualUnpaidModal(false);
     setIsSuccessModal(true);
   };
 
@@ -466,7 +500,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                  </button>
                ))}
              </div>
-             <button onClick={() => setSearchTerm('')} className="p-2.5 text-slate-300 hover:text-rose-500 transition-colors"><RefreshCw size={18} /></button>
+             <button onClick={() => setSearchTerm('')} className="p-2.5 text-slate-300 hover:text-rose-500 transition-colors"><RotateCw size={18} /></button>
           </div>
         </div>
       </div>
@@ -624,6 +658,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                           <button onClick={() => handleAction(user, 'edit')} className="p-2.5 bg-amber-100/50 hover:bg-amber-600 text-amber-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-amber-100" title="Dossier Edit"><Pencil size={14}/></button>
                           <button onClick={() => handleAction(user, 'package')} className="p-2.5 bg-violet-100/50 hover:bg-violet-600 text-violet-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-violet-100" title="Service Provisioning"><PackageIcon size={14}/></button>
                           <button onClick={() => handleAction(user, 'payment')} className="p-2.5 bg-emerald-100/50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-emerald-100" title="Collect Payment"><Banknote size={14}/></button>
+                          <button onClick={() => handleAction(user, 'unpaid_amount')} className="p-2.5 bg-pink-100/50 hover:bg-pink-600 text-pink-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-pink-100" title="Amount Unpaid"><Wallet size={14}/></button>
                           <button onClick={() => handleAction(user, 'emergency_auth')} className="p-2.5 bg-rose-100/50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-rose-100" title="Emergency Auth Reset"><LockKeyhole size={14}/></button>
                        </div>
                     </td>
@@ -1460,6 +1495,66 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                  value={importCsvInput}
                  onChange={e => setImportCsvInput(e.target.value)}
                />
+            </div>
+         </div>
+      </Modal>
+
+      {/* MANUAL UNPAID & ACTIVATION MODAL */}
+      <Modal
+        isOpen={isManualUnpaidModal && !!selectedUser}
+        onClose={() => setIsManualUnpaidModal(false)}
+        title="Custom Activation"
+        icon={<Wallet size={22} className="text-pink-500" />}
+        message={`Set unpaid amount and expiry for ${selectedUser?.name}`}
+        maxWidth="max-w-2xl"
+        scrollable
+        onConfirm={handleExecuteManualUnpaid}
+        confirmLabel="Confirm Custom Activation"
+        isLoading={isProcessing || !selectedPkgId}
+      >
+         <div className="space-y-6 mb-6">
+            <div className="space-y-3">
+               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><PackageIcon size={12}/> 1. Select Activated Package</label>
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                  {state.packages.filter(p => !p.deleted).map(pkg => (
+                    <button 
+                      key={pkg.id} 
+                      onClick={() => {
+                        setSelectedPkgId(pkg.id);
+                        if (manualUnpaidAmount === 0) setManualUnpaidAmount(pkg.price);
+                      }}
+                      className={`p-4 rounded-2xl border-2 text-left transition-all ${selectedPkgId === pkg.id ? 'border-pink-600 bg-pink-50 shadow-md text-slate-900' : 'border-slate-100 bg-slate-50 hover:border-slate-300 text-slate-900'}`}
+                    >
+                       <p className="text-[11px] font-black uppercase">{pkg.name}</p>
+                       <p className="text-[9px] font-bold text-slate-400">Rs. {pkg.price}</p>
+                    </button>
+                  ))}
+               </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Calendar size={12}/> 2. Set Expiry Date</label>
+                  <input 
+                    type="date" 
+                    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-sm outline-none focus:border-pink-500 text-slate-900 transition-all" 
+                    value={manualExpiryDate} 
+                    onChange={e => setManualExpiryDate(e.target.value)} 
+                  />
+               </div>
+               <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Wallet size={12}/> 3. Unpaid Amount (Rs.)</label>
+                  <input 
+                    type="number" 
+                    className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-xl outline-none focus:border-pink-500 text-slate-900 transition-all" 
+                    value={manualUnpaidAmount} 
+                    onChange={e => setManualUnpaidAmount(Number(e.target.value))} 
+                    placeholder="e.g. 500"
+                  />
+                  <p className="text-[8px] font-bold text-slate-400 uppercase mt-1">
+                    Amount left unpaid by the customer.
+                  </p>
+               </div>
             </div>
          </div>
       </Modal>

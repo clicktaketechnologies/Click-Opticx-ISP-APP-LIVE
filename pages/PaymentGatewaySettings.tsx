@@ -6,7 +6,7 @@ import { AppState, PaymentGateway, Role } from '../types';
 import { db } from '../db';
 import {
    CreditCard, ShieldCheck, Globe, Smartphone, Banknote,
-   Settings2, RefreshCw, Save, X, Eye, EyeOff, Trash2,
+   Settings2, RotateCw, Save, X, Eye, EyeOff, Trash2,
    Landmark, Zap, ShieldAlert, CheckCircle, Info, ChevronRight,
    HelpCircle, AlertTriangle, ExternalLink, Play, Activity, Server
 } from 'lucide-react';

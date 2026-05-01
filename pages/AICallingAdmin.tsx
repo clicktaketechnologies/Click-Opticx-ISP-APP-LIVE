@@ -6,7 +6,7 @@ import {
   Mic, Activity, ShieldAlert, History, Settings, Power, 
   Trash2, Plus, X, Search, Clock, CheckCircle, 
   PhoneCall, Zap, User, AlertCircle, Headphones, 
-  Volume2, VolumeX, MessageSquare, Briefcase, RefreshCw, ChevronRight,
+  Volume2, VolumeX, MessageSquare, Briefcase, RotateCw, ChevronRight,
   ShieldCheck, Smartphone, Bot, Save, ListChecks, ArrowUpRight, ArrowRight, CreditCard, UserCircle, Timer, Sliders,
   HeadphonesIcon, Shield, AlertTriangle, Play, TrendingUp, Info
 } from 'lucide-react';

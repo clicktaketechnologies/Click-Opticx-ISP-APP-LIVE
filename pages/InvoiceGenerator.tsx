@@ -5,7 +5,7 @@ import { db } from '../db';
 import { 
   FileText, Search, User, Package as PackageIcon, 
   Send, Download, CheckCircle, X, ChevronRight, ArrowRight,
-  ShieldCheck, Clock, Receipt, Mail, RefreshCw, Calculator,
+  ShieldCheck, Clock, Receipt, Mail, RotateCw, Calculator,
   UserCircle, Hash, Users, Activity, Box, Settings, Copy, Plus, Trash2
 } from 'lucide-react';
 
@@ -226,7 +226,7 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
               <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-sm space-y-8">
                  <div className="flex bg-slate-100 p-1.5 rounded-2xl gap-1">
                     {[
-                      { id: 'subscription', label: 'Subscription', icon: RefreshCw },
+                      { id: 'subscription', label: 'Subscription', icon: RotateCw },
                       { id: 'custom', label: 'Custom Service', icon: Settings },
                       { id: 'equipment', label: 'Equipment', icon: Box }
                     ].map(mode => (

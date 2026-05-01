@@ -6,7 +6,7 @@ import {
   ShieldCheck, Lock, Unlock, Eye, Pencil, Trash2,
   Plus, X, Shield, Activity, Info, AlertTriangle,
   Settings, UserPlus, Users, Check, Ban, ShieldAlert,
-  ArrowRight, Fingerprint, Key, Zap, RefreshCw, Layers,
+  ArrowRight, Fingerprint, Key, Zap, RotateCw, Layers,
   LayoutDashboard, Brain, Mic, FileAudio, Mail, FileText, 
   Terminal, Bell, Monitor, Server, Map, UserCircle, Search, 
   Smartphone, Briefcase, Receipt, CreditCard, Flame, Wallet, 

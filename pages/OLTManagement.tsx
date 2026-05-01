@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
    Cpu, Wifi, Network, Globe, Plus, X, Pencil, Trash2, 
-   Activity, RefreshCw, AlertTriangle, CheckCircle, Search, 
+   Activity, RotateCw, AlertTriangle, CheckCircle, Search, 
    ChevronRight, Zap, Info, DatabaseZap, Monitor, HardDrive, Settings, Trash, Eye,
    ShieldAlert, WifiOff, Clock, Plug, CheckCircle2, XCircle, Loader2
 } from 'lucide-react';
@@ -374,7 +374,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                        title="Refresh Status"
                                        className="p-2 bg-slate-50 text-slate-400 hover:text-blue-500 rounded-lg transition-colors"
                                     >
-                                       <RefreshCw id={`refresh-onu-${onu.id}`} size={16} />
+                                       <RotateCw id={`refresh-onu-${onu.id}`} size={16} />
                                     </button>
                                     <button 
                                        onClick={() => {
@@ -609,7 +609,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="py-2">
                {isChecking ? (
                   <div className="flex flex-col items-center justify-center py-16 gap-4">
-                     <RefreshCw className="animate-spin text-blue-400" size={40} />
+                     <RotateCw className="animate-spin text-blue-400" size={40} />
                      <div className="font-black text-slate-400 uppercase tracking-widest text-[10px]">Interrogating OLT Hardware...</div>
                   </div>
                ) : (

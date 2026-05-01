@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { 
   Network, Server, Database, Zap, 
   Activity, ShieldCheck, ShieldAlert, 
-  Search, Plus, RefreshCw, BarChart3,
+  Search, Plus, RotateCw, BarChart3,
   ArrowRight, Settings, Signal, 
   Cpu, HardDrive, Thermometer,
   Cloud, Globe, Wifi, Radio,
@@ -12,8 +12,10 @@ import {
 import { AppState, NAS, OLT } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
+import { usePermissions } from '../../src/hooks/usePermissions';
 
 const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
+  const { canEdit } = usePermissions(state);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [nodeType, setNodeType] = useState<'all' | 'NAS' | 'OLT'>('all');
@@ -79,8 +81,8 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
            </div>
         </div>
         <div className="flex gap-3">
-            <V2Button label="Poll All Nodes" variant="secondary" icon={RefreshCw} />
-            <V2Button label="Provision Node" icon={Plus} />
+            {canEdit('olt-management') && <V2Button label="Poll All Nodes" variant="secondary" icon={RotateCw} />}
+            {canEdit('olt-management') && <V2Button label="Provision Node" icon={Plus} />}
         </div>
       </div>
 
@@ -136,10 +138,12 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
         title={selectedNode?.name || selectedNode?.alias || ''}
         subtitle={`${selectedNode?.type} Node Transmission Plane`}
         footer={
-            <div className="flex gap-4">
-                <V2Button label="Manual Poll" variant="secondary" className="flex-1" icon={RefreshCw} />
-                <V2Button label="Reset Node" variant="danger" className="flex-1" icon={Power} />
-            </div>
+            canEdit('olt-management') ? (
+                <div className="flex gap-4">
+                    <V2Button label="Manual Poll" variant="secondary" className="flex-1" icon={RotateCw} />
+                    <V2Button label="Reset Node" variant="danger" className="flex-1" icon={Power} />
+                </div>
+            ) : undefined
         }
       >
         {selectedNode && (

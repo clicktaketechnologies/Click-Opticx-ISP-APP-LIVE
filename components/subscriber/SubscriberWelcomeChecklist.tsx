@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
   X, CheckCircle, Smartphone, ShieldCheck, Bell, Fingerprint,
   ArrowRight, Zap, ListChecks, Upload, Camera, Key, Lock,
-  Eye, EyeOff, Hash, UserCheck, ShieldAlert, Loader2, FileText, Info, RefreshCw,
+  Eye, EyeOff, Hash, UserCheck, ShieldAlert, Loader2, FileText, Info, RotateCw,
   ArrowLeft, FastForward
 } from 'lucide-react';
 import { ISPUser, VerificationStatus } from '../../types';
@@ -245,7 +245,7 @@ const SubscriberWelcomeChecklist: React.FC<Props> = ({ user, onComplete }) => {
                     disabled={isProcessing || newPass.length < 6}
                     className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase shadow-xl flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
                   >
-                    {isProcessing ? <Mini5GMicroLoader size={16} /> : <RefreshCw size={16} />}
+                    {isProcessing ? <Mini5GMicroLoader size={16} /> : <RotateCw size={16} />}
                     Update Password
                   </button>
                   <button

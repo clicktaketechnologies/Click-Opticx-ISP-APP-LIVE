@@ -4,7 +4,7 @@ import {
   ChevronRight, Activity, Zap, ShieldAlert, CheckCircle, 
   Settings2, Power, Layers, ArrowRight, Landmark, Map, X,
   History, Clock, ArrowRightLeft, UserCircle, AlertTriangle,
-  Server, Eye, EyeOff, Save, RefreshCw, Play
+  Server, Eye, EyeOff, Save, RotateCw, Play
 } from 'lucide-react';
 import { AppState, PaymentGateway, Role } from '../types';
 import { Modal } from '../components/shared/Modal';

@@ -3,9 +3,9 @@ import {
   BarChart3, Play, Activity, Globe, Wifi, 
   ArrowDownCircle, ArrowUpCircle, ShieldCheck, 
   History as HistoryIcon, Server, Zap, AlertTriangle, 
-  CheckCircle2, Gauge, RefreshCw, ChevronDown, 
+  CheckCircle2, Gauge, RotateCw, ChevronDown, 
   MapPin, Radio, Signal, Cpu, Network, X, ArrowRight,
-  Lock, CloudLightning, MousePointer2
+  Lock, CloudLightning, MousePointer2, Database
 } from 'lucide-react';
 import { 
   AreaChart, Area, ResponsiveContainer 
@@ -236,7 +236,7 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isM
         {/* Metrics Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
            <DiagnosticMetric label="Latency" value={`${results.ping} ms`} icon={Zap} color="text-blue-500" />
-           <DiagnosticMetric label="Jitter" value={`${results.jitter} ms`} icon={RefreshCw} color="text-amber-500" />
+           <DiagnosticMetric label="Jitter" value={`${results.jitter} ms`} icon={RotateCw} color="text-amber-500" />
            <DiagnosticMetric label="Integrity" value={`${100 - results.packetLoss}%`} icon={ShieldCheck} color="text-emerald-500" />
            <DiagnosticMetric label="Signal" value="-18 dBm" icon={Signal} color="text-indigo-500" />
         </div>

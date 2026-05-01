@@ -2,7 +2,7 @@ import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Cloud, Sun, CloudRain, Wind, Droplets, Thermometer, MapPin, 
-  Search, CloudSun, RefreshCw, Loader2, Sunrise, Sunset, 
+  Search, CloudSun, RotateCw, Loader2, Sunrise, Sunset, 
   CloudLightning, CloudSnow, Navigation, Settings2, Globe, AlertCircle, Zap
 } from 'lucide-react';
 import WeatherForecastCard from './WeatherForecastCard';
