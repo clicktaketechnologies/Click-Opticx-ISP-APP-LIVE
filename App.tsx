@@ -9,87 +9,90 @@ import {
 import { PWAPrompt } from './components/PWAPrompt';
 import Modal from './components/shared/Modal';
 
+// Helper to handle chunk loading errors (force reload on new deployments)
+const lazyWithRetry = (componentImport: () => Promise<any>) => 
+  lazy(() => componentImport().catch(() => {
+    window.location.reload();
+    return { default: () => null };
+  }));
+
 // Lazy load pages
-const Login = lazy(() => import('./pages/Login'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const UserManagement = lazy(() => import('./pages/UserManagement'));
-const Recovery = lazy(() => import('./pages/Recovery'));
-const RecoveryDashboard = lazy(() => import('./pages/RecoveryDashboard'));
-const AccountingLedger = lazy(() => import('./pages/AccountingLedger'));
+const Login = lazyWithRetry(() => import('./pages/Login'));
+const Dashboard = lazyWithRetry(() => import('./pages/Dashboard'));
+const UserManagement = lazyWithRetry(() => import('./pages/UserManagement'));
+const Recovery = lazyWithRetry(() => import('./pages/Recovery'));
+const RecoveryDashboard = lazyWithRetry(() => import('./pages/RecoveryDashboard'));
+const AccountingLedger = lazyWithRetry(() => import('./pages/AccountingLedger'));
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
-const PackagesPage = lazy(() => import('./pages/PackagesPage'));
-const ArchivePage = lazy(() => import('./pages/ArchivePage'));
-const AccessControlPage = lazy(() => import('./pages/AccessControlPage'));
-const ResellerManagement = lazy(() => import('./pages/ResellerManagement'));
-const PermissionsPage = lazy(() => import('./pages/PermissionsPage'));
-const DataImportPage = lazy(() => import('./pages/DataImportPage'));
-const DatabaseMonitor = lazy(() => import('./pages/DatabaseMonitor'));
-const FiscalMonitor = lazy(() => import('./pages/FiscalMonitor'));
-const ResponseMapperConfig = lazy(() => import('./pages/ResponseMapperConfig'));
-const CacheManagement = lazy(() => import('./pages/CacheManagement'));
-const BusinessSettings = lazy(() => import('./pages/BusinessSettings'));
-const PaymentMethodsIndex = lazy(() => import('./pages/PaymentMethodsIndex'));
-const StripeSettings = lazy(() => import('./pages/gateways/StripeSettings'));
-const CashSettings = lazy(() => import('./pages/gateways/CashSettings'));
-const JazzCashSettings = lazy(() => import('./pages/gateways/JazzCashSettings'));
-const EasyPaisaSettings = lazy(() => import('./pages/gateways/EasyPaisaSettings'));
-const PayPalSettings = lazy(() => import('./pages/gateways/PayPalSettings'));
-const PayFastSettings = lazy(() => import('./pages/gateways/PayFastSettings'));
-const HomeCollectionSettings = lazy(() => import('./pages/gateways/HomeCollectionSettings'));
-const BankTransferSettings = lazy(() => import('./pages/gateways/BankTransferSettings'));
-const InvoiceGenerator = lazy(() => import('./pages/InvoiceGenerator'));
-const InvoiceManagementAdmin = lazy(() => import('./pages/InvoiceManagementAdmin'));
-const CustomerPortal = lazy(() => import('./pages/CustomerPortal'));
-const SubscriberApp = lazy(() => import('./SubscriberApp'));
-const UserAppManagement = lazy(() => import('./pages/UserAppManagement'));
-const WalletManagement = lazy(() => import('./pages/WalletManagement'));
-const EmergencyLoadAdmin = lazy(() => import('./pages/EmergencyLoadAdmin'));
-const CreditScoreAdmin = lazy(() => import('./pages/CreditScoreAdmin'));
-const ReferralAdmin = lazy(() => import('./pages/ReferralAdmin'));
-const ConnectionSetupAdmin = lazy(() => import('./pages/ConnectionSetupAdmin'));
-const TicketManagementAdmin = lazy(() => import('./pages/TicketManagementAdmin'));
-const TaskManagement = lazy(() => import('./pages/TaskManagement'));
-const MultiCloudSync = lazy(() => import('./pages/MultiCloudSync'));
-const SystemDeploymentCenter = lazy(() => import('./pages/SystemDeploymentCenter'));
-const AboutUs = lazy(() => import('./pages/AboutUs'));
-const AdminLiveMonitoring = lazy(() => import('./pages/AdminLiveMonitoring'));
-const AdminPasswordRequests = lazy(() => import('./pages/AdminPasswordRequests'));
-const UserDeviceMapping = lazy(() => import('./pages/UserDeviceMapping'));
-const AdminProfile = lazy(() => import('./pages/AdminProfile'));
-const AIControlPlane = lazy(() => import('./pages/AIControlPlane'));
-const AICentralDashboard = lazy(() => import('./pages/AICentralDashboard'));
-const AICallingAdmin = lazy(() => import('./pages/AICallingAdmin'));
-const AICallLogs = lazy(() => import('./pages/AICallLogs'));
-const EmailControlCenter = lazy(() => import('./pages/comm/EmailControlCenter'));
-const AdminReminders = lazy(() => import('./pages/AdminReminders'));
-const NASManagement = lazy(() => import('./pages/NASManagement'));
-const OLTManagement = lazy(() => import('./pages/OLTManagement'));
-const NOCDashboard = lazy(() => import('./pages/NOCDashboard'));
-const AuthControlCenter = lazy(() => import('./pages/AuthControlCenter'));
-const SystemFlash = lazy(() => import('./pages/SystemFlash'));
-const SystemConfig = lazy(() => import('./pages/SystemConfig'));
-const SystemReadiness = lazy(() => import('./pages/SystemReadiness'));
-const SpeedTestPage = lazy(() => import('./pages/SpeedTestPage'));
-const HotspotManager = lazy(() => import('./pages/HotspotManager'));
-const PastRecords = lazy(() => import('./pages/PastRecords'));
-const KYCManagement = lazy(() => import('./pages/KYCManagement'));
-const ProviderConfigPage = lazy(() => import('./pages/ProviderConfigPage'));
-const MigrationDashboard = lazy(() => import('./pages/MigrationDashboard'));
-import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
-import { initDualWrite } from './lib/db-adapter';
-import V3Layout from './src/layouts/V3Layout';
-import V2Layout from './layouts/V2Layout';
-const DashboardV2 = lazy(() => import('./pages/v2/DashboardV2'));
-const UserManagementV2 = lazy(() => import('./pages/v2/UserManagementV2'));
-const FiscalHubV2 = lazy(() => import('./pages/v2/FiscalHubV2'));
-const NetworkPlaneV2 = lazy(() => import('./pages/v2/NetworkPlaneV2'));
-const CommCenterV2 = lazy(() => import('./pages/v2/CommCenterV2'));
-const AIAutomationV2 = lazy(() => import('./pages/v2/AIAutomationV2'));
+const PackagesPage = lazyWithRetry(() => import('./pages/PackagesPage'));
+const ArchivePage = lazyWithRetry(() => import('./pages/ArchivePage'));
+const AccessControlPage = lazyWithRetry(() => import('./pages/AccessControlPage'));
+const ResellerManagement = lazyWithRetry(() => import('./pages/ResellerManagement'));
+const PermissionsPage = lazyWithRetry(() => import('./pages/PermissionsPage'));
+const DataImportPage = lazyWithRetry(() => import('./pages/DataImportPage'));
+const DatabaseMonitor = lazyWithRetry(() => import('./pages/DatabaseMonitor'));
+const FiscalMonitor = lazyWithRetry(() => import('./pages/FiscalMonitor'));
+const ResponseMapperConfig = lazyWithRetry(() => import('./pages/ResponseMapperConfig'));
+const CacheManagement = lazyWithRetry(() => import('./pages/CacheManagement'));
+const BusinessSettings = lazyWithRetry(() => import('./pages/BusinessSettings'));
+const PaymentMethodsIndex = lazyWithRetry(() => import('./pages/PaymentMethodsIndex'));
+const StripeSettings = lazyWithRetry(() => import('./pages/gateways/StripeSettings'));
+const CashSettings = lazyWithRetry(() => import('./pages/gateways/CashSettings'));
+const JazzCashSettings = lazyWithRetry(() => import('./pages/gateways/JazzCashSettings'));
+const EasyPaisaSettings = lazyWithRetry(() => import('./pages/gateways/EasyPaisaSettings'));
+const PayPalSettings = lazyWithRetry(() => import('./pages/gateways/PayPalSettings'));
+const PayFastSettings = lazyWithRetry(() => import('./pages/gateways/PayFastSettings'));
+const HomeCollectionSettings = lazyWithRetry(() => import('./pages/gateways/HomeCollectionSettings'));
+const BankTransferSettings = lazyWithRetry(() => import('./pages/gateways/BankTransferSettings'));
+const InvoiceGenerator = lazyWithRetry(() => import('./pages/InvoiceGenerator'));
+const InvoiceManagementAdmin = lazyWithRetry(() => import('./pages/InvoiceManagementAdmin'));
+const CustomerPortal = lazyWithRetry(() => import('./pages/CustomerPortal'));
+const SubscriberApp = lazyWithRetry(() => import('./SubscriberApp'));
+const UserAppManagement = lazyWithRetry(() => import('./pages/UserAppManagement'));
+const WalletManagement = lazyWithRetry(() => import('./pages/WalletManagement'));
+const EmergencyLoadAdmin = lazyWithRetry(() => import('./pages/EmergencyLoadAdmin'));
+const CreditScoreAdmin = lazyWithRetry(() => import('./pages/CreditScoreAdmin'));
+const ReferralAdmin = lazyWithRetry(() => import('./pages/ReferralAdmin'));
+const ConnectionSetupAdmin = lazyWithRetry(() => import('./pages/ConnectionSetupAdmin'));
+const TicketManagementAdmin = lazyWithRetry(() => import('./pages/TicketManagementAdmin'));
+const TaskManagement = lazyWithRetry(() => import('./pages/TaskManagement'));
+const MultiCloudSync = lazyWithRetry(() => import('./pages/MultiCloudSync'));
+const SystemDeploymentCenter = lazyWithRetry(() => import('./pages/SystemDeploymentCenter'));
+const AboutUs = lazyWithRetry(() => import('./pages/AboutUs'));
+const AdminLiveMonitoring = lazyWithRetry(() => import('./pages/AdminLiveMonitoring'));
+const AdminPasswordRequests = lazyWithRetry(() => import('./pages/AdminPasswordRequests'));
+const UserDeviceMapping = lazyWithRetry(() => import('./pages/UserDeviceMapping'));
+const AdminProfile = lazyWithRetry(() => import('./pages/AdminProfile'));
+const AIControlPlane = lazyWithRetry(() => import('./pages/AIControlPlane'));
+const AICentralDashboard = lazyWithRetry(() => import('./pages/AICentralDashboard'));
+const AICallingAdmin = lazyWithRetry(() => import('./pages/AICallingAdmin'));
+const AICallLogs = lazyWithRetry(() => import('./pages/AICallLogs'));
+const EmailControlCenter = lazyWithRetry(() => import('./pages/comm/EmailControlCenter'));
+const AdminReminders = lazyWithRetry(() => import('./pages/AdminReminders'));
+const NASManagement = lazyWithRetry(() => import('./pages/NASManagement'));
+const OLTManagement = lazyWithRetry(() => import('./pages/OLTManagement'));
+const NOCDashboard = lazyWithRetry(() => import('./pages/NOCDashboard'));
+const AuthControlCenter = lazyWithRetry(() => import('./pages/AuthControlCenter'));
+const SystemFlash = lazyWithRetry(() => import('./pages/SystemFlash'));
+const SystemConfig = lazyWithRetry(() => import('./pages/SystemConfig'));
+const SystemReadiness = lazyWithRetry(() => import('./pages/SystemReadiness'));
+const SpeedTestPage = lazyWithRetry(() => import('./pages/SpeedTestPage'));
+const HotspotManager = lazyWithRetry(() => import('./pages/HotspotManager'));
+const PastRecords = lazyWithRetry(() => import('./pages/PastRecords'));
+const KYCManagement = lazyWithRetry(() => import('./pages/KYCManagement'));
+const ProviderConfigPage = lazyWithRetry(() => import('./pages/ProviderConfigPage'));
+const MigrationDashboard = lazyWithRetry(() => import('./pages/MigrationDashboard'));
+const DashboardV2 = lazyWithRetry(() => import('./pages/v2/DashboardV2'));
+const UserManagementV2 = lazyWithRetry(() => import('./pages/v2/UserManagementV2'));
+const FiscalHubV2 = lazyWithRetry(() => import('./pages/v2/FiscalHubV2'));
+const NetworkPlaneV2 = lazyWithRetry(() => import('./pages/v2/NetworkPlaneV2'));
+const CommCenterV2 = lazyWithRetry(() => import('./pages/v2/CommCenterV2'));
+const AIAutomationV2 = lazyWithRetry(() => import('./pages/v2/AIAutomationV2'));
 
-const NotificationControl = lazy(() => import('./pages/admin/NotificationControl'));
-const AdminUserDevices = lazy(() => import('./pages/admin/AdminUserDevices'));
-const NotificationAnalytics = lazy(() => import('./pages/admin/NotificationAnalytics'));
+const NotificationControl = lazyWithRetry(() => import('./pages/admin/NotificationControl'));
+const AdminUserDevices = lazyWithRetry(() => import('./pages/admin/AdminUserDevices'));
+const NotificationAnalytics = lazyWithRetry(() => import('./pages/admin/NotificationAnalytics'));
 
 const SafeStub = ({ name, route }: { name: string, route: string }) => (
   <div className="p-10 text-center animate-in fade-in h-full flex flex-col items-center justify-center">
@@ -99,7 +102,7 @@ const SafeStub = ({ name, route }: { name: string, route: string }) => (
   </div>
 );
 
-const AdminDevicesStub = lazy(() => Promise.resolve({ default: () => <SafeStub name="OLT Devices" route="/admin-devices" /> }));
+const AdminDevicesStub = lazyWithRetry(() => Promise.resolve({ default: () => <SafeStub name="OLT Devices" route="/admin-devices" /> }));
 
 // Error Boundary
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
