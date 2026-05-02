@@ -57,6 +57,8 @@ try {
 
   const ioredisClient = new Redis(redisConfig, {
     maxRetriesPerRequest: 1,
+    enableOfflineQueue: false,
+    showFriendlyErrorStack: false,
     retryStrategy: (times) => {
       if (times > 2) {
         logger.error('❌ Redis Connection Failed after 3 attempts. Fallback initiated.');
@@ -67,8 +69,12 @@ try {
     }
   });
 
+  let redisErrorLogged = false;
   ioredisClient.on('error', (err) => {
-    logger.error('Redis connection error:', err.message);
+    if (!redisErrorLogged) {
+      logger.error('Redis connection error:', err.message);
+      redisErrorLogged = true;
+    }
     switchToMemory();
   });
 

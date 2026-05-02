@@ -58,7 +58,7 @@ class HealthMonitor {
     }
 
     async checkAIHealth() {
-        const keys = await configManager.get('technicalKeys') || {};
+        const keys = configManager.getConfig('technicalKeys') || {};
         const hasGemini = !!keys.geminiApiKey;
         return {
             status: hasGemini ? 'healthy' : 'degraded',
@@ -81,8 +81,9 @@ class HealthMonitor {
                 }
             }
             
-            const supabase = configManager.getSupabaseClient();
-            const hasSupabase = !!supabase;
+            let supabaseClient = null;
+            try { supabaseClient = configManager.getSupabaseClient(); } catch(e) {}
+            const hasSupabase = !!supabaseClient;
 
             return {
                 status: (firebaseStatus === 'connected' && hasSupabase) ? 'healthy' : 'degraded',

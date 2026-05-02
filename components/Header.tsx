@@ -249,15 +249,15 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
         >
           <div className="text-right hidden sm:block">
             <p className="text-[10px] md:text-[11px] font-bold text-slate-900 dark:text-white leading-none mb-1">
-              {user.name?.replace(/[0-9_-]/g, '').trim().split(' ').map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase()).join(' ') || 'Admin'}
+              {user?.name?.replace(/[0-9_-]/g, '').trim().split(' ').map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase()).join(' ') || 'Admin'}
             </p>
-            <p className="badge badge-success !text-[7px] md:!text-[8px] !py-0.5">{user.role}</p>
+            <p className="badge badge-success !text-[7px] md:!text-[8px] !py-0.5">{user?.role || 'Guest'}</p>
           </div>
           <div className="w-8 h-8 md:w-9 md:h-9 bg-slate-100 dark:bg-slate-800 rounded-lg md:rounded-xl flex items-center justify-center border border-white/5 overflow-hidden shrink-0 group-hover:scale-105 transition-all">
-            {user.profileImage ? (
-              <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+            {user?.profileImage ? (
+              <img src={user.profileImage} alt={user?.name || 'User'} className="w-full h-full object-cover" />
             ) : (
-              <UserCircle size={20} md:size={24} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
+              <UserCircle size={24} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
             )}
           </div>
         </button>
