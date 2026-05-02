@@ -148,8 +148,8 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
               <m.icon size={28} />
             </div>
             <div className="text-left">
-              <p className="font-black text-slate-900 uppercase italic tracking-tighter leading-none">{m.label}</p>
-              <p className="text-[10px] text-slate-400 font-bold mt-1 tracking-wide leading-none">{m.desc}</p>
+               <p className="font-bold text-slate-900">{m.label}</p>
+               <p className="text-xs text-slate-400 mt-1">{m.desc}</p>
             </div>
             <ChevronRight className="ml-auto text-slate-300 group-hover:text-blue-500 transition-all" size={24} />
           </button>
@@ -168,8 +168,8 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
                   <ShieldCheck size={24} />
                </div>
                <div>
-                  <p className="text-[10px] font-black text-green-600 uppercase tracking-widest">Biometric Protocol Active</p>
-                  <p className="text-xs font-bold text-slate-600">Please complete the face scan to verify your identity.</p>
+                   <p className="text-xs font-bold text-green-600">Selfie Verification Active</p>
+                   <p className="text-sm text-slate-600">Please take a selfie to verify your identity.</p>
                </div>
             </div>
             {previews.selfie ? (
@@ -266,8 +266,8 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
                   <>
                     <div className="p-6 bg-white rounded-3xl shadow-lg border border-slate-100"><Upload className="text-blue-500" size={32} /></div>
                     <div className="text-center">
-                      <p className="text-xs font-black uppercase text-slate-900 tracking-tighter italic">Drop Identity Artifact</p>
-                      <p className="text-[9px] text-slate-400 font-bold uppercase mt-1 tracking-widest">High Resolution JPG or PNG</p>
+                     <p className="text-sm font-bold text-slate-900">Upload Document</p>
+                     <p className="text-xs text-slate-400 mt-1">High resolution JPG or PNG</p>
                     </div>
                   </>
                 )}
@@ -301,7 +301,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
           )}
           className={`flex-[2] py-4 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl transition-all flex items-center justify-center gap-2 ${isSubmitting ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-950 hover:shadow-blue-500/10'}`}
         >
-          {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Verifying Node & Uploading...</> : 'Process Identity'}
+           {isSubmitting ? <><Loader2 size={16} className="animate-spin" /> Uploading...</> : 'Submit Documents'}
         </button>
       </div>
     </div>
@@ -317,7 +317,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
       </div>
 
       <div className="space-y-4 max-w-md mx-auto">
-        <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Uploading Your Documents</h3>
+         <h3 className="text-xl font-bold text-slate-900">Uploading Your Documents</h3>
         
         <div className="space-y-3">
           <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
@@ -325,7 +325,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
               <Lock size={20} />
             </div>
             <div className="text-left flex-1">
-              <div className="text-[10px] font-black uppercase tracking-widest text-blue-600">Step 1: Securing</div>
+               <div className="text-xs font-bold text-blue-600">Step 1: Securing</div>
               <div className="text-xs text-slate-500 font-bold">Encrypting your documents...</div>
             </div>
           </div>
@@ -335,7 +335,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
               <Cloud size={20} />
             </div>
             <div className="text-left flex-1">
-              <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Step 2: Uploading</div>
+               <div className="text-xs font-bold text-emerald-600">Step 2: Uploading</div>
               <div className="text-xs text-slate-500 font-bold">Saving to secure storage...</div>
             </div>
           </div>
@@ -345,7 +345,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
               <Shield size={20} />
             </div>
             <div className="text-left flex-1">
-              <div className="text-[10px] font-black uppercase tracking-widest text-purple-600">Step 3: Confirming</div>
+               <div className="text-xs font-bold text-purple-600">Step 3: Confirming</div>
               <div className="text-xs text-slate-500 font-bold">Almost done...</div>
             </div>
           </div>
@@ -362,22 +362,22 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
           <Clock size={48} className="animate-spin-slow" />
         </div>
       </div>
-      <div className="text-center space-y-3">
-        <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">We are Verifying</h3>
-        <p className="text-sm text-slate-500 font-bold leading-relaxed max-w-[280px] mx-auto px-4">
-          Your identity artifacts have been received. Our human verification agents are currently reviewing your workspace.
-        </p>
-      </div>
-      <div className="p-4 bg-slate-900 text-amber-400 rounded-3xl border border-white/10 flex items-center gap-3 shadow-2xl">
-         <ShieldCheck size={18} />
-         <span className="text-[10px] font-black uppercase tracking-widest leading-none">Security Node Secure</span>
-      </div>
-      <button
-        onClick={onClose}
-        className="w-full py-5 bg-slate-100 text-slate-400 rounded-3xl font-black text-[10px] uppercase tracking-widest hover:text-slate-600 transition-all border border-slate-200 shadow-sm"
-      >
-        Waiting for Approval...
-      </button>
+       <div className="text-center space-y-3">
+         <h3 className="text-xl font-bold text-slate-900">Under Review</h3>
+         <p className="text-sm text-slate-500 leading-relaxed max-w-[280px] mx-auto px-4">
+           Your documents have been received. Our team is reviewing them and you’ll be notified once approved.
+         </p>
+       </div>
+       <div className="p-4 bg-slate-100 text-slate-600 rounded-2xl flex items-center gap-3">
+          <ShieldCheck size={18} />
+          <span className="text-xs font-bold">Your data is encrypted and secure</span>
+       </div>
+       <button
+         onClick={onClose}
+         className="w-full py-4 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm transition-all border border-slate-200"
+       >
+         Waiting for Approval...
+       </button>
     </div>
   );
 
@@ -386,18 +386,18 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
       <div className="w-24 h-24 bg-green-500 text-white rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-green-500/40 animate-bounce">
         <CheckCircle size={56} strokeWidth={3} />
       </div>
-      <div className="text-center space-y-3">
-        <h3 className="text-3xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">Documents Submitted!</h3>
-        <p className="text-sm text-slate-500 font-bold leading-relaxed max-w-[280px] mx-auto">
-          We've received your documents. Our team will review them shortly. You'll get a notification once approved.
-        </p>
-      </div>
-      <button
-        onClick={onClose}
-        className="w-full py-5 bg-slate-950 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-black transition-all"
-      >
-        Got it!
-      </button>
+       <div className="text-center space-y-3">
+         <h3 className="text-xl font-bold text-slate-900">Documents Submitted!</h3>
+         <p className="text-sm text-slate-500 leading-relaxed max-w-[280px] mx-auto">
+           We've received your documents. Our team will review them shortly. You'll get a notification once approved.
+         </p>
+       </div>
+       <button
+         onClick={onClose}
+         className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-lg transition-all"
+       >
+         Got it!
+       </button>
     </div>
   );
 
@@ -411,10 +411,10 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
       maxWidth="max-w-lg"
       footer={
         <div className="flex items-center justify-between w-full">
-           <div className="flex items-center gap-2">
-              <ShieldCheck className="text-green-500" size={14} />
-              <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Biometric Encrypted</span>
-           </div>
+            <div className="flex items-center gap-2">
+               <ShieldCheck className="text-green-500" size={14} />
+               <span className="text-xs text-slate-500 font-medium">Encrypted & Secure</span>
+            </div>
            <Zap className="text-amber-500 animate-pulse" size={14} />
         </div>
       }
@@ -425,7 +425,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
             <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl space-y-2 text-left animate-in shake duration-500">
                <div className="flex items-center gap-2 text-rose-600">
                   <AlertCircle size={16} />
-                  <p className="text-[10px] font-black uppercase tracking-widest leading-none">Correction Required</p>
+                   <p className="text-xs font-bold text-rose-600">Correction Required</p>
                </div>
                <p className="text-xs font-bold text-slate-600 leading-relaxed italic">
                  "{user.kyc_rejected_reason || 'Sensitive data artifacts did not meet resolution standards. Please resubmit clear photos.'}"

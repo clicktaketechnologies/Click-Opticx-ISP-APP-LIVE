@@ -375,6 +375,7 @@ export interface Invoice {
   paymentMethod?: PaymentMethod;
   notes?: string;
   type?: 'Monthly' | 'Activation' | 'Extension' | 'Other';
+  deleted?: boolean;
 }
 
 export interface ConnectedDevice {
@@ -538,6 +539,8 @@ export interface ISPUser {
   lastKYCUpdate?: string;
   requiredRevisionDocs?: number;
   resellerEmail?: string; // Email of the direct reseller (Franchise/Dealer/SubDealer) who manages this user
+  deleted?: boolean;
+  deletedAt?: string;
 }
 
 
@@ -1072,6 +1075,7 @@ export interface AppState {
   commAutomationRules: CommunicationAutomationRule[];
   notificationTemplates: NotificationTemplate[];
   deliveryLogs: DeliveryLog[];
+  systemHealth?: any;
   recoveryLogs: RecoveryLog[];
   commLogs: CommunicationLog[];
   commStats: CommStats;

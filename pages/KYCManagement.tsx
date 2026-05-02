@@ -7,6 +7,7 @@ import {
   FileCheck, Clock, ShieldAlert, UserCheck, BadgeCheck, Code, Activity, Terminal, UserCircle
 } from 'lucide-react';
 import { Modal } from '../components/shared/Modal';
+import { UIButton } from '../components/ui/UIButton';
 import { VerificationStatus, ISPUser, KYCDocument, AppState } from '../types';
 
 interface KYCProps {
@@ -56,10 +57,14 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
       if (filterStatus === 'pending') return matchesSearch && u.isKYCSubmitted && u.kyc_status === 'pending';
       return matchesSearch && u.kyc_status === filterStatus;
     }).sort((a, b) => {
-      // Sort pending to top
+      // 1. Prioritize pending status
       if (a.kyc_status === 'pending' && b.kyc_status !== 'pending') return -1;
       if (a.kyc_status !== 'pending' && b.kyc_status === 'pending') return 1;
-      return 0;
+      
+      // 2. Sort by submission date (Newest First)
+      const dateA = a.kycSubmissionDate ? new Date(a.kycSubmissionDate).getTime() : 0;
+      const dateB = b.kycSubmissionDate ? new Date(b.kycSubmissionDate).getTime() : 0;
+      return dateB - dateA;
     });
   }, [state.users, searchQuery, filterStatus]);
 
@@ -108,25 +113,27 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
       {/* 1. Page Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1 shrink-0">
         <div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tighter uppercase italic leading-none flex items-center gap-4">
+          <h2 className="text-3xl font-black text-slate-800 tracking-tighter flex items-center gap-4">
              <ShieldCheck className="text-indigo-600" size={32} />
-             Compliance Hub
+             KYC Management
           </h2>
           <div className="flex items-center gap-3 mt-3">
              <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
-             <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] italic leading-none">
-                Unified Identity Lifecycle & Document Vault
+             <p className="text-xs text-slate-500 font-medium">
+                Review and approve subscriber documents
              </p>
           </div>
         </div>
-        <button 
+        <UIButton 
           onClick={handleSyncAll}
           disabled={isSyncing}
-          className="w-full md:w-auto flex items-center justify-center gap-2 bg-slate-100 text-slate-700 hover:bg-slate-200 px-4 py-2 rounded-xl font-bold transition-all"
+          variant="secondary"
+          size="sm"
+          className="w-full md:w-auto"
         >
-          <RefreshCcw size={18} className={isSyncing ? 'animate-spin' : ''} />
-          {isSyncing ? 'Syncing...' : 'Multi-Cloud Sync'}
-        </button>
+          <RefreshCcw size={16} className={`mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+          {isSyncing ? 'Syncing...' : 'Refresh Status'}
+        </UIButton>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
@@ -134,18 +141,18 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
         <div className="xl:col-span-1 space-y-6">
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-6">
             <div>
-               <h3 className="text-slate-900 text-[11px] font-black uppercase tracking-[0.3em] flex items-center gap-3 italic">
+               <h3 className="text-slate-900 text-xs font-bold uppercase tracking-wider flex items-center gap-3">
                  <BarChart3 size={18} className="text-indigo-500" />
-                 Registry Pulse
+                 KYC Statistics
                </h3>
             </div>
             
             <div className="space-y-3">
               {[
-                { label: 'Total Base', count: totalUsers, icon: User, grad: 'var(--grad-primary)', status: 'all', sub: 'Cumulative' },
-                { label: 'Awaiting Review', count: pendingUsers.length, icon: Clock, grad: 'var(--grad-warning)', status: 'pending', sub: 'Critical Sector' },
-                { label: 'Verified Global', count: verifiedUsers.length, icon: UserCheck, grad: 'var(--grad-success)', status: 'verified', sub: 'Authorized' },
-                { label: 'Revision Requests', count: rejectedUsers.length, icon: ShieldAlert, grad: 'var(--grad-error)', status: 'rejected', sub: 'Audit Flagged' }
+                { label: 'Total Users', count: totalUsers, icon: User, grad: 'var(--grad-primary)', status: 'all', sub: 'Cumulative' },
+                { label: 'Pending Review', count: pendingUsers.length, icon: Clock, grad: 'var(--grad-warning)', status: 'pending', sub: 'Needs attention' },
+                { label: 'Approved', count: verifiedUsers.length, icon: UserCheck, grad: 'var(--grad-success)', status: 'verified', sub: 'Authorized' },
+                { label: 'Rejected', count: rejectedUsers.length, icon: ShieldAlert, grad: 'var(--grad-error)', status: 'rejected', sub: 'Action required' }
               ].map(item => (
                 <button 
                   key={item.label}
@@ -179,15 +186,15 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
             <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:scale-125 transition-transform duration-700">
               <Terminal size={160} className="text-indigo-400" />
             </div>
-            <h3 className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em] mb-8 flex items-center gap-3 italic">
-              <Code size={18} /> Activity Logs
+            <h3 className="text-indigo-400 text-xs font-bold mb-8 flex items-center gap-3">
+              <Code size={18} /> System Logs
             </h3>
             
             <div className="space-y-4 h-[300px] overflow-y-auto custom-scrollbar pr-2 font-mono">
                {cloudLogs.length === 0 ? (
                  <div className="h-full flex flex-col items-center justify-center opacity-20 text-center">
-                    <Activity size={40} className="text-slate-600 mb-4 animate-pulse" />
-                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] leading-relaxed">System Idle.<br/>Awaiting Handshake...</p>
+                     <Activity size={40} className="text-slate-600 mb-4 animate-pulse" />
+                     <p className="text-xs text-slate-500 leading-relaxed">No activity yet.<br/>Waiting for events...</p>
                  </div>
                ) : (
                  cloudLogs.map((log, i) => (
@@ -220,7 +227,7 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={20} />
                 <input 
                   type="text"
-                  placeholder="Deep Lookup Identity Registry (Name, UUID, Artifacts...)"
+                  placeholder="Search Users (Name, Email, ID...)"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl pl-16 pr-8 py-4 text-slate-900 text-sm font-black outline-none focus:border-indigo-600 focus:bg-white transition-all placeholder:text-slate-400"
@@ -242,7 +249,7 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
                      </button>
                    ))}
                  </div>
-                 <p className="hidden md:block text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] italic">Identity Lifecycle Engine v4.0</p>
+                 <p className="hidden md:block text-xs font-medium text-slate-400">KYC Queue</p>
               </div>
             </div>
 
@@ -250,11 +257,11 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="!bg-slate-50 !border-b-2 !border-slate-100">
-                    <th className="p-8">Subscriber Identity</th>
-                    <th className="text-center">Engine Access</th>
-                    <th className="text-center">Artifact Count</th>
-                    <th className="text-center">Verification Flow</th>
-                    <th className="text-right pr-10">Access Desk</th>
+                    <th className="p-8">User Info</th>
+                    <th className="text-center">Status</th>
+                    <th className="text-center">Documents</th>
+                    <th className="text-center">Progress</th>
+                    <th className="text-right pr-10">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
@@ -264,8 +271,8 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
                         <div className="w-24 h-24 bg-indigo-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-indigo-100">
                            <Database className="text-indigo-200" size={40} />
                         </div>
-                        <p className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">Zero Discovery Matches</p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Adjust search parameters for broader lookup</p>
+                        <p className="text-xl font-bold text-slate-900">No users found</p>
+                        <p className="text-sm text-slate-500 mt-2">Try adjusting your search filters</p>
                       </td>
                     </tr>
                   ) : (
@@ -277,24 +284,24 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
                               {user.faceData ? <img src={user.faceData} className="w-full h-full object-cover" /> : <UserCircle size={28} />}
                             </div>
                             <div className="min-w-0">
-                              <div className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase italic truncate">{user.name}</div>
-                              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Registry_{user.id.substr(0,8)}</div>
+                              <div className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">{user.name}</div>
+                              <div className="text-xs text-slate-400 mt-0.5 truncate">{user.email || user.id.substr(0,12)}</div>
                             </div>
                           </div>
                         </td>
                         <td className="text-center">
                            <div className="inline-flex flex-col items-center">
                              {(user.kyc_status === 'verified') ? (
-                               <span className="px-5 py-2 rounded-2xl bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                 <BadgeCheck size={14} /> Authorized
+                               <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold flex items-center gap-1.5">
+                                 <BadgeCheck size={14} /> Approved
                                </span>
                              ) : (user.kyc_status === 'rejected') ? (
-                               <span className="px-5 py-2 rounded-2xl bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                               <span className="px-3 py-1 rounded-full bg-rose-50 text-rose-600 text-xs font-bold flex items-center gap-1.5">
                                  <ShieldAlert size={14} /> Rejected
                                </span>
                              ) : (
-                               <span className="px-5 py-2 rounded-2xl bg-amber-50 text-amber-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                 <Clock size={14} /> Pending Audit
+                               <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-xs font-bold flex items-center gap-1.5">
+                                 <Clock size={14} /> Pending
                                </span>
                              )}
                            </div>
@@ -304,7 +311,7 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
                              <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
                                 <FileCheck size={16} />
                              </div>
-                             <span className="text-[11px] font-black text-slate-900">{user.kycDocuments?.length || 0} Artifacts</span>
+                             <span className="text-sm font-bold text-slate-900">{user.kycDocuments?.length || 0} Docs</span>
                           </div>
                         </td>
                         <td className="text-center">
@@ -327,8 +334,8 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
                         <td className="text-right pr-10">
                           <button 
                             onClick={() => setSelectedUser(user)}
-                            className="p-2.5 bg-blue-50 border border-blue-200 hover:bg-blue-600 hover:text-white text-blue-600 rounded-xl transition-all shadow-sm active:scale-95"
-                            title="Audit Identity"
+                            className="p-2 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 rounded-lg transition-all"
+                            title="View Details"
                           >
                             <Eye size={18} />
                           </button>
@@ -347,7 +354,7 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
       <Modal 
         isOpen={!!selectedUser} 
         onClose={() => { setSelectedUser(null); setActionSuccess(null); }}
-        title="IDENTITY AUDIT TERMINAL"
+        title="User KYC Details"
         maxWidth="max-w-6xl"
         scrollable
       >
@@ -357,8 +364,8 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
               <div className="p-8 bg-emerald-50 border-none rounded-[3rem] flex items-center gap-6 animate-in slide-in-from-top-6 duration-700 shadow-xl shadow-emerald-500/10">
                 <div className="w-16 h-16 bg-emerald-500 text-white rounded-2xl flex items-center justify-center shadow-lg"><CheckCircle size={36} /></div>
                 <div className="flex-1">
-                   <h4 className="text-[clamp(1rem,3vw,1.25rem)] font-black text-emerald-900 uppercase italic tracking-tighter">Handshake Successful</h4>
-                   <p className="text-emerald-600 text-[clamp(0.6rem,2vw,0.7rem)] font-black uppercase tracking-[0.3em] mt-1">{actionSuccess}</p>
+                    <h4 className="text-lg font-bold text-emerald-900">Action Completed</h4>
+                    <p className="text-sm text-emerald-600 mt-1">{actionSuccess}</p>
                 </div>
               </div>
             )}
@@ -383,15 +390,15 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
 
                     <div className="space-y-4">
                         <div className="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
-                            <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Flow Integrity</span>
+                         <span className="text-xs text-slate-400">Verification Status</span>
                             {(selectedUser.kyc_status === 'verified') ? (
-                              <span className="text-[10px] font-black text-emerald-500 uppercase italic">Authorized</span>
+                               <span className="text-xs font-bold text-emerald-500">Approved</span>
                             ) : (
-                              <span className="text-[10px] font-black text-amber-500 uppercase italic">Review Req</span>
+                               <span className="text-xs font-bold text-amber-500">Pending Review</span>
                             )}
                         </div>
                         <div className="p-6 bg-white rounded-[2rem] border border-slate-100 shadow-sm">
-                            <div className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-2 italic">Registry Mapping ID</div>
+                             <div className="text-xs text-slate-400 mb-2">User ID</div>
                             <div className="text-[11px] text-slate-900 font-black truncate font-mono bg-slate-50 p-3 rounded-xl">{selectedUser.id}</div>
                         </div>
                     </div>
@@ -404,71 +411,65 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
               <div className="lg:col-span-8 space-y-6">
                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-6">
                     <div className="flex items-center justify-between">
-                       <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.4em] flex items-center gap-3 italic">
-                         <Lock size={18} className="text-indigo-500" />
-                         Mission Control
-                       </h4>
-                       <div className="px-5 py-2 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Auditor: {state.currentUser?.name}</span>
-                       </div>
+                        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-3">
+                          <Lock size={18} className="text-indigo-500" />
+                          Review Actions
+                        </h4>
+                        <div className="px-4 py-2 rounded-lg bg-slate-50 border border-slate-100">
+                           <span className="text-xs text-slate-500">Reviewer: {state.currentUser?.name}</span>
+                        </div>
                     </div>
                     
                     {selectedUser.kyc_status === 'verified' ? (
-                      <div className="py-20 bg-emerald-500 text-white rounded-[3.5rem] text-center space-y-6 shadow-2xl shadow-emerald-500/20 group">
-                        <BadgeCheck size={96} strokeWidth={1} className="mx-auto group-hover:scale-110 transition-transform duration-700" />
-                        <div>
-                           <h5 className="text-4xl font-black uppercase italic tracking-tighter leading-none">Security Authorized</h5>
-                           <p className="text-[10px] font-black uppercase tracking-[0.5em] mt-4 opacity-60 italic">Registry Synchronized • {new Date().toLocaleDateString()}</p>
-                        </div>
-                      </div>
+                       <div className="py-12 bg-emerald-500 text-white rounded-2xl text-center space-y-4 shadow-lg">
+                         <BadgeCheck size={64} strokeWidth={1.5} className="mx-auto" />
+                         <div>
+                            <h5 className="text-xl font-bold">Identity Verified</h5>
+                            <p className="text-sm mt-2 opacity-70">Verified on {new Date().toLocaleDateString()}</p>
+                         </div>
+                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <button 
+                      <div className="flex gap-4">
+                        <UIButton 
                             onClick={() => handleApprove(selectedUser.id)}
                             disabled={!!actionLoading}
-                            className="flex flex-col items-center justify-center gap-6 p-10 bg-emerald-600 text-white rounded-[3rem] group hover:bg-emerald-500 hover:shadow-2xl hover:shadow-emerald-500/20 transition-all active:scale-95 shadow-xl disabled:opacity-50 border-4 border-emerald-500/20"
+                            variant="primary"
+                            size="sm"
+                            className="flex-1"
                         >
-                            <div className="w-20 h-20 rounded-[1.5rem] bg-white/20 backdrop-blur-xl flex items-center justify-center group-hover:scale-110 transition-all shadow-lg border border-white/30">
-                               {actionLoading === 'approve' ? <RefreshCcw size={40} className="animate-spin text-white" /> : <CheckCircle size={40} className="text-white" />}
-                            </div>
-                            <div className="text-center">
-                               <p className="text-2xl font-black uppercase italic tracking-tighter leading-none">Authorize Access</p>
-                               <p className="text-[10px] font-black text-emerald-100 uppercase tracking-[0.3em] mt-3 opacity-70 italic">Finalize Identity Protocol</p>
-                            </div>
-                        </button>
-                        <button 
+                            {actionLoading === 'approve' ? <RefreshCcw size={16} className="animate-spin mr-2" /> : <CheckCircle size={16} className="mr-2" />}
+                            Approve KYC
+                        </UIButton>
+                        <UIButton 
                             onClick={() => setShowRejectModal(true)}
-                            className="flex flex-col items-center justify-center gap-6 p-10 bg-slate-900 text-white rounded-[3rem] group hover:bg-rose-600 hover:shadow-2xl hover:shadow-rose-600/20 transition-all active:scale-95 shadow-xl border-4 border-white/5"
+                            variant="danger"
+                            size="sm"
+                            className="flex-1"
                         >
-                            <div className="w-20 h-20 rounded-[1.5rem] bg-white/10 backdrop-blur-xl flex items-center justify-center group-hover:rotate-12 transition-all shadow-lg border border-white/10">
-                               <XCircle size={40} className="text-white" />
-                            </div>
-                            <div className="text-center">
-                               <p className="text-2xl font-black uppercase italic tracking-tighter leading-none">Flag Discrepancy</p>
-                               <p className="text-[10px] font-black text-slate-400 group-hover:text-rose-100 uppercase tracking-[0.3em] mt-3 opacity-70 italic">Request Correction Flow</p>
-                            </div>
-                        </button>
+                            <XCircle size={16} className="mr-2" />
+                            Reject KYC
+                        </UIButton>
                       </div>
                     )}
                  </div>
 
                  <div className="space-y-6">
                     <div className="flex items-center justify-between px-8">
-                       <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.4em] flex items-center gap-3 italic">
+                       <h4 className="text-sm font-bold text-slate-900 flex items-center gap-3">
                          <FolderSync size={18} className="text-indigo-500" />
-                         Captured Evidence
+                         Uploaded Documents
                        </h4>
-                       <span className="bg-slate-900 text-white px-5 py-2.5 rounded-[1.5rem] font-black text-[9px] uppercase tracking-widest shadow-xl">
-                          {selectedUser.kycDocuments?.length || 0} / {REQUIRED_DOCS} Artifacts
-                       </span>
+                        <span className="bg-slate-900 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-sm">
+                           {selectedUser.kycDocuments?.length || 0} / {REQUIRED_DOCS} Documents
+                        </span>
                     </div>
 
                     {!selectedUser.kycDocuments || selectedUser.kycDocuments.length === 0 ? (
                       <div className="py-40 bg-slate-50 rounded-[4rem] border-4 border-dashed border-slate-100 flex flex-col items-center justify-center text-center space-y-6">
                         <Database size={64} className="text-slate-100" />
                         <div>
-                           <p className="text-xl font-black text-slate-400 uppercase italic tracking-tighter">Digital Void Detected</p>
-                           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mt-2 italic">Awaiting document handshake from subscriber portal</p>
+                           <p className="text-xl font-bold text-slate-400">No Documents Uploaded</p>
+                           <p className="text-sm text-slate-400 mt-2">Waiting for user to upload required documents</p>
                         </div>
                       </div>
                     ) : (
@@ -480,7 +481,7 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
                                  <div className="flex items-end justify-between">
                                     <div className="space-y-2">
                                        <span className="px-3 py-1 bg-indigo-600 text-white text-[8px] font-black uppercase rounded-lg tracking-widest">{doc.type}</span>
-                                       <p className="text-lg font-black text-white italic tracking-tighter leading-none mt-2">Evidence_{idx+1}</p>
+                                        <p className="text-sm font-bold text-white mt-2">Document {idx+1}</p>
                                     </div>
                                     <button 
                                       onClick={() => window.open(doc.fileUrl, '_blank')}
@@ -505,25 +506,25 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
       <Modal
         isOpen={showRejectModal}
         onClose={() => setShowRejectModal(false)}
-        title="REVISION PROTOCOL"
+        title="Reject User KYC"
         maxWidth="max-w-md"
       >
         <div className="space-y-8 p-4">
             <div className="p-8 bg-rose-50 border-none rounded-[3rem] flex items-start gap-6 shadow-xl shadow-rose-500/5">
                 <AlertCircle className="text-rose-500 shrink-0 mt-1" size={32} strokeWidth={2.5} />
                 <div>
-                   <h5 className="text-lg font-black text-rose-900 uppercase italic tracking-tighter">Security Alert</h5>
-                   <p className="text-[10px] text-rose-600 font-black leading-relaxed mt-2 uppercase tracking-widest opacity-80 italic">Identity discrepancy detected. Portal session will be hard-locked for re-verification.</p>
+                   <h5 className="text-lg font-bold text-rose-900">Document Rejection</h5>
+                   <p className="text-sm text-rose-600 mt-2">The user will be required to upload documents again based on your feedback.</p>
                 </div>
             </div>
             
             <div className="space-y-4">
-                <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] ml-4 italic">Auditor Context Registry</label>
+                <label className="text-sm font-bold text-slate-700 ml-2">Rejection Reason</label>
                 <textarea 
                     value={rejectionReason}
                     onChange={(e) => setRejectionReason(e.target.value)}
                     placeholder="Document exact discrepancies or evidence corruption details for the subscriber..."
-                    className="w-full bg-slate-50 border-2 border-slate-100 rounded-[3rem] p-8 text-slate-900 text-sm font-black min-h-[180px] outline-none focus:border-rose-500 focus:bg-white transition-all shadow-inner placeholder:text-slate-300 resize-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 text-slate-900 text-sm outline-none focus:border-rose-500 focus:bg-white transition-all resize-none min-h-[120px]"
                 />
             </div>
             
@@ -545,19 +546,24 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-                <button 
-                    onClick={() => setShowRejectModal(false)}
-                    className="py-6 bg-white border-2 border-slate-100 text-slate-400 hover:text-slate-900 rounded-[2.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all"
-                >
-                    Abort Control
-                </button>
-                <button 
-                    onClick={handleReject}
-                    disabled={!rejectionReason || actionLoading === 'reject'}
-                    className="py-6 bg-slate-950 text-white rounded-[2.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl hover:bg-rose-600 hover:shadow-rose-600/20 disabled:opacity-50"
-                >
-                    {actionLoading === 'reject' ? 'Transmitting...' : 'Flag Revision'}
-                </button>
+                 <UIButton 
+                     onClick={() => setShowRejectModal(false)}
+                     variant="secondary"
+                     size="sm"
+                     className="flex-1"
+                 >
+                     Cancel
+                 </UIButton>
+                 <UIButton 
+                     onClick={handleReject}
+                     disabled={!rejectionReason || actionLoading === 'reject'}
+                     variant="danger"
+                     size="sm"
+                     className="flex-1"
+                     isLoading={actionLoading === 'reject'}
+                 >
+                     Confirm Rejection
+                 </UIButton>
             </div>
         </div>
       </Modal>

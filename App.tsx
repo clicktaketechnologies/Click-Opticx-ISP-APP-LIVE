@@ -223,13 +223,69 @@ const App: React.FC = () => {
     db.auditOverdueLoads();
     db.reconcileData('entire');
 
-    // Removed useless auto-sync loop per UI stabilization requirements
+    // 3. Background Cron (Audit & Reconciliation every 5 mins)
+    const cronInterval = setInterval(() => {
+      console.log('[SYSTEM] Running 5-min background health & data audit...');
+      db.auditOverdueLoads();
+      db.reconcileData('entire');
+    }, 5 * 60 * 1000);
 
     // 4. Initialize Dual-Write Adapter (Phase 1-2)
     initDualWrite();
 
+    // Aggressive Cache Busting for v9.5.3
+    const currentAppVersion = '9.5.4';
+    if (localStorage.getItem('clickopticx_app_version') !== currentAppVersion) {
+      console.warn(`[UPDATE] New version detected: ${currentAppVersion}. Purging old caches...`);
+      localStorage.setItem('clickopticx_app_version', currentAppVersion);
+      if ('caches' in window) {
+        caches.keys().then(names => Promise.all(names.map(name => caches.delete(name))));
+      }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+      // Force reload once to fetch new files
+      setTimeout(() => window.location.reload(), 500);
+    }
+
+    // 5. Multi-Tab Session Sync — listen for logout from other tabs
+    let authChannel: BroadcastChannel | null = null;
+    try {
+      authChannel = new BroadcastChannel('clickopticx_auth');
+      authChannel.onmessage = (event) => {
+        if (event.data?.type === 'LOGOUT') {
+          console.warn('[MULTI-TAB] Logout signal received from another tab');
+          db.commit({ auth: { isLoggedIn: false }, view: 'login', currentUser: undefined });
+          sessionStorage.clear();
+        }
+      };
+    } catch (e) {
+      // Fallback: listen for storage changes
+      const onStorageChange = (e: StorageEvent) => {
+        if (e.key === 'clickopticx_auth_token' && !e.newValue) {
+          console.warn('[MULTI-TAB] Auth token removed in another tab — forcing logout');
+          db.commit({ auth: { isLoggedIn: false }, view: 'login', currentUser: undefined });
+          sessionStorage.clear();
+        }
+      };
+      window.addEventListener('storage', onStorageChange);
+    }
+
+    // 6. Register Service Worker with versioned URL
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js?v=9.5.4').catch(err => {
+        console.warn('[SW] Registration failed:', err);
+      });
+    }
+
     return () => {
       unsubscribe();
+      clearInterval(cronInterval);
+      if (authChannel) authChannel.close();
     };
   }, []);
 
@@ -238,10 +294,38 @@ const App: React.FC = () => {
   };
 
   const handleLogout = () => {
+    // 1. Clear ALL auth tokens from localStorage
     localStorage.removeItem('clickopticx_auth_token');
+    localStorage.removeItem('clickopticx_admin_token');
     localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('clickopticx_v16_registry');
+    
+    // 2. Clear sessionStorage entirely
     sessionStorage.clear();
-    db.commit({ auth: { isLoggedIn: false }, view: 'login' });
+    
+    // 3. Purge ALL Service Worker caches
+    if ('caches' in window) {
+      caches.keys().then(names => names.forEach(name => caches.delete(name)));
+    }
+    
+    // 4. Signal Service Worker to purge its caches
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage('LOGOUT_PURGE');
+    }
+    
+    // 5. Broadcast logout to all other tabs
+    try {
+      const bc = new BroadcastChannel('clickopticx_auth');
+      bc.postMessage({ type: 'LOGOUT', timestamp: Date.now() });
+      bc.close();
+    } catch (e) {
+      // BroadcastChannel not supported — fallback to storage event
+      localStorage.setItem('clickopticx_logout_signal', Date.now().toString());
+      localStorage.removeItem('clickopticx_logout_signal');
+    }
+    
+    // 6. Reset app state
+    db.commit({ auth: { isLoggedIn: false }, view: 'login', currentUser: undefined });
     success('System Logout', 'Session tokens securely cleared.');
   };
 

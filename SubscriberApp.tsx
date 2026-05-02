@@ -73,6 +73,35 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
        }
     }, [user.isKYCSubmitted, user.isKYCVerified, user.verificationStatus]);
 
+    // Real-time KYC status polling on app focus/resume (10s fallback)
+    useEffect(() => {
+      if (user.isKYCVerified) return;
+      let interval: ReturnType<typeof setInterval> | null = null;
+      const pollKYCStatus = async () => {
+        try {
+          const res = await fetch(`${db.getBackendUrl()}/api/kyc/status?userId=${user.id}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.success && data.isKYCVerified) {
+            await db.updateUser(user.id, {
+              isKYCVerified: true,
+              kyc_status: 'approved',
+              verificationStatus: VerificationStatus.VERIFIED
+            });
+            setIsKYCOpen(false);
+            setActiveTab('home');
+          }
+        } catch (_) { /* silent */ }
+      };
+      interval = setInterval(pollKYCStatus, 10000);
+      const onFocus = () => pollKYCStatus();
+      window.addEventListener('focus', onFocus);
+      return () => {
+        if (interval) clearInterval(interval);
+        window.removeEventListener('focus', onFocus);
+      };
+    }, [user.id, user.isKYCVerified]);
+
     const pendingTopups = useMemo(() => (state.topupRequests || []).filter(r => r.userId === user.id && r.status === 'Pending'), [state.topupRequests, user.id]);
     const currentPkg = useMemo(() => state.packages.find(p => p.id === user.packageId), [state.packages, user.packageId]);
     const unreadCount = (state.notifications || []).filter(n => n.targetId === 'all' || n.targetId === user.id).filter(n => !n.read).length;
@@ -121,12 +150,12 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                   <Lock size={40} />
                </div>
                <div className="space-y-2">
-                  <h3 className="text-xl font-black uppercase italic tracking-tighter text-slate-800">Access Restricted</h3>
-                  <p className="text-[10px] text-slate-500 font-black uppercase leading-relaxed tracking-widest">
-                     This feature is currently disabled. Please contact support if you believe this is an error.
+                  <h3 className="text-xl font-bold text-slate-800">Feature Unavailable</h3>
+                  <p className="text-sm text-slate-500">
+                     This feature has been disabled by your administrator.
                   </p>
                </div>
-               <button onClick={() => setActiveTab('home')} className="px-8 py-4 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl">Return to Dashboard</button>
+               <button onClick={() => setActiveTab('home')} className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-lg">Back to Home</button>
             </div>
          );
       }

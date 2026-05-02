@@ -551,7 +551,7 @@ const Dashboard: React.FC<{
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {state.users.slice(0, 10).map(user => (
+              {state.users.filter(u => !u.deleted).slice(0, 10).map(user => (
                 <tr key={user.id} className="group hover:bg-slate-50/50 transition-colors">
                   <td className="p-6">
                     <div className="flex items-center gap-4">

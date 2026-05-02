@@ -51,7 +51,7 @@ import SmartKYCPopup from '../components/subscriber/SmartKYCPopup';
 type SubTab = 'home' | 'wallet' | 'packages' | 'billing' | 'profile' | 'namaz' | 'qibla' | 'tasbih' | 'quran' | 'weather' | 'network' | 'insights' | 'support' | 'cash_pay' | 'online_pay' | 'aichat' | 'referral' | 'news' | 'notifs' | 'emergency' | 'emergency-request' | 'emergency-history' | 'credit-score' | 'connection' | 'about-us' | 'live-usage' | 'connected-devices' | 'reset-password' | 'speed-test' | 'ai-control' | 'ai-home' | 'ai-insights' | 'ai-network' | 'ai-risk' | 'ai-suggestions' | 'ai-voice-call';
 
 const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => void }> = ({ state, user, onLogout }) => {
-  const [activeTab, setActiveTab] = useState<SubTab>('home');
+  const [activeTab, setActiveTab] = useState<SubTab>(user.isKYCVerified ? 'home' : 'quran');
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [newPass, setNewPass] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -70,6 +70,38 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
       setIsKYCOpen(true);
     }
   }, [user.isKYCVerified, user.isKYCSubmitted, user.verificationStatus]);
+
+  // Real-time KYC status polling on app focus/resume (10s fallback)
+  useEffect(() => {
+    if (user.isKYCVerified) return; // Already approved, skip polling
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const pollKYCStatus = async () => {
+      try {
+        const res = await fetch(`${db.getBackendUrl()}/api/kyc/status?userId=${user.id}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.success && data.isKYCVerified) {
+          // Instant unlock — update user state without page refresh
+          await db.updateUser(user.id, {
+            isKYCVerified: true,
+            kyc_status: 'approved',
+            verificationStatus: VerificationStatus.VERIFIED
+          });
+          setIsKYCOpen(false);
+          setActiveTab('home');
+        }
+      } catch (_) { /* silent */ }
+    };
+    // Poll every 10s
+    interval = setInterval(pollKYCStatus, 10000);
+    // Also poll on window focus
+    const onFocus = () => pollKYCStatus();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      if (interval) clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [user.id, user.isKYCVerified]);
 
   // Verification Overlay Logic (Synchronized with user props)
   const [showWelcome, setShowWelcome] = useState(false);
@@ -101,7 +133,8 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
     if (!isPageEnabled(tab)) return;
 
     // SAFE MODE GATING (Identity-Based Access Control)
-    const safeTabs: SubTab[] = ['home', 'support', 'about-us', 'profile', 'notifs'];
+    // Only Islamic Notes and AI Chatbot are accessible
+    const safeTabs: SubTab[] = ['quran', 'tasbih', 'qibla', 'namaz', 'aichat', 'ai-home', 'ai-voice-call', 'profile', 'support'];
     
     if (!user.isKYCVerified && !safeTabs.includes(tab)) {
       setKycIntent(tab);
@@ -144,12 +177,12 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
               <Lock size={40} />
            </div>
            <div className="space-y-2">
-              <h3 className="text-xl font-black uppercase italic tracking-tighter text-slate-800">Node Link Restricted</h3>
-              <p className="text-[10px] text-slate-500 font-black uppercase leading-relaxed tracking-widest">
-                 This functional node has been disabled by the infrastructure administrator.
+              <h3 className="text-xl font-bold text-slate-800">Feature Unavailable</h3>
+              <p className="text-sm text-slate-500">
+                 This feature has been disabled by your administrator.
               </p>
            </div>
-           <button onClick={() => setActiveTab('home')} className="px-8 py-4 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl">Return to Hub</button>
+           <button onClick={() => setActiveTab('home')} className="px-6 py-3 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-lg">Back to Home</button>
         </div>
       );
     }
@@ -222,25 +255,25 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
       <Modal
         isOpen={showVerificationSuccess}
         onClose={acknowledgeVerification}
-        title="Node Verified"
+        title="Identity Verified"
         type="success"
         icon={<CheckCircle size={24} className="text-blue-500" />}
         maxWidth="max-w-md"
         footer={
           <button 
             onClick={acknowledgeVerification} 
-            className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl active:scale-95 transition-all"
+            className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm shadow-lg active:scale-95 transition-all"
           >
-            Open Hub
+            Continue to Dashboard
           </button>
         }
       >
         <div className="py-10 text-center space-y-6">
-           <div className="w-24 h-24 bg-green-500/10 text-green-500 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-inner border border-green-500/20 animate-bounce">
+           <div className="w-24 h-24 bg-green-500/10 text-green-500 rounded-3xl flex items-center justify-center mx-auto shadow-inner border border-green-500/20 animate-bounce">
               <CheckCircle size={56} strokeWidth={3}/>
            </div>
-           <p className="text-[11px] text-slate-400 font-black uppercase leading-relaxed tracking-widest max-w-[250px] mx-auto">
-             Your account identity has been successfully validated. All infrastructure nodes are now accessible.
+           <p className="text-sm text-slate-500 max-w-[280px] mx-auto leading-relaxed">
+             Your identity has been verified successfully. All features are now unlocked.
            </p>
         </div>
       </Modal>
@@ -270,12 +303,12 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
       <main className="flex-1 overflow-y-auto p-4 pb-32 custom-scrollbar relative">
          <div className="max-w-xl mx-auto h-full space-y-4">
             {!user.isKYCVerified && (
-               <div className={`p-4 rounded-3xl border shadow-sm flex items-center justify-between gap-4 animate-in slide-in-from-top duration-500 ${
+               <div className={`p-4 rounded-2xl border shadow-sm flex items-center justify-between gap-4 animate-in slide-in-from-top duration-500 ${
                   user.verificationStatus === VerificationStatus.REVISION ? 'bg-rose-50 border-rose-100' : 
                   user.kyc_status === 'submitted' ? 'bg-blue-50 border-blue-100' : 'bg-amber-50 border-amber-100'
                }`}>
                   <div className="flex items-center gap-3">
-                     <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${
+                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                         user.verificationStatus === VerificationStatus.REVISION ? 'bg-rose-500/10 text-rose-600' : 
                         user.kyc_status === 'submitted' ? 'bg-blue-500/10 text-blue-600' : 'bg-amber-500/10 text-amber-600'
                      }`}>
@@ -283,28 +316,28 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                          user.kyc_status === 'submitted' ? <Clock size={20} /> : <ShieldAlert size={20} />}
                      </div>
                      <div>
-                        <p className={`text-[10px] font-black uppercase tracking-widest ${
+                        <p className={`text-xs font-bold ${
                            user.verificationStatus === VerificationStatus.REVISION ? 'text-rose-600' : 
                            user.kyc_status === 'submitted' ? 'text-blue-600' : 'text-amber-600'
                         }`}>
-                           {user.verificationStatus === VerificationStatus.REVISION ? 'Action Required: ID Revision' : 
-                            user.kyc_status === 'submitted' ? 'Verification in Progress' : 'Identify Verification Required'}
+                           {user.verificationStatus === VerificationStatus.REVISION ? 'Documents Need Revision' : 
+                            user.kyc_status === 'submitted' ? 'Under Review' : 'Verify Your Identity'}
                         </p>
-                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tight">
-                           {user.verificationStatus === VerificationStatus.REVISION ? 'Your documents were rejected. Please update.' : 
-                            user.kyc_status === 'submitted' ? 'Our team is reviewing your digital identity.' : 'Unlock full access by verifying your node.'}
+                        <p className="text-xs text-slate-500 mt-0.5">
+                           {user.verificationStatus === VerificationStatus.REVISION ? 'Your documents were rejected. Please resubmit.' : 
+                            user.kyc_status === 'submitted' ? 'Documents under review. Full access coming soon.' : 'Submit KYC to unlock full app access.'}
                         </p>
                      </div>
                   </div>
                   <button 
                     onClick={() => setIsKYCOpen(true)}
-                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
-                       user.verificationStatus === VerificationStatus.REVISION ? 'bg-rose-600 text-white shadow-lg shadow-rose-500/20' : 
-                       user.kyc_status === 'submitted' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all min-h-[44px] ${
+                       user.verificationStatus === VerificationStatus.REVISION ? 'bg-rose-600 text-white' : 
+                       user.kyc_status === 'submitted' ? 'bg-blue-600 text-white' : 'bg-amber-500 text-white'
                     }`}
                   >
-                     {user.verificationStatus === VerificationStatus.REVISION ? 'Revise ID' : 
-                      user.kyc_status === 'submitted' ? 'Check Status' : 'Verify Now'}
+                     {user.verificationStatus === VerificationStatus.REVISION ? 'Resubmit' : 
+                      user.kyc_status === 'submitted' ? 'View Status' : 'Verify Now'}
                   </button>
                </div>
             )}

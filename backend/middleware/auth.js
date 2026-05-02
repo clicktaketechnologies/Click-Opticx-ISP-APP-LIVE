@@ -53,4 +53,43 @@ const enforceSettings = (feature) => {
     };
 };
 
-module.exports = { protect, restrictTo, enforceSettings };
+const requireKYC = async (req, res, next) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ success: false, message: 'Not authorized' });
+        }
+        
+        // Skip KYC check for admins
+        if (req.user.role === 'Admin' || req.user.role === 'SuperAdmin') {
+            return next();
+        }
+
+        const configManager = require('../services/config-manager');
+        const supabase = configManager.getSupabaseClient();
+        
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('kyc_status')
+            .eq('id', req.user.id)
+            .single();
+
+        if (error || !user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        if (user.kyc_status !== 'approved') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'KYC Required: Access denied until documents are approved.',
+                kyc_status: user.kyc_status || 'unverified'
+            });
+        }
+
+        next();
+    } catch (error) {
+        logger.error(`[KYC-MIDDLEWARE] Error: ${error.message}`);
+        res.status(500).json({ success: false, message: 'Server error checking KYC status' });
+    }
+};
+
+module.exports = { protect, restrictTo, enforceSettings, requireKYC };

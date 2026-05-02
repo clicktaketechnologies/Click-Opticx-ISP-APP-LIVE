@@ -911,7 +911,7 @@ class DB {
       role: Role.SUPER_ADMIN,
       status: 'Active',
       password: 'Click@Opticx2026',
-      balance: 1000000
+      balance: 10000000
     };
 
     if (!this.state.staff) {
@@ -1144,6 +1144,11 @@ class DB {
       this.socket.on('kyc_uploaded', (newKyc: any) => {
         if (!this.state.kycFiles) this.state.kycFiles = [];
         this.state.kycFiles.unshift(newKyc);
+        this.notify();
+      });
+
+      this.socket.on('health:update', (data: any) => {
+        this.state.systemHealth = data;
         this.notify();
       });
 
@@ -2530,6 +2535,16 @@ async logoutImpersonation() {
     await this.commit();
   }
 
+  async deleteInvoice(id: string) {
+    const idx = this.state.invoices.findIndex(i => i.id === id);
+    if (idx !== -1) {
+      this.state.invoices[idx].deleted = true;
+      await this.commit(true);
+      return { success: true };
+    }
+    return { success: false, message: 'Invoice not found' };
+  }
+
   async saveNotificationTemplate(t: Partial<NotificationTemplate>) {
     const id = t.id || 'NTMP-' + Date.now();
     const idx = this.state.notificationTemplates.findIndex(x => x.id === id);
@@ -2799,29 +2814,70 @@ async logoutImpersonation() {
 
 
   async processTopup(collector: string, target: string, type: 'staff' | 'user', amount: number, description: string = 'Credit Refill', forceType?: LedgerType) {
+    const timestamp = new Date().toISOString();
+    
+    // Deduct from Collector if it's a staff member
+    if (collector !== 'System' && collector !== 'GATEWAY') {
+      const cIdx = this.state.staff.findIndex(s => s.email === collector || s.id === collector);
+      if (cIdx !== -1) {
+        this.state.staff[cIdx].balance = (this.state.staff[cIdx].balance || 0) - amount;
+        this.state.ledger.push({
+          id: `DEDUCT-${Date.now()}`,
+          userId: collector,
+          amount,
+          type: LedgerType.DEBIT,
+          timestamp,
+          description: `Credit Distribution to ${target}`,
+          balanceAfter: this.state.staff[cIdx].balance,
+          method: 'Registry Transfer'
+        });
+      } else if (collector.includes('@')) {
+         // If collector is an email but not found in staff, check if it's a superadmin email
+         const admin = this.state.staff.find(s => s.role === Role.SUPER_ADMIN);
+         if (admin) {
+           const aIdx = this.state.staff.findIndex(s => s.id === admin.id);
+           this.state.staff[aIdx].balance = (this.state.staff[aIdx].balance || 0) - amount;
+         }
+      }
+    } else {
+      // System/Gateway refills deduct from SuperAdmin pool by default
+      const adminIdx = this.state.staff.findIndex(s => s.role === Role.SUPER_ADMIN);
+      if (adminIdx !== -1) {
+        this.state.staff[adminIdx].balance = (this.state.staff[adminIdx].balance || 0) - amount;
+      }
+    }
+
     if (type === 'staff') {
-      const sIdx = this.state.staff.findIndex(s => s.email === target);
+      const sIdx = this.state.staff.findIndex(s => s.email === target || s.id === target);
       if (sIdx !== -1) {
         this.state.staff[sIdx].balance = (this.state.staff[sIdx].balance || 0) + amount;
-        this.state.ledger.push({ id: 'TOP_' + Date.now(), userId: target, amount, type: LedgerType.CREDIT, timestamp: new Date().toISOString(), description: 'Admin Refill', balanceAfter: this.state.staff[sIdx].balance, method: 'Registry Direct' });
+        this.state.ledger.push({ 
+          id: 'TOP_' + Date.now(), 
+          userId: target, 
+          amount, 
+          type: LedgerType.CREDIT, 
+          timestamp, 
+          description: description || 'Admin Refill', 
+          balanceAfter: this.state.staff[sIdx].balance, 
+          method: 'Registry Direct' 
+        });
       } else {
         return { success: false, message: 'Target staff node not found.' };
       }
     } else {
       const uIdx = this.findUserIndex(target);
       if (uIdx !== -1) {
-        this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) - amount;
-        // Logic: Adding to balance (Debt) is a DEBIT event in this system
-        const lType = forceType || LedgerType.DEBIT;
+        // ADDING to user balance (Refilling Wallet)
+        this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) + amount;
         this.state.ledger.push({
           id: 'TOP_' + Date.now(),
           userId: target,
           amount,
-          type: lType,
-          timestamp: new Date().toISOString(),
+          type: LedgerType.CREDIT,
+          timestamp,
           description,
           balanceAfter: this.state.users[uIdx].balance,
-          method: 'Direct Handshake'
+          method: 'Wallet Refill'
         });
         await this.syncUserStatusWithBilling(target);
       } else {
@@ -2860,11 +2916,24 @@ async logoutImpersonation() {
 
       this.state.users[uIdx].activationCount = (this.state.users[uIdx].activationCount || 0) + 1;
 
-      // Update balance (Debt Inflow)
+      // Update balance (Deduct from Wallet)
       if (pkg) {
          const taxRate = this.state.settings.enableTax ? this.state.settings.autoTaxPercentage : 0;
          const totalCost = pkg.price + Math.round(pkg.price * (taxRate / 100));
-         this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) + totalCost;
+         
+         // In this credit-based system, activating a package DEDUCTS from the wallet
+         this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) - totalCost;
+         
+         this.state.ledger.push({
+           id: `ACT-${Date.now()}`,
+           userId,
+           amount: totalCost,
+           type: LedgerType.DEBIT,
+           timestamp: new Date().toISOString(),
+           description: `Package Activation: ${pkg.name}`,
+           balanceAfter: this.state.users[uIdx].balance,
+           method: 'System Deduction'
+         });
       }
 
       // =====================================================
@@ -3024,7 +3093,20 @@ async logoutImpersonation() {
     if (!user) return;
     this.socket.emit('unsubscribe-live-traffic', user.username);
   }
-  getConnectedDevices(id: string) { return [{ id: 'D1', name: 'Admin Phone', mac: 'E4:A1:7F:C2:08', ip: '192.168.1.5', signal: -42, duration: '2h 14m', usageToday: 0.4, isBlocked: false }]; }
+  getConnectedDevices(id: string) { 
+    // Filter active users and simulate their devices based on connection type
+    const activeUsers = this.state.users.filter(u => u.status === UserStatus.ACTIVE && !u.deleted);
+    return activeUsers.slice(0, 50).map(u => ({
+      id: `DEV-${u.id}`,
+      name: `${u.name}'s Device`,
+      mac: u.macAddress || '00:00:00:00:00:00',
+      ip: u.macIp || '192.168.1.1',
+      signal: Math.floor(Math.random() * 40) + 60,
+      usageToday: Math.floor(Math.random() * 1024),
+      duration: 'Live',
+      isBlocked: false
+    }));
+  }
   async blockDevice(u: string, d: string) { return true; }
   async renameDevice(u: string, d: string, n: string) { return true; }
   async submitWifiPasswordRequest(u: string, p: string) { return true; }
@@ -3953,6 +4035,7 @@ async logoutImpersonation() {
   }
 
   async getSystemHealth() {
+    if (this.state.systemHealth) return this.state.systemHealth;
     try {
       const res = await fetch(`${this.backendUrl}/api/health`);
       return await res.json();
@@ -5562,19 +5645,19 @@ async logoutImpersonation() {
     const now = new Date();
     const oneDay = 24 * 60 * 60 * 1000;
 
-    const totalUnpaidAmount = this.state.users.reduce((acc, u) => acc + (u.balance || 0), 0);
-    const activeUsers = this.state.users.filter(u => u.status === UserStatus.ACTIVE).length;
+    const totalUnpaidAmount = this.state.users.filter(u => !u.deleted && (u.balance || 0) < 0).reduce((acc, u) => acc + Math.abs(u.balance || 0), 0);
+    const activeUsers = this.state.users.filter(u => u.status === UserStatus.ACTIVE && !u.deleted).length;
     // Real-time online users from connected devices
-    const onlineUsers = this.getConnectedDevices('all').length >= activeUsers ? activeUsers : this.getConnectedDevices('all').length;
+    const onlineUsers = this.getConnectedDevices('all').length;
     const newUsers = this.state.users.filter(u => {
       const created = new Date(u.createdAt);
-      return (now.getTime() - created.getTime()) < 7 * oneDay;
+      return !u.deleted && (now.getTime() - created.getTime()) < 7 * oneDay;
     }).length;
-
-    const expiredUsers = this.state.users.filter(u => u.status === UserStatus.SUSPENDED).length;
-    const disabledUsers = this.state.users.filter(u => u.status === UserStatus.DISABLED).length;
-    const paidUsers = this.state.users.filter(u => (u.balance || 0) <= 0).length;
-    const unpaidUsers = this.state.users.filter(u => (u.balance || 0) > 0).length;
+ 
+    const expiredUsers = this.state.users.filter(u => u.status === UserStatus.SUSPENDED && !u.deleted).length;
+    const disabledUsers = this.state.users.filter(u => u.status === UserStatus.DISABLED && !u.deleted).length;
+    const paidUsers = this.state.users.filter(u => (u.balance || 0) <= 0 && !u.deleted).length;
+    const unpaidUsers = this.state.users.filter(u => (u.balance || 0) > 0 && !u.deleted).length;
 
     const todayMidnight = new Date();
     todayMidnight.setHours(0, 0, 0, 0);
@@ -5823,24 +5906,72 @@ async logoutImpersonation() {
     if (!this.state.archives) this.state.archives = [];
     this.state.archives.push(newArchive);
 
-    // 4. Perform Global Removal
-    this.state.users = this.state.users.filter(u => !ids.has(u.id));
-    this.state.signupRequests = (this.state.signupRequests || []).filter(r => !ids.has(r.userId) && !ids.has(r.id));
-    this.state.packageRequests = (this.state.packageRequests || []).filter(r => !ids.has(r.userId));
-    this.state.topupRequests = (this.state.topupRequests || []).filter(r => !ids.has(r.userId));
-    this.state.emergencyLoads = (this.state.emergencyLoads || []).filter(r => !ids.has(r.userId));
-    this.state.invoices = (this.state.invoices || []).filter(i => !ids.has(i.userId));
-    this.state.ledger = (this.state.ledger || []).filter(l => !ids.has(l.userId));
-    this.state.payments = (this.state.payments || []).filter(p => !ids.has(p.userId));
-    this.state.tickets = (this.state.tickets || []).filter(t => !ids.has(t.userId || ''));
-    this.state.adminReminders = (this.state.adminReminders || []).filter(r => !ids.has(r.userId));
+    // 4. Perform Soft Removal
+    const now = new Date().toISOString();
+    this.state.users.forEach(u => {
+      if (ids.has(u.id)) {
+        u.deleted = true;
+        u.deletedAt = now;
+        u.status = UserStatus.DISABLED;
+      }
+    });
 
-    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Deep Archive & Purge', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `Moved identities to deep archive. Credit Action: ${creditAction}. Adjusted Rs. ${totalCreditAdjusted}.`, riskLevel: 'Critical' });
+    // Mark related invoices as deleted too? Maybe not, keep them for audit.
+    // But mark them so they don't show up in unpaid stats.
+
+    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: now, adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Soft Delete & Archive', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `Marked identities as deleted. Moved to deep archive. Credit Action: ${creditAction}. Adjusted Rs. ${totalCreditAdjusted}.`, riskLevel: 'High' });
     
     await this.commit();
     this.notify();
     return { success: true, count: userIds.length, creditAdjusted: totalCreditAdjusted };
   }
+
+  async exportData(type: 'users' | 'billing' | 'noc') {
+    let data: any[] = [];
+    let filename = `export_${type}_${new Date().getTime()}.csv`;
+    
+    if (type === 'users') {
+      data = this.state.users.filter(u => !u.deleted).map(u => ({
+        ID: u.id,
+        Name: u.name,
+        Username: u.username || 'N/A',
+        Phone: u.phone,
+        Status: u.status,
+        Balance: u.balance,
+        Expiry: u.expiryDate || 'N/A'
+      }));
+    } else if (type === 'billing') {
+      data = this.state.invoices.map(i => ({
+        ID: i.id,
+        User: i.userName,
+        Amount: i.totalAmount,
+        Status: i.status,
+        Date: i.createdAt
+      }));
+    } else {
+      data = this.state.nocEvents || [];
+    }
+
+    if (data.length === 0) return { success: false, message: 'No data to export' };
+
+    const headers = Object.keys(data[0]);
+    const csv = [
+      headers.join(','),
+      ...data.map(row => headers.map(h => `"${row[h] || ''}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    return { success: true };
+  }
+
+
 
   async bulkUpdateExpiry(userIds: string[], expiryDate: string, reason: string, onProgress?: (current: number, total: number, itemName: string) => void) {
     for (let i = 0; i < userIds.length; i++) {

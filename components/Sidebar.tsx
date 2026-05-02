@@ -390,8 +390,8 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
               onNavigate(item.id);
            }}
            className={`w-full flex items-center justify-between px-3 h-[44px] rounded-lg transition-all duration-[150ms] active:scale-[0.98] group overflow-hidden relative ${isActive
-             ? 'bg-[rgba(59,130,246,0.12)]'
-             : 'hover:bg-[#1E293B]'
+             ? 'bg-[#111]'
+             : 'hover:bg-[#111]'
              } ${level > 0 && !isCollapsed ? 'ml-3 w-[calc(100%-0.75rem)]' : ''}`}
          >
            {/* Smooth Active Indicator Bar */}
@@ -419,7 +419,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
          
          {/* Tooltip for collapsed mode item */}
          {isCollapsed && (
-             <div className="absolute left-[75px] top-1/2 -translate-y-1/2 px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-md opacity-0 translate-y-[2px] invisible group-hover/item:opacity-100 group-hover/item:translate-y-[-50%] group-hover/item:visible transition-all duration-[150ms] whitespace-nowrap z-[200] shadow-xl pointer-events-none before:content-[''] before:absolute before:right-full before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-transparent before:border-r-slate-800">
+             <div className="absolute left-[75px] top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#111] text-white text-xs font-semibold rounded-md opacity-0 translate-y-[2px] invisible group-hover/item:opacity-100 group-hover/item:translate-y-[-50%] group-hover/item:visible transition-all duration-[150ms] whitespace-nowrap z-[200] shadow-xl pointer-events-none before:content-[''] before:absolute before:right-full before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-transparent before:border-r-[#111]">
                {item.label}
             </div>
          )}
@@ -465,7 +465,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
 
       {/* Main Sidebar */}
       <aside 
-         className={`fixed inset-y-0 left-0 z-[120] bg-slate-900 flex flex-col h-screen shrink-0 border-r border-slate-800 transition-[width,transform] duration-[250ms] ease-out will-change-[width,transform] shadow-xl ${
+         className={`fixed inset-y-0 left-0 z-[120] bg-black flex flex-col h-screen shrink-0 border-r border-[#111] transition-[width,transform] duration-[250ms] ease-out will-change-[width,transform] shadow-2xl ${
             isOpen ? 'translate-x-0' : '-translate-x-full'
          } lg:translate-x-0 ${isCollapsed ? 'w-[72px]' : 'w-[260px] max-w-[80vw]'}`}
       >

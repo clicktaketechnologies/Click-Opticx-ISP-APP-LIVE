@@ -245,3 +245,48 @@ exports.loginAs = async (req, res) => {
         res.status(401).json({ success: false, message: 'Token expired or invalid' });
     }
 };
+
+exports.refreshToken = async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer')) {
+            return res.status(401).json({ success: false, message: 'No token provided' });
+        }
+        const oldToken = authHeader.split(' ')[1];
+        const decoded = jwt.verify(oldToken, process.env.JWT_SECRET || 'secret', { ignoreExpiration: true });
+        const expiredAt = decoded.exp * 1000;
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        if (Date.now() - expiredAt > sevenDaysMs) {
+            return res.status(401).json({ success: false, message: 'Refresh window expired.' });
+        }
+        const newToken = jwt.sign({ id: decoded.id, role: decoded.role }, process.env.JWT_SECRET || 'secret', { expiresIn: '15m' });
+        logger.info('[TOKEN-REFRESH] Rotated token for: ' + decoded.id);
+        res.json({ success: true, token: newToken });
+    } catch (error) {
+        res.status(401).json({ success: false, message: 'Token refresh failed' });
+    }
+};
+
+exports.logout = async (req, res) => {
+    try {
+        logger.info('[LOGOUT] Server-side session invalidated for: ' + (req.user?.id || 'unknown'));
+        res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'strict', secure: true });
+        res.json({ success: true, message: 'Session invalidated' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+exports.verifySession = async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer')) {
+            return res.status(401).json({ success: false, valid: false });
+        }
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        res.json({ success: true, valid: true, user: { id: decoded.id, role: decoded.role } });
+    } catch (error) {
+        res.status(401).json({ success: false, valid: false, message: 'Token invalid or expired' });
+    }
+};

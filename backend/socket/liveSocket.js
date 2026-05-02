@@ -23,6 +23,11 @@ module.exports = (io) => {
         logger.info(`Socket ${socket.id} joined User ONU Room: ${onuId}`);
       }
     });
+ 
+    socket.on('join-room', (room) => {
+      socket.join(room);
+      logger.info(`Socket ${socket.id} joined custom room: ${room}`);
+    });
 
     // --- AUTOMATION ENGINE CONTROL ---
     socket.on('olt-registry-update', (olts) => {

@@ -45,6 +45,55 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isM
 
   useEffect(() => {
     fetchPublicIP().then(setNetworkInfo);
+    
+    const socket = (db as any).socket;
+    const currentUser = db.getState().currentUser;
+    
+    if (socket && currentUser) {
+      socket.emit('join-room', `user_${currentUser.id}`);
+      
+      socket.on('speedtest:progress', (data: any) => {
+        setResults(prev => ({ 
+          ...prev, 
+          dl: parseFloat(data.download), 
+          ul: parseFloat(data.upload),
+          ping: parseFloat(data.ping),
+          jitter: parseFloat(data.jitter)
+        }));
+        setPhase(data.phase);
+        setStatusText(`${data.phase.toUpperCase()} - ${data.progress}%`);
+        addGraphPoint(data.phase === 'upload' ? parseFloat(data.upload) : parseFloat(data.download), data.phase === 'upload' ? 'ul' : 'dl');
+      });
+
+      socket.on('speedtest:complete', (data: any) => {
+        setPhase('none');
+        setStatusText('Handshake Complete');
+        setTestState('SUCCESS');
+        
+        const finalResults = {
+           dl: parseFloat(data.download),
+           ul: parseFloat(data.upload),
+           ping: parseFloat(data.ping),
+           jitter: parseFloat(data.jitter),
+           packetLoss: 0,
+           server: data.server
+        };
+
+        setResults(finalResults);
+        setHistory(prev => [{ id: Date.now(), ...finalResults }, ...prev]);
+        
+        if (onComplete) {
+           onComplete(finalResults);
+        }
+      });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off('speedtest:progress');
+        socket.off('speedtest:complete');
+      }
+    };
   }, []);
 
   const resetGraph = () => {
@@ -60,6 +109,9 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isM
     if (testState === 'TESTING') return;
     
     try {
+      const currentUser = db.getState().currentUser;
+      if (!currentUser) throw new Error('Authentication Required');
+
       setTestState('TESTING');
       resetGraph();
       setResults({ dl: 0, ul: 0, ping: 0, jitter: 0, packetLoss: 0 });
@@ -67,48 +119,15 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isM
       setPhase('ping');
       setStatusText('Syncing Signal Server...');
 
-      // Fake graph animation while waiting for backend
-      const animInterval = setInterval(() => {
-         const val = Math.random() * 80 + 20;
-         setResults(prev => ({ ...prev, dl: val }));
-         addGraphPoint(val, 'dl');
-      }, 300);
-
-      const response = await fetch('/api/network/speedtest/start', { method: 'POST' });
-      const backendResults = await response.json();
+      await fetch('/api/network/speedtest/start', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: currentUser.id })
+      });
       
-      clearInterval(animInterval);
-
-      if (backendResults.success) {
-         const dlRes = parseFloat(backendResults.results.download);
-         const ulRes = parseFloat(backendResults.results.upload);
-         const pingRes = parseFloat(backendResults.results.ping);
-         
-         setPhase('none');
-         setStatusText('Handshake Complete');
-         setTestState('SUCCESS');
-         
-         const finalResults = {
-            dl: dlRes,
-            ul: ulRes,
-            ping: pingRes,
-            jitter: parseFloat(backendResults.results.jitter),
-            packetLoss: 0,
-            server: backendResults.results.server
-         };
-
-         setResults(finalResults);
-         setHistory(prev => [{ id: Date.now(), dl: dlRes, ul: ulRes, ping: pingRes }, ...prev]);
-         
-         if (onComplete) {
-            onComplete(finalResults);
-         }
-      } else {
-         throw new Error(backendResults.message || 'Speedtest Failed');
-      }
-    } catch (err) {
+    } catch (err: any) {
       console.error('[DIAGNOSTIC ERROR]', err);
-      setStatusText('Network Fault Detected');
+      setStatusText(err.message || 'Network Fault Detected');
       setTestState('ERROR');
     }
   };
@@ -174,17 +193,30 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isM
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-10 items-center">
            <div className="xl:col-span-5 flex flex-col items-center">
               <div className="relative w-full max-w-[280px] md:max-w-[340px] aspect-square flex items-center justify-center">
-                 <svg className="absolute inset-0 w-full h-full -rotate-90">
-                    <circle cx="50%" cy="50%" r="42%" fill="none" stroke="#F1F5F9" strokeWidth="12" />
+                 <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="#F1F5F9" strokeWidth="6" />
                     <circle 
-                      cx="50%" cy="50%" r="42%" 
-                      fill="none" stroke="url(#co-speed-gradient)" strokeWidth="12" strokeLinecap="round"
+                      cx="50" cy="50" r="42" 
+                      fill="none" stroke="url(#co-speed-gradient)" strokeWidth="6" strokeLinecap="round"
                       style={{ 
                         strokeDasharray: '264', 
                         strokeDashoffset: 264 - (264 * (Math.min(currentSpeed, 100) / 100)),
                         transition: 'stroke-dashoffset 0.5s cubic-bezier(0.23, 1, 0.32, 1)',
+                        filter: 'drop-shadow(0 0 8px rgba(37, 99, 235, 0.5))'
                       }}
                     />
+                    {/* Gauge Needle */}
+                    <line 
+                      x1="50" y1="50" x2="50" y2="10" 
+                      stroke="#2563EB" strokeWidth="2" strokeLinecap="round"
+                      style={{ 
+                        transformOrigin: '50% 50%',
+                        transform: `rotate(${ (currentSpeed / 100) * 360 }deg)`,
+                        transition: 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)'
+                      }} 
+                    />
+                    <circle cx="50" cy="50" r="3" fill="#2563EB" />
+                    
                     <defs>
                        <linearGradient id="co-speed-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                           <stop offset="0%" stopColor="#2563EB" />
