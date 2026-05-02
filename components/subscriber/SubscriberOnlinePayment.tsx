@@ -36,34 +36,57 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
       setPaymentError(null);
 
       try {
-         setHandshakeStep(`Initializing TLS tunnel to ${selectedGateway.name}...`);
-         
          const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:5000';
          
-         const response = await fetch(`${backendUrl}/api/payments/process`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-               gatewayId: selectedGateway.id,
-               gatewayName: selectedGateway.name,
-               config: selectedGateway.config,
-               amount: total,
-               userId: user.id,
-               packageId: selectedPkgId
-            })
-         });
+         let gatewaysToTry = [selectedGateway, ...enabledGateways.filter(g => g.id !== selectedGateway.id && g.type === 'online')];
+         let lastError: any = null;
+         let success = false;
+         let finalGateway = selectedGateway;
+         let transactionId = '';
 
-         const result = await response.json();
+         for (const gateway of gatewaysToTry) {
+             try {
+                setHandshakeStep(`Initializing TLS tunnel to ${gateway.name}...`);
+                
+                const response = await fetch(`${backendUrl}/api/payments/process`, {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({
+                      gatewayId: gateway.id,
+                      gatewayName: gateway.name,
+                      config: gateway.config,
+                      amount: total,
+                      userId: user.id,
+                      packageId: selectedPkgId
+                   })
+                });
 
-         if (!response.ok || !result.success) {
-            throw new Error(result.message || 'Unknown registry error from backend.');
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                   throw new Error(result.message || 'Unknown registry error from backend.');
+                }
+
+                success = true;
+                finalGateway = gateway;
+                transactionId = result.transactionId || `TRX-${Math.random().toString(36).substring(7)}`;
+                break;
+             } catch (err: any) {
+                lastError = err;
+                setHandshakeStep(`Failover protocol engaging... Rerouting via secondary nodes`);
+                await new Promise(r => setTimeout(r, 1000));
+             }
+         }
+
+         if (!success) {
+            throw lastError;
          }
 
          setHandshakeStep('Syncing Ledger Node...');
          await db.processTopup('GATEWAY', user.id, 'user', total);
          await db.activatePackage(user.id, selectedPkgId);
 
-         db.logNotification(user.id, 'success', 'Package Provisioned', `Link established via ${selectedGateway.name}. Fiscal action completed. Ext: ${result.transactionId}`);
+         db.logNotification(user.id, 'success', 'Package Provisioned', `Link established via ${finalGateway.name}. Fiscal action completed. Ext: ${transactionId}`);
 
          setIsProcessing(false);
          onSuccess();

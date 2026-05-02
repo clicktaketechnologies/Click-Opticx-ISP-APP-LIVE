@@ -94,6 +94,21 @@ router.post('/:key/rollback', adminGuard, async (req, res) => {
   }
 });
 
+// ─── POST clear-cache ─────────────────────────────────────────────────────────
+router.post('/clear-cache', adminGuard, async (req, res) => {
+  try {
+    logger.warn(`[CONFIG] Global Cache Purge initiated by ${req.ip}`);
+    
+    // In Phase 0/1, we just reload the configManager to re-fetch from Supabase/Environment
+    await configManager.init();
+    
+    res.json({ success: true, message: 'Backend cache layers synchronized successfully' });
+  } catch (e) {
+    logger.error('[CONFIG] Cache purge error:', e.message);
+    res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 // ─── GET config history ───────────────────────────────────────────────────────
 router.get('/:key/history', adminGuard, async (req, res) => {
   try {

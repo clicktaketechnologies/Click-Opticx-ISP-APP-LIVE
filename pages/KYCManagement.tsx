@@ -426,26 +426,26 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
                         <button 
                             onClick={() => handleApprove(selectedUser.id)}
                             disabled={!!actionLoading}
-                            className="flex flex-col items-center justify-center gap-4 p-8 bg-emerald-600 text-white rounded-xl group hover:bg-emerald-700 transition-all active:scale-95 shadow-sm disabled:opacity-50"
+                            className="flex flex-col items-center justify-center gap-6 p-10 bg-emerald-600 text-white rounded-[3rem] group hover:bg-emerald-500 hover:shadow-2xl hover:shadow-emerald-500/20 transition-all active:scale-95 shadow-xl disabled:opacity-50 border-4 border-emerald-500/20"
                         >
-                            <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center group-hover:scale-110 transition-all">
-                               {actionLoading === 'approve' ? <RefreshCcw size={32} className="animate-spin text-white" /> : <ShieldCheck size={32} className="text-white" />}
+                            <div className="w-20 h-20 rounded-[1.5rem] bg-white/20 backdrop-blur-xl flex items-center justify-center group-hover:scale-110 transition-all shadow-lg border border-white/30">
+                               {actionLoading === 'approve' ? <RefreshCcw size={40} className="animate-spin text-white" /> : <CheckCircle size={40} className="text-white" />}
                             </div>
                             <div className="text-center">
-                               <p className="text-lg font-black uppercase italic tracking-tighter">Authorize Profile</p>
-                               <p className="text-[9px] font-black text-emerald-100 uppercase tracking-widest mt-1">Grant System Access</p>
+                               <p className="text-2xl font-black uppercase italic tracking-tighter leading-none">Authorize Access</p>
+                               <p className="text-[10px] font-black text-emerald-100 uppercase tracking-[0.3em] mt-3 opacity-70 italic">Finalize Identity Protocol</p>
                             </div>
                         </button>
                         <button 
                             onClick={() => setShowRejectModal(true)}
-                            className="flex flex-col items-center justify-center gap-4 p-8 bg-rose-600 text-white rounded-xl group hover:bg-rose-700 transition-all active:scale-95 shadow-sm"
+                            className="flex flex-col items-center justify-center gap-6 p-10 bg-slate-900 text-white rounded-[3rem] group hover:bg-rose-600 hover:shadow-2xl hover:shadow-rose-600/20 transition-all active:scale-95 shadow-xl border-4 border-white/5"
                         >
-                            <div className="w-16 h-16 rounded-xl bg-white/20 flex items-center justify-center group-hover:rotate-12 transition-all">
-                               <ShieldAlert size={32} />
+                            <div className="w-20 h-20 rounded-[1.5rem] bg-white/10 backdrop-blur-xl flex items-center justify-center group-hover:rotate-12 transition-all shadow-lg border border-white/10">
+                               <XCircle size={40} className="text-white" />
                             </div>
                             <div className="text-center">
-                               <p className="text-lg font-black uppercase italic tracking-tighter">Flag Revision</p>
-                               <p className="text-[9px] font-black text-rose-100 uppercase tracking-widest mt-1">Request New Evidence</p>
+                               <p className="text-2xl font-black uppercase italic tracking-tighter leading-none">Flag Discrepancy</p>
+                               <p className="text-[10px] font-black text-slate-400 group-hover:text-rose-100 uppercase tracking-[0.3em] mt-3 opacity-70 italic">Request Correction Flow</p>
                             </div>
                         </button>
                       </div>

@@ -54,7 +54,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setError(null);
       setIsProcessing(true);
 
-      const res = await onLogin(credential, password);
+      const res = await onLogin(credential, password, rememberMe);
       setIsProcessing(false);
 
       if (!res.success) {

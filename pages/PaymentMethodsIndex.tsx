@@ -4,10 +4,11 @@ import {
   ChevronRight, Activity, Zap, ShieldAlert, CheckCircle, 
   Settings2, Power, Layers, ArrowRight, Landmark, Map, X,
   History, Clock, ArrowRightLeft, UserCircle, AlertTriangle,
-  Server, Eye, EyeOff, Save, RotateCw, Play
+  Server, Eye, EyeOff, Save, RotateCw, Play, Wallet
 } from 'lucide-react';
 import { AppState, PaymentGateway, Role } from '../types';
-import { Modal } from '../components/shared/Modal';
+import { db } from '../db';
+import Modal from '../components/shared/Modal';
 import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 interface Props {
@@ -16,71 +17,26 @@ interface Props {
 }
 
 const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
-  const [gateways, setGateways] = useState<PaymentGateway[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [showSecrets, setShowSecrets] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const gateways = useMemo(() => state.settings.paymentGateways || [], [state.settings.paymentGateways]);
   const canEdit = [Role.SUPER_ADMIN, Role.FINANCE_ADMIN].includes(state.currentUser?.role as Role);
-
-  useEffect(() => {
-    fetchGateways();
-  }, []);
-
-  const fetchGateways = async () => {
-    setLoading(true);
-    try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/provider-mgmt/gateways`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await response.json();
-        if (data.success) setGateways(data.gateways);
-    } catch (e) {
-        console.error('Failed to fetch gateways');
-    } finally {
-        setLoading(false);
-    }
-  };
 
   const handleToggle = async (id: string, updates: Partial<PaymentGateway>) => {
     if (!canEdit) return;
-    try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/provider-mgmt/gateways/${id}`, {
-            method: 'PUT',
-            headers: { 
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updates)
-        });
-        const data = await response.json();
-        if (data.success) {
-            setGateways(prev => prev.map(g => g.id === id ? { ...g, ...updates } : g));
-        }
-    } catch (e) {
-        alert('Update failed.');
-    }
+    await db.updateGatewayConfig(id, updates);
   };
 
   const handleSaveConfig = async () => {
     if (!selectedGateway || !canEdit) return;
     setIsSaving(true);
     try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/provider-mgmt/gateways/${selectedGateway.id}`, {
-            method: 'PUT',
-            headers: { 
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(selectedGateway)
-        });
-        const data = await response.json();
-        if (data.success) {
-            setGateways(prev => prev.map(g => g.id === selectedGateway.id ? selectedGateway : g));
-            setIsConfigOpen(false);
-        }
+        await db.updateGatewayConfig(selectedGateway.id, selectedGateway);
+        setIsConfigOpen(false);
     } catch (e) {
         alert('Save failed.');
     } finally {
@@ -96,6 +52,8 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
     if (gid.includes('bank')) return <Landmark size={24} />;
     if (gid.includes('home')) return <Map size={24} />;
     if (gid.includes('payfast') || gid.includes('zap')) return <Zap size={24} />;
+    if (gid.includes('sumup')) return <Layers size={24} />;
+    if (gid.includes('wallet')) return <Wallet size={24} />;
     return <CreditCard size={24} />;
   };
 
@@ -106,6 +64,9 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
     if (gid.includes('easypaisa')) return 'bg-green-600';
     if (gid.includes('cash')) return 'bg-slate-900';
     if (gid.includes('payfast')) return 'bg-amber-500';
+    if (gid.includes('sumup')) return 'bg-cyan-600';
+    if (gid.includes('wallet')) return 'bg-indigo-600';
+    if (gid.includes('bank')) return 'bg-blue-800';
     return 'bg-blue-600';
   };
 
@@ -168,22 +129,22 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
                 <div className="space-y-1 mb-4 relative z-10">
                    <h3 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter leading-none">{gateway.name}</h3>
                    <div className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full ${gateway.status === 'Connected' ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">{gateway.status || 'Offline'}</p>
+                        <div className={`w-1.5 h-1.5 rounded-full ${gateway.enabled ? 'bg-green-500' : 'bg-rose-500'}`}></div>
+                        <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">{gateway.enabled ? 'Enabled' : 'Disabled'}</p>
                    </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mb-6 relative z-10 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                     <div>
-                        <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Reputation</p>
-                        <p className={`text-sm font-black italic ${gateway.reputation_score && gateway.reputation_score > 80 ? 'text-green-600' : 'text-amber-600'}`}>
-                            {gateway.reputation_score || 100} %
+                        <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Priority</p>
+                        <p className="text-sm font-black text-slate-900 italic">
+                            Order: {gateway.priority}
                         </p>
                     </div>
                     <div>
-                        <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Usage Today</p>
-                        <p className="text-sm font-black text-slate-900 italic">
-                            Rs. {gateway.usage_today?.toLocaleString() || 0}
+                        <p className="text-[8px] font-black text-slate-400 uppercase mb-1">Type</p>
+                        <p className="text-sm font-black text-slate-900 italic uppercase">
+                            {gateway.type}
                         </p>
                     </div>
                 </div>
@@ -272,21 +233,6 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
                         />
                     </div>
                 </div>
-                <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                    <div>
-                        <h4 className="text-xs font-black uppercase text-white">Daily Cap</h4>
-                        <p className="text-[9px] text-slate-500 font-bold uppercase">Throttle node after this amount</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-black text-slate-500">Rs.</span>
-                        <input 
-                            type="number"
-                            className="w-32 p-2 bg-slate-700 border-none rounded-xl text-right font-black text-white"
-                            value={selectedGateway.daily_limit || 0}
-                            onChange={e => setSelectedGateway({ ...selectedGateway, daily_limit: parseInt(e.target.value) })}
-                        />
-                    </div>
-                </div>
             </div>
 
             <div className="space-y-4">
@@ -327,20 +273,10 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
                             <input 
                                 readOnly
                                 className="flex-1 p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-xs text-slate-400 cursor-not-allowed"
-                                value={selectedGateway.webhook_url || `${import.meta.env.VITE_BACKEND_URL}/api/payments/webhooks/${selectedGateway.id}`}
+                                value={selectedGateway.webhook_url || `${db.getBackendUrl()}/api/payments/webhooks/${selectedGateway.id}`}
                             />
                             <button className="px-4 bg-slate-800 text-blue-400 rounded-xl hover:bg-slate-700 transition-all"><Layers size={14}/></button>
                         </div>
-                    </div>
-                    <div className="space-y-1">
-                        <label className="text-[8px] font-black text-slate-500 uppercase ml-1">Signature Secret (HMAC-SHA256)</label>
-                        <input 
-                            type={showSecrets ? 'text' : 'password'}
-                            className="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-xs text-white outline-none focus:border-blue-500"
-                            placeholder="Paste webhook secret here..."
-                            value={selectedGateway.signature_secret || ''}
-                            onChange={e => setSelectedGateway({ ...selectedGateway, signature_secret: e.target.value })}
-                        />
                     </div>
                 </div>
             </div>

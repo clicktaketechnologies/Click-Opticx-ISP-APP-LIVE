@@ -54,7 +54,12 @@ const SpeedTestPage: React.FC = () => {
                <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-3 leading-none ml-14">Previous 10 session captures registered</p>
             </div>
             <button 
-              onClick={() => { setTestHistory([]); localStorage.removeItem('click_speedHistory'); }}
+              onClick={async () => { 
+                if(confirm('Flush all local telemetry records?')) {
+                  await db.commit({ speedTestHistory: [] });
+                  setTestHistory([]);
+                }
+              }}
               className="px-6 py-3 bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-slate-200"
             >
                Flush Registry

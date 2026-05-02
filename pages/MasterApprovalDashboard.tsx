@@ -46,15 +46,15 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black text-slate-900 tracking-tighter flex items-center gap-3 italic leading-none uppercase">
-            <SafeIcon icon={ShieldCheck} className="text-blue-600" size={32} />
+          <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-black text-slate-900 tracking-tighter flex items-center gap-3 italic leading-none uppercase">
+            <SafeIcon icon={ShieldCheck} className="text-blue-600" size={28} />
             Approval Center
           </h2>
-          <p className="text-slate-400 font-bold text-[10px] tracking-[0.3em] uppercase italic border-l-4 border-blue-500 pl-4">Modular Desk Hub & Operational Registry</p>
+          <p className="text-slate-400 font-bold text-[clamp(0.5rem,1.5vw,0.6rem)] tracking-[0.3em] uppercase italic border-l-4 border-blue-500 pl-4">Modular Desk Hub & Operational Registry</p>
         </div>
-        <div className="flex bg-slate-100/50 p-1.5 rounded-[2.5rem] border border-slate-200 overflow-x-auto custom-scrollbar no-scrollbar scroll-smooth shadow-inner">
+        <div className="flex bg-slate-100/50 p-1.5 rounded-[2.5rem] border border-slate-200 overflow-x-auto no-scrollbar scroll-smooth shadow-inner w-full md:w-auto shrink-0">
           {tabs.map(tab => (
             <button
               key={tab.id}

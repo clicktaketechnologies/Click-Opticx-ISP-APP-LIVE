@@ -308,13 +308,15 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
         ))}
       </div>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 px-1">
         <div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none">
-            <Activity className="text-blue-600" size={32} />
+          <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none uppercase">
+            <Activity className="text-blue-600" size={28} />
             Fiscal Control
           </h2>
-          <p className="text-slate-500 font-medium mt-1">Manage multi-tier recovery, team settlements, and approval logic.</p>
+          <p className="text-[clamp(0.5rem,2vw,0.6rem)] text-slate-500 font-bold uppercase tracking-[0.3em] mt-2 italic border-l-4 border-blue-500 pl-4">
+            Manage multi-tier recovery, team settlements, and approval logic
+          </p>
         </div>
         <div className="flex bg-white p-1.5 rounded-[1.5rem] border border-slate-200 shadow-sm overflow-x-auto w-full md:w-auto">
           {[

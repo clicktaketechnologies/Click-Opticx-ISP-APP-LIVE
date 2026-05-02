@@ -7,14 +7,14 @@ import {
   Square, CheckSquare, Layers, AlertTriangle, Key, Cpu, Zap, Calendar, Banknote, Globe, Loader2, XCircle, RotateCw, Lock, LogOut, Eye, UserCircle, Fingerprint, Map as MapIcon, Smartphone, Bell, ListChecks,
   User, Users, Hash, MessageSquare, Package as PackageIcon, LockKeyhole, ArrowRight, MousePointer2, Settings2, Power,
   SearchCode, EyeOff, ExternalLink, ArrowUpRight, ArrowDownLeft,
-  Mail, Wifi, FileText, MoreHorizontal, Play, FileInput, Circle
+  Mail, Wifi, FileText, MoreHorizontal, Play, FileInput, Circle, RefreshCcw
 } from 'lucide-react';
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
 import { Modal } from '../components/shared/Modal';
 import { ConfirmDialog } from '../components/shared/ConfirmDialog';
 
-const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?: string }> = ({ state, searchTerm: globalSearchTerm, autoOpenAction }) => {
+const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?: string; navParams?: any }> = ({ state, searchTerm: globalSearchTerm, autoOpenAction, navParams }) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,7 +30,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   useEffect(() => {
     if (autoOpenAction === 'add-user') {
       setOnboardingStep(1);
-      setNewUserData({...initialUserForm});
+      setEditUserData({...initialUserForm});
       setIsNewUserModal(true);
     } else if (autoOpenAction === 'recovery') {
       setFilterType('Unpaid');
@@ -84,16 +84,35 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
   const [manualExpiryDate, setManualExpiryDate] = useState(new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]);
   const [manualUnpaidAmount, setManualUnpaidAmount] = useState<number>(0);
+  const [isBulkSellerModal, setIsBulkSellerModal] = useState(false);
+  const [selectedSellerId, setSelectedSellerId] = useState('');
+ 
+  useEffect(() => {
+    if (navParams?.action === 'renew' && navParams?.userId) {
+      const user = state.users.find(u => u.id === navParams.userId);
+      if (user) {
+        setSelectedUserId(user.id);
+        setSelectedPkgId(user.packageId);
+        const pkg = state.packages.find(p => p.id === user.packageId);
+        setManualUnpaidAmount(pkg?.price || 0);
+        setIsManualUnpaidModal(true);
+      }
+    }
+  }, [navParams, state.users, state.packages]);
 
   const initialUserForm: Partial<ISPUser> = {
     name: '', username: '', password: '', packageId: '', connectionType: 'Fiber',
     cnic: '', phone: '', email: '', address: '', subarea: '',
     pppoeId: '', nasId: '', vlanId: '', oltNode: '', portalEnabled: true,
-    status: UserStatus.PENDING_VERIFICATION
+    status: UserStatus.PENDING_VERIFICATION,
+    macLock: false, macAddress: '', boxNumber: '', boxAddress: '',
+    uplinkPort: '', fiberCode: '', fiberColor: '', onuBoard: '', onuPort: '',
+    backupConnection: '', electricityType: '', cableType: '',
+    invoiceWithTax: false, taxExemption: false, autoRenewal: true
   };
 
   const [editUserData, setEditUserData] = useState<Partial<ISPUser>>(initialUserForm);
-  const [newUserData, setNewUserData] = useState<Partial<ISPUser>>(initialUserForm);
+  const [confirmPassword, setConfirmPassword] = useState('');
   
   const activeUsers = useMemo(() => state.users.filter(u => filterType === 'Deleted' ? !!u.deleted : !u.deleted), [state.users, filterType]);
   
@@ -189,6 +208,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     setIsGraceActive(true);
     setPaymentDate(new Date().toISOString().split('T')[0]);
     setSelectedPkgId(user.packageId || '');
+    setConfirmPassword('');
 
     if (action === 'unverify') {
       const confirmUnverify = window.confirm(`Are you sure you want to unverify ${user.name}? This will restrict their access to "Limited Mode".`);
@@ -213,7 +233,10 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     }
 
     switch(action) {
-      case 'edit': setIsEditUserModal(true); break;
+      case 'edit': 
+        setOnboardingStep(1);
+        setIsEditUserModal(true); 
+        break;
       case 'reset': setIsResetPassModal(true); break;
       case 'emergency_auth': setIsEmergencyAuthModal(true); break;
       case 'package': setIsActivationModal(true); break;
@@ -351,11 +374,25 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
 
   const handleUpdateDossier = async () => {
     if (!selectedUserId) return;
+    
+    // Password validation if provided
+    if (editUserData.password) {
+      if (editUserData.password !== confirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
+    }
+
     setIsProcessing(true);
-    await db.updateUser(selectedUserId, editUserData);
+    const res = await db.updateUser(selectedUserId, editUserData);
     setIsProcessing(false);
-    setIsEditUserModal(false);
-    setIsSuccessModal(true);
+    
+    if (res.success) {
+      setIsEditUserModal(false);
+      setIsSuccessModal(true);
+    } else {
+      alert(res.message);
+    }
   };
 
   const handleAuthReset = async () => {
@@ -393,6 +430,16 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     setIsProcessing(false);
   };
 
+  const executeBulkSellerChange = async () => {
+    if(!selectedSellerId) return;
+    setIsProcessing(true);
+    await db.bulkChangeSeller(Array.from(selectedIds), selectedSellerId);
+    setIsBulkSellerModal(false);
+    setSelectedIds(new Set());
+    setIsProcessing(false);
+    setIsSuccessModal(true);
+  };
+
   const ActionIcon = ({ icon: Icon, color, label, onClick, disabled }: any) => (
     <button 
       onClick={onClick}
@@ -408,40 +455,42 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     </button>
   );
 
+  const subAreas = ['Block A', 'Block B', 'Block C', 'Sector 1', 'Sector 2', 'Main Market', 'Garden Town', 'Phase 1', 'Phase 2'];
+
   return (
     <div className="min-h-screen overflow-y-auto space-y-6 pb-12">
       {/* 1. Header Zone */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
-        <div>
-          <h2 className="text-[clamp(1.5rem,5vw,2.5rem)] font-black text-slate-900 tracking-tighter uppercase italic leading-none">Subscribers Hub</h2>
-          <p className="text-[clamp(0.6rem,2vw,0.75rem)] text-slate-400 font-black uppercase tracking-[0.4em] mt-3">Advanced Registry & Lifecycle Engine</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
+        <div className="hidden md:block">
+          <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-black text-slate-900 tracking-tighter uppercase italic leading-none">Subscribers Hub</h2>
+          <p className="text-[clamp(0.5rem,2vw,0.6rem)] text-slate-400 font-black uppercase tracking-[0.3em] mt-2 italic border-l-2 border-indigo-500 pl-3">Advanced Registry & Lifecycle Engine</p>
         </div>
-        <div className="flex gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap gap-3 w-full md:w-auto shrink-0">
           <button 
              onClick={() => setIsImportUsersModal(true)}
-             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3.5 bg-white border border-slate-200 text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
+             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 text-slate-900 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
           >
-             <FileInput size={16} /> Import
+             <FileInput size={14} /> Import
           </button>
           {isAdmin && (
              <button 
                onClick={handleRepairIntegrity}
                disabled={isRepairing}
-               className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-sm border ${
+               className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm border ${
                  isRepairing 
                    ? 'bg-slate-50 text-slate-400 border-slate-100' 
                    : 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100'
                }`}
              >
-               {isRepairing ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
-               <span>{isRepairing ? 'Healing...' : 'Repair Integrity'}</span>
+               {isRepairing ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+               <span>{isRepairing ? 'Healing...' : 'Fix Errors'}</span>
              </button>
           )}
           <button 
             onClick={() => { setOnboardingStep(1); setIsNewUserModal(true); }}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3.5 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-600 shadow-2xl active:scale-95 transition-all"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-slate-950 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] hover:bg-indigo-600 shadow-2xl active:scale-95 transition-all"
           >
-            <UserPlus size={18} />
+            <UserPlus size={16} />
             <span>+ Add New User</span>
           </button>
         </div>
@@ -540,6 +589,9 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
               <button onClick={() => { setBulkTagInput(''); setIsBulkTagModal(true); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
                  <Smartphone size={16} className="text-sky-400"/><span className="text-white">Mapping</span>
               </button>
+              <button onClick={() => { setSelectedSellerId(''); setIsBulkSellerModal(true); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+                 <UserPlus size={16} className="text-indigo-400"/><span className="text-white">Seller</span>
+              </button>
               <button onClick={() => { if(confirm(`Confirm permanent erasure of ${selectedIds.size} accounts?`)) executeBulkPurge(); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 rounded-xl text-[9px] font-black uppercase tracking-widest border border-rose-500/20 text-rose-400 transition-all">
                  <Trash2 size={16}/><span className="text-rose-400">Purge</span>
               </button>
@@ -576,6 +628,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                 <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Name / Username</th>
                 <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Package</th>
                 <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Seller</th>
+                <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Billing Status</th>
                 <th className="text-right py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Balance</th>
                 <th className="text-center py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Expiry</th>
                 <th className="text-center py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Action</th>
@@ -634,6 +687,30 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                          );
                        })()}
                     </td>
+                    <td className="px-6 py-4">
+                       {(() => {
+                         const pkg = state.packages.find(p => p.id === user.packageId);
+                         const price = pkg?.price || 0;
+                         const unpaid = user.balance || 0;
+                         const paid = Math.max(0, price - unpaid);
+                         return (
+                           <div className="flex flex-col gap-1">
+                              <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-slate-400">
+                                 <span>Paid</span>
+                                 <span className="text-emerald-500">Rs. {paid.toLocaleString()}</span>
+                              </div>
+                              <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden flex">
+                                 <div className="bg-emerald-500 h-full" style={{ width: `${price > 0 ? (paid / price) * 100 : 0}%` }}></div>
+                                 <div className="bg-rose-500 h-full" style={{ width: `${price > 0 ? (unpaid / price) * 100 : 0}%` }}></div>
+                              </div>
+                              <div className="flex items-center justify-between text-[8px] font-black uppercase tracking-widest text-slate-400">
+                                 <span>Unpaid</span>
+                                 <span className="text-rose-500">Rs. {unpaid.toLocaleString()}</span>
+                              </div>
+                           </div>
+                         );
+                       })()}
+                    </td>
                     <td className="px-6 py-4 text-right">
                        <p className={`text-sm font-black tabular-nums ${user.balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>Rs. {(user.balance || 0).toLocaleString()}</p>
                        <span className={`inline-flex items-center gap-1 text-[7px] font-black uppercase px-2 py-0.5 rounded-lg ${user.status === UserStatus.ACTIVE ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
@@ -656,9 +733,16 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                        <div className="flex items-center justify-center gap-1.5">
                           <button onClick={() => handleAction(user, 'view')} className="p-2.5 bg-blue-100/50 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-blue-100" title="Full 360 View"><Eye size={14}/></button>
                           <button onClick={() => handleAction(user, 'edit')} className="p-2.5 bg-amber-100/50 hover:bg-amber-600 text-amber-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-amber-100" title="Dossier Edit"><Pencil size={14}/></button>
+                          <button onClick={() => {
+                             setSelectedUserId(user.id);
+                             setSelectedPkgId(user.packageId);
+                             const pkg = state.packages.find(p => p.id === user.packageId);
+                             setManualUnpaidAmount(pkg?.price || 0);
+                             setIsManualUnpaidModal(true);
+                           }} className="p-2.5 bg-indigo-100/50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-indigo-100" title="Quick Renew"><RefreshCcw size={14}/></button>
                           <button onClick={() => handleAction(user, 'package')} className="p-2.5 bg-violet-100/50 hover:bg-violet-600 text-violet-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-violet-100" title="Service Provisioning"><PackageIcon size={14}/></button>
                           <button onClick={() => handleAction(user, 'payment')} className="p-2.5 bg-emerald-100/50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-emerald-100" title="Collect Payment"><Banknote size={14}/></button>
-                          <button onClick={() => handleAction(user, 'unpaid_amount')} className="p-2.5 bg-pink-100/50 hover:bg-pink-600 text-pink-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-pink-100" title="Amount Unpaid"><Wallet size={14}/></button>
+                          <button onClick={() => handleAction(user, 'unpaid_amount')} className="p-2.5 bg-pink-100/50 hover:bg-pink-600 text-pink-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-pink-100" title="Amount Unpaid / Partial Payment"><Wallet size={14}/></button>
                           <button onClick={() => handleAction(user, 'emergency_auth')} className="p-2.5 bg-rose-100/50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-rose-100" title="Emergency Auth Reset"><LockKeyhole size={14}/></button>
                        </div>
                     </td>
@@ -670,33 +754,39 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
         </div>
       </div>
 
-      {/* 1. ONBOARDING WIZARD */}
       <Modal
-        isOpen={isNewUserModal}
-        onClose={() => setIsNewUserModal(false)}
+        isOpen={isNewUserModal || (isEditUserModal && !!selectedUser)}
+        onClose={() => { setIsNewUserModal(false); setIsEditUserModal(false); }}
         title={
-          onboardingStep === 1 ? "Your Basic Information" :
-          onboardingStep === 2 ? "Internet Data Plan" :
-          onboardingStep === 3 ? "Network Details" :
-          onboardingStep === 4 ? "Signup Credentials" :
-          "Register Me Now"
+          isEditUserModal ? `Edit Subscriber: ${selectedUser?.name}` :
+          onboardingStep === 1 ? "General Information" :
+          onboardingStep === 2 ? "Connection Information" :
+          onboardingStep === 3 ? "Internet Data Plan" :
+          "Confirm Registration"
         }
-        icon={<div className="w-8 h-8 bg-blue-600/20 rounded-xl flex items-center justify-center text-blue-400 italic font-black text-xs">S{onboardingStep}</div>}
-        maxWidth="max-w-2xl"
+        icon={isEditUserModal ? <Pencil size={22} className="text-blue-400" /> : <div className="w-8 h-8 bg-blue-600/20 rounded-xl flex items-center justify-center text-blue-400 italic font-black text-xs">S{onboardingStep}</div>}
+        maxWidth="max-w-3xl"
         scrollable
         footer={
           <div className="flex justify-between items-center w-full">
-             <button onClick={() => setOnboardingStep(Math.max(1, onboardingStep - 1))} className="px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 transition-all border border-slate-700 hover:opacity-70 disabled:opacity-30" disabled={onboardingStep === 1}>Previous Step</button>
-             {onboardingStep < 5 ? (
-               <button onClick={() => setOnboardingStep(onboardingStep + 1)} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/30 flex items-center gap-2 transition-all active:scale-95">Next Step <ChevronRight size={14}/></button>
+             <button onClick={() => setOnboardingStep(Math.max(1, onboardingStep - 1))} className="px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 transition-all border border-slate-700 hover:opacity-70 disabled:opacity-30" disabled={onboardingStep === 1}>Go Back</button>
+             {onboardingStep < 4 ? (
+               <button onClick={() => setOnboardingStep(onboardingStep + 1)} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/30 flex items-center gap-2 transition-all active:scale-95">Next Phase <ChevronRight size={14}/></button>
              ) : (
                <button 
                 onClick={async () => { 
+                  if (editUserData.password && editUserData.password !== confirmPassword) {
+                    alert("Passwords do not match!");
+                    return;
+                  }
                   setIsProcessing(true); 
-                  const res = await db.addUser(newUserData); 
+                  const res = isEditUserModal 
+                    ? await db.updateUser(selectedUserId!, editUserData)
+                    : await db.addUser(editUserData); 
                   setIsProcessing(false); 
                   if (res.success) {
-                    setIsNewUserModal(false); 
+                    setIsEditUserModal(false); 
+                    setIsNewUserModal(false);
                     setIsSuccessModal(true); 
                   } else {
                     alert(res.message);
@@ -705,7 +795,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                 className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-green-900/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50" 
                 disabled={isProcessing}
                >
-                  {isProcessing ? <Loader2 className="animate-spin" size={14}/> : <ShieldCheck size={14}/>} Save User
+                  {isProcessing ? <Loader2 className="animate-spin" size={14}/> : <ShieldCheck size={14}/>} {isEditUserModal ? 'Update Dossier' : 'Finalize & Register'}
                </button>
              )}
           </div>
@@ -715,88 +805,193 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
             switch(onboardingStep) {
               case 1: return (
                 <div className="space-y-6 mb-4">
-                   <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">1. Your Basic Information</h4>
-                   <div className="space-y-4">
-                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Full Name</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.name} onChange={e => setNewUserData({...newUserData, name: e.target.value})} placeholder="e.g. John Doe" /></div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">CNIC Number</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.cnic} onChange={e => setNewUserData({...newUserData, cnic: e.target.value})} placeholder="35201-0000000-0" /></div>
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.phone} onChange={e => setNewUserData({...newUserData, phone: e.target.value})} placeholder="03XXXXXXXXX" /></div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Email Address</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.email} onChange={e => setNewUserData({...newUserData, email: e.target.value})} placeholder="john@example.com" /></div>
+                   <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+                     <h4 className="text-xs font-black uppercase text-slate-900 pb-4 flex items-center gap-2">
+                       <User size={16} className="text-blue-600"/> General Information
+                     </h4>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Full Name *</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.name} onChange={e => setEditUserData({...editUserData, name: e.target.value})} placeholder="e.g. John Smith" /></div>
+                        
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Username *</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.username} onChange={e => setEditUserData({...editUserData, username: e.target.value})} placeholder="PPPoE Username" /></div>
+                        
+                        <PasswordInput label="Password *" value={editUserData.password || ''} onChange={v => setEditUserData({...editUserData, password: v})} showStrength />
+                        
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Assigned Seller / Dealer</label>
-                          <select 
-                            className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900 appearance-none"
-                            value={newUserData.dealerId || ''}
-                            onChange={e => setNewUserData({...newUserData, dealerId: e.target.value})}
-                          >
-                            <option value="">System Default</option>
-                            {state.staff.filter(s => s.role === Role.DEALER || s.role === Role.ADMIN).map(s => (
-                              <option key={s.email} value={s.dealerCode || s.email}>{s.name} ({s.role})</option>
-                            ))}
+                          <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Confirm Password *</label>
+                          <input 
+                            type="password"
+                            className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" 
+                            value={confirmPassword} 
+                            onChange={e => setConfirmPassword(e.target.value)} 
+                            placeholder="Confirm Password"
+                          />
+                        </div>
+
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">CNIC Number *</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.cnic} onChange={e => setEditUserData({...editUserData, cnic: e.target.value})} placeholder="e.g: 42201-1234567-8" /></div>
+                        
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Email</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.email} onChange={e => setEditUserData({...editUserData, email: e.target.value})} placeholder="e.g: john@example.com" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Phone</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.phone} onChange={e => setEditUserData({...editUserData, phone: e.target.value})} placeholder="e.g: 0213-4123456" /></div>
+                        
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Mobile *</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.secondaryPhone} onChange={e => setEditUserData({...editUserData, secondaryPhone: e.target.value})} placeholder="e.g: 0333-12345678" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Address *</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.address} onChange={e => setEditUserData({...editUserData, address: e.target.value})} placeholder="e.g: Block #12 Phase 5" /></div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Sub Area *</label>
+                          <select className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm appearance-none" value={editUserData.subarea} onChange={e => setEditUserData({...editUserData, subarea: e.target.value})}>
+                            <option value="">Select Sub Area</option>
+                            {subAreas.map(sa => <option key={sa} value={sa}>{sa}</option>)}
                           </select>
                         </div>
-                      </div>
+                        
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Invoice With Tax</label>
+                          <select className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.invoiceWithTax ? 'true' : 'false'} onChange={e => setEditUserData({...editUserData, invoiceWithTax: e.target.value === 'true'})}>
+                            <option value="false">Disable</option>
+                            <option value="true">Enable</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Tax Exemption</label>
+                          <select className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.taxExemption ? 'true' : 'false'} onChange={e => setEditUserData({...editUserData, taxExemption: e.target.value === 'true'})}>
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                           <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Assigned Seller / Dealer</label>
+                           <select 
+                              className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm"
+                              value={editUserData.dealerId || ''}
+                              onChange={e => setEditUserData({...editUserData, dealerId: e.target.value})}
+                           >
+                              <option value="">System Default</option>
+                              {state.staff.filter(s => s.role === Role.DEALER || s.role === Role.ADMIN || s.role === Role.MANAGER).map(s => (
+                                 <option key={s.email} value={s.dealerCode || s.email}>{s.name} ({s.role})</option>
+                              ))}
+                           </select>
+                        </div>
+
+                        {isEditUserModal && (
+                          <div className="space-y-1">
+                             <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Account Status</label>
+                             <select className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.status} onChange={e => setEditUserData({...editUserData, status: e.target.value as UserStatus})}>
+                                {Object.values(UserStatus).map(s => <option key={s} value={s}>{s}</option>)}
+                             </select>
+                          </div>
+                        )}
+
+                        {isEditUserModal && (
+                          <div className="space-y-1">
+                             <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Expiry Date</label>
+                             <input type="date" className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.expiryDate ? editUserData.expiryDate.split('T')[0] : ''} onChange={e => setEditUserData({...editUserData, expiryDate: e.target.value})} />
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-4 p-4 bg-white border border-slate-100 rounded-xl shadow-sm self-end">
+                           <label className="text-[10px] font-black text-slate-400 uppercase flex-1">Auto Renewal</label>
+                           <button 
+                             onClick={() => setEditUserData({...editUserData, autoRenewal: !editUserData.autoRenewal})}
+                             className={`w-12 h-6 rounded-full transition-all relative ${editUserData.autoRenewal ? 'bg-green-500' : 'bg-slate-200'}`}
+                           >
+                             <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${editUserData.autoRenewal ? 'left-7' : 'left-1'}`} />
+                           </button>
+                        </div>
+                        
+                        <div className="col-span-1 md:col-span-2 space-y-1">
+                           <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Internal Admin Notes</label>
+                           <textarea className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm h-20 resize-none" placeholder="Private notes visible only to admins..." value={editUserData.internalNotes || ''} onChange={e => setEditUserData({...editUserData, internalNotes: e.target.value})} />
+                        </div>
+                     </div>
                    </div>
                 </div>
               );
               case 2: return (
                 <div className="space-y-6 mb-4">
-                   <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">2. Internet Data Plan</h4>
-                   <div className="space-y-4">
-                      <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Select Bandwidth Tier</label>
-                      <div className="grid grid-cols-1 gap-2">
-                         {state.packages.map(p => (
-                           <button key={p.id} onClick={() => setNewUserData({...newUserData, packageId: p.id})} className={`p-4 sm:p-5 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${newUserData.packageId === p.id ? 'border-blue-600 bg-blue-50 shadow-md text-slate-900' : 'bg-slate-50 border-transparent text-slate-900'}`}>
-                              <div><p className="font-black uppercase text-xs">{p.name}</p><p className="text-[9px] font-bold text-slate-400">{p.speed} • Rs.{p.price}</p></div>
-                              {newUserData.packageId === p.id && <CheckCircle size={20} className="text-blue-600"/>}
-                           </button>
-                         ))}
-                      </div>
+                   <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+                     <h4 className="text-xs font-black uppercase text-slate-900 pb-4 flex items-center gap-2">
+                       <Network size={16} className="text-indigo-600"/> Connection Information
+                     </h4>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase ml-1">Connection Type *</label>
+                          <select className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.nasConnectionType} onChange={e => setEditUserData({...editUserData, nasConnectionType: e.target.value as any})}>
+                            <option value="PPPoE">Radius PPPoE</option>
+                            <option value="Hotspot">Hotspot</option>
+                            <option value="Static IP">Static IP</option>
+                            <option value="Manual">Manual</option>
+                          </select>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase ml-1">NAS *</label>
+                          <select 
+                            className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm"
+                            value={editUserData.nasId || ''}
+                            onChange={e => setEditUserData({...editUserData, nasId: e.target.value})}
+                          >
+                            <option value="">Select NAS</option>
+                            {state.nas.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-slate-400 uppercase ml-1">MAC Lock</label>
+                          <select className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.macLock ? 'true' : 'false'} onChange={e => setEditUserData({...editUserData, macLock: e.target.value === 'true'})}>
+                            <option value="false">Disable</option>
+                            <option value="true">Enable</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">MAC Address</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.macAddress} onChange={e => setEditUserData({...editUserData, macAddress: e.target.value})} placeholder="e.g: C8:3A:35:36:9D:00" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Box/POP Number</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.boxNumber} onChange={e => setEditUserData({...editUserData, boxNumber: e.target.value})} placeholder="e.g: 001" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Box/POP Address</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.boxAddress} onChange={e => setEditUserData({...editUserData, boxAddress: e.target.value})} placeholder="e.g: Hyperstar" /></div>
+                        
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Uplink Port</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.uplinkPort} onChange={e => setEditUserData({...editUserData, uplinkPort: e.target.value})} placeholder="e.g: 4" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fiber Code/ID</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.fiberCode} onChange={e => setEditUserData({...editUserData, fiberCode: e.target.value})} placeholder="e.g: 6 Slate" /></div>
+                        
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Fiber Colors</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.fiberColor} onChange={e => setEditUserData({...editUserData, fiberColor: e.target.value})} placeholder="e.g: Blue" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">MC/Switch/ONU Board</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.onuBoard} onChange={e => setEditUserData({...editUserData, onuBoard: e.target.value})} placeholder="e.g: PoE Switch" /></div>
+                        
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Switch/ONU Port</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.onuPort} onChange={e => setEditUserData({...editUserData, onuPort: e.target.value})} placeholder="e.g: 8" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Backup Connection</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.backupConnection} onChange={e => setEditUserData({...editUserData, backupConnection: e.target.value})} placeholder="e.g: Ocean Mall" /></div>
+                        
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Electricity Type/Socket</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.electricityType} onChange={e => setEditUserData({...editUserData, electricityType: e.target.value})} placeholder="e.g: Type D" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Cable Type</label><input className="w-full p-4 bg-white border border-slate-100 rounded-xl font-bold text-sm text-slate-900 shadow-sm" value={editUserData.cableType} onChange={e => setEditUserData({...editUserData, cableType: e.target.value})} placeholder="e.g: CAT6 / Fiber" /></div>
+                     </div>
                    </div>
                 </div>
               );
               case 3: return (
                 <div className="space-y-6 mb-4">
-                   <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">3. Network & Location</h4>
-                   <div className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Area / Sector</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.area} onChange={e => setNewUserData({...newUserData, area: e.target.value})} placeholder="Main Sector" /></div>
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Subarea / Block</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.subarea} onChange={e => setNewUserData({...newUserData, subarea: e.target.value})} placeholder="Block A" /></div>
-                      </div>
-                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Physical Address</label><textarea className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900 h-20" value={newUserData.address || ''} onChange={e => setNewUserData({...newUserData, address: e.target.value})} placeholder="House #, Street, etc." /></div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">PPPoE Link ID</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.pppoeId} onChange={e => setNewUserData({...newUserData, pppoeId: e.target.value})} /></div>
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">NAS Identity</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.nasId} onChange={e => setNewUserData({...newUserData, nasId: e.target.value})} /></div>
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Network Station (OLT)</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.oltNode} onChange={e => setNewUserData({...newUserData, oltNode: e.target.value})} /></div>
-                        <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">VLAN Index</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm text-slate-900" value={newUserData.vlanId} onChange={e => setNewUserData({...newUserData, vlanId: e.target.value})} /></div>
-                      </div>
+                   <div className="bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+                     <h4 className="text-xs font-black uppercase text-slate-900 pb-4 flex items-center gap-2">
+                       <PackageIcon size={16} className="text-emerald-600"/> Internet Data Plan
+                     </h4>
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {state.packages.map(p => (
+                          <button key={p.id} onClick={() => setEditUserData({...editUserData, packageId: p.id})} className={`p-5 rounded-2xl border-2 text-left flex items-center justify-between transition-all ${editUserData.packageId === p.id ? 'border-blue-600 bg-blue-50 shadow-md' : 'bg-white border-slate-100 hover:border-slate-200'}`}>
+                             <div>
+                               <p className="font-black uppercase text-[10px] text-slate-900">{p.name}</p>
+                               <p className="text-[9px] font-black text-blue-600 mt-1">{p.speed} • Rs. {p.price.toLocaleString()}</p>
+                             </div>
+                             {editUserData.packageId === p.id && <CheckCircle size={20} className="text-blue-600"/>}
+                          </button>
+                        ))}
+                     </div>
                    </div>
                 </div>
               );
               case 4: return (
-                <div className="space-y-6 mb-4 text-slate-900">
-                   <h4 className="text-xs font-black uppercase text-slate-300 border-b border-white/5 pb-2 italic">4. Signup Credentials</h4>
-                   <div className="space-y-4">
-                      <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase ml-1">Login Username</label><input className="w-full p-4 bg-slate-50 border-none rounded-xl font-black text-sm" value={newUserData.username} onChange={e => setNewUserData({...newUserData, username: e.target.value})} /></div>
-                      <PasswordInput label="Access Secret" value={newUserData.password || ''} onChange={v => setNewUserData({...newUserData, password: v})} showStrength />
-                   </div>
-                </div>
-              );
-              case 5: return (
                 <div className="space-y-8 text-center py-10 mb-4">
-                   <h4 className="text-xl font-black uppercase text-slate-300 italic">5. Register Me Now</h4>
-                   <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed max-w-md mx-auto">
-                      Ready to create account. This will enable portal access and activate the internet connection.
-                   </p>
-                   <div className="p-6 bg-green-50 border border-green-100 rounded-3xl inline-flex items-center gap-4 shadow-sm">
-                      <ShieldCheck className="text-green-600" size={32}/>
-                      <div className="text-left">
-                         <p className="text-[10px] font-black text-green-900 uppercase">System Ready</p>
-                         <p className="text-[8px] font-black text-green-600 uppercase">Ready to Register</p>
-                      </div>
+                   <div className="w-24 h-24 bg-green-50 text-green-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 shadow-inner">
+                      <ShieldCheck size={48} className="animate-bounce" />
                    </div>
+                   <h4 className="text-2xl font-black uppercase text-slate-900 italic tracking-tighter">Ready to Register</h4>
+                   <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] leading-relaxed max-w-sm mx-auto">
+                      All protocols verified. Subscriber account will be provisioned with full portal access and selected bandwidth parameters.
+                   </p>
                 </div>
               );
               default: return null;
@@ -860,6 +1055,60 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
               )}
            </div>
          )}
+      </Modal>
+
+      {/* Bulk Seller Change Modal */}
+      <Modal
+        isOpen={isBulkSellerModal}
+        onClose={() => setIsBulkSellerModal(false)}
+        title="Reassign Seller Identity"
+        icon={<UserPlus size={24} className="text-indigo-600" />}
+        maxWidth="max-w-md"
+        footer={
+           <button 
+             onClick={executeBulkSellerChange}
+             disabled={!selectedSellerId}
+             className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-900/30 active:scale-95 transition-all disabled:opacity-30"
+           >
+              Transfer Registry Ownership
+           </button>
+        }
+      >
+         <div className="space-y-6">
+            <div className="p-6 bg-slate-50 border border-slate-100 rounded-3xl">
+               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Select Target Dealer/Seller</p>
+               <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar pr-2">
+                  {state.staff.filter(s => [Role.DEALER, Role.SUB_DEALER, Role.FRANCHISE].includes(s.role as Role)).map(seller => (
+                     <button
+                        key={seller.id}
+                        onClick={() => setSelectedSellerId(seller.email || seller.id)}
+                        className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
+                           selectedSellerId === (seller.email || seller.id)
+                              ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg'
+                              : 'bg-white border-slate-100 text-slate-900 hover:border-indigo-600'
+                        }`}
+                     >
+                        <div className="flex items-center gap-3">
+                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-black text-[10px] ${selectedSellerId === (seller.email || seller.id) ? 'bg-white/20' : 'bg-indigo-50 text-indigo-600'}`}>
+                              {seller.name.charAt(0)}
+                           </div>
+                           <div className="text-left">
+                              <p className="text-[11px] font-black uppercase italic">{seller.name}</p>
+                              <p className={`text-[8px] font-bold uppercase tracking-tighter ${selectedSellerId === (seller.email || seller.id) ? 'text-indigo-200' : 'text-slate-400'}`}>{seller.role}</p>
+                           </div>
+                        </div>
+                        {selectedSellerId === (seller.email || seller.id) && <CheckCircle size={18} />}
+                     </button>
+                  ))}
+               </div>
+            </div>
+            <div className="p-6 bg-amber-50 border border-amber-100 rounded-3xl flex items-start gap-4">
+               <AlertTriangle className="text-amber-500 shrink-0" size={20} />
+               <p className="text-[10px] font-black text-amber-900 uppercase leading-relaxed italic">
+                  Critical: This will move {selectedIds.size} subscribers to the new seller. This affects billing cycles and reseller commissions.
+               </p>
+            </div>
+         </div>
       </Modal>
 
       {/* 3. LOG COLLECTION MODAL */}
@@ -939,83 +1188,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
          </div>
       </Modal>
 
-      {/* 4. EDIT USER MODAL */}
-      <Modal
-        isOpen={isEditUserModal && !!selectedUser}
-        onClose={() => setIsEditUserModal(false)}
-        title="Edit User"
-        icon={<Pencil size={22} className="text-blue-400" />}
-        message={`Ref: ${selectedUser?.connectionId}`}
-        maxWidth="max-w-2xl"
-        scrollable
-        onConfirm={handleUpdateDossier}
-        confirmLabel="Save Changes"
-        isLoading={isProcessing}
-      >
-         <div className="space-y-5 mb-4">
-            <div>
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 flex items-center gap-2"><UserCircle size={12}/> Identity</p>
-               <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.name} onChange={e => setEditUserData({...editUserData, name: e.target.value})} /></div>
-                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.phone} onChange={e => setEditUserData({...editUserData, phone: e.target.value})} /></div>
-                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">CNIC</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.cnic} onChange={e => setEditUserData({...editUserData, cnic: e.target.value})} /></div>
-                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label><input type="email" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-indigo-400 outline-none transition-all" value={editUserData.email || ''} onChange={e => setEditUserData({...editUserData, email: e.target.value})} /></div>
-                  <div className="space-y-1 col-span-2">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Seller / Dealer</label>
-                     <select 
-                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 focus:border-indigo-400 outline-none transition-all appearance-none"
-                        value={editUserData.dealerId || ''}
-                        onChange={e => setEditUserData({...editUserData, dealerId: e.target.value})}
-                     >
-                        <option value="">System Default</option>
-                        {state.staff.filter(s => s.role === Role.DEALER || s.role === Role.ADMIN || s.role === Role.MANAGER).map(s => (
-                           <option key={s.email} value={s.dealerCode || s.email}>{s.name} ({s.role})</option>
-                        ))}
-                     </select>
-                  </div>
-               </div>
-            </div>
 
-            <div className="border-t border-slate-100 pt-5">
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 flex items-center gap-2"><Zap size={12}/> Network Config</p>
-               <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Connection ID</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 font-mono focus:border-violet-400 outline-none transition-all" value={editUserData.connectionId || ''} onChange={e => setEditUserData({...editUserData, connectionId: e.target.value})} /></div>
-                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">PPPoE Username</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 font-mono focus:border-violet-400 outline-none transition-all" value={editUserData.pppoeId || ''} onChange={e => setEditUserData({...editUserData, pppoeId: e.target.value})} /></div>
-                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Area / Sector</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-violet-400 outline-none transition-all" value={editUserData.area || ''} onChange={e => setEditUserData({...editUserData, area: e.target.value})} /></div>
-                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Subarea / Block</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-violet-400 outline-none transition-all" value={editUserData.subarea || ''} onChange={e => setEditUserData({...editUserData, subarea: e.target.value})} /></div>
-                  <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Login Username</label><input className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:border-violet-400 outline-none transition-all" value={editUserData.username || ''} onChange={e => setEditUserData({...editUserData, username: e.target.value})} /></div>
-               </div>
-            </div>
-
-            {/* Row 3: Status & Billing */}
-            <div className="border-t border-slate-100 pt-5">
-               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-3 flex items-center gap-2"><Calendar size={12}/> Status & Billing</p>
-               <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Account Status</label>
-                     <select className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 focus:border-rose-400 outline-none transition-all text-sm" value={editUserData.status} onChange={e => setEditUserData({...editUserData, status: e.target.value as UserStatus})}>
-                        {Object.values(UserStatus).map(s => <option key={s} value={s}>{s}</option>)}
-                     </select>
-                  </div>
-                  <div className="space-y-1">
-                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Expiry Date</label>
-                     <input type="date" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-slate-900 focus:border-rose-400 outline-none transition-all" value={editUserData.expiryDate ? editUserData.expiryDate.split('T')[0] : ''} onChange={e => setEditUserData({...editUserData, expiryDate: e.target.value})} />
-                  </div>
-               </div>
-            </div>
-
-            {/* Row 4: Address */}
-            <div className="border-t border-slate-100 pt-5">
-               <div className="space-y-1"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Address</label><textarea className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold h-20 text-slate-900 focus:border-indigo-400 outline-none transition-all resize-none" value={editUserData.address} onChange={e => setEditUserData({...editUserData, address: e.target.value})} /></div>
-            </div>
-
-            {/* Row 5: Internal Notes */}
-            <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
-               <label className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-2 block flex items-center gap-1"><Info size={10}/> Internal Admin Notes</label>
-               <textarea className="w-full p-3 bg-white border border-amber-100 rounded-xl font-bold text-sm text-slate-900 h-16 outline-none focus:border-amber-400 transition-all resize-none" placeholder="Private notes visible only to admins..." value={editUserData.internalNotes || ''} onChange={e => setEditUserData({...editUserData, internalNotes: e.target.value})} />
-            </div>
-         </div>
-      </Modal>
 
       {/* 5. AUTH RESET MODAL */}
       <Modal
@@ -1459,21 +1632,37 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
         scrollable
         onConfirm={async () => {
           setIsProcessing(true);
-          // Mock parser for demo - in real app would parse CSV properly
           const lines = importCsvInput.split('\n').filter(l => l.trim());
+          let successCount = 0;
+          let conflictCount = 0;
+          let errors = [];
+
           for(const line of lines) {
               const parts = line.split(',').map(p => p.trim());
               if (parts.length >= 2) {
-                  await db.addUser({
+                  const res = await db.addUser({
                       name: parts[0],
                       phone: parts[1],
                       packageId: parts[2] || '',
                       connectionId: parts[3] || `TMP-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
-                      status: UserStatus.PENDING_VERIFICATION
+                      status: UserStatus.PENDING_VERIFICATION,
+                      username: parts[4] || parts[0].toLowerCase().replace(/\s/g, '') + Math.floor(100 + Math.random() * 900)
                   } as any);
+                  
+                  if (res.success) successCount++;
+                  else {
+                    conflictCount++;
+                    errors.push(`${parts[0]}: ${res.message}`);
+                  }
               }
           }
-          db.logNotification('all', 'success', 'Import Complete', `Successfully imported ${lines.length} potential users.`);
+          
+          if (conflictCount > 0) {
+            alert(`Import partially successful.\n\nSuccess: ${successCount}\nConflicts: ${conflictCount}\n\nFirst few errors:\n${errors.slice(0, 3).join('\n')}`);
+          } else {
+            db.logNotification('all', 'success', 'Import Complete', `Successfully imported ${successCount} users into the registry.`);
+          }
+          
           setIsProcessing(false);
           setIsImportUsersModal(false);
           setImportCsvInput('');
@@ -1485,13 +1674,13 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
          <div className="space-y-8 mb-4">
             <div className="bg-blue-50/5 border border-blue-500/20 p-6 rounded-2xl">
                <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-2 flex items-center gap-2"><Info size={14}/> CSV Format Guideline</h4>
-               <p className="text-[10px] font-bold text-slate-400 uppercase leading-relaxed">Format: <code className="bg-slate-800 px-2 py-0.5 rounded text-blue-400 border border-slate-700">Name, Phone, Package_ID, Connection_ID</code></p>
+               <p className="text-[10px] font-bold text-slate-400 uppercase leading-relaxed">Format: <code className="bg-slate-800 px-2 py-0.5 rounded text-blue-400 border border-slate-700">Name, Phone, Package_ID, Connection_ID, Username</code></p>
             </div>
             <div className="space-y-3">
                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Paste CSV Data or List</label>
                <textarea 
                  className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-mono text-sm outline-none focus:border-blue-600 transition-all custom-scrollbar resize-none text-slate-900" 
-                 placeholder="John Doe, 03001234567, fiber-basic, CO-8822..."
+                 placeholder="John Doe, 03001234567, fiber-basic, CO-8822, jdoe123..."
                  value={importCsvInput}
                  onChange={e => setImportCsvInput(e.target.value)}
                />

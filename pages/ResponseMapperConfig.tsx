@@ -195,21 +195,131 @@ const ResponseMapperConfig: React.FC<{ state: AppState }> = ({ state }) => {
                         </div>
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex justify-between">
-                            Mapping Configuration (JSON)
-                            <span className="text-blue-500 font-bold lowercase tracking-normal">Config-Driven Architecture</span>
-                        </label>
-                        <textarea 
-                            className="w-full p-6 bg-slate-900 text-blue-400 font-mono text-xs rounded-[2.5rem] min-h-[400px] resize-none border-4 border-slate-800 focus:border-blue-500/50 transition-all outline-none"
-                            value={JSON.stringify(selectedMapping.mappings, null, 2)}
-                            onChange={e => {
-                                try {
-                                    const parsed = JSON.parse(e.target.value);
-                                    setSelectedMapping({ ...selectedMapping, mappings: parsed });
-                                } catch (err) {}
-                            }}
-                        />
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                Visual Protocol Mapping
+                                <span className="px-2 py-0.5 bg-emerald-100 text-emerald-600 rounded text-[8px] font-black tracking-normal">Zero-Code</span>
+                            </label>
+                            <button 
+                                onClick={() => {
+                                    if(confirm('Revert to last saved configuration?')) {
+                                        fetchMappings();
+                                        setIsModalOpen(false);
+                                    }
+                                }} 
+                                className="px-3 py-1.5 bg-slate-100 text-slate-500 hover:text-slate-800 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
+                            >
+                                <RotateCw size={12} /> Rollback
+                            </button>
+                        </div>
+                        
+                        {/* Fields Mapping */}
+                        <div className="p-6 bg-slate-50 rounded-3xl border border-slate-200 space-y-4">
+                            <h5 className="text-[10px] font-black text-slate-900 uppercase tracking-widest italic border-b border-slate-200 pb-2">Data Field Mapping</h5>
+                            {Object.entries(selectedMapping.mappings.fields || {}).map(([key, value], idx) => (
+                                <div key={idx} className="flex gap-2 items-center">
+                                    <input 
+                                        className="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold"
+                                        placeholder="Provider Field (e.g. data.id)"
+                                        value={key}
+                                        onChange={e => {
+                                            const newFields = { ...selectedMapping.mappings.fields };
+                                            delete newFields[key];
+                                            newFields[e.target.value] = value;
+                                            setSelectedMapping({ ...selectedMapping, mappings: { ...selectedMapping.mappings, fields: newFields } });
+                                        }}
+                                    />
+                                    <ChevronRight size={16} className="text-slate-400" />
+                                    <select 
+                                        className="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold"
+                                        value={value as string}
+                                        onChange={e => {
+                                            const newFields = { ...selectedMapping.mappings.fields };
+                                            newFields[key] = e.target.value;
+                                            setSelectedMapping({ ...selectedMapping, mappings: { ...selectedMapping.mappings, fields: newFields } });
+                                        }}
+                                    >
+                                        <option value="transactionId">Internal: Transaction ID</option>
+                                        <option value="amount">Internal: Amount</option>
+                                        <option value="currency">Internal: Currency</option>
+                                        <option value="customerEmail">Internal: Customer Email</option>
+                                    </select>
+                                    <button 
+                                        onClick={() => {
+                                            const newFields = { ...selectedMapping.mappings.fields };
+                                            delete newFields[key];
+                                            setSelectedMapping({ ...selectedMapping, mappings: { ...selectedMapping.mappings, fields: newFields } });
+                                        }}
+                                        className="p-3 text-slate-400 hover:text-rose-500 bg-white border border-slate-200 rounded-xl"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            ))}
+                            <button 
+                                onClick={() => setSelectedMapping({ 
+                                    ...selectedMapping, 
+                                    mappings: { ...selectedMapping.mappings, fields: { ...selectedMapping.mappings.fields, 'new_field': 'transactionId' } } 
+                                })}
+                                className="w-full py-3 bg-white border border-dashed border-slate-300 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-blue-500 hover:text-blue-600 transition-all"
+                            >
+                                + Add Field Map
+                            </button>
+                        </div>
+
+                        {/* Status Mapping */}
+                        <div className="p-6 bg-slate-50 rounded-3xl border border-slate-200 space-y-4">
+                            <h5 className="text-[10px] font-black text-slate-900 uppercase tracking-widest italic border-b border-slate-200 pb-2">Status Transformation</h5>
+                            {Object.entries(selectedMapping.mappings.status || {}).map(([key, value], idx) => (
+                                <div key={idx} className="flex gap-2 items-center">
+                                    <input 
+                                        className="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold"
+                                        placeholder="Provider Status (e.g. succeeded)"
+                                        value={key}
+                                        onChange={e => {
+                                            const newStatus = { ...selectedMapping.mappings.status };
+                                            delete newStatus[key];
+                                            newStatus[e.target.value] = value;
+                                            setSelectedMapping({ ...selectedMapping, mappings: { ...selectedMapping.mappings, status: newStatus } });
+                                        }}
+                                    />
+                                    <ChevronRight size={16} className="text-slate-400" />
+                                    <select 
+                                        className="flex-1 p-3 bg-white border border-slate-200 rounded-xl text-xs font-bold"
+                                        value={value as string}
+                                        onChange={e => {
+                                            const newStatus = { ...selectedMapping.mappings.status };
+                                            newStatus[key] = e.target.value;
+                                            setSelectedMapping({ ...selectedMapping, mappings: { ...selectedMapping.mappings, status: newStatus } });
+                                        }}
+                                    >
+                                        <option value="SUCCESS">Internal: SUCCESS</option>
+                                        <option value="FAILED">Internal: FAILED</option>
+                                        <option value="PENDING">Internal: PENDING</option>
+                                    </select>
+                                    <button 
+                                        onClick={() => {
+                                            const newStatus = { ...selectedMapping.mappings.status };
+                                            delete newStatus[key];
+                                            setSelectedMapping({ ...selectedMapping, mappings: { ...selectedMapping.mappings, status: newStatus } });
+                                        }}
+                                        className="p-3 text-slate-400 hover:text-rose-500 bg-white border border-slate-200 rounded-xl"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            ))}
+                            <button 
+                                onClick={() => setSelectedMapping({ 
+                                    ...selectedMapping, 
+                                    mappings: { ...selectedMapping.mappings, status: { ...selectedMapping.mappings.status, 'new_status': 'SUCCESS' } } 
+                                })}
+                                className="w-full py-3 bg-white border border-dashed border-slate-300 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-blue-500 hover:text-blue-600 transition-all"
+                            >
+                                + Add Status Map
+                            </button>
+                        </div>
                     </div>
                 </div>
 

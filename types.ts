@@ -495,6 +495,8 @@ export interface ISPUser {
   graceDaysRemaining?: number;
   autoRenewal?: boolean;
   invoiceWithTax?: boolean;
+  taxExemption?: boolean;
+  macLock?: boolean;
   pppoeId?: string;
   nasId?: string;
   vlanId?: string;
@@ -1450,6 +1452,16 @@ export interface TechnicalKeys {
   smtpUser: string;
   smtpPass: string;
   fcmServerKey?: string;
+  supabaseServiceRoleKey?: string;
+  resendApiKey?: string;
+  gmailAppPassword?: string;
+  brevoApiKey?: string;
+  mailgunApiKey?: string;
+  mailgunWebhookKey?: string;
+  mailgunPublicKey?: string;
+  cloudinaryUrl?: string;
+  upstashRedisUrl?: string;
+  upstashRedisToken?: string;
 }
 
 export interface PushConfig {

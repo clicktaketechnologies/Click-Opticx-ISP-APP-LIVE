@@ -34,14 +34,19 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
         }
     };
 
-    const handleClearStorage = () => {
+    const handleClearStorage = async () => {
         setIsClearingStorage(true);
         try {
+            // 1. Clear Local Buffer
             localStorage.clear();
             sessionStorage.clear();
-            db.logNotification('all', 'success', 'Registry Reset', 'Local storage and session nodes have been wiped.');
+            
+            // 2. Trigger Real-time Backend Pulse
+            await db.clearBackendCache();
+            
+            db.logNotification('all', 'success', 'Registry Reset', 'Local storage and cloud cache buffers have been synchronized.');
         } catch (err) {
-            db.logNotification('all', 'error', 'Reset Error', 'Failed to clear local registry nodes.');
+            db.logNotification('all', 'error', 'Reset Error', 'Failed to synchronize cache layers.');
         } finally {
             setTimeout(() => setIsClearingStorage(false), 800);
         }

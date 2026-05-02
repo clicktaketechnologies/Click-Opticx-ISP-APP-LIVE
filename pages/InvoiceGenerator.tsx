@@ -147,17 +147,19 @@ const InvoiceGenerator: React.FC<Props> = ({ state, preSelectedUserId, onNavigat
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 pb-12">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
         <div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-            <Calculator className="text-green-600" size={32} />
+          <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none uppercase">
+            <Calculator className="text-green-600" size={28} />
             Billing Engine
           </h2>
-          <p className="text-slate-500 font-medium">Auto-calculate service dues and generate digital invoices.</p>
+          <p className="text-[clamp(0.5rem,2vw,0.6rem)] text-slate-500 font-bold uppercase tracking-[0.3em] mt-2 italic border-l-4 border-green-500 pl-4">
+            Auto-calculate service dues and generate digital invoices
+          </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full md:w-auto shrink-0 justify-end">
           {[1, 2, 3].map(s => (
-            <div key={s} className={`w-10 h-2 rounded-full transition-all duration-500 ${step >= s ? 'bg-green-600 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-200'}`}></div>
+            <div key={s} className={`w-8 h-1.5 md:w-10 md:h-2 rounded-full transition-all duration-500 ${step >= s ? 'bg-green-600 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-200'}`}></div>
           ))}
         </div>
       </div>

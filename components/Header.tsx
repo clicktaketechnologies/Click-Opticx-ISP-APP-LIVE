@@ -98,7 +98,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
   };
 
   return (
-    <header className="h-[70px] bg-surface/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 flex items-center justify-between sticky top-0 z-[60] shadow-sm">
+    <header className="h-[60px] md:h-[70px] bg-surface/80 backdrop-blur-xl border-b border-white/5 px-3 md:px-8 flex items-center justify-between sticky top-0 z-[60] shadow-sm">
       {/* Page Transition Progress Bar */}
       {isPending && (
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-[#1570ef] z-[70] animate-progress-glow overflow-hidden">
@@ -106,30 +106,30 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
         </div>
       )}
 
-      <div className="flex items-center gap-4 md:gap-8 flex-1">
+      <div className="flex items-center gap-2 md:gap-8 flex-1 overflow-hidden">
         <button 
           onClick={toggleSidebar}
-          className="lg:hidden p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all active:scale-90"
+          className="lg:hidden p-1.5 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all active:scale-90 shrink-0"
         >
-          <Menu size={20} />
+          <Menu size={18} />
         </button>
 
-        <div className="flex items-center gap-3 pr-6 border-r border-slate-100 group cursor-pointer transition-all">
-           <div className="w-10 h-10 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-500">
+        <div className="flex items-center gap-2 md:gap-3 pr-4 md:pr-6 border-r border-slate-100 group cursor-pointer transition-all shrink-0">
+           <div className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-500">
               {(branding.logo || branding.logoSquare || branding.logoLight) ? (
                  <img 
                    src={branding.logoSquare || branding.logo || branding.logoLight} 
-                   className="w-full h-full object-contain p-1.5" 
+                   className="w-full h-full object-contain p-1" 
                    alt={branding.brandName || branding.businessName} 
                    onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/favicon.png'; }}
                  />
               ) : (
-                 <Globe size={18} className="text-blue-500 animate-pulse" />
+                 <Globe size={16} className="text-blue-500 animate-pulse" />
               )}
            </div>
-           <div className="hidden xl:block">
-              <h1 className="text-sm font-black uppercase tracking-tighter italic text-slate-900 leading-none">{branding.brandName || branding.businessName}</h1>
-              <p className="text-[8px] font-black text-blue-600 uppercase tracking-[0.3em] mt-1 italic opacity-60">Control Nexus</p>
+           <div className="hidden 2xl:block">
+              <h1 className="text-[10px] md:text-sm font-black uppercase tracking-tighter italic text-slate-900 leading-none">{branding.brandName || branding.businessName}</h1>
+              <p className="text-[7px] md:text-[8px] font-black text-blue-600 uppercase tracking-[0.3em] mt-1 italic opacity-60">Control Nexus</p>
            </div>
         </div>
 
@@ -152,27 +152,27 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
           )}
         </div>
         
-        <div className="hidden xxl:block">
+        <div className="hidden 2xl:block">
            {renderConnectionBadge()}
         </div>
       </div>
 
-      <div className="flex items-center gap-3 md:gap-4 ml-4">
+      <div className="flex items-center gap-2 md:gap-4 ml-2 shrink-0">
         <button 
           onClick={toggleTheme}
-          className="p-2.5 rounded-2xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
+          className="p-2 md:p-2.5 rounded-xl md:rounded-2xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all border border-transparent hover:border-slate-200 dark:hover:bg-slate-800 dark:hover:text-white"
           title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
         >
-          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
         </button>
         <div className="relative" ref={notifRef}>
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
-            className={`relative p-2.5 rounded-2xl transition-all duration-300 ${showNotifications ? 'bg-slate-950 text-white shadow-xl shadow-slate-900/20' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50 border border-transparent hover:border-slate-100'}`}
+            className={`relative p-2 md:p-2.5 rounded-xl md:rounded-2xl transition-all duration-300 ${showNotifications ? 'bg-slate-950 text-white shadow-xl shadow-slate-900/20' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50 border border-transparent hover:border-slate-100'}`}
           >
-            <Bell size={20} strokeWidth={showNotifications ? 3 : 2} />
+            <Bell size={18} md:size={20} strokeWidth={showNotifications ? 3 : 2} />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-600 text-white text-[8px] flex items-center justify-center rounded-lg font-black shadow-lg ring-4 ring-white animate-bounce">
+              <span className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-rose-600 text-white text-[7px] md:text-[8px] flex items-center justify-center rounded-lg font-black shadow-lg ring-2 md:ring-4 ring-white animate-bounce">
                 {unreadCount}
               </span>
             )}
@@ -233,17 +233,17 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
         
         <button 
           onClick={onProfileClick}
-          className="flex items-center gap-3 border-l border-white/10 pl-4 group transition-all"
+          className="flex items-center gap-2 md:gap-3 border-l border-white/10 pl-2 md:pl-4 group transition-all"
         >
           <div className="text-right hidden sm:block">
-            <p className="text-[11px] font-bold text-slate-900 dark:text-white leading-none mb-1">{user.name}</p>
-            <p className="badge badge-success !text-[8px] !py-0.5">{user.role}</p>
+            <p className="text-[10px] md:text-[11px] font-bold text-slate-900 dark:text-white leading-none mb-1">{user.name}</p>
+            <p className="badge badge-success !text-[7px] md:!text-[8px] !py-0.5">{user.role}</p>
           </div>
-          <div className="w-9 h-9 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center border border-white/5 overflow-hidden shrink-0 group-hover:scale-105 transition-all">
+          <div className="w-8 h-8 md:w-9 md:h-9 bg-slate-100 dark:bg-slate-800 rounded-lg md:rounded-xl flex items-center justify-center border border-white/5 overflow-hidden shrink-0 group-hover:scale-105 transition-all">
             {user.profileImage ? (
               <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
             ) : (
-              <UserCircle size={24} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
+              <UserCircle size={20} md:size={24} className="text-slate-400 group-hover:text-blue-500 transition-colors" />
             )}
           </div>
         </button>

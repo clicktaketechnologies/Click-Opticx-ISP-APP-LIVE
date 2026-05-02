@@ -64,16 +64,9 @@ const EmailControlCenter: React.FC<Props> = ({ state }) => {
 
   // ─── Tabs Configuration ───────────────────────────────────────────────────────
   const tabs = [
-    { id: 'monitor', label: 'Dashboard', icon: BarChart3, desc: 'Real-time telemetry' },
-    { id: 'master', label: 'Notification Master', icon: Sparkles, desc: 'Omni-channel hub' },
-    { id: 'templates', label: 'Smart Templates', icon: Layout, desc: 'WYSIWYG builder' },
-    { id: 'campaigns', label: 'Campaigns', icon: TrendingUp, desc: 'Mass dispatch' },
-    { id: 'push', label: 'Push Devices', icon: Mobile, desc: 'FCM management' },
-    { id: 'dispatch', label: 'Manual Dispatch', icon: Send, desc: 'One-click audience' },
-    { id: 'automation', label: 'Auto-Actions', icon: Zap, desc: 'Rule builder' },
-    { id: 'audiences', label: 'Audiences', icon: Users, desc: 'Segment filters' },
-    { id: 'logs', label: 'Gateway Logs', icon: Database, desc: 'Real-time stream' },
-    { id: 'setup', label: 'Comms Setup', icon: Settings, desc: 'Node config' },
+    { id: 'automation', label: 'Auto', icon: Zap, desc: 'Rule builder' },
+    { id: 'dispatch', label: 'Manual', icon: Send, desc: 'Audience builder' },
+    { id: 'setup', label: 'Providers', icon: Server, desc: 'Node config' },
   ];
 
   return (
@@ -288,15 +281,92 @@ const EmailControlCenter: React.FC<Props> = ({ state }) => {
         </div>
       )}
 
+      {/* ─── Page: Manual Dispatch ────────────────────────────────────────────── */}
+      {activeTab === 'dispatch' && (
+        <div className="space-y-8 animate-in slide-in-from-bottom-4">
+            <div className="bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm">
+                <div className="flex justify-between items-start mb-10">
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Manual Dispatch</h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Execute targeted campaigns</p>
+                    </div>
+                </div>
+                
+                <div className="space-y-6">
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Target Audience</label>
+                        <select className="w-full px-5 py-4 bg-white border border-slate-200 rounded-xl font-black text-sm outline-none focus:border-blue-500 transition-all">
+                            <option value="all">All Active Subscribers</option>
+                            <option value="unpaid">Unpaid Invoices</option>
+                            <option value="expiring">Expiring within 7 Days</option>
+                            <option value="offline">Currently Offline</option>
+                            <option value="dealers">All Resellers / Dealers</option>
+                            <option value="staff">Internal Staff</option>
+                        </select>
+                    </div>
+
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Message Template</label>
+                        <select className="w-full px-5 py-4 bg-white border border-slate-200 rounded-xl font-black text-sm outline-none focus:border-blue-500 transition-all">
+                            <option value="t1">Standard Reminder</option>
+                            <option value="t2">Service Outage Notice</option>
+                            <option value="t3">Holiday Greeting</option>
+                            <option value="t4">Promotional Offer</option>
+                        </select>
+                    </div>
+
+                    <button className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-blue-500/20 transition-all active:scale-95 flex items-center justify-center gap-3">
+                        <Send size={18} /> Execute Dispatch Protocol
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
+
+      {/* ─── Page: Automation ────────────────────────────────────────────── */}
+      {activeTab === 'automation' && (
+        <div className="space-y-8 animate-in slide-in-from-bottom-4">
+            <div className="bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm">
+                <div className="flex justify-between items-start mb-10">
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Automation Rules</h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System triggers and workflows</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    {[
+                        { title: 'Invoice Generated', desc: 'Triggered when a new invoice is created', enabled: true },
+                        { title: 'Payment Received', desc: 'Triggered upon successful payment', enabled: true },
+                        { title: 'Service Expiry', desc: 'Triggered 3 days before expiry', enabled: false },
+                        { title: 'Connection Lost', desc: 'Triggered if NAS reports node offline for > 15m', enabled: false },
+                    ].map((rule, idx) => (
+                        <div key={idx} className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center group hover:bg-white hover:shadow-xl transition-all">
+                            <div className="flex gap-4 items-center">
+                                <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center"><Zap size={20}/></div>
+                                <div>
+                                    <h4 className="text-sm font-black text-slate-900 uppercase italic">{rule.title}</h4>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{rule.desc}</p>
+                                </div>
+                            </div>
+                            <div className={`w-12 h-6 rounded-full relative p-1 transition-all ${rule.enabled ? 'bg-emerald-500' : 'bg-slate-200'}`}>
+                                <div className={`w-4 h-4 bg-white rounded-full absolute transition-all ${rule.enabled ? 'right-1' : 'left-1'}`}></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+      )}
+
       {/* Pages 3-9: Placeholder logic with premium aesthetics */}
-      {['templates', 'campaigns', 'push', 'dispatch', 'automation', 'audiences', 'logs'].includes(activeTab) && (
+      {['templates', 'campaigns', 'push', 'audiences', 'logs', 'monitor', 'master'].includes(activeTab) && activeTab !== 'monitor' && activeTab !== 'master' && (
         <div className="flex flex-col items-center justify-center h-[50vh] animate-in zoom-in-95">
             <div className="w-24 h-24 rounded-3xl bg-blue-500/10 flex items-center justify-center text-blue-500 animate-pulse mb-8">
                 <Command size={48} />
             </div>
             <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">{activeTab.replace('_', ' ')} Module</h3>
             <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.4em] mt-2">Provisioning in Progress • Phase 2 Deploy</p>
-            <button onClick={() => setActiveTab('monitor')} className="mt-8 px-8 py-3 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest">Back to Control Plane</button>
         </div>
       )}
     </div>

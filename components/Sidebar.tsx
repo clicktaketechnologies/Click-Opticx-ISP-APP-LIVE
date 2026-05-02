@@ -31,13 +31,14 @@ interface SidebarProps {
   role: string;
   onLogout: () => void;
   isOpen: boolean; 
+  onClose: () => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   businessName: string;
   state: AppState;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, isOpen, isCollapsed, onToggleCollapse, businessName }) => {
+const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, isOpen, onClose, isCollapsed, onToggleCollapse, businessName }) => {
   const state = db.getState();
   const branding = useBranding();
   const appearance = state.settings.appearance;
@@ -425,6 +426,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       {/* Mobile Overlay Background with Blur */}
       <div 
         className={`fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[110] lg:hidden transition-all duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} 
+        onClick={onClose}
       ></div>
 
       {/* Main Sidebar */}

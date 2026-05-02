@@ -10,6 +10,7 @@ import { PWAPrompt } from './components/PWAPrompt';
 import Modal from './components/shared/Modal';
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 import { initDualWrite } from './lib/db-adapter';
+import './public/design-system.css';
 
 // Helper to handle chunk loading errors (force reload on new deployments)
 const lazyWithRetry = (componentImport: () => Promise<any>) => 
@@ -194,6 +195,7 @@ const App: React.FC = () => {
   const [criticalAlert, setCriticalAlert] = useState<any>(null);
   const [globalSearchTerm, setGlobalSearchTerm] = useState('');
   const [isPending, startTransition] = useTransition();
+  const [navParams, setNavParams] = useState<any>(null);
 
   useEffect(() => {
     // 1. Subscribe to State Updates
@@ -222,17 +224,18 @@ const App: React.FC = () => {
     };
   }, []);
 
-  const handleLogin = async (credential: string, pass: string) => {
-    return await db.login(credential, pass);
+  const handleLogin = async (cred: string, pass: string, rememberMe?: boolean) => {
+    return await db.login(cred, pass, rememberMe);
   };
 
   const handleLogout = () => {
     db.commit({ auth: { isLoggedIn: false }, view: 'login' });
   };
 
-  const navigateTo = (page: string) => {
+  const navigateTo = (page: string, params: any = null) => {
     startTransition(() => {
       setCurrentPage(page);
+      setNavParams(params);
     });
   };
 
@@ -243,7 +246,7 @@ const App: React.FC = () => {
       case 'ai-central': return <AICentralDashboard state={dbState} />;
       case 'ai-calling': return <AICallingAdmin state={dbState} />;
       case 'ai-call-logs': return <AICallLogs state={dbState} />;
-      case 'users': return <UserManagement state={dbState} searchTerm={globalSearchTerm} />;
+      case 'users': return <UserManagement state={dbState} searchTerm={globalSearchTerm} navParams={navParams} />;
       case 'packages': return <PackagesPage state={dbState} />;
       case 'approval-desk': return <MasterApprovalDashboard state={dbState} />;
       case 'recovery': return <Recovery state={dbState} searchTerm={globalSearchTerm} />;
@@ -348,10 +351,14 @@ const App: React.FC = () => {
       <div className="flex min-h-screen bg-slate-50 overflow-hidden">
         <Sidebar
           current={currentPage}
-          onNavigate={navigateTo}
+          onNavigate={(p) => {
+            navigateTo(p);
+            if (isSidebarOpen) setIsSidebarOpen(false);
+          }}
           role={authState.role}
           onLogout={handleLogout}
           isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
           isCollapsed={isCollapsed}
           onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
           businessName={dbState.settings.branding.businessName}
@@ -366,7 +373,7 @@ const App: React.FC = () => {
         )}
         <div className={`flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 ${isCollapsed ? 'lg:pl-[70px]' : 'lg:pl-72'}`}>
           <Header
-            user={authState as any}
+            user={dbState.currentUser as any}
             toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             onProfileClick={() => navigateTo('admin-profile')}
             onLogout={handleLogout}

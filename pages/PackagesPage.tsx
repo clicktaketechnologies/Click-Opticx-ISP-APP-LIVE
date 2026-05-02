@@ -126,28 +126,28 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
   return (
     <div className="flex flex-col gap-8 overflow-hidden relative pb-12 animate-in fade-in duration-500">
       {/* 1. Header Zone */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1 shrink-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1 shrink-0">
         <div>
-           <h2 className="text-[clamp(1.5rem,5vw,2.5rem)] font-black text-slate-900 tracking-tighter uppercase italic leading-none flex items-center gap-4">
-             <Layers className="text-indigo-600" size={32} />
+           <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-black text-slate-900 tracking-tighter uppercase italic leading-none flex items-center gap-4">
+             <Layers className="text-indigo-600" size={28} />
              Connectivity Catalog
            </h2>
-           <p className="text-[clamp(0.6rem,2vw,0.75rem)] text-slate-400 font-black uppercase tracking-[0.4em] mt-3 italic">
+           <p className="text-[clamp(0.5rem,2vw,0.6rem)] text-slate-400 font-black uppercase tracking-[0.3em] mt-2 italic border-l-2 border-indigo-500 pl-3">
              Configure retail protocols & high-performance network tiers
            </p>
         </div>
-        <div className="flex gap-3 w-full md:w-auto">
+        <div className="flex flex-wrap gap-3 w-full md:w-auto shrink-0">
           {canManagePackages ? (
             <button 
               onClick={() => handleOpenModal()}
-              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black shadow-2xl active:scale-95 transition-all"
+              className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-slate-950 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] hover:bg-black shadow-2xl active:scale-95 transition-all"
             >
-              <Plus size={18} />
+              <Plus size={16} />
               <span>Deploy New Plan</span>
             </button>
           ) : (
-            <div className="px-5 py-3 bg-slate-100 text-slate-400 rounded-2xl text-[9px] font-black flex items-center gap-2 border border-slate-200 uppercase tracking-widest italic">
-               <Lock size={14} /> Read-Only Access
+            <div className="px-4 py-3 bg-slate-100 text-slate-400 rounded-xl text-[9px] font-black flex items-center gap-2 border border-slate-200 uppercase tracking-widest italic">
+               <Lock size={12} /> Read-Only Access
             </div>
           )}
         </div>

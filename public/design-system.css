@@ -77,6 +77,7 @@
   --grad-info: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
   --grad-violet: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
   --grad-cyan: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%);
+  --grad-rose: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%);
 
   /* Button System */
   --btn-height: 44px;

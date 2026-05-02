@@ -40,6 +40,8 @@ const Dashboard: React.FC<{
   const [reconcileType, setReconcileType] = useState<'user' | 'billing' | 'package' | 'entire'>('entire');
   const [isScanning, setIsScanning] = useState(false);
   const [isFixingAll, setIsFixingAll] = useState(false);
+  const [isQuickRenewModal, setIsQuickRenewModal] = useState(false);
+  const [quickSearch, setQuickSearch] = useState('');
 
   useEffect(() => {
     db.auditOverdueLoads();
@@ -100,6 +102,14 @@ const Dashboard: React.FC<{
       activeDealers: entityFilter === 'users' ? 0 : state.staff.filter(s => [Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(s.role as Role) && s.status === 'Active').length,
       periodRevenue: periodInvoices.reduce((acc, i) => acc + i.totalAmount, 0),
       periodRecovery: periodPayments.reduce((acc, p) => acc + p.amount, 0),
+      periodActivations: state.ledger.filter(l => {
+        const d = new Date(l.timestamp);
+        return d >= startDate && d <= endDate && l.type === LedgerType.DEBIT && l.description?.toLowerCase().includes('activation');
+      }).length,
+      periodVerifications: state.users.filter(u => {
+        const d = new Date(u.createdAt || Date.now());
+        return d >= startDate && d <= endDate && u.verificationStatus === VerificationStatus.VERIFIED;
+      }).length,
       ...db.getFiscalSummary(startDate, endDate)
     };
   }, [state.users, state.staff, state.invoices, state.payments, state.recoveryLogs, dateFilter, customStartDate, customEndDate, collectorFilter, entityFilter]);
@@ -244,55 +254,58 @@ const Dashboard: React.FC<{
     <div className="space-y-8 animate-in fade-in duration-500 pb-12">
       {/* 1. PAGE HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-          <h1 className="text-[clamp(1.5rem,5vw,2.5rem)] font-black text-slate-900 tracking-tighter uppercase italic leading-none">Dashboard</h1>
-          <p className="text-[clamp(0.6rem,2vw,0.75rem)] text-slate-400 font-black uppercase tracking-[0.4em] mt-3">Operational summary and system performance</p>
+        <div className="space-y-1 hidden md:block">
+          <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-black text-slate-900 tracking-tighter uppercase italic leading-none">Dashboard</h2>
+          <p className="text-[clamp(0.5rem,2vw,0.6rem)] text-slate-400 font-black uppercase tracking-[0.3em] mt-2 italic border-l-2 border-emerald-500 pl-3">Operational summary and system performance</p>
         </div>
         
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="flex bg-white p-1 rounded-xl border border-border-main shadow-sm shrink-0">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto shrink-0">
+          <div className="flex bg-white p-1 rounded-xl border border-border-main shadow-sm shrink-0 overflow-x-auto no-scrollbar">
             {[{ id: '3d', label: '3D' }, { id: '7d', label: '7D' }, { id: '30d', label: '30D' }, { id: 'all', label: 'All' }].map(f => (
               <button 
                 key={f.id} 
                 onClick={() => setDateFilter(f.id as any)} 
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${dateFilter === f.id ? 'bg-bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-main'}`}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${dateFilter === f.id ? 'bg-bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-main'}`}
               >
                 {f.label}
               </button>
             ))}
           </div>
-          <button className="btn btn-secondary btn-sm flex-1 md:flex-none">
-            <Download size={16} /> Export
+          <button className="flex-1 md:flex-none btn btn-secondary btn-sm flex items-center justify-center gap-2 px-4 py-2.5 text-[9px] font-black uppercase tracking-widest">
+            <Download size={14} /> Export
           </button>
-          <button onClick={() => onNavigate && onNavigate('users', { action: 'add-user' })} className="btn btn-primary btn-sm flex-1 md:flex-none">
-            <UserPlus size={16} /> New User
+          <button onClick={() => setIsQuickRenewModal(true)} className="flex-1 md:flex-none btn btn-secondary btn-sm bg-indigo-50 text-indigo-700 border-indigo-100 flex items-center justify-center gap-2 px-4 py-2.5 text-[9px] font-black uppercase tracking-widest">
+            <RefreshCcw size={14} /> Renew
+          </button>
+          <button onClick={() => onNavigate && onNavigate('users', { action: 'add-user' })} className="flex-1 md:flex-none btn btn-primary btn-sm flex items-center justify-center gap-2 px-4 py-2.5 text-[9px] font-black uppercase tracking-widest shadow-lg">
+            <UserPlus size={14} /> New
           </button>
         </div>
       </div>
 
       {/* 2. TOP METRIC CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-6">
         {[
-          { label: 'Total Users', value: (globalStats.totalUsers || 0).toLocaleString(), trend: '+2.5%', icon: Users, grad: 'var(--grad-primary)', sub: 'Cumulative Growth' },
-          { label: 'Active Subscribers', value: (globalStats.activeSubs || 0).toLocaleString(), trend: '+1.2%', icon: Activity, grad: 'var(--grad-success)', sub: 'Live Connections' },
-          { label: 'Revenue (Period)', value: `${state.settings.currency} ${(globalStats.periodRevenue || 0).toLocaleString()}`, trend: '+12%', icon: DollarSign, grad: 'var(--grad-info)', sub: 'Gross Invoiced' },
-          { label: 'Operational Profit', value: `${state.settings.currency} ${(globalStats.periodProfit || 0).toLocaleString()}`, trend: `${(((globalStats.periodProfit || 0) / (globalStats.periodRevenue || 1)) * 100).toFixed(1)}%`, icon: Banknote, grad: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', sub: 'Reseller Chain Income' },
-          { label: 'Pending KYC', value: (state.kycRequests || []).filter(r => r.status === 'Pending').length, trend: '-5%', icon: ShieldCheck, grad: 'var(--grad-violet)', sub: 'Verification Queue' },
+          { label: 'Total Users', value: (globalStats.totalUsers || 0).toLocaleString(), trend: '+2.5%', icon: Users, grad: 'var(--grad-primary)', sub: 'Cumulative Growth', path: 'users' },
+          { label: '7D Recovery', value: `${state.settings.currency} ${(globalStats.periodRecovery || 0).toLocaleString()}`, trend: '+18%', icon: HandCoins, grad: 'var(--grad-success)', sub: 'Collection Stream', path: 'recovery' },
+          { label: 'Unpaid Amount', value: `${state.settings.currency} ${(globalStats.totalUnpaidAmount || 0).toLocaleString()}`, trend: '-2%', icon: AlertCircle, grad: 'var(--grad-rose)', sub: 'Outstanding Debt', path: 'users' },
+          { label: 'Activations', value: (globalStats.periodActivations || 0).toLocaleString(), trend: '+12%', icon: Zap, grad: 'var(--grad-violet)', sub: 'New Provisions', path: 'packages' },
+          { label: 'Verified Users', value: (globalStats.periodVerifications || 0).toLocaleString(), trend: '+45%', icon: ShieldCheck, grad: 'var(--grad-info)', sub: 'KYC Completed', path: 'approval-desk' },
         ].map((kpi, idx) => (
-          <div key={idx} className="card relative transition-all overflow-hidden border-none shadow-2xl hover:scale-[1.02] active:scale-95 group" style={{ backgroundImage: kpi.grad }}>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-3xl -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-700" />
-            <div className="relative z-10 flex flex-col gap-6 text-white p-2">
+          <div key={idx} onClick={() => kpi.path && onNavigate?.(kpi.path)} className="card relative transition-all overflow-hidden border-none shadow-xl hover:scale-[1.02] active:scale-95 group cursor-pointer min-h-[160px] flex flex-col justify-center" style={{ background: kpi.grad }}>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-700" />
+            <div className="relative z-10 flex flex-col gap-5 text-white p-6">
               <div className="flex justify-between items-start">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-90">{kpi.label}</span>
-                <div className="p-2.5 rounded-2xl bg-white/25 backdrop-blur-md shadow-inner">
-                   <kpi.icon size={20} strokeWidth={2.5} />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/90 drop-shadow-sm">{kpi.label}</span>
+                <div className="p-2.5 rounded-2xl bg-white/20 backdrop-blur-md border border-white/20 shadow-inner">
+                   <kpi.icon size={20} strokeWidth={2.5} className="text-white" />
                 </div>
               </div>
               <div className="flex flex-col">
-                <h3 className="text-[clamp(1.75rem,5vw,2.5rem)] font-black italic tracking-tighter leading-none">{kpi.value}</h3>
+                <h3 className="text-[clamp(1.75rem,5vw,2.5rem)] font-black italic tracking-tighter leading-none drop-shadow-md text-white">{kpi.value}</h3>
                 <div className="flex items-center gap-2 mt-4">
-                   <span className="text-[9px] font-black uppercase bg-white/30 px-2.5 py-1 rounded-full border border-white/20">{kpi.trend}</span>
-                   <span className="text-[9px] font-black opacity-70 uppercase tracking-widest">{kpi.sub}</span>
+                   <span className="text-[9px] font-black uppercase bg-white/30 px-2.5 py-1 rounded-full border border-white/20 backdrop-blur-sm text-white">{kpi.trend}</span>
+                   <span className="text-[9px] font-black text-white/80 uppercase tracking-widest drop-shadow-sm">{kpi.sub}</span>
                 </div>
               </div>
             </div>
@@ -646,7 +659,72 @@ const Dashboard: React.FC<{
            </div>
         </div>
       </Modal>
-    </div>
+ 
+       <Modal
+         isOpen={isQuickRenewModal}
+         onClose={() => setIsQuickRenewModal(false)}
+         title="Quick Service Renewal"
+         icon={<RefreshCcw size={24} className="text-indigo-600" />}
+         message="Search for a subscriber to perform an instant renewal"
+         maxWidth="max-w-xl"
+       >
+          <div className="space-y-6 mb-4">
+             <div className="relative group">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={20} />
+                <input 
+                  type="text" 
+                  placeholder="Search Name, ID, or Phone..." 
+                  className="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] font-black text-sm outline-none focus:border-indigo-600 focus:bg-white transition-all shadow-inner"
+                  value={quickSearch}
+                  onChange={e => setQuickSearch(e.target.value)}
+                  autoFocus
+                />
+             </div>
+ 
+             <div className="max-h-64 overflow-y-auto custom-scrollbar space-y-2 pr-2">
+                {state.users.filter(u => 
+                  quickSearch.length > 1 && (
+                    u.name.toLowerCase().includes(quickSearch.toLowerCase()) || 
+                    (u.connectionId || '').toLowerCase().includes(quickSearch.toLowerCase()) ||
+                    (u.phone || '').includes(quickSearch)
+                  )
+                ).map(u => (
+                  <button 
+                    key={u.id}
+                    onClick={() => {
+                       setIsQuickRenewModal(false);
+                       onNavigate?.('users', { userId: u.id, action: 'renew' });
+                    }}
+                    className="w-full flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl hover:border-indigo-600 hover:shadow-lg transition-all group"
+                  >
+                     <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                           {u.name.charAt(0)}
+                        </div>
+                        <div className="text-left">
+                           <p className="text-sm font-black text-slate-900">{u.name}</p>
+                           <p className="text-[9px] text-slate-400 font-black uppercase tracking-tighter mt-0.5">{u.connectionId || 'CID_INTERNAL'}</p>
+                        </div>
+                     </div>
+                     <div className="flex items-center gap-3">
+                        <span className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase ${u.status === UserStatus.ACTIVE ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                           {u.status}
+                        </span>
+                        <ChevronRight size={18} className="text-slate-300 group-hover:text-indigo-600" />
+                     </div>
+                  </button>
+                ))}
+                {quickSearch.length > 1 && state.users.filter(u => u.name.toLowerCase().includes(quickSearch.toLowerCase())).length === 0 && (
+                   <p className="text-center py-8 text-[10px] font-black text-slate-300 uppercase tracking-widest italic">No Subscriber Nodes Found</p>
+                )}
+                {quickSearch.length <= 1 && (
+                   <p className="text-center py-8 text-[10px] font-black text-slate-300 uppercase tracking-widest italic">Begin typing to lookup registry...</p>
+                )}
+             </div>
+          </div>
+       </Modal>
+ 
+     </div>
   );
 };
 

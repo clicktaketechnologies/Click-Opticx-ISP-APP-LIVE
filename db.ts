@@ -4,6 +4,7 @@ import { getAuth, signInWithRedirect, signInWithPopup, getRedirectResult, Google
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
 import { getStorage, ref, uploadString, getDownloadURL, FirebaseStorage } from 'firebase/storage';
 import { io, Socket } from 'socket.io-client';
+import { supabase } from './lib/supabase';
 import { notificationManager } from './utils/NotificationManager';
 import { checkKYCLifecycle } from './utils/kycReminders';
 
@@ -610,7 +611,8 @@ const INITIAL_STATE: AppState = {
   networkNodes: [],
   networkMappings: [],
   authProviders: [
-    { id: 'PROV-1', name: 'Firebase', type: 'Provider', priority: 1, status: 'Active', apiKey: 'FIREBASE_AUTH' },
+    { id: 'PROV-S1', name: 'Supabase', type: 'Provider', priority: 1, status: 'Active', apiKey: 'SUPABASE_AUTH' },
+    { id: 'PROV-1', name: 'Firebase', type: 'Provider', priority: 10, status: 'Standby', apiKey: 'FIREBASE_AUTH' },
     { id: 'PROV-2', name: 'SendGrid', type: 'Email', priority: 2, status: 'Active', apiKey: '', metadata: { templateId: 'd-123', fromEmail: 'no-reply@opticx.com', fromName: 'Click Opticx' } },
     { id: 'PROV-3', name: 'Infobip', type: 'SMS', priority: 3, status: 'Active', apiKey: '', metadata: { senderId: 'Opticx', whatsappPhone: '2348000000', templateId: 'reset_tpl_01' } },
     { id: 'PROV-4', name: 'Resend', type: 'Email', priority: 4, status: 'Standby', apiKey: '', metadata: { fromEmail: 'auth@opticx.com' } },
@@ -678,24 +680,26 @@ class DB {
         this.state = { ...INITIAL_STATE, ...parsed };
 
         // --- SECURITY HARDENING: Session Expiry Check ---
-        if (this.state.auth?.isLoggedIn && this.state.auth.lastLoginAt) {
-          const lastLogin = new Date(this.state.auth.lastLoginAt).getTime();
+        if (this.state.auth?.isLoggedIn) {
+          const isPersistent = this.state.auth.isPersistent !== false;
+          const lastLogin = this.state.auth.lastLoginAt ? new Date(this.state.auth.lastLoginAt).getTime() : 0;
           const now = Date.now();
-          const sessionTimeout = 24 * 60 * 60 * 1000; // 24 Hours
+          const sessionTimeout = isPersistent ? (30 * 24 * 60 * 60 * 1000) : (24 * 60 * 60 * 1000); // 30 Days if remembered, 24 Hours if not
           
-          if (now - lastLogin > sessionTimeout) {
+          if (!isPersistent && !sessionStorage.getItem('clickoptix_active_session')) {
+            console.warn('[SECURITY] Non-persistent session detected without active tab. Logging out.');
+            this.state.auth = { isLoggedIn: false };
+            this.state.currentUser = undefined;
+            this.state.view = 'login';
+          } else if (lastLogin && (now - lastLogin > sessionTimeout)) {
             console.warn('[SECURITY] Session expired. Force logout triggered.');
             this.state.auth = { isLoggedIn: false };
             this.state.currentUser = undefined;
             this.state.view = 'login';
           }
-        } else if (this.state.auth?.isLoggedIn && !this.state.auth.lastLoginAt) {
-          // Legacy session without timestamp - force login for safety
-          this.state.auth = { isLoggedIn: false };
-          this.state.view = 'login';
         }
         
-        // If not logged in, always show login view regardless of cached view
+        // If not logged in, always show login view
         if (!this.state.auth?.isLoggedIn) {
           this.state.view = 'login';
         }
@@ -967,6 +971,35 @@ class DB {
       this.auth = getAuth(this.app);
       this.storage = getStorage(this.app);
       
+      // --- SUPABASE AUTH HYDRATION ---
+      supabase.auth.onAuthStateChange(async (event, session) => {
+        console.log(`[SUPABASE-AUTH] Event: ${event}`);
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          if (session?.user) {
+            // Find matched local user
+            const localUser = this.state.users.find(u => u.email === session.user.email);
+            const localStaff = this.state.staff.find(s => s.email === session.user.email);
+            
+            if (localUser || localStaff) {
+               console.log(`[SUPABASE-AUTH] Mapping session to node: ${session.user.email}`);
+               this.state.auth.isLoggedIn = true;
+               this.state.currentUser = (localStaff || localUser) as any;
+               this.notify();
+            }
+          }
+        } else if (event === 'SIGNED_OUT') {
+           // Only logout if not impersonating
+           if (!this.state.isImpersonating) {
+              this.state.auth.isLoggedIn = false;
+              this.state.currentUser = undefined;
+              this.notify();
+           }
+        } else if (event === 'PASSWORD_RECOVERY') {
+           console.log('[SUPABASE-AUTH] Recovery protocol detected. Flagging session for rotation.');
+           // We could trigger a view change here if needed
+        }
+      });
+
       // Handle Redirect Result via centralized method
       this.handleAuthRedirect();
 
@@ -1482,7 +1515,14 @@ class DB {
       if (this.state.invoices?.length > 300) this.state.invoices = this.state.invoices.slice(-300);
       if (this.state.notifications?.length > 100) this.state.notifications = this.state.notifications.slice(-100);
 
-      localStorage.setItem('clickopticx_v16_registry', JSON.stringify(this.state));
+      // --- SESSION PERSISTENCE CONTROL ---
+      if (this.state.auth && this.state.auth.isPersistent === false) {
+          // If not persistent, we don't save auth state to localStorage
+          const { auth, currentUser, ...persistentState } = this.state;
+          localStorage.setItem('clickopticx_v16_registry', JSON.stringify(persistentState));
+      } else {
+          localStorage.setItem('clickopticx_v16_registry', JSON.stringify(this.state));
+      }
     } catch (e: any) { 
       console.warn('[DB] local persistence failed:', e);
       if (e.name === 'QuotaExceededError') {
@@ -1899,7 +1939,7 @@ class DB {
     return MultiCloudService.getLogs();
   }
 
-  async login(credential: string, pass: string) {
+  async login(credential: string, pass: string, rememberMe: boolean = false) {
     if (!credential) return { success: false, message: 'Identity required for lookup.' };
     const identifier = credential.trim();
     const settings = this.state.settings.authSettings || INITIAL_STATE.settings.authSettings;
@@ -1939,8 +1979,14 @@ class DB {
         id: authenticatedEntity.id,
         email: authenticatedEntity.email,
         name: authenticatedEntity.name,
-        lastLoginAt: new Date().toISOString()
+        lastLoginAt: new Date().toISOString(),
+        isPersistent: !!rememberMe
       };
+
+      if (!rememberMe) {
+          sessionStorage.setItem('clickoptix_active_session', 'true');
+      }
+
       this.state.view = res.userType === 'customer' ? 'portal' : 'admin';
       
       if (res.userType === 'customer') {
@@ -2093,6 +2139,23 @@ class DB {
     this.executeLocalWipe();
   }
 
+  async clearBackendCache() {
+    try {
+      const res = await fetch(`${this.backendUrl}/api/config/clear-cache`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success) {
+        this.logNotification('all', 'success', 'Cloud Cache Purged', 'Backend registry buffers have been synchronized in real-time.', 'admin');
+        return { success: true };
+      }
+      return { success: false, message: data.message };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  }
+
   async updateAIKeys(keys: any) {
     this.state.settings.aiConfig.aiKeys = { ...this.state.settings.aiConfig.aiKeys, ...keys };
     await this.commit();
@@ -2109,11 +2172,7 @@ class DB {
   async addUser(u: Partial<ISPUser>) {
     // 1. Precise Field Validation (Duplicate Control)
     const emailMatch = u.email && this.state.users.find(ex => !ex.deleted && (ex.email || '').toLowerCase().trim() === (u.email || '').toLowerCase().trim());
-    if (emailMatch) {
-      console.log('[IRS-HEAL] Duplicate detected on admin add. Triggering registry pulse...');
-      this.healUserRegistry().catch(console.error);
-      return { success: false, message: `CONFLICT: Email (${u.email}) is already registered in registry.` };
-    }
+    if (emailMatch) return { success: false, message: `CONFLICT: Email (${u.email}) is already registered.` };
 
     const phoneMatch = u.phone && this.state.users.find(ex => !ex.deleted && (ex.phone || '').replace(/\D/g, '') === (u.phone || '').replace(/\D/g, ''));
     if (phoneMatch) return { success: false, message: `CONFLICT: Phone Number (${u.phone}) is already in use.` };
@@ -2122,7 +2181,7 @@ class DB {
     if (usernameMatch) return { success: false, message: `CONFLICT: Username (${u.username}) is taken.` };
 
     const cnicMatch = u.cnic && this.state.users.find(ex => !ex.deleted && (ex.cnic || '').replace(/\D/g, '') === (u.cnic || '').replace(/\D/g, ''));
-    if (cnicMatch) return { success: false, message: `CONFLICT: CNIC (${u.cnic}) already exists in our registry.` };
+    if (cnicMatch) return { success: false, message: `CONFLICT: CNIC (${u.cnic}) already exists.` };
 
     const pppoeMatch = u.pppoeId && this.state.users.find(ex => !ex.deleted && (ex.pppoeId || '').toLowerCase().trim() === (u.pppoeId || '').toLowerCase().trim());
     if (pppoeMatch) return { success: false, message: `CONFLICT: PPPoE ID (${u.pppoeId}) is already assigned.` };
@@ -2145,7 +2204,7 @@ class DB {
       connectionType: 'Fiber',
       activityLog: [],
       referralCode: 'REF-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
-      packageId: '', // User must be assigned a plan manually
+      packageId: '', 
       managementMode: 'Manual',
       nasConnectionType: 'PPPoE',
       ...u
@@ -2153,7 +2212,7 @@ class DB {
     this.state.users.push(newUser as any);
     await this.syncUserStatusWithBilling(newUser.id);
     await this.commit();
-    // Sync new NAS-controlled user to router
+    
     if (newUser.managementMode === 'NAS_Controlled' && newUser.routerId) {
       setTimeout(() => this.syncUserToNAS(newUser.id, 'upsert'), 500);
     }
@@ -2164,12 +2223,34 @@ class DB {
     const idx = this.state.users.findIndex(u => 
        u.id === id || 
        (u.username && u.username === id) || 
-       (u.pppoeId && u.pppoeId === id) ||
-       (u.phone && u.phone === id)
+       (u.pppoeId && u.pppoeId === id)
     );
     
     if (idx !== -1) {
       const targetId = this.state.users[idx].id;
+
+      // 1. Conflict Checks for edited fields
+      if (d.email) {
+        const emailMatch = this.state.users.find(ex => ex.id !== targetId && !ex.deleted && (ex.email || '').toLowerCase().trim() === (d.email || '').toLowerCase().trim());
+        if (emailMatch) return { success: false, message: `CONFLICT: Email (${d.email}) is already registered.` };
+      }
+      if (d.username) {
+        const usernameMatch = this.state.users.find(ex => ex.id !== targetId && !ex.deleted && (ex.username || '').toLowerCase().trim() === (d.username || '').toLowerCase().trim());
+        if (usernameMatch) return { success: false, message: `CONFLICT: Username (${d.username}) is taken.` };
+      }
+      if (d.pppoeId) {
+        const pppoeMatch = this.state.users.find(ex => ex.id !== targetId && !ex.deleted && (ex.pppoeId || '').toLowerCase().trim() === (d.pppoeId || '').toLowerCase().trim());
+        if (pppoeMatch) return { success: false, message: `CONFLICT: PPPoE ID (${d.pppoeId}) is already assigned.` };
+      }
+      if (d.phone) {
+        const phoneMatch = this.state.users.find(ex => ex.id !== targetId && !ex.deleted && (ex.phone || '').replace(/\D/g, '') === (d.phone || '').replace(/\D/g, ''));
+        if (phoneMatch) return { success: false, message: `CONFLICT: Phone Number (${d.phone}) is already in use.` };
+      }
+      if (d.cnic) {
+        const cnicMatch = this.state.users.find(ex => ex.id !== targetId && !ex.deleted && (ex.cnic || '').replace(/\D/g, '') === (d.cnic || '').replace(/\D/g, ''));
+        if (cnicMatch) return { success: false, message: `CONFLICT: CNIC (${d.cnic}) already exists.` };
+      }
+
       this.state.users[idx] = { ...this.state.users[idx], ...d };
       if (this.state.currentUser && this.state.currentUser.id === targetId) {
         this.state.currentUser = { ...this.state.currentUser, ...d };
@@ -2178,32 +2259,27 @@ class DB {
       const updatedUser = this.state.users[idx];
       const isNasControlled = updatedUser.managementMode === 'NAS_Controlled' && updatedUser.routerId;
 
-      // NAS Auto-Disconnect on manual suspension
       if (d.status === UserStatus.SUSPENDED || d.status === UserStatus.EXPIRED || d.status === UserStatus.DISABLED || d.status === UserStatus.BLOCKED) {
         if (this.state.settings.nasSystemEnabled && isNasControlled) {
           await this.sendCoACommand(targetId, 'Disconnect');
         }
       }
 
-      // NAS Sync on package or mode change
       if (this.state.settings.nasSystemEnabled && isNasControlled) {
         if (d.packageId || d.managementMode || d.routerId || d.username || d.password || d.nasConnectionType) {
           setTimeout(() => this.syncUserToNAS(targetId, 'upsert'), 300);
         }
-        // Speed-reset CoA when package changes
         if (d.packageId && d.status === UserStatus.ACTIVE) {
           setTimeout(() => this.sendCoACommand(targetId, 'SpeedChange'), 800);
         }
       }
 
-      // INTEGRATION: Real-time status sync on any user update
       await this.syncUserStatusWithBilling(targetId);
-      
       await this.commit(true);
       this.notify();
-      return { success: true, message: `Identity ${targetId} updated successfully.` };
+      return { success: true, message: `Identity updated successfully.` };
     }
-    return { success: false, message: `Handshake Error: Identity artifact [${id}] not found in registry.` };
+    return { success: false, message: `Handshake Error: Identity artifact [${id}] not found.` };
   }
 
 
@@ -6199,6 +6275,22 @@ class DB {
     return { success: true, count: userIds.length };
   }
 
+  async bulkChangeSeller(userIds: string[], sellerId: string, onProgress?: (current: number, total: number, itemName: string) => void) {
+    const total = userIds.length;
+    let count = 0;
+    for (const id of userIds) {
+      count++;
+      const user = this.state.users.find(u => u.id === id);
+      if (user) {
+        onProgress?.(count, total, user.name);
+        user.dealerId = sellerId;
+      }
+    }
+    await this.commit();
+    this.notify();
+    return { success: true, count: userIds.length };
+  }
+
   // ── BULK EMAIL REMINDER ──────────────────────────────────────────────────────
   async bulkSendEmailReminder(userIds: string[], adminId: string) {
     const timestamp = new Date().toISOString();
@@ -6734,22 +6826,16 @@ class DB {
     return { success: true, cloudUrl: `https://${provider.toLowerCase().replace(' ', '')}.com/share/${Math.random().toString(36).substr(2, 9)}` };
   }
 
-  // --- 🛠️ MISSING AUTH & RECOVERY METHODS ---
+  // --- 🛠️ AUTH & RECOVERY METHODS ---
   async sendPasswordReset(identifier: string) {
     // Check if user exists
     const user = this.state.users.find(u => u.email === identifier || u.phone === identifier || u.username === identifier);
     if (!user) return { success: false, message: 'User not found' };
 
-    // If Firebase Auth is setup, we could use sendPasswordResetEmail
-    if (this.auth && user.email) {
-        try {
-            await sendPasswordResetEmail(this.auth, user.email);
-            return { success: true };
-        } catch (e: any) {
-            return { success: false, message: e.message };
-        }
+    if (user.email) {
+        return await this.sendSmartPasswordReset(user.email);
     }
-    return { success: false, message: 'Cloud Dispatch Offline' };
+    return { success: false, message: 'No valid dispatch target found for this identifier.' };
   }
 
   async submitManualPasswordRequest(identifier: string) {
@@ -6794,6 +6880,22 @@ class DB {
     const user = this.state.users.find(u => u.id === userId);
     if (user) {
         user.password = newPass;
+        
+        // --- SUPABASE SYNC ---
+        try {
+          // If the current user is updating their own password (recovery flow)
+          if (this.state.currentUser?.id === userId) {
+            const { error } = await supabase.auth.updateUser({ password: newPass });
+            if (error) {
+               console.error('[SUPABASE-SYNC] Password update failed:', error.message);
+               return { success: false, message: `Auth Sync Failed: ${error.message}` };
+            }
+            console.log('[SUPABASE-SYNC] Auth credential rotated successfully.');
+          }
+        } catch (e: any) {
+          console.error('[SUPABASE-SYNC] Auth bridge error:', e);
+        }
+
         this.notify();
         await this.commit();
         return { success: true };
@@ -7168,7 +7270,13 @@ class DB {
         let result: { success: boolean, message: string } = { success: false, message: 'Handshake timeout' };
         
         // Internal Routing Logic
-        if (provider.name === 'Firebase') {
+        if (provider.name === 'Supabase') {
+          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/reset-password`,
+          });
+          if (error) result = { success: false, message: `Supabase: ${error.message}` };
+          else result = { success: true, message: 'Supabase link dispatched' };
+        } else if (provider.name === 'Firebase') {
           if (this.auth) {
             await sendPasswordResetEmail(this.auth, email);
             result = { success: true, message: 'Firebase link dispatched' };

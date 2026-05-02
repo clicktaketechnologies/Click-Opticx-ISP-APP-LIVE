@@ -45,17 +45,30 @@ export class SupabaseStorageService extends StorageProvider {
   }
 }
 
+import { uploadToCloudinary } from '../lib/cloudinary';
+
 export class CloudinaryService extends StorageProvider {
   name = 'Cloudinary';
   async upload(file: File | Blob, path: string): Promise<StorageResponse> {
-    console.log(`[Cloudinary] Uploading to ${path}...`);
-    return { success: true, url: `https://res.cloudinary.com/demo/image/upload/${path}` };
+    console.log(`[Cloudinary] Executing real-time node upload to ${path}...`);
+    const res = await uploadToCloudinary(file, path);
+    return { 
+      success: res.success, 
+      url: res.url, 
+      fileId: res.public_id, 
+      error: res.error 
+    };
   }
   async delete(fileId: string): Promise<boolean> {
+    // Note: Deletion typically requires signed requests or backend proxy
+    console.warn('[Cloudinary] Direct frontend deletion restricted. Manual audit required.');
     return true;
   }
   async getUrl(fileId: string): Promise<string | null> {
-    return `https://res.cloudinary.com/demo/image/upload/${fileId}`;
+    if (!fileId) return null;
+    if (fileId.startsWith('http')) return fileId;
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    return `https://res.cloudinary.com/${cloudName}/image/upload/${fileId}`;
   }
 }
 

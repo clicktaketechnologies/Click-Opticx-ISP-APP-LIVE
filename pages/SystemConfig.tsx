@@ -138,7 +138,7 @@ const SystemConfig: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Communication Gateway</h3>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">SMTP & Push Notification Secrets</p>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">SMTP, Push & External API Secrets</p>
               </div>
             </div>
 
@@ -147,7 +147,18 @@ const SystemConfig: React.FC = () => {
               <InputField label="SMTP Port" value={techKeys.smtpPort} onChange={(v:any) => setTechKeys({...techKeys, smtpPort: parseInt(v) || 0})} icon={Zap} type="number" />
               <InputField label="SMTP Username" value={techKeys.smtpUser} onChange={(v:any) => setTechKeys({...techKeys, smtpUser: v})} icon={Lock} />
               <InputField label="SMTP Password" value={techKeys.smtpPass} onChange={(v:any) => setTechKeys({...techKeys, smtpPass: v})} icon={Key} type="password" />
-              <div className="md:col-span-2">
+              
+              {/* New Service Keys */}
+              <InputField label="Resend API Key" value={techKeys.resendApiKey || ''} onChange={(v:any) => setTechKeys({...techKeys, resendApiKey: v})} icon={Key} type="password" />
+              <InputField label="Brevo API Key" value={techKeys.brevoApiKey || ''} onChange={(v:any) => setTechKeys({...techKeys, brevoApiKey: v})} icon={Key} type="password" />
+              <InputField label="Mailgun API Key" value={techKeys.mailgunApiKey || ''} onChange={(v:any) => setTechKeys({...techKeys, mailgunApiKey: v})} icon={Key} type="password" />
+              <InputField label="Gmail App Password" value={techKeys.gmailAppPassword || ''} onChange={(v:any) => setTechKeys({...techKeys, gmailAppPassword: v})} icon={Key} type="password" />
+              <InputField label="Cloudinary URL" value={techKeys.cloudinaryUrl || ''} onChange={(v:any) => setTechKeys({...techKeys, cloudinaryUrl: v})} icon={Globe} type="password" />
+              <InputField label="Supabase Service Role" value={techKeys.supabaseServiceRoleKey || ''} onChange={(v:any) => setTechKeys({...techKeys, supabaseServiceRoleKey: v})} icon={Database} type="password" />
+              <InputField label="Upstash Redis URL" value={techKeys.upstashRedisUrl || ''} onChange={(v:any) => setTechKeys({...techKeys, upstashRedisUrl: v})} icon={Server} />
+              <InputField label="Upstash Redis Token" value={techKeys.upstashRedisToken || ''} onChange={(v:any) => setTechKeys({...techKeys, upstashRedisToken: v})} icon={Key} type="password" />
+
+              <div className="md:col-span-2 pt-4 border-t border-slate-100 mt-2">
                 <InputField label="Gemini AI API Key" value={techKeys.geminiApiKey} onChange={(v:any) => setTechKeys({...techKeys, geminiApiKey: v})} icon={Cpu} type="password" />
               </div>
             </div>

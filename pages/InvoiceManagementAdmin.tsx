@@ -148,24 +148,26 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
           { title: "Unpaid Dues", description: "See who hasn't paid yet and send them a quick reminder." }
         ]}
       />
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none">
-            <Archive className="text-blue-600" size={32} />
-            Billing & Payments
+          <h2 className="text-[clamp(1.5rem,5vw,2rem)] font-black text-slate-800 tracking-tight flex items-center gap-3 italic leading-none uppercase">
+            <Archive className="text-blue-600" size={28} />
+            Billing Hub
           </h2>
-          <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest">System Billing Management</p>
+          <p className="text-[clamp(0.5rem,2vw,0.6rem)] text-slate-500 font-bold uppercase tracking-[0.3em] mt-2 italic border-l-4 border-blue-500 pl-4">
+            Manage user bills, payments, and financial records
+          </p>
         </div>
-        <div className="flex bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
+        <div className="flex bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm w-full md:w-auto overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveView('invoices')}
-            className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeView === 'invoices' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+            className={`flex-1 md:flex-none px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap ${activeView === 'invoices' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
           >
             <FileText size={16} /> Billing Record
           </button>
           <button
             onClick={() => setActiveView('clients')}
-            className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeView === 'clients' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
+            className={`flex-1 md:flex-none px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 whitespace-nowrap ${activeView === 'clients' ? 'bg-blue-600 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50'}`}
           >
             <Users size={16} /> User List
           </button>
