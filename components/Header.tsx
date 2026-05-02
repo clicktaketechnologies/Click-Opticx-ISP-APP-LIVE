@@ -13,9 +13,10 @@ interface HeaderProps {
   searchTerm: string;
   onSearch: (term: string) => void;
   isPending?: boolean;
+  onNavigate?: (page: string, params?: any) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, onLogout, searchTerm, onSearch, isPending }) => {
+const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, onLogout, searchTerm, onSearch, isPending, onNavigate }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const state = db.getState();
@@ -114,7 +115,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
           <Menu size={18} />
         </button>
 
-        <div className="flex items-center gap-2 md:gap-3 pr-4 md:pr-6 border-r border-slate-100 group cursor-pointer transition-all shrink-0">
+        <div className="flex items-center gap-2 md:gap-3 pr-4 md:pr-6 border-r border-slate-100 group cursor-pointer transition-all shrink-0 lg:hidden">
            <div className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-500">
               {(branding.logo || branding.logoSquare || branding.logoLight) ? (
                  <img 
@@ -127,25 +128,30 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
                  <Globe size={16} className="text-blue-500 animate-pulse" />
               )}
            </div>
-           <div className="hidden 2xl:block">
+           <div className="hidden sm:block">
               <h1 className="text-[10px] md:text-sm font-black uppercase tracking-tighter italic text-slate-900 leading-none">{branding.brandName || branding.businessName}</h1>
               <p className="text-[7px] md:text-[8px] font-black text-blue-600 uppercase tracking-[0.3em] mt-1 italic opacity-60">Control Nexus</p>
            </div>
         </div>
 
-        <div className="relative hidden lg:block w-72 group">
-          <Search className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${searchTerm ? 'text-blue-500' : 'text-slate-400'}`} size={16} />
+        <div className="hidden lg:flex items-center gap-2 w-72 px-4 py-2 bg-slate-100/50 dark:bg-slate-800/50 border border-transparent focus-within:border-blue-500/50 rounded-2xl transition-all group shrink-0">
+          <Search className={`transition-colors duration-300 shrink-0 ${searchTerm ? 'text-blue-500' : 'text-slate-400'}`} size={16} />
           <input 
             type="text" 
             value={searchTerm}
-            onChange={(e) => onSearch(e.target.value)}
+            onChange={(e) => {
+              // Note: Debounce could be added here if we had a local state, but since it's controlled via props
+              // we can just call onSearch. If a true debounce is needed, we'll need a local state.
+              onSearch(e.target.value);
+            }}
             placeholder="Search connections..." 
-            className="w-full pl-12 pr-10 py-2.5 bg-slate-100/50 dark:bg-slate-800/50 border border-transparent focus:border-blue-500/50 rounded-2xl outline-none text-sm font-medium transition-all"
+            className="w-full bg-transparent outline-none text-sm font-medium transition-all text-slate-900 dark:text-white"
           />
           {searchTerm && (
             <button 
               onClick={() => onSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-rose-500 transition-colors"
+              className="text-slate-400 hover:text-rose-500 transition-colors shrink-0"
+              title="Clear search"
             >
               <X size={14} />
             </button>
@@ -202,7 +208,13 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
                     <div 
                       key={n.id} 
                       className={`p-3 border-b border-slate-50 hover:bg-slate-50 transition-colors flex gap-2 cursor-pointer relative ${!n.read ? 'bg-green-50/20' : ''}`}
-                      onClick={() => db.markNotificationRead(n.id)}
+                      onClick={() => {
+                        db.markNotificationRead(n.id);
+                        if (n.target && onNavigate) {
+                          onNavigate(n.target);
+                          setShowNotifications(false);
+                        }
+                      }}
                     >
                       {!n.read && <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-1 bg-blue-500 rounded-full"></div>}
                       <div className="mt-0.5">{getIcon(n.type)}</div>
@@ -236,7 +248,9 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
           className="flex items-center gap-2 md:gap-3 border-l border-white/10 pl-2 md:pl-4 group transition-all"
         >
           <div className="text-right hidden sm:block">
-            <p className="text-[10px] md:text-[11px] font-bold text-slate-900 dark:text-white leading-none mb-1">{user.name}</p>
+            <p className="text-[10px] md:text-[11px] font-bold text-slate-900 dark:text-white leading-none mb-1">
+              {user.name?.replace(/[0-9_-]/g, '').trim().split(' ').map(n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase()).join(' ') || 'Admin'}
+            </p>
             <p className="badge badge-success !text-[7px] md:!text-[8px] !py-0.5">{user.role}</p>
           </div>
           <div className="w-8 h-8 md:w-9 md:h-9 bg-slate-100 dark:bg-slate-800 rounded-lg md:rounded-xl flex items-center justify-center border border-white/5 overflow-hidden shrink-0 group-hover:scale-105 transition-all">

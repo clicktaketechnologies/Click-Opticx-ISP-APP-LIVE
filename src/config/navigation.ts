@@ -5,7 +5,7 @@ import {
   Ticket, UserCircle, ShieldCheck, Package, LifeBuoy, Key, 
   Building2, Calculator, ClipboardList, CreditCard, Receipt, 
   Wallet, Archive, ListTodo, ShieldAlert, Shield, Info, DatabaseZap,
-  Globe, FileInput, Fingerprint, Compass, Clock, Box, Monitor, Server
+  Globe, FileInput, Fingerprint, Compass, Clock, Box, Monitor, Server, Banknote
 } from 'lucide-react';
 
 export interface NavItem {
@@ -25,15 +25,15 @@ export interface NavSection {
 
 export const NAVIGATION_CONFIG: NavSection[] = [
   {
-    title: 'Overview',
+    title: 'Business Overview',
     icon: LayoutDashboard,
     items: [
       { id: 'dashboard', label: '📊 System Dashboard', icon: LayoutDashboard },
-      { id: 'monitor', label: '🖥️ Service Health', icon: Activity },
+      { id: 'monitor', label: '🖥️ System Status', icon: Activity },
     ]
   },
   {
-    title: 'AI Automation',
+    title: 'AI & Automation',
     icon: Cpu,
     items: [
       { id: 'ai-control', label: '🤖 AI Brain', icon: Cpu },
@@ -44,20 +44,19 @@ export const NAVIGATION_CONFIG: NavSection[] = [
     ]
   },
   {
-    title: 'Communications',
+    title: 'Communication',
     icon: Mail,
     items: [
+      { id: 'comm-center', label: '📧 Comms Center', icon: Mail },
       { id: 'notification-control', label: '🔔 Alerts Center', icon: BellRing },
       { id: 'comm-templates', label: '📝 Message Templates', icon: FileText },
       { id: 'comm-campaigns', label: '📢 Mass Broadcasts', icon: Send },
-      { id: 'admin-user-devices', label: '📱 App Device List', icon: Smartphone },
       { id: 'comm-logs', label: '📊 Message History', icon: ListChecks },
       { id: 'comm-settings', label: '🔌 Channel Config', icon: Settings },
-      { id: 'comm-segments', label: '👥 User Groups', icon: Users },
     ]
   },
   {
-    title: 'Network Ops',
+    title: 'Network Manager',
     icon: Network,
     items: [
       { id: 'admin-live-monitoring', label: '📡 Live Monitor', icon: Monitor },
@@ -80,62 +79,71 @@ export const NAVIGATION_CONFIG: NavSection[] = [
     ]
   },
   {
-    title: 'Subscribers',
+    title: 'User & Access',
     icon: Users,
     items: [
-      { id: 'users', label: '👥 All Customers', icon: Users },
+      { id: 'users', label: '👥 Subscriber Matrix', icon: Users },
       { id: 'customer-360', label: '🔍 Identity Search', icon: Search },
       { id: 'subscriber-accounts', label: '📇 Client Dossiers', icon: UserCircle },
-      { id: 'approval-desk', label: '✅ Pending Onboarding', icon: ShieldCheck },
       { id: 'admin-password-requests', label: '🔑 Access Recovery', icon: Key },
-      { id: 'reseller-management', label: '🤝 Partners & Dealers', icon: Building2 },
-      { id: 'requests-tasks', label: '📦 Service Requests', icon: Box, items: [
-        { id: 'packages-req', label: 'Plan Switches', icon: Package },
-        { id: 'support-queue', label: 'Support Desk', icon: LifeBuoy }
-      ]},
+      { id: 'admin-user-devices', label: '📱 App Device List', icon: Smartphone },
     ]
   },
   {
-    title: 'Finance & Billing',
+    title: 'User Billing',
     icon: Calculator,
     items: [
       { id: 'invoice-manager', label: '💳 Bill Manager', icon: Calculator, items: [
         { id: 'invoice-engine', label: 'Generate Bill', icon: Calculator },
         { id: 'invoice-management', label: 'Invoice Archive', icon: ClipboardList }
       ]},
-      { id: 'gateway-settings', label: '🏦 Payment Channels', icon: CreditCard },
-      { id: 'fiscal-monitor', label: '📊 Money Ledger', icon: Activity },
-      { id: 'recovery', label: '📥 Collections Hub', icon: Receipt },
       { id: 'wallet', label: '💰 Credits & Wallets', icon: Wallet },
       { id: 'emergency-load', label: '⚡ Instant Recharge', icon: Zap },
       { id: 'admin-reminders', label: '🚨 Payment Alerts', icon: BellRing },
     ]
   },
   {
-    title: 'Services',
-    icon: Globe,
-    items: [
-      { id: 'packages', label: '🌐 Internet Plans', icon: Package },
-      { id: 'import', label: '📥 Bulk Upload', icon: FileInput },
-      { id: 'archive-records', label: '🗃️ Historical Data', icon: Archive },
-    ]
-  },
-  {
-    title: 'Operations',
+    title: 'Engineer & Support',
     icon: Ticket,
     items: [
-      { id: 'tickets', label: '🎫 Support Tickets', icon: LifeBuoy },
       { id: 'tasks', label: '📋 Work Orders', icon: ListTodo },
+      { id: 'tickets', label: '🎫 Support Tickets', icon: LifeBuoy },
+      { id: 'engineer-jobs', label: '🛠️ Field Operations', icon: Map },
     ]
   },
   {
-    title: 'Staff & Security',
+    title: 'Finance & Payments',
+    icon: CreditCard,
+    items: [
+      { id: 'gateway-settings', label: '🔌 Payment Gateways', icon: ListChecks },
+      { id: 'fiscal-monitor', label: '📊 Money Ledger', icon: Activity },
+      { id: 'recovery', label: '📥 Collections Hub', icon: Receipt },
+      { id: 'reseller-management', label: '🤝 Partners & Dealers', icon: Building2 },
+    ]
+  },
+  {
+    title: 'Plans & Assets',
+    icon: Package,
+    items: [
+      { id: 'packages', label: '🌐 Internet Packages', icon: Package },
+      { id: 'import', label: '📥 User Import', icon: FileInput },
+      { id: 'archive-records', label: '🗃️ Pass/Record Archive', icon: Archive },
+    ]
+  },
+  {
+    title: 'Staff & RBAC',
     icon: ShieldAlert,
     items: [
-      { id: 'staff', label: '👤 Employee List', icon: ShieldAlert },
-      { id: 'permissions', label: '🔐 Access Controls', icon: ShieldCheck },
-      { id: 'kyc-hub', label: '🆔 Identity KYC', icon: Fingerprint },
-      { id: 'cloud-storage', label: '☁️ Backup & Sync', icon: HardDrive },
+      { id: 'staff', label: '👤 Staff Management', icon: ShieldAlert },
+      { id: 'permissions', label: '🔐 Role-Based Access', icon: ShieldCheck },
+    ]
+  },
+  {
+    title: 'Compliance & KYC',
+    icon: Fingerprint,
+    items: [
+      { id: 'kyc-hub', label: '🆔 Identity Verification', icon: Fingerprint },
+      { id: 'approval-desk', label: '✅ Onboarding Approvals', icon: ShieldCheck },
     ]
   },
   {
@@ -154,6 +162,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
       { id: 'auth-control', label: '🔒 Security Protocols', icon: Shield },
       { id: 'system-deployment', label: '🚀 Core Updates', icon: ShieldCheck },
       { id: 'migration-dashboard', label: '📈 Data Migration', icon: Activity },
+      { id: 'cloud-storage', label: '☁️ Backup & Sync', icon: HardDrive },
     ]
   }
 ];

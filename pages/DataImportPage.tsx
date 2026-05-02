@@ -1,7 +1,7 @@
 
 import React, { useState, useRef } from 'react';
 import { AppState } from '../types';
-import { FileInput, Upload, FileSpreadsheet, CheckCircle, AlertTriangle, Info, FileCode, Trash2, ListChecks, FileText } from 'lucide-react';
+import { FileInput, Upload, FileSpreadsheet, CheckCircle, AlertTriangle, Info, FileCode, Trash2, ListChecks, FileText, XCircle } from 'lucide-react';
 import { db } from '../db';
 
 const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
@@ -40,7 +40,19 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
       try {
         const values = parseRow(row);
         if (values.length < 2) continue;
-        const userData: any = { name: '', phone: '', address: '', area: '', macIp: '', packageId: '' };
+        const userData: any = { 
+          name: '', 
+          phone: '', 
+          address: '', 
+          area: '', 
+          username: '', 
+          password: '', 
+          pppoeId: '', 
+          pppoePass: '',
+          cnic: '',
+          packageId: '',
+          status: 'Active'
+        };
         headers.forEach((h, i) => {
           const val = values[i];
           if (!val) return;
@@ -48,8 +60,22 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
           if (h.match(/phone|mobile|contact/)) userData.phone = val;
           if (h.match(/address|location/)) userData.address = val;
           if (h.match(/area|sector|zone/)) userData.area = val;
+          if (h.match(/username|login|user/)) userData.username = val;
+          if (h.match(/password|pass|secret/)) userData.password = val;
+          if (h.match(/pppoeid|pppoe_id/)) userData.pppoeId = val;
+          if (h.match(/pppoepass|pppoe_pass/)) userData.pppoePass = val;
+          if (h.match(/cnic|nic|identity_no/)) userData.cnic = val;
+          if (h.match(/package|plan|service/)) {
+            // Try to find matching package by name
+            const pkg = state.packages.find(p => p.name.toLowerCase().includes(val.toLowerCase()));
+            if (pkg) userData.packageId = pkg.id;
+          }
         });
         if (!userData.name) throw new Error("Missing customer name");
+        // Ensure username is set if only name is present
+        if (!userData.username && userData.name) {
+          userData.username = userData.name.toLowerCase().replace(/\s+/g, '.');
+        }
         await db.addUser(userData);
         success++;
       } catch (e: any) {
@@ -124,15 +150,37 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
       </div>
 
       {importStatus && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in slide-in-from-top-8">
-          <div className="bg-green-50 p-8 rounded-[2rem] border border-green-100 flex items-center gap-6">
-            <CheckCircle className="text-green-500" size={40} />
-            <div><p className="text-[10px] font-black uppercase text-green-600">Successfully Added</p><h4 className="text-3xl font-black">{importStatus.success} Customers</h4></div>
+        <div className="space-y-6 animate-in slide-in-from-top-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-green-50 p-8 rounded-[2rem] border border-green-100 flex items-center gap-6">
+              <CheckCircle className="text-green-500" size={40} />
+              <div><p className="text-[10px] font-black uppercase text-green-600">Successfully Added</p><h4 className="text-3xl font-black">{importStatus.success} Customers</h4></div>
+            </div>
+            <div className="bg-red-50 p-8 rounded-[2rem] border border-red-100 flex items-center gap-6">
+              <AlertTriangle className="text-red-500" size={40} />
+              <div><p className="text-[10px] font-black uppercase text-red-600">Failed / Invalid</p><h4 className="text-3xl font-black">{importStatus.failed} Errors</h4></div>
+            </div>
+            <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 flex items-center gap-6">
+              <Info className="text-slate-400" size={40} />
+              <div><p className="text-[10px] font-black uppercase text-slate-500">Skipped Rows</p><h4 className="text-3xl font-black text-slate-400">{importStatus.errors.filter(e => e.includes('Empty')).length} Empty</h4></div>
+            </div>
           </div>
-          <div className="bg-red-50 p-8 rounded-[2rem] border border-red-100 flex items-center gap-6">
-            <AlertTriangle className="text-red-500" size={40} />
-            <div><p className="text-[10px] font-black uppercase text-red-600">Could Not Add</p><h4 className="text-3xl font-black">{importStatus.failed} Errors</h4></div>
-          </div>
+
+          {importStatus.errors.length > 0 && (
+            <div className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm overflow-hidden">
+               <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 mb-6 flex items-center gap-2">
+                 <AlertTriangle size={16} className="text-red-500" /> Validation Report
+               </h3>
+               <div className="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                  {importStatus.errors.map((err, i) => (
+                    <div key={i} className="p-4 bg-slate-50 rounded-2xl border-l-4 border-red-500 flex items-start gap-3">
+                       <XCircle size={14} className="text-red-500 mt-0.5 shrink-0" />
+                       <p className="text-[10px] font-bold text-slate-600 leading-relaxed uppercase">{err}</p>
+                    </div>
+                  ))}
+               </div>
+            </div>
+          )}
         </div>
       )}
     </div>

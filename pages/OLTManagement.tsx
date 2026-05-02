@@ -35,6 +35,13 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
       n.location.toLowerCase().includes(searchTerm.toLowerCase())
    );
 
+   useEffect(() => {
+      // Synchronize backend OLT registry for real-time monitoring
+      if (state.oltNodes.length > 0) {
+         db.getSocket()?.emit('olt-registry-update', state.oltNodes);
+      }
+   }, [state.oltNodes.length]);
+
    const handleAddOLT = async () => {
       await db.addOLT(formData);
       setIsAddModal(false);
@@ -304,7 +311,8 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                )}
                {state.oltNodes.length > 0 && (
-                  <table className="w-full text-left border-collapse">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
                   <thead>
                      <tr className="bg-slate-50">
                         <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">ONU Serial</th>
@@ -406,6 +414,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      )}
                   </tbody>
                </table>
+               </div>
                )}
             </div>
          )}

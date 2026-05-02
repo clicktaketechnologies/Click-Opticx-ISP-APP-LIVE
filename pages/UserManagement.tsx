@@ -659,7 +659,11 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                           </div>
                           <div>
                              <p className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase italic">{user.name}</p>
-                             <p className="text-[9px] text-slate-400 font-black uppercase tracking-tighter mt-0.5">@{user.username || 'N/A'}</p>
+                             {user.username ? (
+                               <p className="text-[9px] text-slate-400 font-black uppercase tracking-tighter mt-0.5">@{user.username}</p>
+                             ) : (
+                               <p className="text-[8px] text-amber-500 font-black uppercase tracking-widest mt-1 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-100 inline-block">Pending Setup</p>
+                             )}
                           </div>
                        </div>
                     </td>

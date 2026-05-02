@@ -62,17 +62,27 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
 
   // Auto-open KYC if required
   useEffect(() => {
-    if (!user.isKYCVerified && !user.isKYCSubmitted) {
-      setIsKYCOpen(true);
+    if (user.isKYCVerified) {
+      setIsKYCOpen(false);
+      return;
     }
-    if (user.verificationStatus === VerificationStatus.REVISION) {
+    if (!user.isKYCSubmitted || user.verificationStatus === VerificationStatus.REVISION) {
       setIsKYCOpen(true);
     }
   }, [user.isKYCVerified, user.isKYCSubmitted, user.verificationStatus]);
 
-  // Verification Overlay Logic
-  const [showWelcome, setShowWelcome] = useState(!user.welcomeChecklistShown && user.verificationStatus === VerificationStatus.UNVERIFIED);
-  const [showVerificationSuccess, setShowVerificationSuccess] = useState(user.verificationStatus === VerificationStatus.VERIFIED && !user.verificationSuccessShown);
+  // Verification Overlay Logic (Synchronized with user props)
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!user.welcomeChecklistShown && user.verificationStatus === VerificationStatus.UNVERIFIED) {
+      setShowWelcome(true);
+    }
+    if (user.verificationStatus === VerificationStatus.VERIFIED && !user.verificationSuccessShown) {
+      setShowVerificationSuccess(true);
+    }
+  }, [user.verificationStatus, user.verificationSuccessShown, user.welcomeChecklistShown]);
 
   const appearance = state.settings.appearance;
   const appPages = appearance.appPages || [];

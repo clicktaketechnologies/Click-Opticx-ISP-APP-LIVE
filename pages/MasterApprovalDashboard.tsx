@@ -13,6 +13,7 @@ import { Modal } from '../components/shared/Modal';
 import { KYCReviewDesk } from '../components/admin/desks/KYCReviewDesk';
 import { BillingRequestDesk } from '../components/admin/desks/BillingRequestDesk';
 import { ProvisioningDesk } from '../components/admin/desks/ProvisioningDesk';
+import { SignupDesk } from '../components/admin/desks/SignupDesk';
 import { usePermissions } from '../src/hooks/usePermissions';
 
 // Safe Icon Wrapper
@@ -71,18 +72,7 @@ export const MasterApprovalDashboard: React.FC<Props> = ({ state, defaultTab = '
         {activeTab === 'kyc' && <KYCReviewDesk state={state} />}
         {activeTab === 'billing' && <BillingRequestDesk state={state} />}
         {activeTab === 'provisioning' && <ProvisioningDesk state={state} />}
-        
-        {activeTab === 'signup' && (
-           <div className="p-20 text-center bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50 relative overflow-hidden">
-              <UserCircle size={120} className="text-blue-50/20 mx-auto mb-6 absolute -top-10 -right-10" />
-              <div className="relative z-10">
-                 <SafeIcon icon={Fingerprint} size={64} className="text-blue-100 mx-auto mb-6" />
-                 <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter leading-none mb-4">Registration Queue</h3>
-                 <div className="w-20 h-1 bg-blue-500 mx-auto mb-6 rounded-full" />
-                 <p className="text-xs text-slate-500 font-bold uppercase tracking-widest leading-relaxed max-w-sm mx-auto">New account requests are being routed to the Provisioning Desk. Use the Provisioning Desk for all activations.</p>
-              </div>
-           </div>
-        )}
+        {activeTab === 'signup' && <SignupDesk state={state} />}
         
         {activeTab === 'login' && (
           <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">

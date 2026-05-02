@@ -490,6 +490,51 @@ const BusinessSettings: React.FC<{ state: AppState }> = ({ state }) => {
 
                   <div className="p-8 bg-slate-900 rounded-[2.5rem] space-y-6">
                     <div className="flex items-center gap-3">
+                      <Palette className="text-blue-400" size={24} />
+                      <h4 className="text-xs font-black uppercase text-blue-400 italic tracking-[0.2em]">Theme Engine</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black text-slate-500 uppercase">System Theme</label>
+                        <select 
+                          className="w-full p-4 bg-white/5 border border-white/10 rounded-xl font-bold text-white text-sm outline-none focus:border-blue-500 transition-all"
+                          value={(formData.appearance as any).theme || 'light'}
+                          onChange={e => {
+                            const newTheme = e.target.value;
+                            setFormData({ ...formData, appearance: { ...formData.appearance, theme: newTheme } as any });
+                            localStorage.setItem('clickopticx_theme', newTheme);
+                            if (newTheme === 'dark') document.documentElement.classList.add('dark');
+                            else document.documentElement.classList.remove('dark');
+                          }}
+                        >
+                          <option value="light" className="text-slate-900">Light Mode</option>
+                          <option value="dark" className="text-slate-900">Dark Mode</option>
+                          <option value="system" className="text-slate-900">System Default</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black text-slate-500 uppercase">Primary Brand Color</label>
+                        <div className="flex items-center gap-4 p-2 bg-white/5 border border-white/10 rounded-xl">
+                          <input 
+                            type="color" 
+                            className="w-12 h-10 rounded cursor-pointer bg-transparent border-0 outline-none"
+                            value={(formData.appearance as any).primaryColor || '#6366F1'}
+                            onChange={e => {
+                              const newColor = e.target.value;
+                              setFormData({ ...formData, appearance: { ...formData.appearance, primaryColor: newColor } as any });
+                              localStorage.setItem('clickopticx_brand_color', newColor);
+                              document.documentElement.style.setProperty('--bg-primary', newColor);
+                              document.documentElement.style.setProperty('--grad-primary', `linear-gradient(135deg, ${newColor}, #4F46E5)`);
+                            }}
+                          />
+                          <span className="text-sm font-bold text-white uppercase">{(formData.appearance as any).primaryColor || '#6366F1'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-8 bg-slate-900 rounded-[2.5rem] space-y-6">
+                    <div className="flex items-center gap-3">
                       <RotateCw className="text-blue-400 animate-spin-slow" size={24} />
                       <h4 className="text-xs font-black uppercase text-blue-400 italic tracking-[0.2em]">System Loading Architecture</h4>
                     </div>

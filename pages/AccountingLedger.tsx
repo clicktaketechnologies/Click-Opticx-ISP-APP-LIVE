@@ -72,10 +72,10 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
         <div>
            <h2 className="text-[clamp(1.5rem,5vw,2.5rem)] font-black text-slate-900 tracking-tighter uppercase italic leading-none flex items-center gap-4">
              <Landmark className="text-indigo-600" size={32} />
-             {isDealer ? 'Financial Ledger' : 'Global Accounting Engine'}
+             {isDealer ? 'Payment History' : 'Financial History'}
            </h2>
            <p className="text-[clamp(0.6rem,2vw,0.75rem)] text-slate-400 font-black uppercase tracking-[0.4em] mt-3 italic">
-             {isDealer ? 'Your personalized wallet & activation history' : 'Central organization transaction registry & fiscal audit'}
+             {isDealer ? 'Manage your balance and plan activations' : 'Unified record of all incoming payments and system charges'}
            </p>
         </div>
         <button
@@ -83,16 +83,16 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
           className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-xl font-bold transition-all shadow-sm"
         >
           <Download size={18} />
-          Export Audit Log
+          Download Statement
         </button>
       </div>
 
       {/* 2. Fiscal Summary Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 shrink-0">
          {[
-           { label: 'Total Inflow', val: `${state.settings.currency} ${stats.totalIn.toLocaleString()}`, icon: ArrowDownLeft, grad: 'var(--grad-success)', sub: 'Gross Collections' },
-           { label: 'Total Outflow', val: `${state.settings.currency} ${stats.totalOut.toLocaleString()}`, icon: ArrowUpRight, grad: 'var(--grad-error)', sub: 'System Debits' },
-           { label: 'Net Position', val: `${state.settings.currency} ${stats.net.toLocaleString()}`, icon: TrendingUp, grad: 'var(--grad-info)', sub: 'Period Balance' },
+           { label: 'Total Received', val: `${state.settings.currency} ${stats.totalIn.toLocaleString()}`, icon: ArrowDownLeft, grad: 'var(--grad-success)', sub: 'Payments & Credits' },
+           { label: 'Total Spent', val: `${state.settings.currency} ${stats.totalOut.toLocaleString()}`, icon: ArrowUpRight, grad: 'var(--grad-error)', sub: 'Plan Charges & Deductions' },
+           { label: 'Net Balance', val: `${state.settings.currency} ${stats.net.toLocaleString()}`, icon: TrendingUp, grad: 'var(--grad-info)', sub: 'Current Standing' },
          ].map((kpi, idx) => (
             <div key={idx} className="card relative translation-all overflow-hidden border-none shadow-2xl p-8 group hover:scale-[1.02] active:scale-95" style={{ backgroundImage: kpi.grad }}>
                <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-3xl -mr-16 -mt-16 rounded-full group-hover:scale-150 transition-transform duration-700" />

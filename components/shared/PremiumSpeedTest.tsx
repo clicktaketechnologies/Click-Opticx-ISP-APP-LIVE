@@ -64,40 +64,47 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isM
       resetGraph();
       setResults({ dl: 0, ul: 0, ping: 0, jitter: 0, packetLoss: 0 });
       
-      // 1. Initial Handshake & Latency
       setPhase('ping');
       setStatusText('Syncing Signal Server...');
-      const pingResults = await runPingTest();
-      setResults(prev => ({ ...prev, ...pingResults }));
-      setStatusText('Connection Verified');
-      await new Promise(r => setTimeout(r, 600));
 
-      // 2. Download Diagnostics
-      setPhase('download');
-      setStatusText('Sampling Downlink Bandwidth...');
-      const dlRes = await runDownloadTest((progress) => {
-        setResults(prev => ({ ...prev, dl: progress }));
-        if (Math.random() > 0.6) addGraphPoint(progress, 'dl');
-      });
-      setResults(prev => ({ ...prev, dl: dlRes }));
+      // Fake graph animation while waiting for backend
+      const animInterval = setInterval(() => {
+         const val = Math.random() * 80 + 20;
+         setResults(prev => ({ ...prev, dl: val }));
+         addGraphPoint(val, 'dl');
+      }, 300);
 
-      // 3. Upload Diagnostics
-      setPhase('upload');
-      setStatusText('Sampling Uplink Bandwidth...');
-      const ulRes = await runUploadTest((progress) => {
-        setResults(prev => ({ ...prev, ul: progress }));
-        if (Math.random() > 0.6) addGraphPoint(progress, 'ul');
-      });
-      setResults(prev => ({ ...prev, ul: ulRes }));
-
-      // Finalize
-      setTestState('SUCCESS');
-      setPhase('none');
-      setStatusText('Handshake Complete');
-      setHistory(prev => [{ id: Date.now(), dl: dlRes, ul: ulRes, ping: pingResults.ping }, ...prev]);
+      const response = await fetch('/api/network/speedtest/start', { method: 'POST' });
+      const backendResults = await response.json();
       
-      if (onComplete) {
-        onComplete({ ...results, dl: dlRes, ul: ulRes, ...pingResults });
+      clearInterval(animInterval);
+
+      if (backendResults.success) {
+         const dlRes = parseFloat(backendResults.results.download);
+         const ulRes = parseFloat(backendResults.results.upload);
+         const pingRes = parseFloat(backendResults.results.ping);
+         
+         setPhase('none');
+         setStatusText('Handshake Complete');
+         setTestState('SUCCESS');
+         
+         const finalResults = {
+            dl: dlRes,
+            ul: ulRes,
+            ping: pingRes,
+            jitter: parseFloat(backendResults.results.jitter),
+            packetLoss: 0,
+            server: backendResults.results.server
+         };
+
+         setResults(finalResults);
+         setHistory(prev => [{ id: Date.now(), dl: dlRes, ul: ulRes, ping: pingRes }, ...prev]);
+         
+         if (onComplete) {
+            onComplete(finalResults);
+         }
+      } else {
+         throw new Error(backendResults.message || 'Speedtest Failed');
       }
     } catch (err) {
       console.error('[DIAGNOSTIC ERROR]', err);

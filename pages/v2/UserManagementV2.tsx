@@ -18,15 +18,15 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'Active' | 'Expired' | 'Suspended'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'Active' | 'Expired' | 'Suspended' | 'Pending Verification'>('all');
 
   // 1. Data Filtration (Parity with Legacy)
   const filteredUsers = useMemo(() => {
     return state.users.filter(u => {
       const matchesSearch = 
-        u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.id.includes(searchQuery);
+        (u.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (u.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (u.id || '').includes(searchQuery);
       
       const matchesStatus = filterStatus === 'all' || u.status === filterStatus;
       
@@ -37,6 +37,7 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
   const stats = {
     total: state.users.length,
     active: state.users.filter(u => u.status === 'Active').length,
+    pending: state.users.filter(u => u.status === 'Pending Verification').length,
     expired: state.users.filter(u => u.status === 'Expired').length,
     suspended: state.users.filter(u => u.status === 'Suspended').length
   };
@@ -44,16 +45,17 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
   return (
     <div className="space-y-10">
       {/* Mini Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <MiniStat label="Total Matrix" value={stats.total} color="blue" />
         <MiniStat label="Healthy Nodes" value={stats.active} color="emerald" />
+        <MiniStat label="In-Pipeline" value={stats.pending} color="indigo" />
         <MiniStat label="Offline/Expired" value={stats.expired} color="amber" />
         <MiniStat label="Blacklisted" value={stats.suspended} color="rose" />
       </div>
 
       {/* Action Bar */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
-        <div className="flex items-center gap-4 flex-1 w-full max-w-xl">
+        <div className="flex items-center gap-4 flex-1 w-full max-w-2xl">
            <div className="relative flex-1 group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
               <input 
@@ -64,16 +66,16 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
                 onChange={e => setSearchQuery(e.target.value)}
               />
            </div>
-           <div className="flex gap-1.5 p-1.5 bg-slate-100 rounded-2xl shrink-0">
-              {(['all', 'Active', 'Expired'] as const).map(s => (
+           <div className="flex gap-1.5 p-1.5 bg-slate-100 rounded-2xl shrink-0 overflow-x-auto no-scrollbar">
+              {(['all', 'Active', 'Pending Verification', 'Expired', 'Suspended'] as const).map(s => (
                 <button 
                   key={s}
                   onClick={() => setFilterStatus(s)}
-                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                     filterStatus === s ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
                   }`}
                 >
-                  {s}
+                  {s === 'Pending Verification' ? 'Pending' : s}
                 </button>
               ))}
            </div>

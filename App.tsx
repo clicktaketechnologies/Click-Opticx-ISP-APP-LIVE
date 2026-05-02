@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense, Component, useTransition } from 'react';
+import InventoryManagement from './pages/InventoryManagement';
 import { db } from './db';
 import { MasterApprovalDashboard } from './pages/MasterApprovalDashboard';
 import { Role, AppState, SystemNotification, UserStatus } from './types';
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react';
 import { PWAPrompt } from './components/PWAPrompt';
 import Modal from './components/shared/Modal';
+import { useToast } from './components/shared/Toast';
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 import { initDualWrite } from './lib/db-adapter';
 import './public/design-system.css';
@@ -71,7 +73,7 @@ const AIControlPlane = lazyWithRetry(() => import('./pages/AIControlPlane'));
 const AICentralDashboard = lazyWithRetry(() => import('./pages/AICentralDashboard'));
 const AICallingAdmin = lazyWithRetry(() => import('./pages/AICallingAdmin'));
 const AICallLogs = lazyWithRetry(() => import('./pages/AICallLogs'));
-const EmailControlCenter = lazyWithRetry(() => import('./pages/comm/EmailControlCenter'));
+const UnifiedCommunication = lazyWithRetry(() => import('./pages/UnifiedCommunication'));
 const AdminReminders = lazyWithRetry(() => import('./pages/AdminReminders'));
 const NASManagement = lazyWithRetry(() => import('./pages/NASManagement'));
 const OLTManagement = lazyWithRetry(() => import('./pages/OLTManagement'));
@@ -93,6 +95,7 @@ const NetworkPlaneV2 = lazyWithRetry(() => import('./pages/v2/NetworkPlaneV2'));
 const CommCenterV2 = lazyWithRetry(() => import('./pages/v2/CommCenterV2'));
 const AIAutomationV2 = lazyWithRetry(() => import('./pages/v2/AIAutomationV2'));
 
+const FinanceDashboard = lazyWithRetry(() => import('./pages/FinanceDashboard'));
 const NotificationControl = lazyWithRetry(() => import('./pages/admin/NotificationControl'));
 const AdminUserDevices = lazyWithRetry(() => import('./pages/admin/AdminUserDevices'));
 const NotificationAnalytics = lazyWithRetry(() => import('./pages/admin/NotificationAnalytics'));
@@ -196,31 +199,37 @@ const App: React.FC = () => {
   const [globalSearchTerm, setGlobalSearchTerm] = useState('');
   const [isPending, startTransition] = useTransition();
   const [navParams, setNavParams] = useState<any>(null);
+  const { success } = useToast();
 
   useEffect(() => {
-    // 1. Subscribe to State Updates
-    const unsubscribe = db.onStateChange((state) => {
-      setDbState(state);
-      setAuthState(state.auth);
+    const unsubscribe = db.onStateChange((newState) => {
+      startTransition(() => {
+        setDbState(newState);
+        setAuthState(newState.auth);
+        
+        // Handle Theme Hydration from State / LocalStorage
+        const theme = (newState.settings?.appearance as any)?.theme || localStorage.getItem('clickopticx_theme') || 'light';
+        const brandColor = (newState.settings?.appearance as any)?.primaryColor || localStorage.getItem('clickopticx_brand_color') || '#6366F1';
+        
+        if (theme === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+        
+        document.documentElement.style.setProperty('--bg-primary', brandColor);
+        document.documentElement.style.setProperty('--grad-primary', `linear-gradient(135deg, ${brandColor}, #4F46E5)`);
+      });
     });
 
     // 2. Initial Background Audit
     db.auditOverdueLoads();
     db.reconcileData('entire');
 
-    // 3. System Cron Job (Runs every 5 minutes)
-    const systemCron = setInterval(() => {
-      console.log("[SYSTEM] Executing Background Maintenance...");
-      db.auditOverdueLoads();
-      db.reconcileData('entire');
-    }, 5 * 60 * 1000);
+    // Removed useless auto-sync loop per UI stabilization requirements
 
     // 4. Initialize Dual-Write Adapter (Phase 1-2)
     initDualWrite();
 
     return () => {
       unsubscribe();
-      clearInterval(systemCron);
     };
   }, []);
 
@@ -229,7 +238,11 @@ const App: React.FC = () => {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('clickopticx_auth_token');
+    localStorage.removeItem('supabase.auth.token');
+    sessionStorage.clear();
     db.commit({ auth: { isLoggedIn: false }, view: 'login' });
+    success('System Logout', 'Session tokens securely cleared.');
   };
 
   const navigateTo = (page: string, params: any = null) => {
@@ -265,19 +278,20 @@ const App: React.FC = () => {
       case 'business-settings': return <BusinessSettings state={dbState} />;
       case 'auth-control': return <AuthControlCenter state={dbState} />;
       case 'system-deployment': return <SystemDeploymentCenter state={dbState} />;
-      case 'provider-config': return <ProviderConfigPage state={dbState} />;
       case 'migration-dashboard': return <MigrationDashboard state={dbState} />;
-      case 'gateway-settings': return <PaymentMethodsIndex state={dbState} onNavigate={navigateTo} />;
-      case 'fiscal-monitor': return <FiscalMonitor state={dbState} />;
+      case 'fiscal-monitor': return <FinanceDashboard state={dbState} />;
       case 'response-mapper': return <ResponseMapperConfig state={dbState} />;
-      case 'gateway-stripe': return <StripeSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-      case 'gateway-cash': return <CashSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-      case 'gateway-jazzcash': return <JazzCashSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-      case 'gateway-easypaisa': return <EasyPaisaSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-      case 'gateway-paypal': return <PayPalSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-      case 'gateway-payfast': return <PayFastSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-      case 'gateway-home': return <HomeCollectionSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
-      case 'gateway-bank': return <BankTransferSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />;
+      case 'provider-config': 
+      case 'gateway-settings': 
+      case 'gateway-stripe': 
+      case 'gateway-cash': 
+      case 'gateway-jazzcash': 
+      case 'gateway-easypaisa': 
+      case 'gateway-paypal': 
+      case 'gateway-payfast': 
+      case 'gateway-home': 
+      case 'gateway-bank': 
+        return <SystemConfig />;
       case 'invoice-engine': return <InvoiceGenerator state={dbState} onNavigate={navigateTo} />;
       case 'invoice-management': return <InvoiceManagementAdmin state={dbState} onNavigate={navigateTo} />;
       case 'customer-360': return <CustomerPortal state={dbState} />;
@@ -293,7 +307,7 @@ const App: React.FC = () => {
       case 'admin-device-mapping': return <UserDeviceMapping state={dbState} />;
       case 'admin-profile': return <AdminProfile state={dbState} />;
       case 'tasks': return <TaskManagement state={dbState} />;
-      case 'comm-center': return <EmailControlCenter state={dbState} activePage={p} />;
+      case 'comm-center': return <UnifiedCommunication state={dbState} />;
       case 'admin-reminders': return <AdminReminders state={dbState} onNavigate={navigateTo} />;
       case 'kyc-hub': return <KYCManagement state={dbState} />;
       case 'cloud-storage': return <MultiCloudSync state={dbState} />;
@@ -301,6 +315,7 @@ const App: React.FC = () => {
       case 'olt-management': return <OLTManagement state={dbState} />;
       case 'hotspot-tokens': return <HotspotManager state={dbState} />;
       case 'archive-records': return <PastRecords state={dbState} />;
+      case 'inventory-management': return <InventoryManagement state={dbState} />;
       case 'noc-dashboard': return <NOCDashboard state={dbState} />;
       case 'speed-test': return <SpeedTestPage />;
       case 'notification-control': return <NotificationControl state={dbState} />;
@@ -320,7 +335,10 @@ const App: React.FC = () => {
 
   const renderApp = () => {
     if (dbState.view === 'login') return <Login onLogin={handleLogin} />;
-    if (authState.role === 'Subscriber' || authState.role === 'Customer') return <SubscriberApp state={dbState} user={authState as any} onLogout={handleLogout} />;
+    if (authState.role === 'Subscriber' || authState.role === 'Customer') {
+      const activeUser = dbState.currentUser || dbState.users.find(u => u.id === authState.id) || authState;
+      return <SubscriberApp state={dbState} user={activeUser as any} onLogout={handleLogout} />;
+    }
 
     // V2 Layout is now the DEFAULT admin experience
     // V3 layout available via ?layout=v3 URL param
@@ -380,6 +398,7 @@ const App: React.FC = () => {
             searchTerm={globalSearchTerm}
             onSearch={setGlobalSearchTerm}
             isPending={isPending}
+            onNavigate={navigateTo}
           />
           <main className="p-3 md:p-6 lg:p-8 flex-1 overflow-y-auto custom-scrollbar">
             <Suspense fallback={<Mini5GMicroLoader size={40} />}>

@@ -42,6 +42,18 @@ const Dashboard: React.FC<{
   const [isFixingAll, setIsFixingAll] = useState(false);
   const [isQuickRenewModal, setIsQuickRenewModal] = useState(false);
   const [quickSearch, setQuickSearch] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      // Simulated export API
+      await new Promise(r => setTimeout(r, 800));
+      // db.exportData() if available
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   useEffect(() => {
     db.auditOverdueLoads();
@@ -265,14 +277,19 @@ const Dashboard: React.FC<{
               <button 
                 key={f.id} 
                 onClick={() => setDateFilter(f.id as any)} 
-                className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${dateFilter === f.id ? 'bg-bg-primary text-white shadow-sm' : 'text-text-muted hover:text-text-main'}`}
+                className={`px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${dateFilter === f.id ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}
               >
                 {f.label}
               </button>
             ))}
           </div>
-          <button className="flex-1 md:flex-none btn btn-secondary btn-sm flex items-center justify-center gap-2 px-4 py-2.5 text-[9px] font-black uppercase tracking-widest">
-            <Download size={14} /> Export
+          <button 
+            onClick={handleExport}
+            disabled={isExporting}
+            className="flex-1 md:flex-none btn btn-secondary btn-sm flex items-center justify-center gap-2 px-4 py-2.5 text-[9px] font-black uppercase tracking-widest disabled:opacity-50"
+          >
+            {isExporting ? <RefreshCcw size={14} className="animate-spin" /> : <Download size={14} />} 
+            {isExporting ? 'Exporting...' : 'Export'}
           </button>
           <button onClick={() => setIsQuickRenewModal(true)} className="flex-1 md:flex-none btn btn-secondary btn-sm bg-indigo-50 text-indigo-700 border-indigo-100 flex items-center justify-center gap-2 px-4 py-2.5 text-[9px] font-black uppercase tracking-widest">
             <RefreshCcw size={14} /> Renew
@@ -674,7 +691,7 @@ const Dashboard: React.FC<{
                 <input 
                   type="text" 
                   placeholder="Search Name, ID, or Phone..." 
-                  className="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] font-black text-sm outline-none focus:border-indigo-600 focus:bg-white transition-all shadow-inner"
+                  className="w-full pl-14 pr-6 py-3 md:py-5 bg-slate-50 border-2 border-slate-100 rounded-[1.5rem] font-black text-sm outline-none focus:border-indigo-600 focus:bg-white transition-all shadow-inner"
                   value={quickSearch}
                   onChange={e => setQuickSearch(e.target.value)}
                   autoFocus

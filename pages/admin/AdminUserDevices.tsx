@@ -134,7 +134,14 @@ const AdminUserDevices: React.FC<{ state: AppState }> = ({ state }) => {
                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] text-white shadow-inner ${u.fcmToken ? 'bg-blue-500' : 'bg-slate-300'}`}>
                                            <Monitor size={14} />
                                        </div>
-                                       <span>{u.name}</span>
+                                       <div className="flex flex-col">
+                                           <span className="leading-none">{u.name}</span>
+                                           {u.username ? (
+                                             <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">@{u.username}</span>
+                                           ) : (
+                                             <span className="text-[7px] font-black text-amber-500 uppercase tracking-widest mt-1">Pending Setup</span>
+                                           )}
+                                       </div>
                                    </div>
                                </td>
                                <td className="p-8 font-black text-blue-600 uppercase tracking-widest text-[10px] whitespace-nowrap">{u.connectionId}</td>

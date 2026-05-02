@@ -7,7 +7,8 @@ import {
   Wifi, Building2, FileText, Search, FileInput, ShieldAlert, Server, Smartphone, Zap, CreditCard, BarChart3, Trophy, ChevronRight, Network,
   ClipboardList, LifeBuoy, ListTodo, Info, Database, Monitor, Key, HardDrive, Map, Cpu, Sparkles, Calculator, History, Activity, Mic,
   Mail, Send, ListChecks, BellRing, Settings, UserCheck, ChevronDown, ChevronUp, UserCircle, RefreshCcw, DatabaseZap, PanelLeftClose, PanelLeft, Gauge,
-  Ticket, Archive, RotateCcw, Box, AlertTriangle, Shield, Layers as LayersIcon
+  Ticket, Archive, RotateCcw, Box, AlertTriangle, Shield, Layers as LayersIcon,
+  Globe, Home
 } from 'lucide-react';
 import { useBranding } from '../hooks/useBranding';
 
@@ -112,6 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
           items: [
             { id: 'olt-management', label: 'OLT Infrastructure', icon: Cpu },
             { id: 'nas-management', label: 'Router Settings', icon: Server },
+            { id: 'inventory-management', label: 'Inventory Master', icon: Box },
             { id: 'system-config', label: 'System Gateway', icon: Settings },
           ]
         },
@@ -160,7 +162,6 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
        items: [
          { id: 'invoice-engine', label: 'Billing System', icon: Calculator },
          { id: 'invoice-management', label: 'Invoices', icon: ClipboardList, badge: invoicePendingCount > 0 ? invoicePendingCount : undefined, badgeColor: 'yellow' },
-         { id: 'gateway-settings', label: 'Fiscal Gateways', icon: CreditCard },
          { id: 'fiscal-monitor', label: 'Fiscal Pulse', icon: Activity },
          { id: 'accounting', label: 'Transaction History', icon: History },
          {
@@ -171,6 +172,19 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
              { id: 'wallet', label: 'Wallet & Balance', icon: Wallet },
              { id: 'emergency-load', label: 'Emergency Balance', icon: Zap, badge: emergencyCount > 0 ? emergencyCount : undefined, badgeColor: 'red' },
              { id: 'admin-reminders', label: 'Admin Alerts', icon: BellRing },
+           ]
+         },
+         {
+           id: 'group-gateways', label: 'Payment Gateways', icon: CreditCard,
+           items: [
+             { id: 'gateway-jazzcash', label: 'JazzCash Protocol', icon: Wallet },
+             { id: 'gateway-easypaisa', label: 'EasyPaisa Protocol', icon: Smartphone },
+             { id: 'gateway-stripe', label: 'Stripe Global', icon: CreditCard },
+             { id: 'gateway-paypal', label: 'PayPal Global', icon: Globe },
+             { id: 'gateway-payfast', label: 'PayFast Online', icon: Zap },
+             { id: 'gateway-bank', label: 'Bank Transfers', icon: Database },
+             { id: 'gateway-cash', label: 'Physical Cash', icon: Receipt },
+             { id: 'gateway-home', label: 'Agent Collection', icon: Home },
            ]
          }
        ]
@@ -235,24 +249,44 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
   ], [pendingApprovals, pendingTicketsCount, role, state.settings.appearance, state.users, state.permissions]);
 
   const hasAccess = (id: string) => {
+    const userRole = (role || "").toLowerCase();
+    const superAdmin = Role.SUPER_ADMIN.toLowerCase();
+    const admin = Role.ADMIN.toLowerCase();
+    const financeAdmin = Role.FINANCE_ADMIN.toLowerCase();
+    const supportAdmin = Role.SUPPORT_ADMIN.toLowerCase();
+    const networkAdmin = Role.NETWORK_ADMIN.toLowerCase();
+    const businessAdmin = Role.BUSINESS_ADMIN.toLowerCase();
+
     // Hydration Safety Net
     if (!role || !state.permissions || state.permissions.length === 0) {
-      return true; // Temporarily allow access while syncing to prevent empty sidebar
+      return true; 
     }
 
-    if (role === Role.SUPER_ADMIN) return true;
+    if (userRole === superAdmin) return true;
     if (id === 'ai-calling' && !appearance.showAICalling) return false;
     
     if (id.startsWith('group-')) return true;
 
     const modulePerm = state.permissions.find(p => p.id === id);
-    if (modulePerm) return modulePerm.view.includes(role);
-    if (role === Role.ADMIN) return true;
-    if (role === Role.BUSINESS_ADMIN && ['business-settings', 'dashboard', 'about-us', 'auth-control', 'notification-control', 'notification-analytics', 'comm-templates', 'comm-logs', 'admin-user-devices'].includes(id)) return true;
-    if (role === Role.FINANCE_ADMIN && ['approval-desk', 'wallet', 'recovery', 'accounting', 'invoice-engine', 'invoice-management', 'gateway-settings', 'emergency-load'].includes(id)) return true;
-    if (role === Role.SUPPORT_ADMIN && ['approval-desk', 'customer-360', 'user-app', 'tickets', 'about-us', 'admin-password-requests', 'notification-control', 'comm-templates', 'admin-user-devices'].includes(id)) return true;
-    if (role === Role.NETWORK_ADMIN && ['admin-live-monitoring', 'admin-devices', 'admin-device-mapping', 'connection-setup', 'about-us', 'system-readiness', 'noc-dashboard', 'olt-management', 'nas-management', 'system-config'].includes(id)) return true;
-    if ([Role.FRANCHISE, Role.DEALER, Role.SUB_DEALER].includes(role as Role) && ['dashboard', 'users', 'customer-360', 'packages', 'tickets', 'wallet', 'accounting', 'invoice-management', 'reseller-management'].includes(id)) return true;
+    if (modulePerm) {
+      const allowedRoles = modulePerm.view.map(r => r.toLowerCase());
+      if (allowedRoles.includes(userRole)) return true;
+    }
+
+    if (userRole === admin) return true;
+    
+    if (userRole === businessAdmin && ['business-settings', 'dashboard', 'about-us', 'auth-control', 'notification-control', 'notification-analytics', 'comm-templates', 'comm-logs', 'admin-user-devices'].includes(id)) return true;
+    
+    if (userRole === financeAdmin && ['approval-desk', 'wallet', 'recovery', 'accounting', 'invoice-engine', 'invoice-management', 'gateway-settings', 'emergency-load'].includes(id)) return true;
+    
+    // Explicitly allow gateways for finance and super admins if not in permissions yet
+    if ((userRole === superAdmin || userRole === financeAdmin) && id.startsWith('gateway-')) return true;
+
+    if (userRole === supportAdmin && ['approval-desk', 'customer-360', 'user-app', 'tickets', 'about-us', 'admin-password-requests', 'notification-control', 'comm-templates', 'admin-user-devices'].includes(id)) return true;
+    
+    if (userRole === networkAdmin && ['admin-live-monitoring', 'admin-devices', 'admin-device-mapping', 'connection-setup', 'about-us', 'system-readiness', 'noc-dashboard', 'olt-management', 'nas-management', 'system-config'].includes(id)) return true;
+    
+    if (([Role.FRANCHISE.toLowerCase(), Role.DEALER.toLowerCase(), Role.SUB_DEALER.toLowerCase()].includes(userRole)) && ['dashboard', 'users', 'customer-360', 'packages', 'tickets', 'wallet', 'accounting', 'invoice-management', 'reseller-management'].includes(id)) return true;
     
     if (['tasks', 'about-us'].includes(id)) return true;
     return false;

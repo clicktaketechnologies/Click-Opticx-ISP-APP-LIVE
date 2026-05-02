@@ -163,6 +163,57 @@ const SystemConfig: React.FC = () => {
               </div>
             </div>
           </div>
+
+          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-600">
+                <Server size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Network & Hardware APIs</h3>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">MikroTik, OLT, and CDN Settings</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InputField label="MikroTik Router API IP" value={(techKeys as any).mikrotikIp || ''} onChange={(v:any) => setTechKeys({...techKeys, mikrotikIp: v})} icon={Globe} />
+              <InputField label="MikroTik API Port" value={(techKeys as any).mikrotikPort || ''} onChange={(v:any) => setTechKeys({...techKeys, mikrotikPort: v})} icon={Zap} type="number" />
+              <InputField label="MikroTik Username" value={(techKeys as any).mikrotikUser || ''} onChange={(v:any) => setTechKeys({...techKeys, mikrotikUser: v})} icon={Lock} />
+              <InputField label="MikroTik Password" value={(techKeys as any).mikrotikPass || ''} onChange={(v:any) => setTechKeys({...techKeys, mikrotikPass: v})} icon={Key} type="password" />
+              
+              <InputField label="OLT Management IP" value={(techKeys as any).oltIp || ''} onChange={(v:any) => setTechKeys({...techKeys, oltIp: v})} icon={Globe} />
+              <InputField label="OLT SNMP Community" value={(techKeys as any).oltSnmp || ''} onChange={(v:any) => setTechKeys({...techKeys, oltSnmp: v})} icon={Key} type="password" />
+              
+              <InputField label="Cloudflare API Token" value={(techKeys as any).cloudflareToken || ''} onChange={(v:any) => setTechKeys({...techKeys, cloudflareToken: v})} icon={Key} type="password" />
+              <InputField label="Cloudflare Zone ID" value={(techKeys as any).cloudflareZone || ''} onChange={(v:any) => setTechKeys({...techKeys, cloudflareZone: v})} icon={Database} />
+            </div>
+          </div>
+
+          <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-600">
+                <Globe size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Payment Gateways</h3>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Stripe, JazzCash, EasyPaisa, PayPal</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InputField label="Stripe Secret Key" value={(techKeys as any).stripeSecretKey || ''} onChange={(v:any) => setTechKeys({...techKeys, stripeSecretKey: v})} icon={Key} type="password" />
+              <InputField label="Stripe Publishable Key" value={(techKeys as any).stripePublishableKey || ''} onChange={(v:any) => setTechKeys({...techKeys, stripePublishableKey: v})} icon={Key} type="password" />
+              
+              <InputField label="JazzCash Merchant ID" value={(techKeys as any).jazzcashMerchantId || ''} onChange={(v:any) => setTechKeys({...techKeys, jazzcashMerchantId: v})} icon={Database} />
+              <InputField label="JazzCash Password" value={(techKeys as any).jazzcashPassword || ''} onChange={(v:any) => setTechKeys({...techKeys, jazzcashPassword: v})} icon={Key} type="password" />
+              
+              <InputField label="EasyPaisa Store ID" value={(techKeys as any).easypaisaStoreId || ''} onChange={(v:any) => setTechKeys({...techKeys, easypaisaStoreId: v})} icon={Database} />
+              <InputField label="EasyPaisa Hash Key" value={(techKeys as any).easypaisaHashKey || ''} onChange={(v:any) => setTechKeys({...techKeys, easypaisaHashKey: v})} icon={Key} type="password" />
+              
+              <InputField label="PayPal Client ID" value={(techKeys as any).paypalClientId || ''} onChange={(v:any) => setTechKeys({...techKeys, paypalClientId: v})} icon={Key} type="password" />
+              <InputField label="PayPal Secret" value={(techKeys as any).paypalSecret || ''} onChange={(v:any) => setTechKeys({...techKeys, paypalSecret: v})} icon={Key} type="password" />
+            </div>
+          </div>
         </div>
 
         {/* Global Flags */}

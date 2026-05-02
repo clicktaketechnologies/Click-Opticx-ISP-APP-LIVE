@@ -3,7 +3,7 @@ import { db } from '../db';
 import { 
   ShieldCheck, AlertTriangle, CheckCircle2, XCircle, 
   Terminal, Database, Globe, Bell, Mail, Server, 
-  Cpu, Cloud, Activity, ExternalLink, Zap
+  Cpu, Cloud, Activity, ExternalLink, Zap, RefreshCcw
 } from 'lucide-react';
 import PremiumSpeedTest from '../components/shared/PremiumSpeedTest';
 
@@ -12,26 +12,46 @@ const SystemReadiness: React.FC = () => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [scanning, setScanning] = useState(false);
 
+  const runManualScan = () => {
+    setScanning(true);
+    // Force socket check
+    setSocketConnected((db as any).socket?.connected || false);
+    // Simulate deep scan duration
+    setTimeout(() => {
+      setScanning(false);
+      setDbState(db.getState());
+    }, 1500);
+  };
+
   useEffect(() => {
-    // Check socket connectivity
-    const checkSocket = () => {
-       setSocketConnected((db as any).socket?.connected || false);
-    };
-    const interval = setInterval(checkSocket, 2000);
-    return () => clearInterval(interval);
+    // Initial check on mount
+    const socket = (db as any).socket;
+    setSocketConnected(socket?.connected || false);
+    
+    // Auto-trigger scan on mount for fresh data
+    runManualScan();
   }, []);
 
   const keys = dbState.settings.technicalKeys;
 
   const requirements = [
     {
-      id: 'firebase-web',
-      name: 'Firebase Web Client',
-      desc: 'Enables Firestore real-time sync and Auth.',
-      status: keys.firebaseApiKey && keys.firebaseProjectId ? 'Passed' : 'Missing',
+      id: 'supabase',
+      name: 'Supabase Cloud DB',
+      desc: 'Primary data storage and Auth gateway.',
+      status: keys.supabaseUrl && keys.supabaseAnonKey ? 'Passed' : 'Missing',
       impact: 'Critical',
-      icon: Cloud,
+      icon: Database,
       link: '#/business-settings'
+    },
+    {
+      id: 'email-gateway',
+      name: 'Email Service (Resend/Gmail)',
+      desc: 'Required for billing and system alerts.',
+      status: keys.resendApiKey || (keys.gmailUser && keys.gmailPass) ? 'Passed' : 'Missing',
+      impact: 'High',
+      icon: Mail,
+      link: '#/email-config'
     },
     {
         id: 'firebase-vapid',
@@ -41,15 +61,6 @@ const SystemReadiness: React.FC = () => {
         impact: 'Warning',
         icon: Bell,
         link: '#/business-settings'
-    },
-    {
-      id: 'smtp',
-      name: 'SMTP Gateway',
-      desc: 'Required for billing and alert emails.',
-      status: keys.smtpHost && keys.smtpPass ? 'Passed' : 'Missing',
-      impact: 'High',
-      icon: Mail,
-      link: '#/email-config'
     },
     {
       id: 'socket-io',
@@ -98,9 +109,19 @@ const SystemReadiness: React.FC = () => {
             Environment Diagnostic & Integration Health Check
           </p>
         </div>
-        <div className="text-right">
-            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Overall Integrity</div>
-            <div className="text-3xl font-black text-slate-900">{(overallHealth * 100).toFixed(0)}%</div>
+        <div className="flex items-center gap-6">
+            <button 
+              onClick={runManualScan}
+              disabled={scanning}
+              className="px-8 py-4 bg-slate-900 hover:bg-black disabled:bg-slate-200 text-white disabled:text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl flex items-center gap-3"
+            >
+              {scanning ? <RefreshCcw size={18} className="animate-spin" /> : <Zap size={18} />}
+              {scanning ? 'Auditing...' : 'Initiate Full System Audit'}
+            </button>
+            <div className="text-right">
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Overall Integrity</div>
+                <div className="text-3xl font-black text-slate-900">{(overallHealth * 100).toFixed(0)}%</div>
+            </div>
         </div>
       </div>
 

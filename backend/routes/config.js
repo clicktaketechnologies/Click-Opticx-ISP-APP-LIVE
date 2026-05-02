@@ -238,4 +238,42 @@ async function testStorageProvider(providerId) {
   return { success: false, message: `Unknown storage provider: ${providerId}` };
 }
 
+// ─── GET App Config (Portal/App toggles) ──────────────────────────────────────
+router.get('/app', adminGuard, (req, res) => {
+    const portal_access = configManager.getConfig('portal_access') || true;
+    const app_access = configManager.getConfig('app_access') || true;
+    res.json({ success: true, portal_access, app_access });
+});
+
+// ─── PUT App Config (Portal/App toggles) ──────────────────────────────────────
+router.put('/app', adminGuard, async (req, res) => {
+    try {
+        const { portal_access, app_access } = req.body;
+        if (portal_access !== undefined) await configManager.setConfig('portal_access', portal_access, 'admin');
+        if (app_access !== undefined) await configManager.setConfig('app_access', app_access, 'admin');
+        
+        // Broadcast change via Socket.io if available
+        const io = req.app.get('socketio');
+        if (io) io.emit('config_updated', { portal_access, app_access });
+
+        res.json({ success: true, message: 'App access settings updated.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// ─── GET Control Plane Pages (Config-driven routing) ──────────────────────────
+router.get('/control-plane/pages', adminGuard, (req, res) => {
+    const pages = [
+        { id: 'dashboard', path: '/admin/dashboard', name: 'Dashboard', icon: 'LayoutDashboard' },
+        { id: 'users', path: '/admin/users', name: 'Users', icon: 'Users' },
+        { id: 'billing', path: '/admin/billing', name: 'Billing', icon: 'CreditCard' },
+        { id: 'network', path: '/admin/network', name: 'Network', icon: 'Network' },
+        { id: 'support', path: '/admin/support', name: 'Support', icon: 'Headset' },
+        { id: 'communication', path: '/admin/communication', name: 'Communication', icon: 'Mail' },
+        { id: 'settings', path: '/admin/settings', name: 'Settings', icon: 'Settings' }
+    ];
+    res.json({ success: true, pages });
+});
+
 module.exports = router;

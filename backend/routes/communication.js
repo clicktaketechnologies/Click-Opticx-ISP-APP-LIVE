@@ -1,0 +1,11 @@
+const express = require('express');
+const router = express.Router();
+const commController = require('../controllers/communicationController');
+const { protect, restrictTo } = require('../middleware/auth');
+
+router.post('/config', protect, restrictTo('Admin', 'Super_Admin'), commController.saveConfig);
+router.post('/verify', protect, restrictTo('Admin', 'Super_Admin'), commController.verifyConnection);
+router.post('/send', protect, commController.sendNotification);
+router.get('/logs', protect, restrictTo('Admin', 'Super_Admin'), commController.getLogs);
+
+module.exports = router;

@@ -194,39 +194,23 @@ const SystemDeploymentCenter: React.FC<Props> = ({ state }) => {
         <div className="space-y-6">
           {/* Health Stats */}
           <div className="bg-white rounded-[2.5rem] border-2 border-slate-100 p-8 shadow-sm">
-             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6">Environment Health</h4>
-             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><Server size={16} /></div>
-                      <div>
-                         <p className="text-[10px] font-black text-slate-900 uppercase">Production Status</p>
-                         <p className="text-[9px] font-bold text-slate-400">Stable Connection</p>
-                      </div>
-                   </div>
-                   <div className="text-emerald-500 font-black text-xs uppercase">100%</div>
-                </div>
-                <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center"><Download size={16} /></div>
-                      <div>
-                         <p className="text-[10px] font-black text-slate-900 uppercase">Cloud Sync Latency</p>
-                         <p className="text-[9px] font-bold text-slate-400">Firestore Master</p>
-                      </div>
-                   </div>
-                   <div className="text-blue-500 font-black text-xs uppercase">24ms</div>
-                </div>
-                <div className="flex items-center justify-between">
-                   <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><Lock size={16} /></div>
-                      <div>
-                         <p className="text-[10px] font-black text-slate-900 uppercase">Lockdown Status</p>
-                         <p className="text-[9px] font-bold text-slate-400">Write Protection</p>
-                      </div>
-                   </div>
-                   <div className="text-amber-500 font-black text-xs uppercase">OFF</div>
-                </div>
+             <div className="flex items-center justify-between mb-6">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Environment Health</h4>
+                <button 
+                  onClick={async () => {
+                    (window as any).isDiagRunning = true;
+                    const res = await db.runSystemDiagnostics();
+                    (window as any).diagResults = res;
+                    (window as any).isDiagRunning = false;
+                    window.dispatchEvent(new Event('diag-updated'));
+                  }}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[9px] font-black uppercase tracking-widest transition-all"
+                >
+                  Run Diagnostics
+                </button>
              </div>
+             
+             <HealthStats />
           </div>
 
           {/* Manual Snapshots / Restore Points */}
@@ -313,5 +297,56 @@ const SystemDeploymentCenter: React.FC<Props> = ({ state }) => {
     </div>
   );
 };
+
+const HealthStats: React.FC = () => {
+  const [results, setResults] = useState<any>((window as any).diagResults || null);
+  const [running, setRunning] = useState<boolean>((window as any).isDiagRunning || false);
+
+  React.useEffect(() => {
+    const handler = () => {
+      setResults((window as any).diagResults);
+      setRunning((window as any).isDiagRunning);
+    };
+    window.addEventListener('diag-updated', handler);
+    return () => window.removeEventListener('diag-updated', handler);
+  }, []);
+
+  const stats = [
+    { label: 'SMTP Gateway', key: 'smtp', icon: Mail },
+    { label: 'FCM Notification', key: 'fcm', icon: Bell },
+    { label: 'OLT Infrastructure', key: 'olt', icon: Server },
+    { label: 'MikroTik Control', key: 'mikrotik', icon: Cpu },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {stats.map((s) => {
+        const status = results?.status?.[s.key] || 'PENDING';
+        const isOk = status === 'OK';
+        return (
+          <div key={s.key} className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isOk ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400'}`}>
+                <s.icon size={16} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-900 uppercase">{s.label}</p>
+                <p className={`text-[9px] font-bold uppercase ${isOk ? 'text-emerald-500' : 'text-slate-400'}`}>
+                  {running ? 'Checking...' : (results ? status : 'Ready for test')}
+                </p>
+              </div>
+            </div>
+            {!running && results && !isOk && (
+              <AlertCircle size={14} className="text-rose-500 animate-pulse" />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// Add missing imports for HealthStats
+import { Mail, Bell } from 'lucide-react';
 
 export default SystemDeploymentCenter;

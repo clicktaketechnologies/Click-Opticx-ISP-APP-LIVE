@@ -85,3 +85,82 @@ exports.getKYCList = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
+exports.approveKYC = async (req, res) => {
+    try {
+        const { userId, requestId } = req.body;
+        const supabase = configManager.getSupabaseClient();
+        const io = req.app.get('socketio');
+
+        logger.info(`[KYC-APPROVE] Approving for user: ${userId}`);
+
+        // 1. Update User Status in Postgres
+        const { error: userError } = await supabase
+            .from('users')
+            .update({ 
+                verificationStatus: 'VERIFIED',
+                isKYCVerified: true,
+                status: 'Active'
+            })
+            .eq('id', userId);
+
+        if (userError) throw userError;
+
+        // 2. Update KYC Request Status
+        if (requestId) {
+            await supabase.from('kyc_files').update({ status: 'Approved' }).eq('id', requestId);
+        }
+
+        // 3. Sync to Firebase (Mirror)
+        if (isFirebaseWriteEnabled()) {
+            try {
+                const db = admin.firestore();
+                // Update specific user node
+                const stateRef = db.collection('registry').doc('master_state');
+                const doc = await stateRef.get();
+                if (doc.exists) {
+                    const state = doc.data();
+                    const userIdx = state.users.findIndex(u => u.id === userId);
+                    if (userIdx !== -1) {
+                        state.users[userIdx].verificationStatus = 'VERIFIED';
+                        state.users[userIdx].isKYCVerified = true;
+                        state.users[userIdx].status = 'Active';
+                        await stateRef.update({ users: state.users });
+                    }
+                }
+            } catch (fbErr) {
+                logger.warn(`[KYC-SYNC-FB] Mirror failed: ${fbErr.message}`);
+            }
+        }
+
+        if (io) io.emit('kyc_status_changed', { userId, status: 'Approved' });
+
+        res.json({ success: true, message: 'Identity verified and access granted.' });
+    } catch (error) {
+        logger.error(`[KYC Approve] Error: ${error.message}`);
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+exports.rejectKYC = async (req, res) => {
+    try {
+        const { userId, reason } = req.body;
+        const supabase = configManager.getSupabaseClient();
+
+        logger.info(`[KYC-REJECT] Rejecting for user: ${userId} - Reason: ${reason}`);
+
+        await supabase
+            .from('users')
+            .update({ 
+                verificationStatus: 'REVISION',
+                isKYCVerified: false,
+                kyc_rejected_reason: reason
+            })
+            .eq('id', userId);
+
+        res.json({ success: true, message: 'Identity rejected. Revision requested.' });
+    } catch (error) {
+        logger.error(`[KYC Reject] Error: ${error.message}`);
+        res.status(500).json({ success: false, error: error.message });
+    }
+};

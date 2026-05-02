@@ -13,7 +13,7 @@ const { exec } = require('child_process');
 
 const nasRoutes = require('./routes/nas');
 const oltRoutes = require('./routes/olt');
-const paymentRoutes = require('./routes/payments');
+const financeRoutes = require('./routes/finance');
 const healthRoutes = require('./routes/health');
 const telemetryController = require('./controllers/telemetryController');
 const logger = require('./utils/logger');
@@ -27,10 +27,11 @@ const kycRoutes = require('./routes/kyc');
 const cloudRoutes = require('./routes/cloud');
 const configRoutes = require('./routes/config');
 const emailRoutes = require('./routes/email');
-const providerManagementRoutes = require('./routes/provider-management');
-const storageRoutes = require('./routes/storage');
-const migrationRoutes = require('./routes/migration');
-const emailV2Router = require('./routes/email-v2');
+const adminRoutes = require('./routes/admin');
+const communicationRoutes = require('./routes/communication');
+const networkRoutes = require('./routes/network');
+const inventoryRoutes = require('./routes/inventory');
+const hotspotRoutes = require('./routes/hotspot');
 const configManager = require('./services/config-manager');
 const emailWorker = require('./modules/email/worker');
 const paymentRouter = require('./modules/payments/payment-router');
@@ -205,17 +206,20 @@ app.use('/api', oltRoutes);
 app.use('/api/real-olt', oltRealRoutes);
 app.use('/api/mikrotik', mikrotikRoutes);
 app.use('/api/automation', automationRoutes);
-app.use('/api/payments', paymentRoutes);
+app.use('/api/finance', financeRoutes);
 app.use('/api/health-monitor', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/kyc', kycRoutes);
 app.use('/api/cloud', cloudRoutes);
 app.use('/api/config', configRoutes);
-app.use('/api/email', emailRoutes);
 app.use('/api/storage', storageRoutes);
 app.use('/api/migration', migrationRoutes);
-app.use('/api/email/v2', emailV2Router);
+app.use('/api/v1/admin', adminRoutes);
+app.use('/api/communication', communicationRoutes);
 app.use('/api/provider-mgmt', providerManagementRoutes);
+app.use('/api/network', networkRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/hotspot', hotspotRoutes);
 
 // --- Push Notification API ---
 app.post('/api/push-notify', async (req, res) => {

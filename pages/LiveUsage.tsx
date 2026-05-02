@@ -15,6 +15,9 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
+    // Subscribe to live traffic stream on mount
+    db.subscribeToLiveTraffic(user.id);
+
     if (isPaused) return;
 
     const interval = setInterval(() => {
@@ -37,7 +40,11 @@ const LiveUsage: React.FC<{ user: ISPUser }> = ({ user }) => {
         });
       }
     }, 2000);
-    return () => clearInterval(interval);
+    
+    return () => {
+      clearInterval(interval);
+      db.unsubscribeFromLiveTraffic(user.id);
+    };
   }, [user.id, isPaused]);
 
   // If no hardware is mapped, show the fallback UI
