@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { db } from '../../db';
 import { 
   BarChart3, Play, Activity, Globe, Wifi, 
   ArrowDownCircle, ArrowUpCircle, ShieldCheck, 
@@ -16,14 +17,17 @@ import {
 } from '../../utils/speedtest';
 import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 
+import { ISPUser, StaffUser } from '../../types';
+
 interface Props {
+  user?: ISPUser | StaffUser;
   onComplete?: (results: any) => void;
   onClose?: () => void;
   className?: string;
   isModal?: boolean;
 }
 
-const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isModal }) => {
+const PremiumSpeedTest: React.FC<Props> = ({ user, onComplete, onClose, className, isModal }) => {
   const [testState, setTestState] = useState<'IDLE' | 'TESTING' | 'SUCCESS' | 'ERROR'>('IDLE');
   const [phase, setPhase] = useState<'none' | 'ping' | 'download' | 'upload'>('none');
   const [statusText, setStatusText] = useState('System Ready');
@@ -109,7 +113,7 @@ const PremiumSpeedTest: React.FC<Props> = ({ onComplete, onClose, className, isM
     if (testState === 'TESTING') return;
     
     try {
-      const currentUser = db.getState().currentUser;
+      const currentUser = user || db.getState().currentUser;
       if (!currentUser) throw new Error('Authentication Required');
 
       setTestState('TESTING');

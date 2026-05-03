@@ -667,6 +667,76 @@ class DB {
     return this.backendUrl;
   }
 
+  // --- 🛡️ SECURE TOKEN MANAGEMENT ---
+  /**
+   * Stores a JWT token WITH metadata (issuedAt, expiresAt) so we can
+   * validate expiry client-side on every read.
+   */
+  private storeToken(token: string) {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        console.error('[TOKEN] Invalid JWT format — not storing.');
+        return;
+      }
+      const payload = JSON.parse(atob(parts[1]));
+      const tokenMeta = {
+        token,
+        issuedAt: Date.now(),
+        expiresAt: payload.exp ? payload.exp * 1000 : Date.now() + (7 * 24 * 60 * 60 * 1000), // fallback 7d
+      };
+      localStorage.setItem('clickopticx_auth_token', JSON.stringify(tokenMeta));
+    } catch (e) {
+      console.error('[TOKEN] Failed to decode/store JWT:', e);
+      localStorage.setItem('clickopticx_auth_token', JSON.stringify({
+        token,
+        issuedAt: Date.now(),
+        expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000),
+      }));
+    }
+  }
+
+  /**
+   * Retrieves a stored JWT token, validating its expiry.
+   * Returns null and clears session if the token is expired.
+   * Handles legacy format (bare token string) by forcing re-auth.
+   */
+  public getValidToken(): string | null {
+    try {
+      const raw = localStorage.getItem('clickopticx_auth_token');
+      if (!raw) return null;
+
+      // Handle legacy format: bare token string without metadata wrapper
+      if (!raw.startsWith('{')) {
+        console.warn('[SESSION] Legacy token format detected — clearing for re-authentication.');
+        localStorage.removeItem('clickopticx_auth_token');
+        return null;
+      }
+
+      const meta = JSON.parse(raw);
+      if (!meta.token || !meta.expiresAt) {
+        localStorage.removeItem('clickopticx_auth_token');
+        return null;
+      }
+
+      // Check expiry
+      if (Date.now() > meta.expiresAt) {
+        console.warn('[SESSION] JWT expired. Forcing re-authentication.');
+        localStorage.removeItem('clickopticx_auth_token');
+        this.state.auth = { isLoggedIn: false };
+        this.state.currentUser = undefined;
+        this.state.view = 'login';
+        this.notify();
+        return null;
+      }
+
+      return meta.token;
+    } catch {
+      localStorage.removeItem('clickopticx_auth_token');
+      return null;
+    }
+  }
+
   public getSocket() {
     return this.socket;
   }
@@ -687,23 +757,37 @@ class DB {
         }
         this.state = { ...INITIAL_STATE, ...parsed };
 
-        // --- SECURITY HARDENING: Session Expiry Check ---
+        // --- 🛡️ SECURITY HARDENING: Session Expiry Check ---
         if (this.state.auth?.isLoggedIn) {
           const isPersistent = this.state.auth.isPersistent !== false;
           const lastLogin = this.state.auth.lastLoginAt ? new Date(this.state.auth.lastLoginAt).getTime() : 0;
           const now = Date.now();
-          const sessionTimeout = isPersistent ? (30 * 24 * 60 * 60 * 1000) : (24 * 60 * 60 * 1000); // 30 Days if remembered, 24 Hours if not
+          // P0-FIX: Reduced from 30d/24h to 15d/12h to limit session exposure window
+          const sessionTimeout = isPersistent
+            ? (15 * 24 * 60 * 60 * 1000)  // 15 days max for "Remember Me"
+            : (12 * 60 * 60 * 1000);       // 12 hours for non-persistent sessions
           
+          // P0-FIX: Also validate the stored JWT token expiry
+          const storedToken = this.getValidToken();
+          const tokenExpired = !storedToken;
+
           if (!isPersistent && !sessionStorage.getItem('clickoptix_active_session')) {
             console.warn('[SECURITY] Non-persistent session detected without active tab. Logging out.');
             this.state.auth = { isLoggedIn: false };
             this.state.currentUser = undefined;
             this.state.view = 'login';
-          } else if (lastLogin && (now - lastLogin > sessionTimeout)) {
-            console.warn('[SECURITY] Session expired. Force logout triggered.');
+            localStorage.removeItem('clickopticx_auth_token');
+          } else if (tokenExpired) {
+            console.warn('[SECURITY] JWT token expired or missing. Force logout triggered.');
             this.state.auth = { isLoggedIn: false };
             this.state.currentUser = undefined;
             this.state.view = 'login';
+          } else if (lastLogin && (now - lastLogin > sessionTimeout)) {
+            console.warn('[SECURITY] Session exceeded maximum TTL. Force logout triggered.');
+            this.state.auth = { isLoggedIn: false };
+            this.state.currentUser = undefined;
+            this.state.view = 'login';
+            localStorage.removeItem('clickopticx_auth_token');
           }
         }
         
@@ -1375,11 +1459,14 @@ class DB {
       if (docSnap.exists()) {
         const cloudData = docSnap.data() as Partial<AppState>;
         if (cloudData.users && Array.isArray(cloudData.users)) {
-          // --- 🛡️ SMART MERGE: Prevent 'Hidden Users' ---
+          // --- 🛡️ SMART MERGE: Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
           // Keep all cloud users as base, but preserve local users that haven't synced yet.
           const cloudIds = new Set(cloudData.users.map(u => u.id));
-          const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id));
-          this.state.users = [...cloudData.users, ...localOnlyUsers];
+          const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !u.deleted);
+          this.state.users = [
+            ...cloudData.users.filter(u => !u.deleted),
+            ...localOnlyUsers
+          ];
         }
         if (cloudData.signupRequests && Array.isArray(cloudData.signupRequests)) {
            const cloudSignupIds = new Set(cloudData.signupRequests.map(r => r.id));
@@ -1401,11 +1488,14 @@ class DB {
         if (snapshot.exists()) {
           const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...persistedData } = snapshot.data() as AppState;
           
-          // --- 🛡️ SMART MERGE (Real-time): Prevent 'Hidden Users' ---
+          // --- 🛡️ SMART MERGE (Real-time): Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
           if (persistedData.users && Array.isArray(persistedData.users)) {
             const cloudIds = new Set(persistedData.users.map(u => u.id));
-            const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id));
-            persistedData.users = [...persistedData.users, ...localOnlyUsers];
+            const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !u.deleted);
+            persistedData.users = [
+              ...persistedData.users.filter(u => !u.deleted),
+              ...localOnlyUsers
+            ];
           }
           if (persistedData.signupRequests && Array.isArray(persistedData.signupRequests)) {
             const cloudSignupIds = new Set(persistedData.signupRequests.map(r => r.id));
@@ -1612,9 +1702,12 @@ class DB {
   }
 
   private commitTimer: any = null;
-
   private localCommitTimer: any = null;
   private notifyTimer: any = null;
+
+  public async commitImmediate(patch?: Partial<AppState>) {
+    return this.commit(patch, true);
+  }
 
   public async commit(patch?: Partial<AppState>, immediate = false) {
     if (patch) {
@@ -1855,7 +1948,7 @@ class DB {
 
         const res = await response.json();
         if (res.success && res.token) {
-           localStorage.setItem('clickopticx_auth_token', res.token);
+           this.storeToken(res.token);
            this.state.currentUser = res.user;
            this.state.auth = {
              isLoggedIn: true,
@@ -1922,7 +2015,7 @@ class DB {
 
       const res = await response.json();
       if (res.success && res.token) {
-         localStorage.setItem('clickopticx_auth_token', res.token);
+         this.storeToken(res.token);
          this.state.currentUser = res.user;
          this.state.auth = {
            isLoggedIn: true,
@@ -2085,9 +2178,9 @@ class DB {
         return { success: false, message: res.message || 'Identity verification failed.' };
       }
 
-      // Store JWT token securely (for future requests)
+      // Store JWT token securely with expiry metadata
       if (res.token) {
-        localStorage.setItem('clickopticx_auth_token', res.token);
+        this.storeToken(res.token);
       }
 
       // The backend returns the full user object (staff or user)
@@ -2146,7 +2239,7 @@ class DB {
           }
       }
 
-      await this.commit(true);
+      await this.commit(undefined, true);
       this.authenticateSocket();
       this.notify();
       
@@ -2165,55 +2258,38 @@ class DB {
       };
 
     } catch (e: any) {
-      console.warn('[DB-AUTH-ERROR] Backend Protocol Failed. Attempting Local Handshake...', e.message);
-      
-      // Local Handshake Fallback
-      const localUser = this.state.users.find(u => 
-        (u.username?.toLowerCase() === identifier.toLowerCase() || u.email?.toLowerCase() === identifier.toLowerCase()) &&
-        u.password === pass &&
-        !u.deleted
-      );
-
-      if (localUser) {
-        this.state.currentUser = { ...localUser, role: Role.CUSTOMER };
-        this.notify();
-        this.logAudit('Local User Login', 'Login', 'Login succeeded via local database (Backend Bypass).', localUser.id, localUser.name);
-        return { success: true, user: this.state.currentUser, type: 'customer' };
-      }
-
-      // Check Staff too
-      const localStaff = this.state.staff.find(s => 
-        (s.email.toLowerCase() === identifier.toLowerCase()) && 
-        s.password === pass
-      );
-
-      if (localStaff) {
-        this.state.currentUser = localStaff;
-        this.notify();
-        this.logAudit('Local Staff Login', 'Login', 'Administrative login succeeded via local database (Backend Bypass).', localStaff.email, localStaff.name);
-        return { success: true, user: this.state.currentUser, type: 'staff' };
-      }
-
-      return { success: false, message: 'Communication bridge failure. Credentials could not be verified locally.' };
+      // P0-FIX: Removed plaintext password comparison fallback.
+      // Local credential bypass was a critical security vulnerability —
+      // passwords stored in localStorage in cleartext could be extracted
+      // by any browser extension or XSS attack.
+      console.error('[AUTH] Backend unreachable:', e.message);
+      return { 
+        success: false, 
+        message: 'Server unreachable. Please check your internet connection and try again.' 
+      };
     }
   }
 
   async impersonateUser(userId: string) {
     console.log(`[AUTH] Initiating impersonation for User Node: ${userId}`);
     try {
+      const currentToken = this.getValidToken();
+      if (!currentToken) return { success: false, message: 'Session expired. Please re-authenticate.' };
+
       const response = await fetch(`${this.backendUrl}/api/v1/admin/impersonate/${userId}`, {
         method: 'POST',
         headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+          'Authorization': `Bearer ${currentToken}`
         }
       });
     
     const res = await response.json();
     if (res.success && res.token) {
-      const originalToken = localStorage.getItem('clickopticx_auth_token');
-      if (originalToken) localStorage.setItem('clickopticx_admin_token', originalToken);
+      // Backup the admin token (with its metadata wrapper) for restoration
+      const originalTokenRaw = localStorage.getItem('clickopticx_auth_token');
+      if (originalTokenRaw) localStorage.setItem('clickopticx_admin_token', originalTokenRaw);
       
-      localStorage.setItem('clickopticx_auth_token', res.token);
+      this.storeToken(res.token);
       this.state.currentUser = res.user;
       this.state.auth = {
         ...this.state.auth,
@@ -2236,9 +2312,10 @@ class DB {
 }
 
 async logoutImpersonation() {
-  const adminToken = localStorage.getItem('clickopticx_admin_token');
-  if (adminToken) {
-     localStorage.setItem('clickopticx_auth_token', adminToken);
+  const adminTokenRaw = localStorage.getItem('clickopticx_admin_token');
+  if (adminTokenRaw) {
+     // Restore the original admin token metadata wrapper directly
+     localStorage.setItem('clickopticx_auth_token', adminTokenRaw);
      localStorage.removeItem('clickopticx_admin_token');
      
      this.logAudit('Impersonation End', 'Admin', `Admin terminated impersonation session.`);
@@ -3205,85 +3282,43 @@ async logoutImpersonation() {
 
   async approveSignup(requestId: string) {
     try {
-      const req = this.state.signupRequests.find(r => r.id === requestId);
-      if (!req) return { success: false, message: 'Registry Query Error: Signup request node not found in current state.' };
+      console.log('[DB-AUTH] Sending signup approval to backend for request:', requestId);
 
-      console.log('[DB-AUTH] Approving signup request:', requestId, 'User ID Reference:', req.userId);
+      const currentToken = this.getValidToken();
+      if (!currentToken) return { success: false, message: 'Session expired. Please re-authenticate.' };
 
-      // BROAD SPECTRUM IDENTITY MATCHING:
-      // We look for any user that matches ID, username, email, phone, or cnic
-      let user = this.state.users.find(u => {
-        // Direct ID match (Highest confidence)
-        if (req.userId && u.id === req.userId) return true;
-        
-        // Identity fallback matches
-        const reqUser = (req.username || '').toLowerCase().trim();
-        const dbUser = (u.username || '').toLowerCase().trim();
-        if (reqUser && dbUser && reqUser === dbUser) return true;
-
-        const reqEmail = (req.email || '').toLowerCase().trim();
-        const dbEmail = (u.email || '').toLowerCase().trim();
-        if (reqEmail && dbEmail && reqEmail === dbEmail) return true;
-
-        const reqPhone = (req.phone || '').replace(/\D/g, '');
-        const dbPhone = (u.phone || '').replace(/\D/g, '');
-        if (reqPhone && dbPhone && reqPhone === dbPhone && reqPhone.length >= 10) return true;
-
-        return false;
+      const response = await fetch(`${this.backendUrl}/api/users/signup-requests/${requestId}/approve`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentToken}` 
+        }
       });
-
-      if (!user) {
-        console.warn('[DB-AUTH-HEAL] Identity gap detected during approval. Reconstructing subscriber node for request:', requestId);
-        
-        // SELF-HEALING: If user is missing from registry but request exists, re-create them
-        const healedUser: any = {
-           id: req.userId || ('USR-' + Date.now()),
-           name: req.name || 'New Subscriber',
-           username: (req.username || '').toLowerCase().trim(),
-           email: (req.email || '').toLowerCase().trim(),
-           phone: (req.phone || '').replace(/\D/g, ''),
-           password: req.password || '', // Inherit from request if present
-           status: UserStatus.ACTIVE,
-           approval_status: 'approved',
-           kyc_status: 'pending',
-           role: Role.CUSTOMER,
-           cnic: (req as any).cnic || '',
-           address: (req as any).address || '',
-           area: (req as any).area || 'Central',
-           createdAt: req.timestamp || new Date().toISOString(),
-           packageId: (req as any).packageId || 'PKG-BASIC', 
-           balance: 0,
-           unpaidInvoices: 0,
-           isKYCVerified: false,
-           verificationStatus: VerificationStatus.UNVERIFIED,
-           tags: ['Healed-Identity']
-        };
-
-        this.state.users.push(healedUser);
-        user = healedUser;
+      
+      const res = await response.json();
+      if (!res.success) {
+         return { success: false, message: res.message || 'Backend approval failed' };
       }
 
-      // Update Identity Payload: DECOUPLED FROM KYC
-      user.approval_status = 'approved';
-      user.status = UserStatus.ACTIVE;
-      
-      // Note: we NO LONGER force isKYCVerified=true here. 
-      // The user must go through the KYC flow or be verified manually.
+      // Backend returns the approved request. We update local state directly for immediate UI feedback.
+      const req = this.state.signupRequests.find(r => r.id === requestId);
+      if (req) {
+         req.status = 'Approved';
+         req.approval_status = 'approved';
+         req.processedAt = res.request.processed_at;
+         req.processedBy = res.request.processed_by;
+      }
 
-      // Update Request Payload
-      req.status = 'Approved';
-      req.approval_status = 'approved';
-      req.processedAt = new Date().toISOString();
-      req.processedBy = this.state.currentUser?.name || 'Administrator';
+      // The backend creates the user and emits 'user:created' via socket, but we can also pre-emptively
+      // fetch or rely on the socket to insert the user into `this.state.users`.
 
-      this.logNotification(user.id, 'success', 'Account Pre-Approved', 'Your account protocol is now active. Complete KYC to unlock full fiscal access.');
-      this.logActivity(user.id, 'Approval', 'Subscriber handshake approved by administrator.');
-      this.logAudit('Signup Approved', 'Approval', `Signup for ${user.name} (${user.id}) approved. Account activated in Limited Access Mode.`, user.id, user.name);
+      this.logNotification(requestId, 'success', 'Account Pre-Approved', 'Account approved successfully.');
+      this.logAudit('Signup Approved', 'Approval', `Signup request ${requestId} approved via backend.`, requestId, req?.name || 'Unknown');
 
-      await this.commit(true);
+      await this.commitImmediate();
       this.notify();
       
-      return { success: true, message: 'Identity Approved Successfully. Account is now active in Limited Mode.', userId: user.id };
+      return { success: true, message: 'Identity Approved Successfully.', request: res.request };
     } catch (e: any) {
       console.error('[DB-AUTH-CRITICAL] Approval Bridge Failure:', e);
       return { success: false, message: `System Fault: ${e.message}` };
@@ -5921,7 +5956,7 @@ async logoutImpersonation() {
 
     this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: now, adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Soft Delete & Archive', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `Marked identities as deleted. Moved to deep archive. Credit Action: ${creditAction}. Adjusted Rs. ${totalCreditAdjusted}.`, riskLevel: 'High' });
     
-    await this.commit();
+    await this.commitImmediate();
     this.notify();
     return { success: true, count: userIds.length, creditAdjusted: totalCreditAdjusted };
   }

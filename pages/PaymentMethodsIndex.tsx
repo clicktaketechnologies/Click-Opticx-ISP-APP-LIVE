@@ -17,6 +17,13 @@ interface Props {
 }
 
 const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
+  if (!state || !state.settings) {
+    return (
+      <div className="flex h-96 items-center justify-center">
+        <Mini5GMicroLoader size={48} />
+      </div>
+    );
+  }
   const [loading, setLoading] = useState(false);
   const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);

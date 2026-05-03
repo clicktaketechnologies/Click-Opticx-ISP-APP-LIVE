@@ -4,19 +4,21 @@ import { History as HistoryIcon, Clock, Zap, Activity, AlertTriangle } from 'luc
 import PremiumSpeedTest from '../components/shared/PremiumSpeedTest';
 import { db } from '../db';
 
-const SpeedTestPage: React.FC = () => {
-  const [testHistory, setTestHistory] = useState<any[]>([]);
+import { AppState } from '../types';
+
+interface Props {
+  state: AppState;
+}
+
+const SpeedTestPage: React.FC<Props> = ({ state }) => {
+  if (!state) return <Mini5GMicroLoader size={60} />;
+  const [testHistory, setTestHistory] = useState<any[]>(state.speedTestHistory?.slice(0, 10) || []);
 
   useEffect(() => {
-    const state = db.getState();
-    if (state.speedTestHistory) {
+    if (state && state.speedTestHistory) {
       setTestHistory(state.speedTestHistory.slice(0, 10));
     }
-    
-    return db.onStateChange((newState) => {
-      setTestHistory((newState.speedTestHistory || []).slice(0, 10));
-    });
-  }, []);
+  }, [state?.speedTestHistory]);
 
   const handleTestComplete = (results: any) => {
     const currentUser = db.getState().currentUser;
@@ -38,9 +40,8 @@ const SpeedTestPage: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-12 pb-32 animate-in fade-in duration-700">
       
-      {/* Premium Test Engine */}
       <section>
-        <PremiumSpeedTest onComplete={handleTestComplete} />
+        <PremiumSpeedTest user={state.currentUser} onComplete={handleTestComplete} />
       </section>
 
       {/* Historical Diagnostics */}

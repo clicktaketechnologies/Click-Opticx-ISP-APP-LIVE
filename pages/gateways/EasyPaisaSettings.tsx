@@ -14,6 +14,14 @@ interface Props {
 }
 
 const EasyPaisaSettings: React.FC<Props> = ({ state, onBack }) => {
+  if (!state || !state.settings || !state.settings.paymentGateways) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Mini5GMicroLoader size={40} />
+      </div>
+    );
+  }
+
   const gateway = state.settings.paymentGateways.find(g => g.id === 'easypaisa');
 
   if (!gateway) {

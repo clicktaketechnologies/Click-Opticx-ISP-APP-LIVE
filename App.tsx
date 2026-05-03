@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense, Component, useTransition } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import InventoryManagement from './pages/InventoryManagement';
 import { db } from './db';
 import { MasterApprovalDashboard } from './pages/MasterApprovalDashboard';
@@ -30,6 +31,7 @@ const RecoveryDashboard = lazyWithRetry(() => import('./pages/RecoveryDashboard'
 const AccountingLedger = lazyWithRetry(() => import('./pages/AccountingLedger'));
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+const EmailControlCenter = lazyWithRetry(() => import('./pages/comm/EmailControlCenter'));
 const PackagesPage = lazyWithRetry(() => import('./pages/PackagesPage'));
 const ArchivePage = lazyWithRetry(() => import('./pages/ArchivePage'));
 const AccessControlPage = lazyWithRetry(() => import('./pages/AccessControlPage'));
@@ -189,10 +191,98 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
   }
 }
 
+interface LegacyRoutesProps {
+  dbState: AppState;
+  navigateTo: (page: string, params?: any) => void;
+  globalSearchTerm: string;
+  setGlobalSearchTerm: (term: string) => void;
+  navParams: any;
+}
+
+const LegacyRoutes: React.FC<LegacyRoutesProps> = ({ 
+  dbState, 
+  navigateTo, 
+  globalSearchTerm, 
+  setGlobalSearchTerm, 
+  navParams 
+}) => {
+  return (
+    <Routes>
+      <Route path="/dashboard" element={<Dashboard state={dbState} onNavigate={navigateTo} searchTerm={globalSearchTerm} onClearSearch={() => setGlobalSearchTerm('')} />} />
+      <Route path="/ai-control" element={<AIControlPlane state={dbState} />} />
+      <Route path="/ai-central" element={<AICentralDashboard state={dbState} />} />
+      <Route path="/ai-calling" element={<AICallingAdmin state={dbState} />} />
+      <Route path="/ai-call-logs" element={<AICallLogs state={dbState} />} />
+      <Route path="/users" element={<UserManagement state={dbState} searchTerm={globalSearchTerm} navParams={navParams} />} />
+      <Route path="/packages" element={<PackagesPage state={dbState} />} />
+      <Route path="/approval-desk" element={<MasterApprovalDashboard state={dbState} />} />
+      <Route path="/recovery" element={<Recovery state={dbState} searchTerm={globalSearchTerm} />} />
+      <Route path="/recovery-dashboard" element={<RecoveryDashboard state={dbState} />} />
+      <Route path="/accounting" element={<AccountingLedger state={dbState} />} />
+      <Route path="/archive" element={<ArchivePage state={dbState} />} />
+      <Route path="/staff" element={<AccessControlPage state={dbState} />} />
+      <Route path="/system-flash" element={<SystemFlash state={dbState} />} />
+      <Route path="/system-config" element={<SystemConfig />} />
+      <Route path="/system-readiness" element={<SystemReadiness />} />
+      <Route path="/reseller-management" element={<ResellerManagement state={dbState} />} />
+      <Route path="/permissions" element={<PermissionsPage state={dbState} />} />
+      <Route path="/import" element={<DataImportPage state={dbState} />} />
+      <Route path="/monitor" element={<DatabaseMonitor state={dbState} />} />
+      <Route path="/cache" element={<CacheManagement state={dbState} />} />
+      <Route path="/business-settings" element={<BusinessSettings state={dbState} />} />
+      <Route path="/auth-control" element={<AuthControlCenter state={dbState} />} />
+      <Route path="/system-deployment" element={<SystemDeploymentCenter state={dbState} />} />
+      <Route path="/migration-dashboard" element={<MigrationDashboard state={dbState} />} />
+      <Route path="/fiscal-monitor" element={<FinanceDashboard state={dbState} />} />
+      <Route path="/response-mapper" element={<ResponseMapperConfig state={dbState} />} />
+      <Route path="/provider-config" element={<SystemConfig />} />
+      <Route path="/gateway-settings" element={<PaymentMethodsIndex state={dbState} onNavigate={navigateTo} />} />
+      <Route path="/gateway-stripe" element={<StripeSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />} />
+      <Route path="/gateway-cash" element={<CashSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />} />
+      <Route path="/gateway-jazzcash" element={<JazzCashSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />} />
+      <Route path="/gateway-easypaisa" element={<EasyPaisaSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />} />
+      <Route path="/gateway-paypal" element={<PayPalSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />} />
+      <Route path="/gateway-payfast" element={<PayFastSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />} />
+      <Route path="/gateway-home" element={<HomeCollectionSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />} />
+      <Route path="/gateway-bank" element={<BankTransferSettings state={dbState} onBack={() => navigateTo('gateway-settings')} />} />
+      <Route path="/invoice-engine" element={<InvoiceGenerator state={dbState} onNavigate={navigateTo} />} />
+      <Route path="/invoice-management" element={<InvoiceManagementAdmin state={dbState} onNavigate={navigateTo} />} />
+      <Route path="/customer-360" element={<CustomerPortal state={dbState} />} />
+      <Route path="/user-app" element={<UserAppManagement state={dbState} />} />
+      <Route path="/wallet" element={<WalletManagement state={dbState} />} />
+      <Route path="/dealers" element={<ResellerManagement state={dbState} />} />
+      <Route path="/emergency-load" element={<EmergencyLoadAdmin state={dbState} />} />
+      <Route path="/connection-setup" element={<ConnectionSetupAdmin state={dbState} />} />
+      <Route path="/tickets" element={<TicketManagementAdmin state={dbState} />} />
+      <Route path="/about-us" element={<AboutUs state={dbState} />} />
+      <Route path="/admin-live-monitoring" element={<AdminLiveMonitoring state={dbState} />} />
+      <Route path="/admin-password-requests" element={<AdminPasswordRequests state={dbState} />} />
+      <Route path="/admin-device-mapping" element={<UserDeviceMapping state={dbState} />} />
+      <Route path="/admin-profile" element={<AdminProfile state={dbState} />} />
+      <Route path="/tasks" element={<TaskManagement state={dbState} />} />
+      <Route path="/comm-center" element={<UnifiedCommunication state={dbState} />} />
+      <Route path="/admin-reminders" element={<AdminReminders state={dbState} onNavigate={navigateTo} />} />
+      <Route path="/kyc-hub" element={<KYCManagement state={dbState} />} />
+      <Route path="/cloud-storage" element={<MultiCloudSync state={dbState} />} />
+      <Route path="/nas-management" element={<NASManagement state={dbState} />} />
+      <Route path="/olt-management" element={<OLTManagement state={dbState} />} />
+      <Route path="/hotspot-tokens" element={<HotspotManager state={dbState} />} />
+      <Route path="/archive-records" element={<PastRecords state={dbState} />} />
+      <Route path="/inventory-management" element={<InventoryManagement state={dbState} />} />
+      <Route path="/noc-dashboard" element={<NOCDashboard state={dbState} />} />
+      <Route path="/speed-test" element={<SpeedTestPage state={dbState} />} />
+      <Route path="/notification-control" element={<NotificationControl state={dbState} />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  );
+};
+
 const App: React.FC = () => {
   const [dbState, setDbState] = useState<AppState>(db.getState());
   const [authState, setAuthState] = useState(db.getState().auth);
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentPage = location.pathname.substring(1) || 'dashboard';
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [criticalAlert, setCriticalAlert] = useState<any>(null);
@@ -331,93 +421,14 @@ const App: React.FC = () => {
 
   const navigateTo = (page: string, params: any = null) => {
     startTransition(() => {
-      setCurrentPage(page);
       setNavParams(params);
+      navigate(`/${page}`);
     });
   };
 
-  const renderLegacyPage = (p: string) => {
-    switch (p) {
-      case 'dashboard': return <Dashboard state={dbState} onNavigate={navigateTo} searchTerm={globalSearchTerm} onClearSearch={() => setGlobalSearchTerm('')} />;
-      case 'ai-control': return <AIControlPlane state={dbState} />;
-      case 'ai-central': return <AICentralDashboard state={dbState} />;
-      case 'ai-calling': return <AICallingAdmin state={dbState} />;
-      case 'ai-call-logs': return <AICallLogs state={dbState} />;
-      case 'users': return <UserManagement state={dbState} searchTerm={globalSearchTerm} navParams={navParams} />;
-      case 'packages': return <PackagesPage state={dbState} />;
-      case 'approval-desk': return <MasterApprovalDashboard state={dbState} />;
-      case 'recovery': return <Recovery state={dbState} searchTerm={globalSearchTerm} />;
-      case 'recovery-dashboard': return <RecoveryDashboard state={dbState} />;
-      case 'accounting': return <AccountingLedger state={dbState} />;
-      case 'archive': return <ArchivePage state={dbState} />;
-      case 'staff': return <AccessControlPage state={dbState} />;
-      case 'system-flash': return <SystemFlash state={dbState} />;
-      case 'system-config': return <SystemConfig />;
-      case 'system-readiness': return <SystemReadiness />;
-      case 'reseller-management': return <ResellerManagement state={dbState} />;
-      case 'permissions': return <PermissionsPage state={dbState} />;
-      case 'import': return <DataImportPage state={dbState} />;
-      case 'monitor': return <DatabaseMonitor state={dbState} />;
-      case 'cache': return <CacheManagement state={dbState} />;
-      case 'business-settings': return <BusinessSettings state={dbState} />;
-      case 'auth-control': return <AuthControlCenter state={dbState} />;
-      case 'system-deployment': return <SystemDeploymentCenter state={dbState} />;
-      case 'migration-dashboard': return <MigrationDashboard state={dbState} />;
-      case 'fiscal-monitor': return <FinanceDashboard state={dbState} />;
-      case 'response-mapper': return <ResponseMapperConfig state={dbState} />;
-      case 'provider-config': 
-      case 'gateway-settings': 
-      case 'gateway-stripe': 
-      case 'gateway-cash': 
-      case 'gateway-jazzcash': 
-      case 'gateway-easypaisa': 
-      case 'gateway-paypal': 
-      case 'gateway-payfast': 
-      case 'gateway-home': 
-      case 'gateway-bank': 
-        return <SystemConfig />;
-      case 'invoice-engine': return <InvoiceGenerator state={dbState} onNavigate={navigateTo} />;
-      case 'invoice-management': return <InvoiceManagementAdmin state={dbState} onNavigate={navigateTo} />;
-      case 'customer-360': return <CustomerPortal state={dbState} />;
-      case 'user-app': return <UserAppManagement state={dbState} />;
-      case 'wallet': return <WalletManagement state={dbState} />;
-      case 'dealers': return <ResellerManagement state={dbState} />;
-      case 'emergency-load': return <EmergencyLoadAdmin state={dbState} />;
-      case 'connection-setup': return <ConnectionSetupAdmin state={dbState} />;
-      case 'tickets': return <TicketManagementAdmin state={dbState} />;
-      case 'about-us': return <AboutUs state={dbState} />;
-      case 'admin-live-monitoring': return <AdminLiveMonitoring state={dbState} />;
-      case 'admin-password-requests': return <AdminPasswordRequests state={dbState} />;
-      case 'admin-device-mapping': return <UserDeviceMapping state={dbState} />;
-      case 'admin-profile': return <AdminProfile state={dbState} />;
-      case 'tasks': return <TaskManagement state={dbState} />;
-      case 'comm-center': return <UnifiedCommunication state={dbState} />;
-      case 'admin-reminders': return <AdminReminders state={dbState} onNavigate={navigateTo} />;
-      case 'kyc-hub': return <KYCManagement state={dbState} />;
-      case 'cloud-storage': return <MultiCloudSync state={dbState} />;
-      case 'nas-management': return <NASManagement state={dbState} />;
-      case 'olt-management': return <OLTManagement state={dbState} />;
-      case 'hotspot-tokens': return <HotspotManager state={dbState} />;
-      case 'archive-records': return <PastRecords state={dbState} />;
-      case 'inventory-management': return <InventoryManagement state={dbState} />;
-      case 'noc-dashboard': return <NOCDashboard state={dbState} />;
-      case 'speed-test': return <SpeedTestPage />;
-      case 'notification-control': return <NotificationControl state={dbState} />;
-      case 'admin-user-devices': return <AdminUserDevices state={dbState} />;
-      case 'comm-logs': return <NotificationAnalytics state={dbState} />;
-      case 'admin-devices': return <AdminDevicesStub />;
-      case 'comm-templates': 
-      case 'comm-campaigns': 
-      case 'comm-push': 
-      case 'comm-rules': 
-      case 'comm-segments': 
-      case 'comm-settings': 
-        return <EmailControlCenter state={dbState} activePage={p} />;
-      default: return <Dashboard state={dbState} onNavigate={navigateTo} onClearSearch={() => setGlobalSearchTerm('')} />;
-    }
-  };
-
-  const renderApp = () => {
+  
+  // LegacyRoutes has been moved outside to ensure component stability and prevent re-creation on render.
+const renderApp = () => {
     if (dbState.view === 'login') return <Login onLogin={handleLogin} />;
     if (authState.role === 'Subscriber' || authState.role === 'Customer') {
       const activeUser = dbState.currentUser || dbState.users.find(u => u.id === authState.id) || authState;
@@ -441,7 +452,15 @@ const App: React.FC = () => {
                 case 'network': return <NetworkPlaneV2 state={dbState} />;
                 case 'comm-center': return <CommCenterV2 state={dbState} />;
                 case 'automation': return <AIAutomationV2 state={dbState} />;
-                default: return renderLegacyPage(currentPage);
+                default: return (
+                  <LegacyRoutes 
+                    dbState={dbState} 
+                    navigateTo={navigateTo} 
+                    globalSearchTerm={globalSearchTerm} 
+                    setGlobalSearchTerm={setGlobalSearchTerm} 
+                    navParams={navParams} 
+                  />
+                );
               }
             })()}
           </Suspense>
@@ -463,7 +482,7 @@ const App: React.FC = () => {
           onClose={() => setIsSidebarOpen(false)}
           isCollapsed={isCollapsed}
           onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
-          businessName={dbState.settings.branding.businessName}
+          businessName={dbState?.settings?.branding?.businessName || 'ClickOptix'}
           state={dbState}
         />
         {/* Mobile overlay to capture clicks and close sidebar */}
@@ -486,7 +505,13 @@ const App: React.FC = () => {
           />
           <main className="p-3 md:p-6 lg:p-8 flex-1 overflow-y-auto custom-scrollbar">
             <Suspense fallback={<Mini5GMicroLoader size={40} />}>
-              {renderLegacyPage(currentPage)}
+              <LegacyRoutes 
+                dbState={dbState} 
+                navigateTo={navigateTo} 
+                globalSearchTerm={globalSearchTerm} 
+                setGlobalSearchTerm={setGlobalSearchTerm} 
+                navParams={navParams} 
+              />
             </Suspense>
           </main>
         </div>
@@ -533,4 +558,10 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+const AppWrapper = () => (
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+);
+
+export default AppWrapper;

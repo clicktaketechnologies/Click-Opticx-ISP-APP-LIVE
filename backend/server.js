@@ -35,12 +35,14 @@ const hotspotRoutes = require('./routes/hotspot');
 const storageRoutes = require('./routes/storage');
 const migrationRoutes = require('./routes/migration');
 const providerManagementRoutes = require('./routes/provider-management');
+const usersRoutes = require('./routes/users');
 const configManager = require('./services/config-manager');
 const emailWorker = require('./modules/email/worker');
 const paymentRouter = require('./modules/payments/payment-router');
 const emailRouter = require('./modules/email/email-router');
 const responseMapper = require('./services/response-mapper');
 const HealthMonitor = require('./services/health-monitor');
+const speedtestRoutes = require('./routes/speedtest');
 
 const app = express();
 const server = http.createServer(app);
@@ -223,6 +225,8 @@ app.use('/api/provider-mgmt', providerManagementRoutes);
 app.use('/api/network', networkRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/hotspot', hotspotRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/speedtest', speedtestRoutes);
 
 // --- Push Notification API ---
 app.post('/api/push-notify', async (req, res) => {
