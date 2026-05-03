@@ -69,7 +69,7 @@ router.get('/diagnostics/run', async (req, res) => {
     logger.info('[DIAGNOSTICS] Running manual health check...');
     
     const results = {
-        supabase: process.env.VITE_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY ? "OK" : "MISSING_SUPABASE",
+        supabase: process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY ? "OK" : "MISSING_SUPABASE",
         email: (process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD) || process.env.RESEND_API_KEY ? "OK" : "EMAIL_GATEWAY_DOWN",
         gateways: (process.env.STRIPE_SECRET || process.env.JAZZCASH_MERCHANT_ID) ? "OK" : "NO_GATEWAY_LINKED",
         olt: process.env.OLT_MANAGEMENT_IP ? "OK" : "HARDWARE_OFFLINE",

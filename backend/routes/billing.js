@@ -4,7 +4,7 @@ const logger = require('../utils/logger');
 // Assuming we have a ledger service or direct DB access
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 /**
  * @route GET /api/billing/ledger
