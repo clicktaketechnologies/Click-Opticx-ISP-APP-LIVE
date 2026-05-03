@@ -43,6 +43,9 @@ const emailRouter = require('./modules/email/email-router');
 const responseMapper = require('./services/response-mapper');
 const HealthMonitor = require('./services/health-monitor');
 const speedtestRoutes = require('./routes/speedtest');
+const devicesRoutes = require('./routes/devices');
+const billingRoutes = require('./routes/billing');
+const radiusRoutes = require('./routes/radius');
 
 const app = express();
 const server = http.createServer(app);
@@ -227,6 +230,9 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/hotspot', hotspotRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/speedtest', speedtestRoutes);
+app.use('/api/devices', devicesRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/radius', radiusRoutes);
 
 // --- Push Notification API ---
 app.post('/api/push-notify', async (req, res) => {
