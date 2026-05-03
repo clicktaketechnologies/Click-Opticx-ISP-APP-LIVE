@@ -1,68 +1,57 @@
-import { useAuthStore } from '../stores/authStore';
+/**
+ * Enterprise BSS/OSS API Client
+ * Centralized interface for Network, Billing, and RADIUS operations.
+ */
 
-const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-  ? 'http://localhost:5000'
-  : 'https://click-opticx-isp-app-live.onrender.com';
+import { db } from '../db';
 
-export async function apiCall<T>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const { token, logout, isTokenValid } = useAuthStore.getState();
-  
-  if (token && !isTokenValid()) {
-    logout();
-    throw new Error('Session expired');
-  }
-  
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+const API_BASE = (db as any).backendUrl || 'https://click-opticx-isp-app-live.onrender.com';
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
+export const enterpriseApi = {
+    // 1. Network & Device Plane
+    async testDevice(host: string, protocol: 'SNMP' | 'SSH' | 'MIKROTIK', credentials: any) {
+        const response = await fetch(`${API_BASE}/api/devices/test`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ host, protocol, credentials })
+        });
+        return response.json();
+    },
 
-  // Merge custom headers
-  if (options.headers) {
-    Object.assign(headers, options.headers);
-  }
+    async pollDevice(id: string) {
+        const response = await fetch(`${API_BASE}/api/devices/poll/${id}`);
+        return response.json();
+    },
 
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
-  
-  if (res.status === 401) {
-    logout();
-    throw new Error('Unauthorized');
-  }
-  
-  const data = await res.json();
-  if (!data.success) throw new Error(data.message || 'Request failed');
-  return data;
-}
+    // 2. Billing & Financial Ledger
+    async getLedger() {
+        const response = await fetch(`${API_BASE}/api/billing/ledger`);
+        return response.json();
+    },
 
-// Strongly typed API layer for components to consume via React Query
-export const api = {
-  users: {
-    list: () => apiCall<{ users: any[] }>('/api/users'),
-    get: (id: string) => apiCall<{ user: any }>(`/api/users/${id}`),
-    create: (data: any) => apiCall<{ user: any }>('/api/users', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: any) => apiCall<{ user: any }>(`/api/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
-    delete: (id: string) => apiCall(`/api/users/${id}`, { method: 'DELETE' }),
-    restore: (id: string) => apiCall(`/api/users/${id}/restore`, { method: 'POST' }),
-  },
-  auth: {
-    login: (identifier: string, password: string) => 
-      apiCall<{ token: string; user: any; userType: string }>('/api/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ identifier, password }),
-      }),
-  },
-  signup: {
-    approve: (id: string) => apiCall<{ request: any }>(`/api/users/signup-requests/${id}/approve`, { method: 'POST' }),
-    reject: (id: string, reason: string) => 
-      apiCall<{ request: any }>(`/api/users/signup-requests/${id}/reject`, { method: 'POST', body: JSON.stringify({ reason }) }),
-  },
+    async postLedgerEntry(entry: {
+        debit_account: string;
+        credit_account: string;
+        amount: number;
+        description: string;
+        reference_type?: string;
+        reference_id?: string;
+    }) {
+        const response = await fetch(`${API_BASE}/api/billing/ledger`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(entry)
+        });
+        return response.json();
+    },
+
+    // 3. RADIUS Control
+    async sendRadiusCoa(username: string, action: 'disconnect' | 'coa', attributes: string) {
+        const response = await fetch(`${API_BASE}/api/radius/coa`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, action, attributes })
+        });
+        return response.json();
+    }
 };

@@ -13,12 +13,16 @@ import { AppState, NAS, OLT } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
 import { usePermissions } from '../../src/hooks/usePermissions';
+import { enterpriseApi } from '../../api/client';
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
+import { toast } from 'react-hot-toast'; // Assuming react-hot-toast is available based on previous work
 
 const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
   const { canEdit } = usePermissions(state);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [nodeType, setNodeType] = useState<'all' | 'NAS' | 'OLT'>('all');
+  const [isTesting, setIsTesting] = useState(false);
 
   // 1. Data Consolidation
   const allNodes = useMemo(() => {
@@ -140,7 +144,37 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
         footer={
             canEdit('olt-management') ? (
                 <div className="flex gap-4">
-                    <V2Button label="Manual Poll" variant="secondary" className="flex-1" icon={RotateCw} />
+                    <V2Button 
+                        label={isTesting ? "Testing..." : "Test Connectivity"} 
+                        variant="secondary" 
+                        className="flex-1" 
+                        icon={isTesting ? RotateCw : Zap} 
+                        onClick={async () => {
+                            if (!selectedNode) return;
+                            setIsTesting(true);
+                            try {
+                                const protocol = selectedNode.type === 'NAS' ? 'MIKROTIK' : 'SNMP';
+                                const res = await enterpriseApi.testDevice(
+                                    selectedNode.ip || selectedNode.host,
+                                    protocol,
+                                    { 
+                                        username: selectedNode.username || 'admin', 
+                                        password: selectedNode.password || '',
+                                        community: 'public'
+                                    }
+                                );
+                                if (res.success) {
+                                    alert('Diagnostic Handshake Successful: ' + JSON.stringify(res.data));
+                                } else {
+                                    alert('Diagnostic Failure: ' + res.message);
+                                }
+                            } catch (e: any) {
+                                alert('Network Fault: ' + e.message);
+                            } finally {
+                                setIsTesting(false);
+                            }
+                        }}
+                    />
                     <V2Button label="Reset Node" variant="danger" className="flex-1" icon={Power} />
                 </div>
             ) : undefined

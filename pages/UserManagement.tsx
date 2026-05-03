@@ -13,6 +13,7 @@ import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
 import { Modal } from '../components/shared/Modal';
 import { ConfirmDialog } from '../components/shared/ConfirmDialog';
+import { enterpriseApi } from '../api/client';
 
 const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?: string; navParams?: any }> = ({ state, searchTerm: globalSearchTerm, autoOpenAction, navParams }) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -52,6 +53,9 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [isActivationModal, setIsActivationModal] = useState(false);
   const [isCollectPaymentModal, setIsCollectPaymentModal] = useState(false);
   const [isManualUnpaidModal, setIsManualUnpaidModal] = useState(false);
+  const [isRadiusModal, setIsRadiusModal] = useState(false);
+  const [radiusAction, setRadiusAction] = useState<'disconnect' | 'coa'>('disconnect');
+  const [radiusAttributes, setRadiusAttributes] = useState('Framed-IP-Address=0.0.0.0');
 
   // Bulk States
   const [isBulkGraceModal, setIsBulkGraceModal] = useState(false);
@@ -248,6 +252,9 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
          setManualExpiryDate(new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]);
          setManualUnpaidAmount(user.balance || 0);
          setIsManualUnpaidModal(true); 
+         break;
+      case 'radius':
+         setIsRadiusModal(true);
          break;
     }
   };
@@ -748,6 +755,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                           <button onClick={() => handleAction(user, 'payment')} className="p-2.5 bg-emerald-100/50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-emerald-100" title="Collect Payment"><Banknote size={14}/></button>
                           <button onClick={() => handleAction(user, 'unpaid_amount')} className="p-2.5 bg-pink-100/50 hover:bg-pink-600 text-pink-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-pink-100" title="Amount Unpaid / Partial Payment"><Wallet size={14}/></button>
                           <button onClick={() => handleAction(user, 'emergency_auth')} className="p-2.5 bg-rose-100/50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-rose-100" title="Emergency Auth Reset"><LockKeyhole size={14}/></button>
+                          <button onClick={() => handleAction(user, 'radius')} className="p-2.5 bg-slate-100/50 hover:bg-slate-900 text-slate-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-slate-100" title="RADIUS Session Control"><Radio size={14}/></button>
                        </div>
                     </td>
                   </tr>
@@ -1756,17 +1764,18 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       <Modal
         isOpen={isSuccessModal}
         onClose={() => setIsSuccessModal(false)}
-        title="Success!"
-        hideCloseButton
-        icon={<CheckCircle size={32} className="text-green-400" />}
-        message="Operation completed successfully."
-        maxWidth="max-w-sm"
-        onConfirm={() => setIsSuccessModal(false)}
-        confirmLabel="Back to Users"
+        title="Operation Successful"
+        icon={<CheckCircle size={22} className="text-emerald-500" />}
       >
-         <div className="text-center py-6">
-            <div className="w-24 h-24 bg-green-500/20 text-green-400 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-2xl animate-bounce mb-8"><CheckCircle size={56} strokeWidth={3}/></div>
-            <h3 className="text-3xl font-black uppercase italic tracking-tighter text-slate-200">Success!</h3>
+         <div className="p-10 text-center space-y-6">
+            <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-[2rem] flex items-center justify-center mx-auto shadow-inner">
+                <CheckCircle size={40} />
+            </div>
+            <div>
+                <h3 className="text-xl font-black text-slate-900 uppercase italic tracking-tighter">Handshake Confirmed</h3>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Registry updated and synchronized with live edge nodes</p>
+            </div>
+            <button onClick={() => setIsSuccessModal(false)} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest">Acknowledge</button>
          </div>
       </Modal>
     </div>

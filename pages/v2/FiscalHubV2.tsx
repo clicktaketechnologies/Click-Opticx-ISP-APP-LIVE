@@ -12,6 +12,8 @@ import { AppState, Invoice, ISPUser as UserType } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
 import { usePermissions } from '../../src/hooks/usePermissions';
+import { enterpriseApi } from '../../api/client';
+import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
   const { canEdit, canExport } = usePermissions(state);
@@ -19,6 +21,9 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'all' | 'Paid' | 'Unpaid' | 'Overdue'>('all');
+  const [activeTab, setActiveTab] = useState<'Invoices' | 'Ledger'>('Invoices');
+  const [ledgerEntries, setLedgerEntries] = useState<any[]>([]);
+  const [isLoadingLedger, setIsLoadingLedger] = useState(false);
 
   // 1. Data Filtration
   const filteredInvoices = useMemo(() => {
@@ -39,6 +44,22 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
     overdueCount: state.invoices.filter(i => i.status === 'Overdue').length,
     recoveryRate: '92.4%'
   };
+
+  const fetchLedger = async () => {
+    setIsLoadingLedger(true);
+    try {
+        const res = await enterpriseApi.getLedger();
+        if (res.success) setLedgerEntries(res.data);
+    } catch (e) {
+        console.error('Ledger fetch failed', e);
+    } finally {
+        setIsLoadingLedger(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (activeTab === 'Ledger') fetchLedger();
+  }, [activeTab]);
 
   return (
     <div className="space-y-10">
@@ -62,86 +83,136 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
       {/* Control Bar */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
         <div className="flex items-center gap-4 flex-1 w-full max-w-xl">
-           <div className="relative flex-1 group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
-              <input 
-                type="text"
-                placeholder="Search by Invoice ID or Subscriber..."
-                className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold outline-none focus:border-blue-500 transition-all shadow-inner"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-              />
-           </div>
            <div className="flex gap-1.5 p-1.5 bg-slate-100 rounded-2xl shrink-0">
-              {(['all', 'Paid', 'Unpaid', 'Overdue'] as const).map(s => (
+              {(['Invoices', 'Ledger'] as const).map(t => (
                 <button 
-                  key={s}
-                  onClick={() => setFilterStatus(s)}
-                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
-                    filterStatus === s ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                  key={t}
+                  onClick={() => setActiveTab(t)}
+                  className={`px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                    activeTab === t ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
                   }`}
                 >
-                  {s}
+                  {t}
                 </button>
               ))}
            </div>
+           {activeTab === 'Invoices' && (
+             <div className="relative flex-1 group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+                <input 
+                  type="text"
+                  placeholder="Search by Invoice ID or Subscriber..."
+                  className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-[11px] font-bold outline-none focus:border-blue-500 transition-all shadow-inner"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                />
+             </div>
+           )}
+           {activeTab === 'Invoices' && (
+             <div className="flex gap-1.5 p-1.5 bg-slate-100 rounded-2xl shrink-0">
+                {(['all', 'Paid', 'Unpaid', 'Overdue'] as const).map(s => (
+                  <button 
+                    key={s}
+                    onClick={() => setFilterStatus(s)}
+                    className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${
+                      filterStatus === s ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+             </div>
+           )}
         </div>
         <div className="flex gap-3">
-            {canExport('invoice-management') && <V2Button label="Export Ledger" variant="secondary" icon={Download} />}
+            {canExport('invoice-management') && <V2Button label="Export Fiscal Data" variant="secondary" icon={Download} />}
             {canEdit('invoice-management') && <V2Button label="New Dispatch" icon={Plus} />}
         </div>
       </div>
 
-      {/* Transaction Matrix */}
-      <V2SmartTable headers={['Invoice Node', 'Fiscal Status', 'Transmission Date', 'Total Amount', 'Recovery']}>
-        {filteredInvoices.length === 0 ? (
-          <tr>
-            <td colSpan={5} className="px-10 py-20 text-center">
-              <p className="text-sm font-black text-slate-300 uppercase italic tracking-[0.4em]">No financial nodes detected</p>
-            </td>
-          </tr>
-        ) : filteredInvoices.map(inv => {
-          const user = state.users.find(u => u.id === inv.userId);
-          return (
-            <V2TableRow key={inv.id} onClick={() => { setSelectedInvoice(inv); setIsDetailOpen(true); }}>
-              <V2TableCell>
-                <div className="flex items-center gap-4">
-                   <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                      <Receipt size={20} />
-                   </div>
-                   <div>
-                      <p className="text-sm font-black text-slate-900 uppercase italic leading-none mb-1">#{inv.id.slice(-6).toUpperCase()}</p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{user?.name || 'Unknown User'}</p>
-                   </div>
-                </div>
-              </V2TableCell>
-              <V2TableCell>
-                 <V2Badge 
-                   label={inv.status} 
-                   color={inv.status === 'Paid' ? 'emerald' : inv.status === 'Unpaid' ? 'amber' : 'rose'} 
-                   variant="ghost" 
-                   icon={inv.status === 'Paid' ? CheckCircle2 : inv.status === 'Unpaid' ? Clock : AlertTriangle}
-                 />
-              </V2TableCell>
-              <V2TableCell>
-                 <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{new Date(inv.createdAt).toLocaleDateString()}</p>
-              </V2TableCell>
-              <V2TableCell>
-                 <p className="text-sm font-black text-slate-900 italic">PKR {(inv.totalAmount || 0).toLocaleString()}</p>
-              </V2TableCell>
-              <V2TableCell>
-                 {inv.status !== 'Paid' ? (
-                   <button className="flex items-center gap-2 text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] group-hover:gap-3 transition-all">
-                      RECOVER <ChevronRight size={12} />
-                   </button>
-                 ) : (
-                   <V2Badge label="Settled" color="emerald" variant="solid" icon={ShieldCheck} />
-                 )}
-              </V2TableCell>
+      {/* View Switcher */}
+      {activeTab === 'Invoices' ? (
+        /* Transaction Matrix */
+        <V2SmartTable headers={['Invoice Node', 'Fiscal Status', 'Transmission Date', 'Total Amount', 'Recovery']}>
+          {filteredInvoices.length === 0 ? (
+            <tr>
+              <td colSpan={5} className="px-10 py-20 text-center">
+                <p className="text-sm font-black text-slate-300 uppercase italic tracking-[0.4em]">No financial nodes detected</p>
+              </td>
+            </tr>
+          ) : filteredInvoices.map(inv => {
+            const user = state.users.find(u => u.id === inv.userId);
+            return (
+              <V2TableRow key={inv.id} onClick={() => { setSelectedInvoice(inv); setIsDetailOpen(true); }}>
+                <V2TableCell>
+                  <div className="flex items-center gap-4">
+                     <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                        <Receipt size={20} />
+                     </div>
+                     <div>
+                        <p className="text-sm font-black text-slate-900 uppercase italic leading-none mb-1">#{inv.id.slice(-6).toUpperCase()}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{user?.name || 'Unknown User'}</p>
+                     </div>
+                  </div>
+                </V2TableCell>
+                <V2TableCell>
+                   <V2Badge 
+                     label={inv.status} 
+                     color={inv.status === 'Paid' ? 'emerald' : inv.status === 'Unpaid' ? 'amber' : 'rose'} 
+                     variant="ghost" 
+                     icon={inv.status === 'Paid' ? CheckCircle2 : inv.status === 'Unpaid' ? Clock : AlertTriangle}
+                   />
+                </V2TableCell>
+                <V2TableCell>
+                   <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{new Date(inv.createdAt).toLocaleDateString()}</p>
+                </V2TableCell>
+                <V2TableCell>
+                   <p className="text-sm font-black text-slate-900 italic">PKR {(inv.totalAmount || 0).toLocaleString()}</p>
+                </V2TableCell>
+                <V2TableCell>
+                   {inv.status !== 'Paid' ? (
+                     <button className="flex items-center gap-2 text-[9px] font-black text-blue-600 uppercase tracking-[0.2em] group-hover:gap-3 transition-all">
+                        RECOVER <ChevronRight size={12} />
+                     </button>
+                   ) : (
+                     <V2Badge label="Settled" color="emerald" variant="solid" icon={ShieldCheck} />
+                   )}
+                </V2TableCell>
+              </V2TableRow>
+            );
+          })}
+        </V2SmartTable>
+      ) : (
+        /* Ledger Table */
+        <V2SmartTable headers={['Entry ID', 'Type', 'Amount', 'Balance Flow', 'Description', 'Temporal']}>
+          {isLoadingLedger ? (
+             <tr><td colSpan={6} className="py-20 text-center"><Mini5GMicroLoader size={40} /></td></tr>
+          ) : ledgerEntries.length === 0 ? (
+            <tr><td colSpan={6} className="py-20 text-center text-[10px] font-black uppercase text-slate-300 italic tracking-widest">No ledger clusters identified</td></tr>
+          ) : ledgerEntries.map(entry => (
+            <V2TableRow key={entry.id}>
+               <V2TableCell>
+                  <p className="text-[10px] font-black text-slate-900 uppercase italic">#{entry.id.slice(0, 8)}</p>
+               </V2TableCell>
+               <V2TableCell>
+                  <V2Badge label={entry.type} color={entry.type === 'CREDIT' ? 'emerald' : 'rose'} icon={entry.type === 'CREDIT' ? ArrowUpRight : ArrowDownRight} />
+               </V2TableCell>
+               <V2TableCell>
+                  <p className={`text-sm font-black italic ${entry.type === 'CREDIT' ? 'text-emerald-600' : 'text-rose-600'}`}>PKR {entry.amount.toLocaleString()}</p>
+               </V2TableCell>
+               <V2TableCell>
+                  <p className="text-xs font-bold text-slate-500">PKR {entry.balance_after.toLocaleString()}</p>
+               </V2TableCell>
+               <V2TableCell>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{entry.description}</p>
+               </V2TableCell>
+               <V2TableCell>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{new Date(entry.created_at).toLocaleString()}</p>
+               </V2TableCell>
             </V2TableRow>
-          );
-        })}
-      </V2SmartTable>
+          ))}
+        </V2SmartTable>
+      )}
 
       {/* Recovery Slide-Over */}
       <V2SlideOver
