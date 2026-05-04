@@ -471,7 +471,8 @@ const App: React.FC = () => {
   const roleRoutingActive = !useRoleFallback && isRoleRoutingEnabled();
 
 const renderApp = () => {
-    const enableNewUI = import.meta.env.VITE_ENABLE_NEW_UI === 'true';
+    const enableNewUI = true; // Forced true for immediate live rollout
+
 
     if (dbState.view === 'login') return <Login onLogin={handleLogin} />;
 
