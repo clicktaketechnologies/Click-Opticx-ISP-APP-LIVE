@@ -475,7 +475,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
         <div className="flex flex-wrap gap-3 w-full md:w-auto shrink-0">
           <button 
              onClick={() => setIsImportUsersModal(true)}
-             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 bg-white border border-slate-200 text-slate-900 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
+             className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-white border border-slate-200 text-slate-900 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm"
           >
              <FileInput size={14} /> Import
           </button>
@@ -483,7 +483,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
              <button 
                onClick={handleRepairIntegrity}
                disabled={isRepairing}
-               className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest transition-all shadow-sm border ${
+               className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all shadow-sm border ${
                  isRepairing 
                    ? 'bg-slate-50 text-slate-400 border-slate-100' 
                    : 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100'
@@ -495,10 +495,10 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
           )}
           <button 
             onClick={() => { setOnboardingStep(1); setIsNewUserModal(true); }}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-slate-950 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] hover:bg-indigo-600 shadow-2xl active:scale-95 transition-all"
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-slate-950 text-white rounded-lg font-black text-[9px] uppercase tracking-[0.2em] hover:bg-indigo-600 shadow-2xl active:scale-95 transition-all"
           >
             <UserPlus size={16} />
-            <span>+ Add New User</span>
+            <span>+ Add User</span>
           </button>
         </div>
       </div>
@@ -546,7 +546,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                  <button
                    key={f}
                    onClick={() => setFilterType(f)}
-                   className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                   className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${
                      filterType === f 
                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' 
                        : 'bg-slate-50 text-slate-400 hover:bg-slate-100'
@@ -573,10 +573,10 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
            </div>
            
            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 w-full xl:w-auto">
-              <button onClick={() => setIsBulkGraceModal(true)} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+              <button onClick={() => setIsBulkGraceModal(true)} className="flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[8px] font-black uppercase tracking-widest border border-white/5 transition-all">
                  <Clock size={16} className="text-blue-400"/><span className="text-white">Extension</span>
               </button>
-              <button onClick={() => { setSelectedPkgId(''); setIsBulkPackageModal(true); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+              <button onClick={() => { setSelectedPkgId(''); setIsBulkPackageModal(true); }} className="flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[8px] font-black uppercase tracking-widest border border-white/5 transition-all">
                  <PackageIcon size={16} className="text-violet-400"/><span className="text-white">Plans</span>
               </button>
               <button onClick={async () => { 
@@ -587,19 +587,19 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                   setIsProcessing(false);
                   setIsSuccessModal(true);
                 }
-              }} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+              }} className="flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[8px] font-black uppercase tracking-widest border border-white/5 transition-all">
                  <Lock size={16} className="text-amber-400"/><span className="text-white">Security</span>
               </button>
-              <button onClick={() => setIsApplyDiscountModal(true)} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+              <button onClick={() => setIsApplyDiscountModal(true)} className="flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[8px] font-black uppercase tracking-widest border border-white/5 transition-all">
                  <Zap size={16} className="text-emerald-400"/><span className="text-white">Bonus</span>
               </button>
-              <button onClick={() => { setBulkTagInput(''); setIsBulkTagModal(true); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+              <button onClick={() => { setBulkTagInput(''); setIsBulkTagModal(true); }} className="flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[8px] font-black uppercase tracking-widest border border-white/5 transition-all">
                  <Smartphone size={16} className="text-sky-400"/><span className="text-white">Mapping</span>
               </button>
-              <button onClick={() => { setSelectedSellerId(''); setIsBulkSellerModal(true); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 transition-all">
+              <button onClick={() => { setSelectedSellerId(''); setIsBulkSellerModal(true); }} className="flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 rounded-lg text-[8px] font-black uppercase tracking-widest border border-white/5 transition-all">
                  <UserPlus size={16} className="text-indigo-400"/><span className="text-white">Seller</span>
               </button>
-              <button onClick={() => { if(confirm(`Confirm permanent erasure of ${selectedIds.size} accounts?`)) executeBulkPurge(); }} className="flex items-center justify-center gap-2 px-4 py-3 bg-rose-500/10 hover:bg-rose-500/20 rounded-xl text-[9px] font-black uppercase tracking-widest border border-rose-500/20 text-rose-400 transition-all">
+              <button onClick={() => { if(confirm(`Confirm permanent erasure of ${selectedIds.size} accounts?`)) executeBulkPurge(); }} className="flex items-center justify-center gap-2 px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 rounded-lg text-[8px] font-black uppercase tracking-widest border border-rose-500/20 text-rose-400 transition-all">
                  <Trash2 size={16}/><span className="text-rose-400">Purge</span>
               </button>
            </div>
@@ -742,20 +742,20 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                     </td>
                     <td className="px-6 py-4 text-center">
                        <div className="flex items-center justify-center gap-1.5">
-                          <button onClick={() => handleAction(user, 'view')} className="p-2.5 bg-blue-100/50 hover:bg-blue-600 text-blue-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-blue-100" title="Full 360 View"><Eye size={14}/></button>
-                          <button onClick={() => handleAction(user, 'edit')} className="p-2.5 bg-amber-100/50 hover:bg-amber-600 text-amber-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-amber-100" title="Dossier Edit"><Pencil size={14}/></button>
+                          <button onClick={() => handleAction(user, 'view')} className="p-2 bg-blue-100/50 hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-blue-100" title="Full 360 View"><Eye size={14}/></button>
+                          <button onClick={() => handleAction(user, 'edit')} className="p-2 bg-amber-100/50 hover:bg-amber-600 text-amber-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-amber-100" title="Dossier Edit"><Pencil size={14}/></button>
                           <button onClick={() => {
                              setSelectedUserId(user.id);
                              setSelectedPkgId(user.packageId);
                              const pkg = state.packages.find(p => p.id === user.packageId);
                              setManualUnpaidAmount(pkg?.price || 0);
                              setIsManualUnpaidModal(true);
-                           }} className="p-2.5 bg-indigo-100/50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-indigo-100" title="Quick Renew"><RefreshCcw size={14}/></button>
-                          <button onClick={() => handleAction(user, 'package')} className="p-2.5 bg-violet-100/50 hover:bg-violet-600 text-violet-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-violet-100" title="Service Provisioning"><PackageIcon size={14}/></button>
-                          <button onClick={() => handleAction(user, 'payment')} className="p-2.5 bg-emerald-100/50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-emerald-100" title="Collect Payment"><Banknote size={14}/></button>
-                          <button onClick={() => handleAction(user, 'unpaid_amount')} className="p-2.5 bg-pink-100/50 hover:bg-pink-600 text-pink-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-pink-100" title="Amount Unpaid / Partial Payment"><Wallet size={14}/></button>
-                          <button onClick={() => handleAction(user, 'emergency_auth')} className="p-2.5 bg-rose-100/50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-rose-100" title="Emergency Auth Reset"><LockKeyhole size={14}/></button>
-                          <button onClick={() => handleAction(user, 'radius')} className="p-2.5 bg-slate-100/50 hover:bg-slate-900 text-slate-600 hover:text-white rounded-xl transition-all active:scale-90 shadow-sm border border-slate-100" title="RADIUS Session Control"><Radio size={14}/></button>
+                           }} className="p-2 bg-indigo-100/50 hover:bg-indigo-600 text-indigo-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-indigo-100" title="Quick Renew"><RefreshCcw size={14}/></button>
+                          <button onClick={() => handleAction(user, 'package')} className="p-2 bg-violet-100/50 hover:bg-violet-600 text-violet-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-violet-100" title="Service Provisioning"><PackageIcon size={14}/></button>
+                          <button onClick={() => handleAction(user, 'payment')} className="p-2 bg-emerald-100/50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-emerald-100" title="Collect Payment"><Banknote size={14}/></button>
+                          <button onClick={() => handleAction(user, 'unpaid_amount')} className="p-2 bg-pink-100/50 hover:bg-pink-600 text-pink-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-pink-100" title="Amount Unpaid / Partial Payment"><Wallet size={14}/></button>
+                          <button onClick={() => handleAction(user, 'emergency_auth')} className="p-2 bg-rose-100/50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-rose-100" title="Emergency Auth Reset"><LockKeyhole size={14}/></button>
+                          <button onClick={() => handleAction(user, 'radius')} className="p-2 bg-slate-100/50 hover:bg-slate-900 text-slate-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-slate-100" title="RADIUS Session Control"><Radio size={14}/></button>
                        </div>
                     </td>
                   </tr>

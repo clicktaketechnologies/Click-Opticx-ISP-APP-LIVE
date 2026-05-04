@@ -35,6 +35,7 @@ interface SubscriberLayoutProps {
   activeRoute: string;
   businessName: string;
   businessLogo?: string;
+  isImpersonating?: boolean;
 }
 
 // ─── Navigation Items (Subscriber Domain Only) ────────────────────────────────
@@ -340,6 +341,22 @@ const SubscriberLayout: React.FC<SubscriberLayoutProps> = ({
           >
             {children}
           </main>
+
+          {/* Impersonation Exit Portal */}
+          {isImpersonating && (
+            <div className="fixed bottom-20 right-6 lg:bottom-10 lg:right-10 z-[100] animate-in fade-in zoom-in duration-500">
+               <button
+                 onClick={() => {
+                   // Direct access to window.db if available, else standard reload to admin
+                   (window as any).db?.logoutImpersonation();
+                 }}
+                 className="flex items-center gap-3 px-6 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl hover:bg-indigo-500 hover:scale-105 active:scale-95 transition-all border border-white/20"
+               >
+                 <Shield className="animate-pulse" size={18} />
+                 Return to Admin Node
+               </button>
+            </div>
+          )}
         </div>
       </div>
 

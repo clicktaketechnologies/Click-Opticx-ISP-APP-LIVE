@@ -653,6 +653,7 @@ class DB {
   private listeners: Array<(state: AppState) => void> = [];
   private auditHooks: Array<(log: AuditLog) => void> = [];
   private initialized = false;
+  private recentlyDeletedIds = new Set<string>();
   private firestore: Firestore | null = null;
   private auth: Auth | null = null;
   private messaging: Messaging | null = null;
@@ -1460,11 +1461,14 @@ class DB {
         const cloudData = docSnap.data() as Partial<AppState>;
         if (cloudData.users && Array.isArray(cloudData.users)) {
           // --- 🛡️ SMART MERGE: Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
-          // Keep all cloud users as base, but preserve local users that haven't synced yet.
           const cloudIds = new Set(cloudData.users.map(u => u.id));
-          const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !u.deleted);
+          const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !this.recentlyDeletedIds.has(u.id));
+          
+          // Filter out cloud users that were just deleted locally
+          const validCloudUsers = cloudData.users.filter(u => !this.recentlyDeletedIds.has(u.id));
+
           this.state.users = [
-            ...cloudData.users,
+            ...validCloudUsers,
             ...localOnlyUsers
           ];
         }
@@ -1749,6 +1753,7 @@ class DB {
           const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
           const sanitizedState = JSON.parse(JSON.stringify(cloudSafeState));
           await setDoc(docRef, sanitizedState);
+          this.recentlyDeletedIds.clear();
           console.log('[DB-CLOUD] Master State Synced to Firebase');
         } catch (e) {
           console.error('[DB-CLOUD] Master Sync Error:', e);
@@ -2302,7 +2307,7 @@ class DB {
       this.logAudit('Impersonation Start', 'Admin', `Admin started impersonating user ${res.user.email}`, res.user.id, res.user.name);
       await this.commitImmediate();
       this.notify();
-      window.location.href = '/user/dashboard'; 
+      window.location.href = '/dashboard'; 
       return { success: true };
     }
     return { success: false, message: res.message || 'Impersonation Handshake Failed.' };
@@ -5908,6 +5913,7 @@ async logoutImpersonation() {
 
   async bulkDeleteUsers(userIds: string[], creditAction: 'ADJUST' | 'NONE' = 'NONE', onProgress?: (current: number, total: number, itemName: string) => void) {
     const ids = new Set(userIds);
+    userIds.forEach(id => this.recentlyDeletedIds.add(id));
     let creditAdjustedCount = 0;
     let totalCreditAdjusted = 0;
 
@@ -5942,20 +5948,24 @@ async logoutImpersonation() {
     if (!this.state.archives) this.state.archives = [];
     this.state.archives.push(newArchive);
 
-    // 4. Perform Soft Removal
-    const now = new Date().toISOString();
-    this.state.users.forEach(u => {
-      if (ids.has(u.id)) {
-        u.deleted = true;
-        u.deletedAt = now;
-        u.status = UserStatus.DISABLED;
-      }
-    });
+    // 4. Perform Hard Removal (Permanent)
+    this.state.users = this.state.users.filter(u => !ids.has(u.id));
+
+    // 5. Purge Related Transactional Data from Live State
+    this.state.invoices = (this.state.invoices || []).filter(i => !ids.has(i.userId));
+    this.state.payments = (this.state.payments || []).filter(p => !ids.has(p.userId));
+    this.state.ledger = (this.state.ledger || []).filter(l => !ids.has(l.userId));
+    this.state.emergencyLoads = (this.state.emergencyLoads || []).filter(e => !ids.has(e.userId));
+    this.state.tickets = (this.state.tickets || []).filter(t => !ids.has(t.userId || ''));
+    this.state.signupRequests = (this.state.signupRequests || []).filter(r => !ids.has(r.userId) && !ids.has(r.id));
+    this.state.packageRequests = (this.state.packageRequests || []).filter(r => !ids.has(r.userId));
+    this.state.topupRequests = (this.state.topupRequests || []).filter(r => !ids.has(r.userId));
+
 
     // Mark related invoices as deleted too? Maybe not, keep them for audit.
     // But mark them so they don't show up in unpaid stats.
 
-    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: now, adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Soft Delete & Archive', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `Marked identities as deleted. Moved to deep archive. Credit Action: ${creditAction}. Adjusted Rs. ${totalCreditAdjusted}.`, riskLevel: 'High' });
+    this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Permanent Hard Delete', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `Permanently erased identities and all associated records from registry. Credit Action: ${creditAction}. Adjusted Rs. ${totalCreditAdjusted}.`, riskLevel: 'Critical' });
     
     await this.commitImmediate();
     this.notify();

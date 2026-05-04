@@ -37,6 +37,7 @@ const RecoveryDashboard = lazyWithRetry(() => import('./pages/RecoveryDashboard'
 const AccountingLedger = lazyWithRetry(() => import('./pages/AccountingLedger'));
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+const SuperAdmin = lazyWithRetry(() => import('./pages/SuperAdmin'));
 const EmailControlCenter = lazyWithRetry(() => import('./pages/comm/EmailControlCenter'));
 const PackagesPage = lazyWithRetry(() => import('./pages/PackagesPage'));
 const ArchivePage = lazyWithRetry(() => import('./pages/ArchivePage'));
@@ -247,6 +248,7 @@ const LegacyRoutes: React.FC<LegacyRoutesProps> = ({
       <Route path="/ai-central" element={<AICentralDashboard state={dbState} />} />
       <Route path="/ai-calling" element={<AICallingAdmin state={dbState} />} />
       <Route path="/ai-call-logs" element={<AICallLogs state={dbState} />} />
+      <Route path="/super-admin" element={<SuperAdmin state={dbState} />} />
       <Route path="/users" element={<UserManagement state={dbState} searchTerm={globalSearchTerm} navParams={navParams} />} />
       <Route path="/packages" element={<PackagesPage state={dbState} />} />
       <Route path="/approval-desk" element={<MasterApprovalDashboard state={dbState} />} />
@@ -487,6 +489,7 @@ const renderApp = () => {
           activeRoute={location.pathname}
           businessName={dbState?.settings?.branding?.businessName || 'ClickOptix'}
           businessLogo={(dbState?.settings?.branding as any)?.logoUrl}
+          isImpersonating={authState.isImpersonating}
         >
           <Suspense fallback={<Mini5GMicroLoader size={40} />}>
             <SubscriberApp state={dbState} user={activeUser as any} onLogout={handleLogout} />

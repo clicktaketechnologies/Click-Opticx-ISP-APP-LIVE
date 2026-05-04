@@ -272,7 +272,7 @@ const PermissionsPage: React.FC<{ state: AppState }> = ({ state }) => {
                             <button
                               onClick={() => handleTogglePermission(perm.id, 'view', selectedRole)}
                               disabled={isSuperAdmin}
-                              className={`flex items-center gap-3 px-6 py-4 rounded-[1.5rem] transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
+                              className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
                                 canView 
                                 ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-100' 
                                 : 'bg-white border-slate-100 text-slate-300'
@@ -287,7 +287,7 @@ const PermissionsPage: React.FC<{ state: AppState }> = ({ state }) => {
                             <button
                               onClick={() => handleTogglePermission(perm.id, 'edit', selectedRole)}
                               disabled={isSuperAdmin || !canView}
-                              className={`flex items-center gap-3 px-6 py-4 rounded-[1.5rem] transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
+                              className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
                                 canEdit 
                                 ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-100' 
                                 : 'bg-white border-slate-100 text-slate-300'
@@ -302,7 +302,7 @@ const PermissionsPage: React.FC<{ state: AppState }> = ({ state }) => {
                             <button
                               onClick={() => handleTogglePermission(perm.id, 'delete', selectedRole)}
                               disabled={isSuperAdmin || !canView || !canEdit}
-                              className={`flex items-center gap-3 px-6 py-4 rounded-[1.5rem] transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
+                              className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
                                 canDelete 
                                 ? 'bg-rose-600 border-rose-500 text-white shadow-lg shadow-rose-100' 
                                 : 'bg-white border-slate-100 text-slate-300'

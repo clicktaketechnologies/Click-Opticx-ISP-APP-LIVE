@@ -146,8 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: 'Staff & Roles',
       icon: UserCheck,
       items: [
-        { id: 'staff', label: 'Staff Management', icon: UserCheck },
-        { id: 'permissions', label: 'Roles & Permissions', icon: ShieldAlert }
+        { id: 'staff', label: 'Staff Management', icon: UserCheck }
       ]
     },
     {
@@ -159,6 +158,16 @@ const Sidebar: React.FC<SidebarProps> = ({
         { id: 'cloud-storage', label: 'Multi-Cloud Sync', icon: Cloud }
       ]
     },
+    {
+      id: 'security',
+      label: 'Security & Governance',
+      icon: ShieldCheck,
+      items: [
+        { id: 'super-admin', label: 'SuperAdmin Command', icon: Key },
+        { id: 'permissions', label: 'Matrix Governance', icon: ShieldAlert }
+      ]
+    },
+
     {
       id: 'config',
       label: 'System Configuration',
