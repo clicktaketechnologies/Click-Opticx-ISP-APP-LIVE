@@ -10,17 +10,20 @@ import {
 
 const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
   const user = state.currentUser as StaffUser;
+  
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
-    password: user.password || ''
+    name: user?.name || '',
+    email: user?.email || '',
+    password: user?.password || ''
   });
   const [showPass, setShowPass] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (!user) return <Mini5GMicroLoader size={40} />;
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

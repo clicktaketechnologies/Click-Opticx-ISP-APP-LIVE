@@ -86,18 +86,38 @@ exports.login = async (req, res) => {
         const { identifier, password } = req.body;
         const supabase = configManager.getSupabaseClient();
 
-        // Primary Lookup: Supabase
-        const { data: user, error } = await supabase
+        // Primary Lookup: Supabase users table
+        let { data: user, error } = await supabase
             .from('users')
             .select('*')
             .or(`email.eq.${identifier},username.eq.${identifier},phone.eq.${identifier}`)
             .single();
 
+        // Secondary Lookup: Supabase staff table
         if (!user || error) {
+            const { data: staffUser, error: staffError } = await supabase
+                .from('staff')
+                .select('*')
+                .eq('email', identifier)
+                .single();
+            
+            user = staffUser;
+            error = staffError;
+        }
+
+        if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        let isMatch = await bcrypt.compare(password, user.password);
+        
+        // Legacy plaintext fallback for unmigrated staff/admin accounts
+        if (!isMatch && password === user.password) {
+            isMatch = true;
+            logger.info(`[LOGIN] Legacy plaintext password match for: ${user.id}`);
+            // Optional: Automatically hash and update the password in DB here for security upgrade
+        }
+
         if (!isMatch) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
         }
@@ -163,7 +183,12 @@ exports.forgotPassword = async (req, res) => {
         const { email } = req.body;
         const supabase = configManager.getSupabaseClient();
 
-        const { data: user } = await supabase.from('users').select('id, name').eq('email', email).single();
+        let { data: user } = await supabase.from('users').select('id, name').eq('email', email).single();
+        if (!user) {
+            const { data: staffUser } = await supabase.from('staff').select('id, name').eq('email', email).single();
+            user = staffUser;
+        }
+        
         if (!user) return res.status(404).json({ success: false, message: 'Email not found' });
 
         const resetToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -191,16 +216,30 @@ exports.completeReset = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        // Update DB
-        const { error } = await supabase
+        // Try updating user first
+        let { data: userUpdateData, error } = await supabase
             .from('users')
             .update({ password: hashedPassword })
-            .eq('id', decoded.id);
+            .eq('id', decoded.id)
+            .select('email');
 
-        if (error) throw error;
+        let user = userUpdateData?.[0];
+
+        // If not in users, update staff
+        if (!user || userUpdateData.length === 0) {
+            const { data: staffUpdateData, error: staffError } = await supabase
+                .from('staff')
+                .update({ password: hashedPassword })
+                .eq('id', decoded.id)
+                .select('email');
+            
+            user = staffUpdateData?.[0];
+            if (staffError) throw staffError;
+        } else {
+            if (error) throw error;
+        }
 
         // Update Supabase Auth if email is available
-        const { data: user } = await supabase.from('users').select('email').eq('id', decoded.id).single();
         if (user && user.email) {
             await supabaseAuth.updatePassword(newPassword);
         }

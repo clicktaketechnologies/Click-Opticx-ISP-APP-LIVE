@@ -13,6 +13,7 @@ import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
 import { usePermissions } from '../../src/hooks/usePermissions';
 import { enterpriseApi } from '../../api/client';
+import { useGetLedger } from '../../api/queries';
 import { Mini5GMicroLoader } from '../../components/Mini5GMicroLoader';
 
 const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
@@ -22,8 +23,8 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'all' | 'Paid' | 'Unpaid' | 'Overdue'>('all');
   const [activeTab, setActiveTab] = useState<'Invoices' | 'Ledger'>('Invoices');
-  const [ledgerEntries, setLedgerEntries] = useState<any[]>([]);
-  const [isLoadingLedger, setIsLoadingLedger] = useState(false);
+  
+  const { data: ledgerEntries = [], isLoading: isLoadingLedger } = useGetLedger();
 
   // 1. Data Filtration
   const filteredInvoices = useMemo(() => {
@@ -44,22 +45,6 @@ const FiscalHubV2: React.FC<{ state: AppState }> = ({ state }) => {
     overdueCount: state.invoices.filter(i => i.status === 'Overdue').length,
     recoveryRate: '92.4%'
   };
-
-  const fetchLedger = async () => {
-    setIsLoadingLedger(true);
-    try {
-        const res = await enterpriseApi.getLedger();
-        if (res.success) setLedgerEntries(res.data);
-    } catch (e) {
-        console.error('Ledger fetch failed', e);
-    } finally {
-        setIsLoadingLedger(false);
-    }
-  };
-
-  React.useEffect(() => {
-    if (activeTab === 'Ledger') fetchLedger();
-  }, [activeTab]);
 
   return (
     <div className="space-y-10">

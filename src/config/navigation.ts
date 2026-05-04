@@ -59,7 +59,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
     title: 'Network Manager',
     icon: Network,
     items: [
-      { id: 'admin-live-monitoring', label: '📡 Live Monitor', icon: Monitor },
+      { id: 'network', label: '📡 Network Plane V2', icon: Monitor },
       { id: 'speed-diagnostics', label: '🚀 Speed Center', icon: Gauge, items: [
         { id: 'speed-test', label: 'Speed Test', icon: Gauge },
         { id: 'system-readiness', label: 'Health Check', icon: Activity }
@@ -116,7 +116,7 @@ export const NAVIGATION_CONFIG: NavSection[] = [
     icon: CreditCard,
     items: [
       { id: 'gateway-settings', label: '🔌 Payment Gateways', icon: ListChecks },
-      { id: 'fiscal-monitor', label: '📊 Money Ledger', icon: Activity },
+      { id: 'finance', label: '📊 Fiscal Hub (Admin)', icon: Activity },
       { id: 'recovery', label: '📥 Collections Hub', icon: Receipt },
       { id: 'reseller-management', label: '🤝 Partners & Dealers', icon: Building2 },
     ]

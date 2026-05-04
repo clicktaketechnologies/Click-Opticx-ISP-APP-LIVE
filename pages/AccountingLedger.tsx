@@ -8,6 +8,9 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
   const [endDate, setEndDate] = useState<string>('');
 
   const currentUser = state.currentUser;
+  
+  if (!currentUser) return <div className="p-8 text-center text-slate-400">Loading ledger...</div>;
+  
   const isDealer = currentUser?.role === Role.DEALER;
 
   const filteredLedger = useMemo(() => {

@@ -11,8 +11,8 @@ router.get('/transactions', protect, financeController.getTransactions);
 router.post('/emergency/request', protect, enforceSettings('portal'), financeController.requestEmergency);
 
 // Admin-Only Diagnostic & Control Routes
-router.get('/health', protect, restrictTo('Admin', 'Super_Admin'), financeController.getFinanceHealth);
-router.post('/config', protect, restrictTo('Admin', 'Super_Admin'), financeController.saveFinanceConfig);
+router.get('/health', protect, restrictTo('Admin', 'SuperAdmin'), financeController.getFinanceHealth);
+router.post('/config', protect, restrictTo('Admin', 'SuperAdmin'), financeController.saveFinanceConfig);
 router.post('/agent/collection', protect, restrictTo('Agent', 'Admin'), financeController.logAgentCollection);
 
 module.exports = router;

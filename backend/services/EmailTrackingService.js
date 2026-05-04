@@ -1,92 +1,100 @@
-/**
- * EmailTrackingService.js
- * 
- * Handles email queuing, sending, tracking pixels, and bounce processing using BullMQ.
- */
-
-const { Queue, Worker } = require('bullmq');
+const { Queue, Worker } from 'bullmq';
 const nodemailer = require('nodemailer');
 const logger = require('../utils/logger');
-const IORedis = require('ioredis');
+const { createClient } = require('@supabase/supabase-js');
 
-const connection = new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379');
+const redisOptions = {
+    host: process.env.REDIS_HOST || '127.0.0.1',
+    port: process.env.REDIS_PORT || 6379,
+    password: process.env.REDIS_PASSWORD
+};
 
-// Email Queue
-const emailQueue = new Queue('email-queue', { connection });
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-// Email Worker
-const emailWorker = new Worker('email-queue', async (job) => {
-  const { to, subject, html, trackingId, isMarketing } = job.data;
-  
-  // Setup Nodemailer transporter with SPF/DKIM configured SMTP
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    secure: true,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    // DKIM Signature setup
-    dkim: {
-      domainName: process.env.DKIM_DOMAIN,
-      keySelector: process.env.DKIM_SELECTOR,
-      privateKey: process.env.DKIM_PRIVATE_KEY
-    }
-  });
+let emailQueue;
+let emailWorker;
 
-  // Inject tracking pixel
-  const trackingPixel = `<img src="${process.env.API_BASE_URL}/api/communication/track/open/${trackingId}" width="1" height="1" />`;
-  const trackedHtml = html.replace('</body>', `${trackingPixel}</body>`);
-
-  // Rewrite links for click tracking (simplified example)
-  const clickTrackedHtml = trackedHtml.replace(/href="([^"]*)"/g, (match, url) => {
-    const encodedUrl = Buffer.from(url).toString('base64');
-    return `href="${process.env.API_BASE_URL}/api/communication/track/click/${trackingId}?url=${encodedUrl}"`;
-  });
-
-  const mailOptions = {
-    from: `"ClickOpticx" <${process.env.SMTP_FROM}>`,
-    to,
-    subject,
-    html: clickTrackedHtml,
-    headers: {
-      'X-Entity-Ref-ID': trackingId,
-      'List-Unsubscribe': `<${process.env.API_BASE_URL}/api/communication/unsubscribe/${trackingId}>`
-    }
-  };
-
-  const info = await transporter.sendMail(mailOptions);
-  logger.info(`[EMAIL SENT] ${info.messageId} to ${to}`);
-  return info;
-}, { connection });
-
-emailWorker.on('failed', (job, err) => {
-  logger.error(`[EMAIL QUEUE ERROR] Job ${job.id} failed: ${err.message}`);
-});
-
-class EmailTrackingService {
-  async queueEmail(to, subject, html, trackingId, isMarketing = false) {
-    await emailQueue.add('send-email', {
-      to,
-      subject,
-      html,
-      trackingId,
-      isMarketing
-    }, {
-      attempts: 3,
-      backoff: { type: 'exponential', delay: 5000 }
-    });
-  }
-
-  // Generate SPF/DKIM verification instructions
-  getSpfDkimInstructions(domain) {
-    return {
-      spf: { type: 'TXT', name: '@', value: `v=spf1 include:${process.env.SMTP_PROVIDER_DOMAIN} ~all` },
-      dkim: { type: 'TXT', name: `${process.env.DKIM_SELECTOR}._domainkey`, value: 'v=DKIM1; k=rsa; p=YOUR_PUBLIC_KEY' },
-      dmarc: { type: 'TXT', name: '_dmarc', value: 'v=DMARC1; p=quarantine; rua=mailto:postmaster@yourdomain.com' }
-    };
-  }
+try {
+    // Create BullMQ Queue
+    emailQueue = new Queue('email-dispatch', { connection: redisOptions });
+    logger.info('✅ Email Queue Initialized');
+} catch (e) {
+    logger.warn('⚠️ Email Queue failed to initialize (Redis missing):', e.message);
 }
 
-module.exports = new EmailTrackingService();
+/**
+ * Helper to wrap links with click-tracking
+ */
+const injectTracking = (html, campaignId, recipient) => {
+    const trackingUrl = `${process.env.BACKEND_URL}/api/communication/track`;
+    
+    // Inject invisible 1x1 tracking pixel
+    const pixel = `<img src="${trackingUrl}/open?c=${campaignId}&r=${recipient}" width="1" height="1" style="display:none;" />`;
+    
+    // Rewrite hrefs for click tracking (Simplified Regex for demo)
+    const trackedHtml = html.replace(/href="(http.*?)"/g, `href="${trackingUrl}/click?c=${campaignId}&r=${recipient}&url=$1"`);
+    
+    return trackedHtml + pixel;
+};
+
+try {
+    // Create Worker
+    emailWorker = new Worker('email-dispatch', async job => {
+        const { to, subject, html, campaignId } = job.data;
+        logger.info(`[BULLMQ] Processing email job ${job.id} for ${to}`);
+
+        const trackedHtml = injectTracking(html, campaignId, to);
+
+        // Normally read from configManager or DB
+        const transporter = nodemailer.createTransport({
+            host: process.env.SMTP_HOST,
+            port: process.env.SMTP_PORT,
+            secure: true,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            }
+        });
+
+        try {
+            const info = await transporter.sendMail({
+                from: `"Click Opticx" <${process.env.SMTP_USER}>`,
+                to,
+                subject,
+                html: trackedHtml
+            });
+            
+            await supabase.from('audit_logs').insert({
+                action: 'EMAIL_SENT',
+                details: `Delivered to ${to} (Job ${job.id})`,
+                metadata: { messageId: info.messageId, campaignId }
+            });
+
+            return info;
+        } catch (error) {
+            logger.error(`[BULLMQ] Email failure: ${error.message}`);
+            throw error; // Triggers retry mechanism
+        }
+    }, { connection: redisOptions });
+
+    if (emailWorker) {
+        emailWorker.on('completed', job => {
+            logger.info(`[BULLMQ] Job ${job.id} has completed!`);
+        });
+
+        emailWorker.on('failed', (job, err) => {
+            logger.error(`[BULLMQ] Job ${job.id} has failed with ${err.message}`);
+        });
+    }
+} catch (e) {
+    logger.warn('⚠️ Email Worker failed to initialize (Redis missing):', e.message);
+}
+
+module.exports = {
+    enqueueEmail: async (payload) => {
+        return await emailQueue.add('send-email', payload, {
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 2000 }
+        });
+    }
+};

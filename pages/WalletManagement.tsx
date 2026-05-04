@@ -23,6 +23,8 @@ const WalletManagement: React.FC<{ state: AppState }> = ({ state }) => {
    const currentUser = state.currentUser as StaffUser;
    const isSuperAdmin = currentUser?.role === Role.SUPER_ADMIN;
 
+   if (!currentUser) return <Mini5GMicroLoader size={40} />;
+
    const filteredStaff = useMemo(() => {
       const term = (searchTerm || '').toLowerCase();
       return (state.staff || []).filter(s =>

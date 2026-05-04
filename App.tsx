@@ -13,7 +13,13 @@ import Modal from './components/shared/Modal';
 import { useToast } from './components/shared/Toast';
 import { Mini5GMicroLoader } from './components/Mini5GMicroLoader';
 import { initDualWrite } from './lib/db-adapter';
+import { isRoleRoutingEnabled, recordCrash, clearCrashRecord } from './lib/integrityCheck';
+import { getLayoutForRole, getDefaultPathForRole, getRoutesForRole, canRoleAccessPath } from './lib/roleRouter';
+import SubscriberLayout from './layouts/SubscriberLayout';
+import V3Layout from './src/layouts/V3Layout';
+import AdminLayoutWrapper from './src/layouts/AdminLayoutWrapper';
 import './public/design-system.css';
+import './src/styles/design-tokens.css';
 
 // Helper to handle chunk loading errors (force reload on new deployments)
 const lazyWithRetry = (componentImport: () => Promise<any>) => 
@@ -112,7 +118,35 @@ const SafeStub = ({ name, route }: { name: string, route: string }) => (
 
 const AdminDevicesStub = lazyWithRetry(() => Promise.resolve({ default: () => <SafeStub name="OLT Devices" route="/admin-devices" /> }));
 
-// Error Boundary
+// ─── Role-Router Error Boundary ──────────────────────────────────────────────
+// Wraps ONLY the new role-based routing system. On crash, records it and
+// falls back to the legacy <LegacyRoutes /> component. DOES NOT affect the
+// global ErrorBoundary which continues to protect the full app tree.
+class RoleRouterBoundary extends React.Component<
+  { children: React.ReactNode; onFallback: () => void },
+  { hasCrashed: boolean }
+> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasCrashed: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasCrashed: true };
+  }
+
+  componentDidCatch(error: Error) {
+    recordCrash(error);
+    this.props.onFallback();
+  }
+
+  render() {
+    if (this.state.hasCrashed) return null;
+    return this.props.children;
+  }
+}
+
+// ─── Global Error Boundary ────────────────────────────────────────────────────
 class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean, error: Error | null}> {
   constructor(props: any) {
     super(props);
@@ -426,17 +460,92 @@ const App: React.FC = () => {
     });
   };
 
-  
-  // LegacyRoutes has been moved outside to ensure component stability and prevent re-creation on render.
+  // ─── RENDER LOGIC ──────────────────────────────────────────────────────────
+  // Priority order:
+  // 1. Login screen (not authenticated)
+  // 2. Subscriber portal (isolated SubscriberLayout — zero admin leakage)
+  // 3. NEW: Role-based routing (if VITE_ENABLE_ROLE_ROUTING=true AND integrity is healthy)
+  // 4. LEGACY FALLBACK: V3 layout (if ?layout=v3)
+  // 5. LEGACY FALLBACK: Default V2/sidebar layout
+  const [useRoleFallback, setUseRoleFallback] = useState(false);
+  const roleRoutingActive = !useRoleFallback && isRoleRoutingEnabled();
+
 const renderApp = () => {
+    const enableNewUI = import.meta.env.VITE_ENABLE_NEW_UI === 'true';
+
     if (dbState.view === 'login') return <Login onLogin={handleLogin} />;
+
+    // ── 2. SUBSCRIBER PORTAL — Admin-Isolated Shell ──────────────────────────
     if (authState.role === 'Subscriber' || authState.role === 'Customer') {
       const activeUser = dbState.currentUser || dbState.users.find(u => u.id === authState.id) || authState;
-      return <SubscriberApp state={dbState} user={activeUser as any} onLogout={handleLogout} />;
+      return (
+        <SubscriberLayout
+          user={activeUser as any}
+          onLogout={handleLogout}
+          onNavigate={navigateTo}
+          activeRoute={location.pathname}
+          businessName={dbState?.settings?.branding?.businessName || 'ClickOptix'}
+          businessLogo={(dbState?.settings?.branding as any)?.logoUrl}
+        >
+          <Suspense fallback={<Mini5GMicroLoader size={40} />}>
+            <SubscriberApp state={dbState} user={activeUser as any} onLogout={handleLogout} />
+          </Suspense>
+        </SubscriberLayout>
+      );
     }
 
-    // V2 Layout is now the DEFAULT admin experience
-    // V3 layout available via ?layout=v3 URL param
+    // ── 3. NEW ROLE-BASED ROUTING ────────────────────────────────────────────
+    if (roleRoutingActive) {
+      const userRole = authState.role || 'Admin';
+      const allowedRoutes = getRoutesForRole(userRole);
+      const defaultPath = getDefaultPathForRole(userRole);
+      
+      // Let SuperAdmins access any path, otherwise strict check against allowedRoutes
+      const isSuperAdmin = ['superadmin', 'admin'].includes(userRole.toLowerCase().replace(/\s/g, ''));
+      const isPathInRoutes = canRoleAccessPath(userRole, location.pathname);
+      const pathAllowed = isSuperAdmin || isPathInRoutes;
+
+      return (
+        <RoleRouterBoundary onFallback={() => setUseRoleFallback(true)}>
+          <Suspense fallback={<Mini5GMicroLoader size={60} />}>
+            {/* Role-specific V3 Layout wrapper */}
+            <V3Layout state={dbState} activePage={currentPage} onNavigate={navigateTo} onLogout={handleLogout}>
+              <Routes>
+                {allowedRoutes.map(route => (
+                  <Route
+                    key={route.path}
+                    path={route.path}
+                    element={
+                      React.createElement(route.component as any, {
+                        state: dbState,
+                        onNavigate: navigateTo,
+                      })
+                    }
+                  />
+                ))}
+                
+                {/* Fallback to LegacyRoutes if path is allowed but not in allowedRoutes */}
+                {pathAllowed ? (
+                  <Route path="*" element={
+                    <LegacyRoutes 
+                      dbState={dbState} 
+                      navigateTo={navigateTo} 
+                      globalSearchTerm={globalSearchTerm} 
+                      setGlobalSearchTerm={setGlobalSearchTerm} 
+                      navParams={navParams} 
+                    />
+                  } />
+                ) : (
+                  <Route path="*" element={<Navigate to={defaultPath} replace />} />
+                )}
+              </Routes>
+            </V3Layout>
+          </Suspense>
+        </RoleRouterBoundary>
+      );
+    }
+
+    // ── 4 & 5. LEGACY FALLBACK (unchanged) ──────────────────────────────────
     const forceV3 = new URLSearchParams(window.location.search).get('layout') === 'v3';
 
     if (forceV3) {
@@ -465,6 +574,47 @@ const renderApp = () => {
             })()}
           </Suspense>
         </V3Layout>
+      );
+    }
+
+    if (enableNewUI) {
+      return (
+        <AdminLayoutWrapper
+          state={dbState}
+          current={currentPage}
+          onNavigate={navigateTo}
+          onLogout={handleLogout}
+          user={dbState.currentUser as any}
+          globalSearchTerm={globalSearchTerm}
+          setGlobalSearchTerm={setGlobalSearchTerm}
+          isPending={isPending}
+          businessName={dbState?.settings?.branding?.businessName || 'Click Opticx'}
+        >
+          <Suspense fallback={<Mini5GMicroLoader size={40} />}>
+            <LegacyRoutes 
+              dbState={dbState} 
+              navigateTo={navigateTo} 
+              globalSearchTerm={globalSearchTerm} 
+              setGlobalSearchTerm={setGlobalSearchTerm} 
+              navParams={navParams} 
+            />
+          </Suspense>
+          
+          <Modal
+              isOpen={!!criticalAlert}
+              onClose={() => setCriticalAlert(null)}
+              title={criticalAlert?.title || "System Alert"}
+              type="danger"
+              icon={<ShieldAlert size={24} className="text-white" />}
+              footer={
+                <button onClick={() => setCriticalAlert(null)} className="w-full py-4 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-xl transition-all flex items-center justify-center gap-2">
+                  Acknowledge Alert <ShieldCheck size={16} />
+                </button>
+              }
+          >
+              <p className="text-sm text-slate-400 font-bold uppercase tracking-widest leading-relaxed text-center py-4">{criticalAlert?.message}</p>
+          </Modal>
+        </AdminLayoutWrapper>
       );
     }
 

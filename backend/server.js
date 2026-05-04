@@ -141,6 +141,7 @@ const allowedOrigins = [
     'https://isp-click-opticx.web.app',
     'https://isp-click-opticx.firebaseapp.com',
     'http://localhost:3000',
+    'http://localhost:3001',
     'http://localhost:5173',
     'http://localhost:5001',
     ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [])

@@ -661,7 +661,7 @@ class DB {
   private socket: Socket | null = null;
   private backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
     ? 'http://localhost:5000'
-    : 'https://click-opticx-isp-app-live.onrender.com';
+    : (import.meta.env.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com');
 
   public getBackendUrl() {
     return this.backendUrl;
@@ -1464,7 +1464,7 @@ class DB {
           const cloudIds = new Set(cloudData.users.map(u => u.id));
           const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !u.deleted);
           this.state.users = [
-            ...cloudData.users.filter(u => !u.deleted),
+            ...cloudData.users,
             ...localOnlyUsers
           ];
         }
@@ -1493,7 +1493,7 @@ class DB {
             const cloudIds = new Set(persistedData.users.map(u => u.id));
             const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !u.deleted);
             persistedData.users = [
-              ...persistedData.users.filter(u => !u.deleted),
+              ...persistedData.users,
               ...localOnlyUsers
             ];
           }
@@ -2300,6 +2300,7 @@ class DB {
       } as any;
       
       this.logAudit('Impersonation Start', 'Admin', `Admin started impersonating user ${res.user.email}`, res.user.id, res.user.name);
+      await this.commitImmediate();
       this.notify();
       window.location.href = '/user/dashboard'; 
       return { success: true };
