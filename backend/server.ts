@@ -85,23 +85,11 @@ configManager.init().then(async () => {
 });
 
 // --- Middleware ---
-const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:5173',
-    'http://localhost:5001',
-    'https://isp-click-opticx.web.app',
-    'https://isp-click-opticx.firebaseapp.com',
-    'https://click-opticx-isp-app-live.onrender.com',
-    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [])
-];
-
-app.use(cors({
-    origin: allowedOrigins,
-    credentials: true
-}));
-app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(cors({ origin: '*', credentials: true })); // Temporary for recovery
 app.use(express.json());
+
+// --- IMMEDIATE AUTH PATH (Before Limiter) ---
+app.post('/api/auth/login', authRoutes);
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -112,7 +100,6 @@ app.use('/api/', limiter);
 
 // --- API Versioning (v1) ---
 const apiV1 = express.Router();
-
 apiV1.use('/auth', authRoutes);
 apiV1.use('/billing', billingRoutes);
 apiV1.use('/users', usersRoutes);
@@ -124,42 +111,14 @@ apiV1.use('/config', configRoutes);
 apiV1.use('/storage', storageRoutes);
 apiV1.use('/migration', migrationRoutes);
 
-// Register v1
 app.use('/api/v1', apiV1);
 app.use('/api', apiV1);
-logger.info('🛰️  [BOOT] API routes registered');
 
-// Root Welcome / Health Check
-app.get('/', (req, res) => {
-    res.json({
-        service: 'Click Opticx ISP Backend (v2-TS)',
-        status: 'Operational',
-        timestamp: new Date().toISOString(),
-        version: '1.0.0-ts'
-    });
-});
-
-apiV1.get('/status', (req, res) => {
-    res.json({
-        service: 'Click Opticx ISP Backend (v2-TS)',
-        status: 'Operational',
-        timestamp: new Date().toISOString()
-    });
-});
-
-// --- Nightly Jobs ---
-cron.schedule('0 3 * * *', () => {
-    logger.info('🕒 [SCHEDULER] Triggering Nightly Migration Validation...');
-    exec('node scripts/validate-sync.js', (err, stdout) => {
-        if (err) logger.error(`[VALIDATOR] Nightly run failed: ${err.message}`);
-        else logger.info('[VALIDATOR] Nightly run completed');
-    });
-});
+app.get('/', (req, res) => res.json({ status: 'Operational', recovery: true }));
 
 const PORT = Number(process.env.PORT) || 5000;
 server.listen(PORT, '0.0.0.0', () => {
-    logger.info(`🚀 Backend running on port ${PORT} (Interface: 0.0.0.0)`);
-    logger.info(`✨ ISP Automation Engine: Active`);
+    console.log(`🚀 RECOVERY MODE: Backend running on port ${PORT}`);
 });
 
 export { app, io };
