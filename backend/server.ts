@@ -89,7 +89,7 @@ app.use(cors({ origin: '*', credentials: true })); // Temporary for recovery
 app.use(express.json());
 
 // --- IMMEDIATE AUTH PATH (Before Limiter) ---
-app.post('/api/auth/login', authRoutes);
+app.use('/api/auth', authRoutes);
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
