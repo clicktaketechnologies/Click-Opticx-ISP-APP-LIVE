@@ -46,9 +46,9 @@ const Header: React.FC<HeaderProps> = ({
 
   const notifications = useMemo(() => {
     return state.notifications
-      .filter(n => (n.audience === 'admin' || n.audience === 'system') && (n.targetId === 'all' || n.targetId === user.email))
+      .filter(n => (n.audience === 'admin' || n.audience === 'system') && (n.targetId === 'all' || n.targetId === user?.email))
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-  }, [state.notifications, user.email]);
+  }, [state.notifications, user?.email]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -135,7 +135,7 @@ const Header: React.FC<HeaderProps> = ({
               <div className="px-6 py-4 border-b border-slate-100 dark:border-white/5 flex justify-between items-center bg-slate-50 dark:bg-slate-950/50">
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Activity Relay</span>
                 <button 
-                  onClick={() => db.markAllNotificationsRead(user.email, 'admin')}
+                  onClick={() => db.markAllNotificationsRead(user?.email || 'admin@clickopticx.com', 'admin')}
                   className="text-[10px] font-black uppercase text-indigo-500 hover:underline"
                 >
                   Clear All
@@ -182,15 +182,15 @@ const Header: React.FC<HeaderProps> = ({
           >
             <div className="text-right hidden sm:block">
               <p className="text-xs font-black text-slate-900 dark:text-white leading-none mb-1">
-                {user.name.split(' ')[0]}
+                {user?.name?.split(' ')[0] || 'Admin'}
               </p>
               <span className="px-2 py-0.5 bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[8px] font-black uppercase rounded-md">
-                {user.role}
+                {user?.role || 'Admin'}
               </span>
             </div>
             <div className="w-10 h-10 rounded-xl overflow-hidden border-2 border-white dark:border-slate-800 shadow-md group-hover:scale-105 transition-transform">
-              {user.profileImage ? (
-                <img src={user.profileImage} alt={user.name} className="w-full h-full object-cover" />
+              {user?.profileImage ? (
+                <img src={user.profileImage} alt={user?.name || 'Admin'} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
                   <UserCircle className="text-slate-400" size={24} />
