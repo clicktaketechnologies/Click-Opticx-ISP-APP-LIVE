@@ -89,6 +89,9 @@ const allowedOrigins = [
     'http://localhost:3001',
     'http://localhost:5173',
     'http://localhost:5001',
+    'https://isp-click-opticx.web.app',
+    'https://isp-click-opticx.firebaseapp.com',
+    'https://click-opticx-isp-app-live.onrender.com',
     ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [])
 ];
 
