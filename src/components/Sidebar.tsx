@@ -5,7 +5,7 @@ import {
   Handshake, Receipt, FileText, TrendingUp, Wallet, CreditCard, 
   Package, FileUp, Archive, Headset, ClipboardList, ShieldAlert, 
   Fingerprint, Cloud, Settings, Wrench, ChevronDown, ChevronRight, 
-  LogOut, UserCircle, Menu, X, Smartphone, ShieldCheck
+  LogOut, UserCircle, Menu, X, Smartphone, ShieldCheck, Key
 } from 'lucide-react';
 import { AppState, Role } from '../../types';
 import { useRoleAccess } from '../../hooks/useRoleAccess';
