@@ -156,9 +156,9 @@ cron.schedule('0 3 * * *', () => {
     });
 });
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    logger.info(`🚀 Backend running on port ${PORT}`);
+const PORT = Number(process.env.PORT) || 5000;
+server.listen(PORT, '0.0.0.0', () => {
+    logger.info(`🚀 Backend running on port ${PORT} (Interface: 0.0.0.0)`);
     logger.info(`✨ ISP Automation Engine: Active`);
 });
 
