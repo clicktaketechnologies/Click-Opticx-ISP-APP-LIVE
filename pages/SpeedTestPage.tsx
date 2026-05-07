@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { History as HistoryIcon, Clock, Zap, Activity, AlertTriangle } from 'lucide-react';
 import PremiumSpeedTest from '../components/shared/PremiumSpeedTest';
+import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import { db } from '../db';
 
 import { AppState } from '../types';

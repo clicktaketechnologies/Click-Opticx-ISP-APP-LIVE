@@ -4,7 +4,7 @@ import { AppState, Role } from '../types';
 import { 
   ShieldCheck, Activity, Fingerprint, Lock, 
   Users, Zap, ShieldAlert, Key, Terminal,
-  LayoutDashboard, Server, Database, Globe
+  LayoutDashboard, Server, Database, Globe, ArrowRight
 } from 'lucide-react';
 
 const SuperAdmin: React.FC<{ state: AppState }> = ({ state }) => {

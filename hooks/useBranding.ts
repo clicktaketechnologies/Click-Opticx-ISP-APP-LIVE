@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { db } from '../db';
+import { db, INITIAL_COMM_CONFIG } from '../db';
 import { BrandingConfig } from '../types';
 
 export const useBranding = (): BrandingConfig => {
