@@ -661,9 +661,9 @@ class DB {
   private storage: FirebaseStorage | null = null;
   private app: FirebaseApp | null = null;
   private socket: Socket | null = null;
-  private backendUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+  private backendUrl = ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
     ? 'http://localhost:5000'
-    : (import.meta.env.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com');
+    : (import.meta.env.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com')).replace(/\/$/, '');
 
   public getBackendUrl() {
     return this.backendUrl;

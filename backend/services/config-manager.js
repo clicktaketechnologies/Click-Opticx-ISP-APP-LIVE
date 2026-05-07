@@ -36,46 +36,43 @@ export async function init() {
     realtime: { params: { eventsPerSecond: 2 } },
   });
 
-  try {
-    const { data, error } = await supabase
-      .from('system_configs')
-      .select('key, value');
+  // Non-blocking background configuration load
+  supabase
+    .from('system_configs')
+    .select('key, value')
+    .then(({ data, error }) => {
+      if (error) {
+        console.warn('[CONFIG-MGR] Failed to load configs:', error.message);
+      } else {
+        (data || []).forEach(({ key, value }) => { cache[key] = value; });
+        console.log(`[CONFIG-MGR] Loaded ${Object.keys(cache).length} config keys`);
+      }
+    })
+    .catch(e => console.error('[CONFIG-MGR] Background init error:', e.message));
 
-    if (error) {
-      console.warn('[CONFIG-MGR] Failed to load configs:', error.message);
-    } else {
-      (data || []).forEach(({ key, value }) => { cache[key] = value; });
-      console.log(`[CONFIG-MGR] Loaded ${Object.keys(cache).length} config keys`);
-    }
-
-    // Subscribe to Realtime updates
-    supabase
-      .channel('config_backend_watch')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'system_configs',
-      }, (payload) => {
-        const key = payload.new?.key || payload.old?.key;
-        const value = payload.new?.value;
-        if (key) {
-          const old = cache[key];
-          cache[key] = value;
-          console.log(`[CONFIG-MGR] Live update: "${key}"`);
-          // Notify registered listeners
-          if (listeners[key]) {
-            listeners[key].forEach(cb => { try { cb(value, old); } catch (e) {} });
-          }
-          if (listeners['*']) {
-            listeners['*'].forEach(cb => { try { cb(key, value, old); } catch (e) {} });
-          }
+  // Subscribe to Realtime updates (immediately)
+  supabase
+    .channel('config_backend_watch')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'system_configs',
+    }, (payload) => {
+      const key = payload.new?.key || payload.old?.key;
+      const value = payload.new?.value;
+      if (key) {
+        const old = cache[key];
+        cache[key] = value;
+        console.log(`[CONFIG-MGR] Live update: "${key}"`);
+        if (listeners[key]) {
+          listeners[key].forEach(cb => { try { cb(value, old); } catch (e) {} });
         }
-      })
-      .subscribe();
-
-  } catch (e) {
-    console.error('[CONFIG-MGR] Init error:', e.message);
-  }
+        if (listeners['*']) {
+          listeners['*'].forEach(cb => { try { cb(key, value, old); } catch (e) {} });
+        }
+      }
+    })
+    .subscribe();
 
   initialized = true;
 }
