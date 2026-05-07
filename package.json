@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "server": "tsx backend/server.ts",
-    "server:watch": "tsx --watch backend/server.ts"
+    "server:watch": "tsx --watch backend/server.ts",
+    "start": "npm run server"
   },
   "dependencies": {
     "@google/genai": "^1.35.0",
@@ -55,7 +56,8 @@
     "telnet-client": "^2.2.13",
     "web-push": "^3.6.7",
     "winston": "^3.19.0",
-    "zustand": "^5.0.12"
+    "zustand": "^5.0.12",
+    "tsx": "^4.21.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -66,7 +68,6 @@
     "@vitejs/plugin-react": "^5.0.0",
     "@vitest/ui": "^4.1.2",
     "jsdom": "^29.0.1",
-    "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
     "vitest": "^4.1.2"
