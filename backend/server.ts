@@ -126,8 +126,8 @@ app.use('/api/v1', apiV1);
 // Legacy support (aliasing /api to /api/v1)
 app.use('/api', apiV1);
 
-// Root Welcome
-app.get('/', (req, res) => {
+// Root Welcome / Health Check
+apiV1.get('/status', (req, res) => {
     res.json({
         service: 'Click Opticx ISP Backend (v2-TS)',
         status: 'Operational',
@@ -135,6 +135,28 @@ app.get('/', (req, res) => {
         version: '1.0.0-ts'
     });
 });
+
+// --- Static Frontend Serving (Unified Platform) ---
+const distPath = path.join(__dirname, '../dist');
+if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+        if (!req.path.startsWith('/api')) {
+            res.sendFile(path.join(distPath, 'index.html'));
+        }
+    });
+    logger.info('🌐 [PLATFORM] Frontend static serving active');
+} else {
+    // Basic root response for API-only mode
+    app.get('/', (req, res) => {
+        res.json({
+            service: 'Click Opticx ISP Backend (v2-TS)',
+            status: 'Operational',
+            message: 'Static frontend not found. API mode only.',
+            timestamp: new Date().toISOString()
+        });
+    });
+}
 
 // --- Nightly Jobs ---
 cron.schedule('0 3 * * *', () => {
