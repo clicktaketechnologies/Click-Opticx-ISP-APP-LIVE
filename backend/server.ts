@@ -1,4 +1,5 @@
 import 'dotenv/config';
+console.log('🏁 [BOOT] Server script execution started');
 import express from 'express';
 import http from 'http';
 import { Server as SocketIoServer } from 'socket.io';
@@ -125,9 +126,8 @@ apiV1.use('/migration', migrationRoutes);
 
 // Register v1
 app.use('/api/v1', apiV1);
-
-// Legacy support (aliasing /api to /api/v1)
 app.use('/api', apiV1);
+logger.info('🛰️  [BOOT] API routes registered');
 
 // Root Welcome / Health Check
 app.get('/', (req, res) => {
