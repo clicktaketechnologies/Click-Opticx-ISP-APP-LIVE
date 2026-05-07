@@ -1,5 +1,5 @@
-const { Resend } = require('resend');
-const logger = require('../../../utils/logger');
+import { Resend } from 'resend';
+import logger from '../../../utils/logger.js';
 
 class ResendAdapter {
   constructor(config) {
@@ -31,4 +31,4 @@ class ResendAdapter {
   }
 }
 
-module.exports = ResendAdapter;
+export default ResendAdapter;

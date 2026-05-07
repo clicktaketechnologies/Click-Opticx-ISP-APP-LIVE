@@ -1,4 +1,4 @@
-const MikroNode = require('mikronode');
+import MikroNode from 'mikronode';
 
 class MikroTikService {
   constructor(device) {
@@ -51,4 +51,4 @@ class MikroTikService {
   }
 }
 
-module.exports = MikroTikService;
+export default MikroTikService;

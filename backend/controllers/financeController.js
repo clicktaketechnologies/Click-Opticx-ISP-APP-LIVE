@@ -1,21 +1,15 @@
-const logger = require('../utils/logger');
-const configManager = require('../services/config-manager');
-const redis = require('../services/redisService');
-const crypto = require('crypto');
+import logger from '../utils/logger.js';
+import configManager from '../services/config-manager.js';
+import redis from '../services/redisService.js';
+import crypto from 'crypto';
 
 /**
  * financeController.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Centralized Finance & Ledger Controller (v1)
- * 
- * Requirements:
- * - Ledger-First (financial_transactions table)
- * - ACID Transactions (SELECT FOR UPDATE)
- * - Idempotency (Redis keys)
- * - HMAC Webhook Verification
  */
 
-exports.handleWebhook = async (req, res) => {
+export const handleWebhook = async (req, res) => {
     const { provider } = req.params;
     const signature = req.headers['x-signature'] || req.headers['stripe-signature'];
     const idempotencyKey = req.headers['x-idempotency-key'] || req.body.id || req.body.idempotency_key;
@@ -43,7 +37,7 @@ exports.handleWebhook = async (req, res) => {
         
         // 4. Mark as processed in Redis (24h expiry)
         if (idempotencyKey && result.success) {
-            await redis.set(`webhook_processed:${idempotencyKey}`, 'true', 86400);
+            await redis.set(`webhook_processed:${idempotencyKey}`, 'true', 'EX', 86400);
         }
 
         // 5. Success
@@ -86,7 +80,7 @@ function verifySignature(provider, body, signature) {
     return true; // Simplified for stability check
 }
 
-exports.getTransactions = async (req, res) => {
+export const getTransactions = async (req, res) => {
     const { userId, type, limit = 50, offset = 0 } = req.query;
     const supabase = configManager.getSupabaseClient();
 
@@ -96,13 +90,13 @@ exports.getTransactions = async (req, res) => {
 
     const { data, count, error } = await query
         .order('created_at', { ascending: false })
-        .range(offset, offset + limit - 1);
+        .range(offset, parseInt(offset) + parseInt(limit) - 1);
 
     if (error) return res.status(500).json({ success: false, message: error.message });
     res.json({ success: true, transactions: data, total: count });
 };
 
-exports.requestEmergency = async (req, res) => {
+export const requestEmergency = async (req, res) => {
     const { userId, amount } = req.body;
     const supabase = configManager.getSupabaseClient();
 
@@ -120,7 +114,7 @@ exports.requestEmergency = async (req, res) => {
     }
 };
 
-exports.getFinanceHealth = async (req, res) => {
+export const getFinanceHealth = async (req, res) => {
     // Reconciliation engine & health scan
     res.json({
         status: 'Healthy',
@@ -131,7 +125,7 @@ exports.getFinanceHealth = async (req, res) => {
     });
 };
 
-exports.logAgentCollection = async (req, res) => {
+export const logAgentCollection = async (req, res) => {
     const { userId, amount, method, location, receiptUrl } = req.body;
     const supabase = configManager.getSupabaseClient();
 
@@ -152,7 +146,7 @@ exports.logAgentCollection = async (req, res) => {
     }
 };
 
-exports.saveFinanceConfig = async (req, res) => {
+export const saveFinanceConfig = async (req, res) => {
     const { key, config } = req.body;
     
     try {
@@ -164,3 +158,5 @@ exports.saveFinanceConfig = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+export default { handleWebhook, getTransactions, requestEmergency, getFinanceHealth, logAgentCollection, saveFinanceConfig };

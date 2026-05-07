@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import financeController from '../controllers/financeController.js';
+import { protect, restrictTo, enforceSettings } from '../middleware/auth.js';
+
 const router = express.Router();
-const financeController = require('../controllers/financeController');
-const { protect, restrictTo, enforceSettings } = require('../middleware/auth');
 
 // Webhooks (Public but verified via HMAC in controller)
 router.post('/webhook/:provider', financeController.handleWebhook);
@@ -15,4 +16,4 @@ router.get('/health', protect, restrictTo('Admin', 'SuperAdmin'), financeControl
 router.post('/config', protect, restrictTo('Admin', 'SuperAdmin'), financeController.saveFinanceConfig);
 router.post('/agent/collection', protect, restrictTo('Agent', 'Admin'), financeController.logAgentCollection);
 
-module.exports = router;
+export default router;

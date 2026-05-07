@@ -1,6 +1,6 @@
-const { Worker } = require('bullmq');
-const logger = require('../../utils/logger');
-const { sendEmail } = require('./email-router');
+import { Worker } from 'bullmq';
+import logger from '../../utils/logger.js';
+import emailRouter from './email-router.js';
 
 const EMAIL_QUEUE_NAME = 'manual-email-reminders';
 
@@ -13,14 +13,19 @@ const connection = {
 /**
  * Initialize Email Queue Worker
  */
-function initWorker() {
+export function initWorker() {
+  if (!process.env.REDIS_HOST) {
+    logger.warn('⚠️ REDIS_HOST not set. Skipping BullMQ Worker initialization.');
+    return null;
+  }
+
   const worker = new Worker(EMAIL_QUEUE_NAME, async (job) => {
     const { to, subject, html, category } = job.data;
     
     logger.info(`[EMAIL-WORKER] Processing job ${job.id} for ${to}`);
     
     try {
-      await sendEmail({ to, subject, html, category });
+      await emailRouter.sendEmail({ to, subject, html, category });
       logger.info(`[EMAIL-WORKER] Job ${job.id} completed successfully`);
     } catch (error) {
       logger.error(`[EMAIL-WORKER] Job ${job.id} failed: ${error.message}`);
@@ -43,4 +48,14 @@ function initWorker() {
   return worker;
 }
 
-module.exports = { initWorker };
+export const queueEmail = async (data) => {
+    // This should ideally use a Queue instance from BullMQ
+    // For now, if Redis is missing, we fallback to direct send
+    try {
+        await emailRouter.sendEmail(data);
+    } catch (e) {
+        logger.error(`[EMAIL-QUEUE-FALLBACK] Error: ${e.message}`);
+    }
+};
+
+export default { initWorker, queueEmail };

@@ -1,11 +1,11 @@
-const configManager = require('../../services/config-manager');
-const logger = require('../../utils/logger');
+import configManager from '../../services/config-manager.js';
+import logger from '../../utils/logger.js';
 
 /**
  * Syncs user roles to the Supabase user_roles table
  * This enables Row-Level Security (RLS) enforcement at the DB level
  */
-async function syncUserRole(userId, role, grantedBy = 'system') {
+export async function syncUserRole(userId, role, grantedBy = 'system') {
   const supabase = configManager.getSupabaseClient();
   if (!supabase) return;
 
@@ -32,7 +32,7 @@ async function syncUserRole(userId, role, grantedBy = 'system') {
 /**
  * Revokes a role from a user
  */
-async function revokeUserRole(userId, role) {
+export async function revokeUserRole(userId, role) {
   const supabase = configManager.getSupabaseClient();
   if (!supabase) return;
 
@@ -48,7 +48,7 @@ async function revokeUserRole(userId, role) {
   }
 }
 
-module.exports = {
+export default {
   syncUserRole,
   revokeUserRole
 };

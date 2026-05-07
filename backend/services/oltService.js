@@ -1,4 +1,4 @@
-const { Client } = require('ssh2');
+import { Client } from 'ssh2';
 
 class OLTService {
   constructor(device) {
@@ -77,4 +77,4 @@ class OLTService {
   }
 }
 
-module.exports = OLTService;
+export default OLTService;

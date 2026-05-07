@@ -1,6 +1,6 @@
-const Stripe = require('stripe');
-const BasePaymentAdapter = require('./base-adapter');
-const logger = require('../../../utils/logger');
+import Stripe from 'stripe';
+import BasePaymentAdapter from './base-adapter.js';
+import logger from '../../../utils/logger.js';
 
 class StripeAdapter extends BasePaymentAdapter {
   constructor(config) {
@@ -61,4 +61,4 @@ class StripeAdapter extends BasePaymentAdapter {
   }
 }
 
-module.exports = StripeAdapter;
+export default StripeAdapter;

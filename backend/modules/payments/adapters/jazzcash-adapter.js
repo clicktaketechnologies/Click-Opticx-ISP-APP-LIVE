@@ -1,7 +1,7 @@
-const axios = require('axios');
-const crypto = require('crypto');
-const BasePaymentAdapter = require('./base-adapter');
-const logger = require('../../../utils/logger');
+import axios from 'axios';
+import crypto from 'crypto';
+import BasePaymentAdapter from './base-adapter.js';
+import logger from '../../../utils/logger.js';
 
 class JazzCashAdapter extends BasePaymentAdapter {
   constructor(config) {
@@ -94,4 +94,4 @@ class JazzCashAdapter extends BasePaymentAdapter {
   }
 }
 
-module.exports = JazzCashAdapter;
+export default JazzCashAdapter;

@@ -1,6 +1,7 @@
-const logger = require('../utils/logger');
-const admin = require('firebase-admin');
-const axios = require('axios');
+import logger from '../utils/logger.js';
+import admin from 'firebase-admin';
+import axios from 'axios';
+import redis from './redisService.js';
 
 class FaultDetection {
 
@@ -107,4 +108,4 @@ class FaultDetection {
   }
 }
 
-module.exports = FaultDetection;
+export default FaultDetection;

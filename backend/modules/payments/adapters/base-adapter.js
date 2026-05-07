@@ -25,4 +25,4 @@ class BasePaymentAdapter {
   }
 }
 
-module.exports = BasePaymentAdapter;
+export default BasePaymentAdapter;

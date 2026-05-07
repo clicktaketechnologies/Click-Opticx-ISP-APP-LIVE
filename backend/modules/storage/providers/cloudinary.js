@@ -1,9 +1,9 @@
-const cloudinary = require('cloudinary').v2;
+import { v2 as cloudinary } from 'cloudinary';
 
 /**
  * Cloudinary Storage Provider
  */
-async function upload(file, options = {}) {
+export async function upload(file, options = {}) {
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -31,4 +31,4 @@ async function upload(file, options = {}) {
   }
 }
 
-module.exports = { upload };
+export default { upload };

@@ -1,4 +1,4 @@
-const winston = require('winston');
+import winston from 'winston';
 
 const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',
@@ -41,4 +41,4 @@ logger.streamToSocket = (io) => {
     });
 };
 
-module.exports = logger;
+export default logger;

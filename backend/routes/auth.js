@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const authController = require('../controllers/authController');
+import express from 'express';
+import authController from '../controllers/authController.js';
+import { protect } from '../middleware/auth.js';
 
-const { protect } = require('../middleware/auth');
+const router = express.Router();
 
 // Registry-based Auth Endpoints
 router.post('/signup', authController.signup);
@@ -17,4 +17,4 @@ router.post('/refresh', authController.refreshToken);
 router.post('/logout', protect, authController.logout);
 router.get('/verify', authController.verifySession);
 
-module.exports = router;
+export default router;

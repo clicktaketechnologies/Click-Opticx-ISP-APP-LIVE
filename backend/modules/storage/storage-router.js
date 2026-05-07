@@ -1,8 +1,8 @@
-const logger = require('../../utils/logger');
-const configManager = require('../../services/config-manager');
-const processor = require('./processor');
-const cloudinary = require('./providers/cloudinary');
-const supabaseStorage = require('./providers/supabase-storage');
+import logger from '../../utils/logger.js';
+import configManager from '../../services/config-manager.js';
+import processor from './processor.js';
+import cloudinary from './providers/cloudinary.js';
+import supabaseStorage from './providers/supabase-storage.js';
 
 const providers = {
   cloudinary,
@@ -14,7 +14,7 @@ const providers = {
  * Storage Router
  * Handles multi-provider upload failover and replication
  */
-async function uploadFile(file, options = {}) {
+export async function uploadFile(file, options = {}) {
   const config = configManager.getConfig('storage_providers');
   if (!config) {
     logger.warn('[STORAGE-ROUTER] No configuration found. Using default behavior.');
@@ -95,4 +95,4 @@ async function replicateToBackups(processed, options, primaryProviderId, allProv
   }
 }
 
-module.exports = { uploadFile };
+export default { uploadFile };

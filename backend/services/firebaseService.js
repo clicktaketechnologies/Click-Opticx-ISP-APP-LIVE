@@ -1,5 +1,5 @@
-const admin = require('firebase-admin');
-const logger = require('../utils/logger');
+import admin from 'firebase-admin';
+import logger from '../utils/logger.js';
 
 /**
  * Send a push notification using Firebase Cloud Messaging (FCM)
@@ -34,4 +34,4 @@ async function sendPush(token, title, body, data = {}) {
     }
 }
 
-module.exports = { sendPush };
+export default { sendPush };

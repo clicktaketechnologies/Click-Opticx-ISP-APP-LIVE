@@ -2,17 +2,9 @@
  * config-manager.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Backend Runtime Config Manager
- *
- * Loads system_configs from Supabase on startup and keeps them in memory.
- * Subscribes to Supabase Realtime so admin UI changes reflect instantly
- * in backend services (email-router, storage-router, livePoller, etc.)
- * without requiring a server restart.
  */
 
-const { createClient } = require('@supabase/supabase-js');
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+import { createClient } from '@supabase/supabase-js';
 
 let supabase = null;
 let cache = {};
@@ -20,7 +12,10 @@ let initialized = false;
 const listeners = {};
 
 // ─── Initialize ───────────────────────────────────────────────────────────────
-async function init() {
+export async function init() {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
   if (!supabaseUrl || !supabaseKey) {
     console.warn('[CONFIG-MGR] Supabase env vars missing. Config manager disabled.');
     initialized = true;
@@ -88,17 +83,17 @@ async function init() {
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /** Get a config value by key */
-function getConfig(key, defaultValue = null) {
+export function getConfig(key, defaultValue = null) {
   return key in cache ? cache[key] : defaultValue;
 }
 
 /** Get all configs */
-function getAllConfigs() {
+export function getAllConfigs() {
   return { ...cache };
 }
 
 /** Update a config value */
-async function setConfig(key, value, updatedBy = 'system') {
+export async function setConfig(key, value, updatedBy = 'system') {
   if (!supabase) return { success: false, error: 'Supabase not initialized' };
   try {
     const oldValue = cache[key];
@@ -126,7 +121,7 @@ async function setConfig(key, value, updatedBy = 'system') {
 }
 
 /** Subscribe to changes on a specific key ('*' for all) */
-function onConfigChange(key, cb) {
+export function onConfigChange(key, cb) {
   if (!listeners[key]) listeners[key] = [];
   listeners[key].push(cb);
   return () => {
@@ -135,14 +130,14 @@ function onConfigChange(key, cb) {
 }
 
 /** Test a provider connection */
-async function testProvider(providerType, providerId) {
+export async function testProvider(providerType, providerId) {
   const config = getConfig(`${providerType}_providers`);
   const provider = (config?.providers || []).find(p => p.id === providerId);
   if (!provider) return { success: false, error: 'Provider not found in config' };
   return { success: true, provider, message: `Provider "${providerId}" config found. Live test available from dedicated endpoint.` };
 }
 
-function isReady() { return initialized; }
-function getSupabaseClient() { return supabase; }
+export function isReady() { return initialized; }
+export function getSupabaseClient() { return supabase; }
 
-module.exports = { init, getConfig, getAllConfigs, setConfig, onConfigChange, testProvider, isReady, getSupabaseClient };
+export default { init, getConfig, getAllConfigs, setConfig, onConfigChange, testProvider, isReady, getSupabaseClient };

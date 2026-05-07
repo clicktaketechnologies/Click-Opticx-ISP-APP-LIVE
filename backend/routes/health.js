@@ -1,74 +1,36 @@
-const express = require('express');
+import express from 'express';
+import path from 'path';
+import fs from 'fs';
+import readline from 'readline';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import admin from 'firebase-admin';
+import logger from '../utils/logger.js';
+import paymentRouter from '../modules/payments/payment-router.js';
+import emailRouter from '../modules/email/email-router.js';
+import configManager from '../services/config-manager.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const router = express.Router();
-const path = require('path');
-const fs = require('fs');
-const readline = require('readline');
-const logger = require('../utils/logger');
-const paymentRouter = require('../modules/payments/payment-router');
-const emailRouter = require('../modules/email/email-router');
-const configManager = require('../services/config-manager');
-const admin = require('firebase-admin');
-
-// 1. Aggregated System Health
-router.get('/', async (req, res) => {
-    try {
-        const start = Date.now();
-        
-        // Parallel health checks
-        const [ai, db, email, payments] = await Promise.all([
-            checkAIHealth(),
-            checkDBHealth(),
-            checkEmailHealth(),
-            checkPaymentHealth()
-        ]);
-
-        const latency = Date.now() - start;
-
-        res.json({
-            success: true,
-            status: 'online',
-            timestamp: new Date().toISOString(),
-            latency_ms: latency,
-            version: process.env.npm_package_version || '8.6.0',
-            components: { ai, db, email, payments }
-        });
-    } catch (error) {
-        logger.error(`[HEALTH] Aggregate check failed: ${error.message}`);
-        res.status(500).json({ success: false, message: 'Internal Health Failure' });
-    }
-});
-
-// 2. Component: AI Core
-router.get('/ai', async (req, res) => {
-    const health = await checkAIHealth();
-    res.json(health);
-});
 
 async function checkAIHealth() {
-    // Simple check for API keys presence and mock ping
-    const keys = await configManager.get('technicalKeys') || {};
+    const keys = (await configManager.getConfig('technicalKeys')) || {};
     const hasGemini = !!keys.geminiApiKey;
     return {
         status: hasGemini ? 'healthy' : 'degraded',
-        latency_ms: Math.floor(Math.random() * 200) + 50, // Mock latency
+        latency_ms: Math.floor(Math.random() * 200) + 50,
         model: 'Gemini-1.5-Pro',
         last_verified: new Date().toISOString()
     };
 }
 
-// 3. Component: Cloud DB
-router.get('/db', async (req, res) => {
-    const health = await checkDBHealth();
-    res.json(health);
-});
-
 async function checkDBHealth() {
     try {
         const start = Date.now();
-        // Check Firebase connection
         let firebaseStatus = 'disconnected';
         if (admin.apps.length > 0) {
-            // Check if firestore is initialized
             try {
                 await admin.firestore().collection('system').doc('health').get();
                 firebaseStatus = 'connected';
@@ -77,7 +39,6 @@ async function checkDBHealth() {
             }
         }
         
-        // Check Supabase
         const supabase = configManager.getSupabaseClient();
         const hasSupabase = !!supabase;
 
@@ -93,12 +54,6 @@ async function checkDBHealth() {
     }
 }
 
-// 4. Component: Email Gateway
-router.get('/email', async (req, res) => {
-    const health = await checkEmailHealth();
-    res.json(health);
-});
-
 async function checkEmailHealth() {
     const healthy = emailRouter.getHealthyProviders ? emailRouter.getHealthyProviders() : [];
     const total = emailRouter.providers ? emailRouter.providers.length : 0;
@@ -110,12 +65,6 @@ async function checkEmailHealth() {
     };
 }
 
-// 5. Component: Fiscal Node (Payments)
-router.get('/payments', async (req, res) => {
-    const health = await checkPaymentHealth();
-    res.json(health);
-});
-
 async function checkPaymentHealth() {
     const available = paymentRouter.getAvailableGateways ? paymentRouter.getAvailableGateways() : [];
     return {
@@ -125,6 +74,56 @@ async function checkPaymentHealth() {
         last_verified: new Date().toISOString()
     };
 }
+
+// 1. Aggregated System Health
+router.get('/', async (req, res) => {
+    try {
+        const start = Date.now();
+        const [ai, db, email, payments] = await Promise.all([
+            checkAIHealth(),
+            checkDBHealth(),
+            checkEmailHealth(),
+            checkPaymentHealth()
+        ]);
+        const latency = Date.now() - start;
+
+        res.json({
+            success: true,
+            status: 'online',
+            timestamp: new Date().toISOString(),
+            latency_ms: latency,
+            version: '1.0.0',
+            components: { ai, db, email, payments }
+        });
+    } catch (error) {
+        logger.error(`[HEALTH] Aggregate check failed: ${error.message}`);
+        res.status(500).json({ success: false, message: 'Internal Health Failure' });
+    }
+});
+
+// 2. Component: AI Core
+router.get('/ai', async (req, res) => {
+    const health = await checkAIHealth();
+    res.json(health);
+});
+
+// 3. Component: Cloud DB
+router.get('/db', async (req, res) => {
+    const health = await checkDBHealth();
+    res.json(health);
+});
+
+// 4. Component: Email Gateway
+router.get('/email', async (req, res) => {
+    const health = await checkEmailHealth();
+    res.json(health);
+});
+
+// 5. Component: Fiscal Node (Payments)
+router.get('/payments', async (req, res) => {
+    const health = await checkPaymentHealth();
+    res.json(health);
+});
 
 // 6. Component: Deployment / CI/CD
 router.get('/deploy', async (req, res) => {
@@ -140,7 +139,6 @@ router.get('/deploy', async (req, res) => {
 // GET /api/health-monitor/logs
 router.get('/logs', async (req, res) => {
     const logPath = path.join(__dirname, '../logs/combined.log');
-    
     if (!fs.existsSync(logPath)) {
         return res.json({ success: true, logs: [] });
     }
@@ -164,7 +162,6 @@ router.get('/logs', async (req, res) => {
                         service: parsed.service
                     });
                 } catch (e) {
-                    // Fallback for non-JSON lines
                     logs.push({
                         timestamp: new Date().toISOString(),
                         level: 'info',
@@ -174,8 +171,6 @@ router.get('/logs', async (req, res) => {
                 }
             }
         }
-        
-        // Return only the last 100 logs
         res.json({ success: true, logs: logs.slice(-100) });
     } catch (error) {
         logger.error(`[HEALTH-MONITOR] Failed to read logs: ${error.message}`);
@@ -183,4 +178,4 @@ router.get('/logs', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

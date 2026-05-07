@@ -13,8 +13,25 @@ const connection = {
   password: process.env.REDIS_PASSWORD
 };
 
-// Initialize Queue
-const emailQueue = new Queue(EMAIL_QUEUE_NAME, { connection });
+// Initialize Queue only if REDIS_HOST is provided, otherwise mock it
+let emailQueue;
+const USE_BULLMQ = !!process.env.REDIS_HOST;
+
+if (USE_BULLMQ) {
+  emailQueue = new Queue(EMAIL_QUEUE_NAME, { connection });
+} else {
+  logger.warn('⚠️ REDIS_HOST not set. Disabling BullMQ Email Queue.');
+  emailQueue = {
+    add: async () => ({ id: 'mock-job' }),
+    getWaitingCount: async () => 0,
+    getActiveCount: async () => 0,
+    getCompletedCount: async () => 0,
+    getFailedCount: async () => 0,
+    getDelayedCount: async () => 0,
+    getJobs: async () => [],
+    getJob: async () => null,
+  };
+}
 
 /**
  * Add an email job to the queue

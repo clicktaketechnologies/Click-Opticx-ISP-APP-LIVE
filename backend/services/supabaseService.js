@@ -1,6 +1,6 @@
-const { createClient } = require('@supabase/supabase-js');
-const logger = require('../utils/logger');
-const fs = require('fs');
+import { createClient } from '@supabase/supabase-js';
+import logger from '../utils/logger.js';
+import fs from 'fs';
 
 class SupabaseService {
     constructor() {
@@ -13,6 +13,7 @@ class SupabaseService {
 
     async testConnection() {
         try {
+            if (!this.client) throw new Error('Supabase client not initialized');
             // Test by trying to list buckets
             const { data, error } = await this.client.storage.listBuckets();
             if (error) throw error;
@@ -25,6 +26,7 @@ class SupabaseService {
 
     async uploadFile(fileName, filePath, fileType) {
         try {
+            if (!this.client) throw new Error('Supabase client not initialized');
             const fileData = fs.readFileSync(filePath);
             const { data, error } = await this.client.storage
                 .from('kyc-artifacts') // Expect this bucket to exist
@@ -51,4 +53,4 @@ class SupabaseService {
     }
 }
 
-module.exports = new SupabaseService();
+export default new SupabaseService();

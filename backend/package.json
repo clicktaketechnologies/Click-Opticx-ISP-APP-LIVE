@@ -2,11 +2,14 @@
     "name": "click-opticx-backend",
     "version": "1.0.0",
     "description": "Backend middleware for ISP infrastructure management",
+    "type": "module",
     "main": "server.js",
     "scripts": {
         "start": "node server.js",
-        "build": "echo 'No build step required for backend'",
+        "start:ts": "ts-node server.ts",
+        "build": "tsc",
         "dev": "nodemon server.js",
+        "dev:ts": "nodemon --exec ts-node server.ts",
         "test": "jest"
     },
     "dependencies": {

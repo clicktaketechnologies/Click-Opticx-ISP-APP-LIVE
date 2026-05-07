@@ -225,6 +225,7 @@ const INITIAL_APP_PAGES: AppPage[] = [
   { id: 'news', label: 'Broadcasts', icon: 'Bell', category: 'Communication', enabled: true, showInDirectory: true, isDefault: false, swatch: '#ef4444' },
   { id: 'referral', label: 'Refer & Earn', icon: 'Gift', category: 'Fiscal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#f59e0b' },
   { id: 'weather', label: 'Weather', icon: 'Sun', category: 'Utility', enabled: true, showInDirectory: true, isDefault: false, swatch: '#06b6d4' },
+  { id: 'zakat', label: 'Zakat Calc', icon: 'Calculator', category: 'Islamic', enabled: true, showInDirectory: true, isDefault: false, swatch: '#10b981' },
   { id: 'legal', label: 'Legal Center', icon: 'ShieldCheck', category: 'Legal', enabled: true, showInDirectory: true, isDefault: false, swatch: '#64748b' },
 ];
 
@@ -233,7 +234,7 @@ const INITIAL_APP_SECTIONS: AppSection[] = [
   { id: 'rescue', label: 'EMERGENCY CREDITS', enabled: true, order: 1, layout: 'Grid', gridCols: 1, itemIds: [] },
   { id: 'credit', label: 'FISCAL TRUST SCORE', enabled: true, order: 2, layout: 'Grid', gridCols: 1, itemIds: [] },
   { id: 'fiscal-summary', label: 'FISCAL SUMMARY', enabled: true, order: 3, layout: 'Grid', gridCols: 2, itemIds: [], isSpecialNode: true },
-  { id: 'islamic', label: 'ISLAMIC', enabled: true, order: 4, layout: 'Grid', gridCols: 4, itemIds: ['namaz', 'quran', 'qibla', 'tasbih'] },
+  { id: 'islamic', label: 'ISLAMIC', enabled: true, order: 4, layout: 'Grid', gridCols: 4, itemIds: ['namaz', 'quran', 'qibla', 'tasbih', 'zakat'] },
   { id: 'technical', label: 'TECHNICAL', enabled: true, order: 5, layout: 'Grid', gridCols: 2, itemIds: ['live-usage', 'speed-test', 'connection', 'reset-password'] },
   { id: 'daily-tools', label: 'DAILY TOOLS', enabled: true, order: 6, layout: 'Grid', gridCols: 2, itemIds: ['news', 'referral', 'weather', 'support'] },
   { id: 'legal', label: 'LEGAL & COMPLIANCE', enabled: true, order: 7, layout: 'Grid', gridCols: 1, itemIds: ['legal'] },
@@ -666,6 +667,21 @@ class DB {
 
   public getBackendUrl() {
     return this.backendUrl;
+  }
+
+  /**
+   * Pings the backend to wake it up from cold start.
+   * Recommended to call this when the app first loads or user visits login page.
+   */
+  public async wakeBackend() {
+    console.log('[SYSTEM] Sending proactive wake-up signal to backend...');
+    try {
+      // Use the speedtest ping endpoint as it's lightweight
+      const res = await fetch(`${this.backendUrl}/api/speedtest/ping?cb=${Date.now()}`);
+      if (res.ok) console.log('[SYSTEM] Backend handshake successful.');
+    } catch (e) {
+      console.warn('[SYSTEM] Backend wake-up failed (it might still be sleeping):', (e as any).message);
+    }
   }
 
   // --- 🛡️ SECURE TOKEN MANAGEMENT ---
@@ -2227,43 +2243,71 @@ class DB {
       res = await attemptBackendLogin(15000);
     } catch (e1: any) {
       console.warn('[AUTH] Primary attempt failed, retrying in 3s for cold start:', e1.message);
-      // ─── LAYER 2: Cold-start retry (wait 3s, then 20s timeout) ─────────────
+      // ─── LAYER 2: Cold-start retry 1 (wait 3s, then 20s timeout) ─────────────
       await new Promise(r => setTimeout(r, 3000));
       try {
         res = await attemptBackendLogin(20000);
       } catch (e2: any) {
-        console.warn('[AUTH] Secondary attempt failed. Activating local fallback.', e2.message);
-        // ─── LAYER 3: Local admin/staff fallback ─────────────────────────────
-        const localUser = tryLocalFallback();
-        if (localUser) {
-          console.warn('[AUTH] Backend unavailable — authenticated locally for staff user.');
-          this.state.currentUser = localUser;
-          this.state.auth = {
-            isLoggedIn: true,
-            role: localUser.role,
-            id: localUser.id,
-            email: localUser.email,
-            name: localUser.name,
-            lastLoginAt: new Date().toISOString(),
-            isPersistent: !!rememberMe
+        console.warn('[AUTH] Secondary attempt failed, retrying one last time in 5s:', e2.message);
+        // ─── LAYER 3: Cold-start retry 2 (wait 5s, then 20s timeout) ─────────────
+        await new Promise(r => setTimeout(r, 5000));
+        try {
+          res = await attemptBackendLogin(20000);
+        } catch (e3: any) {
+          console.warn('[AUTH] Final backend attempt failed. Activating local fallback.', e3.message);
+          // ─── LAYER 4: Local admin/staff fallback ─────────────────────────────
+          const localUser = tryLocalFallback();
+          if (localUser) {
+            console.warn('[AUTH] Backend unavailable — authenticated locally for staff user.');
+            this.state.currentUser = localUser;
+            this.state.auth = {
+              isLoggedIn: true,
+              role: localUser.role,
+              id: localUser.id,
+              email: localUser.email,
+              name: localUser.name,
+              lastLoginAt: new Date().toISOString(),
+              isPersistent: !!rememberMe
+            };
+            if (!rememberMe) sessionStorage.setItem('clickoptix_active_session', 'true');
+            this.state.view = 'admin';
+            this.logAudit('Local Fallback Login', 'Login', `Staff authenticated locally due to backend unavailability.`, localUser.id, localUser.name);
+            await this.commit(undefined, false);
+            this.notify();
+            return { success: true, user: localUser, type: 'staff', offlineMode: true };
+          }
+          // No local match found either
+          return {
+            success: false,
+            message: '⚠️ The server is taking longer than usual to wake up. Please wait 10 seconds and try one last time. (System is warming up)',
           };
-          if (!rememberMe) sessionStorage.setItem('clickoptix_active_session', 'true');
-          this.state.view = 'admin';
-          this.logAudit('Local Fallback Login', 'Login', `Staff authenticated locally due to backend unavailability.`, localUser.id, localUser.name);
-          await this.commit(undefined, false);
-          this.notify();
-          return { success: true, user: localUser, type: 'staff', offlineMode: true };
         }
-        // No local match found either
-        return {
-          success: false,
-          message: '⚠️ Server is starting up (cold start). Please wait 30 seconds and try again.',
-        };
       }
     }
 
     // ─── Process backend response ────────────────────────────────────────────
     if (!res || !res.success) {
+      // ─── LAYER 4: Backend responded but user not found — try local staff fallback ──
+      const localStaff = tryLocalFallback();
+      if (localStaff) {
+        console.warn('[AUTH] Backend returned "not found" — authenticated locally for staff user.');
+        this.state.currentUser = localStaff;
+        this.state.auth = {
+          isLoggedIn: true,
+          role: localStaff.role,
+          id: localStaff.id,
+          email: localStaff.email,
+          name: localStaff.name,
+          lastLoginAt: new Date().toISOString(),
+          isPersistent: !!rememberMe
+        };
+        if (!rememberMe) sessionStorage.setItem('clickoptix_active_session', 'true');
+        this.state.view = 'admin';
+        this.logAudit('Local Staff Login', 'Login', `Staff authenticated locally (backend: ${res?.message}).`, localStaff.id, localStaff.name);
+        await this.commit(undefined, false);
+        this.notify();
+        return { success: true, user: localStaff, type: 'staff', offlineMode: false };
+      }
       this.logAudit('Failed Login', 'Login', `Login failed: ${res?.message} for ${identifier}`);
       return { success: false, message: res?.message || 'Identity verification failed.' };
     }

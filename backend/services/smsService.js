@@ -1,5 +1,5 @@
-const logger = require('../utils/logger');
-const axios = require('axios');
+import logger from '../utils/logger.js';
+import axios from 'axios';
 
 /**
  * Send an SMS using the configured provider
@@ -77,4 +77,4 @@ async function sendCustomSMS(to, message, config) {
     return { success: true, messageId: `CUSTOM-${Date.now()}` };
 }
 
-module.exports = { sendSMS };
+export default { sendSMS };

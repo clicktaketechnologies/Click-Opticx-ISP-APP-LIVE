@@ -1,6 +1,6 @@
-const redis = require('./redisService');
-const OLTService = require('./oltService');
-const logger = require('../utils/logger');
+import redis from './redisService.js';
+import OLTService from './oltService.js';
+import logger from '../utils/logger.js';
 
 class SignalMonitor {
 
@@ -52,4 +52,4 @@ class SignalMonitor {
   }
 }
 
-module.exports = SignalMonitor;
+export default SignalMonitor;

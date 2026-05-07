@@ -1,6 +1,8 @@
-const router = require('express').Router();
-const { protect, restrictTo } = require('../middleware/auth');
-const userController = require('../controllers/userController');
+import express from 'express';
+import { protect, restrictTo } from '../middleware/auth.js';
+import userController from '../controllers/userController.js';
+
+const router = express.Router();
 
 // Signup Request Management
 router.post('/signup-requests/:id/approve', protect, restrictTo('SuperAdmin', 'Admin'), userController.approveSignup);
@@ -14,4 +16,4 @@ router.patch('/:id', protect, restrictTo('SuperAdmin', 'Admin'), userController.
 router.delete('/:id', protect, restrictTo('SuperAdmin'), userController.softDeleteUser);
 router.post('/:id/restore', protect, restrictTo('SuperAdmin'), userController.restoreUser);
 
-module.exports = router;
+export default router;

@@ -1,11 +1,11 @@
-const axios = require('axios');
-const FormData = require('form-data');
+import axios from 'axios';
+import FormData from 'form-data';
 
 /**
  * Mailgun Email Provider
  * API Docs: https://documentation.mailgun.com/en/latest/api-sending.html#sending
  */
-async function send({ to, subject, html, from, fromName }) {
+export async function send({ to, subject, html, from, fromName }) {
   const apiKey = process.env.MAILGUN_API_KEY;
   const domain = process.env.MAILGUN_DOMAIN;
   
@@ -42,4 +42,4 @@ async function send({ to, subject, html, from, fromName }) {
   }
 }
 
-module.exports = { send };
+export default { send };

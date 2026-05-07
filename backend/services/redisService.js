@@ -1,5 +1,5 @@
-const Redis = require('ioredis');
-const logger = require('../utils/logger');
+import Redis from 'ioredis';
+import logger from '../utils/logger.js';
 
 // Fallback Memory Store for environments without Redis
 class MemoryRedis {
@@ -36,10 +36,10 @@ class MemoryRedis {
 let activeClient;
 const redisProxy = new Proxy({}, {
   get: (target, prop) => {
-    if (typeof activeClient[prop] === 'function') {
+    if (activeClient && typeof activeClient[prop] === 'function') {
       return activeClient[prop].bind(activeClient);
     }
-    return activeClient[prop];
+    return activeClient ? activeClient[prop] : undefined;
   }
 });
 
@@ -88,4 +88,4 @@ try {
   activeClient = new MemoryRedis();
 }
 
-module.exports = redisProxy;
+export default redisProxy;

@@ -1,4 +1,4 @@
-const { Client } = require('ssh2');
+import { Client } from 'ssh2';
 
 class VSOLService {
   constructor(device) {
@@ -55,4 +55,4 @@ class VSOLService {
   }
 }
 
-module.exports = VSOLService;
+export default VSOLService;

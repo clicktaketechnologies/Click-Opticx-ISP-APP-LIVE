@@ -45,10 +45,11 @@ import EmergencyLoadDashboard from './components/subscriber/EmergencyLoadDashboa
 import RequestEmergencyLoad from './components/subscriber/RequestEmergencyLoad';
 import EmergencyLoadHistory from './components/subscriber/EmergencyLoadHistory';
 import SubscriberLegalCenter from './components/subscriber/SubscriberLegalCenter';
+import SubscriberZakat from './components/subscriber/SubscriberZakat';
 import SmartKYCPopup from './components/subscriber/SmartKYCPopup';
 import Modal from './components/shared/Modal';
 
-type SubTab = 'home' | 'wallet' | 'packages' | 'billing' | 'profile' | 'namaz' | 'qibla' | 'tasbih' | 'quran' | 'weather' | 'network' | 'insights' | 'support' | 'cash_pay' | 'online_pay' | 'aichat' | 'referral' | 'news' | 'notifs' | 'emergency' | 'emergency-request' | 'emergency-history' | 'credit-score' | 'connection' | 'about-us' | 'live-usage' | 'connected-devices' | 'reset-password' | 'speed-test' | 'ai-control' | 'ai-home' | 'ai-insights' | 'ai-network' | 'ai-risk' | 'ai-suggestions' | 'ai-voice-call' | 'legal';
+type SubTab = 'home' | 'wallet' | 'packages' | 'billing' | 'profile' | 'namaz' | 'qibla' | 'tasbih' | 'quran' | 'zakat' | 'weather' | 'network' | 'insights' | 'support' | 'cash_pay' | 'online_pay' | 'aichat' | 'referral' | 'news' | 'notifs' | 'emergency' | 'emergency-request' | 'emergency-history' | 'credit-score' | 'connection' | 'about-us' | 'live-usage' | 'connected-devices' | 'reset-password' | 'speed-test' | 'ai-control' | 'ai-home' | 'ai-insights' | 'ai-network' | 'ai-risk' | 'ai-suggestions' | 'ai-voice-call' | 'legal';
 
 const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => void }> = ({ state, user, onLogout }) => {
    const [activeTab, setActiveTab] = useState<SubTab>('home');
@@ -108,7 +109,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
     const branding = state.settings.branding;
 
    const isPageEnabled = (id: string) => {
-      if (['home', 'profile', 'ai-home', 'ai-insights', 'ai-network', 'ai-risk', 'ai-suggestions', 'aichat', 'emergency', 'emergency-request', 'emergency-history', 'ai-voice-call', 'legal', 'namaz', 'qibla', 'tasbih', 'quran'].includes(id)) return true;
+      if (['home', 'profile', 'ai-home', 'ai-insights', 'ai-network', 'ai-risk', 'ai-suggestions', 'aichat', 'emergency', 'emergency-request', 'emergency-history', 'ai-voice-call', 'legal', 'namaz', 'qibla', 'tasbih', 'quran', 'zakat'].includes(id)) return true;
       return appPages.find(p => p.id === id)?.enabled ?? false;
    };
 
@@ -116,7 +117,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
       if (!isPageEnabled(tab)) return;
 
       // KYC Enforcement: Block fiscal/network tabs if KYC is not verified
-      const allowedWithoutKYC: SubTab[] = ['home', 'profile', 'support', 'legal', 'notifs', 'namaz', 'quran', 'qibla', 'tasbih'];
+      const allowedWithoutKYC: SubTab[] = ['home', 'profile', 'support', 'legal', 'notifs', 'namaz', 'quran', 'qibla', 'tasbih', 'zakat'];
       if (!allowedWithoutKYC.includes(tab) && user.kyc_status !== 'verified') {
          setKycIntent(tab);
          setIsKYCOpen(true);
@@ -125,7 +126,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
       }
 
       // Approval Enforcement: Mirror KYC rules for pending approvals
-      const allowedWithoutApproval: SubTab[] = ['home', 'profile', 'support', 'legal', 'notifs', 'namaz', 'quran', 'qibla', 'tasbih'];
+      const allowedWithoutApproval: SubTab[] = ['home', 'profile', 'support', 'legal', 'notifs', 'namaz', 'quran', 'qibla', 'tasbih', 'zakat'];
       if (!allowedWithoutApproval.includes(tab) && user.approval_status !== 'approved') {
          alert("Your account is pending admin approval. Some features are restricted.");
          return;
@@ -173,6 +174,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
          case 'qibla': return <SubscriberQibla />;
          case 'tasbih': return <SubscriberTasbih />;
          case 'quran': return <SubscriberQuran />;
+         case 'zakat': return <SubscriberZakat />;
          case 'weather': return <SubscriberWeather />;
          case 'network': return <SubscriberNetwork />;
          case 'insights': return <SubscriberInsights />;

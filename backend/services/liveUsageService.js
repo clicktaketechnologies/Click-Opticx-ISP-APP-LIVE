@@ -1,6 +1,6 @@
-const redis = require('./redisService');
-const MikroTikService = require('./mikrotikService');
-const logger = require('../utils/logger');
+import redis from './redisService.js';
+import MikroTikService from './mikrotikService.js';
+import logger from '../utils/logger.js';
 
 class LiveUsageService {
 
@@ -33,4 +33,4 @@ class LiveUsageService {
   }
 }
 
-module.exports = LiveUsageService;
+export default LiveUsageService;

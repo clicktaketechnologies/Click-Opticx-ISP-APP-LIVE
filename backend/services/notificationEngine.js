@@ -1,26 +1,13 @@
-const firebaseService = require('./firebaseService');
-const smsService = require('./smsService');
-const logger = require('../utils/logger');
-const emailRouter = require('../modules/email/email-router');
+import firebaseService from './firebaseService.js';
+import smsService from './smsService.js';
+import logger from '../utils/logger.js';
+import emailRouter from '../modules/email/email-router.js';
 
 /**
  * Smart Notification Engine
  * Orchestrates delivery through Push (Primary) and SMS (Fallback/Secondary)
- * 
- * @param {object} params - Notification parameters
- * @param {string} params.userId - Recipient user ID
- * @param {string} params.userPhone - Recipient phone number (for SMS)
- * @param {string} params.fcmToken - Firebase device token (for Push)
- * @param {string} params.event - Event trigger (e.g., 'PACKAGE_ACTIVATED')
- * @param {string} params.title - Notification title
- * @param {string} params.body - Notification body/message
- * @param {string} params.email - Recipient email (for Email)
- * @param {string} params.html - HTML body (optional for Email)
- * @param {object} params.config - Global CommunicationSettings
- * @param {object} params.data - Extra data for push payload
- * @returns {Promise<object>} - Delivery report
  */
-async function dispatchNotification({
+export async function dispatchNotification({
     userId,
     userPhone,
     fcmToken,
@@ -134,4 +121,4 @@ async function dispatchNotification({
     }
 }
 
-module.exports = { dispatchNotification };
+export default { dispatchNotification };

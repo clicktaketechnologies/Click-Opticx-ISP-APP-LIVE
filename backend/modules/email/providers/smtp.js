@@ -1,9 +1,9 @@
-const nodemailer = require('nodemailer');
+import nodemailer from 'nodemailer';
 
 /**
  * Generic SMTP Email Provider (used for Gmail etc.)
  */
-async function send({ to, subject, html, from, fromName }) {
+export async function send({ to, subject, html, from, fromName }) {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
 
@@ -32,4 +32,4 @@ async function send({ to, subject, html, from, fromName }) {
   }
 }
 
-module.exports = { send };
+export default { send };

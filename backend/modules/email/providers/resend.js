@@ -1,10 +1,10 @@
-const axios = require('axios');
+import axios from 'axios';
 
 /**
  * Resend Email Provider
  * API Docs: https://resend.com/docs/api-reference/emails/send-email
  */
-async function send({ to, subject, html, from, fromName }) {
+export async function send({ to, subject, html, from, fromName }) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error('RESEND_API_KEY is not configured');
 
@@ -32,4 +32,4 @@ async function send({ to, subject, html, from, fromName }) {
   }
 }
 
-module.exports = { send };
+export default { send };

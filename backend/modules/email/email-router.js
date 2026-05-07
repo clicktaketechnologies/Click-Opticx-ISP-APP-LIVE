@@ -2,18 +2,12 @@
  * email-router.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Simplified Email Orchestrator
- *
- * Handles:
- * 1. Multi-provider priority chain (Gmail -> Resend -> Brevo)
- * 2. Automatic failover on provider failure
- * 3. Rate-limit awareness
- * 4. Delivery status logging
  */
 
-const configManager = require('../../services/config-manager');
-const SmtpAdapter = require('./adapters/smtp-adapter');
-const ResendAdapter = require('./adapters/resend-adapter');
-const logger = require('../../utils/logger');
+import configManager from '../../services/config-manager.js';
+import SmtpAdapter from './adapters/smtp-adapter.js';
+import ResendAdapter from './adapters/resend-adapter.js';
+import logger from '../../utils/logger.js';
 
 class EmailRouter {
   constructor() {
@@ -177,4 +171,4 @@ class EmailRouter {
   }
 }
 
-module.exports = new EmailRouter();
+export default new EmailRouter();

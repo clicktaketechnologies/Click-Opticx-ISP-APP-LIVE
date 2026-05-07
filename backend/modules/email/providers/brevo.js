@@ -1,10 +1,10 @@
-const axios = require('axios');
+import axios from 'axios';
 
 /**
  * Brevo (formerly Sendinblue) Email Provider
  * API Docs: https://developers.brevo.com/reference/sendtransacemail
  */
-async function send({ to, subject, html, from, fromName }) {
+export async function send({ to, subject, html, from, fromName }) {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) throw new Error('BREVO_API_KEY is not configured');
 
@@ -32,4 +32,4 @@ async function send({ to, subject, html, from, fromName }) {
   }
 }
 
-module.exports = { send };
+export default { send };

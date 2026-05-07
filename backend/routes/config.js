@@ -1,41 +1,28 @@
 /**
  * config.js — Runtime Config Routes
- * GET    /api/config          → all configs (admin only)
- * GET    /api/config/:key     → single config value
- * PUT    /api/config/:key     → update config
- * POST   /api/config/:key/rollback → rollback to previous version
- * GET    /api/config/:key/history  → last 10 changes
- * POST   /api/config/test-provider → test a provider connection
  */
 
-const express = require('express');
-const router = express.Router();
-const configManager = require('../services/config-manager');
-const logger = require('../utils/logger');
-const nodemailer = require('nodemailer');
-const cloudinary = require('cloudinary').v2;
+import express from 'express';
+import axios from 'axios';
+import FormData from 'form-data';
+import cloudinary from 'cloudinary';
+import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
+import configManager from '../services/config-manager.js';
+import logger from '../utils/logger.js';
+import { protect, restrictTo } from '../middleware/auth.js';
 
-// ─── Simple Admin Guard ───────────────────────────────────────────────────────
-// In Phase 0 we trust the JWT role from db.ts auth. Phase 1 will add full Supabase RLS.
-function adminGuard(req, res, next) {
-  // For now, check Authorization header has a bearer token
-  // Full role check will be added in Phase 1 auth module
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith('Bearer ')) {
-    return res.status(401).json({ success: false, message: 'Authorization required' });
-  }
-  next();
-}
+const router = express.Router();
+const cloudinaryV2 = cloudinary.v2;
 
 // ─── GET all configs ──────────────────────────────────────────────────────────
-router.get('/', adminGuard, (req, res) => {
+router.get('/', protect, restrictTo('SuperAdmin', 'Admin'), (req, res) => {
   const all = configManager.getAllConfigs();
-  // Strip sensitive values from response (API keys are stored in backend only)
   res.json({ success: true, configs: all });
 });
 
 // ─── GET single config ────────────────────────────────────────────────────────
-router.get('/:key', adminGuard, (req, res) => {
+router.get('/:key', protect, (req, res) => {
   const value = configManager.getConfig(req.params.key);
   if (value === null) {
     return res.status(404).json({ success: false, message: 'Config key not found' });
@@ -44,7 +31,7 @@ router.get('/:key', adminGuard, (req, res) => {
 });
 
 // ─── PUT update config ────────────────────────────────────────────────────────
-router.put('/:key', adminGuard, async (req, res) => {
+router.put('/:key', protect, restrictTo('SuperAdmin', 'Admin'), async (req, res) => {
   try {
     const { key } = req.params;
     const { value, updatedBy } = req.body;
@@ -53,12 +40,12 @@ router.put('/:key', adminGuard, async (req, res) => {
       return res.status(400).json({ success: false, message: 'value is required' });
     }
 
-    const result = await configManager.setConfig(key, value, updatedBy || req.ip);
+    const result = await configManager.setConfig(key, value, updatedBy || req.user.id);
     if (!result.success) {
       return res.status(500).json({ success: false, message: result.error });
     }
 
-    logger.info(`[CONFIG] Updated: "${key}" by ${updatedBy || req.ip}`);
+    logger.info(`[CONFIG] Updated: "${key}" by ${updatedBy || req.user.id}`);
     res.json({ success: true, message: `Config "${key}" updated successfully` });
   } catch (e) {
     logger.error('[CONFIG] Update error:', e.message);
@@ -67,7 +54,7 @@ router.put('/:key', adminGuard, async (req, res) => {
 });
 
 // ─── POST rollback ────────────────────────────────────────────────────────────
-router.post('/:key/rollback', adminGuard, async (req, res) => {
+router.post('/:key/rollback', protect, restrictTo('SuperAdmin', 'Admin'), async (req, res) => {
   try {
     const { historyId } = req.body;
     if (!historyId) {
@@ -95,13 +82,10 @@ router.post('/:key/rollback', adminGuard, async (req, res) => {
 });
 
 // ─── POST clear-cache ─────────────────────────────────────────────────────────
-router.post('/clear-cache', adminGuard, async (req, res) => {
+router.post('/clear-cache', protect, restrictTo('SuperAdmin', 'Admin'), async (req, res) => {
   try {
-    logger.warn(`[CONFIG] Global Cache Purge initiated by ${req.ip}`);
-    
-    // In Phase 0/1, we just reload the configManager to re-fetch from Supabase/Environment
+    logger.warn(`[CONFIG] Global Cache Purge initiated by ${req.user.id}`);
     await configManager.init();
-    
     res.json({ success: true, message: 'Backend cache layers synchronized successfully' });
   } catch (e) {
     logger.error('[CONFIG] Cache purge error:', e.message);
@@ -110,7 +94,7 @@ router.post('/clear-cache', adminGuard, async (req, res) => {
 });
 
 // ─── GET config history ───────────────────────────────────────────────────────
-router.get('/:key/history', adminGuard, async (req, res) => {
+router.get('/:key/history', protect, restrictTo('SuperAdmin', 'Admin'), async (req, res) => {
   try {
     const supabase = configManager.getSupabaseClient();
     if (!supabase) return res.status(503).json({ success: false, message: 'Supabase not available' });
@@ -129,7 +113,7 @@ router.get('/:key/history', adminGuard, async (req, res) => {
 });
 
 // ─── POST test-provider ───────────────────────────────────────────────────────
-router.post('/test-provider', adminGuard, async (req, res) => {
+router.post('/test-provider', protect, restrictTo('SuperAdmin', 'Admin'), async (req, res) => {
   const { providerType, providerId } = req.body;
   const start = Date.now();
 
@@ -150,12 +134,10 @@ router.post('/test-provider', adminGuard, async (req, res) => {
   }
 });
 
-// ─── Email Provider Tests ─────────────────────────────────────────────────────
 async function testEmailProvider(providerId) {
   const adminEmail = process.env.GMAIL_USER || 'clickopticx@gmail.com';
 
   if (providerId === 'resend') {
-    const { Resend } = require('resend');
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { error } = await resend.emails.send({
       from: 'Click Opticx <no-reply@clickopticx.com>',
@@ -168,7 +150,6 @@ async function testEmailProvider(providerId) {
   }
 
   if (providerId === 'brevo') {
-    const axios = require('axios');
     const response = await axios.post('https://api.brevo.com/v3/smtp/email', {
       sender: { name: 'Click Opticx', email: adminEmail },
       to: [{ email: adminEmail }],
@@ -179,23 +160,6 @@ async function testEmailProvider(providerId) {
     });
     if (response.status !== 201) throw new Error(`Brevo returned status ${response.status}`);
     return { success: true, provider: 'brevo', message: 'Test email sent via Brevo' };
-  }
-
-  if (providerId === 'mailgun') {
-    const axios = require('axios');
-    const FormData = require('form-data');
-    const form = new FormData();
-    form.append('from', `Click Opticx <postmaster@${process.env.MAILGUN_DOMAIN}>`);
-    form.append('to', adminEmail);
-    form.append('subject', '✅ Mailgun Provider Test');
-    form.append('text', 'Mailgun integration test from Click Opticx Admin.');
-    const response = await axios.post(
-      `https://api.mailgun.net/v3/${process.env.MAILGUN_DOMAIN}/messages`,
-      form,
-      { auth: { username: 'api', password: process.env.MAILGUN_API_KEY }, headers: form.getHeaders() }
-    );
-    if (response.status !== 200) throw new Error(`Mailgun returned status ${response.status}`);
-    return { success: true, provider: 'mailgun', message: 'Test email sent via Mailgun' };
   }
 
   if (providerId === 'gmail') {
@@ -215,15 +179,14 @@ async function testEmailProvider(providerId) {
   return { success: false, message: `Unknown email provider: ${providerId}` };
 }
 
-// ─── Storage Provider Tests ───────────────────────────────────────────────────
 async function testStorageProvider(providerId) {
   if (providerId === 'cloudinary') {
-    cloudinary.config({
+    cloudinaryV2.config({
       cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
       api_key: process.env.CLOUDINARY_API_KEY,
       api_secret: process.env.CLOUDINARY_API_SECRET,
     });
-    const result = await cloudinary.api.ping();
+    const result = await cloudinaryV2.api.ping();
     if (result.status !== 'ok') throw new Error('Cloudinary ping failed');
     return { success: true, provider: 'cloudinary', message: 'Cloudinary connection OK' };
   }
@@ -238,21 +201,18 @@ async function testStorageProvider(providerId) {
   return { success: false, message: `Unknown storage provider: ${providerId}` };
 }
 
-// ─── GET App Config (Portal/App toggles) ──────────────────────────────────────
-router.get('/app', adminGuard, (req, res) => {
-    const portal_access = configManager.getConfig('portal_access') || true;
-    const app_access = configManager.getConfig('app_access') || true;
+router.get('/app', protect, (req, res) => {
+    const portal_access = configManager.getConfig('portal_access') ?? true;
+    const app_access = configManager.getConfig('app_access') ?? true;
     res.json({ success: true, portal_access, app_access });
 });
 
-// ─── PUT App Config (Portal/App toggles) ──────────────────────────────────────
-router.put('/app', adminGuard, async (req, res) => {
+router.put('/app', protect, restrictTo('SuperAdmin', 'Admin'), async (req, res) => {
     try {
         const { portal_access, app_access } = req.body;
-        if (portal_access !== undefined) await configManager.setConfig('portal_access', portal_access, 'admin');
-        if (app_access !== undefined) await configManager.setConfig('app_access', app_access, 'admin');
+        if (portal_access !== undefined) await configManager.setConfig('portal_access', portal_access, req.user.id);
+        if (app_access !== undefined) await configManager.setConfig('app_access', app_access, req.user.id);
         
-        // Broadcast change via Socket.io if available
         const io = req.app.get('socketio');
         if (io) io.emit('config_updated', { portal_access, app_access });
 
@@ -262,18 +222,4 @@ router.put('/app', adminGuard, async (req, res) => {
     }
 });
 
-// ─── GET Control Plane Pages (Config-driven routing) ──────────────────────────
-router.get('/control-plane/pages', adminGuard, (req, res) => {
-    const pages = [
-        { id: 'dashboard', path: '/admin/dashboard', name: 'Dashboard', icon: 'LayoutDashboard' },
-        { id: 'users', path: '/admin/users', name: 'Users', icon: 'Users' },
-        { id: 'billing', path: '/admin/billing', name: 'Billing', icon: 'CreditCard' },
-        { id: 'network', path: '/admin/network', name: 'Network', icon: 'Network' },
-        { id: 'support', path: '/admin/support', name: 'Support', icon: 'Headset' },
-        { id: 'communication', path: '/admin/communication', name: 'Communication', icon: 'Mail' },
-        { id: 'settings', path: '/admin/settings', name: 'Settings', icon: 'Settings' }
-    ];
-    res.json({ success: true, pages });
-});
-
-module.exports = router;
+export default router;

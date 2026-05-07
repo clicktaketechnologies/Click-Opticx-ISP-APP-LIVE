@@ -1,10 +1,10 @@
-const configManager = require('../../../services/config-manager');
-const fs = require('fs');
+import configManager from '../../../services/config-manager.js';
+import fs from 'fs';
 
 /**
  * Supabase Storage Provider
  */
-async function upload(file, options = {}) {
+export async function upload(file, options = {}) {
   const supabase = configManager.getSupabaseClient();
   if (!supabase) throw new Error('Supabase client not initialized');
 
@@ -36,4 +36,4 @@ async function upload(file, options = {}) {
   }
 }
 
-module.exports = { upload };
+export default { upload };

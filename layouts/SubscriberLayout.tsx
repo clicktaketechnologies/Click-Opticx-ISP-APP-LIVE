@@ -283,6 +283,7 @@ const SubscriberLayout: React.FC<SubscriberLayoutProps> = ({
   activeRoute,
   businessName,
   businessLogo,
+  isImpersonating,
 }) => {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
 

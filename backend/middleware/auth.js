@@ -1,7 +1,8 @@
-const jwt = require('jsonwebtoken');
-const logger = require('../utils/logger');
+import jwt from 'jsonwebtoken';
+import logger from '../utils/logger.js';
+import configManager from '../services/config-manager.js';
 
-const protect = (req, res, next) => {
+export const protect = (req, res, next) => {
     let token;
 
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -22,7 +23,7 @@ const protect = (req, res, next) => {
     }
 };
 
-const restrictTo = (...roles) => {
+export const restrictTo = (...roles) => {
     return (req, res, next) => {
         // If impersonating and trying to access restricted admin routes
         if (req.user.scope === 'user_only' && roles.includes('Admin')) {
@@ -37,8 +38,7 @@ const restrictTo = (...roles) => {
     };
 };
 
-const enforceSettings = (feature) => {
-    const configManager = require('../services/config-manager');
+export const enforceSettings = (feature) => {
     return (req, res, next) => {
         const key = feature === 'portal' ? 'portal_access' : 'app_access';
         const isEnabled = configManager.getConfig(key) ?? true;
@@ -53,7 +53,7 @@ const enforceSettings = (feature) => {
     };
 };
 
-const requireKYC = async (req, res, next) => {
+export const requireKYC = async (req, res, next) => {
     try {
         if (!req.user || !req.user.id) {
             return res.status(401).json({ success: false, message: 'Not authorized' });
@@ -64,7 +64,6 @@ const requireKYC = async (req, res, next) => {
             return next();
         }
 
-        const configManager = require('../services/config-manager');
         const supabase = configManager.getSupabaseClient();
         
         const { data: user, error } = await supabase
@@ -92,4 +91,4 @@ const requireKYC = async (req, res, next) => {
     }
 };
 
-module.exports = { protect, restrictTo, enforceSettings, requireKYC };
+export default { protect, restrictTo, enforceSettings, requireKYC };

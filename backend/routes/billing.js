@@ -1,18 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const logger = require('../utils/logger');
-// Assuming we have a ledger service or direct DB access
-const { createClient } = require('@supabase/supabase-js');
+import express from 'express';
+import billingService, { InvoiceState } from '../services/billingService.js';
+import logger from '../utils/logger.js';
+import { protect, restrictTo } from '../middleware/auth.js';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const router = express.Router();
 
 /**
  * @route GET /api/billing/ledger
  * @desc Fetch double-entry ledger records
  */
-router.get('/ledger', async (req, res) => {
+router.get('/ledger', protect, restrictTo('SuperAdmin', 'Admin', 'Accountant'), async (req, res) => {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await billingService.supabase
             .from('ledger_entries')
             .select('*')
             .order('created_at', { ascending: false })
@@ -27,30 +26,52 @@ router.get('/ledger', async (req, res) => {
 });
 
 /**
- * @route POST /api/billing/ledger
- * @desc Create a double-entry ledger record
+ * @route POST /api/billing/payment
+ * @desc Process an invoice payment
  */
-router.post('/ledger', async (req, res) => {
-    const { debit_account, credit_account, amount, description, reference_type, reference_id } = req.body;
-    
+router.post('/payment', protect, async (req, res) => {
+    const { invoiceId, amount, method } = req.body;
     try {
-        // Implementation of double-entry logic (debit one, credit another)
-        // This usually involves a stored procedure in Supabase for atomicity
-        const { data, error } = await supabase.rpc('create_ledger_entry', {
-            p_debit_acc: debit_account,
-            p_credit_acc: credit_account,
-            p_amount: amount,
-            p_desc: description,
-            p_ref_type: reference_type,
-            p_ref_id: reference_id
-        });
-
-        if (error) throw error;
-        res.json({ success: true, data });
+        const result = await billingService.processPayment(invoiceId, amount, method);
+        res.json({ success: true, data: result });
     } catch (error) {
-        logger.error(`[BILLING-LEDGER-POST] Error: ${error.message}`);
         res.status(500).json({ success: false, message: error.message });
     }
 });
 
-module.exports = router;
+/**
+ * @route POST /api/billing/loan
+ * @desc Request an emergency loan
+ */
+router.post('/loan', protect, async (req, res) => {
+    const userId = req.user.id;
+    const { amount } = req.body;
+    try {
+        const result = await billingService.issueEmergencyLoan(userId, amount);
+        res.json({ success: true, data: result });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+/**
+ * @route GET /api/billing/invoices
+ * @desc Fetch invoices for a user
+ */
+router.get('/invoices', protect, async (req, res) => {
+    const userId = req.query.userId || req.user.id;
+    try {
+        const { data, error } = await billingService.supabase
+            .from('invoices')
+            .select('*')
+            .eq('user_id', userId)
+            .order('due_date', { ascending: false });
+
+        if (error) throw error;
+        res.json({ success: true, data });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+export default router;

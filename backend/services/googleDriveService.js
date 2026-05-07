@@ -1,6 +1,6 @@
-const { google } = require('googleapis');
-const fs = require('fs');
-const logger = require('../utils/logger');
+import { google } from 'googleapis';
+import fs from 'fs';
+import logger from '../utils/logger.js';
 
 class GoogleDriveService {
     constructor() {
@@ -73,4 +73,4 @@ class GoogleDriveService {
     }
 }
 
-module.exports = new GoogleDriveService();
+export default new GoogleDriveService();

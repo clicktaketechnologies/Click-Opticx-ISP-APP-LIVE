@@ -1,12 +1,12 @@
-const admin = require('firebase-admin');
-const fs = require('fs');
-const logger = require('../utils/logger');
-const storageRouter = require('../modules/storage/storage-router');
-const configManager = require('../services/config-manager');
+import admin from 'firebase-admin';
+import fs from 'fs';
+import logger from '../utils/logger.js';
+import storageRouter from '../modules/storage/storage-router.js';
+import configManager from '../services/config-manager.js';
 
 const isFirebaseWriteEnabled = () => process.env.FIREBASE_MODE !== 'readonly';
 
-exports.uploadKYC = async (req, res) => {
+export const uploadKYC = async (req, res) => {
     try {
         const { userId, userName } = req.body;
         const uploadedFiles = req.files;
@@ -69,7 +69,7 @@ exports.uploadKYC = async (req, res) => {
     }
 };
 
-exports.getKYCList = async (req, res) => {
+export const getKYCList = async (req, res) => {
     try {
         const supabase = configManager.getSupabaseClient();
         const { data, error } = await supabase
@@ -86,7 +86,7 @@ exports.getKYCList = async (req, res) => {
     }
 };
 
-exports.approveKYC = async (req, res) => {
+export const approveKYC = async (req, res) => {
     try {
         const { userId, requestId } = req.body;
         const supabase = configManager.getSupabaseClient();
@@ -142,7 +142,7 @@ exports.approveKYC = async (req, res) => {
     }
 };
 
-exports.rejectKYC = async (req, res) => {
+export const rejectKYC = async (req, res) => {
     try {
         const { userId, reason } = req.body;
         const supabase = configManager.getSupabaseClient();
@@ -169,7 +169,7 @@ exports.rejectKYC = async (req, res) => {
 };
 
 // GET /api/kyc/status?userId=xxx — Subscriber polls their own KYC status
-exports.getKYCStatus = async (req, res) => {
+export const getKYCStatus = async (req, res) => {
     try {
         const userId = req.query.userId || req.user?.id;
         if (!userId) return res.status(400).json({ success: false, message: 'User ID required' });
@@ -200,7 +200,7 @@ exports.getKYCStatus = async (req, res) => {
 };
 
 // GET /api/kyc/queue — Admin gets pending KYC queue
-exports.getKYCQueue = async (req, res) => {
+export const getKYCQueue = async (req, res) => {
     try {
         const supabase = configManager.getSupabaseClient();
         const status = req.query.status || 'pending';
@@ -223,4 +223,6 @@ exports.getKYCQueue = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
+export default { uploadKYC, getKYCList, approveKYC, rejectKYC, getKYCStatus, getKYCQueue };
 

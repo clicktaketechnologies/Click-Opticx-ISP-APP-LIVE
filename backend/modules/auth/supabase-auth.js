@@ -1,13 +1,13 @@
-const configManager = require('../../services/config-manager');
-const logger = require('../../utils/logger');
-const bcrypt = require('bcryptjs');
+import configManager from '../../services/config-manager.js';
+import logger from '../../utils/logger.js';
+import bcrypt from 'bcryptjs';
 
 /**
  * Supabase Auth Service
  * Wraps Supabase Auth operations for the ISP app
  */
 
-async function signUp({ email, password, phone, metadata }) {
+export async function signUp({ email, password, phone, metadata }) {
   const supabase = configManager.getSupabaseClient();
   if (!supabase) throw new Error('Supabase client not initialized');
 
@@ -24,7 +24,7 @@ async function signUp({ email, password, phone, metadata }) {
   return data;
 }
 
-async function signIn({ email, phone, password }) {
+export async function signIn({ email, phone, password }) {
   const supabase = configManager.getSupabaseClient();
   if (!supabase) throw new Error('Supabase client not initialized');
 
@@ -35,7 +35,7 @@ async function signIn({ email, phone, password }) {
   return data;
 }
 
-async function resetPassword(email) {
+export async function resetPassword(email) {
   const supabase = configManager.getSupabaseClient();
   if (!supabase) throw new Error('Supabase client not initialized');
 
@@ -47,7 +47,7 @@ async function resetPassword(email) {
   return data;
 }
 
-async function updatePassword(newPassword) {
+export async function updatePassword(newPassword) {
   const supabase = configManager.getSupabaseClient();
   if (!supabase) throw new Error('Supabase client not initialized');
 
@@ -63,7 +63,7 @@ async function updatePassword(newPassword) {
  * Syncs a user to the Supabase 'users' table
  * This is used for the dual-write pattern during migration
  */
-async function syncUserToPostgres(userData) {
+export async function syncUserToPostgres(userData) {
   const supabase = configManager.getSupabaseClient();
   if (!supabase) return;
 
@@ -88,7 +88,7 @@ async function syncUserToPostgres(userData) {
   }
 }
 
-module.exports = {
+export default {
   signUp,
   signIn,
   resetPassword,

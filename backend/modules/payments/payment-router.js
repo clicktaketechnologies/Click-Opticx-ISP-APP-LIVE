@@ -2,17 +2,12 @@
  * payment-router.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Central Payment Orchestrator
- *
- * Routes payments to the best available gateway based on:
- * 1. Admin priority
- * 2. Real-time health (reputation scores)
- * 3. Automatic fallback if primary fails
  */
 
-const configManager = require('../../services/config-manager');
-const StripeAdapter = require('./adapters/stripe-adapter');
-const JazzCashAdapter = require('./adapters/jazzcash-adapter');
-const logger = require('../../utils/logger');
+import configManager from '../../services/config-manager.js';
+import StripeAdapter from './adapters/stripe-adapter.js';
+import JazzCashAdapter from './adapters/jazzcash-adapter.js';
+import logger from '../../utils/logger.js';
 
 class PaymentRouter {
   constructor() {
@@ -83,7 +78,7 @@ class PaymentRouter {
   /** Get healthy gateways sorted by priority */
   getAvailableGateways(criteria = {}) {
     return this.gateways
-      .filter(g => g.enabled && g.reputation_score > 30)
+      .filter(g => g.enabled && (g.reputation_score || 100) > 30)
       .filter(g => {
         if (criteria.mode && g.mode !== criteria.mode) return false;
         return true;
@@ -164,4 +159,4 @@ class PaymentRouter {
   }
 }
 
-module.exports = new PaymentRouter();
+export default new PaymentRouter();

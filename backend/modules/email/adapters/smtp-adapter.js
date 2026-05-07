@@ -1,8 +1,8 @@
 /**
  * smtp-adapter.js
  */
-const nodemailer = require('nodemailer');
-const logger = require('../../../utils/logger');
+import nodemailer from 'nodemailer';
+import logger from '../../../utils/logger.js';
 
 class SmtpAdapter {
   constructor(config) {
@@ -44,4 +44,4 @@ class SmtpAdapter {
   }
 }
 
-module.exports = SmtpAdapter;
+export default SmtpAdapter;

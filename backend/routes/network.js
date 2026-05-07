@@ -1,16 +1,19 @@
-const express = require('express');
+import express from 'express';
+import logger from '../utils/logger.js';
+
 const router = express.Router();
-const logger = require('../utils/logger');
-// Ensure to implement SSE for live monitoring
+
+/**
+ * @route GET /api/network/monitoring/live
+ * @desc Server-Sent Events for live monitoring
+ */
 router.get('/monitoring/live', (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
     
-    // Send initial status
     res.write(`data: ${JSON.stringify({ status: 'connected', type: 'init' })}\n\n`);
     
-    // Simulate real-time data
     const interval = setInterval(() => {
         const bandwidth = {
             rx: Math.random() * 100,
@@ -26,14 +29,15 @@ router.get('/monitoring/live', (req, res) => {
     });
 });
 
+/**
+ * @route POST /api/network/speedtest/start
+ * @desc Initiate speedtest telemetry
+ */
 router.post('/speedtest/start', (req, res) => {
     const io = req.app.get('socketio');
     const { userId } = req.body;
     
     logger.info(`[SPEEDTEST] Starting live telemetry stream for User: ${userId}`);
-    
-    // In production, this would interface with LibreSpeed or Ookla CLI.
-    // Here we simulate the real-time stream.
     
     res.json({ success: true, message: 'Test initiated' });
 
@@ -65,6 +69,10 @@ router.post('/speedtest/start', (req, res) => {
     }, 200);
 });
 
+/**
+ * @route GET /api/network/diagnostics/run
+ * @desc Health diagnostics for system dependencies
+ */
 router.get('/diagnostics/run', async (req, res) => {
     logger.info('[DIAGNOSTICS] Running manual health check...');
     
@@ -76,7 +84,6 @@ router.get('/diagnostics/run', async (req, res) => {
         mikrotik: process.env.MIKROTIK_IP ? "OK" : "NAS_UNREACHABLE"
     };
 
-    // Simulate network latency for UX feel
     setTimeout(() => {
         res.json({
             success: Object.values(results).every(v => v === "OK"),
@@ -88,14 +95,12 @@ router.get('/diagnostics/run', async (req, res) => {
 router.post('/olt/:id/connect', (req, res) => {
     const { id } = req.params;
     logger.info(`[OLT] Testing connection for ${id}...`);
-    // Connect logic
     res.json({ success: true, message: "Connected to OLT successfully" });
 });
 
 router.post('/olt/:id/refresh', (req, res) => {
     const { id } = req.params;
     logger.info(`[OLT] Pulling ONU data for ${id}...`);
-    // Refresh logic
     res.json({ success: true, data: { status: "Active", uptime: "24d 1h" } });
 });
 
@@ -103,8 +108,7 @@ router.post('/olt/:id/reset-onu-password', (req, res) => {
     const { id } = req.params;
     const { onuId, newPassword } = req.body;
     logger.info(`[OLT] Resetting ONU password for ${id}/${onuId}...`);
-    // Reset via TR-069/CLI
     res.json({ success: true, message: "ONU Password Reset Successfully" });
 });
 
-module.exports = router;
+export default router;

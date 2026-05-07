@@ -1,8 +1,8 @@
-const logger = require('../utils/logger');
-const configManager = require('../services/config-manager');
-const admin = require('firebase-admin');
-const emailRouter = require('../modules/email/email-router');
-const paymentRouter = require('../modules/payments/payment-router');
+import logger from '../utils/logger.js';
+import configManager from '../services/config-manager.js';
+import admin from 'firebase-admin';
+import emailRouter from '../modules/email/email-router.js';
+import paymentRouter from '../modules/payments/payment-router.js';
 
 class HealthMonitor {
     constructor(io) {
@@ -58,7 +58,7 @@ class HealthMonitor {
     }
 
     async checkAIHealth() {
-        const keys = configManager.getConfig('technicalKeys') || {};
+        const keys = (await configManager.getConfig('technicalKeys')) || {};
         const hasGemini = !!keys.geminiApiKey;
         return {
             status: hasGemini ? 'healthy' : 'degraded',
@@ -147,4 +147,4 @@ class HealthMonitor {
     }
 }
 
-module.exports = HealthMonitor;
+export default HealthMonitor;

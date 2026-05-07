@@ -2,12 +2,9 @@
  * response-mapper.js
  * ─────────────────────────────────────────────────────────────────────────────
  * Config-Driven Integration Mapper
- *
- * Transforms 3rd-party (Stripe, JazzCash, etc.) responses into
- * standardized internal formats based on DB-stored mappings.
  */
 
-const configManager = require('./config-manager');
+import configManager from './config-manager.js';
 
 class ResponseMapper {
   constructor() {
@@ -94,4 +91,4 @@ class ResponseMapper {
   }
 }
 
-module.exports = new ResponseMapper();
+export default new ResponseMapper();

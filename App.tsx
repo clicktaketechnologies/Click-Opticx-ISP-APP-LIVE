@@ -345,7 +345,8 @@ const App: React.FC = () => {
       });
     });
 
-    // 2. Initial Background Audit
+    // 2. Initial Background Audit & Proactive Backend Wake
+    db.wakeBackend();
     db.auditOverdueLoads();
     db.reconcileData('entire');
 
@@ -355,6 +356,12 @@ const App: React.FC = () => {
       db.auditOverdueLoads();
       db.reconcileData('entire');
     }, 5 * 60 * 1000);
+
+    // 4. Background Keep-Alive (every 14 mins to prevent Render sleep)
+    const keepAliveInterval = setInterval(() => {
+      console.log('[SYSTEM] Sending keep-alive heartbeat to prevent server sleep...');
+      db.wakeBackend();
+    }, 14 * 60 * 1000);
 
     // 4. Initialize Dual-Write Adapter (Phase 1-2)
     initDualWrite();
@@ -411,6 +418,7 @@ const App: React.FC = () => {
     return () => {
       unsubscribe();
       clearInterval(cronInterval);
+      clearInterval(keepAliveInterval);
       if (authChannel) authChannel.close();
     };
   }, []);

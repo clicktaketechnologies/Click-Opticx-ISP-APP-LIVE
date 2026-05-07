@@ -1,14 +1,14 @@
-const sharp = require('sharp');
-const fs = require('fs');
-const crypto = require('crypto');
-const path = require('path');
-const logger = require('../../utils/logger');
+import sharp from 'sharp';
+import fs from 'fs';
+import crypto from 'crypto';
+import path from 'path';
+import logger from '../../utils/logger.js';
 
 /**
  * File Processor
  * Handles compression, resizing and checksum calculation
  */
-async function processFile(file, config = {}) {
+export async function processFile(file, config = {}) {
   const { compression_quality = 85, max_dimension = 2000 } = config;
   
   const ext = path.extname(file.originalname).toLowerCase();
@@ -61,4 +61,4 @@ function calculateChecksum(filePath) {
   });
 }
 
-module.exports = { processFile };
+export default { processFile };

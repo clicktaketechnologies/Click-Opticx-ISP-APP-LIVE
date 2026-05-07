@@ -1,4 +1,4 @@
-const OLTService = require('./oltService');
+import OLTService from './oltService.js';
 
 class ONUDiscoveryService {
 
@@ -29,4 +29,4 @@ class ONUDiscoveryService {
   }
 }
 
-module.exports = ONUDiscoveryService;
+export default ONUDiscoveryService;

@@ -49,6 +49,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const tagline = branding.tagline || 'Welcome to the Next Gen Internet';
    const developer = branding.developer || 'ClickTake Technologies';
 
+   React.useEffect(() => {
+      // Proactively wake the backend if it's sleeping (mitigate Render cold starts)
+      db.wakeBackend();
+   }, []);
+
    const handleLogin = async (e: React.FormEvent) => {
       e.preventDefault();
       setError(null);
