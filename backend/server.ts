@@ -85,7 +85,23 @@ configManager.init().then(async () => {
 });
 
 // --- Middleware ---
-app.use(cors({ origin: '*', credentials: true })); // Temporary for recovery
+const allowedOrigins = [
+    'https://isp-click-opticx.web.app',
+    'https://isp-click-opticx.firebaseapp.com',
+    'http://localhost:3000',
+    'http://localhost:5173'
+];
+
+app.use(cors({ 
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }, 
+    credentials: true 
+}));
 app.use(express.json());
 
 // --- IMMEDIATE AUTH PATH (Before Limiter) ---
