@@ -6,7 +6,7 @@ services:
     region: singapore
     rootDir: backend
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: tsx server.ts
     envVars:
       - key: PORT
         value: 5000
