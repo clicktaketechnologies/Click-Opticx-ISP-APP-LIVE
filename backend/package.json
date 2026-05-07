@@ -3,13 +3,12 @@
     "version": "1.0.0",
     "description": "Backend middleware for ISP infrastructure management",
     "type": "module",
-    "main": "server.js",
+    "main": "server.ts",
     "scripts": {
-        "start": "node server.js",
-        "start:ts": "ts-node server.ts",
+        "start": "tsx server.ts",
+        "start:ts": "tsx server.ts",
         "build": "tsc",
-        "dev": "nodemon server.js",
-        "dev:ts": "nodemon --exec ts-node server.ts",
+        "dev": "tsx --watch server.ts",
         "test": "jest"
     },
     "dependencies": {
@@ -44,7 +43,8 @@
         "stripe": "^22.1.0",
         "telnet-client": "^2.2.13",
         "web-push": "^3.6.7",
-        "winston": "^3.8.2"
+        "winston": "^3.8.2",
+        "tsx": "^4.21.0"
     },
     "devDependencies": {
         "jest": "^29.5.0",
