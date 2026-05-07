@@ -4,7 +4,8 @@ services:
     env: node
     plan: free
     region: singapore
-    buildCommand: npm install && npm run build
+    rootDir: backend
+    buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: PORT
