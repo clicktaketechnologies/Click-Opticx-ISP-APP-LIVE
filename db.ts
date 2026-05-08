@@ -1888,6 +1888,10 @@ class DB {
     return () => { this.listeners = this.listeners.filter(x => x !== l); };
   }
 
+  onConfigChange(path: string, l: (state: AppState) => void) {
+    return this.onStateChange(l);
+  }
+
   onAuditLog(hook: (log: AuditLog) => void) {
     this.auditHooks.push(hook);
   }

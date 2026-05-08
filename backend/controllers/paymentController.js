@@ -147,10 +147,19 @@ exports.handleWebhook = async (req, res) => {
             logger.info(`[WEBHOOK] Successfully processed ${amount} for User ${userId} via ${gatewayId}`);
 
             if (io) {
+                // Notify Admin Dashboard
                 io.to('admin_dashboard').emit('payment_update', {
                     ...paymentData,
                     newBalance,
                     source: 'Webhook'
+                });
+
+                // Notify Specific User for Instant UI Update
+                io.to(`user_${userId}`).emit('payment_status_update', {
+                    transactionId,
+                    amount,
+                    status: 'Completed',
+                    newBalance
                 });
             }
         }

@@ -130,12 +130,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       try {
          const res = await db.submitSignupRequest(signupData);
          if (res.success) {
-            // New Flow: Always login immediately if signup was successful
-            const loginRes = await onLogin(signupData.username, signupData.password);
-            if (!loginRes.success) {
-               setError("Signup successful, but auto-login failed. Please sign in manually.");
-               setView('login');
-            }
+            // New Flow: Always redirect to login and show verification message
+            alert(res.message || "Account created! Please check your email for the verification link.");
+            setView('login');
          } else {
             setError(res.message || 'Signup failed.');
          }

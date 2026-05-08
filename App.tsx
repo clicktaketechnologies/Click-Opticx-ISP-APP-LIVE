@@ -105,6 +105,8 @@ const CommCenterV2 = lazyWithRetry(() => import('./pages/v2/CommCenterV2'));
 const AIAutomationV2 = lazyWithRetry(() => import('./pages/v2/AIAutomationV2'));
 const SpeedTest = lazyWithRetry(() => import('./pages/SpeedTest'));
 const TrashManagement = lazyWithRetry(() => import('./pages/TrashManagement'));
+const VerifyEmail = lazyWithRetry(() => import('./pages/VerifyEmail'));
+
 
 
 const FinanceDashboard = lazyWithRetry(() => import('./pages/FinanceDashboard'));
@@ -486,8 +488,16 @@ const App: React.FC = () => {
 const renderApp = () => {
     const enableNewUI = true; // Forced true for immediate live rollout
 
-
-    if (dbState.view === 'login') return <Login onLogin={handleLogin} />;
+    // ── 1. UNAUTHENTICATED ROUTES (Login, Verify, Reset) ────────────────────
+    if (!authState.isLoggedIn && dbState.view === 'login') {
+      return (
+        <Routes>
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={<Login onLogin={handleLogin} />} />
+          <Route path="*" element={<Login onLogin={handleLogin} />} />
+        </Routes>
+      );
+    }
 
     // ── 2. SUBSCRIBER PORTAL — Admin-Isolated Shell ──────────────────────────
     if (authState.role === 'Subscriber' || authState.role === 'Customer') {

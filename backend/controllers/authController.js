@@ -44,13 +44,26 @@ export const signup = async (req, res) => {
             phone: phone,
             password: hashedPassword,
             role: assignedRole,
-            status: 'Active',
+            status: 'PENDING_VERIFICATION',
             created_at: new Date().toISOString()
         };
 
         // 2. Supabase Primary Write
         const { error: sbError } = await supabase.from('users').insert([newUser]);
         if (sbError) throw sbError;
+
+        // 3. Queue Verification Email
+        if (email) {
+            const verificationToken = jwt.sign({ id: userId, type: 'email_verification' }, process.env.JWT_SECRET || 'secret', { expiresIn: '24h' });
+            const verificationLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
+            
+            await emailWorker.queueEmail({
+                to: email,
+                subject: 'Verify Your ISP Account',
+                html: `<h3>Welcome to Click Opticx</h3><p>Please verify your account by clicking the link: <a href="${verificationLink}">${verificationLink}</a></p>`
+            });
+        }
+
 
         // 3. Supabase Auth Registration
         if (email) {
@@ -74,12 +87,17 @@ export const signup = async (req, res) => {
             }
         }
 
-        res.status(201).json({ success: true, userId });
+        res.status(201).json({ 
+            success: true, 
+            message: "Verification required. Check your inbox to activate your account.",
+            userId 
+        });
     } catch (error) {
         logger.error(`[SIGNUP] Error: ${error.message}`);
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
 
 export const login = async (req, res) => {
     try {
@@ -139,6 +157,22 @@ if (!isMatch && password === user.password) {
 
         if (!isMatch) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
+        }
+
+        // --- STATUS CHECK ENFORCEMENT ---
+        if (user.status === 'PENDING_VERIFICATION') {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Account not verified. Please check your email for activation link.',
+                status: 'PENDING_VERIFICATION'
+            });
+        }
+
+        if (user.status === 'SUSPENDED' || user.status === 'Locked') {
+            return res.status(403).json({ 
+                success: false, 
+                message: `Account is ${user.status}. Please contact support.` 
+            });
         }
 
         const token = jwt.sign(
@@ -208,19 +242,20 @@ export const forgotPassword = async (req, res) => {
             user = staffUser;
         }
         
-        if (!user) return res.status(404).json({ success: false, message: 'Email not found' });
+        if (user) {
+            const resetToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+            const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
 
-        const resetToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+            // Send via new Email Infrastructure
+            await emailWorker.queueEmail({
+                to: email,
+                subject: 'Password Reset Request',
+                html: `<h3>Hello ${user.name}</h3><p>Click the link to reset your password: <a href="${resetLink}">${resetLink}</a></p>`
+            });
+        }
 
-        // Send via new Email Infrastructure
-        await emailWorker.queueEmail({
-            to: email,
-            subject: 'Password Reset Request',
-            html: `<h3>Hello ${user.name}</h3><p>Click the link to reset your password: <a href="${resetLink}">${resetLink}</a></p>`
-        });
-
-        res.json({ success: true, message: 'Reset link sent to your email.' });
+        // Always return success to prevent user enumeration
+        res.json({ success: true, message: 'If an account exists with this email, a reset link has been sent.' });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -335,18 +370,42 @@ export const logout = async (req, res) => {
     }
 };
 
-export const verifySession = async (req, res) => {
+export const verifyEmail = async (req, res) => {
     try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer')) {
-            return res.status(401).json({ success: false, valid: false });
-        }
-        const token = authHeader.split(' ')[1];
+        const { token } = req.query;
+        if (!token) return res.status(400).json({ success: false, message: 'Verification token required' });
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-        res.json({ success: true, valid: true, user: { id: decoded.id, role: decoded.role } });
+        if (decoded.type !== 'email_verification') throw new Error('Invalid token type');
+
+        const supabase = configManager.getSupabaseClient();
+        
+        // Update user status
+        const { error } = await supabase
+            .from('users')
+            .update({ status: 'Active' })
+            .eq('id', decoded.id);
+
+        if (error) throw error;
+
+        logger.info(`[VERIFY-EMAIL] User ${decoded.id} activated.`);
+        res.json({ success: true, message: 'Account successfully verified. You can now login.' });
     } catch (error) {
-        res.status(401).json({ success: false, valid: false, message: 'Token invalid or expired' });
+        logger.error(`[VERIFY-EMAIL] Error: ${error.message}`);
+        res.status(400).json({ success: false, message: 'Invalid or expired verification link.' });
     }
 };
 
-export default { signup, login, socialHandshake, forgotPassword, completeReset, loginAs, refreshToken, logout, verifySession };
+export const checkVerificationStatus = async (req, res) => {
+    try {
+        const { userId } = req.query;
+        const supabase = configManager.getSupabaseClient();
+        const { data: user } = await supabase.from('users').select('status').eq('id', userId).single();
+        
+        res.json({ success: true, status: user?.status || 'NotFound' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export default { signup, login, socialHandshake, forgotPassword, completeReset, loginAs, refreshToken, logout, verifySession, verifyEmail, checkVerificationStatus };

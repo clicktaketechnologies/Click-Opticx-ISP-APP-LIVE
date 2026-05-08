@@ -11,6 +11,9 @@ router.post('/login-as', authController.loginAs);
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/social-handshake', authController.socialHandshake);
 router.post('/complete-reset', authController.completeReset);
+router.get('/verify-email', authController.verifyEmail);
+router.get('/check-verification-status', authController.checkVerificationStatus);
+
 
 // Session endpoints
 router.post('/refresh', authController.refreshToken);
