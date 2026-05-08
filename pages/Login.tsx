@@ -52,6 +52,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    React.useEffect(() => {
       // Proactively wake the backend if it's sleeping (mitigate Render cold starts)
       db.wakeBackend();
+
+      // Handle Password Reset Redirects
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      const email = params.get('email');
+      if (token) {
+         setResetToken(token);
+         if (email) setResetIdentifier(email);
+         setView('reset_finalize');
+      }
    }, []);
 
    const handleLogin = async (e: React.FormEvent) => {
@@ -183,7 +193,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       if (verify.success || resetToken === 'BIOMETRIC_APPROVED') {
          const userAccount = await db.findUserForReset(resetIdentifier);
          if (userAccount) {
-            await db.updateCustomerPassword(userAccount.id, newPassword);
+            await db.updateCustomerPassword(userAccount.id, newPassword, resetToken);
             setIsProcessing(false);
             setView('login');
             setError(null);

@@ -1483,35 +1483,48 @@ class DB {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      const docSnap = await getDoc(docRef);
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s budget for multi-shard load
+
+      const shards = [
+        'master_state',
+        'users_shard',
+        'finance_shard',
+        'ops_shard',
+        'notifications_shard'
+      ];
+
+      const results = await Promise.all(shards.map(s => getDoc(doc(this.firestore!, 'registry', s))));
       clearTimeout(timeoutId);
 
-      if (docSnap.exists()) {
-        const cloudData = docSnap.data() as Partial<AppState>;
-        if (cloudData.users && Array.isArray(cloudData.users)) {
-          // --- 🛡️ SMART MERGE: Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
-          const cloudIds = new Set(cloudData.users.map(u => u.id));
-          const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !this.recentlyDeletedIds.has(u.id));
-          
-          // Filter out cloud users that were just deleted locally
-          const validCloudUsers = cloudData.users.filter(u => !this.recentlyDeletedIds.has(u.id));
+      let mergedState = { ...this.state };
 
-          this.state.users = [
-            ...validCloudUsers,
-            ...localOnlyUsers
-          ];
+      results.forEach(snap => {
+        if (snap.exists()) {
+          const shardData = snap.data();
+          if (snap.id === 'users_shard') {
+            // --- 🛡️ SMART MERGE: Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
+            if (shardData.users && Array.isArray(shardData.users)) {
+              const cloudIds = new Set(shardData.users.map((u: any) => u.id));
+              const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !this.recentlyDeletedIds.has(u.id));
+              const validCloudUsers = shardData.users.filter((u: any) => !this.recentlyDeletedIds.has(u.id));
+              mergedState.users = [...validCloudUsers, ...localOnlyUsers];
+            }
+            if (shardData.signupRequests && Array.isArray(shardData.signupRequests)) {
+              const cloudSignupIds = new Set(shardData.signupRequests.map((r: any) => r.id));
+              const localOnlySignups = this.state.signupRequests.filter(r => !cloudSignupIds.has(r.id));
+              mergedState.signupRequests = [...shardData.signupRequests, ...localOnlySignups];
+            }
+          } else {
+            mergedState = { ...mergedState, ...shardData };
+          }
         }
-        if (cloudData.signupRequests && Array.isArray(cloudData.signupRequests)) {
-           const cloudSignupIds = new Set(cloudData.signupRequests.map(r => r.id));
-           const localOnlySignups = this.state.signupRequests.filter(r => !cloudSignupIds.has(r.id));
-           this.state.signupRequests = [...cloudData.signupRequests, ...localOnlySignups];
-        }
-        
-        const { users, signupRequests, ...otherCloudData } = cloudData;
-        this.state = { ...this.state, ...otherCloudData };
-        this.reconcileIdentity();
-        this.patchState();
-      }
+      });
+
+      this.state = mergedState;
+      this.reconcileIdentity();
+      this.patchState();
 
       clearTimeout(fallbackTimer);
       this.initialized = true;
@@ -1756,6 +1769,8 @@ class DB {
       if (this.state.ledger?.length > 300) this.state.ledger = this.state.ledger.slice(-300);
       if (this.state.invoices?.length > 300) this.state.invoices = this.state.invoices.slice(-300);
       if (this.state.notifications?.length > 100) this.state.notifications = this.state.notifications.slice(-100);
+      if (this.state.securityLogs?.length > 100) this.state.securityLogs = this.state.securityLogs.slice(-100);
+      if (this.state.signupRequests?.length > 100) this.state.signupRequests = this.state.signupRequests.slice(-100);
 
       // --- SESSION PERSISTENCE CONTROL ---
       if (this.state.auth && this.state.auth.isPersistent === false) {
@@ -1778,14 +1793,31 @@ class DB {
     const performCloudWrite = async () => {
       if (this.firestore && this.initialized) {
         try {
-          const docRef = doc(this.firestore, 'registry', 'master_state');
-          const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
-          const sanitizedState = JSON.parse(JSON.stringify(cloudSafeState));
-          await setDoc(docRef, sanitizedState);
+          // Split state into shards to overcome 1MB limit
+          const { 
+            users, signupRequests,
+            ledger, invoices, topupRequests, packageRequests,
+            auditLogs, aiLogs, nocAlerts, emergencyLoads, deliveryLogs,
+            notifications,
+            currentUser, originalAdminUser, isImpersonating, connectionStatus, // Exclude session-local state
+            ...masterData 
+          } = this.state;
+
+          // Sanitize master data
+          const sanitizedMaster = JSON.parse(JSON.stringify(masterData));
+
+          await Promise.all([
+            setDoc(doc(this.firestore, 'registry', 'master_state'), sanitizedMaster),
+            setDoc(doc(this.firestore, 'registry', 'users_shard'), { users, signupRequests }),
+            setDoc(doc(this.firestore, 'registry', 'finance_shard'), { ledger, invoices, topupRequests, packageRequests }),
+            setDoc(doc(this.firestore, 'registry', 'ops_shard'), { auditLogs, aiLogs, nocAlerts, emergencyLoads, deliveryLogs }),
+            setDoc(doc(this.firestore, 'registry', 'notifications_shard'), { notifications })
+          ]);
+
           this.recentlyDeletedIds.clear();
-          console.log('[DB-CLOUD] Master State Synced to Firebase');
+          console.log('[DB-CLOUD] Sharded State Handshake Success');
         } catch (e) {
-          console.error('[DB-CLOUD] Master Sync Error:', e);
+          console.error('[DB-CLOUD] Sharded Sync Error:', e);
         } finally {
           this.commitTimer = null;
           this.notify();

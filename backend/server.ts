@@ -34,6 +34,8 @@ import storageRoutes from './routes/storage.js';
 import migrationRoutes from './routes/migration.js';
 import brandingRoutes from './routes/branding.js';
 import trashRoutes from './routes/trash.js';
+import adminRoutes from './routes/admin.js';
+
 
 
 
@@ -132,6 +134,7 @@ apiV1.use('/storage', storageRoutes);
 apiV1.use('/migration', migrationRoutes);
 apiV1.use('/branding', brandingRoutes);
 apiV1.use('/trash', trashRoutes);
+apiV1.use('/admin', adminRoutes);
 
 
 

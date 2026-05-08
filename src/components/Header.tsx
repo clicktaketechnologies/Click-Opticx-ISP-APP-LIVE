@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   Bell, Search, UserCircle, X, CheckCircle, Info, AlertTriangle, 
   Menu, LogOut, Zap, ShieldAlert, Moon, Sun, ChevronDown, 
-  Settings, User, CreditCard, BellRing
+  Settings, User, CreditCard, BellRing, Database
 } from 'lucide-react';
 import { AppState, Role } from '../../types';
 import { db } from '../../db';
@@ -200,7 +200,7 @@ const Header: React.FC<HeaderProps> = ({
             <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${showProfileMenu ? 'rotate-180' : ''}`} />
           </button>
 
-          {showProfileMenu && (
+            {showProfileMenu && (
             <div className="absolute right-0 mt-4 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl z-[200] overflow-hidden animate-in fade-in slide-in-from-top-2 p-2">
               <button 
                 onClick={() => { onProfileClick(); setShowProfileMenu(false); }}
@@ -209,15 +209,43 @@ const Header: React.FC<HeaderProps> = ({
                 <User size={18} className="text-slate-400 group-hover:text-indigo-500" />
                 <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Admin Profile</span>
               </button>
-              <button className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 dark:hover:bg-white/5 rounded-2xl transition-all group">
+              
+              <button 
+                onClick={() => { if (onNavigate) onNavigate('fiscal-monitor'); setShowProfileMenu(false); }}
+                className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 dark:hover:bg-white/5 rounded-2xl transition-all group"
+              >
                 <CreditCard size={18} className="text-slate-400 group-hover:text-indigo-500" />
                 <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Billing Overview</span>
               </button>
-              <button className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 dark:hover:bg-white/5 rounded-2xl transition-all group">
+
+              <button 
+                onClick={() => { if (onNavigate) onNavigate('system-config'); setShowProfileMenu(false); }}
+                className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 dark:hover:bg-white/5 rounded-2xl transition-all group"
+              >
                 <Settings size={18} className="text-slate-400 group-hover:text-indigo-500" />
                 <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Preferences</span>
               </button>
+
               <div className="h-px bg-slate-100 dark:bg-white/5 my-2 mx-4" />
+
+              <button 
+                onClick={() => { if (onNavigate) onNavigate('migration-dashboard'); setShowProfileMenu(false); }}
+                className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 dark:hover:bg-white/5 rounded-2xl transition-all group"
+              >
+                <Database size={18} className="text-slate-400 group-hover:text-indigo-500" />
+                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">App Architecture</span>
+              </button>
+
+              <button 
+                onClick={() => { if (onNavigate) onNavigate('ai-control'); setShowProfileMenu(false); }}
+                className="w-full flex items-center gap-3 p-4 hover:bg-slate-50 dark:hover:bg-white/5 rounded-2xl transition-all group"
+              >
+                <Zap size={18} className="text-slate-400 group-hover:text-indigo-500" />
+                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Command Center</span>
+              </button>
+
+              <div className="h-px bg-slate-100 dark:bg-white/5 my-2 mx-4" />
+              
               <button 
                 onClick={onLogout}
                 className="w-full flex items-center gap-3 p-4 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-2xl transition-all group"

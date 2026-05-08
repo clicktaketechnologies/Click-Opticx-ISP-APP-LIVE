@@ -195,6 +195,15 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
                     <ActionSquare icon={MessageSquare} label="Message" color="blue" />
                     <ActionSquare icon={ShieldAlert} label="Alert" color="rose" />
                     <ActionSquare icon={Repeat} label="Reset Pwd" color="slate" />
+                    <ActionSquare 
+                      icon={Eye} 
+                      label="Login As" 
+                      color="indigo" 
+                      onClick={() => {
+                        db.impersonateUser(selectedUser.id);
+                        setIsDetailOpen(false);
+                      }} 
+                    />
                 </div>
             </div>
         )}
@@ -231,14 +240,18 @@ const InfoCard = ({ icon: Icon, label, value }: any) => (
     </div>
 );
 
-const ActionSquare = ({ icon: Icon, label, color }: any) => {
+const ActionSquare = ({ icon: Icon, label, color, onClick }: any) => {
     const colors: any = {
         blue: 'bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white',
         rose: 'bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white',
         slate: 'bg-slate-50 text-slate-600 hover:bg-slate-600 hover:text-white',
+        indigo: 'bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white',
     };
     return (
-        <button className={`flex flex-col items-center gap-3 p-6 rounded-3xl transition-all group ${colors[color]}`}>
+        <button 
+          onClick={onClick}
+          className={`flex-1 flex flex-col items-center gap-3 p-6 rounded-3xl transition-all group ${colors[color]}`}
+        >
             <Icon size={24} className="group-hover:scale-110 transition-transform" />
             <span className="text-[9px] font-black uppercase tracking-widest">{label}</span>
         </button>

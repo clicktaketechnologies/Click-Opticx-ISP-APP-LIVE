@@ -25,10 +25,10 @@ const CustomerPortal: React.FC<{ state: AppState }> = ({ state }) => {
    const searchResults = useMemo(() => {
       if (query.length < 2) return [];
       return state.users.filter(u =>
-         !u.deleted && (
-            u.name.toLowerCase().includes(query.toLowerCase()) ||
-            u.phone.includes(query) ||
-            u.connectionId.toLowerCase().includes(query.toLowerCase()) ||
+         u && !u.deleted && (
+            (u.name || '').toLowerCase().includes(query.toLowerCase()) ||
+            (u.phone || '').includes(query) ||
+            (u.connectionId || '').toLowerCase().includes(query.toLowerCase()) ||
             (u.cnic && u.cnic.includes(query)) ||
             (u.username && u.username.toLowerCase().includes(query.toLowerCase())) ||
             (u.macIp && u.macIp.toLowerCase().includes(query.toLowerCase()))
