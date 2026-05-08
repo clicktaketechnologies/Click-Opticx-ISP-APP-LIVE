@@ -103,6 +103,9 @@ const FiscalHubV2 = lazyWithRetry(() => import('./pages/v2/FiscalHubV2'));
 const NetworkPlaneV2 = lazyWithRetry(() => import('./pages/v2/NetworkPlaneV2'));
 const CommCenterV2 = lazyWithRetry(() => import('./pages/v2/CommCenterV2'));
 const AIAutomationV2 = lazyWithRetry(() => import('./pages/v2/AIAutomationV2'));
+const SpeedTest = lazyWithRetry(() => import('./pages/SpeedTest'));
+const TrashManagement = lazyWithRetry(() => import('./pages/TrashManagement'));
+
 
 const FinanceDashboard = lazyWithRetry(() => import('./pages/FinanceDashboard'));
 const NotificationControl = lazyWithRetry(() => import('./pages/admin/NotificationControl'));

@@ -1796,3 +1796,15 @@ export interface ArchiveRecord {
 }
 
 
+export interface BrandingAsset {
+  id: string;
+  url: string;
+  public_id: string;
+  file_name: string;
+  file_size: number;
+  file_type: string;
+  is_deleted: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at?: string;
+}

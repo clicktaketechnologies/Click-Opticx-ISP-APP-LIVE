@@ -285,7 +285,7 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
                             </div>
                             <div className="min-w-0">
                               <div className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">{user.name}</div>
-                              <div className="text-xs text-slate-400 mt-0.5 truncate">{user.email || user.id.substr(0,12)}</div>
+                              <div className="text-xs text-slate-400 mt-0.5 truncate">{user?.email || user.id.substr(0,12)}</div>
                             </div>
                           </div>
                         </td>

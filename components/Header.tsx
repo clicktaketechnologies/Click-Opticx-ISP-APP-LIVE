@@ -38,7 +38,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
     // ADMIN TERMINAL FILTER: Only show admin or system audience notifications
     return state.notifications.filter(n => 
       (n.audience === 'admin' || n.audience === 'system') && 
-      (n.targetId === 'all' || n.targetId === user.email)
+      (n.targetId === 'all' || n.targetId === user?.email)
     );
   }, [state.notifications, user]);
 
@@ -55,7 +55,9 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
   };
 
   const handleMarkAllRead = () => {
-    db.markAllNotificationsRead(user.email, 'admin');
+    if (user?.email) {
+      db.markAllNotificationsRead(user.email, 'admin');
+    }
   };
 
   const renderConnectionBadge = () => {

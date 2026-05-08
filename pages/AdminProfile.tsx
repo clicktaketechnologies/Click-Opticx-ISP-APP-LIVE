@@ -31,12 +31,21 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
       setIsUploading(true);
       const reader = new FileReader();
       reader.onloadend = async () => {
+        const onPhotoChange = async (base64String: string) => {
+          if (!user?.email) return;
+          try {
+            const photoUrl = await db.uploadMedia(`profiles/admin-${user.email}-${Date.now()}`, base64String);
+            await db.updateStaff(user.email, { profileImage: photoUrl } as any);
+            db.logNotification(user.email, 'success', 'Profile Photo Updated', 'Your identity avatar has been synchronized.');
+          } catch (err) {
+            console.error(err);
+          }
+        };
         try {
           const base64String = reader.result as string;
-          const photoUrl = await db.uploadMedia(`profiles/admin-${user.email}-${Date.now()}`, base64String);
-          await db.updateStaff(user.email, { profileImage: photoUrl } as any);
+          await onPhotoChange(base64String);
           if (state.currentUser) {
-             state.currentUser.profileImage = photoUrl;
+             (state.currentUser as any).profileImage = base64String;
           }
           setSuccess(true);
           setTimeout(() => setSuccess(false), 3000);
@@ -53,6 +62,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.email) return;
     setIsSaving(true);
     
     // Update the staff record in the database
@@ -146,7 +156,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                    Sync your local registry with the cloud master. Forces a manual state refresh.
                 </p>
                 <button
-                   onClick={() => db.clearProfileCache(user.email)}
+                   onClick={() => user?.email && db.clearProfileCache(user.email)}
                    className="w-full py-4 bg-amber-50 text-amber-600 border border-amber-100 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-100 transition-all active:scale-95 shadow-sm"
                 >
                    Clear Personal Cache

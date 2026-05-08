@@ -588,7 +588,7 @@ const Dashboard: React.FC<{
                   </td>
                   <td className="text-right">
                     <span className="text-sm font-black text-slate-900 tabular-nums">
-                      {state.settings.currency} {(state.invoices.find(i => i.userId === user.email && i.status === PaymentStatus.UNPAID)?.dueAmount || 0).toLocaleString()}
+                      {state.settings.currency} {(state.invoices.find(i => i.userId === user?.email && i.status === PaymentStatus.UNPAID)?.dueAmount || 0).toLocaleString()}
                     </span>
                   </td>
                   <td className="text-center pr-6">

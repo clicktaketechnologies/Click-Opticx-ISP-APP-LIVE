@@ -78,7 +78,7 @@ export const InvoiceTemplate: React.FC<InvoiceTemplateProps> = ({ user, invoice,
                </h3>
                <div className="space-y-1">
                   <p className="text-xl font-black text-slate-900 uppercase italic">{user.name}</p>
-                  <p className="text-xs font-bold text-slate-500 lowercase tracking-tight">{user.email}</p>
+                  <p className="text-xs font-bold text-slate-500 lowercase tracking-tight">{user?.email}</p>
                   <p className="text-xs font-bold text-slate-500">{user.phone}</p>
                   <p className="text-xs font-bold text-slate-500 italic mt-2 opacity-60 leading-relaxed">{user.address || 'Standard Service Location'}</p>
                </div>

@@ -32,6 +32,10 @@ import healthRoutes from './routes/health.js';
 import configRoutes from './routes/config.js';
 import storageRoutes from './routes/storage.js';
 import migrationRoutes from './routes/migration.js';
+import brandingRoutes from './routes/branding.js';
+import trashRoutes from './routes/trash.js';
+
+
 
 // ESM dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -126,6 +130,10 @@ apiV1.use('/health', healthRoutes);
 apiV1.use('/config', configRoutes);
 apiV1.use('/storage', storageRoutes);
 apiV1.use('/migration', migrationRoutes);
+apiV1.use('/branding', brandingRoutes);
+apiV1.use('/trash', trashRoutes);
+
+
 
 app.use('/api/v1', apiV1);
 app.use('/api', apiV1);

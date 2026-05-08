@@ -316,7 +316,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 </div>
                 <div className="flex flex-col overflow-hidden">
                   <span className="text-xs font-black text-white truncate leading-none mb-1">
-                    {state.auth?.email?.split('@')[0].toUpperCase()}
+                    {state.auth?.email?.split('@')?.[0]?.toUpperCase() || 'SYSTEM'}
                   </span>
                   <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest truncate">
                     {role || 'Authorized'}

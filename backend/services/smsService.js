@@ -15,12 +15,10 @@ async function sendSMS(to, message, config) {
         throw new Error('Recipient and message are required for SMS');
     }
 
-    logger.info(`[SMS] Sending via ${smsProvider || 'Mock'} to ${to}`);
+    logger.info(`[SMS] Sending via ${smsProvider} to ${to}`);
 
-    // If simulation mode or no provider configured
-    if (!smsProvider || smsProvider === 'Mock') {
-        logger.info(`[SMS-MOCK] Message transmitted to ${to}: ${message}`);
-        return { success: true, messageId: `MOCK-SMS-${Date.now()}` };
+    if (!smsProvider) {
+        throw new Error('SMS Provider not configured. Production requires a valid gateway.');
     }
 
     try {

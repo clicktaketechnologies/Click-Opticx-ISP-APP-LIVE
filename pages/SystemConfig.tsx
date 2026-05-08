@@ -3,8 +3,10 @@ import { db } from '../db';
 import { TechnicalKeys, PushConfig, Role } from '../types';
 import { 
   Database, Shield, Cpu, Bell, Save, Key, Globe, Mail, 
-  Settings, Server, Zap, Lock, Eye, EyeOff, CheckCircle2, AlertCircle 
+  Settings, Server, Zap, Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Image as ImageIcon 
 } from 'lucide-react';
+import BrandingMediaManager from '../components/admin/BrandingMediaManager';
+
 
 const SystemConfig: React.FC = () => {
   const [dbState, setDbState] = useState(db.getState());
@@ -213,6 +215,19 @@ const SystemConfig: React.FC = () => {
               <InputField label="PayPal Client ID" value={(techKeys as any).paypalClientId || ''} onChange={(v:any) => setTechKeys({...techKeys, paypalClientId: v})} icon={Key} type="password" />
               <InputField label="PayPal Secret" value={(techKeys as any).paypalSecret || ''} onChange={(v:any) => setTechKeys({...techKeys, paypalSecret: v})} icon={Key} type="password" />
             </div>
+          </div>
+
+          <div className="bg-slate-50 p-8 rounded-[3rem] border border-slate-200 space-y-8">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="p-3 bg-blue-600/10 rounded-2xl text-blue-600">
+                <ImageIcon size={24} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Visual Identity & Assets</h3>
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Global Branding Registry</p>
+              </div>
+            </div>
+            <BrandingMediaManager />
           </div>
         </div>
 

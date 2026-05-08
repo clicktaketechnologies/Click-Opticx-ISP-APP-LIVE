@@ -24,14 +24,7 @@ router.get('/stock', async (req, res) => {
         res.json({ success: true, stock: defaultStock });
     } catch (e) {
         logger.error(`[INVENTORY] Fetch error: ${e.message}`);
-        // Fallback to mock for local testing if Firestore fails
-        res.json({
-            success: true,
-            stock: [
-                { id: 1, item: "MikroTik hAP ac2 (Mock)", quantity: 15, price: 12000 },
-                { id: 2, item: "ONU Huawei EG8141A5 (Mock)", quantity: 3, price: 4500 }
-            ]
-        });
+        res.status(500).json({ success: false, message: 'Inventory registry unreachable.' });
     }
 });
 

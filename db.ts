@@ -1331,6 +1331,11 @@ class DB {
         }
       });
 
+      this.socket.on('branding_media_updated', (data: any) => {
+        console.log('[SOCKET] Branding media updated:', data);
+        this.notify();
+      });
+
       this.socket.on('global-wipe', (data: any) => {
         console.warn('[SECURITY] Global Wipe Protocol Received via Socket:', data.timestamp);
         this.executeLocalWipe();
@@ -2490,6 +2495,94 @@ async logoutImpersonation() {
         return { success: true };
       }
       return { success: false, message: data.message };
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  // --- Branding Media Control ---
+  async getBrandingMedia() {
+    try {
+      const res = await fetch(`${this.backendUrl}/api/branding/media`, {
+        headers: { 
+          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        }
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  async uploadBrandingMedia(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch(`${this.backendUrl}/api/branding/media`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        },
+        body: formData
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  async deleteBrandingMedia(id: string) {
+    try {
+      const res = await fetch(`${this.backendUrl}/api/branding/media?id=${id}`, {
+        method: 'DELETE',
+        headers: { 
+          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        }
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  // --- Trash Management ---
+  async getTrash() {
+    try {
+      const res = await fetch(`${this.backendUrl}/api/trash`, {
+        headers: { 
+          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        }
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  async restoreFromTrash(id: string) {
+    try {
+      const res = await fetch(`${this.backendUrl}/api/trash/${id}/restore`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        }
+      });
+      return await res.json();
+    } catch (e: any) {
+      return { success: false, message: e.message };
+    }
+  }
+
+  async purgeFromTrash(id: string) {
+    try {
+      const res = await fetch(`${this.backendUrl}/api/trash/${id}`, {
+        method: 'DELETE',
+        headers: { 
+          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        }
+      });
+      return await res.json();
     } catch (e: any) {
       return { success: false, message: e.message };
     }
