@@ -1,10 +1,11 @@
-const express = require('express');
+import express from 'express';
+import adminController from '../controllers/adminController.js';
+import { protect, restrictTo } from '../middleware/auth.js';
+
 const router = express.Router();
-const adminController = require('../controllers/adminController');
-const { protect, restrictTo } = require('../middleware/auth');
 
 // Impersonation Flow
 router.post('/impersonate/:userId', protect, restrictTo('Admin', 'SuperAdmin'), adminController.impersonate);
 router.post('/impersonate/logout', protect, adminController.logoutImpersonation);
 
-module.exports = router;
+export default router;

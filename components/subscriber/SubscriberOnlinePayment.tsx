@@ -67,6 +67,13 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
                    throw new Error(result.message || 'Unknown registry error from backend.');
                 }
 
+                if (result.checkoutUrl) {
+                   setHandshakeStep('Redirecting to Secure Gateway...');
+                   window.location.href = result.checkoutUrl;
+                   return;
+                }
+
+                // If no checkoutUrl, assume offline/manual gateway logic
                 success = true;
                 finalGateway = gateway;
                 transactionId = result.transactionId || `TRX-${Math.random().toString(36).substring(7)}`;
@@ -82,12 +89,8 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
             throw lastError;
          }
 
-         setHandshakeStep('Syncing Ledger Node...');
-         await db.processTopup('GATEWAY', user.id, 'user', total);
-         await db.activatePackage(user.id, selectedPkgId);
-
-         db.logNotification(user.id, 'success', 'Package Provisioned', `Link established via ${finalGateway.name}. Fiscal action completed. Ext: ${transactionId}`);
-
+         // Offline manual fallback (if any gateway actually returns success without a URL)
+         setHandshakeStep('Request Pending...');
          setIsProcessing(false);
          onSuccess();
       } catch (err: any) {

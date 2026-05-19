@@ -26,7 +26,7 @@ exports.processPayment = async (req, res) => {
             return res.status(400).json(result);
         }
 
-        // Standard ledgering logic (as before, but enhanced)
+        // Standard ledgering logic: Record the intent as Pending
         const transactionId = result.transactionId || `TXN-${Date.now()}`;
         const paymentData = {
             id: transactionId,
@@ -34,7 +34,7 @@ exports.processPayment = async (req, res) => {
             user_name: userName || 'Customer',
             amount: parseFloat(amount),
             method: result.gateway || 'Unknown',
-            status: 'Completed',
+            status: 'Pending',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
         };
@@ -42,16 +42,11 @@ exports.processPayment = async (req, res) => {
         // Supabase Primary Write
         await supabase.from('payments').insert([paymentData]);
 
-        // Update User Balance
-        const { data: user } = await supabase.from('users').select('balance').eq('id', userId).single();
-        const newBalance = (user?.balance || 0) + parseFloat(amount);
-        await supabase.from('users').update({ balance: newBalance }).eq('id', userId);
-
         // Notify Admin Dashboard
         if (io) {
             io.to('admin_dashboard').emit('payment_update', {
                 ...paymentData,
-                newBalance
+                newBalance: 'Pending'
             });
         }
 
@@ -68,9 +63,9 @@ exports.processPayment = async (req, res) => {
         return res.json({ 
             success: true, 
             transactionId, 
-            newBalance,
+            checkoutUrl: result.checkoutUrl,
             gateway: result.gateway,
-            message: 'Payment processed and routed successfully.' 
+            message: 'Checkout session created.' 
         });
 
     } catch (error) {

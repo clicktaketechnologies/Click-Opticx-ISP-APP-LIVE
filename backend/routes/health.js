@@ -21,7 +21,7 @@ async function checkAIHealth() {
     return {
         status: hasGemini ? 'healthy' : 'degraded',
         latency_ms: Math.floor(Math.random() * 200) + 50,
-        model: 'Gemini-1.5-Pro',
+        model: 'Gemini-1.5-Flash',
         last_verified: new Date().toISOString()
     };
 }
@@ -43,7 +43,7 @@ async function checkDBHealth() {
         const hasSupabase = !!supabase;
 
         return {
-            status: (firebaseStatus === 'connected' && hasSupabase) ? 'healthy' : 'degraded',
+            status: hasSupabase ? 'healthy' : 'unhealthy',
             firebase: firebaseStatus,
             supabase: hasSupabase ? 'connected' : 'disconnected',
             latency_ms: Date.now() - start,

@@ -50,7 +50,7 @@ export const runPingTest = async (): Promise<{ping: number, jitter: number, pack
   for (let i = 0; i < 5; i++) {
     const start = performance.now();
     try {
-      const response = await fetch('https://speed.cloudflare.com/__down?bytes=0', { cache: 'no-store', mode: 'cors' });
+      const response = await fetch('/api/speedtest/ping', { cache: 'no-store' });
       if (!response.ok) throw new Error();
       samples.push(Math.floor(performance.now() - start));
     } catch (e) {
@@ -76,12 +76,10 @@ export const runPingTest = async (): Promise<{ping: number, jitter: number, pack
 };
 
 export const runDownloadTest = async (onProgress: (m: number) => void): Promise<number> => {
-  // Download ~10MB
-  const size = 10 * 1024 * 1024;
-  const url = `https://speed.cloudflare.com/__down?bytes=${size}`;
+  const url = `/api/speedtest/download`;
   const start = performance.now();
   try {
-    const response = await fetch(url, { cache: 'no-store', mode: 'cors' });
+    const response = await fetch(url, { cache: 'no-store' });
     if (!response.body) throw new Error('No body');
     const reader = response.body.getReader();
     let received = 0;
@@ -99,22 +97,10 @@ export const runDownloadTest = async (onProgress: (m: number) => void): Promise<
     }
     const end = performance.now();
     const duration = (end - start) / 1000;
-    const speedBps = (size * 8) / duration;
+    const speedBps = (received * 8) / duration;
     return Number((speedBps / 1000000).toFixed(1));
   } catch (e) {
-     // Realistic fallback simulation if CORS/network fails
-     return new Promise(resolve => {
-         let p = 0;
-         const interval = setInterval(() => {
-             p += 10;
-             const val = 45 + Math.random() * 10;
-             onProgress(Number(val.toFixed(1)));
-             if (p >= 100) {
-                 clearInterval(interval);
-                 resolve(Number((48 + Math.random() * 5).toFixed(1)));
-             }
-         }, 150);
-     });
+     return 0;
   }
 };
 
@@ -122,10 +108,10 @@ export const runUploadTest = async (onProgress: (m: number) => void): Promise<nu
    // Upload 2MB
    const size = 2 * 1024 * 1024;
    const blob = new Blob([new ArrayBuffer(size)]);
-   const url = 'https://speed.cloudflare.com/__up';
+   const url = '/api/speedtest/upload';
    const start = performance.now();
    
-   return new Promise((resolve) => {
+   return new Promise((resolve, reject) => {
       try {
         const xhr = new XMLHttpRequest();
         xhr.upload.onprogress = (event) => {
@@ -146,26 +132,16 @@ export const runUploadTest = async (onProgress: (m: number) => void): Promise<nu
                const speedBps = (size * 8) / duration;
                resolve(Number((speedBps / 1000000).toFixed(1)));
            } else {
-               throw new Error('Upload failed');
+               reject(new Error('Upload failed'));
            }
         };
         xhr.onerror = () => {
-           throw new Error('Network error');
+           reject(new Error('Network error'));
         };
         xhr.open('POST', url, true);
         xhr.send(blob);
       } catch (e) {
-          // Fallback simulation
-          let p = 0;
-          const interval = setInterval(() => {
-             p += 10;
-             const val = 20 + Math.random() * 5;
-             onProgress(Number(val.toFixed(1)));
-             if (p >= 100) {
-                 clearInterval(interval);
-                 resolve(Number((22 + Math.random() * 3).toFixed(1)));
-             }
-         }, 100);
+          reject(e);
       }
    });
 };

@@ -12,6 +12,7 @@ router.post('/forgot-password', authController.forgotPassword);
 router.post('/social-handshake', authController.socialHandshake);
 router.post('/complete-reset', authController.completeReset);
 router.get('/verify-email', authController.verifyEmail);
+router.post('/verify-otp', authController.verifyOtp);
 router.get('/check-verification-status', authController.checkVerificationStatus);
 
 

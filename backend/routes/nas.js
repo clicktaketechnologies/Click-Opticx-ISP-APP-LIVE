@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const nasController = require('../controllers/nasController');
+import * as nasController from '../controllers/nasController.js';
 
 // Sync a subscriber's credentials to the MikroTik router
 router.post('/nas/sync', nasController.syncSubscriber);
@@ -14,4 +14,4 @@ router.post('/nas/health', nasController.checkHealth);
 // Fetch live router statistics
 router.get('/nas/stats', nasController.getNasStats);
 
-module.exports = router;
+export default router;

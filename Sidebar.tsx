@@ -133,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
         </div>
         <div>
           <h1 className="text-xl font-black tracking-tighter uppercase italic text-white leading-none">{businessName || 'CLICK OPTICX'}</h1>
-          <p className="text-[8px] font-black text-indigo-400 tracking-[0.4em] uppercase opacity-70 mt-2">v4.0 Core Engine</p>
+          <p className="text-[8px] font-black text-indigo-400 tracking-[0.4em] uppercase opacity-70 mt-2">v9.5.4 Core Engine</p>
         </div>
       </div>
 
@@ -172,16 +172,16 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
                       onClick={() => onNavigate(item.id)}
                       className={`w-full flex items-center justify-between px-6 py-4 rounded-[1.5rem] transition-all duration-300 group relative ${isActive
                         ? 'bg-indigo-600 text-white shadow-2xl shadow-indigo-600/20 active:scale-95'
-                        : 'text-slate-500 hover:bg-white/[0.03] hover:text-slate-100'
+                        : 'text-slate-500 hover:bg-indigo-600/10 hover:text-indigo-500'
                         }`}
                     >
                       <div className="flex items-center gap-4 relative z-10">
                         <item.icon 
-                          size={18} 
+                          size={24} 
                           strokeWidth={isActive ? 3 : 2}
-                          className={`${isActive ? 'text-white' : 'text-slate-700 group-hover:text-indigo-400'} transition-colors`} 
+                          className={`${isActive ? 'text-white' : 'text-slate-500 group-hover:text-indigo-500'} transition-colors`} 
                         />
-                        <span className={`font-black text-[11px] uppercase italic tracking-wider ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-200'}`}>
+                        <span className={`font-black text-[11px] uppercase italic tracking-wider ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-indigo-500'}`}>
                           {item.label}
                         </span>
                       </div>

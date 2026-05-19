@@ -146,7 +146,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-8 space-y-10 animate-in slide-in-from-right-4 duration-500">
        <div className="space-y-2">
           <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Confidence Scoring Architecture</h3>
-          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Protocol: Decision Gating v4.0</p>
+          <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Protocol: Decision Gating v9.5.4</p>
        </div>
 
        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -348,7 +348,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
              </div>
              <div>
                 <h3 className="text-xl font-black text-white uppercase italic tracking-tighter leading-none">Transparency Ledger</h3>
-                <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.4em] mt-1">Audit Trail v4.2 • Registry Handshakes: {state.aiLogs.length}</p>
+                <p className="text-[9px] text-slate-500 font-black uppercase tracking-[0.4em] mt-1">Audit Trail v9.5.4 • Registry Handshakes: {state.aiLogs.length}</p>
              </div>
           </div>
           <div className="flex gap-3">

@@ -1,6 +1,7 @@
 import { Worker } from 'bullmq';
 import logger from '../../utils/logger.js';
 import emailRouter from './email-router.js';
+import nodemailer from 'nodemailer';
 
 const EMAIL_QUEUE_NAME = 'manual-email-reminders';
 
@@ -48,13 +49,13 @@ export function initWorker() {
   return worker;
 }
 
+import { addEmailToQueue } from './queue.js';
+
 export const queueEmail = async (data) => {
-    // This should ideally use a Queue instance from BullMQ
-    // For now, if Redis is missing, we fallback to direct send
     try {
-        await emailRouter.sendEmail(data);
+        await addEmailToQueue(data);
     } catch (e) {
-        logger.error(`[EMAIL-QUEUE-FALLBACK] Error: ${e.message}`);
+        logger.error(`[EMAIL-WORKER] Failed to add email to queue: ${e.message}`);
     }
 };
 

@@ -157,7 +157,7 @@ export const Modal: React.FC<ModalProps> = ({
         {/* BODY */}
         <div
           className={`${noPadding ? '' : 'px-5 sm:px-8 py-4 sm:py-6'} overflow-y-auto custom-scrollbar flex-1`}
-          style={{ minHeight: 0 }}
+          style={{ minHeight: 0, maxHeight: '80vh' }}
         >
           {message && (
             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed mb-6 italic border-l-2 border-blue-500 pl-4">{message}</p>
@@ -177,14 +177,14 @@ export const Modal: React.FC<ModalProps> = ({
                 <button
                   onClick={onClose}
                   disabled={isLoading}
-                  className="px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-30 border border-slate-200 shadow-sm shadow-slate-100"
+                  className="h-10 px-4 py-2 shrink-0 rounded-xl font-bold text-sm text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-30 border border-slate-200 shadow-sm shadow-slate-100"
                 >
                   {cancelLabel}
                 </button>
                 <button
                   onClick={handleConfirm}
                   disabled={isLoading}
-                  className={`px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest text-white flex items-center justify-center gap-3 transition-all active:scale-95 disabled:opacity-50 shadow-xl ${
+                  className={`h-10 px-4 py-2 shrink-0 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 shadow-xl ${
                     confirmDanger || type === 'danger'
                       ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200'
                       : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'

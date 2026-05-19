@@ -28,9 +28,10 @@ const SubscriberAIChat: React.FC<{ user: ISPUser, state: AppState }> = ({ user, 
     setAiError(null);
 
     try {
-      if (!process.env.API_KEY) throw new Error("API_KEY_MISSING");
+      const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY;
+      if (!apiKey) throw new Error("API_KEY_MISSING");
 
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey });
       
       const activeOutage = state.nocEvents.find(e => e.area === user.area && e.status === 'Active');
       const currentPkg = state.packages.find(p => p.id === user.packageId);
@@ -50,7 +51,7 @@ const SubscriberAIChat: React.FC<{ user: ISPUser, state: AppState }> = ({ user, 
       STYLE: Industrial, professional, uppercase where appropriate.`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-1.5-flash',
         contents: userMsg,
         config: { systemInstruction: context }
       });

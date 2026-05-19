@@ -1,5 +1,5 @@
-const { Client } = require('ssh2');
-const logger = require('../utils/logger');
+import { Client } from 'ssh2';
+import logger from '../utils/logger.js';
 
 // ─── BRAND COMMAND TEMPLATES ──────────────────────────────────────────────────
 const BRAND_TEMPLATES = {
@@ -91,7 +91,7 @@ function classifyError(error) {
 }
 
 // ─── OLT Health / Presence ────────────────────────────────────────────────────
-exports.checkHealth = async (req, res) => {
+export const checkHealth = async (req, res) => {
     const { olt } = req.body;
     if (!olt || !olt.ip) return res.status(400).json({ success: false, message: 'OLT IP required' });
 
@@ -118,7 +118,7 @@ exports.checkHealth = async (req, res) => {
 };
 
 // ─── Test Connection (Quick check with detailed feedback) ──────────────────────
-exports.testConnection = async (req, res) => {
+export const testConnection = async (req, res) => {
     const { olt } = req.body;
     if (!olt || !olt.ip) return res.status(400).json({ success: false, message: 'OLT data required' });
 
@@ -151,7 +151,7 @@ exports.testConnection = async (req, res) => {
 
 
 // ─── ONU Actions (Reboot, Reset, Signal) ──────────────────────────────────────
-exports.executeOnuAction = async (req, res) => {
+export const executeOnuAction = async (req, res) => {
     const { olt, onu, action } = req.body;
     if (!olt || !onu || !action) return res.status(400).json({ success: false, message: 'Missing OLT, ONU, or action' });
 
@@ -179,7 +179,7 @@ exports.executeOnuAction = async (req, res) => {
 };
 
 // ─── OLT Pulse (Live Speed, Devices, Usage) ───────────────────────────────────
-exports.getPulse = async (req, res) => {
+export const getPulse = async (req, res) => {
     const { olt } = req.body;
     if (!olt) return res.status(400).json({ success: false, message: 'OLT required' });
 
@@ -221,7 +221,7 @@ exports.getPulse = async (req, res) => {
 };
 
 // ─── ONU Detailed Status (Optical Power, Online Time) ─────────────────────────
-exports.getOnuStatus = async (req, res) => {
+export const getOnuStatus = async (req, res) => {
     const { olt, onu } = req.body;
     if (!olt || !onu) return res.status(400).json({ success: false, message: 'Missing OLT or ONU' });
 
@@ -260,7 +260,7 @@ exports.getOnuStatus = async (req, res) => {
 };
 
 // ─── ONU Password Reset ───────────────────────────────────────────────────────
-exports.resetOnuPassword = async (req, res) => {
+export const resetOnuPassword = async (req, res) => {
     const { olt, onu, newPassword } = req.body;
     if (!olt || !onu || !newPassword) return res.status(400).json({ success: false, message: 'Missing parameters' });
 
@@ -278,7 +278,7 @@ exports.resetOnuPassword = async (req, res) => {
 };
 
 // ─── Discover Unregistered ONUs ───────────────────────────────────────────────
-exports.discoverOnus = async (req, res) => {
+export const discoverOnus = async (req, res) => {
     const { olt } = req.body;
     if (!olt) return res.status(400).json({ success: false, message: 'OLT required' });
 
@@ -293,4 +293,4 @@ exports.discoverOnus = async (req, res) => {
     }
 };
 
-module.exports = exports;
+

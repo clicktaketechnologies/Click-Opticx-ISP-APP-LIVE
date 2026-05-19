@@ -34,9 +34,11 @@ class BillingService {
     const invoice = {
       id: invoiceId,
       user_id: userId,
-      amount,
+      total_amount: amount,
+      subtotal: amount,
       paid_amount: 0,
-      state: InvoiceState.CREATED,
+      due_amount: amount,
+      status: 'Unpaid',
       due_date: dueDate,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -81,12 +83,13 @@ class BillingService {
       if (fetchError || !invoice) throw new Error('Invoice not found');
 
       const newPaidAmount = invoice.paid_amount + paymentAmount;
-      let newState = invoice.state;
+      const newDueAmount = Math.max(0, invoice.total_amount - newPaidAmount);
+      let newStatus = invoice.status;
 
-      if (newPaidAmount >= invoice.amount) {
-        newState = InvoiceState.PAID;
+      if (newPaidAmount >= invoice.total_amount) {
+        newStatus = 'Paid';
       } else if (newPaidAmount > 0) {
-        newState = InvoiceState.PARTIAL;
+        newStatus = 'Partial';
       }
 
       // 2. Update invoice
@@ -94,7 +97,8 @@ class BillingService {
         .from('invoices')
         .update({
           paid_amount: newPaidAmount,
-          state: newState,
+          due_amount: newDueAmount,
+          status: newStatus,
           updated_at: new Date().toISOString()
         })
         .eq('id', invoiceId);
@@ -116,7 +120,7 @@ class BillingService {
       await this.supabase.rpc('sync_user_balance', { p_user_id: invoice.user_id });
 
       logger.info(`[BILLING] Payment of ${paymentAmount} processed for invoice ${invoiceId}`);
-      return { ...invoice, paid_amount: newPaidAmount, state: newState };
+      return { ...invoice, paid_amount: newPaidAmount, status: newStatus };
     } catch (error) {
       logger.error(`[BILLING-PAYMENT] Error: ${error.message}`);
       throw error;

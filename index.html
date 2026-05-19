@@ -209,6 +209,22 @@
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print, nav, header, aside, .sidebar { display: none !important; }
+            .print-only { display: block !important; }
+            * {
+                box-shadow: none !important;
+                text-shadow: none !important;
+            }
+            .invoice-body, .modal {
+                box-shadow: none !important;
+                border: none !important;
+            }
+            .page-break-inside-avoid { page-break-inside: avoid; }
+            @page { margin: 1cm; }
+        }
     </style>
 
 </head>

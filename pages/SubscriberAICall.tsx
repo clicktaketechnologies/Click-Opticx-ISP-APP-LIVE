@@ -74,7 +74,8 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
     setPhase('connecting');
 
     try {
-      if (!process.env.API_KEY) throw new Error("AI Service is currently unavailable. (API_KEY_MISSING)");
+      const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY;
+      if (!apiKey) throw new Error("AI Service is currently unavailable. (API_KEY_MISSING)");
 
       // Setup Output Context (24kHz for Gemini TTS)
       const outputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
@@ -87,7 +88,7 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
       await inputAudioContext.resume();
       inputAudioContextRef.current = inputAudioContext;
 
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey });
       const systemInstruction = `You are the Support AI for ${state.settings.branding.businessName}. 
       Subscriber: ${user.name} (${user.connectionId}). Balance: ${user.balance}. 
       Persona: ${callConfig.persona}. Speak naturally.`;
@@ -96,7 +97,7 @@ const SubscriberAICall: React.FC<Props> = ({ user, state, onBack }) => {
       outputNode.connect(outputAudioContext.destination);
 
       const sessionPromise = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
+        model: 'gemini-2.0-flash-exp',
         callbacks: {
           onopen: () => {
             setPhase('active');

@@ -132,7 +132,43 @@ const PastRecords: React.FC<{ state: AppState }> = ({ state }) => {
                     <span className="text-[10px] font-black text-slate-400 uppercase">Vault Size</span>
                     <span className="text-sm font-black text-slate-900">{(JSON.stringify(state.archives).length / 1024).toFixed(2)} KB</span>
                  </div>
-                 <button className="w-full py-4 bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all">
+                 <button 
+                   onClick={async (e) => {
+                     const btn = e.currentTarget;
+                     const originalText = btn.innerHTML;
+                     try {
+                       btn.innerHTML = 'Exporting...';
+                       btn.disabled = true;
+                       
+                       // Simulate chunked export for large datasets
+                       const dataStr = JSON.stringify(state.archives, null, 2);
+                       const blob = new Blob([dataStr], { type: 'application/json' });
+                       const url = URL.createObjectURL(blob);
+                       
+                       const link = document.createElement("a");
+                       link.setAttribute("href", url);
+                       link.setAttribute("download", `cold_export_${new Date().toISOString().split('T')[0]}.json`);
+                       document.body.appendChild(link);
+                       link.click();
+                       document.body.removeChild(link);
+                       URL.revokeObjectURL(url);
+                       
+                       btn.innerHTML = 'Export Complete!';
+                       setTimeout(() => {
+                         btn.innerHTML = originalText;
+                         btn.disabled = false;
+                       }, 2000);
+                     } catch (err) {
+                       console.error(err);
+                       btn.innerHTML = `Error: ${(err as Error).message}`;
+                       setTimeout(() => {
+                         btn.innerHTML = originalText;
+                         btn.disabled = false;
+                       }, 3000);
+                     }
+                   }}
+                   className="w-full py-4 bg-slate-50 text-slate-400 hover:bg-rose-50 hover:text-rose-600 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
+                 >
                     Initiate Cold Export
                  </button>
               </div>

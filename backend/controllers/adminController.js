@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
-const configManager = require('../services/config-manager');
-const logger = require('../utils/logger');
+import jwt from 'jsonwebtoken';
+import configManager from '../services/config-manager.js';
+import logger from '../utils/logger.js';
 
-exports.impersonate = async (req, res) => {
+export const impersonate = async (req, res) => {
     try {
         const { userId } = req.params;
         const adminId = req.user.id; // From auth middleware
@@ -54,8 +54,13 @@ exports.impersonate = async (req, res) => {
     }
 };
 
-exports.logoutImpersonation = async (req, res) => {
+export const logoutImpersonation = async (req, res) => {
     // Client-side mostly (destroy token), but we log it
     logger.info(`[IMPERSONATION-LOGOUT] Session terminated for User ${req.user.id} by Admin ${req.user.impersonator_id}`);
     res.json({ success: true, message: 'Impersonation session terminated.' });
+};
+
+export default {
+    impersonate,
+    logoutImpersonation
 };

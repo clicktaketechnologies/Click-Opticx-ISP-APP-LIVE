@@ -1228,6 +1228,35 @@ const Recovery: React.FC<{ state: AppState; searchTerm?: string; autoOpenAction?
               <Printer size={18} /> Print Report
             </button>
             <button
+              onClick={async () => {
+                if (!auditData) return;
+                try {
+                  const rows = [
+                    ['Date', 'Type', 'Amount', 'Balance', 'Reference', 'Description'],
+                    ...auditData.ledger.map(l => [
+                      new Date(l.date).toISOString(),
+                      l.type,
+                      l.amount.toString(),
+                      l.balanceAfter.toString(),
+                      l.reference || '',
+                      l.description || ''
+                    ])
+                  ];
+                  const csvContent = rows.map(e => e.map(field => `"${field}"`).join(",")).join("\n");
+                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.setAttribute("href", url);
+                  link.setAttribute("download", `audit_report_${auditData.identity.id}.csv`);
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+                } catch (err) {
+                  console.error('Export failed:', err);
+                  alert(`Export Failed: ${(err as Error).message}`);
+                }
+              }}
               className="flex-1 py-4 bg-blue-600 text-white rounded-2xl shadow-xl hover:bg-blue-700 transition-all flex items-center justify-center gap-3 uppercase text-[10px] font-black"
             >
               <Download size={18} /> Export CSV

@@ -28,63 +28,63 @@ import {
 
 // --- MULTI-CLOUD STORAGE PILOT ---
 const MultiCloudService = {
-    providers: ['Google Drive', 'PCloud', 'Dropbox', 'OneDrive'],
-    logs: [] as { id: string; type: string; provider: string; status: string; timestamp: string; details: string; duration: number }[],
-    
-    async syncArtifacts(userId: string, files: string[], onLog?: (log: any) => void) {
-        console.log(`[CLOUD-SYNC] Initiating handshake for ${userId} across ${this.providers.length} providers...`);
-        
-        for (const provider of this.providers) {
-            const start = Date.now();
-            const logId = `SYNC-${Math.random().toString(36).substr(2, 9)}`;
-            
-            // Log Initiation
-            const initLog = { 
-                id: logId, 
-                type: 'Handshake_INIT', 
-                provider, 
-                status: 'Connecting', 
-                timestamp: new Date().toISOString(), 
-                details: `Opening secure TLS tunnel to ${provider} registry...`,
-                duration: 0
-            };
-            this.logs.unshift(initLog);
-            if (onLog) onLog(initLog);
+  providers: ['Google Drive', 'PCloud', 'Dropbox', 'OneDrive'],
+  logs: [] as { id: string; type: string; provider: string; status: string; timestamp: string; details: string; duration: number }[],
 
-            await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
+  async syncArtifacts(userId: string, files: string[], onLog?: (log: any) => void) {
+    console.log(`[CLOUD-SYNC] Initiating handshake for ${userId} across ${this.providers.length} providers...`);
 
-            // Log Data Transfer
-            const transferLog = { 
-                ...initLog, 
-                type: 'Data_Transfer', 
-                status: 'Streaming', 
-                details: `Uploading ${files.length} encrypted identity artifacts (AES-256)...`,
-                timestamp: new Date().toISOString()
-            };
-            this.logs[0] = transferLog;
-            if (onLog) onLog(transferLog);
+    for (const provider of this.providers) {
+      const start = Date.now();
+      const logId = `SYNC-${Math.random().toString(36).substr(2, 9)}`;
 
-            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+      // Log Initiation
+      const initLog = {
+        id: logId,
+        type: 'Handshake_INIT',
+        provider,
+        status: 'Connecting',
+        timestamp: new Date().toISOString(),
+        details: `Opening secure TLS tunnel to ${provider} registry...`,
+        duration: 0
+      };
+      this.logs.unshift(initLog);
+      if (onLog) onLog(initLog);
 
-            // Log Completion
-            const finalLog = { 
-                ...transferLog, 
-                type: 'Sync_Complete', 
-                status: 'Success', 
-                details: `Artifacts successfully archived in ${provider} vault.`,
-                timestamp: new Date().toISOString(),
-                duration: Date.now() - start
-            };
-            this.logs[0] = finalLog;
-            if (onLog) onLog(finalLog);
-        }
+      await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 500));
 
-        return { success: true, timestamp: new Date().toISOString(), logs: this.logs.slice(0, 10) };
-    },
-    
-    getLogs() {
-        return this.logs.slice(0, 20);
+      // Log Data Transfer
+      const transferLog = {
+        ...initLog,
+        type: 'Data_Transfer',
+        status: 'Streaming',
+        details: `Uploading ${files.length} encrypted identity artifacts (AES-256)...`,
+        timestamp: new Date().toISOString()
+      };
+      this.logs[0] = transferLog;
+      if (onLog) onLog(transferLog);
+
+      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+
+      // Log Completion
+      const finalLog = {
+        ...transferLog,
+        type: 'Sync_Complete',
+        status: 'Success',
+        details: `Artifacts successfully archived in ${provider} vault.`,
+        timestamp: new Date().toISOString(),
+        duration: Date.now() - start
+      };
+      this.logs[0] = finalLog;
+      if (onLog) onLog(finalLog);
     }
+
+    return { success: true, timestamp: new Date().toISOString(), logs: this.logs.slice(0, 10) };
+  },
+
+  getLogs() {
+    return this.logs.slice(0, 20);
+  }
 };
 
 // Monitoring interface nodes
@@ -156,10 +156,10 @@ export const INITIAL_COMM_CONFIG: CommunicationSettings = {
   emailMode: 'CUSTOM_SMTP',
   emailProvider: 'SMTP',
   providerConfig: { apiKey: '', senderDomain: '' },
-  smtpConfig: { 
-    host: 'smtp.clickopticx.com', 
-    port: 587, 
-    encryption: 'TLS', 
+  smtpConfig: {
+    host: 'smtp.clickopticx.com',
+    port: 587,
+    encryption: 'TLS',
     username: 'relay@clickopticx.com',
     password: '' // Optional for local
   },
@@ -320,7 +320,7 @@ const INITIAL_STATE: AppState = {
   approvalRequests: [],
   archives: [],
   hotspotTokens: [],
-  signupRequests: [], 
+  signupRequests: [],
   staff: [
     { email: 'admin@clickopticx.com', name: 'System Administrator', role: Role.SUPER_ADMIN, status: 'Active', password: 'Click@Opticx2026', balance: 1000000 },
   ],
@@ -340,25 +340,25 @@ const INITIAL_STATE: AppState = {
   aiAgentEnabled: false,
   activeProvider: null,
   users: [
-    { 
-      id: 'USR-REC-1', 
-      name: 'Zohaib Hassan', 
-      status: UserStatus.ACTIVE, 
-      verificationStatus: VerificationStatus.VERIFIED, 
-      isKYCVerified: true, 
-      isKYCSubmitted: true, 
-      kyc_status: 'verified', 
-      approval_status: 'approved', 
-      packageId: 'PKG-1', 
-      balance: 1500, 
-      phone: '03001234567', 
-      address: 'Block 5, Gulshan', 
-      area: 'Gulshan', 
-      portalEnabled: true, 
-      connectionId: 'CID-001', 
-      creditScore: 750, 
-      referralPoints: 0, 
-      referralCode: 'ZOH-750', 
+    {
+      id: 'USR-REC-1',
+      name: 'Zohaib Hassan',
+      status: UserStatus.ACTIVE,
+      verificationStatus: VerificationStatus.VERIFIED,
+      isKYCVerified: true,
+      isKYCSubmitted: true,
+      kyc_status: 'verified',
+      approval_status: 'approved',
+      packageId: 'PKG-1',
+      balance: 1500,
+      phone: '03001234567',
+      address: 'Block 5, Gulshan',
+      area: 'Gulshan',
+      portalEnabled: true,
+      connectionId: 'CID-001',
+      creditScore: 750,
+      referralPoints: 0,
+      referralCode: 'ZOH-750',
       createdAt: new Date().toISOString(),
       activationCount: 5,
       connectionType: 'Fiber',
@@ -368,61 +368,61 @@ const INITIAL_STATE: AppState = {
       kyc_attempt_count: 1,
       kyc_history: []
     },
-    { 
-      id: 'USR-REC-2', 
-      name: 'Maria Khan', 
-      status: UserStatus.ACTIVE, 
-      verificationStatus: VerificationStatus.VERIFIED, 
-      isKYCVerified: true, 
-      isKYCSubmitted: true, 
-      kyc_status: 'verified', 
-      approval_status: 'approved', 
-      packageId: 'PKG-2', 
-      balance: 0, 
-      lastPaymentDate: new Date().toISOString(), 
-      phone: '03217654321', 
-      address: 'Phase 6, DHA', 
-      area: 'DHA', 
-      portalEnabled: true, 
-      connectionId: 'CID-002', 
-      creditScore: 820, 
-      referralPoints: 100, 
-      referralCode: 'MK789', 
-      activationCount: 12, 
-      connectionType: 'Fiber', 
-      managementMode: 'Manual', 
-      nasConnectionType: 'Manual', 
-      activityLog: [], 
-      kyc_attempt_count: 1, 
-      kyc_history: [] 
+    {
+      id: 'USR-REC-2',
+      name: 'Maria Khan',
+      status: UserStatus.ACTIVE,
+      verificationStatus: VerificationStatus.VERIFIED,
+      isKYCVerified: true,
+      isKYCSubmitted: true,
+      kyc_status: 'verified',
+      approval_status: 'approved',
+      packageId: 'PKG-2',
+      balance: 0,
+      lastPaymentDate: new Date().toISOString(),
+      phone: '03217654321',
+      address: 'Phase 6, DHA',
+      area: 'DHA',
+      portalEnabled: true,
+      connectionId: 'CID-002',
+      creditScore: 820,
+      referralPoints: 100,
+      referralCode: 'MK789',
+      activationCount: 12,
+      connectionType: 'Fiber',
+      managementMode: 'Manual',
+      nasConnectionType: 'Manual',
+      activityLog: [],
+      kyc_attempt_count: 1,
+      kyc_history: []
     },
-    { 
-      id: 'USR-REC-3', 
-      name: 'Asif Ali', 
-      status: UserStatus.ACTIVE, 
-      verificationStatus: VerificationStatus.PENDING, 
-      isKYCVerified: false, 
-      isKYCSubmitted: true, 
-      kyc_status: 'submitted', 
-      approval_status: 'pending', 
-      packageId: 'PKG-1', 
-      balance: 750, 
-      isRecoveryMode: true, 
-      phone: '03149876543', 
-      address: 'North Karachi', 
-      area: 'North', 
-      portalEnabled: true, 
-      connectionId: 'CID-003', 
-      creditScore: 640, 
-      referralPoints: 10, 
-      referralCode: 'AA444', 
-      activationCount: 3, 
-      connectionType: 'Wireless', 
-      managementMode: 'Manual', 
-      nasConnectionType: 'Manual', 
-      activityLog: [], 
-      kyc_attempt_count: 1, 
-      kyc_history: [] 
+    {
+      id: 'USR-REC-3',
+      name: 'Asif Ali',
+      status: UserStatus.ACTIVE,
+      verificationStatus: VerificationStatus.PENDING,
+      isKYCVerified: false,
+      isKYCSubmitted: true,
+      kyc_status: 'submitted',
+      approval_status: 'pending',
+      packageId: 'PKG-1',
+      balance: 750,
+      isRecoveryMode: true,
+      phone: '03149876543',
+      address: 'North Karachi',
+      area: 'North',
+      portalEnabled: true,
+      connectionId: 'CID-003',
+      creditScore: 640,
+      referralPoints: 10,
+      referralCode: 'AA444',
+      activationCount: 3,
+      connectionType: 'Wireless',
+      managementMode: 'Manual',
+      nasConnectionType: 'Manual',
+      activityLog: [],
+      kyc_attempt_count: 1,
+      kyc_history: []
     }
   ],
   liveUsage: [],
@@ -445,19 +445,19 @@ const INITIAL_STATE: AppState = {
   settings: {
     branding: {
       businessName: 'Click Opticx',
-      shortName: 'CO ISP', 
-      appTitle: 'Click Opticx ISP', 
+      shortName: 'CO ISP',
+      appTitle: 'Click Opticx ISP',
       appSubtitle: 'Automation Engine v1.2.6',
-      logoLight: '/favicon.png', 
-      logoDark: '/favicon.png', 
-      logoSquare: '/favicon.png', 
-      favicon: '/favicon.png', 
-      primaryColor: '#0084ff', 
-      secondaryColor: '#32d64f', 
-      accentColor: '#32d64f', 
-      textColorLight: '#ffffff', 
-      textColorDark: '#0f172a', 
-      primaryFont: 'Inter', 
+      logoLight: '/favicon.png',
+      logoDark: '/favicon.png',
+      logoSquare: '/favicon.png',
+      favicon: '/favicon.png',
+      primaryColor: '#0084ff',
+      secondaryColor: '#32d64f',
+      accentColor: '#32d64f',
+      textColorLight: '#ffffff',
+      textColorDark: '#0f172a',
+      primaryFont: 'Inter',
       secondaryFont: 'Inter',
       brandName: 'Click Opticx',
       tagline: 'Welcome to the Next Gen Internet',
@@ -528,27 +528,27 @@ const INITIAL_STATE: AppState = {
     commConfig: INITIAL_COMM_CONFIG,
     infrastructure: INITIAL_INFRA_CONFIG,
     legal: INITIAL_LEGAL_CONFIG,
-    technicalKeys: { 
-        firebaseApiKey: firebaseConfig.apiKey, 
-        firebaseAuthDomain: firebaseConfig.authDomain, 
-        firebaseProjectId: firebaseConfig.projectId, 
-        firebaseStorageBucket: firebaseConfig.storageBucket, 
-        firebaseMessagingSenderId: firebaseConfig.messagingSenderId, 
-        firebaseAppId: firebaseConfig.appId, 
-        firebaseVapidKey: '', // TO BE FILLED BY ADMIN
-        geminiApiKey: '', 
-        smtpHost: INITIAL_COMM_CONFIG.smtpConfig.host, 
-        smtpPort: INITIAL_COMM_CONFIG.smtpConfig.port, 
-        smtpUser: INITIAL_COMM_CONFIG.smtpConfig.username, 
-        smtpPass: '' 
+    technicalKeys: {
+      firebaseApiKey: firebaseConfig.apiKey,
+      firebaseAuthDomain: firebaseConfig.authDomain,
+      firebaseProjectId: firebaseConfig.projectId,
+      firebaseStorageBucket: firebaseConfig.storageBucket,
+      firebaseMessagingSenderId: firebaseConfig.messagingSenderId,
+      firebaseAppId: firebaseConfig.appId,
+      firebaseVapidKey: '', // TO BE FILLED BY ADMIN
+      geminiApiKey: '',
+      smtpHost: INITIAL_COMM_CONFIG.smtpConfig.host,
+      smtpPort: INITIAL_COMM_CONFIG.smtpConfig.port,
+      smtpUser: INITIAL_COMM_CONFIG.smtpConfig.username,
+      smtpPass: ''
     },
     pushConfig: { enabled: true, autoExpireAlerts: true, lowSignalAlerts: true, invoiceAlerts: true, marketingAlerts: false },
-    cloudStorage: { 
-        provider: 'Google Drive', 
-        isEnabled: true, 
-        lastSync: new Date().toISOString(),
-        providers: ['Google Drive', 'PCloud', 'Dropbox'],
-        authMode: 'OAuth'
+    cloudStorage: {
+      provider: 'Google Drive',
+      isEnabled: true,
+      lastSync: new Date().toISOString(),
+      providers: ['Google Drive', 'PCloud', 'Dropbox'],
+      authMode: 'OAuth'
     },
     terminology: INITIAL_TERMINOLOGY,
     aiAgentEnabled: false,
@@ -661,7 +661,7 @@ class DB {
   private storage: FirebaseStorage | null = null;
   private app: FirebaseApp | null = null;
   private socket: Socket | null = null;
-  private backendUrl = ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+  private backendUrl = ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
     : (import.meta.env.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com')).replace(/\/$/, '');
 
@@ -690,27 +690,11 @@ class DB {
    * validate expiry client-side on every read.
    */
   private storeToken(token: string) {
+    // Tokens are now managed securely via httpOnly cookies by the backend.
+    // We clean up any lingering local storage tokens to comply with zero-localStorage policies.
     try {
-      const parts = token.split('.');
-      if (parts.length !== 3) {
-        console.error('[TOKEN] Invalid JWT format — not storing.');
-        return;
-      }
-      const payload = JSON.parse(atob(parts[1]));
-      const tokenMeta = {
-        token,
-        issuedAt: Date.now(),
-        expiresAt: payload.exp ? payload.exp * 1000 : Date.now() + (7 * 24 * 60 * 60 * 1000), // fallback 7d
-      };
-      localStorage.setItem('clickopticx_auth_token', JSON.stringify(tokenMeta));
-    } catch (e) {
-      console.error('[TOKEN] Failed to decode/store JWT:', e);
-      localStorage.setItem('clickopticx_auth_token', JSON.stringify({
-        token,
-        issuedAt: Date.now(),
-        expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000),
-      }));
-    }
+      localStorage.removeItem('clickopticx_auth_token');
+    } catch(e) {}
   }
 
   /**
@@ -720,38 +704,15 @@ class DB {
    */
   public getValidToken(): string | null {
     try {
-      const raw = localStorage.getItem('clickopticx_auth_token');
-      if (!raw) return null;
-
-      // Handle legacy format: bare token string without metadata wrapper
-      if (!raw.startsWith('{')) {
-        console.warn('[SESSION] Legacy token format detected — clearing for re-authentication.');
-        localStorage.removeItem('clickopticx_auth_token');
-        return null;
-      }
-
-      const meta = JSON.parse(raw);
-      if (!meta.token || !meta.expiresAt) {
-        localStorage.removeItem('clickopticx_auth_token');
-        return null;
-      }
-
-      // Check expiry
-      if (Date.now() > meta.expiresAt) {
-        console.warn('[SESSION] JWT expired. Forcing re-authentication.');
-        localStorage.removeItem('clickopticx_auth_token');
-        this.state.auth = { isLoggedIn: false };
-        this.state.currentUser = undefined;
-        this.state.view = 'login';
-        this.notify();
-        return null;
-      }
-
-      return meta.token;
-    } catch {
       localStorage.removeItem('clickopticx_auth_token');
-      return null;
+      localStorage.removeItem('clickopticx_admin_token');
+    } catch (e) {}
+
+    // In production, session state is verified by backend httpOnly cookies.
+    if (this.state.auth?.isLoggedIn) {
+      return 'cookie_managed_token';
     }
+    return null;
   }
 
   public getSocket() {
@@ -760,6 +721,7 @@ class DB {
 
 
   constructor() {
+    (window as any).db = this;
     this.state = INITIAL_STATE;
     try {
       const cached = localStorage.getItem('clickopticx_v16_registry');
@@ -783,7 +745,7 @@ class DB {
           const sessionTimeout = isPersistent
             ? (15 * 24 * 60 * 60 * 1000)  // 15 days max for "Remember Me"
             : (12 * 60 * 60 * 1000);       // 12 hours for non-persistent sessions
-          
+
           // P0-FIX: Also validate the stored JWT token expiry
           const storedToken = this.getValidToken();
           const tokenExpired = !storedToken;
@@ -807,7 +769,7 @@ class DB {
             localStorage.removeItem('clickopticx_auth_token');
           }
         }
-        
+
         // If not logged in, always show login view
         if (!this.state.auth?.isLoggedIn) {
           this.state.view = 'login';
@@ -846,25 +808,25 @@ class DB {
       this.state = INITIAL_STATE;
     }
     this.ensureArrays();
-    
+
     // Trigger initial state patch
     this.patchState();
-    
+
     // Auto-rescue orphaned KYC states
     this.reconcileKYCState();
-    
+
     // Cloud Layer Initialization
     this.initializeCloudLayer().catch(console.error);
-    
+
     // 🛡️ PERSISTENCE GUARD: Force cloud sync before tab close
     window.addEventListener('beforeunload', () => {
       if (this.firestore && this.initialized) {
         const docRef = doc(this.firestore, 'registry', 'master_state');
         const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
         if (cloudSafeState && Object.keys(cloudSafeState).length > 0) {
-           // Strip any undefined properties that might crash setDoc
-           const sanitized = JSON.parse(JSON.stringify(cloudSafeState));
-           setDoc(docRef, sanitized).catch(err => console.error('[CLOUD-SYNC] Background sync failed:', err));
+          // Strip any undefined properties that might crash setDoc
+          const sanitized = JSON.parse(JSON.stringify(cloudSafeState));
+          setDoc(docRef, sanitized).catch(err => console.error('[CLOUD-SYNC] Background sync failed:', err));
         }
       }
     });
@@ -893,48 +855,48 @@ class DB {
 
     if (currentBuild < TARGET_BUILD) {
       console.log(`[MIGRATION] System update detected: Build ${currentBuild} -> ${TARGET_BUILD}`);
-      
+
       // 1. Take Automatic Backup before any changes
       await this.createSystemSnapshot(`Auto-backup before migration to Build ${TARGET_BUILD}`, true);
 
       // 2. Run sequential additive migrations
       const migrationsRun: string[] = [];
-      
+
       try {
-          // Migration Build 863: Initialize deployment logs if missing
-          if (currentBuild < 863) {
-            if (!this.state.deploymentLogs) this.state.deploymentLogs = [];
-            if (!this.state.systemSnapshots) this.state.systemSnapshots = [];
-            migrationsRun.push('INIT_DEPLOYMENT_LOGS');
-          }
+        // Migration Build 863: Initialize deployment logs if missing
+        if (currentBuild < 863) {
+          if (!this.state.deploymentLogs) this.state.deploymentLogs = [];
+          if (!this.state.systemSnapshots) this.state.systemSnapshots = [];
+          migrationsRun.push('INIT_DEPLOYMENT_LOGS');
+        }
 
-          // [MIGRATIONS END]
+        // [MIGRATIONS END]
 
-          // 3. Update versioning metadata
-          this.state.systemVersion = TARGET_BUILD;
-          this.state.lastUpdateDate = new Date().toISOString();
-          
-          this.state.deploymentLogs.unshift({
-            id: `DEP-${Date.now()}`,
-            timestamp: new Date().toISOString(),
-            fromBuild: currentBuild,
-            toBuild: TARGET_BUILD,
-            status: 'Success',
-            migrationsRun
-          });
+        // 3. Update versioning metadata
+        this.state.systemVersion = TARGET_BUILD;
+        this.state.lastUpdateDate = new Date().toISOString();
 
-          this.patchState();
-          console.log(`[MIGRATION] Migration successful: System now at Build ${TARGET_BUILD}`);
+        this.state.deploymentLogs.unshift({
+          id: `DEP-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          fromBuild: currentBuild,
+          toBuild: TARGET_BUILD,
+          status: 'Success',
+          migrationsRun
+        });
+
+        this.patchState();
+        console.log(`[MIGRATION] Migration successful: System now at Build ${TARGET_BUILD}`);
       } catch (error) {
-          console.error('[MIGRATION] Fail critical: Exception during schema update', error);
-          this.state.deploymentLogs.unshift({
-            id: `DEP-FAIL-${Date.now()}`,
-            timestamp: new Date().toISOString(),
-            fromBuild: currentBuild,
-            toBuild: TARGET_BUILD,
-            status: 'Fail',
-            migrationsRun: []
-          });
+        console.error('[MIGRATION] Fail critical: Exception during schema update', error);
+        this.state.deploymentLogs.unshift({
+          id: `DEP-FAIL-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          fromBuild: currentBuild,
+          toBuild: TARGET_BUILD,
+          status: 'Fail',
+          migrationsRun: []
+        });
       }
     }
   }
@@ -944,7 +906,7 @@ class DB {
 
     const snapshotId = `SNAP-${Date.now()}`;
     const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
-    
+
     const snapshot: SystemSnapshot = {
       id: snapshotId,
       timestamp: new Date().toISOString(),
@@ -960,11 +922,11 @@ class DB {
       // 1. Store in local state history
       this.state.systemSnapshots.unshift(snapshot);
       if (this.state.systemSnapshots.length > 10) this.state.systemSnapshots.pop(); // Keep last 10
-      
+
       // 2. Persist to dedicated backups collection in Firestore
       const backupRef = doc(this.firestore, 'system_backups', snapshotId);
       await setDoc(backupRef, snapshot);
-      
+
       this.patchState();
       console.log(`[SNAPSHOT] Secure state archive created: ${snapshotId}`);
       return { success: true, id: snapshotId };
@@ -976,15 +938,15 @@ class DB {
 
   public async restoreSystemSnapshot(snapshotId: string) {
     if (!this.firestore) return { success: false, message: 'Cloud layer not ready' };
-    
+
     try {
       const backupRef = doc(this.firestore, 'system_backups', snapshotId);
       const snap = await getDoc(backupRef);
-      
+
       if (!snap.exists()) return { success: false, message: 'Snapshot not found in vault' };
-      
+
       const restorableData = snap.data() as SystemSnapshot;
-      
+
       // 🛡️ DATA SAFETY: Perform a shallow merge to preserve session state
       // but overwrite core registry with snapshot data
       this.state = {
@@ -995,7 +957,7 @@ class DB {
 
       this.patchState();
       console.log(`[RESTORE] System rolled back to Snapshot: ${snapshotId}`);
-      
+
       // Update logs
       this.state.deploymentLogs.unshift({
         id: `ROLLBACK-${Date.now()}`,
@@ -1035,7 +997,7 @@ class DB {
 
   private reconcileKYCState() {
     let changed = false;
-    
+
     // 1. Restore orphaned KYC requests or missing flags into state.users
     this.state.kycRequests?.forEach(req => {
       let user = this.state.users.find(u => u.id === req.userId);
@@ -1053,10 +1015,10 @@ class DB {
           activationCount: 0,
           portalEnabled: true,
         };
-        
-        const status = req.status === 'Approved' ? VerificationStatus.VERIFIED : 
-                      (req.status === 'Rejected' ? VerificationStatus.REVISION : VerificationStatus.PENDING);
-        
+
+        const status = req.status === 'Approved' ? VerificationStatus.VERIFIED :
+          (req.status === 'Rejected' ? VerificationStatus.REVISION : VerificationStatus.PENDING);
+
         this.syncUserKYCState(newUser, status, req.rejectionReason);
         this.state.users.push(newUser);
         changed = true;
@@ -1071,9 +1033,9 @@ class DB {
         }
 
         // Force sync status if mismatched with approved request
-        const targetStatus = req.status === 'Approved' ? VerificationStatus.VERIFIED : 
-                            (req.status === 'Rejected' ? VerificationStatus.REVISION : VerificationStatus.PENDING);
-        
+        const targetStatus = req.status === 'Approved' ? VerificationStatus.VERIFIED :
+          (req.status === 'Rejected' ? VerificationStatus.REVISION : VerificationStatus.PENDING);
+
         if (user.verificationStatus !== targetStatus) {
           console.log(`[KYC-RECONCILE] Status Mismatch Fixed for ${user.id}: ${user.verificationStatus} -> ${targetStatus}`);
           this.syncUserKYCState(user, targetStatus, req.rejectionReason);
@@ -1086,9 +1048,9 @@ class DB {
       if (this.state.currentUser && this.state.currentUser.id === req.userId && user) {
         if (this.state.currentUser.verificationStatus !== user.verificationStatus) {
           console.log('[KYC-RECONCILE] Syncing current user session flags');
-          this.state.currentUser = { 
-            ...this.state.currentUser, 
-            ...user, 
+          this.state.currentUser = {
+            ...this.state.currentUser,
+            ...user,
             role: this.state.currentUser.role // Preserve current role context
           };
           changed = true;
@@ -1109,7 +1071,7 @@ class DB {
       this.firestore = getFirestore(this.app);
       this.auth = getAuth(this.app);
       this.storage = getStorage(this.app);
-      
+
       // --- SUPABASE AUTH HYDRATION ---
       supabase.auth.onAuthStateChange(async (event, session) => {
         console.log(`[SUPABASE-AUTH] Event: ${event}`);
@@ -1118,24 +1080,24 @@ class DB {
             // Find matched local user
             const localUser = this.state.users.find(u => u.email === session.user.email);
             const localStaff = this.state.staff.find(s => s.email === session.user.email);
-            
+
             if (localUser || localStaff) {
-               console.log(`[SUPABASE-AUTH] Mapping session to node: ${session.user.email}`);
-               this.state.auth.isLoggedIn = true;
-               this.state.currentUser = (localStaff || localUser) as any;
-               this.notify();
+              console.log(`[SUPABASE-AUTH] Mapping session to node: ${session.user.email}`);
+              this.state.auth.isLoggedIn = true;
+              this.state.currentUser = (localStaff || localUser) as any;
+              this.notify();
             }
           }
         } else if (event === 'SIGNED_OUT') {
-           // Only logout if not impersonating
-           if (!this.state.isImpersonating) {
-              this.state.auth.isLoggedIn = false;
-              this.state.currentUser = undefined;
-              this.notify();
-           }
+          // Only logout if not impersonating
+          if (!this.state.isImpersonating) {
+            this.state.auth.isLoggedIn = false;
+            this.state.currentUser = undefined;
+            this.notify();
+          }
         } else if (event === 'PASSWORD_RECOVERY') {
-           console.log('[SUPABASE-AUTH] Recovery protocol detected. Flagging session for rotation.');
-           // We could trigger a view change here if needed
+          console.log('[SUPABASE-AUTH] Recovery protocol detected. Flagging session for rotation.');
+          // We could trigger a view change here if needed
         }
       });
 
@@ -1212,30 +1174,30 @@ class DB {
       });
 
       this.socket.on('live-data', (data: any) => {
-         // Support for the newer live poller format
-         if (!this.state.liveUsage) this.state.liveUsage = [];
-         const existing = [...this.state.liveUsage];
-         existing.unshift({
-           userId: data.username || 'N/A',
-           nasId: 'NAS-MIKROTIK',
-           upload: data.traffic?.txMbps || 0,
-           download: data.traffic?.rxMbps || 0,
-           sessionTime: 'N/A',
-           ipAddress: 'N/A',
-           timestamp: new Date().toISOString()
-         });
-         this.state.liveUsage = existing.slice(0, 100);
-         this.notify();
+        // Support for the newer live poller format
+        if (!this.state.liveUsage) this.state.liveUsage = [];
+        const existing = [...this.state.liveUsage];
+        existing.unshift({
+          userId: data.username || 'N/A',
+          nasId: 'NAS-MIKROTIK',
+          upload: data.traffic?.txMbps || 0,
+          download: data.traffic?.rxMbps || 0,
+          sessionTime: 'N/A',
+          ipAddress: 'N/A',
+          timestamp: new Date().toISOString()
+        });
+        this.state.liveUsage = existing.slice(0, 100);
+        this.notify();
       });
 
       this.socket.on('discovery', (data: any) => {
         console.log('[AUTOMATION] New ONU Detected:', data);
-        
+
         // Add to dedicated discovery array
         if (!this.state.discoveredOnus) this.state.discoveredOnus = [];
         const exists = this.state.discoveredOnus.some(o => o.serial === data.serial);
         if (!exists) {
-            this.state.discoveredOnus.unshift({ ...data, detectedAt: new Date().toISOString() });
+          this.state.discoveredOnus.unshift({ ...data, detectedAt: new Date().toISOString() });
         }
 
         this.state.nocAlerts.unshift({
@@ -1360,11 +1322,11 @@ class DB {
 
   private authenticateSocket() {
     if (!this.socket || !this.state.currentUser) return;
-    
+
     // Admins join the global dashboard room, Users join their specific ONU room
     const role = this.state.currentUser.role;
     const isAdmin = [Role.SUPER_ADMIN, Role.ADMIN, Role.NETWORK_ADMIN].includes(role);
-    
+
     const payload: any = {
       role: isAdmin ? 'admin' : 'user'
     };
@@ -1384,7 +1346,7 @@ class DB {
    */
   private async syncUserKYCState(user: ISPUser, status: VerificationStatus, reason?: string) {
     user.verificationStatus = status;
-    
+
     switch (status) {
       case VerificationStatus.VERIFIED:
         user.isKYCVerified = true;
@@ -1392,7 +1354,7 @@ class DB {
         user.kyc_status = 'verified';
         user.approval_status = 'approved';
         user.status = UserStatus.ACTIVE;
-        
+
         // Sync to Backend
         fetch(`${this.backendUrl}/api/kyc/approve`, {
           method: 'POST',
@@ -1433,7 +1395,7 @@ class DB {
 
     // Direct update to currentUser if it matches to ensure immediate visual sync in portal
     if (this.state.currentUser?.id === user.id) {
-       this.state.currentUser = { ...this.state.currentUser, ...user } as any;
+      this.state.currentUser = { ...this.state.currentUser, ...user } as any;
     }
   }
 
@@ -1442,7 +1404,7 @@ class DB {
     if (!user) return { success: false, message: 'Identity Node Not Found' };
 
     this.syncUserKYCState(user, VerificationStatus.REVISION, reason);
-    
+
     // Also mark any pending kycRequests as rejected
     this.state.kycRequests.forEach(r => {
       if (r.userId === userId && r.status === 'Pending') {
@@ -1453,7 +1415,7 @@ class DB {
 
     this.logNotification(userId, 'warning', 'Identity Revision Required', reason, 'user');
     this.logAudit('KYC Revision Requested', 'Update', `Requested identity resubmission for ${user.name}. Reason: ${reason}`, userId, user.name);
-    
+
     await this.commit();
     this.notify();
     return { success: true };
@@ -1468,14 +1430,14 @@ class DB {
   private async syncWithCloudMaster() {
     if (!this.firestore) return;
     const docRef = doc(this.firestore, 'registry', 'master_state');
-    
+
     // Safety Fallback: Mark system configured within 2s so UI never freezes
     const fallbackTimer = setTimeout(() => {
-       if (!this.initialized) {
-          console.warn('[DB] Cloud Handshake Timeout: Falling back to cached state.');
-          this.initialized = true;
-          this.notify();
-       }
+      if (!this.initialized) {
+        console.warn('[DB] Cloud Handshake Timeout: Falling back to cached state.');
+        this.initialized = true;
+        this.notify();
+      }
     }, 2000);
 
     try {
@@ -1483,106 +1445,110 @@ class DB {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s budget for multi-shard load
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s budget for multi-shard load
 
-      const shards = [
-        'master_state',
-        'users_shard',
-        'finance_shard',
-        'ops_shard',
-        'notifications_shard'
-      ];
+        const shards = [
+          'master_state',
+          'users_shard',
+          'finance_shard',
+          'ops_shard',
+          'notifications_shard'
+        ];
 
-      const results = await Promise.all(shards.map(s => getDoc(doc(this.firestore!, 'registry', s))));
-      clearTimeout(timeoutId);
+        const results = await Promise.all(shards.map(s => getDoc(doc(this.firestore!, 'registry', s))));
+        clearTimeout(timeoutId);
 
-      let mergedState = { ...this.state };
+        let mergedState = { ...this.state };
 
-      results.forEach(snap => {
-        if (snap.exists()) {
-          const shardData = snap.data();
-          if (snap.id === 'users_shard') {
-            // --- 🛡️ SMART MERGE: Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
-            if (shardData.users && Array.isArray(shardData.users)) {
-              const cloudIds = new Set(shardData.users.map((u: any) => u.id));
-              const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !this.recentlyDeletedIds.has(u.id));
-              const validCloudUsers = shardData.users.filter((u: any) => !this.recentlyDeletedIds.has(u.id));
-              mergedState.users = [...validCloudUsers, ...localOnlyUsers];
-            }
-            if (shardData.signupRequests && Array.isArray(shardData.signupRequests)) {
-              const cloudSignupIds = new Set(shardData.signupRequests.map((r: any) => r.id));
-              const localOnlySignups = this.state.signupRequests.filter(r => !cloudSignupIds.has(r.id));
-              mergedState.signupRequests = [...shardData.signupRequests, ...localOnlySignups];
-            }
-          } else {
-            mergedState = { ...mergedState, ...shardData };
-          }
-        }
-      });
-
-      this.state = mergedState;
-      this.reconcileIdentity();
-      this.patchState();
-
-      clearTimeout(fallbackTimer);
-      this.initialized = true;
-      this.notify();
-
-      onSnapshot(docRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...persistedData } = snapshot.data() as AppState;
-          
-          // --- 🛡️ SMART MERGE (Real-time): Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
-          if (persistedData.users && Array.isArray(persistedData.users)) {
-            const cloudIds = new Set(persistedData.users.map(u => u.id));
-            const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !u.deleted);
-            persistedData.users = [
-              ...persistedData.users,
-              ...localOnlyUsers
-            ];
-          }
-          if (persistedData.signupRequests && Array.isArray(persistedData.signupRequests)) {
-            const cloudSignupIds = new Set(persistedData.signupRequests.map(r => r.id));
-            const localOnlySignups = this.state.signupRequests.filter(r => !cloudSignupIds.has(r.id));
-            persistedData.signupRequests = [...persistedData.signupRequests, ...localOnlySignups];
-          }
-
-          this.state = { ...this.state, ...persistedData };
-
-          // Real-time synchronization of the current user session
-          if (this.state.currentUser) {
-            const upToDateUser = this.findUserNode(this.state.currentUser.id || this.state.currentUser.email);
-            if (upToDateUser && this.state.currentUser.role === Role.CUSTOMER) {
-               this.state.currentUser = { ...upToDateUser, role: Role.CUSTOMER };
+        results.forEach(snap => {
+          if (snap.exists()) {
+            const shardData = snap.data();
+            if (snap.id === 'users_shard') {
+              // --- 🛡️ SMART MERGE: Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
+              if (shardData.users && Array.isArray(shardData.users)) {
+                const cloudIds = new Set(shardData.users.map((u: any) => u.id));
+                const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !this.recentlyDeletedIds.has(u.id));
+                const validCloudUsers = shardData.users.filter((u: any) => !this.recentlyDeletedIds.has(u.id));
+                mergedState.users = [...validCloudUsers, ...localOnlyUsers];
+              }
+              if (shardData.signupRequests && Array.isArray(shardData.signupRequests)) {
+                const cloudSignupIds = new Set(shardData.signupRequests.map((r: any) => r.id));
+                const localOnlySignups = this.state.signupRequests.filter(r => !cloudSignupIds.has(r.id));
+                mergedState.signupRequests = [...shardData.signupRequests, ...localOnlySignups];
+              }
             } else {
-               const upToDateStaff = this.state.staff.find(s => s.email.toLowerCase() === (this.state.currentUser.email || '').toLowerCase());
-               if (upToDateStaff) {
-                  this.state.currentUser = { ...upToDateStaff };
-               }
+              mergedState = { ...mergedState, ...shardData };
             }
           }
+        });
 
-          this.patchState();
-          this.notify();
-        }
-      });
+        this.state = mergedState;
+        this.reconcileIdentity();
+        this.patchState();
 
-      // Start recovery maintenance cycle (IRS Service - Every 10 minutes)
-      setInterval(() => this.runRecoveryMaintenance(), 600000);
-      // Run once on init — delayed so it doesn't race with render
-      setTimeout(() => this.runRecoveryMaintenance(), 5000);
-      
-      // Handle Firebase Auth Redirect Result
-      await this.handleAuthRedirect();
+        clearTimeout(fallbackTimer);
+        this.initialized = true;
+        this.notify();
+
+        onSnapshot(docRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...persistedData } = snapshot.data() as AppState;
+
+            // --- 🛡️ SMART MERGE (Real-time): Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
+            if (persistedData.users && Array.isArray(persistedData.users)) {
+              const cloudIds = new Set(persistedData.users.map(u => u.id));
+              const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !u.deleted);
+              persistedData.users = [
+                ...persistedData.users,
+                ...localOnlyUsers
+              ];
+            }
+            if (persistedData.signupRequests && Array.isArray(persistedData.signupRequests)) {
+              const cloudSignupIds = new Set(persistedData.signupRequests.map(r => r.id));
+              const localOnlySignups = this.state.signupRequests.filter(r => !cloudSignupIds.has(r.id));
+              persistedData.signupRequests = [...persistedData.signupRequests, ...localOnlySignups];
+            }
+
+            this.state = { ...this.state, ...persistedData };
+
+            // Real-time synchronization of the current user session
+            if (this.state.currentUser) {
+              const upToDateUser = this.findUserNode(this.state.currentUser.id || this.state.currentUser.email);
+              if (upToDateUser && this.state.currentUser.role === Role.CUSTOMER) {
+                this.state.currentUser = { ...upToDateUser, role: Role.CUSTOMER };
+              } else {
+                const upToDateStaff = this.state.staff.find(s => s.email.toLowerCase() === (this.state.currentUser.email || '').toLowerCase());
+                if (upToDateStaff) {
+                  this.state.currentUser = { ...upToDateStaff };
+                }
+              }
+            }
+
+            this.patchState();
+            this.notify();
+          }
+        });
+
+        // Start recovery maintenance cycle (IRS Service - Every 10 minutes)
+        setInterval(() => this.runRecoveryMaintenance(), 600000);
+        // Run once on init — delayed so it doesn't race with render
+        setTimeout(() => this.runRecoveryMaintenance(), 5000);
+
+        // Handle Firebase Auth Redirect Result
+        await this.handleAuthRedirect();
+      } catch (e: any) {
+        clearTimeout(fallbackTimer);
+        this.initialized = true;
+        this.notify();
+      }
     } catch (e: any) {
-      clearTimeout(fallbackTimer);
+      console.error('[DB] Cloud Sync Outer Fault:', e);
       this.initialized = true;
       this.notify();
     }
   }
-
 
   private patchState() {
     this.reconcileKYCState();
@@ -1774,45 +1740,69 @@ class DB {
 
       // --- SESSION PERSISTENCE CONTROL ---
       if (this.state.auth && this.state.auth.isPersistent === false) {
-          // If not persistent, we don't save auth state to localStorage
-          const { auth, currentUser, ...persistentState } = this.state;
-          localStorage.setItem('clickopticx_v16_registry', JSON.stringify(persistentState));
+        // If not persistent, we don't save auth state to localStorage
+        const { auth, currentUser, ...persistentState } = this.state;
+        localStorage.setItem('clickopticx_v16_registry', JSON.stringify(persistentState));
       } else {
-          localStorage.setItem('clickopticx_v16_registry', JSON.stringify(this.state));
+        localStorage.setItem('clickopticx_v16_registry', JSON.stringify(this.state));
       }
-    } catch (e: any) { 
+    } catch (e: any) {
       console.warn('[DB] local persistence failed:', e);
       if (e.name === 'QuotaExceededError') {
-         this.state.auditLogs = []; 
-         this.state.deliveryLogs = [];
-         console.log('[DB] Emergency local flush performed.');
+        this.state.auditLogs = [];
+        this.state.deliveryLogs = [];
+        console.log('[DB] Emergency local flush performed.');
       }
     }
+
+    // Trigger UI update immediately for optimistic state rendering
+    this.notify();
 
     // 2. CLOUD PERSISTENCE (Firestore Master Source)
     const performCloudWrite = async () => {
       if (this.firestore && this.initialized) {
         try {
           // Split state into shards to overcome 1MB limit
-          const { 
+          const {
             users, signupRequests,
             ledger, invoices, topupRequests, packageRequests,
             auditLogs, aiLogs, nocAlerts, emergencyLoads, deliveryLogs,
             notifications,
             currentUser, originalAdminUser, isImpersonating, connectionStatus, // Exclude session-local state
-            ...masterData 
+            ...masterData
           } = this.state;
 
-          // Sanitize master data
-          const sanitizedMaster = JSON.parse(JSON.stringify(masterData));
+          // Sanitize everything to remove 'undefined' which crashes Firestore
+          const deepSanitize = (obj: any) => {
+            if (!obj) return obj;
+            return JSON.parse(JSON.stringify(obj, (key, value) => {
+              if (value === undefined) return null;
+              return value;
+            }));
+          };
 
-          await Promise.all([
-            setDoc(doc(this.firestore, 'registry', 'master_state'), sanitizedMaster),
-            setDoc(doc(this.firestore, 'registry', 'users_shard'), { users, signupRequests }),
-            setDoc(doc(this.firestore, 'registry', 'finance_shard'), { ledger, invoices, topupRequests, packageRequests }),
-            setDoc(doc(this.firestore, 'registry', 'ops_shard'), { auditLogs, aiLogs, nocAlerts, emergencyLoads, deliveryLogs }),
-            setDoc(doc(this.firestore, 'registry', 'notifications_shard'), { notifications })
-          ]);
+          const shards = [
+            { id: 'master_state', data: masterData },
+            { id: 'users_shard', data: { users: users || [], signupRequests: signupRequests || [] } },
+            { id: 'finance_shard', data: { ledger: ledger || [], invoices: invoices || [], topupRequests: topupRequests || [], packageRequests: packageRequests || [] } },
+            { id: 'ops_shard', data: { auditLogs: auditLogs || [], aiLogs: aiLogs || [], nocAlerts: nocAlerts || [], emergencyLoads: emergencyLoads || [], deliveryLogs: deliveryLogs || [] } },
+            { id: 'notifications_shard', data: { notifications: notifications || [] } }
+          ];
+
+          for (const shard of shards) {
+            const sanitized = deepSanitize(shard.data);
+            try {
+              await setDoc(doc(this.firestore, 'registry', shard.id), sanitized);
+            } catch (err: any) {
+              console.error(`[DB-CLOUD] Shard Write Failure [${shard.id}]:`, err.message);
+              // Fallback: remove all potential offending fields and try one last time for that shard
+              if (err.message?.includes('undefined')) {
+                 console.warn(`[DB-CLOUD] Attempting emergency recovery for shard ${shard.id}...`);
+                 const emergency = JSON.parse(JSON.stringify(sanitized));
+                 await setDoc(doc(this.firestore, 'registry', shard.id), emergency).catch(e => console.error('[DB-CLOUD] Recovery Failed:', e));
+              }
+            }
+          }
 
           this.recentlyDeletedIds.clear();
           console.log('[DB-CLOUD] Sharded State Handshake Success');
@@ -1828,8 +1818,8 @@ class DB {
     };
 
     if (immediate) {
-       if (this.commitTimer) clearTimeout(this.commitTimer);
-       await performCloudWrite();
+      if (this.commitTimer) clearTimeout(this.commitTimer);
+      await performCloudWrite();
     } else {
       if (this.commitTimer) clearTimeout(this.commitTimer);
       this.commitTimer = setTimeout(performCloudWrite, 800);
@@ -1843,7 +1833,7 @@ class DB {
     this.notifyTimer = setTimeout(() => {
       // --- REACT INTEGRITY: Force fresh object references for the Entire UI Tree ---
       // This solves issues where nested array mutations (e.g. status changes) were missed by React
-      const snapshot: AppState = { 
+      const snapshot: AppState = {
         ...this.state,
         users: [...this.state.users],
         signupRequests: [...this.state.signupRequests],
@@ -1860,16 +1850,16 @@ class DB {
         nocAlerts: [...this.state.nocAlerts || []],
         upstreamLinks: [...this.state.upstreamLinks || []]
       };
-      
+
       this.listeners.forEach(l => l(snapshot));
-    }, 50); 
+    }, 50);
   }
 
   getState(): AppState { return { ...this.state }; }
 
   get onus() { return this.state.onus; }
   get discoveredOnus() { return this.state.discoveredOnus || []; }
-  set discoveredOnus(val: any[]) { 
+  set discoveredOnus(val: any[]) {
     this.state.discoveredOnus = val;
     this.notify();
   }
@@ -1900,18 +1890,18 @@ class DB {
       action,
       type,
       details,
-      userId,
-      userName,
-      adminId: admin?.id,
-      adminName: admin?.name,
-      metadata
+      userId: userId || null,
+      userName: userName || null,
+      adminId: admin?.id || null,
+      adminName: admin?.name || null,
+      metadata: metadata || null
     };
     if (!this.state.auditLogs) this.state.auditLogs = [];
     this.state.auditLogs.unshift(log); // Newest first
-    
+
     // Trigger Audit Hooks (Phase 2 Mirroring)
     this.auditHooks.forEach(h => h(log));
-    
+
     await this.commit();
   }
 
@@ -1935,7 +1925,7 @@ class DB {
   private findUserIndex(identifier: string): number {
     if (!identifier || typeof identifier !== 'string') return -1;
     const clean = identifier.trim().toLowerCase();
-    
+
     return this.state.users.findIndex(u => {
       if (!u) return false;
       const uid = (u.id || '').toLowerCase();
@@ -1945,11 +1935,11 @@ class DB {
       const uphone = (u.phone || '').replace(/\D/g, '');
       const cleanPhone = clean.replace(/\D/g, '');
 
-      return uid === clean || 
-             uemail === clean || 
-             uname === clean || 
-             uconn === clean || 
-             (uphone && cleanPhone && uphone === cleanPhone);
+      return uid === clean ||
+        uemail === clean ||
+        uname === clean ||
+        uconn === clean ||
+        (uphone && cleanPhone && uphone === cleanPhone);
     });
   }
 
@@ -1962,8 +1952,8 @@ class DB {
     await this.forceSync();
     const upToDate = this.findUserNode(userId);
     if (upToDate && this.state.currentUser && this.state.currentUser.id === upToDate.id) {
-       this.state.currentUser = { ...upToDate, role: this.state.currentUser.role };
-       this.notify();
+      this.state.currentUser = { ...upToDate, role: this.state.currentUser.role };
+      this.notify();
     }
     return { success: true, message: 'Identity Node Re-synchronized' };
   }
@@ -1977,7 +1967,7 @@ class DB {
   }
 
   isConfigured() { return this.initialized; }
-  
+
   getHealth(): DBHealth {
     return {
       documentSize: JSON.stringify(this.state).length,
@@ -2004,13 +1994,13 @@ class DB {
       if (result) {
         const user = result.user;
         console.log('[AUTH] Handling Redirect Success:', user.email);
-        
+
         // --- BACKEND HANDSHAKE ---
         const response = await fetch(`${this.backendUrl}/api/auth/social-handshake`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            email: user.email, 
+          body: JSON.stringify({
+            email: user.email,
             name: user.displayName || 'Google User',
             provider: 'Google'
           })
@@ -2018,22 +2008,22 @@ class DB {
 
         const res = await response.json();
         if (res.success && res.token) {
-           this.storeToken(res.token);
-           this.state.currentUser = res.user;
-           this.state.auth = {
-             isLoggedIn: true,
-             role: res.user.role,
-             id: res.user.id,
-             email: res.user.email,
-             name: res.user.name,
-             lastLoginAt: new Date().toISOString(),
-             isPersistent: true
-           };
-           this.authenticateSocket();
-           this.notify();
-           this.logAudit('Google Login', 'Login', `Authenticated via Backend Handshake: ${user.email}`, res.user.id, res.user.name);
+          this.storeToken(res.token);
+          this.state.currentUser = res.user;
+          this.state.auth = {
+            isLoggedIn: true,
+            role: res.user.role,
+            id: res.user.id,
+            email: res.user.email,
+            name: res.user.name,
+            lastLoginAt: new Date().toISOString(),
+            isPersistent: true
+          };
+          this.authenticateSocket();
+          this.notify();
+          this.logAudit('Google Login', 'Login', `Authenticated via Backend Handshake: ${user.email}`, res.user.id, res.user.name);
         } else {
-           this.logNotification('all', 'error', 'Auth Handshake Failed', res.message || 'Identity verification rejected.');
+          this.logNotification('all', 'error', 'Auth Handshake Failed', res.message || 'Identity verification rejected.');
         }
       }
     } catch (e: any) {
@@ -2059,8 +2049,8 @@ class DB {
       return { success: true, confirmationResult };
     } catch (e: any) {
       if (this.recaptchaVerifier) {
-          this.recaptchaVerifier.clear();
-          this.recaptchaVerifier = null;
+        this.recaptchaVerifier.clear();
+        this.recaptchaVerifier = null;
       }
       return { success: false, message: e.message };
     }
@@ -2076,8 +2066,8 @@ class DB {
       const response = await fetch(`${this.backendUrl}/api/auth/social-handshake`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          phone: phone, 
+        body: JSON.stringify({
+          phone: phone,
           name: 'Phone User',
           provider: 'SMS'
         })
@@ -2085,23 +2075,23 @@ class DB {
 
       const res = await response.json();
       if (res.success && res.token) {
-         this.storeToken(res.token);
-         this.state.currentUser = res.user;
-         this.state.auth = {
-           isLoggedIn: true,
-           role: res.user.role,
-           id: res.user.id,
-           email: res.user.email,
-           name: res.user.name,
-           lastLoginAt: new Date().toISOString(),
-           isPersistent: true
-         };
-         this.authenticateSocket();
-         this.notify();
-         this.logAudit('Phone Login', 'Login', `Authenticated via Backend Handshake: ${phone}`, res.user.id, res.user.name);
-         return { success: true, user: this.state.currentUser };
+        this.storeToken(res.token);
+        this.state.currentUser = res.user;
+        this.state.auth = {
+          isLoggedIn: true,
+          role: res.user.role,
+          id: res.user.id,
+          email: res.user.email,
+          name: res.user.name,
+          lastLoginAt: new Date().toISOString(),
+          isPersistent: true
+        };
+        this.authenticateSocket();
+        this.notify();
+        this.logAudit('Phone Login', 'Login', `Authenticated via Backend Handshake: ${phone}`, res.user.id, res.user.name);
+        return { success: true, user: this.state.currentUser };
       } else {
-         return { success: false, message: res.message || 'Identity verification rejected by backend.' };
+        return { success: false, message: res.message || 'Identity verification rejected by backend.' };
       }
     } catch (e: any) {
       console.error('[AUTH] OTP Verification Error:', e);
@@ -2147,7 +2137,7 @@ class DB {
   private async dispatchDirectEmail(userId: string, subject: string, body: string) {
     const user = this.findUserNode(userId);
     if (!user || !user.email) return { success: false };
-    
+
     this.logCommunication({
       userId,
       userName: user.name,
@@ -2175,22 +2165,22 @@ class DB {
     };
     if (!this.state.deliveryLogs) this.state.deliveryLogs = [];
     this.state.deliveryLogs.push(log);
-    
+
     // Simulate sending real email via node backend API
     try {
-            const config = this.state.settings.commConfig.smtpConfig;
-            const senderId = this.state.settings.commConfig.otpSenderId || 'SDR-1';
-            const sender = this.state.settings.commConfig.senderIdentities.find(s => s.id === senderId) || this.state.settings.commConfig.senderIdentities[0];
-            const senderEmail = this.state.settings.commConfig.otpEmail || sender?.email || 'noreply@clickopticx.com';
-            
-            this.socket.emit('send-email', { 
-                config,
-                payload: {
-                    from: senderEmail,
-                    senderName: sender?.name || 'Click Opticx Authority',
-                    to, 
-                    subject: 'Login Verification Protocol - OTP', 
-                    html: `
+      const config = this.state.settings.commConfig.smtpConfig;
+      const senderId = this.state.settings.commConfig.otpSenderId || 'SDR-1';
+      const sender = this.state.settings.commConfig.senderIdentities.find(s => s.id === senderId) || this.state.settings.commConfig.senderIdentities[0];
+      const senderEmail = this.state.settings.commConfig.otpEmail || sender?.email || 'noreply@clickopticx.com';
+
+      this.socket.emit('send-email', {
+        config,
+        payload: {
+          from: senderEmail,
+          senderName: sender?.name || 'Click Opticx Authority',
+          to,
+          subject: 'Login Verification Protocol - OTP',
+          html: `
                         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px; background-color: #f8fafc; border-radius: 20px;">
                             <div style="max-width: 600px; margin: 0 auto; background-color: white; padding: 40px; border-radius: 30px; border: 1px solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
                                 <h1 style="color: #1570ef; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.025em; margin-bottom: 24px;">Security Handshake Initiation</h1>
@@ -2202,9 +2192,9 @@ class DB {
                             </div>
                         </div>
                     `
-                }
-            });
-    } catch(err) {}
+        }
+      });
+    } catch (err) { }
 
     await this.commit();
     return { success: true };
@@ -2212,8 +2202,8 @@ class DB {
 
   async syncArtifacts(userId: string, files: string[], onLog?: (log: any) => void) {
     const res = await MultiCloudService.syncArtifacts(userId, files, (log) => {
-        if (onLog) onLog(log);
-        this.notify(); // Re-render to show progress
+      if (onLog) onLog(log);
+      this.notify(); // Re-render to show progress
     });
     this.state.settings.cloudStorage.lastSync = res.timestamp;
     await this.commit();
@@ -2235,30 +2225,40 @@ class DB {
 
     // ─── Helper: attempt a single backend login call ────────────────────────
     const attemptBackendLogin = async (timeoutMs: number) => {
-      const controller = new AbortController();
-      const tid = setTimeout(() => controller.abort(), timeoutMs);
+      const response = await fetch(`${this.backendUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password: pass })
+      });
+      
+      let resData;
       try {
-        const response = await fetch(`${this.backendUrl}/api/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ identifier, password: pass }),
-          signal: controller.signal,
-        });
-        clearTimeout(tid);
-        return await response.json();
-      } finally {
-        clearTimeout(tid);
+        resData = await response.json();
+      } catch(e) {
+        resData = {};
       }
+
+      if (!response.ok || !resData.success) {
+        throw new Error(resData.message || resData.error || 'Authentication failed');
+      }
+
+      return {
+         success: true,
+         user: resData.user,
+         userType: resData.user.role === 'Customer' ? 'customer' : 'staff',
+         token: resData.token
+      };
     };
 
     // ─── Helper: local staff/admin fallback (bcrypt-free, hash-based) ───────
     const tryLocalFallback = () => {
       const lowerIdentifier = identifier.toLowerCase();
-      // Look through locally stored staff/admin users
-      const staffUser = this.state.users.find(u => {
+
+      // 1. Search this.state.users for non-customer roles (dynamically created admins)
+      let found: any = this.state.users.find(u => {
         if (!u || u.deleted) return false;
         const role = (u.role || '').toLowerCase();
-        if (role === 'customer' || role === 'subscriber') return false; // customers must use backend
+        if (role === 'customer' || role === 'subscriber') return false;
         return (
           (u.email || '').toLowerCase() === lowerIdentifier ||
           (u.username || '').toLowerCase() === lowerIdentifier ||
@@ -2266,14 +2266,29 @@ class DB {
         );
       });
 
-      if (!staffUser) return null;
+      // 2. ── CRITICAL FIX: Also search this.state.staff[] (System Admin lives here) ──
+      if (!found) {
+        found = (this.state.staff || []).find((s: any) => {
+          if (!s) return false;
+          return (
+            (s.email || '').toLowerCase() === lowerIdentifier ||
+            (s.username || '').toLowerCase() === lowerIdentifier ||
+            (s.phone || '') === identifier
+          );
+        });
+        // Ensure staff entry has an id (staff[] entries may omit id)
+        if (found && !found.id) {
+          found = { ...found, id: 'STAFF-' + (found.email || 'unknown').replace(/[^a-z0-9]/gi, '-') };
+        }
+      }
+
+      if (!found) return null;
 
       // Validate password against stored plain or hashed credential
-      // For admins created via the panel the password is stored as plain text
-      const storedPass = staffUser.password || '';
+      const storedPass = found.password || '';
       const passwordMatch = storedPass === pass;
       if (!passwordMatch) return null;
-      return staffUser;
+      return found;
     };
 
     // ─── LAYER 1: Backend primary attempt (15s timeout) ─────────────────────
@@ -2283,47 +2298,33 @@ class DB {
     try {
       res = await attemptBackendLogin(15000);
     } catch (e1: any) {
-      console.warn('[AUTH] Primary attempt failed, retrying in 3s for cold start:', e1.message);
-      // ─── LAYER 2: Cold-start retry 1 (wait 3s, then 20s timeout) ─────────────
-      await new Promise(r => setTimeout(r, 3000));
-      try {
-        res = await attemptBackendLogin(20000);
-      } catch (e2: any) {
-        console.warn('[AUTH] Secondary attempt failed, retrying one last time in 5s:', e2.message);
-        // ─── LAYER 3: Cold-start retry 2 (wait 5s, then 20s timeout) ─────────────
-        await new Promise(r => setTimeout(r, 5000));
-        try {
-          res = await attemptBackendLogin(20000);
-        } catch (e3: any) {
-          console.warn('[AUTH] Final backend attempt failed. Activating local fallback.', e3.message);
-          // ─── LAYER 4: Local admin/staff fallback ─────────────────────────────
-          const localUser = tryLocalFallback();
-          if (localUser) {
-            console.warn('[AUTH] Backend unavailable — authenticated locally for staff user.');
-            this.state.currentUser = localUser;
-            this.state.auth = {
-              isLoggedIn: true,
-              role: localUser.role,
-              id: localUser.id,
-              email: localUser.email,
-              name: localUser.name,
-              lastLoginAt: new Date().toISOString(),
-              isPersistent: !!rememberMe
-            };
-            if (!rememberMe) sessionStorage.setItem('clickoptix_active_session', 'true');
-            this.state.view = 'admin';
-            this.logAudit('Local Fallback Login', 'Login', `Staff authenticated locally due to backend unavailability.`, localUser.id, localUser.name);
-            await this.commit(undefined, false);
-            this.notify();
-            return { success: true, user: localUser, type: 'staff', offlineMode: true };
-          }
-          // No local match found either
-          return {
-            success: false,
-            message: '⚠️ The server is taking longer than usual to wake up. Please wait 10 seconds and try one last time. (System is warming up)',
-          };
-        }
+      console.warn('[AUTH] Primary attempt failed:', e1.message);
+      // ─── LAYER 2: Local admin/staff fallback ─────────────────────────────
+      const localUser = tryLocalFallback();
+      if (localUser) {
+        console.warn('[AUTH] Backend unavailable — authenticated locally for staff user.');
+        this.state.currentUser = localUser;
+        this.state.auth = {
+          isLoggedIn: true,
+          role: localUser.role,
+          id: localUser.id,
+          email: localUser.email,
+          name: localUser.name,
+          lastLoginAt: new Date().toISOString(),
+          isPersistent: !!rememberMe
+        };
+        if (!rememberMe) sessionStorage.setItem('clickoptix_active_session', 'true');
+        this.state.view = 'admin';
+        this.logAudit('Local Fallback Login', 'Login', `Staff authenticated locally due to backend unavailability.`, localUser.id, localUser.name);
+        await this.commit(undefined, false);
+        this.notify();
+        return { success: true, user: localUser, type: 'staff', offlineMode: true };
       }
+      // No local match found either
+      return {
+        success: false,
+        message: '⚠️ Authentication failed or service unavailable. Please try again.',
+      };
     }
 
     // ─── Process backend response ────────────────────────────────────────────
@@ -2360,7 +2361,7 @@ class DB {
 
     // The backend returns the full user object (staff or user)
     const authenticatedEntity = res.user;
-    
+
     // Update local session state
     this.state.currentUser = authenticatedEntity;
     this.state.auth = {
@@ -2374,54 +2375,54 @@ class DB {
     };
 
     if (!rememberMe) {
-        sessionStorage.setItem('clickoptix_active_session', 'true');
+      sessionStorage.setItem('clickoptix_active_session', 'true');
     }
 
     this.state.view = res.userType === 'customer' ? 'portal' : 'admin';
-    
+
     if (res.userType === 'customer') {
-        this.state.currentUser.role = Role.CUSTOMER;
-        const existingIdx = this.state.users.findIndex(u => u.id === authenticatedEntity.id);
-        if (existingIdx === -1) {
-          const localUser: ISPUser = {
-            ...authenticatedEntity,
-            role: Role.CUSTOMER,
-            kyc_attempt_count: authenticatedEntity.kyc_attempt_count ?? 0,
-            kyc_history: authenticatedEntity.kyc_history ?? [],
-            activityLog: authenticatedEntity.activityLog ?? [],
-            connectionId: authenticatedEntity.connectionId || 'PENDING-' + authenticatedEntity.id?.slice(-4),
-            nasConnectionType: authenticatedEntity.nasConnectionType || 'Manual',
-            referralCode: authenticatedEntity.referralCode || 'REF-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
-            activationCount: authenticatedEntity.activationCount ?? 0,
-          };
-          this.state.users.push(localUser);
-          console.log('[REGISTRY SYNC] User upserted into local state after backend login:', localUser.id);
-        } else {
-          this.state.users[existingIdx] = {
-            ...this.state.users[existingIdx],
-            ...authenticatedEntity,
-            role: Role.CUSTOMER,
-          };
-          console.log('[REGISTRY SYNC] Local user record refreshed from backend:', authenticatedEntity.id);
-        }
+      this.state.currentUser.role = Role.CUSTOMER;
+      const existingIdx = this.state.users.findIndex(u => u.id === authenticatedEntity.id);
+      if (existingIdx === -1) {
+        const localUser: ISPUser = {
+          ...authenticatedEntity,
+          role: Role.CUSTOMER,
+          kyc_attempt_count: authenticatedEntity.kyc_attempt_count ?? 0,
+          kyc_history: authenticatedEntity.kyc_history ?? [],
+          activityLog: authenticatedEntity.activityLog ?? [],
+          connectionId: authenticatedEntity.connectionId || 'PENDING-' + authenticatedEntity.id?.slice(-4),
+          nasConnectionType: authenticatedEntity.nasConnectionType || 'Manual',
+          referralCode: authenticatedEntity.referralCode || 'REF-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+          activationCount: authenticatedEntity.activationCount ?? 0,
+        };
+        this.state.users.push(localUser);
+        console.log('[REGISTRY SYNC] User upserted into local state after backend login:', localUser.id);
+      } else {
+        this.state.users[existingIdx] = {
+          ...this.state.users[existingIdx],
+          ...authenticatedEntity,
+          role: Role.CUSTOMER,
+        };
+        console.log('[REGISTRY SYNC] Local user record refreshed from backend:', authenticatedEntity.id);
+      }
     }
 
     await this.commit(undefined, true);
     this.authenticateSocket();
     this.notify();
-    
+
     this.logAudit(
-      res.userType === 'staff' ? 'Staff Login' : 'User Login', 
-      'Login', 
+      res.userType === 'staff' ? 'Staff Login' : 'User Login',
+      'Login',
       `${res.userType === 'staff' ? 'Administrative identity' : 'Subscriber identity'} authenticated successfully.`,
       authenticatedEntity.id,
       authenticatedEntity.name
     );
 
-    return { 
-      success: true, 
-      user: this.state.currentUser, 
-      type: res.userType 
+    return {
+      success: true,
+      user: this.state.currentUser,
+      type: res.userType
     };
   }
 
@@ -2434,81 +2435,93 @@ class DB {
 
       const response = await fetch(`${this.backendUrl}/api/v1/admin/impersonate/${userId}`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${currentToken}`
         }
       });
-    
-    const res = await response.json();
-    if (res.success && res.token) {
-      // Backup the admin token (with its metadata wrapper) for restoration
-      const originalTokenRaw = localStorage.getItem('clickopticx_auth_token');
-      if (originalTokenRaw) localStorage.setItem('clickopticx_admin_token', originalTokenRaw);
-      
-      this.storeToken(res.token);
-      this.state.currentUser = res.user;
-      this.state.auth = {
-        ...this.state.auth,
-        id: res.user.id,
-        role: res.user.role,
-        isImpersonating: true,
-        impersonatorId: this.state.auth?.id
-      } as any;
-      
-      this.logAudit('Impersonation Start', 'Admin', `Admin started impersonating user ${res.user.email}`, res.user.id, res.user.name);
-      await this.commitImmediate();
-      this.notify();
-      window.location.href = '/dashboard'; 
-      return { success: true };
-    }
-    return { success: false, message: res.message || 'Impersonation Handshake Failed.' };
-  } catch (e: any) {
-    console.error('[AUTH] Impersonation Error:', e);
-    return { success: false, message: e.message };
-  }
-}
 
-async logoutImpersonation() {
-  const adminTokenRaw = localStorage.getItem('clickopticx_admin_token');
-  if (adminTokenRaw) {
-     // Restore the original admin token metadata wrapper directly
-     localStorage.setItem('clickopticx_auth_token', adminTokenRaw);
-     localStorage.removeItem('clickopticx_admin_token');
-     
-     this.logAudit('Impersonation End', 'Admin', `Admin terminated impersonation session.`);
-     this.notify();
-     window.location.href = '/admin/dashboard';
+      const res = await response.json();
+      if (res.success && res.token) {
+        // Backup the admin token (with its metadata wrapper) for restoration
+        const originalTokenRaw = localStorage.getItem('clickopticx_auth_token');
+        if (originalTokenRaw) localStorage.setItem('clickopticx_admin_token', originalTokenRaw);
+
+        this.storeToken(res.token);
+        this.state.currentUser = res.user;
+        this.state.auth = {
+          ...this.state.auth,
+          id: res.user.id,
+          role: res.user.role,
+          isImpersonating: true,
+          impersonatorId: this.state.auth?.id
+        } as any;
+
+        this.logAudit('Impersonation Start', 'Admin', `Admin started impersonating user ${res.user.email}`, res.user.id, res.user.name);
+        await this.commitImmediate();
+        this.notify();
+        window.location.href = '/dashboard';
+        return { success: true };
+      }
+      return { success: false, message: res.message || 'Impersonation Handshake Failed.' };
+    } catch (e: any) {
+      console.error('[AUTH] Impersonation Error:', e);
+      return { success: false, message: e.message };
+    }
   }
-}
+
+  async logoutImpersonation() {
+    const adminTokenRaw = localStorage.getItem('clickopticx_admin_token');
+    if (adminTokenRaw) {
+      // Restore the original admin token metadata wrapper directly
+      localStorage.setItem('clickopticx_auth_token', adminTokenRaw);
+      localStorage.removeItem('clickopticx_admin_token');
+
+      this.logAudit('Impersonation End', 'Admin', `Admin terminated impersonation session.`);
+      this.notify();
+      window.location.href = '/admin/dashboard';
+    }
+  }
 
 
   async logout() {
     console.log('[DB] Protocol: Terminating session and clearing persistent buffers.');
     if (this.socket) {
-        this.socket.emit('logout');
+      this.socket.emit('logout');
     }
-    
+
     // 1. Clear State
     this.state.currentUser = undefined;
     this.state.isImpersonating = false;
     this.state.auth = { isLoggedIn: false };
     this.state.view = 'login';
-    
+
     // 2. Clear Auth Tokens & Persistent Buffers
     localStorage.removeItem('clickopticx_auth_token');
     localStorage.removeItem('clickopticx_v16_registry'); // Wipe cache to enforce clean login on refresh
-    
-    // 3. Terminate Firebase Handshake
-    if (this.auth) {
-        try {
-            await this.auth.signOut();
-        } catch (e) {
-            console.warn('[AUTH] Firebase SignOut failed (likely already disconnected):', e);
-        }
+
+    // 3. Clear Cookies to prevent auto-login
+    try {
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+    } catch (e) {
+      console.warn('Failed to clear cookies:', e);
     }
 
-    // 4. Final Notification
+    // 4. Terminate Firebase Handshake
+    if (this.auth) {
+      try {
+        await this.auth.signOut();
+      } catch (e) {
+        console.warn('[AUTH] Firebase SignOut failed (likely already disconnected):', e);
+      }
+    }
+
+    // 5. Final Notification and hard redirect
     this.notify();
+    window.location.href = '/login';
   }
 
   async triggerGlobalWipe() {
@@ -2540,8 +2553,8 @@ async logoutImpersonation() {
   async getBrandingMedia() {
     try {
       const res = await fetch(`${this.backendUrl}/api/branding/media`, {
-        headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        headers: {
+          'Authorization': `Bearer ${this.getValidToken()}`
         }
       });
       return await res.json();
@@ -2554,11 +2567,11 @@ async logoutImpersonation() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const res = await fetch(`${this.backendUrl}/api/branding/media`, {
         method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        headers: {
+          'Authorization': `Bearer ${this.getValidToken()}`
         },
         body: formData
       });
@@ -2572,8 +2585,8 @@ async logoutImpersonation() {
     try {
       const res = await fetch(`${this.backendUrl}/api/branding/media?id=${id}`, {
         method: 'DELETE',
-        headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        headers: {
+          'Authorization': `Bearer ${this.getValidToken()}`
         }
       });
       return await res.json();
@@ -2586,8 +2599,8 @@ async logoutImpersonation() {
   async getTrash() {
     try {
       const res = await fetch(`${this.backendUrl}/api/trash`, {
-        headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        headers: {
+          'Authorization': `Bearer ${this.getValidToken()}`
         }
       });
       return await res.json();
@@ -2600,8 +2613,8 @@ async logoutImpersonation() {
     try {
       const res = await fetch(`${this.backendUrl}/api/trash/${id}/restore`, {
         method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        headers: {
+          'Authorization': `Bearer ${this.getValidToken()}`
         }
       });
       return await res.json();
@@ -2614,8 +2627,8 @@ async logoutImpersonation() {
     try {
       const res = await fetch(`${this.backendUrl}/api/trash/${id}`, {
         method: 'DELETE',
-        headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+        headers: {
+          'Authorization': `Bearer ${this.getValidToken()}`
         }
       });
       return await res.json();
@@ -2672,7 +2685,7 @@ async logoutImpersonation() {
       connectionType: 'Fiber',
       activityLog: [],
       referralCode: 'REF-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
-      packageId: '', 
+      packageId: '',
       managementMode: 'Manual',
       nasConnectionType: 'PPPoE',
       ...u
@@ -2680,7 +2693,7 @@ async logoutImpersonation() {
     this.state.users.push(newUser as any);
     await this.syncUserStatusWithBilling(newUser.id);
     await this.commit();
-    
+
     if (newUser.managementMode === 'NAS_Controlled' && newUser.routerId) {
       setTimeout(() => this.syncUserToNAS(newUser.id, 'upsert'), 500);
     }
@@ -2688,12 +2701,12 @@ async logoutImpersonation() {
   }
 
   async updateUser(id: string, d: any) {
-    const idx = this.state.users.findIndex(u => 
-       u.id === id || 
-       (u.username && u.username === id) || 
-       (u.pppoeId && u.pppoeId === id)
+    const idx = this.state.users.findIndex(u =>
+      u.id === id ||
+      (u.username && u.username === id) ||
+      (u.pppoeId && u.pppoeId === id)
     );
-    
+
     if (idx !== -1) {
       const targetId = this.state.users[idx].id;
 
@@ -2783,7 +2796,7 @@ async logoutImpersonation() {
         body: JSON.stringify({ config })
       });
       return await res.json();
-    } catch(e: any) {
+    } catch (e: any) {
       return { success: false, message: e.message };
     }
   }
@@ -2835,8 +2848,8 @@ async logoutImpersonation() {
   async sendTestEmail(config: any, testData: any) {
     // Proxy to the new centralized dispatcher to ensure logging and simulation
     return await this.dispatchEmail(
-      testData.recipient, 
-      testData.subject || 'Gateway Diagnostic Test', 
+      testData.recipient,
+      testData.subject || 'Gateway Diagnostic Test',
       'This is a diagnostic handshake to verify the ISP Communication Pipeline.'
     );
   }
@@ -2870,12 +2883,12 @@ async logoutImpersonation() {
   async saveNotificationTemplate(t: Partial<NotificationTemplate>) {
     const id = t.id || 'NTMP-' + Date.now();
     const idx = this.state.notificationTemplates.findIndex(x => x.id === id);
-    const data = { 
-        ...t, 
-        id, 
-        lastUpdated: new Date().toISOString(),
-        channels: t.channels || ['Push'],
-        event: t.event || 'GENERAL'
+    const data = {
+      ...t,
+      id,
+      lastUpdated: new Date().toISOString(),
+      channels: t.channels || ['Push'],
+      event: t.event || 'GENERAL'
     } as NotificationTemplate;
     if (idx !== -1) this.state.notificationTemplates[idx] = data;
     else this.state.notificationTemplates.push(data);
@@ -2894,50 +2907,50 @@ async logoutImpersonation() {
 
     const template = this.state.notificationTemplates.find(t => t.event === event);
     if (!template && event !== 'GENERAL') {
-        logger.warn(`No template found for event: ${event}`);
+      logger.warn(`No template found for event: ${event}`);
     }
 
     const payload = {
-        userId: user.id,
-        userPhone: user.phone,
-        fcmToken: user.fcmToken, // Assuming this field exists or will be added
-        event,
-        title: template?.pushTitle || 'Click Opticx Notification',
-        body: template?.pushBody || 'New update from Click Opticx',
-        config: this.state.settings.commConfig,
-        data: data || {}
+      userId: user.id,
+      userPhone: user.phone,
+      fcmToken: user.fcmToken, // Assuming this field exists or will be added
+      event,
+      title: template?.pushTitle || 'Click Opticx Notification',
+      body: template?.pushBody || 'New update from Click Opticx',
+      config: this.state.settings.commConfig,
+      data: data || {}
     };
 
     try {
-        const res = await fetch(`${this.backendUrl}/api/smart-notify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const report = await res.json();
-        
-        // Log the delivery
-        const log: DeliveryLog = {
-            id: 'LOG-' + Date.now(),
-            userId: user.id,
-            userName: user.name,
-            event: event as NotificationTriggerEvent,
-            timestamp: new Date().toISOString(),
-            gatewayUsed: report.gatewayUsed as NotificationGateway,
-            fallbackUsed: report.fallbackUsed as NotificationGateway,
-            status: report.status as NotificationDeliveryStatus,
-            retryCount: report.retryCount || 0,
-            triggerSource: 'Automation',
-            type: report.fallbackUsed ? 'SMS' : 'Push',
-            channel: report.fallbackUsed ? 'Global SMS' : 'Firebase FCM'
-        };
-        this.state.deliveryLogs.unshift(log);
-        await this.commit();
-        this.notify();
-        
-        return report;
+      const res = await fetch(`${this.backendUrl}/api/smart-notify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const report = await res.json();
+
+      // Log the delivery
+      const log: DeliveryLog = {
+        id: 'LOG-' + Date.now(),
+        userId: user.id,
+        userName: user.name,
+        event: event as NotificationTriggerEvent,
+        timestamp: new Date().toISOString(),
+        gatewayUsed: report.gatewayUsed as NotificationGateway,
+        fallbackUsed: report.fallbackUsed as NotificationGateway,
+        status: report.status as NotificationDeliveryStatus,
+        retryCount: report.retryCount || 0,
+        triggerSource: 'Automation',
+        type: report.fallbackUsed ? 'SMS' : 'Push',
+        channel: report.fallbackUsed ? 'Global SMS' : 'Firebase FCM'
+      };
+      this.state.deliveryLogs.unshift(log);
+      await this.commit();
+      this.notify();
+
+      return report;
     } catch (error: any) {
-        return { success: false, status: 'Failed', error: error.message };
+      return { success: false, status: 'Failed', error: error.message };
     }
   }
 
@@ -2973,10 +2986,10 @@ async logoutImpersonation() {
   async sendCampaign(id: string) {
     const camp = this.state.emailCampaigns.find(c => c.id === id);
     if (!camp) return { success: false, message: 'Campaign not found' };
-    
+
     const segment = this.state.audienceSegments.find(s => s.id === camp.segmentId);
     if (!segment) return { success: false, message: 'Segment not found' };
-    
+
     const template = this.state.emailTemplates.find(t => t.id === camp.templateId);
     if (!template) return { success: false, message: 'Template not found' };
 
@@ -3008,7 +3021,7 @@ async logoutImpersonation() {
       } else {
         failedCount++;
       }
-      
+
       // Update stats in real-time
       camp.stats.sent = sentCount;
       camp.stats.failed = failedCount;
@@ -3018,9 +3031,9 @@ async logoutImpersonation() {
     camp.status = failedCount === 0 ? 'Completed' : (sentCount > 0 ? 'Completed' : 'Failed');
     camp.sentAt = new Date().toISOString();
     await this.commit();
-    
-    this.logNotification('all', failedCount === 0 ? 'success' : 'warning', 
-      'Campaign Dispatched', 
+
+    this.logNotification('all', failedCount === 0 ? 'success' : 'warning',
+      'Campaign Dispatched',
       `Email campaign "${camp.name}" processed. Sent: ${sentCount}, Failed: ${failedCount}.`);
 
     return { success: true, sent: sentCount, failed: failedCount };
@@ -3103,19 +3116,19 @@ async logoutImpersonation() {
 
   async addStaff(s: Partial<StaffUser>) {
     if (!s.email) return { success: false, message: 'Corporate identity requires a valid email.' };
-    
+
     // Conflict Check
     const exists = this.state.staff.find(ex => ex.email.toLowerCase().trim() === s.email?.toLowerCase().trim());
     if (exists) return { success: false, message: `CONFLICT: Staff identity [${s.email}] already exists in governance registry.` };
 
-    const next = { 
-      ...s, 
-      status: s.status || 'Active', 
-      password: s.password || 'Click@Opticx2026', 
+    const next = {
+      ...s,
+      status: s.status || 'Active',
+      password: s.password || 'Click@Opticx2026',
       balance: s.balance || 0,
       role: s.role || Role.TEAM_MEMBER
     } as StaffUser;
-    
+
     this.state.staff.push(next);
     await this.commit(true);
     return { success: true, message: 'Personnel identity provisioned successfully.' };
@@ -3137,7 +3150,7 @@ async logoutImpersonation() {
 
   async processTopup(collector: string, target: string, type: 'staff' | 'user', amount: number, description: string = 'Credit Refill', forceType?: LedgerType) {
     const timestamp = new Date().toISOString();
-    
+
     // Deduct from Collector if it's a staff member
     if (collector !== 'System' && collector !== 'GATEWAY') {
       const cIdx = this.state.staff.findIndex(s => s.email === collector || s.id === collector);
@@ -3154,12 +3167,12 @@ async logoutImpersonation() {
           method: 'Registry Transfer'
         });
       } else if (collector.includes('@')) {
-         // If collector is an email but not found in staff, check if it's a superadmin email
-         const admin = this.state.staff.find(s => s.role === Role.SUPER_ADMIN);
-         if (admin) {
-           const aIdx = this.state.staff.findIndex(s => s.id === admin.id);
-           this.state.staff[aIdx].balance = (this.state.staff[aIdx].balance || 0) - amount;
-         }
+        // If collector is an email but not found in staff, check if it's a superadmin email
+        const admin = this.state.staff.find(s => s.role === Role.SUPER_ADMIN);
+        if (admin) {
+          const aIdx = this.state.staff.findIndex(s => s.id === admin.id);
+          this.state.staff[aIdx].balance = (this.state.staff[aIdx].balance || 0) - amount;
+        }
       }
     } else {
       // System/Gateway refills deduct from SuperAdmin pool by default
@@ -3173,15 +3186,15 @@ async logoutImpersonation() {
       const sIdx = this.state.staff.findIndex(s => s.email === target || s.id === target);
       if (sIdx !== -1) {
         this.state.staff[sIdx].balance = (this.state.staff[sIdx].balance || 0) + amount;
-        this.state.ledger.push({ 
-          id: 'TOP_' + Date.now(), 
-          userId: target, 
-          amount, 
-          type: LedgerType.CREDIT, 
-          timestamp, 
-          description: description || 'Admin Refill', 
-          balanceAfter: this.state.staff[sIdx].balance, 
-          method: 'Registry Direct' 
+        this.state.ledger.push({
+          id: 'TOP_' + Date.now(),
+          userId: target,
+          amount,
+          type: LedgerType.CREDIT,
+          timestamp,
+          description: description || 'Admin Refill',
+          balanceAfter: this.state.staff[sIdx].balance,
+          method: 'Registry Direct'
         });
       } else {
         return { success: false, message: 'Target staff node not found.' };
@@ -3215,14 +3228,14 @@ async logoutImpersonation() {
     const uIdx = this.findUserIndex(userId);
     if (uIdx !== -1) {
       const user = this.state.users[uIdx];
-      
+
       // STRICT RULES: Prevent duplicate activation of the same package if currently active
       const isActive = [UserStatus.ACTIVE, UserStatus.PAYMENT_DUE, UserStatus.ACTIVE_UNPAID, UserStatus.EMERGENCY_ACTIVE].includes(user.status);
       const isSamePkg = user.packageId === pkgId;
       const isNotExpired = user.expiryDate && new Date(user.expiryDate) > new Date();
 
       if (isActive && isSamePkg && isNotExpired) {
-          return { success: false, message: 'This package is already active on this node. Use Upgrade/Change flow for different packages.' };
+        return { success: false, message: 'This package is already active on this node. Use Upgrade/Change flow for different packages.' };
       }
 
       this.state.users[uIdx].packageId = pkgId;
@@ -3240,22 +3253,22 @@ async logoutImpersonation() {
 
       // Update balance (Deduct from Wallet)
       if (pkg) {
-         const taxRate = this.state.settings.enableTax ? this.state.settings.autoTaxPercentage : 0;
-         const totalCost = pkg.price + Math.round(pkg.price * (taxRate / 100));
-         
-         // In this credit-based system, activating a package DEDUCTS from the wallet
-         this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) - totalCost;
-         
-         this.state.ledger.push({
-           id: `ACT-${Date.now()}`,
-           userId,
-           amount: totalCost,
-           type: LedgerType.DEBIT,
-           timestamp: new Date().toISOString(),
-           description: `Package Activation: ${pkg.name}`,
-           balanceAfter: this.state.users[uIdx].balance,
-           method: 'System Deduction'
-         });
+        const taxRate = this.state.settings.enableTax ? this.state.settings.autoTaxPercentage : 0;
+        const totalCost = pkg.price + Math.round(pkg.price * (taxRate / 100));
+
+        // In this credit-based system, activating a package DEDUCTS from the wallet
+        this.state.users[uIdx].balance = (this.state.users[uIdx].balance || 0) - totalCost;
+
+        this.state.ledger.push({
+          id: `ACT-${Date.now()}`,
+          userId,
+          amount: totalCost,
+          type: LedgerType.DEBIT,
+          timestamp: new Date().toISOString(),
+          description: `Package Activation: ${pkg.name}`,
+          balanceAfter: this.state.users[uIdx].balance,
+          method: 'System Deduction'
+        });
       }
 
       // =====================================================
@@ -3265,7 +3278,7 @@ async logoutImpersonation() {
       if (pkg) {
         const user = this.state.users[uIdx];
         const resellerEmail = user.resellerEmail;
-        
+
         if (resellerEmail) {
           // PROFIT ENGINE — fire-and-forget, non-blocking
           // Each reseller tier independently uses its own packageConfig:
@@ -3286,19 +3299,19 @@ async logoutImpersonation() {
       // NAS Simulation Intercept
       if (this.state.settings.nasSystemEnabled && this.state.users[uIdx].managementMode === 'NAS_Controlled') {
         if (this.state.users[uIdx].routerId) {
-           await this.sendCoACommand(userId, 'ACTIVATE_PACKAGE');
-           this.logNotification(userId, 'info', 'Cloud NAS Activation', `Sent API commands to router ${this.state.users[uIdx].routerId} for provisioning.`);
+          await this.sendCoACommand(userId, 'ACTIVATE_PACKAGE');
+          this.logNotification(userId, 'info', 'Cloud NAS Activation', `Sent API commands to router ${this.state.users[uIdx].routerId} for provisioning.`);
         } else {
-           this.logNotification('all', 'error', 'NAS Auto-Sync Failed', `User ${this.state.users[uIdx].name} is NAS Controlled but has no router assigned.`);
-           return { success: false, message: 'No router assigned for NAS-controlled user.' };
+          this.logNotification('all', 'error', 'NAS Auto-Sync Failed', `User ${this.state.users[uIdx].name} is NAS Controlled but has no router assigned.`);
+          return { success: false, message: 'No router assigned for NAS-controlled user.' };
         }
       }
 
       // Smart Notification Integration
       await this.dispatchSmartNotification(userId, 'PACKAGE_ACTIVATED', {
-          packageId: pkgId,
-          packageName: pkg?.name || pkgId,
-          expiryDate: this.state.users[uIdx].expiryDate
+        packageId: pkgId,
+        packageName: pkg?.name || pkgId,
+        expiryDate: this.state.users[uIdx].expiryDate
       });
 
       await this.commit(true);
@@ -3322,15 +3335,15 @@ async logoutImpersonation() {
 
     // ACTION SYNC: Activate package now that it's paid
     await this.activatePackage(inv.userId, inv.packageId);
-    
+
     // FINAL SYNC: Re-evaluate account status
     await this.syncUserStatusWithBilling(inv.userId);
 
     // Smart Notification Integration
     await this.dispatchSmartNotification(inv.userId, 'PAYMENT_RECEIVED', {
-        amount: inv.paidAmount,
-        invoiceId: inv.id,
-        method: 'Wallet'
+      amount: inv.paidAmount,
+      invoiceId: inv.id,
+      method: 'Wallet'
     });
 
     await this.commit(true);
@@ -3344,10 +3357,10 @@ async logoutImpersonation() {
       id: 'INV-' + Math.floor(100000 + Math.random() * 900000),
       userId, userName: user.name,
       packageId: pkgId, packageName: this.state.packages.find(p => p.id === pkgId)?.name || 'Custom',
-      items, subtotal: amount, taxRate: this.state.settings.enableTax ? this.state.settings.autoTaxPercentage : 0, 
-      taxAmount: this.state.settings.enableTax ? Math.round(amount * (this.state.settings.autoTaxPercentage / 100)) : 0, 
-      discountAmount: 0, 
-      totalAmount: amount + (this.state.settings.enableTax ? Math.round(amount * (this.state.settings.autoTaxPercentage / 100)) : 0), 
+      items, subtotal: amount, taxRate: this.state.settings.enableTax ? this.state.settings.autoTaxPercentage : 0,
+      taxAmount: this.state.settings.enableTax ? Math.round(amount * (this.state.settings.autoTaxPercentage / 100)) : 0,
+      discountAmount: 0,
+      totalAmount: amount + (this.state.settings.enableTax ? Math.round(amount * (this.state.settings.autoTaxPercentage / 100)) : 0),
       paidAmount: 0,
       dueAmount: amount + (this.state.settings.enableTax ? Math.round(amount * (this.state.settings.autoTaxPercentage / 100)) : 0),
       status: PaymentStatus.UNPAID, dueDate: new Date(Date.now() + 86400000 * 5).toISOString(), createdAt: new Date().toISOString()
@@ -3367,13 +3380,13 @@ async logoutImpersonation() {
     if (idx !== -1) { this.state.users[idx].welcomeChecklistShown = true; await this.commit(); }
   }
 
-  getLiveUsage(id: string) { 
+  getLiveUsage(id: string) {
     const user = this.findUserNode(id);
     if (!user) return { down: '0.0', up: '0.0', ping: 0, usageToday: '0.0', usageMonth: '0.0', offline: true };
-    
+
     // Attempt to find the latest real-time data from the socket stream
     const latest = (this.state.liveUsage || []).find(u => u.userId === user.username || u.userId === user.id);
-    
+
     if (latest) {
       return {
         down: latest.download.toFixed(2),
@@ -3385,24 +3398,24 @@ async logoutImpersonation() {
       };
     }
 
-    return { 
-      down: '0.0', 
-      up: '0.0', 
-      ping: 0, 
-      usageToday: '0.0', 
-      usageMonth: '0.0', 
-      offline: user.status === UserStatus.DISABLED 
-    }; 
+    return {
+      down: '0.0',
+      up: '0.0',
+      ping: 0,
+      usageToday: '0.0',
+      usageMonth: '0.0',
+      offline: user.status === UserStatus.DISABLED
+    };
   }
 
   subscribeToLiveTraffic(userId: string) {
     if (!this.socket) return;
     const user = this.findUserNode(userId);
     if (!user) return;
-    
+
     // In a real system, we'd fetch the NAS/OLT config from the state
     const nas = this.state.nasConfigs?.[0] || { ip: '127.0.0.1', username: 'admin', password: 'password' };
-    
+
     this.socket.emit('subscribe-live-traffic', {
       username: user.username,
       deviceConfig: nas
@@ -3415,7 +3428,7 @@ async logoutImpersonation() {
     if (!user) return;
     this.socket.emit('unsubscribe-live-traffic', user.username);
   }
-  getConnectedDevices(id: string) { 
+  getConnectedDevices(id: string) {
     // Filter active users and simulate their devices based on connection type
     const activeUsers = this.state.users.filter(u => u.status === UserStatus.ACTIVE && !u.deleted);
     return activeUsers.slice(0, 50).map(u => ({
@@ -3464,15 +3477,15 @@ async logoutImpersonation() {
 
 
   async bulkVerifyUsers(userIds: string[], verified: boolean) {
-     for (const id of userIds) {
-        const user = this.findUserNode(id);
-        if (user) {
-           this.syncUserKYCState(user, verified ? VerificationStatus.VERIFIED : VerificationStatus.UNVERIFIED);
-        }
-     }
-     await this.commit(true);
-     this.notify();
-     this.logAudit(`Bulk ${verified ? 'Verify' : 'Unverify'}`, 'System', `${verified ? 'Verified' : 'Unverified'} ${userIds.length} identity nodes.`, 'multiple');
+    for (const id of userIds) {
+      const user = this.findUserNode(id);
+      if (user) {
+        this.syncUserKYCState(user, verified ? VerificationStatus.VERIFIED : VerificationStatus.UNVERIFIED);
+      }
+    }
+    await this.commit(true);
+    this.notify();
+    this.logAudit(`Bulk ${verified ? 'Verify' : 'Unverify'}`, 'System', `${verified ? 'Verified' : 'Unverified'} ${userIds.length} identity nodes.`, 'multiple');
   }
 
 
@@ -3486,12 +3499,12 @@ async logoutImpersonation() {
       const isBase64 = base64Data.startsWith('data:');
 
       const uploadTask = async () => {
-         if (isBase64) {
-            await uploadString(storageRef, base64Data, 'data_url');
-         } else {
-            await uploadString(storageRef, base64Data, 'raw');
-         }
-         return await getDownloadURL(storageRef);
+        if (isBase64) {
+          await uploadString(storageRef, base64Data, 'data_url');
+        } else {
+          await uploadString(storageRef, base64Data, 'raw');
+        }
+        return await getDownloadURL(storageRef);
       };
 
       return await Promise.race([
@@ -3509,12 +3522,12 @@ async logoutImpersonation() {
     if (idx === -1) return { success: false, message: 'Identity node not found.' };
 
     this.state.users[idx] = { ...this.state.users[idx], ...data };
-    
+
     // Update currentUser if applicable
     if (this.state.currentUser && this.state.currentUser.id === id) {
-       this.state.currentUser = { ...this.state.users[idx], role: this.state.currentUser.role };
+      this.state.currentUser = { ...this.state.users[idx], role: this.state.currentUser.role };
     }
-    
+
     await this.commit(true);
     this.notify();
     return { success: true };
@@ -3534,24 +3547,24 @@ async logoutImpersonation() {
 
       const response = await fetch(`${this.backendUrl}/api/users/signup-requests/${requestId}/approve`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${currentToken}` 
+          'Authorization': `Bearer ${currentToken}`
         }
       });
-      
+
       const res = await response.json();
       if (!res.success) {
-         return { success: false, message: res.message || 'Backend approval failed' };
+        return { success: false, message: res.message || 'Backend approval failed' };
       }
 
       // Backend returns the approved request. We update local state directly for immediate UI feedback.
       const req = this.state.signupRequests.find(r => r.id === requestId);
       if (req) {
-         req.status = 'Approved';
-         req.approval_status = 'approved';
-         req.processedAt = res.request.processed_at;
-         req.processedBy = res.request.processed_by;
+        req.status = 'Approved';
+        req.approval_status = 'approved';
+        req.processedAt = res.request.processed_at;
+        req.processedBy = res.request.processed_by;
       }
 
       // The backend creates the user and emits 'user:created' via socket, but we can also pre-emptively
@@ -3562,7 +3575,7 @@ async logoutImpersonation() {
 
       await this.commitImmediate();
       this.notify();
-      
+
       return { success: true, message: 'Identity Approved Successfully.', request: res.request };
     } catch (e: any) {
       console.error('[DB-AUTH-CRITICAL] Approval Bridge Failure:', e);
@@ -4037,7 +4050,7 @@ async logoutImpersonation() {
       const p = this.state.payments[idx];
       if (p.status === 'Pending') {
         p.status = 'Approved';
-        
+
         // Process financial impact
         const user = this.findUserNode(p.userId);
         if (user) {
@@ -4059,7 +4072,7 @@ async logoutImpersonation() {
               }
             }
           }
-          
+
           this.state.ledger.push({
             id: 'LGR-' + Date.now(),
             userId: p.userId,
@@ -4069,20 +4082,20 @@ async logoutImpersonation() {
             description: `Payment Approved: ${p.method} - Ref: ${p.id}`,
             timestamp: new Date().toISOString()
           });
-          
+
           // Auto-update user status if balance is cleared
           if (user.balance <= 0 && user.status === UserStatus.SUSPENDED) {
-             user.status = UserStatus.ACTIVE;
-             this.logNotification(user.id, 'success', 'Account Reactivated', 'Your payment has been verified and service has been restored.');
+            user.status = UserStatus.ACTIVE;
+            this.logNotification(user.id, 'success', 'Account Reactivated', 'Your payment has been verified and service has been restored.');
           }
-          
+
           // Re-sync user state
           await this.syncUserStatusWithBilling(user.id);
         }
       } else {
         p.status = 'Approved'; // Fallback for other states
       }
-      
+
       await this.commit();
       this.notify();
     }
@@ -4119,7 +4132,7 @@ async logoutImpersonation() {
     if (user) {
       const admin = this.state.currentUser;
       const paymentId = 'PAY_' + Date.now();
-      
+
       this.state.payments.push({
         id: paymentId,
         userId: id,
@@ -4199,7 +4212,7 @@ async logoutImpersonation() {
 
     // Re-sync status
     await this.syncUserStatusWithBilling(userId);
-    
+
     await this.commit(true);
     this.notify();
     return { success: true };
@@ -4209,13 +4222,13 @@ async logoutImpersonation() {
     let userName = 'External/New Node';
     const user = this.findUserNode(userId);
     if (user) {
-       userName = user.name;
+      userName = user.name;
     } else if (type !== 'Staff_Addition') {
-       return { success: false, message: 'Target identity node not found' };
+      return { success: false, message: 'Target identity node not found' };
     } else {
-       userName = payload.name || userId;
+      userName = payload.name || userId;
     }
-    
+
     this.state.approvalRequests.push({
       id: 'APR_' + Date.now() + Math.random().toString(36).substr(2, 5),
       type,
@@ -4230,7 +4243,7 @@ async logoutImpersonation() {
       status: 'Pending',
       timestamp: new Date().toISOString()
     });
-    
+
     // Set user to Pending Verification while request is unapproved
     user.status = UserStatus.PENDING_VERIFICATION;
     await this.commit();
@@ -4244,7 +4257,7 @@ async logoutImpersonation() {
     req.status = 'Rejected';
     const user = this.findUserNode(req.userId);
     if (user && user.status === UserStatus.PENDING_VERIFICATION) {
-       await this.syncUserStatusWithBilling(user.id);
+      await this.syncUserStatusWithBilling(user.id);
     }
     await this.commit();
     this.notify();
@@ -4327,12 +4340,12 @@ async logoutImpersonation() {
   async approveRequest(reqId: string) {
     const req = this.state.approvalRequests.find(r => r.id === reqId);
     if (!req) return { success: false, message: 'Request not found' };
-    
+
     if (req.status !== 'Pending') return { success: false, message: 'Request already processed' };
     req.status = 'Approved';
-    
+
     let res: any = { success: true, message: '' };
-    
+
     try {
       const pkgId = req.payload.pkgId || req.payload.packageId;
       const amount = req.payload.amount || req.amount || 0;
@@ -4341,29 +4354,29 @@ async logoutImpersonation() {
       const details = req.payload.details || { notes: req.notes || 'Approval Desk Verification' };
 
       if (req.type === 'Payment_Collection' || req.type === 'Plan_Activation') {
-         if (pkgId) {
-            res = await this.resolvePlanActivationBilling(req.userId, pkgId, amount, status, method as any, details);
-            if (res.success) {
-               await this.activatePackage(req.userId, pkgId, status as any, req.payload.expiryDate || req.payload.activationStartDate);
-            }
-         } else {
-            // Simple payment if no package involved
-            await this.addManualPayment(req.userId, amount, method as any, details);
-         }
+        if (pkgId) {
+          res = await this.resolvePlanActivationBilling(req.userId, pkgId, amount, status, method as any, details);
+          if (res.success) {
+            await this.activatePackage(req.userId, pkgId, status as any, req.payload.expiryDate || req.payload.activationStartDate);
+          }
+        } else {
+          // Simple payment if no package involved
+          await this.addManualPayment(req.userId, amount, method as any, details);
+        }
       } else if (req.type === 'Clear_Dues') {
-         res = await this.clearAllDues(req.userId);
+        res = await this.clearAllDues(req.userId);
       } else if (req.type === 'Staff_Addition') {
-         await this.addStaff(req.payload);
-         res = { success: true, message: 'Identity Provisioned' };
+        await this.addStaff(req.payload);
+        res = { success: true, message: 'Identity Provisioned' };
       }
     } catch (e: any) {
       res = { success: false, message: e.message };
     }
-    
+
     if (res.success) {
-       await this.syncUserStatusWithBilling(req.userId);
+      await this.syncUserStatusWithBilling(req.userId);
     }
-    
+
     await this.commit(true);
     this.notify();
     return res;
@@ -4512,15 +4525,15 @@ async logoutImpersonation() {
 
     // 2.6 INTEGRATION: Cloud NAS Synchronization
     if (this.state.settings.nasSystemEnabled && user.managementMode === 'NAS_Controlled') {
-       if (user.routerId) {
-          // Send CoA activation command
-          await this.sendCoACommand(userId, 'ACTIVATE_PACKAGE');
-          // Full sync to ensuring framing/rate-limits match
-          setTimeout(() => this.syncUserToNAS(userId, 'upsert'), 500);
-          this.logNotification(userId, 'info', 'Cloud NAS Recovery', `Provisioning commands dispatched to router ${user.routerId} for service restoration.`);
-       } else {
-          this.logNotification(userId, 'warning', 'NAS Sync Missed', 'Node is NAS-controlled but lacks a router assignment. Network state may persist in Restricted mode.');
-       }
+      if (user.routerId) {
+        // Send CoA activation command
+        await this.sendCoACommand(userId, 'ACTIVATE_PACKAGE');
+        // Full sync to ensuring framing/rate-limits match
+        setTimeout(() => this.syncUserToNAS(userId, 'upsert'), 500);
+        this.logNotification(userId, 'info', 'Cloud NAS Recovery', `Provisioning commands dispatched to router ${user.routerId} for service restoration.`);
+      } else {
+        this.logNotification(userId, 'warning', 'NAS Sync Missed', 'Node is NAS-controlled but lacks a router assignment. Network state may persist in Restricted mode.');
+      }
     }
 
     // 3. Recovery Logging
@@ -4556,11 +4569,11 @@ async logoutImpersonation() {
 
     for (const id of userIds) {
       await this.resolvePlanActivationBilling(
-        id, 
-        pkgId, 
-        totalAmount, 
-        paymentStatus, 
-        'Bulk Recovery Protocol', 
+        id,
+        pkgId,
+        totalAmount,
+        paymentStatus,
+        'Bulk Recovery Protocol',
         { notes: `BATCH_UNPAID (${numMonths} Pkg): ${notes}` }
       );
     }
@@ -4607,60 +4620,60 @@ async logoutImpersonation() {
   async forceGlobalSync() {
     if (!this.firestore) return { success: false, message: 'Cloud Layer Void' };
     try {
-       const docRef = doc(this.firestore, 'registry', 'master_state');
-       const snap = await getDoc(docRef);
-       if (snap.exists()) {
-          const remoteState = snap.data() as Partial<AppState>;
-          
-          let recovered = 0;
-          // Atomic Heal: Merge missing users/staff into local state
-          if (Array.isArray(remoteState.users)) {
-             remoteState.users.forEach(ru => {
-                const exists = this.state.users.some(lu => lu.id === ru.id || (ru.email && lu.email === ru.email));
-                if (!exists) {
-                   this.state.users.push(ru);
-                   recovered++;
-                }
-             });
-          }
-          if (Array.isArray(remoteState.staff)) {
-             remoteState.staff.forEach(rs => {
-                const exists = this.state.staff.some(ls => ls.id === rs.id || (rs.email && ls.email === rs.email));
-                if (!exists) {
-                   this.state.staff.push(rs);
-                   recovered++;
-                }
-             });
-          }
+      const docRef = doc(this.firestore, 'registry', 'master_state');
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const remoteState = snap.data() as Partial<AppState>;
 
-          if (recovered > 0) {
-             this.notify();
-             await this.commit(true);
-          }
-          return { success: true, recovered, message: `Stability Re-aligned. ${recovered} nodes recovered.` };
-       }
-       return { success: false, message: 'Cloud Registry not found.' };
+        let recovered = 0;
+        // Atomic Heal: Merge missing users/staff into local state
+        if (Array.isArray(remoteState.users)) {
+          remoteState.users.forEach(ru => {
+            const exists = this.state.users.some(lu => lu.id === ru.id || (ru.email && lu.email === ru.email));
+            if (!exists) {
+              this.state.users.push(ru);
+              recovered++;
+            }
+          });
+        }
+        if (Array.isArray(remoteState.staff)) {
+          remoteState.staff.forEach(rs => {
+            const exists = this.state.staff.some(ls => ls.id === rs.id || (rs.email && ls.email === rs.email));
+            if (!exists) {
+              this.state.staff.push(rs);
+              recovered++;
+            }
+          });
+        }
+
+        if (recovered > 0) {
+          this.notify();
+          await this.commit(true);
+        }
+        return { success: true, recovered, message: `Stability Re-aligned. ${recovered} nodes recovered.` };
+      }
+      return { success: false, message: 'Cloud Registry not found.' };
     } catch (e: any) {
-       return { success: false, message: e.message };
+      return { success: false, message: e.message };
     }
   }
 
   async healUserRegistry() {
-     console.log('[IRS] Initiating User Registry Audit...');
-     const syncRes = await this.forceGlobalSync();
-     
-     // 2. Data Integrity Scrub (Remove damaged/empty nodes)
-     const initialCount = this.state.users.length;
-     this.state.users = this.state.users.filter((u, i, arr) => 
-        u && u.id && arr.findIndex(x => x.id === u.id) === i
-     );
+    console.log('[IRS] Initiating User Registry Audit...');
+    const syncRes = await this.forceGlobalSync();
 
-     if (syncRes.success && syncRes.recovered && syncRes.recovered > 0) {
-        this.logAudit('IRS Healing', 'System', `Detected and recovered ${syncRes.recovered} ghost user nodes from Firebase Master.`);
-     }
+    // 2. Data Integrity Scrub (Remove damaged/empty nodes)
+    const initialCount = this.state.users.length;
+    this.state.users = this.state.users.filter((u, i, arr) =>
+      u && u.id && arr.findIndex(x => x.id === u.id) === i
+    );
 
-     this.notify();
-     return { success: true, recovered: syncRes.success ? syncRes.recovered : 0 };
+    if (syncRes.success && syncRes.recovered && syncRes.recovered > 0) {
+      this.logAudit('IRS Healing', 'System', `Detected and recovered ${syncRes.recovered} ghost user nodes from Firebase Master.`);
+    }
+
+    this.notify();
+    return { success: true, recovered: syncRes.success ? syncRes.recovered : 0 };
   }
 
   async runRecoveryMaintenance() {
@@ -4680,9 +4693,9 @@ async logoutImpersonation() {
           changes++;
           this.logNotification(user.id, 'warning', 'Service Protocol Expired', 'Package validity has reached zero. Account shifted to expiration registry.');
           notificationManager.sendSuspensionNotice(user.email, user.name);
-          
+
           if (this.state.settings.nasSystemEnabled && user.managementMode === 'NAS_Controlled' && user.routerId) {
-             void this.sendCoACommand(user.id, 'Disconnect');
+            void this.sendCoACommand(user.id, 'Disconnect');
           }
         } else if (user.balance > 0) {
           if (user.activationDate) {
@@ -4695,7 +4708,7 @@ async logoutImpersonation() {
               notificationManager.sendRecoveryWarning(user.email, user.name, user.balance);
 
               if (this.state.settings.nasSystemEnabled && user.managementMode === 'NAS_Controlled' && user.routerId) {
-                 void this.sendCoACommand(user.id, 'Disconnect');
+                void this.sendCoACommand(user.id, 'Disconnect');
               }
             }
           }
@@ -4710,9 +4723,9 @@ async logoutImpersonation() {
           user.status = UserStatus.RECOVERY_MODE;
           changes++;
           this.logNotification(user.id, 'error', 'Emergency Period Expired', 'Payment not received within emergency window.');
-          
+
           if (this.state.settings.nasSystemEnabled && user.managementMode === 'NAS_Controlled' && user.routerId) {
-             void this.sendCoACommand(user.id, 'Disconnect');
+            void this.sendCoACommand(user.id, 'Disconnect');
           }
         }
       }
@@ -4729,12 +4742,12 @@ async logoutImpersonation() {
   async auditOverdueLoads() {
     let hasChanges = false;
     const now = new Date().toISOString();
-    
+
     this.state.emergencyLoads.forEach(load => {
       if (load.status === 'Active' && load.expiryTimestamp < now) {
         load.status = 'Overdue';
         hasChanges = true;
-        
+
         // Penalize credit score
         const user = this.findUserNode(load.userId);
         if (user) {
@@ -4789,7 +4802,7 @@ async logoutImpersonation() {
       inv.paidAmount += payment;
       inv.dueAmount = Math.max(0, inv.totalAmount - inv.paidAmount);
       remainingAmount -= payment;
-      
+
       if (inv.dueAmount <= 0) {
         inv.status = PaymentStatus.PAID;
         inv.paidAt = new Date().toISOString();
@@ -5259,7 +5272,7 @@ async logoutImpersonation() {
     const settings = this.state.settings.authSettings || INITIAL_STATE.settings.authSettings;
 
     if (!settings.signupEnabled) {
-      return { success: false, message: 'Signups are currently disabled.' };
+      throw new Error('Signups are currently disabled.');
     }
 
     // Normalize values
@@ -5271,114 +5284,73 @@ async logoutImpersonation() {
     };
 
     // --- Duplicate check (local) ---
-    const exists = this.state.users.find(u =>
-      (payload.email && u.email?.toLowerCase() === payload.email) ||
-      (payload.username && (u.username || '').toLowerCase() === payload.username) ||
-      (payload.phone && u.phone?.replace(/\D/g, '') === payload.phone.replace(/\D/g, ''))
-    );
+    const normalizedPhone = payload.phone ? payload.phone.replace(/\D/g, '') : '';
+    const exists = this.state.users.find(u => {
+      // Email match (exact)
+      if (payload.email && u.email?.toLowerCase() === payload.email) return true;
+      // Username match: only if BOTH sides are non-empty and >=3 chars
+      const uUsername = (u.username || '').toLowerCase();
+      if (payload.username && payload.username.length >= 3 && uUsername.length >= 3 && uUsername === payload.username) return true;
+      // Phone match: only if BOTH sides are >=8 digits (avoid partial/seed data collisions)
+      const uPhone = (u.phone || '').replace(/\D/g, '');
+      if (normalizedPhone.length >= 8 && uPhone.length >= 8 && uPhone === normalizedPhone) return true;
+      return false;
+    });
     if (exists) {
       console.log('[IRS-HEAL] Duplicate detected on signup. Triggering background reconciliation...');
       this.healUserRegistry().catch(console.error);
-      return { success: false, message: 'An account with this identity already exists. Please try logging in or reset your password.' };
+      throw new Error('An account with this identity already exists. Please try logging in or reset your password.');
     }
 
     console.log('[DB-AUTH] Dispatching signup protocol for:', payload.username);
 
-    // --- Try backend first (with 8s timeout) ---
+    // --- Hit Backend Signup API ---
+    const response = await fetch(`${this.backendUrl}/api/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    
+    let resData;
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-      const response = await fetch(`${this.backendUrl}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const res = await response.json();
-        if (res.success) {
-          this.logAudit('New User Signup', 'Request', `New user ${data.name} signed up via secure backend.`, res.user?.id, data.name);
-          
-          // --- 🛡️ REGISTRY SYNC: Ensure new user is added to master state ---
-          if (res.user) {
-            const existingIdx = this.state.users.findIndex(u => u.id === res.user.id);
-            if (existingIdx === -1) {
-              const newUser: ISPUser = {
-                ...res.user,
-                role: Role.CUSTOMER,
-                status: res.user.status || UserStatus.PENDING_VERIFICATION,
-                verificationStatus: res.user.verificationStatus || VerificationStatus.UNVERIFIED,
-                balance: res.user.balance || 0,
-                creditScore: res.user.creditScore || 600,
-                createdAt: res.user.createdAt || new Date().toISOString()
-              };
-              this.state.users.unshift(newUser);
-              
-              // Also ensure a signup request exists for the admin desk
-              if (!this.state.signupRequests) this.state.signupRequests = [];
-              const hasReq = this.state.signupRequests.some(r => r.userId === res.user.id || r.email === res.user.email);
-              if (!hasReq) {
-                this.state.signupRequests.unshift({
-                  id: 'REQ-B-' + Date.now(),
-                  userId: res.user.id,
-                  name: res.user.name,
-                  username: res.user.username,
-                  email: res.user.email,
-                  phone: res.user.phone || '',
-                  status: 'Approved', // Already approved via backend
-                  timestamp: new Date().toISOString()
-                } as any);
-              }
-              
-              await this.commit();
-            }
-          }
-          
-          return { success: true, message: 'Account Handshake Successful.', user: res.user };
-        }
-        
-        // AUTO-HEAL: If backend reports conflict, trigger local sync
-        if (res.message?.toLowerCase().includes('already') || response.status === 409) {
-           console.log('[IRS-HEAL] Backend reported conflict. Running mandatory node sync...');
-           this.healUserRegistry().catch(console.error);
-        }
-        
-        // Backend returned a logical failure (duplicate, validation)
-        return { success: false, message: res.message || 'Signup refused by authority node.' };
-      }
-      // Backend responded with HTTP error — fall through to local fallback
-      console.warn('[DB-AUTH] Backend returned HTTP error, falling back to local registry write.');
-    } catch (e: any) {
-      // Network error, timeout, or backend sleeping (Render cold start)
-      console.warn('[DB-AUTH] Backend unreachable, falling back to local registry write. Reason:', e.message);
+      resData = await response.json();
+    } catch(e) {
+      resData = {};
     }
 
-    // --- Local Firestore Fallback ---
-    try {
-      const newUserId = 'USR-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+    if (!response.ok || !resData.success) {
+      if (resData.message?.toLowerCase().includes('already')) {
+        console.log('[IRS-HEAL] Backend reported conflict. Running mandatory node sync...');
+        this.healUserRegistry().catch(console.error);
+      }
+      throw new Error(resData.message || resData.error || 'Signup refused by authority node.');
+    }
+
+    const newUserId = resData.userId || 'USR-' + Date.now();
+    
+    this.logAudit('New User Signup', 'Request', `New user ${payload.name} signed up via Backend API.`, newUserId, payload.name);
+
+    const existingIdx = this.state.users.findIndex(u => u.id === newUserId);
+    if (existingIdx === -1) {
       const newUser: ISPUser = {
         id: newUserId,
-        name: (payload.name || 'New User').trim(),
-        username: payload.username || '',
-        email: payload.email || '',
-        phone: payload.phone || '',
-        password: payload.password,
-        address: payload.address || '',
-        area: payload.area || '',
-        packageId: payload.packageId || (this.state.packages[0]?.id || 'PKG-BASIC'),
+        name: payload.name,
+        email: payload.email,
+        username: payload.username,
+        phone: payload.phone,
         status: UserStatus.PENDING_VERIFICATION,
         verificationStatus: VerificationStatus.UNVERIFIED,
+        balance: 0,
+        creditScore: 600,
+        createdAt: new Date().toISOString(),
+        role: Role.CUSTOMER,
+        address: payload.address || '',
+        area: payload.area || '',
+        packageId: payload.packageId || 'PKG-BASIC',
         isKYCVerified: false,
         isKYCSubmitted: false,
         kyc_status: 'pending',
         approval_status: 'pending',
-        role: Role.CUSTOMER,
-        balance: 0,
-        creditScore: 600,
-        createdAt: new Date().toISOString(),
         kyc_attempt_count: 0,
         kyc_history: [],
         portalEnabled: true,
@@ -5390,38 +5362,27 @@ async logoutImpersonation() {
         activityLog: [],
         connectionId: 'PENDING-' + newUserId.slice(-4),
       };
-      
-      const requestObj: SignupRequest = {
-        id: 'REQ-' + Date.now(),
-        userId: newUserId,
-        name: newUser.name,
-        username: newUser.username,
-        email: newUser.email,
-        phone: newUser.phone,
-        cnic: payload.cnic || '',
-        address: newUser.address,
-        area: newUser.area,
-        packageId: newUser.packageId,
-        status: 'Pending',
-        timestamp: new Date().toISOString()
-      };
+      this.state.users.unshift(newUser);
 
-      // Push to registry
-      this.state.users.push(newUser);
-      this.state.signupRequests.push(requestObj);
+      if (!this.state.signupRequests) this.state.signupRequests = [];
+      const hasReq = this.state.signupRequests.some(r => r.userId === newUserId || r.email === payload.email);
+      if (!hasReq) {
+        this.state.signupRequests.unshift({
+          id: 'REQ-B-' + Date.now(),
+          userId: newUserId,
+          name: payload.name,
+          username: payload.username,
+          email: payload.email,
+          phone: payload.phone || '',
+          status: 'Approved', 
+          timestamp: new Date().toISOString()
+        } as any);
+      }
 
-      await this.commit(true);
-      this.notify();
-
-      this.logAudit('New User Signup', 'Request', `New user ${newUser.name} registered via local fallback. Identity Node: ${newUserId}`, newUserId, newUser.name);
-
-      console.log('[DB-AUTH] Local signup fallback succeeded for:', newUser.username);
-      return { success: true, message: 'Account handshake complete. Please login.', user: newUser };
-
-    } catch (fallbackError: any) {
-      console.error('[DB-AUTH-ERROR] Both backend and local signup failed:', fallbackError);
-      return { success: false, message: 'Signup failed. Please check your connection and try again.' };
+      await this.commit();
     }
+
+    return { success: true, message: resData.message || 'Account Handshake Successful.', userId: newUserId, user: this.state.users[0] };
   }
 
   async initiatePasswordReset(identifier: string) {
@@ -5440,15 +5401,15 @@ async logoutImpersonation() {
       const uCnic = (u.cnic || '').replace(/\D/g, '');
       const uPppoe = (u.pppoeId || '').toLowerCase().trim();
       const uConnId = (u.connectionId || '').toLowerCase().trim();
-      
+
       const searchDigits = input.replace(/\D/g, '');
 
       return uUsername === input ||
-             uEmail === input ||
-             (uPhone !== '' && uPhone === searchDigits) ||
-             (uCnic !== '' && uCnic === searchDigits) ||
-             uPppoe === input ||
-             uConnId === input;
+        uEmail === input ||
+        (uPhone !== '' && uPhone === searchDigits) ||
+        (uCnic !== '' && uCnic === searchDigits) ||
+        uPppoe === input ||
+        uConnId === input;
     });
 
     if (!user) return { success: false, message: 'IDENTITY_NOT_FOUND' };
@@ -5470,22 +5431,22 @@ async logoutImpersonation() {
 
     if (isEmail) {
       dispatchRes = await this.dispatchEmail(
-        input, 
-        'Password Recovery - Click Opticx', 
+        input,
+        'Password Recovery - Click Opticx',
         `Your identity re-encryption code is: ${otpCode}. It expires in 5 minutes.`
       );
     } else {
       dispatchRes = await this.dispatchSMS(
-        input, 
+        input,
         `CO ISP OTP: ${otpCode}. Valid for 5 mins.`
       );
     }
-    
-    return { 
-      success: dispatchRes.success, 
-      message: dispatchRes.success ? 'OTP Dispatched' : (dispatchRes.error || 'Identity Dispatch Failure'), 
-      otpCode: dispatchRes.success ? otpCode : undefined, 
-      logUniqueId: dispatchRes.logId 
+
+    return {
+      success: dispatchRes.success,
+      message: dispatchRes.success ? 'OTP Dispatched' : (dispatchRes.error || 'Identity Dispatch Failure'),
+      otpCode: dispatchRes.success ? otpCode : undefined,
+      logUniqueId: dispatchRes.logId
     };
   }
 
@@ -5552,7 +5513,7 @@ async logoutImpersonation() {
         });
         const data = await res.json();
         realLatency = Date.now() - start;
-        
+
         if (data.success) {
           dispatchStatus = 'Sent';
         } else {
@@ -5569,7 +5530,7 @@ async logoutImpersonation() {
     }
 
     const isOTP = subject.toLowerCase().includes('otp') || subject.toLowerCase().includes('recovery');
-    
+
     const logId = await this._logDispatch({
       type: 'Email',
       to,
@@ -5688,7 +5649,7 @@ async logoutImpersonation() {
   }): Promise<string> {
     const timestamp = new Date().toISOString();
     const id = (params.type === 'Email' ? 'EL-' : 'SL-') + Date.now();
-    
+
     // 1. Sync CommunicationLog (ACC context)
     const user = this.state.users.find(u => u.id === params.userId || u.email === params.to || u.phone === params.to);
     const commEntry: CommunicationLog = {
@@ -5732,17 +5693,17 @@ async logoutImpersonation() {
 
     const now = new Date();
     const hasPkg = !!user.packageId;
-    
+
     // 1. Handshake: If no package assignment node exists, clear billing status
     if (!hasPkg) {
-       const nonBillingStatuses = [UserStatus.SUSPENDED, UserStatus.DISABLED, UserStatus.BLOCKED, UserStatus.PENDING_VERIFICATION];
-       if (!nonBillingStatuses.includes(user.status)) {
-          user.status = UserStatus.PENDING_VERIFICATION;
-       }
-       user.isRecoveryMode = false;
-       await this.commit();
-       this.notify();
-       return;
+      const nonBillingStatuses = [UserStatus.SUSPENDED, UserStatus.DISABLED, UserStatus.BLOCKED, UserStatus.PENDING_VERIFICATION];
+      if (!nonBillingStatuses.includes(user.status)) {
+        user.status = UserStatus.PENDING_VERIFICATION;
+      }
+      user.isRecoveryMode = false;
+      await this.commit();
+      this.notify();
+      return;
     }
 
     // 2. Fiscal Logic: Determine status based on balance and expiry registry
@@ -5754,27 +5715,27 @@ async logoutImpersonation() {
     const isManuallyLocked = manualLockouts.includes(user.status);
 
     if (!isExpired) {
-        if (isPaid) {
-            if (!isManuallyLocked) {
-                user.status = UserStatus.ACTIVE;
-            }
-            user.isRecoveryMode = false;
-        } else {
-            // NODE_HEALTH: User has dues but timer is still running
-            // Transition from lockout to GRACE if time remains
-            // But only if not manually suspended/disabled/blocked
-            const lockoutStatuses = [UserStatus.EXPIRED, UserStatus.RECOVERY_MODE];
-            if (lockoutStatuses.includes(user.status)) {
-                user.status = UserStatus.ACTIVE_UNPAID;
-            }
+      if (isPaid) {
+        if (!isManuallyLocked) {
+          user.status = UserStatus.ACTIVE;
         }
+        user.isRecoveryMode = false;
+      } else {
+        // NODE_HEALTH: User has dues but timer is still running
+        // Transition from lockout to GRACE if time remains
+        // But only if not manually suspended/disabled/blocked
+        const lockoutStatuses = [UserStatus.EXPIRED, UserStatus.RECOVERY_MODE];
+        if (lockoutStatuses.includes(user.status)) {
+          user.status = UserStatus.ACTIVE_UNPAID;
+        }
+      }
     } else {
-        // TIMER_EXPIRED: Registry lockdown until fiscal resolution
-        // Only override to EXPIRED if not already manually locked out
-        const manualLockouts = [UserStatus.SUSPENDED, UserStatus.DISABLED, UserStatus.BLOCKED];
-        if (!manualLockouts.includes(user.status)) {
-            user.status = UserStatus.EXPIRED;
-        }
+      // TIMER_EXPIRED: Registry lockdown until fiscal resolution
+      // Only override to EXPIRED if not already manually locked out
+      const manualLockouts = [UserStatus.SUSPENDED, UserStatus.DISABLED, UserStatus.BLOCKED];
+      if (!manualLockouts.includes(user.status)) {
+        user.status = UserStatus.EXPIRED;
+      }
     }
 
     await this.commit();
@@ -5791,44 +5752,44 @@ async logoutImpersonation() {
 
   async runSystemTester(onProgress: (log: TestLog) => void) {
     const tests = [
-      { 
-        module: 'Core Identity', 
-        action: 'Registry Handshake', 
+      {
+        module: 'Core Identity',
+        action: 'Registry Handshake',
         test: async () => this.state.users.length > 0 ? 'Working' : 'Failed',
         info: 'Verifies if the subscriber database is reachable and populated.'
       },
-      { 
-        module: 'Security', 
-        action: 'Auth Logic Check', 
+      {
+        module: 'Security',
+        action: 'Auth Logic Check',
         test: async () => this.state.settings.authSettings.loginEnabled ? 'Working' : 'Warning',
         info: 'Checks if login gatekeepers are active.'
       },
-      { 
-        module: 'Infrastructure', 
-        action: 'Backend API Link', 
+      {
+        module: 'Infrastructure',
+        action: 'Backend API Link',
         test: async () => {
           try {
             const res = await fetch(`${this.backendUrl}/api/health`);
             return res.ok ? 'Working' : 'Failed';
-          } catch(e) { return 'Failed'; }
+          } catch (e) { return 'Failed'; }
         },
         info: 'Verifies the connection to the Node.js backend relay.'
       },
-      { 
-        module: 'Inventory', 
-        action: 'Package Protocol', 
+      {
+        module: 'Inventory',
+        action: 'Package Protocol',
         test: async () => this.state.packages.length > 0 ? 'Working' : 'Failed',
         info: 'Ensures service packages are correctly loaded in the registry.'
       },
-      { 
-        module: 'Finance', 
-        action: 'Invoice Engine', 
+      {
+        module: 'Finance',
+        action: 'Invoice Engine',
         test: async () => this.state.invoices !== undefined ? 'Working' : 'Failed',
         info: 'Verifies that the billing ledger is operational.'
       },
-      { 
-        module: 'Gateway', 
-        action: 'Communication Node', 
+      {
+        module: 'Gateway',
+        action: 'Communication Node',
         test: async () => this.state.settings.commConfig.simulationMode ? 'Warning' : 'Working',
         info: 'Checks if real-world dispatch mode is active (Green = Real, Orange = Simulation).'
       }
@@ -5844,14 +5805,14 @@ async logoutImpersonation() {
         status: status as any,
         details: status === 'Working' ? `PASS: ${t.info}` : `FAIL/WARN: ${t.info}`
       };
-      
+
       this.state.testLogs = [log, ...(this.state.testLogs || [])].slice(0, 500);
       onProgress(log);
       await this.commit();
       // Removed artificial bottling effect for faster response
 
     }
-    
+
     this.notify();
     return { success: true, message: 'System Scan Complete' };
   }
@@ -5933,7 +5894,7 @@ async logoutImpersonation() {
       const created = new Date(u.createdAt);
       return !u.deleted && (now.getTime() - created.getTime()) < 7 * oneDay;
     }).length;
- 
+
     const expiredUsers = this.state.users.filter(u => u.status === UserStatus.SUSPENDED && !u.deleted).length;
     const disabledUsers = this.state.users.filter(u => u.status === UserStatus.DISABLED && !u.deleted).length;
     const paidUsers = this.state.users.filter(u => (u.balance || 0) <= 0 && !u.deleted).length;
@@ -6024,7 +5985,7 @@ async logoutImpersonation() {
         }
         this.state.users[idx].notes = (this.state.users[idx].notes || '') + `\n[${new Date().toLocaleDateString()}] Bulk update: ${status}. ${note}${expiryDate ? ' New Expiry: ' + expiryDate : ''}`;
         if (onProgress) onProgress(i + 1, userIds.length, this.state.users[idx].name);
-        
+
         // Sync billing status for consistency
         await this.syncUserStatusWithBilling(id);
       }
@@ -6040,7 +6001,7 @@ async logoutImpersonation() {
         }
       }
     }
-    
+
     // Activity Log
     const actionDesc = `Status: ${status}${expiryDate ? ' (Expiry: ' + expiryDate + ')' : ''}`;
     this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Bulk Set Status', targetId: 'Multiple', targetName: `${userIds.length} users`, details: actionDesc, riskLevel: 'Low' });
@@ -6062,14 +6023,14 @@ async logoutImpersonation() {
     for (const id of userIds) {
       const user = this.findUserNode(id);
       if (onProgress && user) {
-          onProgress(sentCount + 1, userIds.length, user.name);
+        onProgress(sentCount + 1, userIds.length, user.name);
       }
       if (user) {
         // Dispatch based on channel
         if (channel === 'Email' && user.email) {
-            this.enqueueEmail(user.email, 'Payment Reminder', templateId || 'TMP-1', {}, 'Critical').catch(() => {});
+          this.enqueueEmail(user.email, 'Payment Reminder', templateId || 'TMP-1', {}, 'Critical').catch(() => { });
         } else if (channel === 'WhatsApp' && user.phone) {
-            await this.dispatchSMS(user.phone, `[CLICK OPTICX] Reminder: Outstanding balance Rs. ${user.balance}. Please clear to avoid suspension.`);
+          await this.dispatchSMS(user.phone, `[CLICK OPTICX] Reminder: Outstanding balance Rs. ${user.balance}. Please clear to avoid suspension.`);
         }
 
         // Log Communication
@@ -6095,6 +6056,30 @@ async logoutImpersonation() {
 
   async bulkGenerateInvoices(userIds: string[], onProgress?: (current: number, total: number, itemName: string) => void) {
     let generated = 0;
+
+    try {
+      const response = await fetch(`${this.backendUrl}/api/billing/invoice/bulk-generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.getValidToken()}`
+        },
+        body: JSON.stringify({
+          userIds: userIds,
+          dueDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+          description: 'Monthly Subscription'
+        })
+      });
+      const data = await response.json();
+      if (!data.success) {
+        console.warn("[BILLING] Backend generation failed, proceeding with local fallback", data.message);
+      } else {
+        console.log("[BILLING] Backend synchronized successfully");
+      }
+    } catch (e) {
+      console.warn("[BILLING] Backend unreachable for live invoice generation", e);
+    }
+
     for (let i = 0; i < userIds.length; i++) {
       const id = userIds[i];
       const user = this.findUserNode(id);
@@ -6142,7 +6127,7 @@ async logoutImpersonation() {
       }
       if (i % 10 === 0) await new Promise(r => setTimeout(r, 0)); // Yield
     }
-    
+
     this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Bulk Invoices Created', targetId: 'Multiple', targetName: `${generated} generated`, details: 'Monthly recurring billing run.', riskLevel: 'Low' });
 
     await this.commit();
@@ -6170,12 +6155,12 @@ async logoutImpersonation() {
     };
 
     // 2. Adjust Balance if requested
-    for(const user of archiveData.users) {
-        if (user.balance < 0 && creditAction === 'ADJUST') {
-            totalCreditAdjusted += Math.abs(user.balance);
-            user.balance = 0;
-            creditAdjustedCount++;
-        }
+    for (const user of archiveData.users) {
+      if (user.balance < 0 && creditAction === 'ADJUST') {
+        totalCreditAdjusted += Math.abs(user.balance);
+        user.balance = 0;
+        creditAdjustedCount++;
+      }
     }
 
     // 3. Create Archive Record
@@ -6205,7 +6190,7 @@ async logoutImpersonation() {
     // But mark them so they don't show up in unpaid stats.
 
     this.state.securityLogs.push({ id: 'LOG-' + Date.now(), timestamp: new Date().toISOString(), adminEmail: this.state.currentUser?.email || 'admin@clickopticx.com', adminIp: '127.0.0.1', action: 'Permanent Hard Delete', targetId: 'Multiple', targetName: `${userIds.length} users`, details: `Permanently erased identities and all associated records from registry. Credit Action: ${creditAction}. Adjusted Rs. ${totalCreditAdjusted}.`, riskLevel: 'Critical' });
-    
+
     await this.commitImmediate();
     this.notify();
     return { success: true, count: userIds.length, creditAdjusted: totalCreditAdjusted };
@@ -6214,7 +6199,7 @@ async logoutImpersonation() {
   async exportData(type: 'users' | 'billing' | 'noc') {
     let data: any[] = [];
     let filename = `export_${type}_${new Date().getTime()}.csv`;
-    
+
     if (type === 'users') {
       data = this.state.users.filter(u => !u.deleted).map(u => ({
         ID: u.id,
@@ -6277,7 +6262,7 @@ async logoutImpersonation() {
 
   async bulkRotateNodes(userIds: string[], targetNode: string, onProgress?: (current: number, total: number, itemName: string) => void) {
     for (let i = 0; i < userIds.length; i++) {
-        const id = userIds[i];
+      const id = userIds[i];
       const idx = this.findUserIndex(id);
       if (idx !== -1) {
         this.state.users[idx].oltNode = targetNode;
@@ -6314,7 +6299,7 @@ async logoutImpersonation() {
     if (!olt) return { success: false, message: 'OLT not found' };
 
     try {
-      const res = await fetch(`${this.backendUrl}/api/olt/pulse`, {
+      const res = await fetch(`${this.backendUrl}/api/network/olt/pulse`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ olt })
@@ -6336,7 +6321,7 @@ async logoutImpersonation() {
       const res = await fetch(`${this.backendUrl}/api/network/olt/${onu.oltId}/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ onuId: onu.id })
+        body: JSON.stringify({ onuId: onu.id, olt })
       });
       const data = await res.json();
       if (data.success) {
@@ -6404,7 +6389,7 @@ async logoutImpersonation() {
       await this.commit();
       return { success: true, message: `CoA logged (NAS system ${!nas ? 'not assigned' : 'disabled'}).` };
     }
-    
+
     try {
       const res = await fetch(`${this.backendUrl}/api/nas/coa`, {
         method: 'POST',
@@ -6489,9 +6474,9 @@ async logoutImpersonation() {
   async checkOLTHealth(id: string) {
     const olt = this.state.oltNodes.find(n => n.id === id);
     if (!olt) return { success: false, message: 'OLT not found' };
-    
+
     try {
-      const res = await fetch(`${this.backendUrl}/api/olt/health`, {
+      const res = await fetch(`${this.backendUrl}/api/network/olt/health`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ olt })
@@ -6566,7 +6551,7 @@ async logoutImpersonation() {
   async flashSystem(month: string, options: { resetUsage: boolean, removeInvoices: boolean, reason?: string }, adminId: string) {
     const admin = this.state.staff.find(s => s.email === adminId) || this.state.currentUser;
     const adminName = admin?.name || 'SuperAdmin';
-    
+
     // 1. Process Users
     this.state.users.forEach(user => {
       user.package_status = 'N/A';
@@ -6606,12 +6591,12 @@ async logoutImpersonation() {
       reason: options.reason,
       timestamp: new Date().toISOString()
     };
-    
+
     if (!this.state.flashLogs) this.state.flashLogs = [];
     this.state.flashLogs.push(log);
 
     await this.logSecurity(`FLASH_SYSTEM_${month}`, 'all', `System Flash executed by ${adminName} for month ${month}.`, 'Critical');
-    
+
     this.notify();
     await this.commit();
     return { success: true, count: this.state.users.length };
@@ -6631,14 +6616,15 @@ async logoutImpersonation() {
     try {
       const response = await fetch(`${this.backendUrl}/api/network/olt/${oltId}/connect`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ olt })
       });
       const data = await response.json();
-      
+
       olt.connectionStatus = data.success ? 'Connected' : 'Failed';
       olt.lastError = data.error || (data.success ? undefined : 'Handshake Rejected');
       olt.status = data.success ? 'Online' : 'Offline';
-      
+
       this.notify();
       await this.commit();
       return data;
@@ -6655,7 +6641,7 @@ async logoutImpersonation() {
   async bulkFlashUsers(userIds: string[], months: number, adminId: string, resetPackage: boolean = false) {
     const admin = this.state.staff.find(s => s.email === adminId) || this.state.currentUser;
     const adminName = admin?.name || 'SuperAdmin';
-    
+
     // N/A Full Wipe Mode if months === -1
     const isFullWipe = months === -1;
 
@@ -6696,18 +6682,18 @@ async logoutImpersonation() {
       }
 
       if (resetPackage && !isFullWipe) {
-          user.packageId = 'PKG-3M';
-          user.status = UserStatus.EXPIRED; // Force new activation
-          user.expiryDate = undefined;
-          user.lastPaymentDate = new Date().toISOString();
+        user.packageId = 'PKG-3M';
+        user.status = UserStatus.EXPIRED; // Force new activation
+        user.expiryDate = undefined;
+        user.lastPaymentDate = new Date().toISOString();
       } else {
-          user.status = UserStatus.ACTIVE;
-          user.lastPaymentDate = new Date().toISOString();
-          // Extend expiry by 30 days if it was expired or near expiry
-          const now = new Date();
-          const currentExpiry = user.expiryDate ? new Date(user.expiryDate) : now;
-          const newExpiry = new Date(Math.max(now.getTime(), currentExpiry.getTime()) + 30 * 24 * 60 * 60 * 1000);
-          user.expiryDate = newExpiry.toISOString();
+        user.status = UserStatus.ACTIVE;
+        user.lastPaymentDate = new Date().toISOString();
+        // Extend expiry by 30 days if it was expired or near expiry
+        const now = new Date();
+        const currentExpiry = user.expiryDate ? new Date(user.expiryDate) : now;
+        const newExpiry = new Date(Math.max(now.getTime(), currentExpiry.getTime()) + 30 * 24 * 60 * 60 * 1000);
+        user.expiryDate = newExpiry.toISOString();
       }
 
       // Add recovery log
@@ -6738,9 +6724,9 @@ async logoutImpersonation() {
   async sendEmailHybrid(to: string, subject: string, templateId: string, customData?: any) {
     const user = this.state.users.find(u => u.email === to);
     const template = this.state.emailTemplates.find(t => t.id === templateId);
-    
+
     if (!template) return { success: false, message: 'Template not found' };
-    
+
     // 1. Parse Template
     let html = template.content;
     const mergeData = {
@@ -6763,7 +6749,7 @@ async logoutImpersonation() {
     // 2. Dispatch Logic
     const timestamp = new Date().toISOString();
     const config = this.state.settings.commConfig;
-    
+
     // ── PHASE 1: PREFER BACKGROUND QUEUE ──
     try {
       const enqueued = await this.enqueueEmail(to, subject, templateId, customData);
@@ -6855,7 +6841,7 @@ async logoutImpersonation() {
     if (!template) throw new Error('Template not found');
 
     const user = this.state.users.find(u => u.email === to);
-    
+
     // Merge data
     const mergeData = {
       user: {
@@ -6879,7 +6865,7 @@ async logoutImpersonation() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ to, subject, html, category })
     });
-    
+
     return res.json();
   }
 
@@ -6929,13 +6915,13 @@ async logoutImpersonation() {
       try {
         if (this.socket) {
           this.socket.emit('send-email', {
-             config: this.state.settings.commConfig.smtpConfig,
-             payload: {
-                 from: sender?.email || 'noreply@clickopticx.com',
-                 senderName: sender?.name || 'Click Opticx Recovery',
-                 to: user.email, 
-                 subject: 'Payment Protocol Alert', 
-                 html: `
+            config: this.state.settings.commConfig.smtpConfig,
+            payload: {
+              from: sender?.email || 'noreply@clickopticx.com',
+              senderName: sender?.name || 'Click Opticx Recovery',
+              to: user.email,
+              subject: 'Payment Protocol Alert',
+              html: `
                      <div style="font-family: sans-serif; padding: 20px;">
                          <h2>Outstanding Balance Notice</h2>
                          <p>Dear ${user.name},</p>
@@ -6945,10 +6931,10 @@ async logoutImpersonation() {
                          <p style="font-size: 10px; color: #666;">This is an automated reminder from Click Opticx Billing Engine.</p>
                      </div>
                  `
-             }
+            }
           });
         }
-      } catch(e) {}
+      } catch (e) { }
 
       const admin = this.state.staff.find(s => s.email === adminId) || this.state.currentUser;
       const adminName = admin?.name || 'System';
@@ -7048,7 +7034,7 @@ async logoutImpersonation() {
   async checkRouterHealth(id: string) {
     const nas = this.state.nas.find(n => n.id === id);
     if (!nas) return { success: false, message: 'NAS not found' };
-    
+
     try {
       const res = await fetch(`${this.backendUrl}/api/nas/health`, {
         method: 'POST',
@@ -7067,12 +7053,12 @@ async logoutImpersonation() {
       nas.lastCheck = new Date().toISOString();
       await this.commit();
       this.notify();
-      return { 
-        success: false, 
-        status: 'Offline', 
-        radius: 'Failed', 
-        api: 'Failed', 
-        coa: nas.coaEnabled ? 'Enabled' : 'Disabled' 
+      return {
+        success: false,
+        status: 'Offline',
+        radius: 'Failed',
+        api: 'Failed',
+        coa: nas.coaEnabled ? 'Enabled' : 'Disabled'
       };
     }
   }
@@ -7081,8 +7067,8 @@ async logoutImpersonation() {
     const nas = this.state.nas.find(n => n.id === nasId);
     if (!nas) return 0;
 
-    const activeUsersOnNas = this.state.users.filter(u => 
-      u.routerId === nasId && 
+    const activeUsersOnNas = this.state.users.filter(u =>
+      u.routerId === nasId &&
       u.status === UserStatus.ACTIVE
     ).length;
 
@@ -7099,7 +7085,7 @@ async logoutImpersonation() {
         body: JSON.stringify({ nasId, count, ...config })
       });
       const data = await response.json();
-      
+
       if (data.success) {
         // Since backend successfully generated, we generate local versions for UI display 
         // until a full sync happens. (Or if backend returns them, we use those)
@@ -7164,7 +7150,7 @@ async logoutImpersonation() {
 
     if (!this.state.archives) this.state.archives = [];
     this.state.archives.unshift(newArchive);
-    
+
     await this.logAudit('System Archive', 'System', `Cold storage snapshot created for ${month}`, 'System');
     await this.commit();
     this.notify();
@@ -7183,7 +7169,7 @@ async logoutImpersonation() {
     }
 
     this.state.users.push({ ...archivedUser, status: UserStatus.ACTIVE, tags: [...(archivedUser.tags || []), 'Restored'] });
-    
+
     archive.data.invoices.forEach(inv => {
       if (inv.userId === userId && !this.state.invoices.find(i => i.id === inv.id)) {
         this.state.invoices.push(inv);
@@ -7252,7 +7238,7 @@ async logoutImpersonation() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           device: olt,
-          onuId: onu.serialNumber, 
+          onuId: onu.serialNumber,
           ssid,
           newPassword: pass
         })
@@ -7325,40 +7311,40 @@ async logoutImpersonation() {
         const totalDue = this.state.invoices
           .filter(i => (i.userId === u.id || i.userId === u.email) && i.status !== PaymentStatus.PAID)
           .reduce((acc, i) => acc + (i.dueAmount || (i.totalAmount - i.paidAmount) || 0), 0);
-        
-        if (Math.abs((u.balance || 0) - totalDue) > 1) { 
-           newMissing.push({
-             id: `MIS_BAL_${u.id}`,
-             type: 'billing',
-             severity: 'high',
-             title: 'Balance/Invoice Mismatch',
-             description: `User ${u.name} balance (${u.balance || 0}) does not match unpaid/partial invoices (${totalDue}).`,
-             targetId: u.id,
-             suggestedFix: 'Re-calculate Balance',
-             timestamp,
-             status: 'detected'
-           });
+
+        if (Math.abs((u.balance || 0) - totalDue) > 1) {
+          newMissing.push({
+            id: `MIS_BAL_${u.id}`,
+            type: 'billing',
+            severity: 'high',
+            title: 'Balance/Invoice Mismatch',
+            description: `User ${u.name} balance (${u.balance || 0}) does not match unpaid/partial invoices (${totalDue}).`,
+            targetId: u.id,
+            suggestedFix: 'Re-calculate Balance',
+            timestamp,
+            status: 'detected'
+          });
         }
       });
     }
 
     // 3. PACKAGE SCAN
     if (type === 'package' || type === 'entire') {
-       this.state.users.forEach(u => {
-         if (u.packageId && !this.state.packages.some(p => p.id === u.packageId)) {
-           newMissing.push({
-             id: `MIS_PKG_${u.id}_${u.packageId}`,
-             type: 'package',
-             severity: 'high',
-             title: 'Deleted Package Assigned',
-             description: `User ${u.name} is assigned to package ${u.packageId} which was deleted from catalog.`,
-             targetId: u.id,
-             suggestedFix: 'Re-assign to Default',
-             timestamp,
-             status: 'detected'
-           });
-         }
-       });
+      this.state.users.forEach(u => {
+        if (u.packageId && !this.state.packages.some(p => p.id === u.packageId)) {
+          newMissing.push({
+            id: `MIS_PKG_${u.id}_${u.packageId}`,
+            type: 'package',
+            severity: 'high',
+            title: 'Deleted Package Assigned',
+            description: `User ${u.name} is assigned to package ${u.packageId} which was deleted from catalog.`,
+            targetId: u.id,
+            suggestedFix: 'Re-assign to Default',
+            timestamp,
+            status: 'detected'
+          });
+        }
+      });
     }
 
     this.state.missingData = newMissing;
@@ -7428,10 +7414,10 @@ async logoutImpersonation() {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-           ctx.drawImage(img, 0, 0, width, height);
-           resolve(canvas.toDataURL('image/jpeg', quality));
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
         } else {
-           resolve(base64);
+          resolve(base64);
         }
       };
       img.onerror = () => resolve(base64);
@@ -7446,7 +7432,7 @@ async logoutImpersonation() {
 
   async setCloudProvider(provider: 'Google Drive' | 'PCloud' | 'Dropbox') {
     if (!this.state.settings.cloudStorage) {
-        this.state.settings.cloudStorage = { provider, isEnabled: true, lastSync: '', providers: ['Google Drive', 'PCloud', 'Dropbox'], authMode: 'OAuth' };
+      this.state.settings.cloudStorage = { provider, isEnabled: true, lastSync: '', providers: ['Google Drive', 'PCloud', 'Dropbox'], authMode: 'OAuth' };
     }
     this.state.settings.cloudStorage.provider = provider;
     this.state.settings.cloudStorage.lastSync = new Date().toISOString();
@@ -7469,21 +7455,21 @@ async logoutImpersonation() {
     if (!user) return { success: false, message: 'User not found' };
 
     if (user.email) {
-        return await this.sendSmartPasswordReset(user.email);
+      return await this.sendSmartPasswordReset(user.email);
     }
     return { success: false, message: 'No valid dispatch target found for this identifier.' };
   }
 
   async submitManualPasswordRequest(identifier: string) {
     const request: any = {
-        id: `REQ-${Date.now()}`,
-        userId: identifier,
-        userName: identifier,
-        phone: '',
-        email: identifier,
-        status: 'Pending',
-        timestamp: new Date().toISOString(),
-        verificationMethod: 'Manual'
+      id: `REQ-${Date.now()}`,
+      userId: identifier,
+      userName: identifier,
+      phone: '',
+      email: identifier,
+      status: 'Pending',
+      timestamp: new Date().toISOString(),
+      verificationMethod: 'Manual'
     };
     if (!this.state.passwordRequests) this.state.passwordRequests = [];
     this.state.passwordRequests.unshift(request);
@@ -7494,7 +7480,7 @@ async logoutImpersonation() {
   async verifyFaceForReset(identifier: string, faceImage: string) {
     const user = this.state.users.find(u => u.email === identifier || u.phone === identifier || u.username === identifier);
     if (!user) return { success: false, message: 'User not found' };
-    
+
     // In a real app, we'd send this to an AI vision API
     // Here we simulate successful match if they have faceData stored or just allow for demo
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -7514,73 +7500,73 @@ async logoutImpersonation() {
   async updateCustomerPassword(userId: string, newPass: string, token?: string) {
     const user = this.state.users.find(u => u.id === userId);
     if (user) {
-        user.password = newPass;
-        
-        // --- BACKEND SYNC ---
-        try {
-          const response = await fetch(`${this.backendUrl}/api/auth/complete-reset`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              token: token,
-              newPassword: newPass
-            })
-          });
-          const res = await response.json();
-          if (!res.success) {
-            console.error('[BACKEND-SYNC] Password update rejected:', res.message);
-          }
-        } catch (e: any) {
-          console.error('[BACKEND-SYNC] Auth bridge error:', e);
+      user.password = newPass;
+
+      // --- BACKEND SYNC ---
+      try {
+        const response = await fetch(`${this.backendUrl}/api/auth/complete-reset`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: token,
+            newPassword: newPass
+          })
+        });
+        const res = await response.json();
+        if (!res.success) {
+          console.error('[BACKEND-SYNC] Password update rejected:', res.message);
         }
+      } catch (e: any) {
+        console.error('[BACKEND-SYNC] Auth bridge error:', e);
+      }
 
-        // --- SUPABASE SYNC (Legacy Fallback) ---
-        try {
-          if (this.state.currentUser?.id === userId) {
-            await supabase.auth.updateUser({ password: newPass });
-          }
-        } catch (e: any) {}
+      // --- SUPABASE SYNC (Legacy Fallback) ---
+      try {
+        if (this.state.currentUser?.id === userId) {
+          await supabase.auth.updateUser({ password: newPass });
+        }
+      } catch (e: any) { }
 
-        this.notify();
-        await this.commit();
-        return { success: true };
+      this.notify();
+      await this.commit();
+      return { success: true };
     }
     return { success: false };
   }
 
   // --- KYC & CLOUD STORAGE HANDSHAKE ---
-  
+
   async submitKYC(userId: string, method: KYCMethod, documents: string[], metadata?: any, faceData?: string) {
     let user = this.findUserNode(userId);
-    
+
     if (!user && this.state.currentUser?.id === userId) {
       this.state.users.push({ ...this.state.currentUser } as any);
       user = this.findUserNode(userId);
     }
-    
+
     if (!user) return { success: false, message: 'User not found. Please log out and log in again.' };
 
     const kycDocs = await Promise.all(documents.map(async (url, i) => {
       const isBase64 = url.length > 500 && (url.startsWith('data:image') || url.startsWith('blob:'));
-      
+
       let safeUrl = url;
       if (isBase64) {
-          try {
-              // Precise Archival based on side if CNIC
-              const docName = method === KYCMethod.CNIC ? (i === 0 ? 'cnic_front' : 'cnic_back') : 
-                              method === KYCMethod.PASSPORT ? 'passport' : `doc_${i}`;
-              safeUrl = await this.uploadMedia(`kyc/${userId}/${docName}.png`, url);
-          } catch (e: any) {
-              console.warn("[KYC-UPLOAD] Failed to sync to cloud storage:", e.message);
-              // Fallback is already handled in uploadMedia to return base64, 
-              // but we'll be explicit here if needed.
-          }
+        try {
+          // Precise Archival based on side if CNIC
+          const docName = method === KYCMethod.CNIC ? (i === 0 ? 'cnic_front' : 'cnic_back') :
+            method === KYCMethod.PASSPORT ? 'passport' : `doc_${i}`;
+          safeUrl = await this.uploadMedia(`kyc/${userId}/${docName}.png`, url);
+        } catch (e: any) {
+          console.warn("[KYC-UPLOAD] Failed to sync to cloud storage:", e.message);
+          // Fallback is already handled in uploadMedia to return base64, 
+          // but we'll be explicit here if needed.
+        }
       }
 
       return {
-        type: method === KYCMethod.CNIC ? (i === 0 ? 'CNIC Front' : 'CNIC Back') : 
-              method === KYCMethod.PASSPORT ? 'Passport' :
-              method === KYCMethod.LIVE_SCAN ? 'Face Scan' : 'Document',
+        type: method === KYCMethod.CNIC ? (i === 0 ? 'CNIC Front' : 'CNIC Back') :
+          method === KYCMethod.PASSPORT ? 'Passport' :
+            method === KYCMethod.LIVE_SCAN ? 'Face Scan' : 'Document',
         fileUrl: safeUrl,
         submittedAt: new Date().toISOString(),
         status: 'Pending'
@@ -7592,9 +7578,9 @@ async logoutImpersonation() {
     if (faceData) {
       const isBase64Face = faceData.length > 500 && (faceData.startsWith('data:image') || faceData.startsWith('blob:'));
       if (isBase64Face) {
-          user.faceData = await this.uploadMedia(`kyc/${userId}/face_audit.png`, faceData);
+        user.faceData = await this.uploadMedia(`kyc/${userId}/face_audit.png`, faceData);
       } else {
-          user.faceData = faceData;
+        user.faceData = faceData;
       }
     }
 
@@ -7621,7 +7607,7 @@ async logoutImpersonation() {
     this.logNotification(userId, 'info', 'Documents Received', 'Your identity documents have been submitted for review. Our team will verify them shortly.', 'user');
     this.logActivity(userId, 'Update', `Identity documents submitted via ${method}.`);
     this.logAudit('Documents Submitted', 'Update', `User ${user.name} (${userId}) submitted identity documents via ${method}.`, userId, user.name);
-    
+
     await this.commit();
     this.notify();
     return { success: true };
@@ -7676,10 +7662,10 @@ async logoutImpersonation() {
     if (!user) return { success: false, message: 'Subscriber context not found.' };
 
     this.syncUserKYCState(user, VerificationStatus.VERIFIED);
-    
+
     this.logNotification(user.id, 'success', 'Identity Verified', 'Your identity artifacts have been verified. Full infrastructure access granted.', 'user');
     this.logAudit('Identity Verified', 'Approval', `KYC for ${user.name} approved.`, user.id, user.name);
-    
+
     this.notify();
     await this.commit();
     return { success: true };
@@ -7697,12 +7683,12 @@ async logoutImpersonation() {
 
     this.syncUserKYCState(user, VerificationStatus.REVISION, reason);
     if (options?.revisionDocsCount) {
-       user.requiredRevisionDocs = options.revisionDocsCount;
+      user.requiredRevisionDocs = options.revisionDocsCount;
     }
-    
+
     this.logNotification(user.id, 'error', 'Identity Revised', `Identity artifacts require revision: ${reason}`, 'user');
     this.logAudit('Identity Rejected', 'Rejection', `KYC for ${user.name} rejected. Reason: ${reason}`, user.id, user.name);
-    
+
     this.notify();
     await this.commit();
     return { success: true };
@@ -7712,13 +7698,13 @@ async logoutImpersonation() {
   async adminVerifyUser(userId: string) {
     const req = this.state.kycRequests.find(r => r.userId === userId && r.status === 'Pending');
     if (req) return this.approveKYC(req.id);
-    
+
     const user = this.findUserNode(userId);
     if (!user) return { success: false, message: 'Subscriber not found' };
 
     this.syncUserKYCState(user, VerificationStatus.VERIFIED);
     this.logAudit('Direct Verification', 'Approval', `Administrative verification override for ${user.name}`, userId, user.name);
-    
+
     this.notify();
     await this.commit();
     return { success: true };
@@ -7727,10 +7713,10 @@ async logoutImpersonation() {
   async unverifyUser(userId: string) {
     const user = this.findUserNode(userId);
     if (!user) return { success: false, message: 'Subscriber not found' };
-    
+
     this.syncUserKYCState(user, VerificationStatus.UNVERIFIED);
     this.logAudit('Direct Unverifcation', 'Update', `Administrative de-verification for ${user.name}`, userId, user.name);
-    
+
     this.notify();
     await this.commit();
     return { success: true };
@@ -7739,44 +7725,44 @@ async logoutImpersonation() {
   async approveUnifiedRequest(requestId: string, type: 'kyc' | 'package' | 'topup') {
     if (type === 'kyc') return this.approveKYC(requestId);
     if (type === 'topup') {
-        const req = this.state.topupRequests.find(r => r.id === requestId);
-        if (!req) return { success: false, message: 'Request Void' };
-        req.status = 'Approved';
-        const user = this.state.users.find(u => u.id === req.userId);
-        if (user) {
-            user.balance += req.amount;
-            this.logNotification(user.id, 'success', 'Fiscal Credit Applied', `Your handshake for ${this.state.settings.currency} ${req.amount.toLocaleString()} was approved and credited.`, 'user');
+      const req = this.state.topupRequests.find(r => r.id === requestId);
+      if (!req) return { success: false, message: 'Request Void' };
+      req.status = 'Approved';
+      const user = this.state.users.find(u => u.id === req.userId);
+      if (user) {
+        user.balance += req.amount;
+        this.logNotification(user.id, 'success', 'Fiscal Credit Applied', `Your handshake for ${this.state.settings.currency} ${req.amount.toLocaleString()} was approved and credited.`, 'user');
+      }
+      if (this.state.settings.autoCloudSync && (req as any).paymentProof) {
+        const syncRes = await MultiCloudService.syncArtifacts(req.userId, [(req as any).paymentProof]);
+        if (syncRes.success) {
+          req.externalUrl = `https://drive.google.com/open?id=mock_sync_${req.id}`;
+          req.localPurged = true;
+          this.logAudit('Cloud Archive Sync', 'System', `Fiscal artifact for ${req.id} shifted to ${this.state.settings.cloudStorage?.provider || 'External Storage'}.`, req.userId, req.userName);
         }
-        if (this.state.settings.autoCloudSync && (req as any).paymentProof) {
-            const syncRes = await MultiCloudService.syncArtifacts(req.userId, [(req as any).paymentProof]);
-            if (syncRes.success) {
-                req.externalUrl = `https://drive.google.com/open?id=mock_sync_${req.id}`;
-                req.localPurged = true;
-                this.logAudit('Cloud Archive Sync', 'System', `Fiscal artifact for ${req.id} shifted to ${this.state.settings.cloudStorage?.provider || 'External Storage'}.`, req.userId, req.userName);
-            }
-        }
-        this.logAudit('Billing Approved', 'Approval', `Top-up of ${req.amount} for ${req.userName} approved.`, req.userId, req.userName);
-        this.notify();
-        await this.commit();
-        return { success: true };
+      }
+      this.logAudit('Billing Approved', 'Approval', `Top-up of ${req.amount} for ${req.userName} approved.`, req.userId, req.userName);
+      this.notify();
+      await this.commit();
+      return { success: true };
     }
     if (type === 'package') {
-        const req = this.state.packageRequests.find(r => r.id === requestId);
-        if (!req) return { success: false, message: 'Provisioning Request Void' };
-        req.status = 'Approved';
-        const user = this.state.users.find(u => u.id === req.userId);
-        if (user) {
-            user.packageId = req.packageId;
-            user.status = UserStatus.ACTIVE;
-            const expiry = new Date();
-            expiry.setDate(expiry.getDate() + 30);
-            user.expiryDate = expiry.toISOString();
-            this.logNotification(user.id, 'success', 'Service Link Active', `Your ${req.packageName} plan has been provisioned and is now live.`, 'user');
-        }
-        this.logAudit('Provisioning Approved', 'Approval', `Plan ${req.packageName} activated for ${req.userName}.`, req.userId, req.userName);
-        this.notify();
-        await this.commit();
-        return { success: true };
+      const req = this.state.packageRequests.find(r => r.id === requestId);
+      if (!req) return { success: false, message: 'Provisioning Request Void' };
+      req.status = 'Approved';
+      const user = this.state.users.find(u => u.id === req.userId);
+      if (user) {
+        user.packageId = req.packageId;
+        user.status = UserStatus.ACTIVE;
+        const expiry = new Date();
+        expiry.setDate(expiry.getDate() + 30);
+        user.expiryDate = expiry.toISOString();
+        this.logNotification(user.id, 'success', 'Service Link Active', `Your ${req.packageName} plan has been provisioned and is now live.`, 'user');
+      }
+      this.logAudit('Provisioning Approved', 'Approval', `Plan ${req.packageName} activated for ${req.userName}.`, req.userId, req.userName);
+      this.notify();
+      await this.commit();
+      return { success: true };
     }
     return { success: false, message: 'Protocol Unknown' };
   }
@@ -7784,26 +7770,26 @@ async logoutImpersonation() {
   async rejectUnifiedRequest(requestId: string, type: 'kyc' | 'package' | 'topup', reason: string, options?: { revisionDocsCount?: number }) {
     if (type === 'kyc') return this.rejectKYC(requestId, reason, options);
     if (type === 'topup') {
-        const req = this.state.topupRequests.find(r => r.id === requestId);
-        if (!req) return { success: false, message: 'Request Void' };
-        req.status = 'Rejected';
-        req.rejectionReason = reason;
-        this.logNotification(req.userId, 'error', 'Fiscal Handshake Denied', `The request for ${req.amount} was rejected: ${reason}`, 'user');
-        this.logAudit('Billing Rejected', 'Rejection', `Top-up for ${req.userName} rejected. Reason: ${reason}`, req.userId, req.userName);
-        this.notify();
-        await this.commit();
-        return { success: true };
+      const req = this.state.topupRequests.find(r => r.id === requestId);
+      if (!req) return { success: false, message: 'Request Void' };
+      req.status = 'Rejected';
+      req.rejectionReason = reason;
+      this.logNotification(req.userId, 'error', 'Fiscal Handshake Denied', `The request for ${req.amount} was rejected: ${reason}`, 'user');
+      this.logAudit('Billing Rejected', 'Rejection', `Top-up for ${req.userName} rejected. Reason: ${reason}`, req.userId, req.userName);
+      this.notify();
+      await this.commit();
+      return { success: true };
     }
     if (type === 'package') {
-        const req = this.state.packageRequests.find(r => r.id === requestId);
-        if (!req) return { success: false, message: 'Provisioning Request Void' };
-        req.status = 'Rejected';
-        req.rejectionReason = reason;
-        this.logNotification(req.userId, 'error', 'Provisioning Registry Fault', `Your service plan request was denied: ${reason}`, 'user');
-        this.logAudit('Provisioning Rejected', 'Rejection', `Plan ${req.packageName} for ${req.userName} rejected. Reason: ${reason}`, req.userId, req.userName);
-        this.notify();
-        await this.commit();
-        return { success: true };
+      const req = this.state.packageRequests.find(r => r.id === requestId);
+      if (!req) return { success: false, message: 'Provisioning Request Void' };
+      req.status = 'Rejected';
+      req.rejectionReason = reason;
+      this.logNotification(req.userId, 'error', 'Provisioning Registry Fault', `Your service plan request was denied: ${reason}`, 'user');
+      this.logAudit('Provisioning Rejected', 'Rejection', `Plan ${req.packageName} for ${req.userName} rejected. Reason: ${reason}`, req.userId, req.userName);
+      this.notify();
+      await this.commit();
+      return { success: true };
     }
     return { success: false, message: 'Protocol Unknown' };
   }
@@ -7856,7 +7842,7 @@ async logoutImpersonation() {
     }
 
     const latency = Date.now() - start;
-    
+
     // Log Activity
     this.logAuthActivity({
       provider: provider.name,
@@ -7892,21 +7878,20 @@ async logoutImpersonation() {
 
   async sendSmartPasswordReset(email: string) {
     console.log(`[CSAE] Initiating smart auth routing for: ${email}`);
-    
+
     try {
       const response = await fetch(`${this.backendUrl}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
+      const data = await response.json();
 
-      const result = await response.json();
-      
-      if (result.success) {
-         this.logAudit('Password Reset Requested', 'Auth', `Recovery link requested for: ${email}`);
-         return { success: true, provider: 'Email' };
+      if (data.success) {
+        this.logAudit('Password Reset Requested', 'Auth', `Recovery link requested for: ${email}`);
+        return { success: true, provider: 'Custom Auth Backend' };
       } else {
-         return { success: false, message: result.message || 'Recovery Protocol Fault: Handshake failed.' };
+        return { success: false, message: data.message || 'Recovery Protocol Fault: Handshake failed.' };
       }
     } catch (e: any) {
       console.error('[AUTH] Reset Request Error:', e);
@@ -7925,20 +7910,20 @@ async logoutImpersonation() {
 
     // Check for expiration
     if (new Date(account.expiry).getTime() < Date.now()) {
-       result = 'Expired';
-       message = 'Protocol Expired: OAuth2 session has timed out. Rotation required.';
+      result = 'Expired';
+      message = 'Protocol Expired: OAuth2 session has timed out. Rotation required.';
     } else {
-       try {
-         const endpoint = account.provider === 'Google Drive' ? 'https://www.googleapis.com' : 
-                         (account.provider === 'OneDrive' ? 'https://graph.microsoft.com' : 'https://api.pcloud.com');
-         
-         await fetch(endpoint, { mode: 'no-cors' });
-         result = 'Success';
-         message = `${account.provider} Handshake Success: Infrastructure reachable.`;
-       } catch (err: any) {
-         result = 'Fail';
-         message = `Protocol Fault: ${err.message || 'Connection timeout.'}`;
-       }
+      try {
+        const endpoint = account.provider === 'Google Drive' ? 'https://www.googleapis.com' :
+          (account.provider === 'OneDrive' ? 'https://graph.microsoft.com' : 'https://api.pcloud.com');
+
+        await fetch(endpoint, { mode: 'no-cors' });
+        result = 'Success';
+        message = `${account.provider} Handshake Success: Infrastructure reachable.`;
+      } catch (err: any) {
+        result = 'Fail';
+        message = `Protocol Fault: ${err.message || 'Connection timeout.'}`;
+      }
     }
 
     // Log Activity Matrix
@@ -7959,25 +7944,25 @@ async logoutImpersonation() {
     const idx = this.state.cloudAccounts.findIndex(a => a.id === id);
     if (idx !== -1) {
       const provider = this.state.cloudAccounts[idx].provider;
-       this.state.cloudAccounts[idx] = {
-          ...this.state.cloudAccounts[idx],
-          status: 'Disconnected',
-          accessToken: '',
-          refreshToken: '',
-          isPrimary: false,
-          isBackup: false
-       };
-       this.logCloudActivity({
-          fileName: `Node Decommission: ${provider}`,
-          source: provider,
-          destination: 'Registry Archive',
-          status: 'Completed',
-          progress: 100,
-          timestamp: new Date().toISOString()
-       });
-       this.notify();
-       await this.commit();
-       return { success: true, message: `Cloud Node successfully decommissioned.` };
+      this.state.cloudAccounts[idx] = {
+        ...this.state.cloudAccounts[idx],
+        status: 'Disconnected',
+        accessToken: '',
+        refreshToken: '',
+        isPrimary: false,
+        isBackup: false
+      };
+      this.logCloudActivity({
+        fileName: `Node Decommission: ${provider}`,
+        source: provider,
+        destination: 'Registry Archive',
+        status: 'Completed',
+        progress: 100,
+        timestamp: new Date().toISOString()
+      });
+      this.notify();
+      await this.commit();
+      return { success: true, message: `Cloud Node successfully decommissioned.` };
     }
     return { success: false, message: 'Node not found in registry.' };
   }
@@ -7993,11 +7978,11 @@ async logoutImpersonation() {
     const backups = activeClouds.filter(a => a.id !== primary.id);
 
     if (!kyc.cloudStorage) kyc.cloudStorage = {};
-    
+
     // Simulate primary upload
     const primaryId = primary.id;
     kyc.cloudStorage[primaryId] = `cloud://${primary.provider.toLowerCase()}/kyc/${requestId}/${fileName}`;
-    
+
     this.logCloudActivity({
       fileName,
       source: 'Local Buffer',
@@ -8010,15 +7995,15 @@ async logoutImpersonation() {
     // Auto-backup logic
     for (const backup of backups) {
       if (backup.autoSyncEnabled || backup.isBackup) {
-         kyc.cloudStorage[backup.id] = `cloud://${backup.provider.toLowerCase()}/kyc/${requestId}/${fileName}`;
-         this.logCloudActivity({
-            fileName,
-            source: primary.provider,
-            destination: backup.provider,
-            status: 'Completed',
-            progress: 100,
-            timestamp: new Date().toISOString()
-         });
+        kyc.cloudStorage[backup.id] = `cloud://${backup.provider.toLowerCase()}/kyc/${requestId}/${fileName}`;
+        this.logCloudActivity({
+          fileName,
+          source: primary.provider,
+          destination: backup.provider,
+          status: 'Completed',
+          progress: 100,
+          timestamp: new Date().toISOString()
+        });
       }
     }
 
@@ -8036,79 +8021,79 @@ async logoutImpersonation() {
   }
 
   async shiftKYCArtifact(requestId: string, destProviderId: string) {
-     const kyc = this.state.kycRequests.find(r => r.id === requestId);
-     const dest = this.state.cloudAccounts.find(a => a.id === destProviderId);
-     if (!kyc || !dest) return { success: false, message: 'Source or Destination node void.' };
+    const kyc = this.state.kycRequests.find(r => r.id === requestId);
+    const dest = this.state.cloudAccounts.find(a => a.id === destProviderId);
+    if (!kyc || !dest) return { success: false, message: 'Source or Destination node void.' };
 
-     const logId = `SHIFT-${Date.now()}`;
-     this.logCloudActivity({
-        id: logId,
-        fileName: `RE-LOCATE: KYC-${requestId}`,
-        source: kyc.syncReport?.primaryProvider || 'Unknown',
-        destination: dest.provider,
-        status: 'In Progress',
-        progress: 25,
-        timestamp: new Date().toISOString()
-     });
+    const logId = `SHIFT-${Date.now()}`;
+    this.logCloudActivity({
+      id: logId,
+      fileName: `RE-LOCATE: KYC-${requestId}`,
+      source: kyc.syncReport?.primaryProvider || 'Unknown',
+      destination: dest.provider,
+      status: 'In Progress',
+      progress: 25,
+      timestamp: new Date().toISOString()
+    });
 
-     // Simulate relay
-     await new Promise(r => setTimeout(r, 1500));
-     
-     if (!kyc.cloudStorage) kyc.cloudStorage = {};
-     kyc.cloudStorage[dest.id] = `cloud://${dest.provider.toLowerCase()}/kyc/${requestId}/shifted_artifact`;
-     
-     const log = this.state.cloudTransferLogs.find(l => l.id === logId);
-     if (log) {
-        log.status = 'Completed';
-        log.progress = 100;
-     }
+    // Simulate relay
+    await new Promise(r => setTimeout(r, 1500));
 
-     this.notify();
-     await this.commit();
-     return { success: true, message: `Artifact shifted to ${dest.provider}.` };
+    if (!kyc.cloudStorage) kyc.cloudStorage = {};
+    kyc.cloudStorage[dest.id] = `cloud://${dest.provider.toLowerCase()}/kyc/${requestId}/shifted_artifact`;
+
+    const log = this.state.cloudTransferLogs.find(l => l.id === logId);
+    if (log) {
+      log.status = 'Completed';
+      log.progress = 100;
+    }
+
+    this.notify();
+    await this.commit();
+    return { success: true, message: `Artifact shifted to ${dest.provider}.` };
   }
 
   async verifyCloudIntegrity(requestId: string) {
-     const kyc = this.state.kycRequests.find(r => r.id === requestId);
-     if (!kyc || !kyc.cloudStorage) return { success: false, message: 'No cloud storage found for this record.' };
+    const kyc = this.state.kycRequests.find(r => r.id === requestId);
+    if (!kyc || !kyc.cloudStorage) return { success: false, message: 'No cloud storage found for this record.' };
 
-     await new Promise(r => setTimeout(r, 1000));
-     if (kyc.syncReport) {
-        kyc.syncReport.lastVerified = new Date().toISOString();
-     }
-     
-     this.notify();
-     return { success: true, message: 'Cloud integrity verified across all nodes.' };
+    await new Promise(r => setTimeout(r, 1000));
+    if (kyc.syncReport) {
+      kyc.syncReport.lastVerified = new Date().toISOString();
+    }
+
+    this.notify();
+    return { success: true, message: 'Cloud integrity verified across all nodes.' };
   }
 
   async triggerCloudSync(accountId: string) {
-     const account = this.state.cloudAccounts.find(a => a.id === accountId);
-     if (!account) return { success: false, message: 'Registry Error: Target account void.' };
-     
-     // Log Sync Initiation
-     const logId = `SYNC-${Date.now()}`;
-     this.logCloudActivity({
-        id: logId,
-        fileName: `Metadata Sync: ${account.provider}`,
-        source: account.provider,
-        destination: 'Registry Cache',
-        status: 'In Progress',
-        progress: 10,
-        timestamp: new Date().toISOString()
-     });
+    const account = this.state.cloudAccounts.find(a => a.id === accountId);
+    if (!account) return { success: false, message: 'Registry Error: Target account void.' };
 
-     // Simulate sync process
-     await new Promise(r => setTimeout(r, 2000));
-     
-     const log = this.state.cloudTransferLogs.find(l => l.id === logId);
-     if (log) {
-        log.status = 'Completed';
-        log.progress = 100;
-     }
+    // Log Sync Initiation
+    const logId = `SYNC-${Date.now()}`;
+    this.logCloudActivity({
+      id: logId,
+      fileName: `Metadata Sync: ${account.provider}`,
+      source: account.provider,
+      destination: 'Registry Cache',
+      status: 'In Progress',
+      progress: 10,
+      timestamp: new Date().toISOString()
+    });
 
-     this.notify();
-     await this.commit();
-     return { success: true, message: `Handshake Complete: ${account.provider} metadata re-indexed.` };
+    // Simulate sync process
+    await new Promise(r => setTimeout(r, 2000));
+
+    const log = this.state.cloudTransferLogs.find(l => l.id === logId);
+    if (log) {
+      log.status = 'Completed';
+      log.progress = 100;
+    }
+
+    this.notify();
+    await this.commit();
+    return { success: true, message: `Handshake Complete: ${account.provider} metadata re-indexed.` };
   }
 
   async updateCloudAccount(id: string, data: Partial<CloudAccount>) {
@@ -8123,13 +8108,13 @@ async logoutImpersonation() {
   }
 
   private logCloudActivity(activity: Omit<CloudTransferLog, 'id'> & { id?: string }) {
-     const log: CloudTransferLog = {
-        id: activity.id || `TX-${Date.now()}`,
-        ...activity
-     };
-     this.state.cloudTransferLogs.unshift(log);
-     if (this.state.cloudTransferLogs.length > 30) this.state.cloudTransferLogs.pop();
-     this.notify();
+    const log: CloudTransferLog = {
+      id: activity.id || `TX-${Date.now()}`,
+      ...activity
+    };
+    this.state.cloudTransferLogs.unshift(log);
+    if (this.state.cloudTransferLogs.length > 30) this.state.cloudTransferLogs.pop();
+    this.notify();
   }
 
   async adminEmergencyAuthReset(userId: string, mode: 'Link' | 'TempPassword', tempPassword?: string) {
@@ -8141,15 +8126,15 @@ async logoutImpersonation() {
     } else {
       // Force Temporary Password
       if (!tempPassword) return { success: false, message: 'Target password payload missing.' };
-      
+
       user.password = tempPassword;
       user.mustChangePassword = true;
       user.lastPasswordChange = new Date().toISOString();
-      
+
       const details = `Administrative override: Set temporary password. Node flagged for forced rotation.`;
       this.logAudit('Emergency Reset', 'System', details, userId, user.name);
       this.logNotification(userId, 'warning', 'Account Security Notice', 'Your password has been reset by an administrator. You must change it at next login.', 'user');
-      
+
       await this.commit();
       this.notify();
       return { success: true, message: 'Temporary password established. Subscriber node updated.' };

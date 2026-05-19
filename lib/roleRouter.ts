@@ -280,16 +280,16 @@ export function getDefaultPathForRole(role: string): string {
  * Used for guarded navigation — returns false if the role is not permitted.
  */
 export function canRoleAccessPath(role: string, path: string): boolean {
+  // Normalize  // Robust check for SuperAdmin or Admin (Case-insensitive, Handles spaces)
+  const isSuperAdmin = ['superadmin', 'admin'].includes(role.toLowerCase().replace(/\s/g, ''));
+  if (isSuperAdmin) return true;
+
   // Normalize path (remove trailing slash, except for root)
   const normalizedPath = path === '/' ? '/' : path.replace(/\/$/, '');
   
   const route = ALL_ROLE_ROUTES.find(r => r.path === normalizedPath);
   if (!route) return false;
 
-  // Normalize  // Robust check for SuperAdmin or Admin (Case-insensitive, Handles spaces)
-  const isSuperAdmin = ['superadmin', 'admin'].includes(role.toLowerCase().replace(/\s/g, ''));
-  if (isSuperAdmin) return true;
-  
   const cleanRole = role.toLowerCase().replace(/\s/g, '');
   return route.requiredRoles.some(requiredRole => {
     const cleanRequired = requiredRole.toLowerCase().replace(/\s/g, '');

@@ -1,5 +1,6 @@
-const snmp = require('net-snmp');
-const logger = require('../utils/logger');
+import snmp from 'net-snmp';
+import logger from '../utils/logger.js';
+import configManager from '../services/config-manager.js';
 
 // SNMP OIDs for interface statistics
 const OIDS = {
@@ -12,13 +13,42 @@ const OIDS = {
 const telemetryCache = new Map();
 
 // Real-time Bandwidth Monitoring via SNMP
-exports.streamBandwidth = (socket, userId) => {
-    // In production, fetch device IP from user's assigned device
-    // For now, using placeholder logic
-    const deviceIp = '192.168.1.1'; // Replace with actual device lookup
-    const interfaceIndex = 1; // Replace with actual interface
+export const streamBandwidth = async (socket, userId) => {
+    const supabase = configManager.getSupabaseClient();
+    let deviceIp = '192.168.1.1'; // Robust fallback
+    let interfaceIndex = 1;
 
-    logger.info(`Starting bandwidth stream for user ${userId} on ${deviceIp}`);
+    try {
+        if (supabase) {
+            // Retrieve subscriber's connection parameters
+            const { data: user, error } = await supabase
+                .from('users')
+                .select('raw_data, area, connection_type')
+                .eq('id', userId)
+                .single();
+
+            if (user && !error) {
+                // If the user's raw_data or connection mapping defines a target IP/nas
+                if (user.raw_data && user.raw_data.deviceIp) {
+                    deviceIp = user.raw_data.deviceIp;
+                } else {
+                    // Try to fetch active NAS IP from global system configs
+                    const networkConfigs = configManager.getConfig('network_providers');
+                    if (networkConfigs && networkConfigs.mikrotik && networkConfigs.mikrotik.ip) {
+                        deviceIp = networkConfigs.mikrotik.ip;
+                    }
+                }
+                
+                if (user.raw_data && user.raw_data.interfaceIndex) {
+                    interfaceIndex = parseInt(user.raw_data.interfaceIndex) || 1;
+                }
+            }
+        }
+    } catch (dbErr) {
+        logger.error(`[TELEMETRY] Database device lookup failed: ${dbErr.message}`);
+    }
+
+    logger.info(`Starting bandwidth stream for user ${userId} on ${deviceIp} interface ${interfaceIndex}`);
 
     const session = snmp.createSession(deviceIp, 'public', {
         version: snmp.Version2c,
@@ -94,7 +124,7 @@ exports.streamBandwidth = (socket, userId) => {
 };
 
 // Get device statistics (one-time fetch)
-exports.getDeviceStats = async (deviceIp, interfaceIndex = 1) => {
+export const getDeviceStats = async (deviceIp, interfaceIndex = 1) => {
     return new Promise((resolve, reject) => {
         const session = snmp.createSession(deviceIp, 'public');
 
@@ -122,4 +152,7 @@ exports.getDeviceStats = async (deviceIp, interfaceIndex = 1) => {
     });
 };
 
-module.exports = exports;
+export default {
+    streamBandwidth,
+    getDeviceStats
+};

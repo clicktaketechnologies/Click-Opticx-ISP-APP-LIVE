@@ -42,6 +42,7 @@
     "node-cron": "^4.2.1",
     "node-routeros": "^1.6.9",
     "nodemailer": "^8.0.7",
+    "pg": "^8.21.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "^6.30.3",
@@ -54,10 +55,11 @@
     "ssh2": "^1.17.0",
     "stripe": "^22.1.1",
     "telnet-client": "^2.2.13",
+    "tsx": "^4.21.0",
     "web-push": "^3.6.7",
     "winston": "^3.19.0",
-    "zustand": "^5.0.12",
-    "tsx": "^4.21.0"
+    "zod": "^4.4.3",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

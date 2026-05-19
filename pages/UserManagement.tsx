@@ -624,7 +624,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                  <button onClick={() => setSelectedIds(new Set(filteredUsers.filter(u => u.balance > 0).map(u => u.id)))} className="text-[9px] font-black text-amber-500 uppercase tracking-tighter hover:underline">Select Overdue</button>
               </div>
            </div>
-           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] italic">ClickOptix Registry Core • v4.0</p>
+           <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] italic">ClickOptix Registry Core • v9.5.4</p>
         </div>
         
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full min-w-full">

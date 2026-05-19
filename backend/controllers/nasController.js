@@ -1,5 +1,5 @@
-const RouterOSAPI = require('node-routeros');
-const logger = require('../utils/logger');
+import RouterOSAPI from 'node-routeros';
+import logger from '../utils/logger.js';
 
 // ─── Helper: open a MikroTik API connection ───────────────────────────────────
 async function openMikrotikApi({ ip, apiPort = 8728, apiUsername = 'admin', apiPassword = '' }) {
@@ -21,7 +21,7 @@ async function closeApi(api) {
 
 // ─── PPPoE User Sync ──────────────────────────────────────────────────────────
 // POST /api/nas/sync
-exports.syncSubscriber = async (req, res) => {
+export const syncSubscriber = async (req, res) => {
     const { nas, user, action = 'upsert' } = req.body;
 
     if (!nas || !user) {
@@ -129,7 +129,7 @@ async function syncHotspot(api, user, action) {
 
 // ─── CoA / Disconnect ─────────────────────────────────────────────────────────
 // POST /api/nas/coa
-exports.executeCoA = async (req, res) => {
+export const executeCoA = async (req, res) => {
     const { nas, user, action } = req.body;
 
     if (!nas || !user || !action) {
@@ -184,7 +184,7 @@ exports.executeCoA = async (req, res) => {
 
 // ─── Router Health / Stats ────────────────────────────────────────────────────
 // GET /api/nas/:nasId/stats
-exports.getNasStats = async (req, res) => {
+export const getNasStats = async (req, res) => {
     const { ip, port, apiUsername, apiPassword } = req.query;
 
     if (!ip) {
@@ -244,7 +244,7 @@ exports.getNasStats = async (req, res) => {
 
 // ─── Full Router Health Check ─────────────────────────────────────────────────
 // POST /api/nas/health
-exports.checkHealth = async (req, res) => {
+export const checkHealth = async (req, res) => {
     const { nas } = req.body;
 
     if (!nas || !nas.ip) {
@@ -303,4 +303,4 @@ exports.checkHealth = async (req, res) => {
     }
 };
 
-module.exports = exports;
+

@@ -13,6 +13,7 @@ router.post('/emergency/request', protect, enforceSettings('portal'), financeCon
 
 // Admin-Only Diagnostic & Control Routes
 router.get('/health', protect, restrictTo('Admin', 'SuperAdmin'), financeController.getFinanceHealth);
+router.get('/pulse', protect, restrictTo('Admin', 'SuperAdmin', 'Accountant'), financeController.getFiscalPulse);
 router.post('/config', protect, restrictTo('Admin', 'SuperAdmin'), financeController.saveFinanceConfig);
 router.post('/agent/collection', protect, restrictTo('Agent', 'Admin'), financeController.logAgentCollection);
 

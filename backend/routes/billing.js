@@ -40,6 +40,31 @@ router.post('/payment', protect, async (req, res) => {
 });
 
 /**
+ * @route POST /api/billing/invoice/bulk-generate
+ * @desc Generate invoices for a batch of users
+ */
+router.post('/invoice/bulk-generate', protect, restrictTo('SuperAdmin', 'Admin', 'Accountant', 'FinanceAdmin'), async (req, res) => {
+    const { userIds, amount, dueDate, description } = req.body;
+    try {
+        if (!userIds || !Array.isArray(userIds)) throw new Error('userIds array is required');
+        
+        const results = [];
+        for (const userId of userIds) {
+            try {
+                const invoice = await billingService.createInvoice(userId, amount || 0, dueDate || new Date().toISOString(), description);
+                results.push({ userId, success: true, invoice });
+            } catch (err) {
+                results.push({ userId, success: false, error: err.message });
+            }
+        }
+        res.json({ success: true, data: results });
+    } catch (error) {
+        logger.error(`[BILLING-BULK-GENERATE] Error: ${error.message}`);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+/**
  * @route POST /api/billing/loan
  * @desc Request an emergency loan
  */

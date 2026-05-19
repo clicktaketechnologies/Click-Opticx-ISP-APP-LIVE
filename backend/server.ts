@@ -35,6 +35,9 @@ import migrationRoutes from './routes/migration.js';
 import brandingRoutes from './routes/branding.js';
 import trashRoutes from './routes/trash.js';
 import adminRoutes from './routes/admin.js';
+import packageRoutes from './routes/packages.js';
+import speedtestRoutes from './routes/speedtest.js';
+import nasRoutes from './routes/nas.js';
 
 
 
@@ -82,9 +85,17 @@ try {
     logger.error(`❌ Firebase Admin Init Failed: ${error.message}`);
 }
 
+import emailRouter from './modules/email/email-router.js';
+
 // --- Supabase Config Manager Init ---
 configManager.init().then(async () => {
     logger.info('🗄️  Supabase Config Manager: Online');
+    try {
+        await emailRouter.init();
+        logger.info('📧 Email Router: Initialized with healthy adapters');
+    } catch (emailErr: any) {
+        logger.warn(`⚠️ Email Router Init Failure: ${emailErr.message}`);
+    }
     livePoller.startPolling();
 }).catch((err: any) => {
     logger.warn(`⚠️ Supabase Config Manager: ${err.message}`);
@@ -95,7 +106,8 @@ const allowedOrigins = [
     'https://isp-click-opticx.web.app',
     'https://isp-click-opticx.firebaseapp.com',
     'http://localhost:3000',
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'http://localhost:4173'
 ];
 
 app.use(cors({ 
@@ -135,8 +147,21 @@ apiV1.use('/migration', migrationRoutes);
 apiV1.use('/branding', brandingRoutes);
 apiV1.use('/trash', trashRoutes);
 apiV1.use('/admin', adminRoutes);
+apiV1.use('/packages', packageRoutes);
+apiV1.use('/speedtest', speedtestRoutes);
+apiV1.use('/nas', nasRoutes);
 
 
+
+// Error Handler
+apiV1.use((err, req, res, next) => {
+    logger.error(`[API-ERROR] ${err.stack}`);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+});
 
 app.use('/api/v1', apiV1);
 app.use('/api', apiV1);

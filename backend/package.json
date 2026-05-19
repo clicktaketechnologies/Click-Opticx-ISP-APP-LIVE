@@ -14,6 +14,7 @@
     "dependencies": {
         "@supabase/supabase-js": "^2.103.0",
         "@upstash/redis": "^1.37.0",
+        "argon2": "^0.44.0",
         "axios": "^1.14.0",
         "bcryptjs": "^2.4.3",
         "bullmq": "^5.73.4",
@@ -42,9 +43,10 @@
         "ssh2": "^1.17.0",
         "stripe": "^22.1.0",
         "telnet-client": "^2.2.13",
+        "tsx": "^4.21.0",
         "web-push": "^3.6.7",
         "winston": "^3.8.2",
-        "tsx": "^4.21.0"
+        "zod": "^4.4.3"
     },
     "devDependencies": {
         "jest": "^29.5.0",

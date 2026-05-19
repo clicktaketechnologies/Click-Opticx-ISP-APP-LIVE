@@ -15,5 +15,7 @@ router.post('/', protect, restrictTo('SuperAdmin', 'Admin'), userController.crea
 router.patch('/:id', protect, restrictTo('SuperAdmin', 'Admin'), userController.updateUser);
 router.delete('/:id', protect, restrictTo('SuperAdmin'), userController.softDeleteUser);
 router.post('/:id/restore', protect, restrictTo('SuperAdmin'), userController.restoreUser);
+router.post('/:id/transfer', protect, restrictTo('SuperAdmin', 'Admin'), userController.transferUser);
+router.post('/import', protect, restrictTo('SuperAdmin', 'Admin'), userController.importUsers);
 
 export default router;

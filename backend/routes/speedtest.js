@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import crypto from 'crypto';
+import logger from '../utils/logger.js';
+
 const router = express.Router();
-const crypto = require('crypto');
-const logger = require('../utils/logger');
 
 // Pre-allocate a 5MB buffer for download tests to avoid CPU overhead during requests
 const DOWNLOAD_BUFFER = crypto.randomBytes(5 * 1024 * 1024);
@@ -69,4 +70,4 @@ router.post('/upload', (req, res) => {
     });
 });
 
-module.exports = router;
+export default router;

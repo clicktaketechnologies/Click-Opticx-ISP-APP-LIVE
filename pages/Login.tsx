@@ -1,21 +1,24 @@
 import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
    ShieldCheck, Wifi, CheckCircle, ArrowLeft, Loader2, Cpu, Zap,
    User, Smartphone, AtSign, Contact, LayoutGrid, Clock, MapPin,
    AlertCircle, ShieldAlert, Key, Globe, Info, Package, Send, History, X, Scale, Scan
 } from 'lucide-react';
 import { db } from '../db';
+import { supabase } from '../lib/supabase';
 import PasswordInput from '../components/shared/PasswordInput';
 import { useBranding } from '../hooks/useBranding';
 import Modal from '../components/shared/Modal';
 import FaceScanner from '../components/shared/FaceScanner';
 
 interface LoginProps {
-   onLogin: (credential: string, pass: string) => any;
+   onLogin: (credential: string, pass: string, rememberMe?: boolean) => any;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
+   const navigate = useNavigate();
    const state = db.getState();
    const branding = useBranding();
    const legal = state.settings.legal;
@@ -54,10 +57,22 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       db.wakeBackend();
 
       // Handle Password Reset Redirects
+      const hash = window.location.hash;
       const params = new URLSearchParams(window.location.search);
       const token = params.get('token');
       const email = params.get('email');
-      if (token) {
+
+      const isRecovery = hash.includes('type=recovery') || params.get('type') === 'recovery' || hash.includes('recovery_token=') || hash.includes('access_token=');
+
+      if (isRecovery) {
+         setView('reset_finalize');
+         setResetToken('SUPABASE_RECOVERY');
+         supabase.auth.getUser().then(({ data }) => {
+            if (data?.user?.email) {
+               setResetIdentifier(data.user.email);
+            }
+         });
+      } else if (token) {
          setResetToken(token);
          if (email) setResetIdentifier(email);
          setView('reset_finalize');
@@ -126,6 +141,24 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
    const handleSignup = async (e: React.FormEvent) => {
       e.preventDefault();
+      
+      if (!signupData.name.trim()) {
+         setError("Full Name is required.");
+         return;
+      }
+      if (signupData.username.trim().length < 3) {
+         setError("Username must be at least 3 characters long.");
+         return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(signupData.email)) {
+         setError("Invalid email format.");
+         return;
+      }
+      if (signupData.phone.replace(/\D/g, '').length < 10) {
+         setError("Phone number must be at least 10 characters long.");
+         return;
+      }
       if (signupData.password !== signupData.confirmPassword) {
          setError("Passwords do not match.");
          return;
@@ -134,15 +167,25 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          setError("Password must be at least 8 characters long.");
          return;
       }
+      if (!/[A-Z]/.test(signupData.password)) {
+         setError("Password must contain at least one uppercase letter.");
+         return;
+      }
+      if (!/[0-9]/.test(signupData.password)) {
+         setError("Password must contain at least one number.");
+         return;
+      }
+      if (!/[^a-zA-Z0-9]/.test(signupData.password)) {
+         setError("Password must contain at least one symbol.");
+         return;
+      }
 
       setIsProcessing(true);
       setError(null);
       try {
          const res = await db.submitSignupRequest(signupData);
          if (res.success) {
-            // New Flow: Always redirect to login and show verification message
-            alert(res.message || "Account created! Please check your email for the verification link.");
-            setView('login');
+            navigate(`/verify-email?userId=${res.userId}&email=${encodeURIComponent(signupData.email)}`);
          } else {
             setError(res.message || 'Signup failed.');
          }
@@ -187,20 +230,37 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const handleResetFinalize = async (e: React.FormEvent) => {
       e.preventDefault();
       setIsProcessing(true);
+      setError(null);
 
-      const verify = await db.verifyResetCode(resetIdentifier, resetToken);
+      let isAllowed = false;
+      if (resetToken === 'BIOMETRIC_APPROVED' || resetToken === 'SUPABASE_RECOVERY') {
+         isAllowed = true;
+      } else {
+         const verify = await db.verifyResetCode(resetIdentifier, resetToken);
+         if (verify.success) isAllowed = true;
+      }
 
-      if (verify.success || resetToken === 'BIOMETRIC_APPROVED') {
-         const userAccount = await db.findUserForReset(resetIdentifier);
-         if (userAccount) {
-            await db.updateCustomerPassword(userAccount.id, newPassword, resetToken);
+      if (isAllowed) {
+         try {
+            if (resetToken === 'SUPABASE_RECOVERY') {
+               const { error: recoveryErr } = await supabase.auth.updateUser({ password: newPassword });
+               if (recoveryErr) throw recoveryErr;
+            }
+
+            const userAccount = await db.findUserForReset(resetIdentifier);
+            if (userAccount) {
+               await db.updateCustomerPassword(userAccount.id, newPassword, resetToken);
+               setIsProcessing(false);
+               setView('login');
+               setError(null);
+               alert("Success! Your password has been updated. You can now sign in.");
+            } else {
+               setIsProcessing(false);
+               setError("Login verification timed out. Please try again.");
+            }
+         } catch (err: any) {
             setIsProcessing(false);
-            setView('login');
-            setError(null);
-            alert("Success! Your password has been updated. You can now sign in.");
-         } else {
-            setIsProcessing(false);
-            setError("Login verification timed out. Please try again.");
+            setError(err.message || "Failed to finalize password reset.");
          }
       } else {
          setIsProcessing(false);
