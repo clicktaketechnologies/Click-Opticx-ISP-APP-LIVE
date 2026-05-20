@@ -642,8 +642,23 @@ class DB {
     this.state = INITIAL_STATE;
     try {
       const cached = typeof localStorage !== 'undefined' ? localStorage.getItem('clickopticx_v16_registry') : null;
+      let sessionCached = null;
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        try {
+          const rawSession = sessionStorage.getItem('clickopticx_session_state');
+          if (rawSession) sessionCached = JSON.parse(rawSession);
+        } catch (e) {}
+      }
+
       if (cached) {
         const parsed = JSON.parse(cached);
+        // Stripping dynamic/sensitive data to prevent local caching/pollution issues
+        delete parsed.users;
+        delete parsed.auth;
+        delete parsed.currentUser;
+        delete parsed.originalAdminUser;
+        delete parsed.isImpersonating;
+
         // Deep merge or ensure branding paths aren't empty
         if (parsed.settings?.branding) {
           if (!parsed.settings.branding.logoLight) parsed.settings.branding.logoLight = '/favicon.png';
@@ -652,74 +667,82 @@ class DB {
           if (!parsed.settings.branding.favicon) parsed.settings.branding.favicon = '/favicon.png';
         }
         this.state = { ...INITIAL_STATE, ...parsed };
-
-        // --- 🛡️ SECURITY HARDENING: Session Expiry Check ---
-        if (this.state.auth?.isLoggedIn) {
-          const isPersistent = this.state.auth.isPersistent !== false;
-          const lastLogin = this.state.auth.lastLoginAt ? new Date(this.state.auth.lastLoginAt).getTime() : 0;
-          const now = Date.now();
-          // P0-FIX: Reduced from 30d/24h to 15d/12h to limit session exposure window
-          const sessionTimeout = isPersistent
-            ? (15 * 24 * 60 * 60 * 1000)  // 15 days max for "Remember Me"
-            : (12 * 60 * 60 * 1000);       // 12 hours for non-persistent sessions
-
-          // P0-FIX: Also validate the stored JWT token expiry
-          const storedToken = this.getValidToken();
-          const tokenExpired = !storedToken;
-
-          if (!isPersistent && !sessionStorage.getItem('clickoptix_active_session')) {
-            console.warn('[SECURITY] Non-persistent session detected without active tab. Logging out.');
-            this.state.auth = { isLoggedIn: false };
-            this.state.currentUser = undefined;
-            this.state.view = 'login';
-            localStorage.removeItem('clickopticx_auth_token');
-          } else if (tokenExpired) {
-            console.warn('[SECURITY] JWT token expired or missing. Force logout triggered.');
-            this.state.auth = { isLoggedIn: false };
-            this.state.currentUser = undefined;
-            this.state.view = 'login';
-          } else if (lastLogin && (now - lastLogin > sessionTimeout)) {
-            console.warn('[SECURITY] Session exceeded maximum TTL. Force logout triggered.');
-            this.state.auth = { isLoggedIn: false };
-            this.state.currentUser = undefined;
-            this.state.view = 'login';
-            localStorage.removeItem('clickopticx_auth_token');
-          }
-        }
-
-        // If not logged in, always show login view
-        if (!this.state.auth?.isLoggedIn) {
-          this.state.view = 'login';
-        }
-
-        // Deep-merge settings so new defaults (like authSettings) are always present
-        this.state.settings = { ...INITIAL_STATE.settings, ...this.state.settings };
-        if (!this.state.settings.authSettings) {
-          this.state.settings.authSettings = INITIAL_STATE.settings.authSettings;
-        } else {
-          this.state.settings.authSettings = { ...INITIAL_STATE.settings.authSettings, ...this.state.settings.authSettings };
-        }
-
-        // Robustify roles
-        if (!this.state.roles || !Array.isArray(this.state.roles) || this.state.roles.length === 0) {
-          this.state.roles = INITIAL_STATE.roles;
-        }
-
-        // Ensure signupRequests array exists
-        if (!this.state.signupRequests) {
-          this.state.signupRequests = [];
-        }
-
-        if (!Array.isArray(this.state.cloudAccounts)) {
-          this.state.cloudAccounts = [];
-        }
-
-        if (!Array.isArray(this.state.cloudTransferLogs)) {
-          this.state.cloudTransferLogs = [];
-        }
-
-        this.patchState();
       }
+
+      // Merge session state if it exists
+      if (sessionCached) {
+        this.state.auth = { ...this.state.auth, ...sessionCached.auth };
+        this.state.currentUser = sessionCached.currentUser;
+        this.state.originalAdminUser = sessionCached.originalAdminUser;
+        this.state.isImpersonating = sessionCached.isImpersonating;
+      }
+
+      // --- 🛡️ SECURITY HARDENING: Session Expiry Check ---
+      if (this.state.auth?.isLoggedIn) {
+        const isPersistent = this.state.auth.isPersistent !== false;
+        const lastLogin = this.state.auth.lastLoginAt ? new Date(this.state.auth.lastLoginAt).getTime() : 0;
+        const now = Date.now();
+        // P0-FIX: Reduced from 30d/24h to 15d/12h to limit session exposure window
+        const sessionTimeout = isPersistent
+          ? (15 * 24 * 60 * 60 * 1000)  // 15 days max for "Remember Me"
+          : (12 * 60 * 60 * 1000);       // 12 hours for non-persistent sessions
+
+        // P0-FIX: Also validate the stored JWT token expiry
+        const storedToken = this.getValidToken();
+        const tokenExpired = !storedToken;
+
+        if (!isPersistent && !sessionStorage.getItem('clickoptix_active_session')) {
+          console.warn('[SECURITY] Non-persistent session detected without active tab. Logging out.');
+          this.state.auth = { isLoggedIn: false };
+          this.state.currentUser = undefined;
+          this.state.view = 'login';
+          localStorage.removeItem('clickopticx_auth_token');
+        } else if (tokenExpired) {
+          console.warn('[SECURITY] JWT token expired or missing. Force logout triggered.');
+          this.state.auth = { isLoggedIn: false };
+          this.state.currentUser = undefined;
+          this.state.view = 'login';
+        } else if (lastLogin && (now - lastLogin > sessionTimeout)) {
+          console.warn('[SECURITY] Session exceeded maximum TTL. Force logout triggered.');
+          this.state.auth = { isLoggedIn: false };
+          this.state.currentUser = undefined;
+          this.state.view = 'login';
+          localStorage.removeItem('clickopticx_auth_token');
+        }
+      }
+
+      // If not logged in, always show login view
+      if (!this.state.auth?.isLoggedIn) {
+        this.state.view = 'login';
+      }
+
+      // Deep-merge settings so new defaults (like authSettings) are always present
+      this.state.settings = { ...INITIAL_STATE.settings, ...this.state.settings };
+      if (!this.state.settings.authSettings) {
+        this.state.settings.authSettings = INITIAL_STATE.settings.authSettings;
+      } else {
+        this.state.settings.authSettings = { ...INITIAL_STATE.settings.authSettings, ...this.state.settings.authSettings };
+      }
+
+      // Robustify roles
+      if (!this.state.roles || !Array.isArray(this.state.roles) || this.state.roles.length === 0) {
+        this.state.roles = INITIAL_STATE.roles;
+      }
+
+      // Ensure signupRequests array exists
+      if (!this.state.signupRequests) {
+        this.state.signupRequests = [];
+      }
+
+      if (!Array.isArray(this.state.cloudAccounts)) {
+        this.state.cloudAccounts = [];
+      }
+
+      if (!Array.isArray(this.state.cloudTransferLogs)) {
+        this.state.cloudTransferLogs = [];
+      }
+
+      this.patchState();
     } catch (e) {
       console.error('Failed to load cached state:', e);
       this.state = INITIAL_STATE;
@@ -1657,12 +1680,18 @@ class DB {
       if (this.state.signupRequests?.length > 100) this.state.signupRequests = this.state.signupRequests.slice(-100);
 
       // --- SESSION PERSISTENCE CONTROL ---
-      if (this.state.auth && this.state.auth.isPersistent === false) {
-        // If not persistent, we don't save auth state to localStorage
-        const { auth, currentUser, ...persistentState } = this.state;
-        localStorage.setItem('clickopticx_v16_registry', JSON.stringify(persistentState));
-      } else {
-        localStorage.setItem('clickopticx_v16_registry', JSON.stringify(this.state));
+      // We NEVER save auth, currentUser, originalAdminUser, isImpersonating, or users array in localStorage
+      const { auth, currentUser, originalAdminUser, isImpersonating, users, ...persistentState } = this.state;
+      localStorage.setItem('clickopticx_v16_registry', JSON.stringify(persistentState));
+
+      // Save auth session info to sessionStorage so refreshes within the same tab work smoothly without auto-login exposure
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem('clickopticx_session_state', JSON.stringify({
+          auth: this.state.auth,
+          currentUser: this.state.currentUser,
+          originalAdminUser: this.state.originalAdminUser,
+          isImpersonating: this.state.isImpersonating
+        }));
       }
     } catch (e: any) {
       console.warn('[DB] local persistence failed:', e);
@@ -1935,7 +1964,7 @@ class DB {
             email: res.user.email,
             name: res.user.name,
             lastLoginAt: new Date().toISOString(),
-            isPersistent: true
+            isPersistent: false
           };
           this.authenticateSocket();
           this.notify();
@@ -2002,7 +2031,7 @@ class DB {
           email: res.user.email,
           name: res.user.name,
           lastLoginAt: new Date().toISOString(),
-          isPersistent: true
+          isPersistent: false
         };
         this.authenticateSocket();
         this.notify();
@@ -2247,7 +2276,7 @@ class DB {
               email: localUser.email,
               name: localUser.name,
               lastLoginAt: new Date().toISOString(),
-              isPersistent: !!rememberMe
+              isPersistent: false
             };
             if (!rememberMe) sessionStorage.setItem('clickoptix_active_session', 'true');
             this.state.view = 'admin';
@@ -2278,7 +2307,7 @@ class DB {
           email: localStaff.email,
           name: localStaff.name,
           lastLoginAt: new Date().toISOString(),
-          isPersistent: !!rememberMe
+          isPersistent: false
         };
         if (!rememberMe) sessionStorage.setItem('clickoptix_active_session', 'true');
         this.state.view = 'admin';
@@ -2308,7 +2337,7 @@ class DB {
       email: authenticatedEntity.email,
       name: authenticatedEntity.name,
       lastLoginAt: new Date().toISOString(),
-      isPersistent: !!rememberMe
+      isPersistent: false
     };
 
     if (!rememberMe) {

@@ -26,7 +26,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const [view, setView] = useState<'login' | 'signup' | 'reset_request' | 'reset_finalize' | 'phone_login' | 'otp_verify' | 'face_reset'>('login');
    const [credential, setCredential] = useState('');
    const [password, setPassword] = useState('');
-   const [rememberMe, setRememberMe] = useState(true);
+   const rememberMe = false;
 
    const [phone, setPhone] = useState('');
    const [otp, setOtp] = useState('');
@@ -297,14 +297,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             required
          />
 
-         <div className="flex flex-wrap items-center justify-between px-1 pt-2 gap-4">
-            <label className="flex items-center gap-2 cursor-pointer group">
-               <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberMe ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'}`}>
-                  {rememberMe && <CheckCircle size={12} className="text-white" />}
-               </div>
-               <input type="checkbox" className="hidden" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
-               <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Remember me</span>
-            </label>
+         <div className="flex justify-end px-1 pt-2">
             <button type="button" onClick={() => setView('reset_request')} className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">Forgot Password?</button>
          </div>
 

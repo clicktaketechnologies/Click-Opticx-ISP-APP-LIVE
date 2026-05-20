@@ -14,6 +14,8 @@ export const supabase: SupabaseClient = createClient(
   {
     auth: {
       persistSession: true,
+      storageKey: 'clickopticx_sb_session',
+      storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
       autoRefreshToken: true,
       detectSessionInUrl: true,
     },
