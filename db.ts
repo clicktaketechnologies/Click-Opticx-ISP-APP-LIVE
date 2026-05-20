@@ -661,9 +661,9 @@ class DB {
   private storage: FirebaseStorage | null = null;
   private app: FirebaseApp | null = null;
   private socket: Socket | null = null;
-  private backendUrl = ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  private backendUrl = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
     ? 'http://localhost:5000'
-    : (import.meta.env.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com')).replace(/\/$/, '');
+    : ((typeof import.meta !== 'undefined' && import.meta.env?.VITE_BACKEND_URL) || 'https://click-opticx-isp-app-live.onrender.com').replace(/\/$/, '');
 
   public getBackendUrl() {
     return this.backendUrl;
@@ -721,10 +721,12 @@ class DB {
 
 
   constructor() {
-    (window as any).db = this;
+    if (typeof window !== 'undefined') {
+      (window as any).db = this;
+    }
     this.state = INITIAL_STATE;
     try {
-      const cached = localStorage.getItem('clickopticx_v16_registry');
+      const cached = typeof localStorage !== 'undefined' ? localStorage.getItem('clickopticx_v16_registry') : null;
       if (cached) {
         const parsed = JSON.parse(cached);
         // Deep merge or ensure branding paths aren't empty
@@ -818,18 +820,19 @@ class DB {
     // Cloud Layer Initialization
     this.initializeCloudLayer().catch(console.error);
 
-    // 🛡️ PERSISTENCE GUARD: Force cloud sync before tab close
-    window.addEventListener('beforeunload', () => {
-      if (this.firestore && this.initialized) {
-        const docRef = doc(this.firestore, 'registry', 'master_state');
-        const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
-        if (cloudSafeState && Object.keys(cloudSafeState).length > 0) {
-          // Strip any undefined properties that might crash setDoc
-          const sanitized = JSON.parse(JSON.stringify(cloudSafeState));
-          setDoc(docRef, sanitized).catch(err => console.error('[CLOUD-SYNC] Background sync failed:', err));
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeunload', () => {
+        if (this.firestore && this.initialized) {
+          const docRef = doc(this.firestore, 'registry', 'master_state');
+          const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
+          if (cloudSafeState && Object.keys(cloudSafeState).length > 0) {
+            // Strip any undefined properties that might crash setDoc
+            const sanitized = JSON.parse(JSON.stringify(cloudSafeState));
+            setDoc(docRef, sanitized).catch(err => console.error('[CLOUD-SYNC] Background sync failed:', err));
+          }
         }
-      }
-    });
+      });
+    }
 
     // Background Tasks
     setTimeout(() => this.initializeSocketLayer(), 3000);
@@ -2225,29 +2228,35 @@ class DB {
 
     // ─── Helper: attempt a single backend login call ────────────────────────
     const attemptBackendLogin = async (timeoutMs: number) => {
-      const response = await fetch(`${this.backendUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier, password: pass })
-      });
-      
-      let resData;
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), timeoutMs);
       try {
-        resData = await response.json();
-      } catch(e) {
-        resData = {};
+        const response = await fetch(`${this.backendUrl}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password: pass }),
+          signal: controller.signal,
+        });
+        clearTimeout(tid);
+        const text = await response.text();
+        let resData;
+        try {
+          resData = JSON.parse(text);
+        } catch (parseErr) {
+          throw new Error(`Server returned invalid response format: ${response.status}`);
+        }
+        if (!response.ok || !resData.success) {
+          throw new Error(resData.message || resData.error || 'Authentication failed');
+        }
+        return {
+          success: true,
+          user: resData.user,
+          userType: resData.user.role === 'Customer' ? 'customer' : 'staff',
+          token: resData.token
+        };
+      } finally {
+        clearTimeout(tid);
       }
-
-      if (!response.ok || !resData.success) {
-        throw new Error(resData.message || resData.error || 'Authentication failed');
-      }
-
-      return {
-         success: true,
-         user: resData.user,
-         userType: resData.user.role === 'Customer' ? 'customer' : 'staff',
-         token: resData.token
-      };
     };
 
     // ─── Helper: local staff/admin fallback (bcrypt-free, hash-based) ───────
@@ -2298,35 +2307,48 @@ class DB {
     try {
       res = await attemptBackendLogin(15000);
     } catch (e1: any) {
-      console.warn('[AUTH] Primary attempt failed:', e1.message);
-      // ─── LAYER 2: Local admin/staff fallback ─────────────────────────────
-      const localUser = tryLocalFallback();
-      if (localUser) {
-        console.warn('[AUTH] Backend unavailable — authenticated locally for staff user.');
-        this.state.currentUser = localUser;
-        this.state.auth = {
-          isLoggedIn: true,
-          role: localUser.role,
-          id: localUser.id,
-          email: localUser.email,
-          name: localUser.name,
-          lastLoginAt: new Date().toISOString(),
-          isPersistent: !!rememberMe
-        };
-        if (!rememberMe) sessionStorage.setItem('clickoptix_active_session', 'true');
-        this.state.view = 'admin';
-        this.logAudit('Local Fallback Login', 'Login', `Staff authenticated locally due to backend unavailability.`, localUser.id, localUser.name);
-        await this.commit(undefined, false);
-        this.notify();
-        return { success: true, user: localUser, type: 'staff', offlineMode: true };
+      console.warn('[AUTH] Primary attempt failed, retrying in 3s for cold start:', e1.message);
+      // ─── LAYER 2: Cold-start retry 1 (wait 3s, then 20s timeout) ─────────────
+      await new Promise(r => setTimeout(r, 3000));
+      try {
+        res = await attemptBackendLogin(20000);
+      } catch (e2: any) {
+        console.warn('[AUTH] Secondary attempt failed, retrying one last time in 5s:', e2.message);
+        // ─── LAYER 3: Cold-start retry 2 (wait 5s, then 20s timeout) ─────────────
+        await new Promise(r => setTimeout(r, 5000));
+        try {
+          res = await attemptBackendLogin(20000);
+        } catch (e3: any) {
+          console.warn('[AUTH] Final backend attempt failed. Activating local fallback.', e3.message);
+          // ─── LAYER 4: Local admin/staff fallback ─────────────────────────────
+          const localUser = tryLocalFallback();
+          if (localUser) {
+            console.warn('[AUTH] Backend unavailable — authenticated locally for staff user.');
+            this.state.currentUser = localUser;
+            this.state.auth = {
+              isLoggedIn: true,
+              role: localUser.role,
+              id: localUser.id,
+              email: localUser.email,
+              name: localUser.name,
+              lastLoginAt: new Date().toISOString(),
+              isPersistent: !!rememberMe
+            };
+            if (!rememberMe) sessionStorage.setItem('clickoptix_active_session', 'true');
+            this.state.view = 'admin';
+            this.logAudit('Local Fallback Login', 'Login', `Staff authenticated locally due to backend unavailability.`, localUser.id, localUser.name);
+            await this.commit(undefined, false);
+            this.notify();
+            return { success: true, user: localUser, type: 'staff', offlineMode: true };
+          }
+          // No local match found either
+          return {
+            success: false,
+            message: '⚠️ The server is taking longer than usual to wake up. Please wait 10 seconds and try one last time. (System is warming up)',
+          };
+        }
       }
-      // No local match found either
-      return {
-        success: false,
-        message: '⚠️ Authentication failed or service unavailable. Please try again.',
-      };
     }
-
     // ─── Process backend response ────────────────────────────────────────────
     if (!res || !res.success) {
       // ─── LAYER 4: Backend responded but user not found — try local staff fallback ──
@@ -5304,86 +5326,149 @@ class DB {
 
     console.log('[DB-AUTH] Dispatching signup protocol for:', payload.username);
 
-    // --- Hit Backend Signup API ---
-    const response = await fetch(`${this.backendUrl}/api/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    
-    let resData;
+    // --- Try hitting Backend Signup API with Timeout ---
     try {
-      resData = await response.json();
-    } catch(e) {
-      resData = {};
-    }
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-    if (!response.ok || !resData.success) {
-      if (resData.message?.toLowerCase().includes('already')) {
-        console.log('[IRS-HEAL] Backend reported conflict. Running mandatory node sync...');
-        this.healUserRegistry().catch(console.error);
+      const response = await fetch(`${this.backendUrl}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        let res: any;
+        const text = await response.text();
+        try {
+          res = JSON.parse(text);
+        } catch (parseErr) {
+          console.warn('[DB-AUTH] Backend returned non-JSON response, falling back to local registry.');
+          throw new Error('Malformed backend response format');
+        }
+        if (res.success) {
+          this.logAudit('New User Signup', 'Request', `New user ${data.name} signed up via secure backend.`, res.user?.id, data.name);
+          
+          // --- 🛡️ REGISTRY SYNC: Ensure new user is added to master state ---
+          if (res.user) {
+            const existingIdx = this.state.users.findIndex(u => u.id === res.user.id);
+            if (existingIdx === -1) {
+              const newUser: ISPUser = {
+                ...res.user,
+                role: Role.CUSTOMER,
+                status: res.user.status || UserStatus.PENDING_VERIFICATION,
+                verificationStatus: res.user.verificationStatus || VerificationStatus.UNVERIFIED,
+                balance: res.user.balance || 0,
+                creditScore: res.user.creditScore || 600,
+                createdAt: res.user.createdAt || new Date().toISOString()
+              };
+              this.state.users.unshift(newUser);
+              
+              // Also ensure a signup request exists for the admin desk
+              if (!this.state.signupRequests) this.state.signupRequests = [];
+              const hasReq = this.state.signupRequests.some(r => r.userId === res.user.id || r.email === res.user.email);
+              if (!hasReq) {
+                this.state.signupRequests.unshift({
+                  id: 'REQ-B-' + Date.now(),
+                  userId: res.user.id,
+                  name: res.user.name,
+                  username: res.user.username,
+                  email: res.user.email,
+                  phone: res.user.phone || '',
+                  status: 'Approved', // Already approved via backend
+                  timestamp: new Date().toISOString()
+                } as any);
+              }
+              
+              await this.commit();
+            }
+          }
+          
+          return { success: true, message: 'Account Handshake Successful.', user: res.user };
+        }
+        
+        // AUTO-HEAL: If backend reports conflict, trigger local sync
+        if (res.message?.toLowerCase().includes('already') || response.status === 409) {
+           console.log('[IRS-HEAL] Backend reported conflict. Running mandatory node sync...');
+           this.healUserRegistry().catch(console.error);
+        }
+        
+        // Backend returned a logical failure (duplicate, validation)
+        return { success: false, message: res.message || 'Signup refused by authority node.' };
       }
-      throw new Error(resData.message || resData.error || 'Signup refused by authority node.');
+      // Backend responded with HTTP error — fall through to local fallback
+      console.warn('[DB-AUTH] Backend returned HTTP error, falling back to local registry write.');
+    } catch (e: any) {
+      // Network error, timeout, or backend sleeping (Render cold start)
+      console.warn('[DB-AUTH] Backend unreachable, falling back to local registry write. Reason:', e.message);
     }
 
-    const newUserId = resData.userId || 'USR-' + Date.now();
-    
-    this.logAudit('New User Signup', 'Request', `New user ${payload.name} signed up via Backend API.`, newUserId, payload.name);
+    // --- LOCAL REGISTRY FALLBACK ---
+    const newUserId = 'USR-' + Date.now();
+    const newUser: ISPUser = {
+      id: newUserId,
+      name: payload.name,
+      email: payload.email,
+      username: payload.username,
+      phone: payload.phone,
+      status: UserStatus.PENDING_VERIFICATION,
+      verificationStatus: VerificationStatus.UNVERIFIED,
+      balance: 0,
+      creditScore: 600,
+      createdAt: new Date().toISOString(),
+      role: Role.CUSTOMER,
+      address: payload.address || '',
+      area: payload.area || '',
+      packageId: payload.packageId || 'PKG-BASIC',
+      isKYCVerified: false,
+      isKYCSubmitted: false,
+      kyc_status: 'pending',
+      approval_status: 'pending',
+      kyc_attempt_count: 0,
+      kyc_history: [],
+      portalEnabled: true,
+      managementMode: 'Manual',
+      connectionType: 'Fiber',
+      nasConnectionType: 'Manual',
+      referralCode: 'REF-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+      activationCount: 0,
+      activityLog: [],
+      connectionId: 'PENDING-' + newUserId.slice(-4),
+    };
 
-    const existingIdx = this.state.users.findIndex(u => u.id === newUserId);
-    if (existingIdx === -1) {
-      const newUser: ISPUser = {
-        id: newUserId,
-        name: payload.name,
-        email: payload.email,
-        username: payload.username,
-        phone: payload.phone,
-        status: UserStatus.PENDING_VERIFICATION,
-        verificationStatus: VerificationStatus.UNVERIFIED,
-        balance: 0,
-        creditScore: 600,
-        createdAt: new Date().toISOString(),
-        role: Role.CUSTOMER,
-        address: payload.address || '',
-        area: payload.area || '',
-        packageId: payload.packageId || 'PKG-BASIC',
-        isKYCVerified: false,
-        isKYCSubmitted: false,
-        kyc_status: 'pending',
-        approval_status: 'pending',
-        kyc_attempt_count: 0,
-        kyc_history: [],
-        portalEnabled: true,
-        managementMode: 'Manual',
-        connectionType: 'Fiber',
-        nasConnectionType: 'Manual',
-        referralCode: 'REF-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
-        activationCount: 0,
-        activityLog: [],
-        connectionId: 'PENDING-' + newUserId.slice(-4),
-      };
-      this.state.users.unshift(newUser);
+    const requestObj = {
+      id: 'REQ-L-' + Date.now(),
+      userId: newUserId,
+      name: payload.name,
+      username: payload.username,
+      email: payload.email,
+      phone: payload.phone || '',
+      status: 'Pending',
+      timestamp: new Date().toISOString()
+    } as any;
 
+    try {
+      // Push to registry
+      this.state.users.push(newUser);
       if (!this.state.signupRequests) this.state.signupRequests = [];
-      const hasReq = this.state.signupRequests.some(r => r.userId === newUserId || r.email === payload.email);
-      if (!hasReq) {
-        this.state.signupRequests.unshift({
-          id: 'REQ-B-' + Date.now(),
-          userId: newUserId,
-          name: payload.name,
-          username: payload.username,
-          email: payload.email,
-          phone: payload.phone || '',
-          status: 'Approved', 
-          timestamp: new Date().toISOString()
-        } as any);
-      }
+      this.state.signupRequests.push(requestObj);
 
-      await this.commit();
+      await this.commit(true);
+      this.notify();
+
+      this.logAudit('New User Signup', 'Request', `New user ${newUser.name} registered via local fallback. Identity Node: ${newUserId}`, newUserId, newUser.name);
+
+      console.log('[DB-AUTH] Local signup fallback succeeded for:', newUser.username);
+      return { success: true, message: 'Account handshake complete. Please login.', user: newUser };
+
+    } catch (fallbackError: any) {
+      console.error('[DB-AUTH-ERROR] Both backend and local signup failed:', fallbackError);
+      return { success: false, message: '⚠️ Authentication failed or service unavailable. Please try again.' };
     }
-
-    return { success: true, message: resData.message || 'Account Handshake Successful.', userId: newUserId, user: this.state.users[0] };
   }
+
 
   async initiatePasswordReset(identifier: string) {
     const input = identifier.toLowerCase().trim();
@@ -7885,17 +7970,23 @@ class DB {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
-      const data = await response.json();
-
+      const text = await response.text();
+      let data;
+      try {
+         data = JSON.parse(text);
+      } catch (parseErr) {
+         return { success: false, message: '⚠️ Authentication failed or service unavailable. Please try again.' };
+      }
+      
       if (data.success) {
-        this.logAudit('Password Reset Requested', 'Auth', `Recovery link requested for: ${email}`);
-        return { success: true, provider: 'Custom Auth Backend' };
+         this.logAudit('Password Reset Requested', 'Auth', `Recovery link requested for: ${email}`);
+         return { success: true, provider: 'Email' };
       } else {
-        return { success: false, message: data.message || 'Recovery Protocol Fault: Handshake failed.' };
+         return { success: false, message: data.message || 'Recovery Protocol Fault: Handshake failed.' };
       }
     } catch (e: any) {
       console.error('[AUTH] Reset Request Error:', e);
-      return { success: false, message: 'Auth Service Node Disconnected.' };
+      return { success: false, message: '⚠️ Authentication failed or service unavailable. Please try again.' };
     }
   }
 

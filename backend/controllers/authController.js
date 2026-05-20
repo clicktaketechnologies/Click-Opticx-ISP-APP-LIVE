@@ -1,4 +1,4 @@
-import admin from 'firebase-admin';
+﻿import admin from 'firebase-admin';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import logger from '../utils/logger.js';
@@ -837,4 +837,4 @@ export const verifySession = async (req, res) => {
     }
 };
 
-export default { signup, login, socialHandshake, forgotPassword, completeReset, loginAs, refreshToken, logout, verifySession, verifyEmail, checkVerificationStatus, verifyOtp };
+export default { signup, login, socialHandshake, forgotPassword, completeReset, loginAs, refreshToken, logout, verifySession, verifyEmail, checkVerificationStatus, verifyOtp };
