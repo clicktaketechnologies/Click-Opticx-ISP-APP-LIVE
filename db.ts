@@ -1295,6 +1295,7 @@ class DB {
         user.kyc_status = 'verified';
         user.approval_status = 'approved';
         user.status = UserStatus.ACTIVE;
+        delete user.kyc_rejected_reason;
 
         // Sync to Backend
         fetch(`${this.backendUrl}/api/kyc/approve`, {
@@ -5265,7 +5266,7 @@ class DB {
     if (exists) {
       console.log('[IRS-HEAL] Duplicate detected on signup. Triggering background reconciliation...');
       this.healUserRegistry().catch(console.error);
-      throw new Error('An account with this identity already exists. Please try logging in or reset your password.');
+      return { success: false, error: 'CONFLICT_ERROR', message: 'An account with this identity already exists. Please try logging in or reset your password.' };
     }
 
     console.log('[DB-AUTH] Dispatching signup protocol for:', payload.username);
