@@ -1,7 +1,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const SUPABASE_URL = typeof import.meta.env !== 'undefined' ? (import.meta.env.VITE_SUPABASE_URL as string) : (process.env.VITE_SUPABASE_URL as string);
+const SUPABASE_ANON_KEY = typeof import.meta.env !== 'undefined' ? (import.meta.env.VITE_SUPABASE_ANON_KEY as string) : (process.env.VITE_SUPABASE_ANON_KEY as string);
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.warn('[SUPABASE] Missing env vars. Client will be unavailable.');
@@ -14,6 +14,8 @@ export const supabase: SupabaseClient = createClient(
   {
     auth: {
       persistSession: true,
+      storageKey: 'clickopticx_sb_session',
+      storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
       autoRefreshToken: true,
       detectSessionInUrl: true,
     },

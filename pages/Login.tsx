@@ -7,7 +7,10 @@ import {
    AlertCircle, ShieldAlert, Key, Globe, Info, Package, Send, History, X, Scale, Scan
 } from 'lucide-react';
 import { db } from '../db';
+import { useToast } from '../components/shared/Toast';
 import { supabase } from '../lib/supabase';
+
+
 import PasswordInput from '../components/shared/PasswordInput';
 import { useBranding } from '../hooks/useBranding';
 import Modal from '../components/shared/Modal';
@@ -26,7 +29,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const [view, setView] = useState<'login' | 'signup' | 'reset_request' | 'reset_finalize' | 'phone_login' | 'otp_verify' | 'face_reset'>('login');
    const [credential, setCredential] = useState('');
    const [password, setPassword] = useState('');
-   const [rememberMe, setRememberMe] = useState(true);
+   const rememberMe = false;
 
    const [phone, setPhone] = useState('');
    const [otp, setOtp] = useState('');
@@ -36,7 +39,12 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const [resetToken, setResetToken] = useState('');
    const [newPassword, setNewPassword] = useState('');
 
-   const [error, setError] = useState<string | null>(null);
+   const toast = useToast();
+   const setError = (msg: string | null) => {
+      if (msg) {
+         toast.error('Error', msg);
+      }
+   };
    const [isProcessing, setIsProcessing] = useState(false);
    const [showLegalModal, setShowLegalModal] = useState<'terms' | 'agreement' | null>(null);
 
@@ -88,7 +96,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setIsProcessing(false);
 
       if (!res.success) {
-         setError((res as any).message || 'Login failed. Please check your credentials.');
+         toast.error('Login Error', (res as any).message || 'Login failed. Please check your credentials.');
       }
    };
 
@@ -187,7 +195,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          if (res.success) {
             navigate(`/verify-email?userId=${res.userId}&email=${encodeURIComponent(signupData.email)}`);
          } else {
-            setError(res.message || 'Signup failed.');
+            toast.error('Signup Error', res.message || 'Signup failed.');
          }
       } catch (err: any) {
          setError(err.message || 'An unexpected error occurred.');
@@ -297,14 +305,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             required
          />
 
-         <div className="flex flex-wrap items-center justify-between px-1 pt-2 gap-4">
-            <label className="flex items-center gap-2 cursor-pointer group">
-               <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${rememberMe ? 'bg-blue-600 border-blue-600' : 'bg-white border-slate-200'}`}>
-                  {rememberMe && <CheckCircle size={12} className="text-white" />}
-               </div>
-               <input type="checkbox" className="hidden" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
-               <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Remember me</span>
-            </label>
+         <div className="flex justify-end px-1 pt-2">
             <button type="button" onClick={() => setView('reset_request')} className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">Forgot Password?</button>
          </div>
 
@@ -757,14 +758,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         </p>
                      </div>
                   )}
-
-                  {error && (
-                     <div className="p-4 mb-8 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-4 text-rose-600 animate-in shake duration-500">
-                        <AlertCircle className="shrink-0 mt-0.5" size={18} />
-                        <p className="text-[11px] font-black uppercase leading-relaxed tracking-tight">{error}</p>
-                     </div>
-                  )}
-
                   <div className="min-h-[400px]">
                      {view === 'login' && renderLogin()}
                      {view === 'signup' && renderSignup()}

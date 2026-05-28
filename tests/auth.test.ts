@@ -1,7 +1,38 @@
 /**
- * @vitest-environment jsdom
+ * @vitest-environment node
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Define localStorage and sessionStorage mocks on globalThis for ESM compatibility
+const storageMock = () => {
+  const storage: Record<string, string> = {};
+  return {
+    getItem: vi.fn((key: string) => storage[key] || null),
+    setItem: vi.fn((key: string, value: string) => { storage[key] = value; }),
+    removeItem: vi.fn((key: string) => { delete storage[key]; }),
+    clear: vi.fn(() => { for (const key in storage) delete storage[key]; }),
+    length: 0,
+    key: vi.fn(() => null),
+  } as any;
+};
+
+if (typeof globalThis.localStorage === 'undefined') {
+  globalThis.localStorage = storageMock();
+}
+if (typeof global.localStorage === 'undefined') {
+  global.localStorage = globalThis.localStorage;
+}
+
+if (typeof globalThis.sessionStorage === 'undefined') {
+  globalThis.sessionStorage = storageMock();
+}
+if (typeof global.sessionStorage === 'undefined') {
+  global.sessionStorage = globalThis.sessionStorage;
+}
+
+// Mock fetch globally to reject instantly for offline/fallback test execution
+globalThis.fetch = vi.fn().mockImplementation(() => Promise.reject(new TypeError('Failed to fetch')));
+
 import { db } from '../db';
 
 // Mock Firebase and other global dependencies
@@ -37,7 +68,7 @@ describe('ClickOptix Authentication Logic', () => {
   it('should attempt login and return failure for empty credentials', async () => {
     const res = await db.login('', '');
     expect(res.success).toBe(false);
-    expect(res.message).toMatch(/Internal Validation Failure/);
+    expect(res.message).toMatch(/Identity required for lookup/);
   });
 
   it('should handle signup requests', async () => {
@@ -49,10 +80,9 @@ describe('ClickOptix Authentication Logic', () => {
       address: 'Unit Test St'
     };
     
-    // We expect this to fail or return a message since backend is not actually running in test
-    // but the logic (the function execution) should be stable
     const res = await db.submitSignupRequest(signupData);
     expect(res).toBeDefined();
-    // Since we are mocking, we just want to ensure it doesn't throw 'Illegal constructor'
+    expect(res.success).toBe(true);
+    expect(res.message).toMatch(/Account handshake complete/);
   });
 });

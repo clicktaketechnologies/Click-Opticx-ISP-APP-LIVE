@@ -20,7 +20,7 @@ export interface EmailPayload {
 
 class NotificationManager {
     private static instance: NotificationManager;
-    private apiBase = window.location.hostname === 'localhost' ? 'http://127.0.0.1:5000/api' : 'https://click-opticx-isp-app-live.onrender.com/api';
+    private apiBase = (typeof window !== 'undefined' && window.location.hostname === 'localhost') ? 'http://127.0.0.1:5000/api' : 'https://click-opticx-isp-app-live.onrender.com/api';
 
     private constructor() { }
 
