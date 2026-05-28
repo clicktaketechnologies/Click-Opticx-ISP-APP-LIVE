@@ -58,55 +58,55 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
    const [isKYCOpen, setIsKYCOpen] = useState(false);
    const [kycIntent, setKycIntent] = useState<SubTab | null>(null);
 
-    // Verification Overlay Logic
-    const [showWelcome, setShowWelcome] = useState(!user.welcomeChecklistShown && user.verificationStatus === VerificationStatus.UNVERIFIED);
-    const [showVerificationSuccess, setShowVerificationSuccess] = useState(user.verificationStatus === VerificationStatus.VERIFIED && !user.verificationSuccessShown);
+   // Verification Overlay Logic
+   const [showWelcome, setShowWelcome] = useState(!user.welcomeChecklistShown && user.verificationStatus === VerificationStatus.UNVERIFIED);
+   const [showVerificationSuccess, setShowVerificationSuccess] = useState(user.verificationStatus === VerificationStatus.VERIFIED && !user.verificationSuccessShown);
 
-    const appearance = state.settings.appearance;
-    const appPages = appearance.appPages || [];
+   const appearance = state.settings.appearance;
+   const appPages = appearance.appPages || [];
 
-    // AUTO-TRIGGER KYC FOR NEW USERS
-    useEffect(() => {
-       // Show if NOT verified AND (NOT submitted OR requires revision)
-       if (!user.isKYCVerified && (!user.isKYCSubmitted || user.verificationStatus === VerificationStatus.REVISION)) {
-          const timer = setTimeout(() => setIsKYCOpen(true), 1500);
-          return () => clearTimeout(timer);
-       }
-    }, [user.isKYCSubmitted, user.isKYCVerified, user.verificationStatus]);
+   // AUTO-TRIGGER KYC FOR NEW USERS
+   useEffect(() => {
+      // Show if NOT verified AND (NOT submitted OR requires revision)
+      if (!user.isKYCVerified && (!user.isKYCSubmitted || user.verificationStatus === VerificationStatus.REVISION)) {
+         const timer = setTimeout(() => setIsKYCOpen(true), 1500);
+         return () => clearTimeout(timer);
+      }
+   }, [user.isKYCSubmitted, user.isKYCVerified, user.verificationStatus]);
 
-    // Real-time KYC status polling on app focus/resume (10s fallback)
-    useEffect(() => {
+   // Real-time KYC status polling on app focus/resume (10s fallback)
+   useEffect(() => {
       if (user.isKYCVerified) return;
       let interval: ReturnType<typeof setInterval> | null = null;
       const pollKYCStatus = async () => {
-        try {
-          const res = await fetch(`${db.getBackendUrl()}/api/kyc/status?userId=${user.id}`);
-          if (!res.ok) return;
-          const data = await res.json();
-          if (data.success && data.isKYCVerified) {
-            await db.updateUser(user.id, {
-              isKYCVerified: true,
-              kyc_status: 'approved',
-              verificationStatus: VerificationStatus.VERIFIED
-            });
-            setIsKYCOpen(false);
-            setActiveTab('home');
-          }
-        } catch (_) { /* silent */ }
+         try {
+            const res = await fetch(`${db.getBackendUrl()}/api/kyc/status?userId=${user.id}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.success && data.isKYCVerified) {
+               await db.updateUser(user.id, {
+                  isKYCVerified: true,
+                  kyc_status: 'approved',
+                  verificationStatus: VerificationStatus.VERIFIED
+               });
+               setIsKYCOpen(false);
+               setActiveTab('home');
+            }
+         } catch (_) { /* silent */ }
       };
       interval = setInterval(pollKYCStatus, 10000);
       const onFocus = () => pollKYCStatus();
       window.addEventListener('focus', onFocus);
       return () => {
-        if (interval) clearInterval(interval);
-        window.removeEventListener('focus', onFocus);
+         if (interval) clearInterval(interval);
+         window.removeEventListener('focus', onFocus);
       };
-    }, [user.id, user.isKYCVerified]);
+   }, [user.id, user.isKYCVerified]);
 
-    const pendingTopups = useMemo(() => (state.topupRequests || []).filter(r => r.userId === user.id && r.status === 'Pending'), [state.topupRequests, user.id]);
-    const currentPkg = useMemo(() => state.packages.find(p => p.id === user.packageId), [state.packages, user.packageId]);
-    const unreadCount = (state.notifications || []).filter(n => n.targetId === 'all' || n.targetId === user.id).filter(n => !n.read).length;
-    const branding = state.settings.branding;
+   const pendingTopups = useMemo(() => (state.topupRequests || []).filter(r => r.userId === user.id && r.status === 'Pending'), [state.topupRequests, user.id]);
+   const currentPkg = useMemo(() => state.packages.find(p => p.id === user.packageId), [state.packages, user.packageId]);
+   const unreadCount = (state.notifications || []).filter(n => n.targetId === 'all' || n.targetId === user.id).filter(n => !n.read).length;
+   const branding = state.settings.branding;
 
    const isPageEnabled = (id: string) => {
       if (['home', 'profile', 'ai-home', 'ai-insights', 'ai-network', 'ai-risk', 'ai-suggestions', 'aichat', 'emergency', 'emergency-request', 'emergency-history', 'ai-voice-call', 'legal', 'namaz', 'qibla', 'tasbih', 'quran', 'zakat'].includes(id)) return true;
@@ -188,7 +188,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
          case 'live-usage': return <LiveUsage user={user} />;
          case 'connected-devices': return <ConnectedDevices user={user} />;
          case 'reset-password': return <ResetDevicePassword user={user} />;
-         case 'speed-test': return <SpeedTestPage />;
+         case 'speed-test': return <SpeedTestPage state={state} />;
          case 'about-us': return <AboutUs state={state} />;
          case 'ai-control': return <AICentralDashboard state={state} />;
          case 'ai-home': return <SubscriberAIHome user={user} state={state} onNavigate={(t) => handleTabChange(t as SubTab)} />;
@@ -204,29 +204,53 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
       }
    };
 
-    const navItems = [
-       { id: 'home', icon: Home, label: 'Home' },
-       { id: 'ai-home', icon: Sparkles, label: 'AI' },
-       { id: 'live-usage', icon: Monitor, label: 'Live' },
-       { id: 'wallet', icon: Wallet, label: 'Wallet' },
-       { id: 'packages', icon: Wifi, label: 'Plans' },
-    ].filter(item => {
-       if (user.kyc_status !== 'verified' && item.id !== 'home') return false;
-       return item.id === 'home' || isPageEnabled(item.id);
-    });
+   const navItems = [
+      { id: 'home', icon: Home, label: 'Home' },
+      { id: 'ai-home', icon: Sparkles, label: 'AI' },
+      { id: 'live-usage', icon: Monitor, label: 'Live' },
+      { id: 'wallet', icon: Wallet, label: 'Wallet' },
+      { id: 'packages', icon: Wifi, label: 'Plans' },
+   ].filter(item => {
+      if (user.kyc_status !== 'verified' && item.id !== 'home') return false;
+      return item.id === 'home' || isPageEnabled(item.id);
+   });
+
+   const [isAdminImpersonating, setIsAdminImpersonating] = useState(false);
+
+   useEffect(() => {
+      setIsAdminImpersonating(!!localStorage.getItem('admin_token'));
+   }, []);
+
+   const handleExitImpersonation = () => {
+      const adminToken = localStorage.getItem('admin_token');
+      localStorage.removeItem('admin_token');
+      localStorage.setItem('token', adminToken || '');
+      window.location.href = '/'; // Or let the router redirect
+   };
 
    return (
       <div className="h-screen bg-slate-50 flex flex-col overflow-hidden text-slate-900">
-         <SmartKYCPopup 
-            user={user} 
-            isOpen={isKYCOpen} 
-            onClose={() => setIsKYCOpen(false)} 
+         {isAdminImpersonating && (
+            <div className="bg-rose-600 text-white px-4 py-2 flex items-center justify-between z-[300] relative text-[10px] font-black uppercase tracking-widest shadow-md shrink-0">
+               <div className="flex items-center gap-2">
+                  <Eye size={14} className="animate-pulse" />
+                  Viewing as {user.name}
+               </div>
+               <button onClick={handleExitImpersonation} className="px-3 py-1 bg-rose-700 hover:bg-rose-800 rounded flex items-center gap-2 transition-colors shadow-inner">
+                  <LogOut size={12} /> Exit Impersonation
+               </button>
+            </div>
+         )}
+         <SmartKYCPopup
+            user={user}
+            isOpen={isKYCOpen}
+            onClose={() => setIsKYCOpen(false)}
             onSuccess={() => {
                setIsKYCOpen(false);
                if (kycIntent) {
                   setKycIntent(null);
                }
-            }} 
+            }}
          />
          {showWelcome && <SubscriberWelcomeChecklist user={user} onComplete={() => setShowWelcome(false)} />}
          <Modal
@@ -236,31 +260,31 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
             type="success"
             icon={<ShieldCheck size={24} className="text-white" />}
             footer={
-               <button 
-                 onClick={acknowledgeVerification} 
-                 className="w-full py-4 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-xl transition-all"
+               <button
+                  onClick={acknowledgeVerification}
+                  className="w-full py-4 bg-slate-950 text-white rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-xl transition-all"
                >
-                 Explore Home
+                  Explore Home
                </button>
             }
-          >
-             <div className="py-6 text-center space-y-4">
-                <div className="w-20 h-20 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner border-4 border-green-100">
-                   <CheckCircle size={44} />
-                </div>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed px-6">
-                   Your identity has been verified. Your account is now fully active and all features are unlocked.
-                </p>
-             </div>
-          </Modal>
+         >
+            <div className="py-6 text-center space-y-4">
+               <div className="w-20 h-20 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner border-4 border-green-100">
+                  <CheckCircle size={44} />
+               </div>
+               <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-relaxed px-6">
+                  Your identity has been verified. Your account is now fully active and all features are unlocked.
+               </p>
+            </div>
+         </Modal>
          <header className="h-[72px] bg-white px-5 flex items-center justify-between sticky top-0 z-[200] shrink-0 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] border-b border-slate-50">
             <div className="flex items-center gap-3">
                {branding.favicon ? (
-                 <img src={branding.favicon} className="w-10 h-10 object-contain drop-shadow-sm" alt="Logo" />
+                  <img src={branding.favicon} className="w-10 h-10 object-contain drop-shadow-sm" alt="Logo" />
                ) : (
-                 <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                    <Globe size={20} className="animate-pulse" />
-                 </div>
+                  <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                     <Globe size={20} className="animate-pulse" />
+                  </div>
                )}
                <div className="flex flex-col justify-center">
                   <div className="flex items-center gap-2">
@@ -280,7 +304,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1 truncate max-w-[180px] sm:max-w-xs">{branding.tagline || 'Reliable Connectivity'}</p>
                </div>
             </div>
-            
+
             <div className="flex items-center gap-2 sm:gap-3">
                {appearance.showAICalling && (
                   <button onClick={() => handleTabChange('ai-voice-call')} className="p-2 sm:p-2.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl relative transition-colors shadow-sm">
@@ -304,31 +328,31 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
          </header>
          <main className="flex-1 overflow-y-auto p-4 pb-32 custom-scrollbar">
             <div className="max-w-xl mx-auto h-full space-y-4 pt-1">
-                {/* KYC Enforcement Banner */}
-                {user.kyc_status === 'pending' && user.verificationStatus !== VerificationStatus.REVISION && (
-                   <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500 shadow-sm">
-                      <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
-                            <ShieldAlert size={20} />
-                         </div>
-                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-tight text-amber-900 leading-none">Verification Required</p>
-                            <p className="text-[9px] font-bold uppercase text-amber-600 mt-0.5 tracking-widest leading-none">Complete your identity verification for full access</p>
-                         </div>
-                      </div>
-                      <button 
-                         onClick={() => setIsKYCOpen(true)}
-                         className="px-4 py-2 bg-amber-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all shadow-lg active:scale-95"
-                      >
-                         Verify Now
-                      </button>
-                   </div>
-                )}
+               {/* KYC Enforcement Banner */}
+               {user.kyc_status === 'pending' && user.verificationStatus !== VerificationStatus.REVISION && (
+                  <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500 shadow-sm">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                           <ShieldAlert size={20} />
+                        </div>
+                        <div>
+                           <p className="text-[10px] font-black uppercase tracking-tight text-amber-900 leading-none">Verification Required</p>
+                           <p className="text-[9px] font-bold uppercase text-amber-600 mt-0.5 tracking-widest leading-none">Complete your identity verification for full access</p>
+                        </div>
+                     </div>
+                     <button
+                        onClick={() => setIsKYCOpen(true)}
+                        className="px-4 py-2 bg-amber-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all shadow-lg active:scale-95"
+                     >
+                        Verify Now
+                     </button>
+                  </div>
+               )}
 
-                {/* KYC Revision Required Banner */}
-                {user.verificationStatus === VerificationStatus.REVISION && (
-                   <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-4 animate-in shake duration-500 shadow-md">
-                      <div className="flex items-center justify-between gap-4">
+               {/* KYC Revision Required Banner */}
+               {user.verificationStatus === VerificationStatus.REVISION && (
+                  <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex flex-col gap-4 animate-in shake duration-500 shadow-md">
+                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
                               <ShieldAlert size={20} />
@@ -338,21 +362,21 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
                               <p className="text-[9px] font-bold uppercase text-rose-500 mt-0.5 tracking-widest leading-none">Your documents were declined</p>
                            </div>
                         </div>
-                        <button 
+                        <button
                            onClick={() => setIsKYCOpen(true)}
                            className="px-4 py-2 bg-rose-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-700 transition-all shadow-lg active:scale-95"
                         >
                            Fix Now
                         </button>
-                      </div>
-                      <div className="p-3 bg-white/50 border border-rose-100 rounded-xl">
-                         <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1 italic">Reason:</p>
+                     </div>
+                     <div className="p-3 bg-white/50 border border-rose-100 rounded-xl">
+                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1 italic">Reason:</p>
                         <p className="text-[11px] font-black text-rose-700 leading-tight italic">
                            "{user.kyc_rejected_reason || 'Documents need to be clearer. Please provide higher quality photos.'}"
                         </p>
-                      </div>
-                   </div>
-                )}
+                     </div>
+                  </div>
+               )}
 
                {/* Approval Progress Banner */}
                {user.kyc_status === 'submitted' && user.approval_status === 'pending' && (

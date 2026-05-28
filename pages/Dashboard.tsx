@@ -47,9 +47,23 @@ const Dashboard: React.FC<{
   const handleExport = async () => {
     setIsExporting(true);
     try {
-      // Simulated export API
-      await new Promise(r => setTimeout(r, 800));
-      // db.exportData() if available
+      // Live Export API: Generate CSV from global state
+      const rows = [
+        ['Type', 'ID', 'Name/Desc', 'Status', 'Amount/Value', 'Date']
+      ];
+      
+      state.users.forEach(u => rows.push(['User', u.id, u.name, u.status, u.packageId || 'N/A', u.createdAt || 'N/A']));
+      state.invoices.forEach(i => rows.push(['Invoice', i.id, i.packageName || 'Service', i.status, String(i.totalAmount), i.createdAt]));
+      state.payments.forEach(p => rows.push(['Payment', p.id, p.paymentMethod || 'Manual', p.status, String(p.amount), p.timestamp]));
+      
+      const csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `platform_export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     } finally {
       setIsExporting(false);
     }

@@ -177,7 +177,7 @@ const VerifyEmail: React.FC = () => {
                     inputMode="numeric"
                     maxLength={1}
                     value={digit}
-                    ref={(el) => (inputRefs.current[idx] = el)}
+                    ref={(el) => { inputRefs.current[idx] = el; }}
                     onChange={(e) => handleOtpChange(e, idx)}
                     onKeyDown={(e) => handleKeyDown(e, idx)}
                     className="w-12 h-14 bg-slate-950 border border-slate-800 text-center text-xl font-bold rounded-xl outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-white placeholder:text-slate-700"

@@ -35,7 +35,12 @@ export function stopPolling() {
 
 export function addUserToPoll(username, deviceConfig) {
   if (!activePollingUsers.has(username)) {
-    activePollingUsers.set(username, { device: deviceConfig });
+    // Prevent memory exhaustion under high subscriber loads
+    if (activePollingUsers.size >= 1000) {
+      logger.warn(`[POLLER] Cannot add ${username} to live polling. Maximum poller limit (1000) reached.`);
+      return;
+    }
+    activePollingUsers.set(username, { device: deviceConfig, addedAt: Date.now() });
     logger.info(`Added ${username} to live polling`);
   }
 }

@@ -30,13 +30,12 @@ class HealthMonitor {
 
     async getAggregatedHealth() {
         const start = Date.now();
-        const [ai, db, email, payments] = await Promise.all([
+        const [ai, db, email, payments, hardware] = await Promise.all([
             this.checkAIHealth(),
             this.checkDBHealth(),
             this.checkEmailHealth(),
             this.checkPaymentHealth(),
             this.checkHardwareHealth()
-
         ]);
 
         const systemScore = this.calculateSystemScore({ ai, db, email, payments, hardware });

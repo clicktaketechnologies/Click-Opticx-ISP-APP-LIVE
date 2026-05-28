@@ -368,7 +368,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                                  <div className="flex items-center gap-2">
                                     <StatusRing status={olt.status} />
                                     <span className={`text-[6px] font-black uppercase tracking-tighter ${olt.status === 'Online' ? 'text-green-500' : 'text-rose-500'}`}>
-                                       {olt.status === 'Online' ? 'LIVE TELEMETRY' : 'DUMMY DATA'}
+                                       {olt.status === 'Online' ? 'LIVE TELEMETRY' : 'NO TELEMETRY'}
                                     </span>
                                  </div>
                               </div>
@@ -455,7 +455,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                </div>
 
-               {/* 6. LIVE TRAFFIC GRAPH (MOCKED) */}
+               {/* 6. LIVE TRAFFIC GRAPH */}
                <div className={`p-8 rounded-[2.5rem] border ${isNocMode ? 'bg-white/5 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
                   <div className="flex items-center justify-between mb-10">
                      <div className="flex items-center gap-3">

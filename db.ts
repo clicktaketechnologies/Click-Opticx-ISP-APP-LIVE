@@ -1468,9 +1468,31 @@ class DB {
             if (snap.id === 'users_shard') {
               // --- 🛡️ SMART MERGE: Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
               if (shardData.users && Array.isArray(shardData.users)) {
+                const archivedIds = new Set<string>();
+                const collectArchives = (stateObj: any) => {
+                  if (stateObj?.archives && Array.isArray(stateObj.archives)) {
+                    stateObj.archives.forEach((a: any) => {
+                      if (a?.data?.users && Array.isArray(a.data.users)) {
+                        a.data.users.forEach((u: any) => {
+                          if (u && u.id) archivedIds.add(u.id);
+                        });
+                      }
+                    });
+                  }
+                };
+                collectArchives(this.state);
+                collectArchives(mergedState);
+
                 const cloudIds = new Set(shardData.users.map((u: any) => u.id));
-                const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !this.recentlyDeletedIds.has(u.id));
-                const validCloudUsers = shardData.users.filter((u: any) => !this.recentlyDeletedIds.has(u.id));
+                const localOnlyUsers = this.state.users.filter(u => 
+                  !cloudIds.has(u.id) && 
+                  !this.recentlyDeletedIds.has(u.id) && 
+                  !archivedIds.has(u.id)
+                );
+                const validCloudUsers = shardData.users.filter((u: any) => 
+                  !this.recentlyDeletedIds.has(u.id) && 
+                  !archivedIds.has(u.id)
+                );
                 mergedState.users = [...validCloudUsers, ...localOnlyUsers];
               }
               if (shardData.signupRequests && Array.isArray(shardData.signupRequests)) {
@@ -1498,10 +1520,30 @@ class DB {
 
             // --- 🛡️ SMART MERGE (Real-time): Prevent 'Hidden Users' & 'Deleted User Resurrection' ---
             if (persistedData.users && Array.isArray(persistedData.users)) {
+              const archivedIds = new Set<string>();
+              const collectArchives = (stateObj: any) => {
+                if (stateObj?.archives && Array.isArray(stateObj.archives)) {
+                  stateObj.archives.forEach((a: any) => {
+                    if (a?.data?.users && Array.isArray(a.data.users)) {
+                      a.data.users.forEach((u: any) => {
+                        if (u && u.id) archivedIds.add(u.id);
+                      });
+                    }
+                  });
+                }
+              };
+              collectArchives(this.state);
+              collectArchives(persistedData);
+
               const cloudIds = new Set(persistedData.users.map(u => u.id));
-              const localOnlyUsers = this.state.users.filter(u => !cloudIds.has(u.id) && !u.deleted);
+              const localOnlyUsers = this.state.users.filter(u => 
+                !cloudIds.has(u.id) && 
+                !u.deleted && 
+                !archivedIds.has(u.id)
+              );
+              const validCloudUsers = persistedData.users.filter(u => !archivedIds.has(u.id));
               persistedData.users = [
-                ...persistedData.users,
+                ...validCloudUsers,
                 ...localOnlyUsers
               ];
             }
@@ -3370,6 +3412,44 @@ class DB {
     return inv;
   }
 
+  async generateInvoice(payload: Partial<Invoice>) {
+    try {
+      const response = await fetch(`${this.backendUrl}/api/billing/invoice/generate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.getValidToken()}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!data.success) {
+        console.warn("[BILLING] Backend generation failed", data.message);
+      }
+    } catch (e) {
+      console.warn("[BILLING] Backend unreachable for live invoice generation", e);
+    }
+    
+    // Fallback to local state if backend is unreachable or to keep state in sync
+    const inv: Invoice = {
+      id: payload.id || 'INV-' + Math.floor(100000 + Math.random() * 900000),
+      userId: payload.userId!, userName: payload.userName || 'Unknown',
+      packageId: payload.packageId || '', packageName: payload.packageName || 'Custom',
+      items: payload.items || [], subtotal: payload.subtotal || 0, taxRate: payload.taxRate || 0,
+      taxAmount: payload.taxAmount || 0,
+      discountAmount: payload.discountAmount || 0,
+      totalAmount: payload.totalAmount || 0,
+      paidAmount: payload.paidAmount || 0,
+      dueAmount: payload.dueAmount || payload.totalAmount || 0,
+      status: payload.status || PaymentStatus.UNPAID, 
+      dueDate: payload.dueDate || new Date(Date.now() + 86400000 * 5).toISOString(), 
+      createdAt: payload.createdAt || new Date().toISOString()
+    };
+    this.state.invoices.push(inv);
+    await this.commit();
+    return inv;
+  }
+
   async markVerificationSuccessShown(userId: string) {
     const idx = this.findUserIndex(userId);
     if (idx !== -1) { this.state.users[idx].verificationSuccessShown = true; await this.commit(); }
@@ -4625,14 +4705,31 @@ class DB {
       if (snap.exists()) {
         const remoteState = snap.data() as Partial<AppState>;
 
+        const archivedIds = new Set<string>();
+        const collectArchives = (stateObj: any) => {
+          if (stateObj?.archives && Array.isArray(stateObj.archives)) {
+            stateObj.archives.forEach((a: any) => {
+              if (a?.data?.users && Array.isArray(a.data.users)) {
+                a.data.users.forEach((u: any) => {
+                  if (u && u.id) archivedIds.add(u.id);
+                });
+              }
+            });
+          }
+        };
+        collectArchives(this.state);
+        collectArchives(remoteState);
+
         let recovered = 0;
         // Atomic Heal: Merge missing users/staff into local state
         if (Array.isArray(remoteState.users)) {
           remoteState.users.forEach(ru => {
-            const exists = this.state.users.some(lu => lu.id === ru.id || (ru.email && lu.email === ru.email));
-            if (!exists) {
-              this.state.users.push(ru);
-              recovered++;
+            if (ru && ru.id && !archivedIds.has(ru.id)) {
+              const exists = this.state.users.some(lu => lu.id === ru.id || (ru.email && lu.email === ru.email));
+              if (!exists) {
+                this.state.users.push(ru);
+                recovered++;
+              }
             }
           });
         }

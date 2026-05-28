@@ -72,8 +72,13 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
     setIsModalOpen(true);
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [toast, setToast] = useState<{type: 'success'|'error', msg: string}|null>(null);
+
   const handleSave = async () => {
     if (!canManagePackages || !formData.name) return;
+    setIsSaving(true);
+    setToast(null);
     
     const cleanData = {
       ...formData,
@@ -83,12 +88,37 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
       duration: Number(formData.duration)
     };
 
-    if (editingPkgId) {
-      await db.updatePackage(editingPkgId, cleanData);
-    } else {
-      await db.addPackage(cleanData);
+    try {
+      if (editingPkgId) {
+        // Direct backend API synchronization
+        const res = await fetch(`${db.backendUrl}/api/packages/${editingPkgId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('clickopticx_admin_token')}` },
+          body: JSON.stringify(cleanData)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || 'Backend sync failed');
+        
+        await db.updatePackage(editingPkgId, cleanData); // Sync local state
+        setToast({ type: 'success', msg: 'Package updated successfully!' });
+      } else {
+        const res = await fetch(`${db.backendUrl}/api/packages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('clickopticx_admin_token')}` },
+          body: JSON.stringify(cleanData)
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || 'Backend creation failed');
+
+        await db.addPackage(cleanData); // Sync local state
+        setToast({ type: 'success', msg: 'Package deployed successfully!' });
+      }
+      setTimeout(() => setIsModalOpen(false), 1500);
+    } catch (err: any) {
+      setToast({ type: 'error', msg: `Error: ${err.message}` });
+    } finally {
+      setIsSaving(false);
     }
-    setIsModalOpen(false);
   };
 
   const handleToggleStatus = async (id: string) => {
@@ -237,6 +267,39 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 italic">Marketing Lead Subtext</label>
                 <input type="text" className="w-full p-6 bg-white border-2 border-slate-100 rounded-[2rem] outline-none font-black text-slate-900 focus:border-indigo-600 transition-all shadow-inner placeholder:text-slate-200" value={formData.subtitle} onChange={e => setFormData({...formData, subtitle: e.target.value})} placeholder="e.g. Maximum Performance Node" />
               </div>
+
+              {/* Revealed Hidden Fields */}
+              <div className="space-y-2 flex flex-col justify-center">
+                 <label className="flex items-center gap-3 ml-4 cursor-pointer">
+                    <div className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${formData.isRecommended ? 'bg-indigo-600' : 'bg-slate-300'}`}>
+                       <div className={`w-4 h-4 bg-white rounded-full transition-all shadow-md ${formData.isRecommended ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                    </div>
+                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest italic">Recommended Plan</span>
+                 </label>
+              </div>
+              
+              <div className="space-y-2 flex flex-col justify-center">
+                 <label className="flex items-center gap-3 ml-4 cursor-pointer">
+                    <div className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${(formData as any).autoRenew !== false ? 'bg-emerald-600' : 'bg-slate-300'}`}>
+                       <div className={`w-4 h-4 bg-white rounded-full transition-all shadow-md ${(formData as any).autoRenew !== false ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                    </div>
+                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest italic">Auto-Renew</span>
+                 </label>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 italic">Visibility</label>
+                <select className="w-full p-6 bg-white border-2 border-slate-100 rounded-[2rem] outline-none font-black text-slate-900 focus:border-indigo-600 transition-all shadow-inner" value={(formData as any).visibility || 'Public'} onChange={e => setFormData({...formData, visibility: e.target.value} as any)}>
+                   <option value="Public">Public (Storefront)</option>
+                   <option value="Hidden">Hidden (Direct Link Only)</option>
+                   <option value="Admin">Admin Only</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-4 italic">Bandwidth Cap</label>
+                <input type="text" className="w-full p-6 bg-white border-2 border-slate-100 rounded-[2rem] outline-none font-black text-slate-900 focus:border-indigo-600 transition-all shadow-inner placeholder:text-slate-200" value={(formData as any).bandwidthCap || ''} onChange={e => setFormData({...formData, bandwidthCap: e.target.value} as any)} placeholder="e.g. 1TB (Leave empty for unmetered)" />
+              </div>
             </div>
           </div>
 
@@ -329,18 +392,27 @@ const PackagesPage: React.FC<{ state: AppState }> = ({ state }) => {
             </div>
           </div>
 
+          {toast && (
+             <div className={`p-4 rounded-2xl border flex items-center gap-3 text-xs font-black uppercase tracking-widest ${toast.type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-600' : 'bg-emerald-50 border-emerald-200 text-emerald-600'}`}>
+                {toast.type === 'error' ? <ShieldAlert size={16} /> : <ShieldCheck size={16} />}
+                {toast.msg}
+             </div>
+          )}
+
           <div className="flex gap-4 pt-6">
              <button 
                 onClick={() => setIsModalOpen(false)}
                 className="flex-1 py-6 bg-white border-2 border-slate-100 text-slate-400 hover:text-slate-900 rounded-[2.5rem] font-black text-[10px] uppercase tracking-widest transition-all"
              >
-                Abort Reconfiguration
+                Cancel
              </button>
              <button 
                 onClick={handleSave}
-                className="flex-[2] py-6 bg-slate-950 text-white rounded-[2.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl hover:bg-black active:scale-95"
+                disabled={isSaving}
+                className="flex-[2] py-6 flex justify-center items-center gap-3 bg-slate-950 text-white rounded-[2.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl hover:bg-black active:scale-95 disabled:opacity-50"
              >
-                {editingPkgId ? 'Save Protocol Changes' : 'Authorize Provisioning'}
+                {isSaving ? <Activity className="animate-spin" size={16} /> : <Save size={16} />}
+                {editingPkgId ? 'Save Package Updates' : '➕ Add New Plan'}
              </button>
           </div>
         </div>

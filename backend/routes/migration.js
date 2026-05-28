@@ -11,6 +11,7 @@ import { dirname } from 'path';
 import configManager from '../services/config-manager.js';
 import logger from '../utils/logger.js';
 import { protect, restrictTo } from '../middleware/auth.js';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -169,7 +170,7 @@ router.get('/preflight', protect, restrictTo('SuperAdmin', 'Admin'), async (req,
 // ─── Trigger Manual Validation ────────────────────────────────────────────────
 router.post('/validate', protect, restrictTo('SuperAdmin', 'Admin'), async (req, res) => {
   const scriptPath = path.join(__dirname, '..', 'scripts', 'validate-sync.js');
-  exec(`node "${scriptPath}"`, { cwd: path.join(__dirname, '..') }, (err) => {
+  exec(`node "${scriptPath}"`, { cwd: path.join(__dirname, '..'), timeout: 300000 }, (err) => {
     if (err) logger.error(`[MIGRATION] Validation trigger failed: ${err.message}`);
     else logger.info('[MIGRATION] Manual validation completed');
   });
@@ -180,7 +181,7 @@ router.post('/validate', protect, restrictTo('SuperAdmin', 'Admin'), async (req,
 router.post('/backup', protect, restrictTo('SuperAdmin', 'Admin'), async (req, res) => {
   const scriptPath = path.join(__dirname, '..', 'scripts', 'export-firebase-backup.js');
   logger.info('[MIGRATION] Starting Firebase cold backup...');
-  exec(`node "${scriptPath}"`, { cwd: path.join(__dirname, '..') }, (err) => {
+  exec(`node "${scriptPath}"`, { cwd: path.join(__dirname, '..'), timeout: 300000 }, (err) => {
     if (err) logger.error(`[MIGRATION] Backup failed: ${err.message}`);
     else logger.info('[MIGRATION] Firebase backup completed successfully');
   });
@@ -231,6 +232,7 @@ router.post('/cutover', protect, restrictTo('SuperAdmin'), async (req, res) => {
     await configManager.setConfig('migration_control', cutoverConfig, 'cutover-sequence');
     
     await supabase.from('audit_logs').insert({
+      id: crypto.randomUUID(),
       action: 'Phase 3 Cutover Executed',
       user_id: req.user.id,
       user_name: 'Cutover Sequence',
@@ -269,6 +271,7 @@ router.post('/rollback', protect, restrictTo('SuperAdmin'), async (req, res) => 
     await configManager.setConfig('migration_control', rollbackConfig, 'rollback-sequence');
 
     await supabase.from('audit_logs').insert({
+      id: crypto.randomUUID(),
       action: 'Emergency Rollback to Firebase',
       user_id: req.user.id,
       user_name: 'Rollback Sequence',

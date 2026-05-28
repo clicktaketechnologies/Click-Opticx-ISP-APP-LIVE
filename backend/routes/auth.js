@@ -20,5 +20,6 @@ router.get('/check-verification-status', authController.checkVerificationStatus)
 router.post('/refresh', authController.refreshToken);
 router.post('/logout', protect, authController.logout);
 router.get('/verify', authController.verifySession);
+router.post('/change-password', protect, authController.changePassword);
 
 export default router;

@@ -113,6 +113,7 @@ const FinanceDashboard = lazyWithRetry(() => import('./pages/FinanceDashboard'))
 const NotificationControl = lazyWithRetry(() => import('./pages/admin/NotificationControl'));
 const AdminUserDevices = lazyWithRetry(() => import('./pages/admin/AdminUserDevices'));
 const NotificationAnalytics = lazyWithRetry(() => import('./pages/admin/NotificationAnalytics'));
+const SystemDiagnostic = lazyWithRetry(() => import('./pages/admin/SystemDiagnostic'));
 
 const SafeStub = ({ name, route }: { name: string, route: string }) => (
   <div className="p-10 text-center animate-in fade-in h-full flex flex-col items-center justify-center">
@@ -300,6 +301,7 @@ const LegacyRoutes: React.FC<LegacyRoutesProps> = ({
       <Route path="/admin-password-requests" element={<AdminPasswordRequests state={dbState} />} />
       <Route path="/admin-device-mapping" element={<UserDeviceMapping state={dbState} />} />
       <Route path="/admin-profile" element={<AdminProfile state={dbState} />} />
+      <Route path="/system-diagnostic" element={<SystemDiagnostic />} />
       <Route path="/tasks" element={<TaskManagement state={dbState} />} />
       <Route path="/comm-center" element={<UnifiedCommunication state={dbState} />} />
       <Route path="/admin-reminders" element={<AdminReminders state={dbState} onNavigate={navigateTo} />} />
@@ -404,8 +406,8 @@ const App: React.FC = () => {
     } catch (e) {
       // Fallback: listen for storage changes
       const onStorageChange = (e: StorageEvent) => {
-        if (e.key === 'clickopticx_auth_token' && !e.newValue) {
-          console.warn('[MULTI-TAB] Auth token removed in another tab — forcing logout');
+        if (e.key === 'clickopticx_logout_signal' && e.newValue) {
+          console.warn('[MULTI-TAB] Logout signal detected via storage event — forcing logout');
           db.commit({ auth: { isLoggedIn: false }, view: 'login', currentUser: undefined });
           sessionStorage.clear();
         }

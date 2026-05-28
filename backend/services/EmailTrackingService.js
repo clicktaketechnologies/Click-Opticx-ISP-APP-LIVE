@@ -2,6 +2,7 @@ import { Queue, Worker } from 'bullmq';
 import nodemailer from 'nodemailer';
 import logger from '../utils/logger.js';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const redisOptions = {
     host: process.env.REDIS_HOST || '127.0.0.1',
@@ -80,6 +81,7 @@ if (USE_BULLMQ) {
                 });
                 
                 await getSupabase().from('audit_logs').insert({
+                    id: crypto.randomUUID(),
                     action: 'EMAIL_SENT',
                     details: `Delivered to ${to} (Job ${job.id})`,
                     metadata: { messageId: info.messageId, campaignId }

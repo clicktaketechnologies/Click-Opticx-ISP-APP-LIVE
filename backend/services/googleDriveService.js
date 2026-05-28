@@ -30,16 +30,26 @@ class GoogleDriveService {
     async uploadFile(fileName, filePath, mimeType) {
         try {
             const drive = google.drive({ version: 'v3', auth: this.oauth2Client });
+            const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+
             const response = await drive.files.create({
                 requestBody: {
                     name: fileName,
-                    parents: [] // Can specify folder ID here
+                    parents: folderId ? [folderId] : [] // Use configured folder or root
                 },
                 media: {
                     mimeType: mimeType,
                     body: fs.createReadStream(filePath),
                 },
+                fields: 'id, webViewLink, webContentLink'
             });
+
+            // Grant viewer access so the URL is accessible
+            await drive.permissions.create({
+                fileId: response.data.id,
+                requestBody: { role: 'reader', type: 'anyone' }
+            }).catch(() => {}); // Non-blocking — failure won't abort upload
+
             return response.data;
         } catch (error) {
             logger.error(`[Google Drive] Upload Echo: ${error.message}`);

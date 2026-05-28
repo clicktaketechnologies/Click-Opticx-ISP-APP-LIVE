@@ -62,7 +62,7 @@ export const signup = async (req, res) => {
         // 1. Zod Validation
         const validation = signupSchema.safeParse(req.body);
         if (!validation.success) {
-            const firstError = validation.error.errors[0];
+            const firstError = validation.error.issues[0];
             return res.status(400).json({ 
                 success: false, 
                 error: 'VALIDATION_ERROR',
@@ -217,7 +217,8 @@ export const signup = async (req, res) => {
         // 9. Write Audit Log
         try {
             const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-            await supabase.from('audit_logs').insert({
+            const { error: auditError } = await supabase.from('audit_logs').insert({
+                id: crypto.randomUUID(),
                 action: 'SIGNUP_PENDING',
                 user_id: userId,
                 user_name: name,
@@ -226,6 +227,9 @@ export const signup = async (req, res) => {
                 ip_address: ip,
                 metadata: { email, phone, timestamp: new Date().toISOString() }
             });
+            if (auditError) {
+                logger.error('[AUDIT-LOG] Failed to write SIGNUP_PENDING audit log:', auditError);
+            }
         } catch (logErr) {
             logger.warn(`[AUDIT-LOG] Failed to write signup log: ${logErr.message}`);
         }
@@ -247,7 +251,7 @@ export const login = async (req, res) => {
         // 1. Zod Validation
         const validation = loginSchema.safeParse(req.body);
         if (!validation.success) {
-            const firstError = validation.error.errors[0];
+            const firstError = validation.error.issues[0];
             return res.status(400).json({ 
                 success: false, 
                 error: 'VALIDATION_ERROR',
@@ -299,6 +303,7 @@ export const login = async (req, res) => {
         if (!user || error) {
             const { data: staffUser } = await supabase
                 .from('staff')
+                .select('*')
                 .or(`email.eq.${identifier},username.eq.${identifier},phone.eq.${identifier}`)
                 .maybeSingle();
             
@@ -342,6 +347,7 @@ export const login = async (req, res) => {
         }
 
         // 5. Account Status Enforcement
+        const BLOCKED_STATUSES = ['PENDING_VERIFICATION', 'SUSPENDED', 'Locked', 'Disabled', 'Blocked'];
         if (user.status === 'PENDING_VERIFICATION') {
             return res.status(403).json({ 
                 success: false, 
@@ -360,11 +366,19 @@ export const login = async (req, res) => {
             });
         }
 
-        if (user.status.toLowerCase() !== 'active') {
+        // Block explicitly disabled/blocked accounts, but allow all ISP active variants
+        // (e.g. 'Active', 'Active - Payment Due', 'Emergency Active', 'Grace Period Active', etc.)
+        const isActiveVariant = user.status && (
+            user.status.toLowerCase().startsWith('active') ||
+            user.status.toLowerCase().includes('active') ||
+            user.status === 'Recovery Mode Active' ||
+            user.status === 'No Active Plan' // allow login even with no plan
+        );
+        if (!isActiveVariant && BLOCKED_STATUSES.includes(user.status)) {
             return res.status(403).json({ 
                 success: false, 
                 error: 'INACTIVE_ACCOUNT',
-                message: `Account status is ${user.status}. Access blocked.` 
+                message: `Account status is "${user.status}". Access blocked.` 
             });
         }
 
@@ -405,15 +419,21 @@ export const login = async (req, res) => {
 
         // Audit Log
         try {
-            await supabase.from('audit_logs').insert({
+            const { error: auditError } = await supabase.from('audit_logs').insert({
+                id: crypto.randomUUID(),
                 action: 'LOGIN_SUCCESS',
                 user_id: user.id,
                 user_name: user.name,
-                details: 'User authenticated successfully via Supabase Auth.',
+                admin_id: null,
+                admin_name: null,
+                details: 'User logged in successfully.',
                 type: 'AUTH',
                 ip_address: ip,
-                metadata: { fingerprint, timestamp: new Date().toISOString() }
+                metadata: { email: user.email, role: user.role, fingerprint, timestamp: new Date().toISOString() }
             });
+            if (auditError) {
+                logger.error('[AUDIT-LOG] Failed to write LOGIN_SUCCESS audit log:', auditError);
+            }
         } catch (logErr) {
             logger.warn(`[AUDIT-LOG] Failed to write login log: ${logErr.message}`);
         }
@@ -480,6 +500,7 @@ export const verifyOtp = async (req, res) => {
         try {
             const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
             await supabase.from('audit_logs').insert({
+                id: crypto.randomUUID(),
                 action: 'VERIFY_OTP_SUCCESS',
                 user_id: userId,
                 user_name: user.name,
@@ -513,7 +534,7 @@ export const socialHandshake = async (req, res) => {
             .maybeSingle();
 
         if (!user) {
-            const userId = 'USR-' + Date.now();
+            const userId = crypto.randomUUID();
             user = {
                 id: userId,
                 name,
@@ -783,6 +804,89 @@ export const checkVerificationStatus = async (req, res) => {
     }
 };
 
+
+export const changePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const userId = req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, error: 'NOT_AUTHENTICATED', message: 'Not authenticated' });
+        }
+
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ success: false, error: 'MISSING_FIELDS', message: 'Old and new passwords are required' });
+        }
+
+        // Validate password strength
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            return res.status(400).json({ success: false, error: 'WEAK_NEW_PASSWORD', message: 'Password must be at least 8 characters, and contain at least one uppercase letter, one number, and one symbol.' });
+        }
+
+        const supabase = configManager.getSupabaseClient();
+        
+        // Find user
+        let userTable = 'users';
+        let { data: user } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
+        if (!user) {
+            userTable = 'staff';
+            const { data: staffUser } = await supabase.from('staff').select('*').eq('id', userId).maybeSingle();
+            user = staffUser;
+        }
+
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'USER_NOT_FOUND', message: 'User not found' });
+        }
+
+        // Verify old password
+        const passwordMatches = await argon2.verify(user.password, oldPassword);
+        if (!passwordMatches) {
+            return res.status(400).json({ success: false, error: 'INVALID_OLD_PASSWORD', message: 'The old password you entered is incorrect.' });
+        }
+
+        // Hash new password
+        const hashedPassword = await argon2.hash(newPassword, { type: argon2.argon2id });
+
+        // Update password and revoke all sessions
+        const updatedRawData = {
+            ...user.raw_data,
+            sessions: []
+        };
+
+        const { error } = await supabase.from(userTable).update({
+            password: hashedPassword,
+            raw_data: updatedRawData
+        }).eq('id', userId);
+
+        if (error) {
+            return res.status(500).json({ success: false, error: 'NETWORK_ERROR', message: 'Database update failed' });
+        }
+
+        // Write Audit Log
+        try {
+            const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+            await supabase.from('audit_logs').insert({
+                id: crypto.randomUUID(),
+                action: 'PASSWORD_CHANGED',
+                user_id: userId,
+                user_name: user.name,
+                details: 'User password changed successfully. Other sessions revoked.',
+                type: 'SECURITY',
+                ip_address: ip,
+                created_at: new Date().toISOString()
+            });
+        } catch (auditErr) {
+            logger.error('[AUDIT-LOG] Failed to write password change audit log:', auditErr);
+        }
+
+        res.json({ success: true, message: 'Password updated successfully. Please re-login.' });
+    } catch (error) {
+        logger.error(`[CHANGE-PASSWORD] Error: ${error.message}`);
+        res.status(500).json({ success: false, error: 'NETWORK_ERROR', message: error.message });
+    }
+};
+
 export const verifySession = async (req, res) => {
     try {
         const cookieHeader = req.headers.cookie;
@@ -837,4 +941,4 @@ export const verifySession = async (req, res) => {
     }
 };
 
-export default { signup, login, socialHandshake, forgotPassword, completeReset, loginAs, refreshToken, logout, verifySession, verifyEmail, checkVerificationStatus, verifyOtp };
+export default { signup, login, socialHandshake, forgotPassword, completeReset, loginAs, refreshToken, logout, verifySession, verifyEmail, checkVerificationStatus, verifyOtp, changePassword };

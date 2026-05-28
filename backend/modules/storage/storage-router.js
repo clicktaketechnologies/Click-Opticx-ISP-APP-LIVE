@@ -1,6 +1,6 @@
 import logger from '../../utils/logger.js';
 import configManager from '../../services/config-manager.js';
-import processor from './processor.js';
+import { processFile } from './processor.js';
 import cloudinary from './providers/cloudinary.js';
 import supabaseStorage from './providers/supabase-storage.js';
 
@@ -22,7 +22,7 @@ export async function uploadFile(file, options = {}) {
   }
 
   // 1. Pre-process file (compression, checksum)
-  const processed = await processor.processFile(file, config);
+  const processed = await processFile(file, config);
   
   const sortedProviders = [...(config.providers || [])]
     .filter(p => p.enabled)

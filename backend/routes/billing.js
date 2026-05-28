@@ -2,6 +2,7 @@ import express from 'express';
 import billingService, { InvoiceState } from '../services/billingService.js';
 import logger from '../utils/logger.js';
 import { protect, restrictTo } from '../middleware/auth.js';
+import { handleWebhookSimulate, handleGenerateInvoice } from '../controllers/billingController.js';
 
 const router = express.Router();
 
@@ -98,5 +99,17 @@ router.get('/invoices', protect, async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
+
+/**
+ * @route POST /api/billing/webhook/simulate
+ * @desc Simulate a payment gateway webhook
+ */
+router.post('/webhook/simulate', protect, handleWebhookSimulate);
+
+/**
+ * @route POST /api/billing/invoice/generate
+ * @desc Generate an ad-hoc invoice
+ */
+router.post('/invoice/generate', protect, restrictTo('SuperAdmin', 'Admin', 'Accountant', 'FinanceAdmin'), handleGenerateInvoice);
 
 export default router;

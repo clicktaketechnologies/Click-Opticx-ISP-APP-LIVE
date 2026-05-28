@@ -93,9 +93,12 @@ class FaultDetection {
                   title: 'ISP Network Alert',
                   body: alert.message
               },
+              // FCM requires all data values to be strings
               data: {
-                  type: alert.type,
-                  onu: alert.onu,
+                  type: String(alert.type || ''),
+                  onu: String(alert.onu || ''),
+                  severity: String(alert.severity || ''),
+                  timestamp: String(alert.timestamp || Date.now()),
                   click_action: 'FLUTTER_NOTIFICATION_CLICK'
               },
               token: token

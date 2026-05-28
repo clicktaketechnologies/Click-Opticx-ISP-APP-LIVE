@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AppState, ISPUser, Invoice } from '../types';
+import { AppState, ISPUser, Invoice, UserStatus } from '../types';
 
 interface BSSStore {
   // Global State
@@ -10,7 +10,7 @@ interface BSSStore {
   // Actions
   setUsers: (users: ISPUser[]) => void;
   setInvoices: (invoices: Invoice[]) => void;
-  updateUserStatus: (id: string, status: string) => void;
+  updateUserStatus: (id: string, status: UserStatus) => void;
   
   // Cache invalidation triggers (simple event bus for cross-component sync)
   lastUpdate: number;

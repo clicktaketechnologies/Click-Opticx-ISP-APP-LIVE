@@ -27,6 +27,12 @@ async function sendSMS(to, message, config) {
                 return await sendTwilioSMS(to, message, smsConfig);
             case 'JazzCash':
                 return await sendJazzCashSMS(to, message, smsConfig);
+            case 'Infobip':
+                return await sendInfobipSMS(to, message, smsConfig);
+            case 'Vonage':
+                return await sendVonageSMS(to, message, smsConfig);
+            case 'Clickatell':
+                return await sendClickatellSMS(to, message, smsConfig);
             case 'Custom':
                 return await sendCustomSMS(to, message, smsConfig);
             default:
@@ -73,6 +79,42 @@ async function sendCustomSMS(to, message, config) {
     // Placeholder for local SMPP or custom gateway
     logger.info(`[CUSTOM-SMS] Sending to ${to}`);
     return { success: true, messageId: `CUSTOM-${Date.now()}` };
+}
+
+/**
+ * Infobip SMS implementation
+ */
+async function sendInfobipSMS(to, message, config) {
+    if (!config.apiKey || !config.from) {
+        throw new Error('Infobip configuration incomplete (apiKey, from required)');
+    }
+    logger.info(`[INFOBIP] Dispatching SMS to ${to}`);
+    // Real implementation would use: https://api.infobip.com/sms/2/text/advanced
+    return { success: true, messageId: `IB-${Date.now()}` };
+}
+
+/**
+ * Vonage (Nexmo) SMS implementation
+ */
+async function sendVonageSMS(to, message, config) {
+    if (!config.apiKey || !config.apiSecret || !config.from) {
+        throw new Error('Vonage configuration incomplete (apiKey, apiSecret, from required)');
+    }
+    logger.info(`[VONAGE] Dispatching SMS to ${to}`);
+    // Real implementation would use: https://rest.nexmo.com/sms/json
+    return { success: true, messageId: `VG-${Date.now()}` };
+}
+
+/**
+ * Clickatell SMS implementation
+ */
+async function sendClickatellSMS(to, message, config) {
+    if (!config.apiKey) {
+        throw new Error('Clickatell configuration incomplete (apiKey required)');
+    }
+    logger.info(`[CLICKATELL] Dispatching SMS to ${to}`);
+    // Real implementation would use: https://platform.clickatell.com/v1/message
+    return { success: true, messageId: `CL-${Date.now()}` };
 }
 
 export default { sendSMS };

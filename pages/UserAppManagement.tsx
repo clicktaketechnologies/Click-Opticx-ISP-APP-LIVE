@@ -77,6 +77,28 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
       await db.updateAppSection(section);
    };
 
+   const handleImpersonate = async (userId: string) => {
+      setIsProcessing(userId);
+      try {
+         const adminToken = localStorage.getItem('token');
+         const res = await fetch(`${db.getBackendUrl()}/api/admin/impersonate/${userId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${adminToken}` }
+         });
+         const data = await res.json();
+         if (data.success) {
+            localStorage.setItem('admin_token', adminToken || '');
+            localStorage.setItem('token', data.token);
+            window.location.href = '/'; // Routes to subscriber view automatically due to token
+         } else {
+            alert('Impersonation failed: ' + data.message);
+         }
+      } catch (err: any) {
+         alert('Network error: ' + err.message);
+      }
+      setIsProcessing(null);
+   };
+
    // Add Sun to the icon mapping to resolve shorthand property scope error
    const getIcon = (iconName: string) => {
       const map: any = { Home, Monitor, Wallet, Wifi, Bell, Headphones, FileText, Target, Smartphone, Gauge, Zap, Key, Fingerprint, Clock, Book, Compass, Globe, MessageSquare, Trophy, Megaphone, User, Mic, Sun };
@@ -176,10 +198,11 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                                  </td>
                                  <td className="px-8 py-5 text-right">
                                     <button
-                                       onClick={() => db.impersonateUser(user.id)}
+                                       onClick={() => handleImpersonate(user.id)}
+                                       disabled={isProcessing === user.id}
                                        className="px-4 py-2 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-2 ml-auto"
                                     >
-                                       <Eye size={14} /> Login As User
+                                       {isProcessing === user.id ? <Mini5GMicroLoader size={14} /> : <Eye size={14} />} Login As User
                                     </button>
                                  </td>
                               </tr>

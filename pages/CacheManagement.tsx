@@ -10,10 +10,13 @@ import {
     DatabaseZap
 } from 'lucide-react';
 
+import { useToast } from '../components/shared/Toast';
+
 const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
     const [isClearingWorkers, setIsClearingWorkers] = useState(false);
     const [isClearingStorage, setIsClearingStorage] = useState(false);
     const [healthStatus, setHealthStatus] = useState<'IDLE' | 'CHECKING' | 'HEALTHY'>('IDLE');
+    const { success: toastSuccess, error: toastError } = useToast();
 
     const handleClearServiceWorkers = async () => {
         setIsClearingWorkers(true);
@@ -24,6 +27,7 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
                     await registration.unregister();
                 }
                 db.logNotification('all', 'success', 'Cache Purged', 'All environment service workers have been decommissioned.');
+                toastSuccess('Service Workers', 'Service workers decommissioned successfully');
             } else {
                 db.logNotification('all', 'error', 'Purge Failed', 'Service Worker API not available in this node.');
             }
@@ -40,13 +44,48 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
             // 1. Clear Local Buffer
             localStorage.clear();
             sessionStorage.clear();
+
+            // Clear IndexedDB
+            if (window.indexedDB && window.indexedDB.databases) {
+                try {
+                    const dbs = await window.indexedDB.databases();
+                    dbs.forEach(d => {
+                        if (d.name) window.indexedDB.deleteDatabase(d.name);
+                    });
+                } catch (e) {
+                    console.warn('[CACHE] IndexedDB clear failed:', e);
+                }
+            }
+
+            // Clear Service Worker Cache
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                } catch (e) {
+                    console.warn('[CACHE] SW unregister failed:', e);
+                }
+            }
+
+            if ('caches' in window) {
+                try {
+                    const keys = await caches.keys();
+                    await Promise.all(keys.map(key => caches.delete(key)));
+                } catch (e) {
+                    console.warn('[CACHE] Cache storage clear failed:', e);
+                }
+            }
             
             // 2. Trigger Real-time Backend Pulse
             await db.clearBackendCache();
             
             db.logNotification('all', 'success', 'Registry Reset', 'Local storage and cloud cache buffers have been synchronized.');
-        } catch (err) {
+            toastSuccess('Personal Cache', 'Personal cache cleared successfully');
+        } catch (err: any) {
             db.logNotification('all', 'error', 'Reset Error', 'Failed to synchronize cache layers.');
+            toastError('Personal Cache', 'Failed to clear cache: ' + err.message);
         } finally {
             setTimeout(() => setIsClearingStorage(false), 800);
         }

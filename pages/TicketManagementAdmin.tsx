@@ -5,7 +5,7 @@ import {
   LifeBuoy, Search, Filter, MessageSquare, Clock, CheckCircle, 
   XCircle, AlertTriangle, User, ArrowRight, ChevronRight, X,
   Send, ShieldAlert, Activity, Hash, Layers, Monitor, HardDrive,
-  Plus, UserPlus, Calendar, ShieldCheck, RotateCw, Trash2
+  Plus, UserPlus, Calendar, ShieldCheck, RotateCw, Trash2, FileText
 } from 'lucide-react';
 import Modal from '../components/shared/Modal';
 
@@ -21,6 +21,20 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
   const [isAddNOCModalOpen, setIsAddNOCModalOpen] = useState(false);
+  const [selectedBulkIds, setSelectedBulkIds] = useState<string[]>([]);
+
+  const toggleBulkSelect = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedBulkIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const handleBulkResolve = async () => {
+    for (const id of selectedBulkIds) {
+      await handleStatusUpdate(id, TicketStatus.RESOLVED);
+    }
+    setSelectedBulkIds([]);
+    db.logNotification('all', 'success', 'Bulk Action Complete', `${selectedBulkIds.length} tickets resolved.`);
+  };
 
   const [nocFormData, setNocFormData] = useState<Partial<NOCEvent>>({
     title: '',
@@ -33,8 +47,14 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
     state.tickets.find(t => t.id === selectedTicketId),
   [state.tickets, selectedTicketId]);
 
+  const currentUser = state.currentUser;
+  const isSuperAdmin = currentUser?.role === Role.SUPER_ADMIN || currentUser?.role === Role.ADMIN;
+
   const filteredTickets = useMemo(() => {
     return state.tickets.filter(t => {
+      // Role-Based Visibility: Dealers/Staff only see tickets explicitly assigned to them or their users
+      if (!isSuperAdmin && t.assignedTo !== currentUser?.email) return false;
+
       const term = searchTerm.toLowerCase().trim();
       const matchesSearch = t.subject.toLowerCase().includes(term) || 
                            t.userName.toLowerCase().includes(term) ||
@@ -53,8 +73,13 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
       }
 
       return matchesSearch && matchesStatus && matchesPriority && matchesAssignee && matchesDate;
+    }).map(t => {
+      // Calculate SLA Breach: If open for > 24 hours
+      const hoursOpen = (new Date().getTime() - new Date(t.createdAt).getTime()) / (1000 * 60 * 60);
+      const isSlaBreached = (t.status === TicketStatus.OPEN || t.status === TicketStatus.IN_PROGRESS) && hoursOpen > 24;
+      return { ...t, isSlaBreached };
     });
-  }, [state.tickets, searchTerm, statusFilter, priorityFilter, assigneeFilter, dateStartFilter, dateEndFilter]);
+  }, [state.tickets, searchTerm, statusFilter, priorityFilter, assigneeFilter, dateStartFilter, dateEndFilter, currentUser, isSuperAdmin]);
 
   const handleStatusUpdate = async (id: string, status: TicketStatus) => {
     await db.updateTicketStatus(id, status);
@@ -179,12 +204,31 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
 
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col min-h-[400px]">
                <div className="p-6 bg-slate-950 border-b border-white/5 flex items-center justify-between">
-                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ticket List</h3>
-                  <span className="text-[9px] font-black text-blue-400 bg-white/5 px-2 py-0.5 rounded uppercase">Live</span>
+                  <div className="flex items-center gap-3">
+                     <input 
+                       type="checkbox" 
+                       className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-500 focus:ring-0"
+                       checked={selectedBulkIds.length > 0 && selectedBulkIds.length === filteredTickets.length}
+                       onChange={(e) => {
+                          if (e.target.checked) setSelectedBulkIds(filteredTickets.map(t => t.id));
+                          else setSelectedBulkIds([]);
+                       }}
+                     />
+                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ticket List</h3>
+                  </div>
+                  {selectedBulkIds.length > 0 ? (
+                     <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-black text-slate-300 uppercase">{selectedBulkIds.length} Selected</span>
+                        <button onClick={handleBulkResolve} className="px-3 py-1.5 bg-green-600 text-white rounded text-[9px] font-black uppercase tracking-widest hover:bg-green-500 transition-all">Resolve</button>
+                     </div>
+                  ) : (
+                     <span className="text-[9px] font-black text-blue-400 bg-white/5 px-2 py-0.5 rounded uppercase">Live</span>
+                  )}
                </div>
                <div className="divide-y divide-slate-100 overflow-y-auto custom-scrollbar flex-1 bg-white">
                   {filteredTickets.map(ticket => {
                     const isHigh = ticket.priority === TicketPriority.HIGH || ticket.priority === TicketPriority.CRITICAL;
+                    const isSlaBreached = (ticket as any).isSlaBreached;
                     return (
                       <div 
                         key={ticket.id}
@@ -193,10 +237,20 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                       >
                          <div className="flex justify-between items-start">
                             <div className="flex items-center gap-3">
+                               <input 
+                                 type="checkbox" 
+                                 className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-0"
+                                 checked={selectedBulkIds.includes(ticket.id)}
+                                 onChange={(e) => toggleBulkSelect(ticket.id, e as any)}
+                                 onClick={e => e.stopPropagation()}
+                               />
                                <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${ticket.status === TicketStatus.OPEN ? 'bg-blue-600' : 'bg-slate-300'}`}></div>
                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{ticket.id}</span>
                             </div>
-                            <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${getPriorityColor(ticket.priority)}`}>{ticket.priority}</span>
+                            <div className="flex items-center gap-2">
+                               {isSlaBreached && <span className="px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-rose-100 text-rose-600 border border-rose-200 flex items-center gap-1"><ShieldAlert size={10} /> SLA Breach</span>}
+                               <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${getPriorityColor(ticket.priority)}`}>{ticket.priority}</span>
+                            </div>
                          </div>
                          <div>
                             <h4 className="font-black text-slate-900 uppercase tracking-tight text-sm leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">{ticket.subject}</h4>
@@ -269,6 +323,32 @@ const TicketManagementAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                     <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm">
                        <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 italic">Customer Description</h4>
                        <p className="text-sm font-bold text-slate-950 leading-relaxed uppercase whitespace-pre-wrap">{selectedTicket.description}</p>
+                       
+                       {/* Attachments Preview */}
+                       {selectedTicket.attachments && selectedTicket.attachments.length > 0 && (
+                          <div className="mt-8 pt-6 border-t border-slate-100">
+                             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <HardDrive size={14} className="text-indigo-500" /> Attached Diagnostics
+                             </h4>
+                             <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                                {selectedTicket.attachments.map((url, idx) => (
+                                   <a 
+                                     key={idx} href={url} target="_blank" rel="noreferrer"
+                                     className="shrink-0 w-32 h-24 bg-slate-100 rounded-xl border border-slate-200 flex items-center justify-center overflow-hidden group/preview relative"
+                                   >
+                                      {url.match(/\.(jpeg|jpg|gif|png)$/) != null ? (
+                                        <img src={url} alt={`attachment-${idx}`} className="w-full h-full object-cover group-hover/preview:scale-110 transition-transform" />
+                                      ) : (
+                                        <FileText size={24} className="text-slate-400" />
+                                      )}
+                                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
+                                         <span className="text-[9px] font-black uppercase text-white tracking-widest">View</span>
+                                      </div>
+                                   </a>
+                                ))}
+                             </div>
+                          </div>
+                       )}
                     </div>
 
                     <div className="space-y-6">

@@ -332,6 +332,7 @@ export interface SupportTicket {
   createdAt: string;
   updatedAt: string;
   closedAt?: string;
+  attachments?: string[];
 }
 
 export interface NOCEvent {
@@ -539,7 +540,6 @@ export interface ISPUser {
   lastKYCUpdate?: string;
   requiredRevisionDocs?: number;
   resellerEmail?: string; // Email of the direct reseller (Franchise/Dealer/SubDealer) who manages this user
-  deleted?: boolean;
   deletedAt?: string;
 }
 
@@ -1466,6 +1466,26 @@ export interface TechnicalKeys {
   cloudinaryUrl?: string;
   upstashRedisUrl?: string;
   upstashRedisToken?: string;
+  paypalClientId?: string;
+  paypalSecret?: string;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+  gmailUser?: string;
+  gmailPass?: string;
+  mikrotikIp?: string;
+  mikrotikPort?: string;
+  mikrotikUser?: string;
+  mikrotikPass?: string;
+  oltIp?: string;
+  oltSnmp?: string;
+  cloudflareToken?: string;
+  cloudflareZone?: string;
+  stripeSecretKey?: string;
+  stripePublishableKey?: string;
+  jazzcashMerchantId?: string;
+  jazzcashPassword?: string;
+  easypaisaStoreId?: string;
+  easypaisaHashKey?: string;
 }
 
 export interface PushConfig {
@@ -1474,6 +1494,7 @@ export interface PushConfig {
   lowSignalAlerts: boolean;
   invoiceAlerts: boolean;
   marketingAlerts: boolean;
+  cloudSyncEnabled?: boolean;
 }
 
 export interface CloudStorageConfig {

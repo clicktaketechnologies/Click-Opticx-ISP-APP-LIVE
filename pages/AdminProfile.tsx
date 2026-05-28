@@ -2,6 +2,7 @@ import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import React, { useState, useRef } from 'react';
 import { AppState, StaffUser } from '../types';
 import { db } from '../db';
+import { useToast } from '../components/shared/Toast';
 import { 
   User, Mail, Lock, Eye, EyeOff, Save, Camera, 
   ShieldCheck, RotateCw, CheckCircle, AlertCircle,
@@ -21,6 +22,10 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const { success: toastSuccess, error: toastError } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!user) return <Mini5GMicroLoader size={40} />;
@@ -65,18 +70,72 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
     if (!user?.email) return;
     setIsSaving(true);
     
+    if (newPassword) {
+      if (!oldPassword) {
+        toastError('Password Change', 'Old password is required to change password.');
+        setIsSaving(false);
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        toastError('Password Change', 'New password and confirm password do not match.');
+        setIsSaving(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${db.getBackendUrl()}/api/auth/change-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ oldPassword, newPassword }),
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+          const errorMsg = result.error || 'NETWORK_ERROR';
+          toastError('Password Change', `${result.message || errorMsg}`);
+          setIsSaving(false);
+          return;
+        }
+
+        toastSuccess('Password Change', 'Password updated successfully. Forcing re-login...');
+        
+        // Reset states
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+
+        setTimeout(() => {
+          localStorage.removeItem('clickopticx_auth_token');
+          localStorage.removeItem('clickopticx_admin_token');
+          localStorage.removeItem('supabase.auth.token');
+          localStorage.removeItem('clickopticx_v16_registry');
+          sessionStorage.clear();
+          if ('caches' in window) {
+            caches.keys().then(names => names.forEach(name => caches.delete(name)));
+          }
+          db.commit({ auth: { isLoggedIn: false }, view: 'login', currentUser: undefined });
+          window.location.reload();
+        }, 1500);
+        return;
+      } catch (err: any) {
+        toastError('Password Change', `NETWORK_ERROR: ${err.message}`);
+        setIsSaving(false);
+        return;
+      }
+    }
+
     // Update the staff record in the database
     await db.updateStaff(user.email, {
       name: formData.name,
-      email: formData.email,
-      password: formData.password
+      email: formData.email
     });
 
     // Update session state if email changed
     if (state.currentUser) {
        state.currentUser.name = formData.name;
        state.currentUser.email = formData.email;
-       state.currentUser.password = formData.password;
     }
 
     setTimeout(() => {
@@ -219,29 +278,64 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
                 </div>
 
                 <div className="space-y-6 pt-8 border-t border-slate-50">
-                   <div className="flex items-center justify-between">
-                      <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><Lock size={14} className="text-rose-500" /> Security Secret</h4>
-                      {isEditing && (
-                         <button 
-                           type="button"
-                           onClick={() => setShowPass(!showPass)}
-                           className="text-[9px] font-black text-blue-600 uppercase tracking-widest"
-                         >
-                            {showPass ? 'Hide Secret' : 'Reveal Secret'}
-                         </button>
-                      )}
-                   </div>
-                   <div className="relative">
-                      <Key className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
-                      <input 
-                        type={showPass ? 'text' : 'password'}
-                        disabled={!isEditing}
-                        placeholder="••••••••"
-                        className={`w-full pl-14 pr-16 py-5 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-xl outline-none transition-all ${isEditing ? 'focus:border-blue-500 focus:bg-white' : 'opacity-60 cursor-not-allowed'}`}
-                        value={formData.password}
-                        onChange={e => setFormData({...formData, password: e.target.value})}
-                      />
-                   </div>
+                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                      <Lock size={14} className="text-rose-500" /> Change Security Secret (Optional)
+                   </h4>
+                   {isEditing ? (
+                      <div className="space-y-4">
+                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Old Password</label>
+                            <div className="relative">
+                               <Key className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                               <input 
+                                 type="password"
+                                 placeholder="Enter current password"
+                                 className="w-full pl-14 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm outline-none focus:border-blue-500 focus:bg-white transition-all"
+                                 value={oldPassword}
+                                 onChange={e => setOldPassword(e.target.value)}
+                               />
+                            </div>
+                         </div>
+                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">New Password</label>
+                            <div className="relative">
+                               <Key className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                               <input 
+                                 type="password"
+                                 placeholder="Enter new password"
+                                 className="w-full pl-14 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm outline-none focus:border-blue-500 focus:bg-white transition-all"
+                                 value={newPassword}
+                                 onChange={e => setNewPassword(e.target.value)}
+                               />
+                            </div>
+                         </div>
+                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 italic">Confirm New Password</label>
+                            <div className="relative">
+                               <Key className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                               <input 
+                                 type="password"
+                                 placeholder="Confirm new password"
+                                 className="w-full pl-14 pr-4 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm outline-none focus:border-blue-500 focus:bg-white transition-all"
+                                 value={confirmPassword}
+                                 onChange={e => setConfirmPassword(e.target.value)}
+                               />
+                            </div>
+                         </div>
+                      </div>
+                   ) : (
+                      <div className="relative">
+                         <Key className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
+                         <input 
+                           type="password"
+                           disabled={true}
+                           placeholder="••••••••"
+                           className="w-full pl-14 pr-16 py-5 bg-slate-50 border-2 border-slate-100 rounded-[2.5rem] font-black text-xl outline-none opacity-60 cursor-not-allowed"
+                           value=""
+                           readOnly
+                         />
+                      </div>
+                   )}
                 </div>
 
                 {isEditing && (

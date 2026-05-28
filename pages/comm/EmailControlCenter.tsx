@@ -359,8 +359,57 @@ const EmailControlCenter: React.FC<Props> = ({ state }) => {
         </div>
       )}
 
-      {/* Pages 3-9: Placeholder logic with premium aesthetics */}
-      {['templates', 'campaigns', 'push', 'audiences', 'logs', 'monitor', 'master'].includes(activeTab) && activeTab !== 'monitor' && activeTab !== 'master' && (
+      {activeTab === 'templates' && (
+        <div className="bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm animate-in slide-in-from-bottom-4">
+            <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter mb-8">Template Engine</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Template Name</label>
+                    <input id="tplName" placeholder="e.g. Welcome Message" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none" />
+                </div>
+                <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Template Type</label>
+                    <select id="tplType" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none">
+                        <option value="email">Email</option>
+                        <option value="sms">SMS</option>
+                    </select>
+                </div>
+                <div className="md:col-span-2 space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Template Body</label>
+                    <textarea id="tplBody" rows={6} placeholder="Hello {{name}}, welcome to our service!" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm outline-none resize-none" />
+                </div>
+                <div className="md:col-span-2 flex justify-end">
+                    <button 
+                       onClick={async () => {
+                           const name = (document.getElementById('tplName') as HTMLInputElement).value;
+                           const type = (document.getElementById('tplType') as HTMLSelectElement).value;
+                           const body = (document.getElementById('tplBody') as HTMLTextAreaElement).value;
+                           if (!name || !body) return alert("Please fill all fields");
+                           try {
+                               const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/templates`, {
+                                   method: 'POST',
+                                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${localStorage.getItem('clickopticx_admin_token')}` },
+                                   body: JSON.stringify({ name, type, body })
+                               });
+                               const data = await res.json();
+                               if (data.success) {
+                                   alert('Template Saved Successfully!');
+                                   (document.getElementById('tplName') as HTMLInputElement).value = '';
+                                   (document.getElementById('tplBody') as HTMLTextAreaElement).value = '';
+                               } else alert(data.message);
+                           } catch (e: any) { alert(e.message); }
+                       }}
+                       className="px-8 py-4 bg-slate-900 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl"
+                    >
+                        Save Template
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
+
+      {/* Pages 4-9: Placeholder logic with premium aesthetics */}
+      {['campaigns', 'push', 'audiences', 'logs', 'monitor', 'master'].includes(activeTab) && activeTab !== 'monitor' && activeTab !== 'master' && (
         <div className="flex flex-col items-center justify-center h-[50vh] animate-in zoom-in-95">
             <div className="w-24 h-24 rounded-3xl bg-blue-500/10 flex items-center justify-center text-blue-500 animate-pulse mb-8">
                 <Command size={48} />

@@ -9,7 +9,18 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
   const [importStatus, setImportStatus] = useState<{success: number, failed: number, errors: string[]} | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
+  const [importLogs, setImportLogs] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+     // Fetch real-time import logs on mount
+     fetch(`${db.backendUrl}/api/import/logs`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('clickopticx_admin_token')}` }
+     }).then(r => r.json()).then(d => {
+        if (d.success && d.data) setImportLogs(d.data);
+     }).catch(() => console.log('Import logs fetch failed.'));
+  }, []);
 
   const processData = async (data: string) => {
     if (!data.trim()) return;
@@ -35,23 +46,17 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
     let fail = 0;
     const errors: string[] = [];
     
+    setProgress({ current: 0, total: rows.length });
+
     for (let idx = 0; idx < rows.length; idx++) {
       const row = rows[idx];
       try {
         const values = parseRow(row);
         if (values.length < 2) continue;
         const userData: any = { 
-          name: '', 
-          phone: '', 
-          address: '', 
-          area: '', 
-          username: '', 
-          password: '', 
-          pppoeId: '', 
-          pppoePass: '',
-          cnic: '',
-          packageId: '',
-          status: 'Active'
+          name: '', phone: '', address: '', area: '', 
+          username: '', password: '', pppoeId: '', pppoePass: '',
+          cnic: '', packageId: '', status: 'Active'
         };
         headers.forEach((h, i) => {
           const val = values[i];
@@ -66,13 +71,11 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
           if (h.match(/pppoepass|pppoe_pass/)) userData.pppoePass = val;
           if (h.match(/cnic|nic|identity_no/)) userData.cnic = val;
           if (h.match(/package|plan|service/)) {
-            // Try to find matching package by name
             const pkg = state.packages.find(p => p.name.toLowerCase().includes(val.toLowerCase()));
             if (pkg) userData.packageId = pkg.id;
           }
         });
         if (!userData.name) throw new Error("Missing customer name");
-        // Ensure username is set if only name is present
         if (!userData.username && userData.name) {
           userData.username = userData.name.toLowerCase().replace(/\s+/g, '.');
         }
@@ -82,11 +85,46 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
         errors.push(`Line ${idx+2}: ${e.message}`);
         fail++;
       }
+      setProgress({ current: idx + 1, total: rows.length });
     }
+
     setImportStatus({ success, failed: fail, errors });
+    
+    // Persist real-time import log history to DB
+    const logEntry = {
+       fileName: fileName || 'Pasted Data',
+       rowsImported: success,
+       failed: fail,
+       status: fail > 0 ? (success === 0 ? 'Failed' : 'Partial') : 'Success',
+       errors: errors.slice(0, 10).join(' | '),
+       timestamp: new Date().toISOString()
+    };
+    
+    try {
+       await fetch(`${db.backendUrl}/api/import/logs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('clickopticx_admin_token')}` },
+          body: JSON.stringify(logEntry)
+       });
+       setImportLogs([logEntry, ...importLogs]);
+    } catch (e) {
+       console.error("Failed to sync import log to cloud.", e);
+    }
+
     setIsProcessing(false);
     setCsvData('');
     db.logNotification('all', 'success', 'Import Complete', `Added ${success} new customers from your list.`);
+  };
+
+  const exportImportHistory = () => {
+      const csvContent = "data:text/csv;charset=utf-8," + "Date,File,Rows Imported,Failed,Status,Errors\n" + 
+        importLogs.map(l => `${new Date(l.timestamp).toLocaleString()},${l.fileName},${l.rowsImported},${l.failed},${l.status},"${l.errors || ''}"`).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `import_history_${new Date().getTime()}.csv`);
+      document.body.appendChild(link);
+      link.click();
   };
 
   return (
@@ -140,6 +178,13 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
           {fileName && <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase">{fileName}</div>}
         </div>
 
+        {isProcessing && progress.total > 0 && (
+          <div className="w-full bg-slate-100 rounded-full h-3 mb-4 overflow-hidden">
+             <div className="bg-blue-600 h-3 rounded-full transition-all duration-300" style={{ width: `${(progress.current / progress.total) * 100}%` }}></div>
+             <p className="text-[10px] text-center font-bold text-slate-500 mt-2 uppercase">Processing {progress.current} of {progress.total} rows</p>
+          </div>
+        )}
+
         <button 
           onClick={() => processData(csvData)}
           disabled={!csvData.trim() || isProcessing}
@@ -151,37 +196,80 @@ const DataImportPage: React.FC<{ state: AppState }> = ({ state }) => {
 
       {importStatus && (
         <div className="space-y-6 animate-in slide-in-from-top-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-green-50 p-8 rounded-[2rem] border border-green-100 flex items-center gap-6">
-              <CheckCircle className="text-green-500" size={40} />
-              <div><p className="text-[10px] font-black uppercase text-green-600">Successfully Added</p><h4 className="text-3xl font-black">{importStatus.success} Customers</h4></div>
-            </div>
-            <div className="bg-red-50 p-8 rounded-[2rem] border border-red-100 flex items-center gap-6">
-              <AlertTriangle className="text-red-500" size={40} />
-              <div><p className="text-[10px] font-black uppercase text-red-600">Failed / Invalid</p><h4 className="text-3xl font-black">{importStatus.failed} Errors</h4></div>
-            </div>
-            <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 flex items-center gap-6">
-              <Info className="text-slate-400" size={40} />
-              <div><p className="text-[10px] font-black uppercase text-slate-500">Skipped Rows</p><h4 className="text-3xl font-black text-slate-400">{importStatus.errors.filter(e => e.includes('Empty')).length} Empty</h4></div>
-            </div>
-          </div>
+           {/* Rest of the success/fail UI ... */}
+           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+             <div className="bg-green-50 p-8 rounded-[2rem] border border-green-100 flex items-center gap-6">
+               <CheckCircle className="text-green-500" size={40} />
+               <div><p className="text-[10px] font-black uppercase text-green-600">Successfully Added</p><h4 className="text-3xl font-black">{importStatus.success} Customers</h4></div>
+             </div>
+             <div className="bg-red-50 p-8 rounded-[2rem] border border-red-100 flex items-center gap-6">
+               <AlertTriangle className="text-red-500" size={40} />
+               <div><p className="text-[10px] font-black uppercase text-red-600">Failed / Invalid</p><h4 className="text-3xl font-black">{importStatus.failed} Errors</h4></div>
+             </div>
+             <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 flex items-center gap-6">
+               <Info className="text-slate-400" size={40} />
+               <div><p className="text-[10px] font-black uppercase text-slate-500">Skipped Rows</p><h4 className="text-3xl font-black text-slate-400">{importStatus.errors.filter(e => e.includes('Empty')).length} Empty</h4></div>
+             </div>
+           </div>
 
-          {importStatus.errors.length > 0 && (
-            <div className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm overflow-hidden">
-               <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 mb-6 flex items-center gap-2">
-                 <AlertTriangle size={16} className="text-red-500" /> Validation Report
-               </h3>
-               <div className="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
-                  {importStatus.errors.map((err, i) => (
-                    <div key={i} className="p-4 bg-slate-50 rounded-2xl border-l-4 border-red-500 flex items-start gap-3">
-                       <XCircle size={14} className="text-red-500 mt-0.5 shrink-0" />
-                       <p className="text-[10px] font-bold text-slate-600 leading-relaxed uppercase">{err}</p>
-                    </div>
-                  ))}
-               </div>
-            </div>
-          )}
+           {importStatus.errors.length > 0 && (
+             <div className="bg-white border border-slate-100 rounded-[2rem] p-8 shadow-sm overflow-hidden">
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-900 mb-6 flex items-center gap-2">
+                  <AlertTriangle size={16} className="text-red-500" /> Validation Report
+                </h3>
+                <div className="max-h-60 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                   {importStatus.errors.map((err, i) => (
+                     <div key={i} className="p-4 bg-slate-50 rounded-2xl border-l-4 border-red-500 flex items-start gap-3">
+                        <XCircle size={14} className="text-red-500 mt-0.5 shrink-0" />
+                        <p className="text-[10px] font-bold text-slate-600 leading-relaxed uppercase">{err}</p>
+                     </div>
+                   ))}
+                </div>
+             </div>
+           )}
         </div>
+      )}
+
+      {/* Import History Logs Table */}
+      {importLogs.length > 0 && (
+          <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden mt-12 animate-in fade-in slide-in-from-bottom-8">
+             <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-3">
+                  <ListChecks size={20} className="text-indigo-500" /> Real-Time Import Logs
+                </h3>
+                <button onClick={exportImportHistory} className="px-5 py-2.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all">
+                   Export CSV
+                </button>
+             </div>
+             <div className="overflow-x-auto">
+                <table className="w-full text-left whitespace-nowrap">
+                   <thead className="bg-white text-[9px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
+                      <tr>
+                         <th className="px-8 py-5">Date / Time</th>
+                         <th className="px-8 py-5">Source File</th>
+                         <th className="px-8 py-5">Imported</th>
+                         <th className="px-8 py-5">Status</th>
+                         <th className="px-8 py-5">Errors Sample</th>
+                      </tr>
+                   </thead>
+                   <tbody className="divide-y divide-slate-50 text-xs font-medium text-slate-600">
+                      {importLogs.map((log, idx) => (
+                         <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                            <td className="px-8 py-5 text-slate-500">{new Date(log.timestamp).toLocaleString()}</td>
+                            <td className="px-8 py-5 font-bold text-slate-800">{log.fileName}</td>
+                            <td className="px-8 py-5 font-mono text-emerald-600">+{log.rowsImported}</td>
+                            <td className="px-8 py-5">
+                               {log.status === 'Success' && <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] font-black uppercase">Success</span>}
+                               {log.status === 'Partial' && <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[9px] font-black uppercase">Partial</span>}
+                               {log.status === 'Failed' && <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-[9px] font-black uppercase">Failed</span>}
+                            </td>
+                            <td className="px-8 py-5 text-rose-500 max-w-xs truncate">{log.errors || '---'}</td>
+                         </tr>
+                      ))}
+                   </tbody>
+                </table>
+             </div>
+          </div>
       )}
     </div>
   );

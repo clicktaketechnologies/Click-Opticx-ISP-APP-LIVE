@@ -7,7 +7,7 @@ import {
   Square, CheckSquare, Layers, AlertTriangle, Key, Cpu, Zap, Calendar, Banknote, Globe, Loader2, XCircle, RotateCw, Lock, LogOut, Eye, UserCircle, Fingerprint, Map as MapIcon, Smartphone, Bell, ListChecks,
   User, Users, Hash, MessageSquare, Package as PackageIcon, LockKeyhole, ArrowRight, MousePointer2, Settings2, Power,
   SearchCode, EyeOff, ExternalLink, ArrowUpRight, ArrowDownLeft,
-  Mail, Wifi, FileText, MoreHorizontal, Play, FileInput, Circle, RefreshCcw, Radio
+  Mail, Wifi, FileText, MoreHorizontal, Play, FileInput, Circle, RefreshCcw, Radio, ClipboardList
 } from 'lucide-react';
 import { db } from '../db';
 import PasswordInput from '../components/shared/PasswordInput';
@@ -118,6 +118,10 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
   const [editUserData, setEditUserData] = useState<Partial<ISPUser>>(initialUserForm);
   const [confirmPassword, setConfirmPassword] = useState('');
   
+  const [isSystemLogsModal, setIsSystemLogsModal] = useState(false);
+  const [systemLogs, setSystemLogs] = useState<any[]>([]);
+  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+
   const activeUsers = useMemo(() => state.users.filter(u => filterType === 'Deleted' ? !!u.deleted : !u.deleted), [state.users, filterType]);
   
   const filteredUsers = useMemo(() => {
@@ -331,7 +335,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
     }
 
     await db.addManualPayment(selectedUserId, collectAmount, selectedMethod);
-    
+
     const updates: any = {};
     if (shouldActivatePkg && selectedPkgId) {
        await db.activatePackage(selectedUserId, selectedPkgId);
@@ -464,6 +468,29 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
 
   const subAreas = ['Block A', 'Block B', 'Block C', 'Sector 1', 'Sector 2', 'Main Market', 'Garden Town', 'Phase 1', 'Phase 2'];
 
+  useEffect(() => {
+    if (isSystemLogsModal) {
+      const fetchLogs = async () => {
+        setIsLoadingLogs(true);
+        try {
+          const res = await fetch(`${db.getBackendUrl()}/api/logs`);
+          if (res.ok) {
+            const data = await res.json();
+            setSystemLogs(data.logs || []);
+          } else {
+             // Fallback if the route is not defined
+             setSystemLogs([{ id: '1', level: 'error', action: 'API_ERROR', details: 'Failed to fetch logs from backend.', created_at: new Date().toISOString() }]);
+          }
+        } catch (error: any) {
+          setSystemLogs([{ id: '1', level: 'error', action: 'NETWORK_ERROR', details: error.message, created_at: new Date().toISOString() }]);
+        } finally {
+          setIsLoadingLogs(false);
+        }
+      };
+      fetchLogs();
+    }
+  }, [isSystemLogsModal]);
+
   return (
     <div className="min-h-screen overflow-y-auto space-y-6 pb-12">
       {/* 1. Header Zone */}
@@ -481,16 +508,11 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
           </button>
           {isAdmin && (
              <button 
-               onClick={handleRepairIntegrity}
-               disabled={isRepairing}
-               className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all shadow-sm border ${
-                 isRepairing 
-                   ? 'bg-slate-50 text-slate-400 border-slate-100' 
-                   : 'bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100'
-               }`}
+               onClick={() => setIsSystemLogsModal(true)}
+               className="flex-1 md:flex-none flex items-center justify-center gap-2 px-3 py-2 rounded-lg font-black text-[9px] uppercase tracking-widest transition-all shadow-sm border bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100"
              >
-               {isRepairing ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
-               <span>{isRepairing ? 'Healing...' : 'Fix Errors'}</span>
+               <ClipboardList size={14} />
+               <span>View System Logs</span>
              </button>
           )}
           <button 
@@ -755,7 +777,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                           <button onClick={() => handleAction(user, 'payment')} className="p-2 bg-emerald-100/50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-emerald-100" title="Collect Payment"><Banknote size={14}/></button>
                           <button onClick={() => handleAction(user, 'unpaid_amount')} className="p-2 bg-pink-100/50 hover:bg-pink-600 text-pink-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-pink-100" title="Amount Unpaid / Partial Payment"><Wallet size={14}/></button>
                           <button onClick={() => handleAction(user, 'emergency_auth')} className="p-2 bg-rose-100/50 hover:bg-rose-600 text-rose-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-rose-100" title="Emergency Auth Reset"><LockKeyhole size={14}/></button>
-                          <button onClick={() => handleAction(user, 'radius')} className="p-2 bg-slate-100/50 hover:bg-slate-900 text-slate-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-slate-100" title="RADIUS Session Control"><Radio size={14}/></button>
+                          <button onClick={() => handleAction(user, 'radius')} className="p-2 bg-slate-100/50 hover:bg-slate-900 text-slate-600 hover:text-white rounded-lg transition-all active:scale-90 shadow-sm border border-slate-100" title="Manage RADIUS Access"><Radio size={14}/></button>
                        </div>
                     </td>
                   </tr>
@@ -781,9 +803,9 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
         scrollable
         footer={
           <div className="flex justify-between items-center w-full">
-             <button onClick={() => setOnboardingStep(Math.max(1, onboardingStep - 1))} className="px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-400 transition-all border border-slate-700 hover:opacity-70 disabled:opacity-30" disabled={onboardingStep === 1}>Go Back</button>
+             <button onClick={() => setOnboardingStep(Math.max(1, onboardingStep - 1))} className="px-5 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest text-slate-700 bg-gray-200 hover:bg-gray-300 transition-all disabled:opacity-30" disabled={onboardingStep === 1}>Go Back</button>
              {onboardingStep < 4 ? (
-               <button onClick={() => setOnboardingStep(onboardingStep + 1)} className="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/30 flex items-center gap-2 transition-all active:scale-95">Next Phase <ChevronRight size={14}/></button>
+               <button onClick={() => setOnboardingStep(onboardingStep + 1)} className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-green-900/30 flex items-center gap-2 transition-all active:scale-95">Next Phase <ChevronRight size={14}/></button>
              ) : (
                <button 
                 onClick={async () => { 
@@ -804,7 +826,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                     alert(res.message);
                   }
                 }} 
-                className="px-6 py-2.5 bg-green-600 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-green-900/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50" 
+                className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-green-900/30 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50" 
                 disabled={isProcessing}
                >
                   {isProcessing ? <Loader2 className="animate-spin" size={14}/> : <ShieldCheck size={14}/>} {isEditUserModal ? 'Update Dossier' : 'Finalize & Register'}
@@ -1758,6 +1780,42 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                </div>
             </div>
          </div>
+      </Modal>
+      {/* SYSTEM LOGS MODAL */}
+      <Modal
+        isOpen={isSystemLogsModal}
+        onClose={() => setIsSystemLogsModal(false)}
+        title="System Audit Logs"
+        icon={<ClipboardList size={24} className="text-indigo-600" />}
+        maxWidth="max-w-5xl"
+        scrollable
+      >
+        <div className="space-y-4 p-4">
+           {isLoadingLogs ? (
+              <div className="py-20 text-center"><Loader2 size={32} className="animate-spin text-indigo-500 mx-auto" /></div>
+           ) : systemLogs.length === 0 ? (
+              <p className="text-center py-20 text-slate-400 font-black uppercase tracking-widest text-[10px]">No recent error logs found.</p>
+           ) : (
+             <div className="space-y-3">
+               {systemLogs.map(log => (
+                 <div key={log.id} className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                       <span className={`px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest ${log.level === 'error' || log.action?.includes('ERROR') ? 'bg-rose-100 text-rose-700' : 'bg-slate-200 text-slate-700'}`}>
+                         {log.action || log.level || 'SYSTEM'}
+                       </span>
+                       <span className="text-[9px] font-bold text-slate-400">{new Date(log.created_at || log.timestamp).toLocaleString()}</span>
+                    </div>
+                    <p className="text-sm font-black text-slate-900">{log.details || log.message}</p>
+                    {(log.metadata || log.stack) && (
+                       <pre className="mt-2 p-3 bg-slate-900 text-emerald-400 text-[10px] rounded-xl overflow-x-auto font-mono">
+                          {JSON.stringify(log.metadata || log.stack, null, 2)}
+                       </pre>
+                    )}
+                 </div>
+               ))}
+             </div>
+           )}
+        </div>
       </Modal>
 
       {/* SUCCESS MODAL */}

@@ -250,7 +250,8 @@ const SystemConfig: React.FC = () => {
                 { label: 'Low Signal (-dBm) Alerts', value: pushConfig.lowSignalAlerts, key: 'lowSignalAlerts' },
                 { label: 'Invoice Generation Alerts', value: pushConfig.invoiceAlerts, key: 'invoiceAlerts' },
                 { label: 'Marketing Auto-Push', value: pushConfig.marketingAlerts, key: 'marketingAlerts' },
-                { label: 'Auto-Expire Reminders', value: pushConfig.autoExpireAlerts, key: 'autoExpireAlerts' }
+                { label: 'Auto-Expire Reminders', value: pushConfig.autoExpireAlerts, key: 'autoExpireAlerts' },
+                { label: 'Cloud Data Residency Sync', value: pushConfig.cloudSyncEnabled || false, key: 'cloudSyncEnabled' }
               ].map((item) => (
                 <button
                   key={item.key}

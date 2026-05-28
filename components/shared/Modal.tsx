@@ -177,7 +177,7 @@ export const Modal: React.FC<ModalProps> = ({
                 <button
                   onClick={onClose}
                   disabled={isLoading}
-                  className="h-10 px-4 py-2 shrink-0 rounded-xl font-bold text-sm text-slate-600 bg-white hover:bg-slate-50 transition-all disabled:opacity-30 border border-slate-200 shadow-sm shadow-slate-100"
+                  className="h-10 px-4 py-2 shrink-0 rounded-xl font-bold text-sm text-slate-700 bg-gray-200 hover:bg-gray-300 transition-all disabled:opacity-30 shadow-sm shadow-slate-100"
                 >
                   {cancelLabel}
                 </button>
@@ -186,15 +186,15 @@ export const Modal: React.FC<ModalProps> = ({
                   disabled={isLoading}
                   className={`h-10 px-4 py-2 shrink-0 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 shadow-xl ${
                     confirmDanger || type === 'danger'
-                      ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-200'
-                      : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
+                      ? 'bg-red-600 hover:bg-red-700 shadow-red-200'
+                      : 'bg-green-600 hover:bg-green-700 shadow-green-200'
                   }`}
                   style={{ opacity: isLoading ? 0.7 : 1 }}
                 >
                   {isLoading ? (
                     <>
                       <Loader2 size={16} className="animate-spin" />
-                      Protocol Syncing...
+                      Processing Request...
                     </>
                   ) : (
                     <>

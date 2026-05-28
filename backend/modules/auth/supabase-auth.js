@@ -11,10 +11,22 @@ export async function signUp({ email, password, phone, metadata }) {
   const supabase = configManager.getSupabaseClient();
   if (!supabase) throw new Error('Supabase client not initialized');
 
+  if (supabase.auth.admin) {
+    const { data, error } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      phone,
+      phone_confirm: !!phone,
+      user_metadata: metadata || {}
+    });
+    if (error) throw error;
+    return data;
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    phone,
     options: {
       data: metadata || {},
     }

@@ -7,6 +7,8 @@
 import configManager from '../../services/config-manager.js';
 import SmtpAdapter from './adapters/smtp-adapter.js';
 import ResendAdapter from './adapters/resend-adapter.js';
+import * as mailgunProvider from './providers/mailgun.js';
+import * as brevoProvider from './providers/brevo.js';
 import logger from '../../utils/logger.js';
 
 class EmailRouter {
@@ -20,8 +22,9 @@ class EmailRouter {
     await this.refreshProviders();
     
     // 1. Listen to Config Manager for generic triggers
+    // Wildcard callback signature is (key, value, old)
     configManager.onConfigChange('*', (key) => {
-      if (key === 'email_providers' || key.includes('email')) {
+      if (typeof key === 'string' && (key === 'email_providers' || key.includes('email'))) {
         this.refreshProviders();
       }
     });
@@ -59,7 +62,10 @@ class EmailRouter {
                 let adapter = null;
                 if (p.id === 'gmail_smtp' || p.id.includes('smtp')) adapter = new SmtpAdapter(p.config);
                 if (p.id === 'resend') adapter = new ResendAdapter(p.config);
-                
+                // Lightweight providers (no init needed — use module directly)
+                if (p.id === 'mailgun') adapter = { send: (opts) => mailgunProvider.send(opts), init: async () => {} };
+                if (p.id === 'brevo')   adapter = { send: (opts) => brevoProvider.send(opts),   init: async () => {} };
+
                 if (adapter) {
                     await adapter.init();
                     this.adapters[p.id] = adapter;
@@ -70,7 +76,7 @@ class EmailRouter {
         }
       }
 
-      console.log(`[EMAIL-ROUTER] Refreshed ${this.providers.length} email providers, ${Object.keys(this.adapters).length} adapters online`);
+      logger.info(`[EMAIL-ROUTER] Refreshed ${this.providers.length} email providers, ${Object.keys(this.adapters).length} adapters online`);
     }
   }
 
@@ -96,12 +102,12 @@ class EmailRouter {
     for (const provider of healthy) {
       // Check daily limit
       if (provider.usage_today >= provider.daily_limit) {
-        console.warn(`[EMAIL-ROUTER] Provider ${provider.name} reached daily limit. Skipping...`);
+        logger.warn(`[EMAIL-ROUTER] Provider ${provider.name} reached daily limit. Skipping...`);
         continue;
       }
 
       try {
-        console.log(`[EMAIL-ROUTER] Dispatching email via: ${provider.name}`);
+        logger.info(`[EMAIL-ROUTER] Dispatching email via: ${provider.name}`);
         
         // Placeholder for actual provider logic (Nodemailer, Resend SDK, etc.)
         const result = await this.executeSendAction(provider, options);
@@ -147,7 +153,7 @@ class EmailRouter {
       email: options.to,
       subject: options.subject,
       provider_used: providerId,
-      status: 'Sent',
+      status: 'Delivered', // Must match migration stats query filter
       template_id: options.templateId || 'manual'
     });
   }

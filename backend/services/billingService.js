@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import configManager from '../services/config-manager.js';
 import { v4 as uuidv4 } from 'uuid';
 import logger from '../utils/logger.js';
 
@@ -17,13 +17,9 @@ export const InvoiceState = {
 
 class BillingService {
   get supabase() {
-    if (!this._supabase) {
-      this._supabase = createClient(
-        process.env.SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY
-      );
-    }
-    return this._supabase;
+    const client = configManager.getSupabaseClient();
+    if (!client) throw new Error('[BILLING] Supabase client not initialized. Ensure configManager.init() has run.');
+    return client;
   }
 
   /**

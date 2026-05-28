@@ -1,4 +1,16 @@
 import winston from 'winston';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import fs from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const logDir = join(__dirname, '../logs');
+
+// Ensure log directory exists
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+}
 
 const logger = winston.createLogger({
     level: process.env.LOG_LEVEL || 'info',
@@ -24,9 +36,9 @@ const logger = winston.createLogger({
             )
         }),
         // Write all logs with level 'error' and below to error.log
-        new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
+        new winston.transports.File({ filename: join(logDir, 'error.log'), level: 'error' }),
         // Write all logs to combined.log
-        new winston.transports.File({ filename: 'logs/combined.log' })
+        new winston.transports.File({ filename: join(logDir, 'combined.log') })
     ]
 });
 

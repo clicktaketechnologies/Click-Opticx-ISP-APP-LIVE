@@ -99,8 +99,13 @@ export async function dispatchNotification({
             }
         }
 
-        // Mode 5: Email Only (Phase 1 Addition)
-        if (notificationMode === 'Email_Only' || (email && !fcmToken && !userPhone)) {
+        // Mode 5: Email Only / implicit email fallback (when no push or SMS channel available)
+        if (notificationMode === 'Email_Only' || (!fcmToken && !userPhone && email)) {
+            if (!email) {
+                report.status = 'Failed';
+                report.error = 'Email_Only mode selected but no email address provided';
+                return report;
+            }
             const res = await emailRouter.sendEmail({
                 to: email,
                 subject: title,

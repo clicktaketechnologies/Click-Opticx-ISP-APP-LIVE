@@ -52,8 +52,8 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           </div>
         )}
       </div>
-      <div className="relative group">
-        <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors pointer-events-none" size={18} />
+      <div className="flex items-center gap-2 bg-[#F8FAFC] border-2 border-slate-100 rounded-2xl focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/10 transition-all px-4 py-1 group">
+        <Lock className="text-slate-400 group-focus-within:text-blue-600 transition-colors shrink-0" size={18} />
         <input
           type={show ? "text" : "password"}
           value={value}
@@ -61,13 +61,12 @@ const PasswordInput: React.FC<PasswordInputProps> = ({
           placeholder={placeholder}
           required={required}
           autoComplete={autoComplete}
-          className="w-full pl-12 pr-14 py-4 bg-[#F8FAFC] border-2 border-slate-100 rounded-2xl outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 transition-all font-medium text-[#0F172A] placeholder:text-slate-400"
-          style={{ paddingLeft: '3.5rem' }}
+          className="flex-1 bg-transparent py-3 outline-none font-medium text-[#0F172A] placeholder:text-slate-400 w-full"
         />
         <button
           type="button"
           onClick={() => setShow(!show)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50/50 rounded-xl transition-all"
+          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50/50 rounded-xl transition-all shrink-0"
         >
           {show ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>

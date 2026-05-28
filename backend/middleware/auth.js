@@ -5,21 +5,32 @@ import configManager from '../services/config-manager.js';
 export const protect = (req, res, next) => {
     let token;
 
+    // 1. Check Authorization: Bearer header (API clients / mobile apps)
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        try {
-            token = req.headers.authorization.split(' ')[1];
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        token = req.headers.authorization.split(' ')[1];
+    }
 
-            req.user = decoded;
-            next();
-        } catch (error) {
-            logger.error(`[AUTH-MIDDLEWARE] Token invalid: ${error.message}`);
-            return res.status(401).json({ success: false, message: 'Not authorized, token failed' });
-        }
+    // 2. Fallback: Read from httpOnly cookie (browser-based sessions after login)
+    if (!token && req.headers.cookie) {
+        const cookies = {};
+        req.headers.cookie.split(';').forEach(c => {
+            const parts = c.split('=');
+            cookies[parts.shift().trim()] = decodeURIComponent(parts.join('='));
+        });
+        token = cookies.accessToken || cookies.access_token;
     }
 
     if (!token) {
         return res.status(401).json({ success: false, message: 'Not authorized, no token' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        req.user = decoded;
+        next();
+    } catch (error) {
+        logger.error(`[AUTH-MIDDLEWARE] Token invalid: ${error.message}`);
+        return res.status(401).json({ success: false, message: 'Not authorized, token failed' });
     }
 };
 
@@ -31,7 +42,9 @@ export const restrictTo = (...roles) => {
             return res.status(403).json({ success: false, message: 'Access denied: Scoped session restricted to User Portal.' });
         }
 
-        if (!roles.includes(req.user.role)) {
+        // SuperAdmin inherently has access to all restricted routes
+        const allowedRoles = [...roles, 'SuperAdmin'];
+        if (!allowedRoles.includes(req.user.role)) {
             return res.status(403).json({ success: false, message: 'Access denied: Insufficient permissions.' });
         }
         next();

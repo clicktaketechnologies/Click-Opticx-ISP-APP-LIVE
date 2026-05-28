@@ -425,6 +425,20 @@ async function processRetryQueue() {
   }
 }
 
+function generateUUID(): string {
+  if (typeof window !== 'undefined' && window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 // ─── Audit Log Mirror ─────────────────────────────────────────────────────────
 /**
  * Call this to mirror audit logs to Supabase in real-time
@@ -440,6 +454,7 @@ export async function mirrorAuditLog(log: {
   if (!dualWriteActive) return;
   try {
     await supabase.from('audit_logs').insert({
+      id: generateUUID(),
       action: log.action,
       user_id: log.userId || null,
       user_name: log.userName || null,
@@ -543,6 +558,7 @@ export async function switchMigrationMode(
 
     // Log the mode switch for audit
     await supabase.from('audit_logs').insert({
+      id: generateUUID(),
       action: `Migration mode switched to: ${mode}`,
       user_id: 'system',
       user_name: 'DB Adapter',

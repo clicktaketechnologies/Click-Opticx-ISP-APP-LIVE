@@ -3,7 +3,7 @@ import {
   Mail, Send, Bell, History, Settings, Zap, 
   ShieldCheck, AlertCircle, CheckCircle2, 
   Clock, Filter, Search, MoreVertical, 
-  Trash2, Copy, ExternalLink, RefreshCcw
+  Trash2, Copy, ExternalLink, RefreshCcw, Smartphone
 } from 'lucide-react';
 import { db } from '../db';
 import { AppState } from '../types';
@@ -39,7 +39,7 @@ const UnifiedCommunication: React.FC<{ state: AppState }> = ({ state }) => {
     const fetchLogs = async () => {
         setIsLoading(true);
         try {
-            const response = await fetch(`${db.backendUrl}/api/communication/logs`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/communication/logs`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}` }
             });
             const res = await response.json();
@@ -51,7 +51,7 @@ const UnifiedCommunication: React.FC<{ state: AppState }> = ({ state }) => {
     const handleSend = async () => {
         setIsSending(true);
         try {
-            const response = await fetch(`${db.backendUrl}/api/communication/send`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/communication/send`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -296,6 +296,76 @@ const UnifiedCommunication: React.FC<{ state: AppState }> = ({ state }) => {
                                         <Mini5GMicroLoader size={40} />
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    )}
+                    {activeTab === 'config' && (
+                        <div className="bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm animate-in slide-in-from-bottom-4">
+                            <div className="flex justify-between items-start mb-10">
+                                <div>
+                                    <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Infrastructure Setup & Testing</h2>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Validate external provider bindings</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="p-8 bg-slate-50 border border-slate-200 rounded-3xl space-y-6 group hover:bg-white transition-all">
+                                    <div className="flex justify-between items-center">
+                                       <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center">
+                                           <Mail size={24} />
+                                       </div>
+                                       <span className="px-3 py-1 bg-green-100 text-green-700 text-[9px] font-black uppercase rounded-lg">Operational</span>
+                                    </div>
+                                    <div>
+                                       <h4 className="font-black uppercase tracking-tight text-slate-900">Email Gateway</h4>
+                                       <p className="text-[10px] font-bold text-slate-400 uppercase">SMTP Node (Port 587)</p>
+                                    </div>
+                                    <button 
+                                       onClick={async () => {
+                                           setIsLoading(true);
+                                           try {
+                                              const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/comm/test-email`, {
+                                                 headers: { Authorization: `Bearer ${localStorage.getItem('clickopticx_admin_token')}`}
+                                              });
+                                              const data = await res.json();
+                                              alert(data.success ? 'SMTP Handshake Successful!' : `Error: ${data.message}`);
+                                          } catch (e: any) { alert(e.message); }
+                                          finally { setIsLoading(false); }
+                                       }}
+                                       className="w-full py-4 bg-slate-200 hover:bg-blue-600 hover:text-white rounded-xl text-[10px] font-black uppercase transition-all"
+                                    >
+                                        Ping Email Gateway
+                                    </button>
+                                </div>
+
+                                <div className="p-8 bg-slate-50 border border-slate-200 rounded-3xl space-y-6 group hover:bg-white transition-all">
+                                    <div className="flex justify-between items-center">
+                                       <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center">
+                                           <Smartphone size={24} />
+                                       </div>
+                                       <span className="px-3 py-1 bg-green-100 text-green-700 text-[9px] font-black uppercase rounded-lg">Operational</span>
+                                    </div>
+                                    <div>
+                                       <h4 className="font-black uppercase tracking-tight text-slate-900">SMS Gateway</h4>
+                                       <p className="text-[10px] font-bold text-slate-400 uppercase">Twilio / Local API</p>
+                                    </div>
+                                    <button 
+                                       onClick={async () => {
+                                           setIsLoading(true);
+                                           try {
+                                              const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/comm/test-sms`, {
+                                                 headers: { Authorization: `Bearer ${localStorage.getItem('clickopticx_admin_token')}`}
+                                              });
+                                              const data = await res.json();
+                                              alert(data.success ? 'SMS Handshake Successful!' : `Error: ${data.message}`);
+                                          } catch (e: any) { alert(e.message); }
+                                          finally { setIsLoading(false); }
+                                       }}
+                                       className="w-full py-4 bg-slate-200 hover:bg-indigo-600 hover:text-white rounded-xl text-[10px] font-black uppercase transition-all"
+                                    >
+                                        Ping SMS Gateway
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     )}
