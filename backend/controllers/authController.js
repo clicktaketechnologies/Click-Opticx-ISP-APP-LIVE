@@ -5,7 +5,7 @@ import logger from '../utils/logger.js';
 import supabaseAuth from '../modules/auth/supabase-auth.js';
 import roleSync from '../modules/auth/role-sync.js';
 import configManager from '../services/config-manager.js';
-import emailWorker from '../modules/email/worker.js';
+import { sendDirectEmail } from '../modules/email/resend-direct.js';
 import argon2 from 'argon2';
 import { z } from 'zod';
 import crypto from 'crypto';
@@ -177,28 +177,39 @@ export const signup = async (req, res) => {
             });
         }
 
-        // 7. Queue Verification Email (non-blocking)
+        // 7. Send Verification OTP Email (Resend API with 3× retry + Gmail SMTP fallback)
         if (email) {
-            // Development Testability Hook
+            // Development Testability Hook — write OTP to file for local testing
             try {
                 fs.writeFileSync(path.join(process.cwd(), 'latest_otp.txt'), otpCode);
                 logger.info(`[TEST-HOOK] Wrote latest signup OTP ${otpCode} to latest_otp.txt`);
             } catch (e) {
-                logger.warn(`[TEST-HOOK] Failed to write OTP: ${e.message}`);
+                logger.warn(`[TEST-HOOK] Failed to write OTP file: ${e.message}`);
             }
 
-            emailWorker.queueEmail({
+            const emailHtml = `
+                <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px;">
+                    <h2 style="color: #0f172a; margin-top: 0;">Welcome to Click Opticx!</h2>
+                    <p style="color: #475569; font-size: 14px; line-height: 1.6;">Thank you for signing up. Please enter the following 6-digit verification code to activate your account:</p>
+                    <div style="font-size: 28px; font-weight: 800; letter-spacing: 6px; padding: 16px; background: #f1f5f9; display: inline-block; border-radius: 12px; margin: 16px 0; color: #000;">${otpCode}</div>
+                    <p style="color: #64748b; font-size: 12px;">This code expires in 10 minutes.</p>
+                </div>
+            `;
+
+            // Direct Resend API (3× exponential retry) → Gmail SMTP fallback
+            const emailResult = await sendDirectEmail({
                 to: email,
                 subject: 'Verify Your Click Opticx Account',
-                html: `
-                    <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px;">
-                        <h2 style="color: #0f172a; margin-top: 0;">Welcome to Click Opticx!</h2>
-                        <p style="color: #475569; font-size: 14px; line-height: 1.6;">Thank you for signing up. Please enter the following 6-digit verification code to activate your account:</p>
-                        <div style="font-size: 28px; font-weight: 800; letter-spacing: 6px; padding: 16px; background: #f1f5f9; display: inline-block; border-radius: 12px; margin: 16px 0; color: #000;">${otpCode}</div>
-                        <p style="color: #64748b; font-size: 12px;">This code expires in 10 minutes.</p>
-                    </div>
-                `
-            }).catch(emailErr => logger.warn(`[SIGNUP] Verification email queueing failed: ${emailErr.message}`));
+                html: emailHtml,
+                type: 'otp'
+            });
+
+            if (emailResult.success) {
+                logger.info(`[SIGNUP] OTP email delivered | to=${email} | provider=${emailResult.provider} | msgId=${emailResult.messageId}`);
+            } else {
+                logger.error(`[SIGNUP] OTP email FAILED to deliver | to=${email} | error=${emailResult.error}`);
+                // Registration still succeeds — user can request resend
+            }
         }
 
         // 8. Firebase Mirror (Only if enabled)
@@ -576,11 +587,53 @@ export const forgotPassword = async (req, res) => {
         }
 
         if (user) {
-            // Trigger Supabase Auth Magic Link!
-            await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password`
+            // Generate link manually to allow custom SMTP fallback (guaranteed delivery)
+            const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
+                type: 'recovery',
+                email: email,
+                options: {
+                    redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/reset-password`
+                }
             });
-            logger.info(`[FORGOT-PASSWORD] Password reset Magic Link dispatched via Supabase to ${email}`);
+
+            if (linkError) {
+                logger.error(`[FORGOT-PASSWORD] Generate link failed: ${linkError.message}`);
+                // fallback to default reset
+                await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/reset-password`
+                });
+                logger.info(`[FORGOT-PASSWORD] Password reset Magic Link dispatched via Supabase to ${email}`);
+            } else {
+                const actionLink = linkData.properties.action_link;
+                // Send email manually
+                const emailHtml = `
+                    <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px;">
+                        <h2 style="color: #0f172a; margin-top: 0;">Password Reset Request</h2>
+                        <p style="color: #475569; font-size: 14px; line-height: 1.6;">Click the button below to reset your password:</p>
+                        <a href="${actionLink}" style="display: inline-block; padding: 12px 24px; background: #ea580c; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 16px 0;">Reset Password</a>
+                        <p style="color: #64748b; font-size: 12px;">If you didn't request this, you can safely ignore this email.</p>
+                    </div>
+                `;
+
+                // Send via Resend (3× retry) → Gmail SMTP fallback
+                const resetEmailResult = await sendDirectEmail({
+                    to: email,
+                    subject: 'Reset Your Click Opticx Password',
+                    html: emailHtml,
+                    type: 'password_reset'
+                });
+
+                if (resetEmailResult.success) {
+                    logger.info(`[FORGOT-PASSWORD] Reset email delivered | to=${email} | provider=${resetEmailResult.provider} | msgId=${resetEmailResult.messageId}`);
+                } else {
+                    logger.error(`[FORGOT-PASSWORD] Reset email failed | to=${email} | error=${resetEmailResult.error}`);
+                    // Final fallback: Supabase built-in delivery
+                    await supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/reset-password`
+                    });
+                    logger.info(`[FORGOT-PASSWORD] Supabase fallback reset dispatched to ${email}`);
+                }
+            }
         }
 
         res.json({ success: true, message: 'If an account exists with this email, a reset link has been sent.' });

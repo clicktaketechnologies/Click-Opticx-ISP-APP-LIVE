@@ -1,4 +1,4 @@
-const CACHE_VERSION = '9.6.1';
+const CACHE_VERSION = '9.6.3';
 const CACHE_NAME = 'click-opticx-v' + CACHE_VERSION;
 const OFFLINE_URL = '/offline.html';
 

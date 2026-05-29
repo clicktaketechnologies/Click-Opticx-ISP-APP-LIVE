@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Click Opticx ISP System v9.5.4 - Live</title>
+    <title>Click Opticx ISP System v9.6.2 - Live</title>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <script>
         // Force refresh on version mismatch - DATA SAFE MODE
-        const LATEST_VERSION = 'v9.6.1-LIVE';
+        const LATEST_VERSION = 'v9.6.3-LIVE';
         if (localStorage.getItem('app_deployment_v') !== LATEST_VERSION) {
             // Targeted cleanup: Remove UI/Layout state but PRESERVE the core registry
             Object.keys(localStorage).forEach(key => {
@@ -19,7 +19,27 @@
                 }
             });
             localStorage.setItem('app_deployment_v', LATEST_VERSION);
-            window.location.reload(true);
+            
+            // Clear service workers aggressively
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    for(let registration of registrations) {
+                        registration.unregister();
+                    }
+                });
+            }
+            
+            // Clear all caches aggressively
+            if ('caches' in window) {
+                caches.keys().then((names) => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                });
+            }
+
+            // Force hard reload with cache-busting query param
+            window.location.href = window.location.pathname + '?v=' + new Date().getTime();
         }
     </script>
     <link rel="icon" type="image/png" href="/favicon.png">

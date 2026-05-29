@@ -38,6 +38,7 @@ import adminRoutes from './routes/admin.js';
 import packageRoutes from './routes/packages.js';
 import speedtestRoutes from './routes/speedtest.js';
 import nasRoutes from './routes/nas.js';
+import emailStatusRoutes from './routes/email-status.js';
 
 
 
@@ -150,6 +151,7 @@ apiV1.use('/admin', adminRoutes);
 apiV1.use('/packages', packageRoutes);
 apiV1.use('/speedtest', speedtestRoutes);
 apiV1.use('/nas', nasRoutes);
+apiV1.use('/email', emailStatusRoutes);
 
 
 

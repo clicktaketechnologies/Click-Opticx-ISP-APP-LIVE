@@ -65,26 +65,30 @@ async function checkDualWriteFlag() {
       .from('system_configs')
       .select('value')
       .eq('key', 'migration_control')
-      .single();
+      .maybeSingle();
 
     if (data?.value) {
       applyMigrationConfig(data.value);
     }
 
     // Subscribe to live config changes
-    supabase
-      .channel('migration_control_watch')
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'system_configs',
-        filter: `key=eq.migration_control`,
-      }, (payload: any) => {
-        if (payload.new?.value) {
-          applyMigrationConfig(payload.new.value);
-        }
-      })
-      .subscribe();
+    const channelName = 'migration_control_watch';
+    const channels = supabase.getChannels();
+    if (!channels.some(c => c.topic === `realtime:${channelName}`)) {
+      supabase
+        .channel(channelName)
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'system_configs',
+          filter: `key=eq.migration_control`,
+        }, (payload: any) => {
+          if (payload.new?.value) {
+            applyMigrationConfig(payload.new.value);
+          }
+        })
+        .subscribe();
+    }
   } catch (e) {
     console.warn('[DB-ADAPTER] Could not fetch migration config, defaulting to firebase_only:', e);
   }

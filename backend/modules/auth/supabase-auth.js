@@ -52,7 +52,7 @@ export async function resetPassword(email) {
   if (!supabase) throw new Error('Supabase client not initialized');
 
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/recovery`,
+    redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/recovery`,
   });
 
   if (error) throw error;

@@ -12,12 +12,68 @@ services:
         value: 5000
       - key: NODE_ENV
         value: production
+
+      # ─── CORS / URLs ────────────────────────────────────────────────────────
       - key: ALLOWED_ORIGINS
         value: "https://isp-click-opticx.web.app,https://isp-click-opticx.firebaseapp.com,https://click-opticx-isp-app-live.onrender.com,http://localhost:3000,http://localhost:5173"
+      - key: FRONTEND_URL
+        value: "https://isp-click-opticx.web.app"
+
+      # ─── Security ───────────────────────────────────────────────────────────
+      - key: JWT_SECRET
+        sync: false   # Set manually in Render dashboard — DO NOT auto-generate (breaks sessions)
+
+      # ─── Supabase ───────────────────────────────────────────────────────────
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # ─── Email Providers ────────────────────────────────────────────────────
+      - key: RESEND_API_KEY
+        sync: false   # Required — primary delivery path
+      - key: RESEND_FROM_DOMAIN
+        value: "clickopticx.com"
+      - key: EMAIL_FROM_NAME
+        value: "Click Opticx"
+      - key: EMAIL_FROM_ADDRESS
+        value: "no-reply@clickopticx.com"
+      - key: GMAIL_USER
+        sync: false   # Fallback SMTP user
+      - key: GMAIL_APP_PASSWORD
+        sync: false   # Fallback SMTP app password
+
+      # ─── Firebase Admin ─────────────────────────────────────────────────────
       - key: FIREBASE_SERVICE_ACCOUNT
         sync: false
-      - key: JWT_SECRET
-        generateValue: true
-      - key: REDIS_URL
-        sync: false # Optional, will fallback to memory if not provided
+      - key: FIREBASE_MODE
+        value: "readonly"
 
+      # ─── Redis / Queue ──────────────────────────────────────────────────────
+      # Upstash HTTP REST API (works on Render free tier, no TCP Redis needed)
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      # Legacy BullMQ TCP (optional — omit on Render free tier)
+      - key: REDIS_HOST
+        sync: false
+        # value: leave blank — in-memory queue fallback will be used
+
+      # ─── Cloudinary ─────────────────────────────────────────────────────────
+      - key: CLOUDINARY_CLOUD_NAME
+        value: "dzzuvb4fg"
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # ─── Other ──────────────────────────────────────────────────────────────
+      - key: UNDICI_NO_HTTP2
+        value: "1"
+      - key: PRIMARY_SOURCE
+        value: "supabase"
+      - key: DUAL_WRITE_ENABLED
+        value: "false"
