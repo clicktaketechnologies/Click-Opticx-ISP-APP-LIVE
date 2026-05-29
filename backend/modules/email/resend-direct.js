@@ -31,12 +31,44 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+let _supabase = null;
+async function getSupabase() {
+  if (_supabase) return _supabase;
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) return null;
+  try {
+    const { createClient } = await import('@supabase/supabase-js');
+    _supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    return _supabase;
+  } catch {
+    return null;
+  }
+}
+
+async function getProviderStatus(providerId) {
+    const sb = await getSupabase();
+    if (!sb) return true;
+    try {
+        const { data } = await sb.from('email_providers').select('enabled').eq('id', providerId).single();
+        if (data) return data.enabled;
+    } catch(e) {
+        // ignore
+    }
+    return true; // Default to enabled if error
+}
+
 /**
  * Send an email directly via Resend REST API with retry.
  * @param {{ to: string, subject: string, html: string, type?: string }} opts
  * @returns {Promise<{ success: boolean, messageId?: string, error?: string, provider: string }>}
  */
 export async function sendDirectEmail({ to, subject, html, type = 'transactional' }) {
+  const isResendEnabled = await getProviderStatus('resend');
+  
+  if (!isResendEnabled) {
+      logger.info(`[RESEND-DIRECT] Resend provider is disabled by admin. Skipping direct Resend path.`);
+      return await sendViaGmailFallback({ to, subject, html, type, lastError: 'Provider disabled in admin' });
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
@@ -97,6 +129,13 @@ export async function sendDirectEmail({ to, subject, html, type = 'transactional
  * Gmail SMTP last-resort fallback (nodemailer)
  */
 async function sendViaGmailFallback({ to, subject, html, type, lastError }) {
+  const isGmailEnabled = await getProviderStatus('gmail_smtp');
+  if (!isGmailEnabled) {
+      const msg = `All primary delivery paths failed (or disabled). Gmail SMTP fallback is also disabled by admin.`;
+      logger.error(`[GMAIL-FALLBACK] ${msg}`);
+      await logEmailAttempt({ to, type, status: 'failed', error: msg, provider: 'none' });
+      return { success: false, error: msg, provider: 'none' };
+  }
   const gmailUser = process.env.GMAIL_USER;
   const gmailPass = process.env.GMAIL_APP_PASSWORD;
 

@@ -246,7 +246,29 @@ const EmailControlCenter: React.FC<Props> = ({ state }) => {
                                 </div>
                             </div>
                             <div className="flex flex-col items-end gap-3">
-                                <button className={`w-12 h-6 rounded-full relative p-1 transition-all ${p.enabled ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : 'bg-slate-200'}`}>
+                                <button 
+                                    onClick={async () => {
+                                        try {
+                                            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/v2/providers/${p.id}`, {
+                                                method: 'PATCH',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'Authorization': `Bearer ${localStorage.getItem('clickopticx_admin_token')}`
+                                                },
+                                                body: JSON.stringify({ enabled: !p.enabled })
+                                            });
+                                            if (res.ok) {
+                                                fetchProviders();
+                                            } else {
+                                                const data = await res.json();
+                                                alert(`Failed to update provider: ${data.error || data.message || 'Unknown error'}`);
+                                            }
+                                        } catch (e: any) {
+                                            alert(`Error updating provider: ${e.message}`);
+                                        }
+                                    }}
+                                    className={`w-12 h-6 rounded-full relative p-1 transition-all ${p.enabled ? 'bg-emerald-500 shadow-lg shadow-emerald-200' : 'bg-slate-200'}`}
+                                >
                                     <div className={`w-4 h-4 bg-white rounded-full absolute transition-all ${p.enabled ? 'right-1' : 'left-1'}`}></div>
                                 </button>
                                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{p.enabled ? 'Operational' : 'Hibernating'}</span>
