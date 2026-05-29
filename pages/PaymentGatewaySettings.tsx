@@ -1,22 +1,27 @@
 import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 import { Modal } from '../components/shared/Modal';
+import { useToast } from '../components/shared/Toast';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { AppState, PaymentGateway, Role } from '../types';
 import { db } from '../db';
 import {
    CreditCard, ShieldCheck, Globe, Smartphone, Banknote,
    Settings2, RotateCw, Save, X, Eye, EyeOff, Trash2,
    Landmark, Zap, ShieldAlert, CheckCircle, Info, ChevronRight,
-   HelpCircle, AlertTriangle, ExternalLink, Play, Activity, Server
+   HelpCircle, AlertTriangle, ExternalLink, Play, Activity, Server,
+   Copy, Webhook, Wifi, WifiOff, Loader2
 } from 'lucide-react';
 
 const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
+   const { success: toastSuccess, error: toastError, info: toastInfo } = useToast();
    const [activeTab, setActiveTab] = useState<'all' | 'online' | 'wallet' | 'offline'>('all');
    const [selectedGateway, setSelectedGateway] = useState<PaymentGateway | null>(null);
    const [isConfigOpen, setIsConfigOpen] = useState(false);
    const [showSecrets, setShowSecrets] = useState(false);
    const [isSaving, setIsSaving] = useState(false);
+   const [isTesting, setIsTesting] = useState(false);
+   const [testResult, setTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
 
    const currentUserRole = state.currentUser?.role || Role.VIEWER;
    const canEdit = [Role.SUPER_ADMIN, Role.FINANCE_ADMIN].includes(currentUserRole as Role);
@@ -35,13 +40,69 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
 
    const handleSaveConfig = async () => {
       if (!selectedGateway || !canEdit) return;
+      // Validate required config fields before saving
+      const emptyKeys = Object.entries(selectedGateway.config)
+         .filter(([k, v]) => !v && !k.toLowerCase().includes('optional'))
+         .map(([k]) => k);
+      if (emptyKeys.length > 0 && selectedGateway.type !== 'offline') {
+         toastError(`Missing required fields: ${emptyKeys.join(', ')}`);
+         return;
+      }
       setIsSaving(true);
-      await db.updateGatewayConfig(selectedGateway.id, selectedGateway);
-      setTimeout(() => {
-         setIsSaving(false);
-         setIsConfigOpen(false);
+      try {
+         await db.updateGatewayConfig(selectedGateway.id, selectedGateway);
          db.logNotification('all', 'success', 'Config Synchronized', `${selectedGateway.name} Connection Parameters updated.`);
-      }, 600);
+         toastSuccess(`${selectedGateway.name} configuration saved successfully.`);
+         setIsConfigOpen(false);
+      } catch (e: any) {
+         toastError(`Save failed: ${e.message}`);
+      } finally {
+         setIsSaving(false);
+      }
+   };
+
+   const handleTestConnection = useCallback(async () => {
+      if (!selectedGateway) return;
+      setIsTesting(true);
+      setTestResult(null);
+      try {
+         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment/test-gateway`, {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+               Authorization: `Bearer ${localStorage.getItem('clickopticx_admin_token')}`,
+            },
+            body: JSON.stringify({
+               gatewayId: selectedGateway.id,
+               config: selectedGateway.config,
+               sandbox: selectedGateway.sandbox,
+            }),
+         });
+         const data = await res.json();
+         if (data.success) {
+            setTestResult({ ok: true, msg: data.message || 'Connection pulse successful — gateway is reachable.' });
+            toastSuccess(`${selectedGateway.name}: Gateway reachable ✓`);
+         } else {
+            setTestResult({ ok: false, msg: data.message || 'Gateway rejected the connection pulse.' });
+            toastError(`${selectedGateway.name}: ${data.message}`);
+         }
+      } catch (e: any) {
+         setTestResult({ ok: false, msg: `Network error: ${e.message}` });
+         toastError(`Connection test failed: ${e.message}`);
+      } finally {
+         setIsTesting(false);
+      }
+   }, [selectedGateway, toastSuccess, toastError]);
+
+   const getWebhookUrl = (gatewayId: string) => {
+      const base = import.meta.env.VITE_BACKEND_URL || 'https://your-backend.com';
+      return `${base}/api/webhooks/${gatewayId}`;
+   };
+
+   const copyWebhookUrl = (gatewayId: string) => {
+      navigator.clipboard.writeText(getWebhookUrl(gatewayId))
+         .then(() => toastSuccess('Webhook URL copied to clipboard.'))
+         .catch(() => toastError('Failed to copy — please copy manually.'));
    };
 
    const getGatewayIcon = (id: string) => {
@@ -166,7 +227,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
          {/* Configuration Modal */}
          <Modal
            isOpen={isConfigOpen && !!selectedGateway}
-           onClose={() => setIsConfigOpen(false)}
+           onClose={() => { setIsConfigOpen(false); setTestResult(null); }}
            title={selectedGateway ? `${selectedGateway.name} Configuration` : 'Configuration'}
            type="form"
            icon={selectedGateway ? getGatewayIcon(selectedGateway.id) : undefined}
@@ -249,14 +310,56 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                    )}
                  </div>
                </div>
+               {/* Webhook URL Panel */}
+               {selectedGateway.type !== 'offline' && (
+                 <div className="p-4 bg-slate-800 rounded-2xl space-y-2 border border-slate-700">
+                   <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                     <Webhook size={12} className="text-blue-400" /> Webhook Endpoint URL
+                   </label>
+                   <div className="flex items-center gap-2">
+                     <code className="flex-1 text-[10px] font-mono text-green-400 bg-black/30 px-3 py-2 rounded-lg truncate">
+                       {getWebhookUrl(selectedGateway.id)}
+                     </code>
+                     <button
+                       onClick={() => copyWebhookUrl(selectedGateway!.id)}
+                       className="p-2 bg-slate-700 hover:bg-blue-600 text-slate-300 hover:text-white rounded-lg transition-all"
+                       title="Copy webhook URL"
+                     >
+                       <Copy size={14} />
+                     </button>
+                   </div>
+                   <p className="text-[9px] text-slate-500 font-bold uppercase">Register this URL in your gateway's dashboard to receive payment notifications.</p>
+                 </div>
+               )}
+
+               {/* Test Result Banner */}
+               {testResult && (
+                 <div className={`flex items-start gap-3 p-4 rounded-2xl border ${
+                   testResult.ok
+                     ? 'bg-emerald-900/20 border-emerald-700 text-emerald-400'
+                     : 'bg-rose-900/20 border-rose-700 text-rose-400'
+                 }`}>
+                   {testResult.ok ? <Wifi size={16} className="mt-0.5 shrink-0" /> : <WifiOff size={16} className="mt-0.5 shrink-0" />}
+                   <p className="text-[10px] font-bold uppercase tracking-wide">{testResult.msg}</p>
+                 </div>
+               )}
+
                <div className="pt-4 border-t border-white/5 flex gap-3">
-                 <button className="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
-                   <Play size={12}/> Test Connection Pulse
-                 </button>
-                 <button className="flex-1 py-3 bg-slate-800/50 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest cursor-not-allowed flex items-center justify-center gap-2">
-                   <ExternalLink size={12}/> Documentation API
-                 </button>
-               </div>
+                  <button
+                    onClick={handleTestConnection}
+                    disabled={isTesting}
+                    className="flex-1 py-3 bg-slate-800 text-slate-300 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-700 hover:text-white transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {isTesting ? <Loader2 size={12} className="animate-spin" /> : <Play size={12}/>}
+                    {isTesting ? 'Testing...' : 'Test Connection Pulse'}
+                  </button>
+                  <button
+                    onClick={() => window.open(`https://docs.${selectedGateway.id}.com`, '_blank')}
+                    className="flex-1 py-3 bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2"
+                  >
+                    <ExternalLink size={12}/> Documentation API
+                  </button>
+                </div>
              </div>
            )}
          </Modal>

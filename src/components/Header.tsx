@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { AppState, Role } from '../../types';
 import { db } from '../../db';
+import { useTheme } from 'next-themes';
 
 interface HeaderProps {
   user: { id?: string; email: string; role: Role; name: string; profileImage?: string };
@@ -24,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [theme, setTheme] = useState(() => localStorage.getItem('clickopticx_theme') || 'light');
+  const { theme, setTheme } = useTheme();
   
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -53,11 +54,7 @@ const Header: React.FC<HeaderProps> = ({
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    if (newTheme === 'dark') document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
-    localStorage.setItem('clickopticx_theme', newTheme);
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   const getNotifIcon = (type: string) => {

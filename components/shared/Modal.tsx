@@ -76,29 +76,83 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const handleConfirm = useCallback(async () => {
     if (onConfirm) await onConfirm();
   }, [onConfirm]);
 
-  // ESC key to close
+  // ESC key to close - allow even during loading for safety
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !isLoading) onClose();
+      if (e.key === 'Escape') {
+        // Allow ESC during loading only if we can show a confirmation
+        if (!isLoading) {
+          onClose();
+        }
+      }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [isOpen, isLoading, onClose]);
 
-  // Lock body scroll
+  // Focus trap implementation
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+    if (!isOpen) return;
+
+    // Save previously focused element
+    previousFocusRef.current = document.activeElement as HTMLElement;
+
+    // Focus the first focusable element in the modal
+    const focusableElements = modalRef.current?.querySelectorAll(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusableElements && focusableElements.length > 0) {
+      (focusableElements[0] as HTMLElement).focus();
+    } else if (modalRef.current) {
+      modalRef.current.focus();
     }
-    return () => { document.body.style.overflow = ''; };
+
+    // Trap focus within modal
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+
+      const focusable = modalRef.current?.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+
+      if (!focusable || focusable.length === 0) return;
+
+      const firstElement = focusable[0] as HTMLElement;
+      const lastElement = focusable[focusable.length - 1] as HTMLElement;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleTabKey);
+
+    // Lock body scroll
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', handleTabKey);
+      document.body.style.overflow = '';
+      // Restore focus to previously focused element
+      if (previousFocusRef.current) {
+        previousFocusRef.current.focus();
+      }
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -116,13 +170,16 @@ export const Modal: React.FC<ModalProps> = ({
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-[9000] flex items-center justify-center p-4 transition-all duration-300"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 transition-all duration-300"
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(6px)' }}
     >
       <div
         ref={modalRef}
-        data-modal="true"
-        className={`modal relative w-full ${maxWidth} rounded-[2rem] flex flex-col shadow-2xl transition-all duration-200 overflow-hidden bg-white border border-slate-100`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        tabIndex={-1}
+        className={`modal relative w-full mx-4 ${maxWidth} rounded-[2rem] flex flex-col shadow-2xl transition-all duration-200 overflow-hidden bg-white border border-slate-100 outline-none`}
         style={{
           animation: 'modalIn 0.2s ease-out',
           maxHeight: 'calc(100vh - 2rem)'
@@ -136,7 +193,7 @@ export const Modal: React.FC<ModalProps> = ({
             <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 shadow-sm">
               {displayIcon}
             </div>
-            <h2 className="text-sm font-black uppercase tracking-widest text-slate-900 leading-tight">
+            <h2 id="modal-title" className="text-sm font-black uppercase tracking-widest text-slate-900 leading-tight">
               {title}
             </h2>
           </div>

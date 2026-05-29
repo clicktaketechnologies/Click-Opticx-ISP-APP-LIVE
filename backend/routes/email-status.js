@@ -14,6 +14,7 @@ import express from 'express';
 import { Resend } from 'resend';
 import { getQueueMetrics } from '../modules/email/queue.js';
 import logger from '../utils/logger.js';
+import { protect, restrictTo } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -108,6 +109,110 @@ router.get('/status', async (req, res) => {
   const statusCode = report.overall === 'down' ? 503 : 200;
   logger.info(`[EMAIL-STATUS] Health check: ${report.overall} (${report.latency_ms}ms)`);
   res.status(statusCode).json({ success: report.overall !== 'down', ...report });
+});
+
+// ── Resend Domains Management (Admin Only) ───────────────────────────────────
+
+// GET /domains - List all Resend domains
+router.get('/domains', protect, restrictTo('Admin'), async (req, res) => {
+  try {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({ success: false, error: 'RESEND_API_KEY is not configured on the server' });
+    }
+    const resend = new Resend(apiKey);
+    const { data, error } = await resend.domains.list();
+    if (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+    res.json({ success: true, domains: data?.data || [] });
+  } catch (err) {
+    logger.error(`[EMAIL] Failed to list Resend domains: ${err.message}`);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /domains/:id - Retrieve domain details (including DNS records)
+router.get('/domains/:id', protect, restrictTo('Admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({ success: false, error: 'RESEND_API_KEY is not configured on the server' });
+    }
+    const resend = new Resend(apiKey);
+    const { data, error } = await resend.domains.get(id);
+    if (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+    res.json({ success: true, domain: data });
+  } catch (err) {
+    logger.error(`[EMAIL] Failed to get Resend domain: ${err.message}`);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /domains - Create a new Resend domain
+router.post('/domains', protect, restrictTo('Admin'), async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ success: false, error: 'Domain name is required' });
+    }
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({ success: false, error: 'RESEND_API_KEY is not configured on the server' });
+    }
+    const resend = new Resend(apiKey);
+    const { data, error } = await resend.domains.create({ name });
+    if (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+    res.json({ success: true, domain: data });
+  } catch (err) {
+    logger.error(`[EMAIL] Failed to create Resend domain: ${err.message}`);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /domains/:id/verify - Verify DNS records for a domain
+router.post('/domains/:id/verify', protect, restrictTo('Admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({ success: false, error: 'RESEND_API_KEY is not configured on the server' });
+    }
+    const resend = new Resend(apiKey);
+    const { data, error } = await resend.domains.verify(id);
+    if (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+    res.json({ success: true, data });
+  } catch (err) {
+    logger.error(`[EMAIL] Failed to verify Resend domain: ${err.message}`);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /domains/:id - Remove a Resend domain
+router.delete('/domains/:id', protect, restrictTo('Admin'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({ success: false, error: 'RESEND_API_KEY is not configured on the server' });
+    }
+    const resend = new Resend(apiKey);
+    const { data, error } = await resend.domains.remove(id);
+    if (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+    res.json({ success: true, message: 'Domain removed successfully', data });
+  } catch (err) {
+    logger.error(`[EMAIL] Failed to delete Resend domain: ${err.message}`);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 export default router;

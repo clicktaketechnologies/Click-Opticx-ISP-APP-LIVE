@@ -32,6 +32,12 @@ const EmailControlCenter: React.FC<Props> = ({ state }) => {
   const [providers, setProviders] = useState<EmailProvider[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Resend Domains State
+  const [domains, setDomains] = useState<any[]>([]);
+  const [domainsLoading, setDomainsLoading] = useState(false);
+  const [newDomainName, setNewDomainName] = useState('');
+  const [selectedDomain, setSelectedDomain] = useState<any>(null);
+
   // ─── Data Fetching ──────────────────────────────────────────────────────────
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -57,16 +63,123 @@ const EmailControlCenter: React.FC<Props> = ({ state }) => {
     } catch (e) {}
   };
 
+  const fetchDomains = async () => {
+    setDomainsLoading(true);
+    try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/domains`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('clickopticx_admin_token')}`
+            }
+        });
+        const data = await res.json();
+        if (data.success) {
+            setDomains(data.domains || []);
+        }
+    } catch (e) {
+        console.error('Failed to fetch domains', e);
+    } finally {
+        setDomainsLoading(false);
+    }
+  };
+
+  const handleSelectDomain = async (id: string) => {
+    try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/domains/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('clickopticx_admin_token')}`
+            }
+        });
+        const data = await res.json();
+        if (data.success) {
+            setSelectedDomain(data.domain);
+        } else {
+            alert(data.error || 'Failed to fetch domain details');
+        }
+    } catch (e: any) {
+        alert(e.message);
+    }
+  };
+
+  const handleAddDomain = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDomainName) return;
+    try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/domains`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('clickopticx_admin_token')}`
+            },
+            body: JSON.stringify({ name: newDomainName })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setNewDomainName('');
+            fetchDomains();
+            alert('Domain added successfully! DNS records generated.');
+        } else {
+            alert(data.error || 'Failed to add domain');
+        }
+    } catch (err: any) {
+        alert(err.message);
+    }
+  };
+
+  const handleVerifyDomain = async (id: string) => {
+    try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/domains/${id}/verify`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('clickopticx_admin_token')}`
+            }
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert('Verification triggered successfully!');
+            fetchDomains();
+        } else {
+            alert(data.error || 'Failed to trigger verification');
+        }
+    } catch (err: any) {
+        alert(err.message);
+    }
+  };
+
+  const handleRemoveDomain = async (id: string) => {
+    if (!confirm('Are you sure you want to remove this domain from Resend?')) return;
+    try {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/email/domains/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('clickopticx_admin_token')}`
+            }
+        });
+        const data = await res.json();
+        if (data.success) {
+            setSelectedDomain(null);
+            fetchDomains();
+            alert('Domain removed successfully.');
+        } else {
+            alert(data.error || 'Failed to remove domain');
+        }
+    } catch (err: any) {
+        alert(err.message);
+    }
+  };
+
   useEffect(() => {
     fetchDashboardData();
     fetchProviders();
+    fetchDomains();
   }, []);
 
   // ─── Tabs Configuration ───────────────────────────────────────────────────────
   const tabs = [
+    { id: 'monitor', label: 'Monitor', icon: Activity, desc: 'Realtime dashboard' },
+    { id: 'setup', label: 'Providers', icon: Server, desc: 'Node config' },
     { id: 'automation', label: 'Auto', icon: Zap, desc: 'Rule builder' },
     { id: 'dispatch', label: 'Manual', icon: Send, desc: 'Audience builder' },
-    { id: 'setup', label: 'Providers', icon: Server, desc: 'Node config' },
+    { id: 'templates', label: 'Templates', icon: Layout, desc: 'HTML Templates' }
   ];
 
   return (
@@ -299,6 +412,197 @@ const EmailControlCenter: React.FC<Props> = ({ state }) => {
                         <Shield className="absolute -right-12 -bottom-12 opacity-[0.01] scale-150" size={200} />
                     </div>
                 ))}
+            </div>
+
+            {/* Resend Domains Orchestration Panel */}
+            <div className="bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm mt-12">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                    <div>
+                        <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Resend Domains Orchestrator</h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Add and verify sending domains to allow Resend API delivery</p>
+                    </div>
+                    
+                    <form onSubmit={handleAddDomain} className="flex gap-3 w-full md:w-auto">
+                        <input
+                            type="text"
+                            placeholder="e.g. clickopticx.com"
+                            value={newDomainName}
+                            onChange={(e) => setNewDomainName(e.target.value)}
+                            className="px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:border-blue-500 transition-all flex-1 md:w-64"
+                        />
+                        <button 
+                            type="submit"
+                            className="px-6 py-3.5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2"
+                        >
+                            <Plus size={14}/> Add Domain
+                        </button>
+                    </form>
+                </div>
+
+                {domainsLoading ? (
+                    <div className="flex justify-center py-12">
+                        <Mini5GMicroLoader />
+                    </div>
+                ) : domains.length === 0 ? (
+                    <div className="text-center py-12 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                        <GlobeIcon className="mx-auto text-slate-300 mb-4" size={40} />
+                        <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">No domains configured yet</p>
+                        <p className="text-xs text-slate-400 mt-1">Add a domain above to configure DNS verification records.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Left Side: Domains List */}
+                            <div className="space-y-4">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Configured Domains</label>
+                                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                                    {domains.map(d => (
+                                        <div 
+                                            key={d.id} 
+                                            onClick={() => handleSelectDomain(d.id)}
+                                            className={`p-5 rounded-2xl border transition-all cursor-pointer flex justify-between items-center ${
+                                                selectedDomain?.id === d.id 
+                                                ? 'bg-slate-900 border-slate-900 text-white shadow-xl' 
+                                                : 'bg-slate-50 border-slate-100 hover:bg-white hover:shadow-lg text-slate-900'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <GlobeIcon size={20} className={selectedDomain?.id === d.id ? 'text-blue-400' : 'text-slate-400'} />
+                                                <div>
+                                                    <h5 className="font-black text-sm uppercase tracking-tight">{d.name}</h5>
+                                                    <p className={`text-[8px] font-bold uppercase tracking-widest mt-1 ${selectedDomain?.id === d.id ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                        Region: {d.region || 'us-east-1'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                                                <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                                                    d.status === 'verified'
+                                                    ? 'bg-emerald-500/10 text-emerald-500'
+                                                    : 'bg-amber-500/10 text-amber-500'
+                                                }`}>
+                                                    {d.status}
+                                                </span>
+                                                {d.status !== 'verified' && (
+                                                    <button
+                                                        onClick={() => handleVerifyDomain(d.id)}
+                                                        title="Trigger Verification Check"
+                                                        className={`p-2 rounded-xl transition-all ${
+                                                            selectedDomain?.id === d.id 
+                                                            ? 'bg-white/10 hover:bg-white/20 text-white' 
+                                                            : 'bg-slate-200/50 hover:bg-slate-200 text-slate-600'
+                                                        }`}
+                                                    >
+                                                        <RotateCw size={14} />
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={() => handleRemoveDomain(d.id)}
+                                                    title="Remove Domain"
+                                                    className={`p-2 rounded-xl transition-all ${
+                                                        selectedDomain?.id === d.id 
+                                                        ? 'bg-red-500/20 hover:bg-red-500/40 text-red-400' 
+                                                        : 'bg-red-50/50 hover:bg-red-50 text-red-600'
+                                                    }`}
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Right Side: Selected Domain Records & Details */}
+                            <div className="bg-slate-50 border border-slate-100 rounded-3xl p-6 flex flex-col justify-between min-h-[300px]">
+                                {selectedDomain ? (
+                                    <div className="space-y-6">
+                                        <div className="flex justify-between items-start border-b border-slate-200/60 pb-4">
+                                            <div>
+                                                <h4 className="font-black text-lg text-slate-900 uppercase italic leading-none">{selectedDomain.name}</h4>
+                                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Status: {selectedDomain.status} • Region: {selectedDomain.region}</p>
+                                            </div>
+                                            <button 
+                                                onClick={() => handleSelectDomain(selectedDomain.id)}
+                                                className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-xl text-[8px] font-black uppercase tracking-widest text-slate-600 transition-all"
+                                            >
+                                                <RotateCw size={10} /> Refresh
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">DNS Records to Configure</label>
+                                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Add these at your domain registrar</span>
+                                            </div>
+
+                                            <div className="space-y-3 overflow-y-auto max-h-[250px] pr-1">
+                                                {selectedDomain.records && selectedDomain.records.length > 0 ? (
+                                                    selectedDomain.records.map((r: any, idx: number) => (
+                                                        <div key={idx} className="p-4 bg-white border border-slate-100 rounded-xl space-y-2">
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="px-2 py-0.5 bg-slate-100 rounded text-[9px] font-black text-slate-700 uppercase">{r.type || r.record}</span>
+                                                                <span className={`text-[8px] font-black uppercase tracking-widest ${
+                                                                    r.status === 'verified' || r.status === 'valid'
+                                                                    ? 'text-emerald-500'
+                                                                    : 'text-amber-500'
+                                                                }`}>
+                                                                    {r.status || 'pending'}
+                                                                </span>
+                                                            </div>
+                                                            <div className="grid grid-cols-1 gap-1 text-[11px]">
+                                                                <div>
+                                                                    <span className="text-slate-400 font-bold uppercase text-[8px] tracking-wider block">Host/Name</span>
+                                                                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                                                                        <code className="text-xs font-mono text-slate-800 break-all select-all">{r.name}</code>
+                                                                        <button 
+                                                                            onClick={() => {
+                                                                                navigator.clipboard.writeText(r.name);
+                                                                                alert('Host copied!');
+                                                                            }}
+                                                                            className="text-slate-400 hover:text-slate-600"
+                                                                            title="Copy"
+                                                                        >
+                                                                            <Copy size={12} />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="mt-1">
+                                                                    <span className="text-slate-400 font-bold uppercase text-[8px] tracking-wider block">Value/Target</span>
+                                                                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                                                                        <code className="text-xs font-mono text-slate-800 break-all select-all">{r.value}</code>
+                                                                        <button 
+                                                                            onClick={() => {
+                                                                                navigator.clipboard.writeText(r.value);
+                                                                                alert('Value copied!');
+                                                                            }}
+                                                                            className="text-slate-400 hover:text-slate-600"
+                                                                            title="Copy"
+                                                                        >
+                                                                            <Copy size={12} />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-xs text-slate-400 italic">No DNS records returned for this domain. Try verifying or re-adding.</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center flex-1 py-12 text-center">
+                                        <GlobeIcon className="text-slate-300 mb-3" size={32} />
+                                        <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Select a domain from the list</p>
+                                        <p className="text-[10px] text-slate-400 mt-1 max-w-[200px]">Click a domain to retrieve its DNS records and verification status.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
       )}

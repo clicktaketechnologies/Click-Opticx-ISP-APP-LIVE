@@ -9,16 +9,19 @@
  * PUT /api/provider-mgmt/email-providers/:id
  */
 
-const express = require('express');
+import express from 'express';
+import configManager from '../services/config-manager.js';
+import logger from '../utils/logger.js';
+import CryptoService from '../services/cryptoService.js';
+
 const router = express.Router();
-const configManager = require('../services/config-manager');
-const logger = require('../utils/logger');
 
 function adminGuard(req, res, next) {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) {
     return res.status(401).json({ success: false, message: 'Authorization required' });
   }
+  // Simplified guard for provider configuration
   next();
 }
 
@@ -39,6 +42,11 @@ router.put('/gateways/:id', adminGuard, async (req, res) => {
   const updates = req.body;
   const supabase = configManager.getSupabaseClient();
 
+  // Encrypt sensitive config before saving
+  if (updates.config) {
+    updates.config = CryptoService.encryptConfig(updates.config);
+  }
+
   const { error } = await supabase
     .from('payment_gateways')
     .update({ ...updates, updated_at: new Date().toISOString() })
@@ -46,7 +54,7 @@ router.put('/gateways/:id', adminGuard, async (req, res) => {
 
   if (error) return res.status(500).json({ success: false, error: error.message });
   
-  logger.info(`[PROVIDER-MGMT] Updated Gateway: ${id}`);
+  logger.info(`[PROVIDER-MGMT] Updated Gateway: ${id} (Encrypted)`);
   res.json({ success: true, message: `Gateway ${id} updated` });
 });
 
@@ -67,6 +75,11 @@ router.put('/email-providers/:id', adminGuard, async (req, res) => {
   const updates = req.body;
   const supabase = configManager.getSupabaseClient();
 
+  // Encrypt sensitive config before saving
+  if (updates.config) {
+    updates.config = CryptoService.encryptConfig(updates.config);
+  }
+
   const { error } = await supabase
     .from('email_providers')
     .update({ ...updates, updated_at: new Date().toISOString() })
@@ -74,8 +87,8 @@ router.put('/email-providers/:id', adminGuard, async (req, res) => {
 
   if (error) return res.status(500).json({ success: false, error: error.message });
 
-  logger.info(`[PROVIDER-MGMT] Updated Email Provider: ${id}`);
-  res.json({ success: true, message: `Email provider ${id} updated` });
+  logger.info(`[PROVIDER-MGMT] Updated Email Provider: ${id} (Encrypted)`);
+  res.json({ success: true, message: `Email Provider ${id} updated` });
 });
 
 // ─── Response Mappings ───────────────────────────────────────────────────────
@@ -134,4 +147,4 @@ router.put('/mappings/:id', adminGuard, async (req, res) => {
   res.json({ success: true, message: `Mapping ${id} updated to v${nextVersion}` });
 });
 
-module.exports = router;
+export default router;

@@ -1,17 +1,15 @@
-
 import React, { useState, useMemo } from 'react';
 import { AppState, Role } from '../types';
 import { db } from '../db';
 import {
-  UserPlus, Search, Filter, X,
-  Shield, Unlock, Lock,
+  UserPlus, Search, Filter, X, Shield, Unlock, Lock,
   ShieldAlert, Circle, Clock, Eye, EyeOff, Key,
   Users, ShieldCheck, Settings, Mail, Fingerprint,
-  Check, Ban, Pencil, Trash2, Activity, LayoutDashboard, Brain, Mic, FileAudio, FileText, Terminal, Bell, Monitor, Server, Map, UserCircle, Smartphone, Briefcase, Receipt, CreditCard, Flame, Wallet, Landmark, Zap, Layers, FileInput, Archive, UserCheck, Globe, Headphones, RotateCw, ChevronRight, Sparkles, ClipboardList, Info
+  Check, Ban, Pencil, Trash2, Activity, LayoutDashboard, Brain, Mic, FileAudio, FileText, Terminal, Bell, Monitor, Server, Map, UserCircle, Smartphone, Briefcase, Receipt, CreditCard, Flame, Wallet, Landmark, Zap, Layers, FileInput, Archive, UserCheck, Globe, Headphones, RotateCw, ChevronRight, Sparkles, ClipboardList, Info, AlertTriangle, Plus, ArrowRight
 } from 'lucide-react';
 import { Modal } from '../components/shared/Modal';
 
-// Human-readable mapping for module IDs (Shared with PermissionsPage)
+// Human-readable mapping for module IDs (Shared)
 const MODULE_METADATA: Record<string, { label: string; icon: any }> = {
   'dashboard': { label: 'Global Overview', icon: LayoutDashboard },
   'ai-control': { label: 'AI Intelligence Plane', icon: Brain },
@@ -54,14 +52,15 @@ const MODULE_METADATA: Record<string, { label: string; icon: any }> = {
   'tickets': { label: 'Support Handlers', icon: Headphones },
 };
 
-const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
+const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
   const [activeView, setActiveView] = useState<'personnel' | 'governance'>('personnel');
+  
+  // Personnel State
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('All');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any | null>(null);
   const [showPass, setShowPass] = useState(false);
-
   const [formData, setFormData] = useState<any>({
     email: '',
     name: '',
@@ -69,6 +68,12 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
     role: Role.TEAM_MEMBER,
     status: 'Active'
   });
+
+  // Governance State
+  const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
+  const [newRoleName, setNewRoleName] = useState('');
+  const [isDeletingRole, setIsDeletingRole] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string>(Role.SUPER_ADMIN);
 
   const filteredStaff = useMemo(() => {
     return (state.staff || []).filter(s => {
@@ -79,7 +84,12 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
     });
   }, [state.staff, searchTerm, roleFilter]);
 
-  const handleOpenModal = (staff?: any) => {
+  const assignedStaffForRole = useMemo(() => {
+    return (state.staff || []).filter(s => s.role === selectedRole);
+  }, [state.staff, selectedRole]);
+
+  // Personnel Handlers
+  const handleOpenStaffModal = (staff?: any) => {
     if (staff) {
       setEditingStaff(staff);
       setFormData({ ...staff, password: staff.password || 'superpass' });
@@ -87,10 +97,10 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
       setEditingStaff(null);
       setFormData({ email: '', name: '', password: '', role: Role.TEAM_MEMBER, status: 'Active' });
     }
-    setIsModalOpen(true);
+    setIsStaffModalOpen(true);
   };
 
-  const handleSave = async () => {
+  const handleSaveStaff = async () => {
     if (!formData.email || !formData.name) {
       alert("Verification Failed: Corporate identity requires a name and email.");
       return;
@@ -127,22 +137,46 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
         alert('Provisioning Request Submitted: Your request for a new personnel identity has been routed to the Governance Authority for verification.');
       }
     }
-    setIsModalOpen(false);
+    setIsStaffModalOpen(false);
   };
 
-  const toggleStatus = (email: string, currentStatus: string) => {
+  const toggleStaffStatus = (email: string, currentStatus: string) => {
     const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
     db.updateStaff(email, { status: newStatus as 'Active' | 'Suspended' });
   };
 
+  // Governance Handlers
   const handleTogglePermission = (moduleId: string, action: 'view' | 'edit' | 'delete', role: string) => {
     if (role === Role.SUPER_ADMIN) return;
     const module = state.permissions.find(p => p.id === moduleId);
     if (!module) return;
-    const currentRoles = [...module[action]];
+
+    const currentRoles = [...(module[action] || [])];
     const hasRole = currentRoles.includes(role);
-    const newRoles = hasRole ? currentRoles.filter(r => r !== role) : [...currentRoles, role];
+
+    const newRoles = hasRole
+      ? currentRoles.filter(r => r !== role)
+      : [...currentRoles, role];
+
     db.updateModulePermission(moduleId, { [action]: newRoles });
+  };
+
+  const handleAddRole = async () => {
+    if (!newRoleName.trim()) return;
+    const roleId = newRoleName.trim().toUpperCase();
+    await db.addRole(roleId);
+    setNewRoleName('');
+    setIsAddRoleModalOpen(false);
+    setSelectedRole(roleId);
+  };
+
+  const handleDeleteRole = async (roleName: string) => {
+    if (roleName === Role.SUPER_ADMIN) return;
+    await db.deleteRole(roleName);
+    setIsDeletingRole(null);
+    if (selectedRole === roleName) {
+      setSelectedRole(Role.SUPER_ADMIN);
+    }
   };
 
   return (
@@ -175,12 +209,21 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
               <ShieldAlert size={16} /> Scope Matrix
             </button>
           </div>
-          <button
-            onClick={() => handleOpenModal()}
-            className="group flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-500 transition-all active:scale-95 shadow-xl shadow-indigo-100 border border-white/10"
-          >
-            <UserPlus size={18} /> Provision Account
-          </button>
+          {activeView === 'personnel' ? (
+            <button
+              onClick={() => handleOpenStaffModal()}
+              className="group flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-500 transition-all active:scale-95 shadow-xl shadow-indigo-100 border border-white/10"
+            >
+              <UserPlus size={18} /> Provision Account
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsAddRoleModalOpen(true)}
+              className="group flex items-center justify-center gap-3 px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-500 transition-all active:scale-95 shadow-xl shadow-indigo-100 border border-white/10"
+            >
+              <Shield size={18} /> Initialize Tier
+            </button>
+          )}
         </div>
       </div>
 
@@ -249,13 +292,13 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
 
                   <div className="flex gap-3 relative z-10">
                     <button 
-                      onClick={() => handleOpenModal(member)} 
+                      onClick={() => handleOpenStaffModal(member)} 
                       className="flex-[2] py-4 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all active:scale-95 shadow-xl"
                     >
                       Protocol Access
                     </button>
                     <button 
-                      onClick={() => toggleStatus(member.email, member.status)} 
+                      onClick={() => toggleStaffStatus(member.email, member.status)} 
                       className={`flex-1 flex items-center justify-center rounded-2xl transition-all active:scale-95 border-2 ${member.status === 'Active' ? 'bg-rose-50 border-rose-100 text-rose-600 hover:bg-rose-600 hover:text-white' : 'bg-emerald-50 border-emerald-100 text-emerald-600 hover:bg-emerald-600 hover:text-white'}`}
                     >
                       {member.status === 'Active' ? <Lock size={20} /> : <Unlock size={20} />}
@@ -263,9 +306,7 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                 </div>
 
-                {/* Background decorative icon with increased visibility */}
                 <Fingerprint className="absolute -right-12 -bottom-12 opacity-[0.08] scale-150 pointer-events-none group-hover:scale-[1.8] group-hover:rotate-12 transition-all duration-700 text-indigo-900" size={240} />
-                
                 {member.status === 'Suspended' && (
                   <div className="absolute top-4 left-4">
                      <ShieldAlert size={24} className="text-rose-600 opacity-20" />
@@ -277,138 +318,241 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
         </div>
       ) : (
         <div className="animate-in slide-in-from-right-4 duration-500">
-          <div className="bg-white rounded-[4rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden flex flex-col min-h-[600px] relative">
-            <div className="p-10 bg-slate-950 text-white flex justify-between items-center sticky top-0 z-20 border-b border-white/5">
-              <div className="flex items-center gap-6">
-                <div className="w-14 h-14 bg-indigo-600 rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-indigo-500/30">
-                   <Settings size={32} className="animate-[spin_10s_linear_infinite]" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            {/* ─── LEFT PANEL: ROLE SELECTOR ─── */}
+            <div className="lg:col-span-3 space-y-8">
+              <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-xl p-8 space-y-8 sticky top-10">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-3">
+                    <Shield size={16} className="text-indigo-600" />
+                    Sovereign Tiers
+                  </h3>
+                  <span className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[9px] font-black text-indigo-600">{state.roles.length} Nodes</span>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-black tracking-tighter uppercase italic leading-none mb-1">Infrastructure Governance</h3>
-                   <div className="flex items-center gap-3">
-                    <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.8)]"></span>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Integrated Authority Matrix</p>
-                  </div>
+
+                <div className="space-y-2">
+                  {state.roles.map(role => {
+                    const isActive = selectedRole === role;
+                    const staffCount = (state.staff || []).filter(s => s.role === role).length;
+                    
+                    return (
+                      <button
+                        key={role}
+                        onClick={() => setSelectedRole(role)}
+                        className={`w-full group flex items-center justify-between p-5 rounded-[2rem] border transition-all duration-300 relative overflow-hidden ${
+                          isActive 
+                          ? 'bg-slate-950 border-slate-900 text-white shadow-2xl scale-[1.02]' 
+                          : 'bg-white border-slate-100 text-slate-600 hover:border-indigo-600/30 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-4 relative z-10">
+                          <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                            isActive ? 'bg-indigo-600 shadow-lg shadow-indigo-600/40' : 'bg-slate-50 border border-slate-100 group-hover:bg-white'
+                          }`}>
+                            {role === Role.SUPER_ADMIN ? <Key size={16} /> : <Shield size={16} className={isActive ? 'text-white' : 'text-slate-400'} />}
+                          </div>
+                          <div className="text-left">
+                            <span className={`text-[11px] font-black uppercase tracking-tight block ${isActive ? 'text-white' : 'text-slate-900'}`}>{role}</span>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-indigo-400' : 'text-slate-400'}`}>
+                                {staffCount} {staffCount === 1 ? 'AGENT' : 'AGENTS'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        {!isActive && (
+                          <ChevronRight size={14} className="text-slate-300 opacity-0 -translate-x-2 transition-all group-hover:opacity-100 group-hover:translate-x-0" />
+                        )}
+                        {isActive && (
+                          <div className="absolute inset-y-0 right-0 w-1.5 bg-indigo-500"></div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-              </div>
-              <div className="hidden lg:flex items-center gap-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.6)]"></div>
-                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none">Entry</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.6)]"></div>
-                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none">Logic</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)]"></div>
-                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest leading-none">Purge</span>
+
+                <div className="p-6 bg-slate-50 border border-slate-100 rounded-[2.5rem] relative overflow-hidden">
+                   <Sparkles className="absolute -right-4 -bottom-4 text-indigo-500/5 size-20" />
+                   <p className="text-[10px] text-slate-500 font-bold leading-relaxed uppercase italic relative z-10">
+                     Select a tier to audit its cryptographic permissions and personnel distribution.
+                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="flex-1 overflow-auto custom-scrollbar">
-              <table className="w-full text-left border-collapse">
-                <thead className="sticky top-0 z-10 bg-white/95 backdrop-blur-xl border-b border-slate-100 uppercase tracking-[0.4em]">
-                  <tr>
-                    <th className="px-10 py-8 text-[11px] font-black text-slate-400 min-w-[300px]">Strategic Modules</th>
-                    {state.roles.map(role => (
-                      <th key={role} className="px-8 py-8 text-[11px] font-black text-indigo-600 text-center min-w-[200px] border-l border-slate-50">{role}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {(state.permissions || []).map(perm => {
-                    const metadata = MODULE_METADATA[perm.id] || { label: perm.id, icon: Activity };
-                    const Icon = metadata.icon;
+            {/* ─── RIGHT PANEL: MATRIX & STAFF ─── */}
+            <div className="lg:col-span-9 space-y-10">
+              <div className="bg-white rounded-[4.5rem] border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden flex flex-col h-[750px] relative">
+                <div className="p-10 bg-slate-950 text-white flex justify-between items-center sticky top-0 z-20 border-b border-white/5">
+                  <div className="flex items-center gap-6">
+                    <div className="w-14 h-14 bg-indigo-600 rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-indigo-500/30">
+                       {selectedRole === Role.SUPER_ADMIN ? <Key size={32} /> : <ShieldAlert size={32} />}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className="text-3xl font-black tracking-tighter uppercase italic leading-none">{selectedRole}</h3>
+                        <span className="px-3 py-1 bg-white/10 rounded-full text-[8px] font-black tracking-widest uppercase border border-white/10">Scope Protocol v1.2</span>
+                      </div>
+                      <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em] flex items-center gap-3">
+                        <Activity size={12} className="text-indigo-500" />
+                        Cryptographic Permission Matrix
+                      </p>
+                    </div>
+                  </div>
 
-                    return (
-                      <tr key={perm.id} className="hover:bg-slate-50 transition-all group/row">
-                        <td className="px-10 py-10">
-                          <div className="flex items-center gap-6">
-                            <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover/row:bg-indigo-600 group-hover/row:text-white group-hover/row:shadow-xl group-hover/row:shadow-indigo-100 transition-all duration-500">
-                               <Icon size={24} />
-                            </div>
-                            <div>
-                              <span className="font-black text-slate-900 uppercase tracking-tight text-sm block leading-none mb-2">{metadata.label}</span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 opacity-60">
-                                  <Lock size={10} className="text-indigo-500" />
-                                  {perm.id}
-                                </span>
+                  {selectedRole !== Role.SUPER_ADMIN && (
+                     <button
+                       onClick={() => setIsDeletingRole(selectedRole)}
+                       className="flex items-center gap-3 px-6 py-4 bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white rounded-2xl transition-all font-black text-[9px] uppercase tracking-widest border border-rose-500/20 active:scale-95 shadow-xl"
+                     >
+                       <Trash2 size={14} />
+                       Revoke Entire Tier
+                     </button>
+                  )}
+                </div>
+
+                <div className="flex-1 overflow-auto custom-scrollbar">
+                  <table className="w-full text-left border-collapse">
+                    <thead className="sticky top-0 z-10 bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-sm">
+                      <tr>
+                        <th className="px-12 py-8 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">Target System Modules</th>
+                        <th className="px-12 py-8 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] text-center">Authority Matrix (Entry • Logic • Purge)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {(state.permissions || []).map(perm => {
+                        const metadata = MODULE_METADATA[perm.id] || { label: perm.id, icon: Activity };
+                        const Icon = metadata.icon;
+                        const canView = perm.view?.includes(selectedRole) || false;
+                        const canEdit = perm.edit?.includes(selectedRole) || false;
+                        const canDelete = perm.delete?.includes(selectedRole) || false;
+                        const isSuperAdmin = selectedRole === Role.SUPER_ADMIN;
+
+                        return (
+                          <tr key={perm.id} className="hover:bg-slate-50 transition-all group/row">
+                            <td className="px-12 py-10">
+                              <div className="flex items-center gap-6">
+                                <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover/row:bg-indigo-600 group-hover/row:text-white group-hover/row:shadow-xl group-hover/row:shadow-indigo-100 transition-all duration-500">
+                                   <Icon size={24} />
+                                </div>
+                                <div>
+                                  <span className="font-black text-slate-900 uppercase tracking-tight text-base block leading-none mb-2">{metadata.label}</span>
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                                      <Lock size={10} className="text-indigo-500" />
+                                      {perm.id}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        </td>
-                        {(state.roles || []).map(role => {
-                          const canView = perm.view?.includes(role) || false;
-                          const canEdit = perm.edit?.includes(role) || false;
-                          const canDelete = perm.delete?.includes(role) || false;
-                          const isSuperAdmin = role === Role.SUPER_ADMIN;
-
-                          return (
-                            <td key={role} className={`px-6 py-6 border-l border-slate-50 ${isSuperAdmin ? 'bg-indigo-50/10' : ''}`}>
-                              <div className="flex items-center justify-center gap-2 bg-slate-100/30 p-2 rounded-[2rem] border border-slate-100 shadow-inner">
-                                {/* HORIZONTAL TOGGLES */}
+                            </td>
+                            <td className="px-12 py-10">
+                              <div className="flex items-center justify-center gap-1.5 bg-slate-50/50 p-2 rounded-[2rem] border border-slate-100/50 w-fit mx-auto shadow-inner">
                                 <button
-                                  onClick={() => handleTogglePermission(perm.id, 'view', role)}
+                                  onClick={() => handleTogglePermission(perm.id, 'view', selectedRole)}
                                   disabled={isSuperAdmin}
-                                  className={`p-3.5 rounded-2xl transition-all border-2 ${
+                                  className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
                                     canView 
-                                    ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-100 scale-110' 
+                                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-100' 
                                     : 'bg-white border-slate-100 text-slate-300'
-                                  } ${isSuperAdmin ? 'cursor-default opacity-100' : 'hover:-translate-y-1 active:scale-95'}`}
+                                  } ${isSuperAdmin ? 'cursor-default' : 'hover:-translate-y-1 active:scale-95 hover:shadow-xl'}`}
                                 >
-                                  <Eye size={16} strokeWidth={3} />
+                                  <Eye size={14} strokeWidth={canView ? 3 : 2} />
+                                  Entry
                                 </button>
 
+                                <div className="w-px h-6 bg-slate-200 mx-1"></div>
+
                                 <button
-                                  onClick={() => handleTogglePermission(perm.id, 'edit', role)}
+                                  onClick={() => handleTogglePermission(perm.id, 'edit', selectedRole)}
                                   disabled={isSuperAdmin || !canView}
-                                  className={`p-3.5 rounded-2xl transition-all border-2 ${
+                                  className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
                                     canEdit 
-                                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-100 scale-110' 
+                                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-100' 
                                     : 'bg-white border-slate-100 text-slate-300'
-                                  } ${isSuperAdmin ? 'cursor-default opacity-100' : 'hover:-translate-y-1 active:scale-95'} ${!canView && !isSuperAdmin ? 'opacity-20 grayscale' : ''}`}
+                                  } ${isSuperAdmin ? 'cursor-default' : 'hover:-translate-y-1 active:scale-95'}`}
                                 >
-                                  <Pencil size={16} strokeWidth={3} />
+                                  <Pencil size={14} strokeWidth={canEdit ? 3 : 2} />
+                                  Logic
                                 </button>
 
+                                <div className="w-px h-6 bg-slate-200 mx-1"></div>
+
                                 <button
-                                  onClick={() => handleTogglePermission(perm.id, 'delete', role)}
+                                  onClick={() => handleTogglePermission(perm.id, 'delete', selectedRole)}
                                   disabled={isSuperAdmin || !canView || !canEdit}
-                                  className={`p-3.5 rounded-2xl transition-all border-2 ${
+                                  className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
                                     canDelete 
-                                    ? 'bg-rose-600 border-rose-500 text-white shadow-lg shadow-rose-100 scale-110' 
+                                    ? 'bg-rose-600 border-rose-500 text-white shadow-lg shadow-rose-100' 
                                     : 'bg-white border-slate-100 text-slate-300'
-                                  } ${isSuperAdmin ? 'cursor-default opacity-100' : 'hover:-translate-y-1 active:scale-95'} ${(!canView || !canEdit) && !isSuperAdmin ? 'opacity-20 grayscale' : ''}`}
+                                  } ${isSuperAdmin ? 'cursor-default' : 'hover:-translate-y-1 active:scale-95'}`}
                                 >
-                                  <Trash2 size={16} strokeWidth={3} />
+                                  <Trash2 size={14} strokeWidth={canDelete ? 3 : 2} />
+                                  Purge
                                 </button>
                               </div>
                             </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* ASSIGNED PERSONNEL */}
+              <div className="bg-white rounded-[4rem] border border-slate-100 shadow-xl p-12 space-y-10 relative overflow-hidden group">
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="space-y-2">
+                    <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] flex items-center gap-3">
+                       <UserCheck size={18} className="text-emerald-500" />
+                       Active Guardians
+                    </h4>
+                    <p className="text-2xl font-black tracking-tight text-slate-900 italic">Personnel Assigned to {selectedRole}</p>
+                  </div>
+                  <div className="px-6 py-3 bg-emerald-50 border border-emerald-100 rounded-2xl text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                    {assignedStaffForRole.length} Nodes Online
+                  </div>
+                </div>
+
+                {assignedStaffForRole.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
+                    {assignedStaffForRole.map(staff => (
+                      <div key={staff.email} className="group/staff flex items-center gap-5 p-6 bg-slate-50 border border-slate-100 rounded-[2.5rem] hover:bg-white hover:border-emerald-500/30 hover:shadow-2xl transition-all duration-500">
+                        <div className="w-14 h-14 bg-white border border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 group-hover/staff:bg-emerald-600 group-hover/staff:text-white transition-all shadow-sm">
+                           <UserCircle size={32} />
+                        </div>
+                        <div>
+                          <p className="font-black text-slate-900 uppercase tracking-tight text-sm leading-none mb-1">{staff.name}</p>
+                          <p className="text-[9px] font-bold text-slate-400 lowercase italic opacity-80">{staff.email}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-16 text-center bg-slate-50 border border-dashed border-slate-200 rounded-[3rem] relative z-10">
+                     <AlertTriangle className="size-16 text-slate-200 mx-auto mb-6" />
+                     <p className="font-black text-slate-400 uppercase tracking-widest text-xs">No active nodes registered for this scope tier.</p>
+                  </div>
+                )}
+                
+                <Users className="absolute -right-20 -bottom-20 text-emerald-500/5 size-80 group-hover:scale-110 transition-transform duration-1000" />
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* PROVISIONING MODAL */}
+      {/* ─── MODALS ─── */}
       <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isStaffModalOpen}
+        onClose={() => setIsStaffModalOpen(false)}
         title={editingStaff ? 'Modify Core Identity' : 'Provision Personnel'}
         type="form"
         icon={<UserPlus size={24} className="text-indigo-400" />}
         maxWidth="max-w-xl"
         scrollable
-        onConfirm={handleSave}
+        onConfirm={handleSaveStaff}
         confirmLabel={editingStaff ? 'Protocol Update' : 'Initialize Agent'}
         cancelLabel="Relinquish"
       >
@@ -484,9 +628,48 @@ const AccessControlPage: React.FC<{ state: AppState }> = ({ state }) => {
           </div>
         </div>
       </Modal>
+
+      <Modal
+        isOpen={isAddRoleModalOpen}
+        onClose={() => setIsAddRoleModalOpen(false)}
+        title="Tier Forge"
+        type="form"
+        icon={<UserPlus size={20} className="text-indigo-400" />}
+        maxWidth="max-w-lg"
+        onConfirm={handleAddRole}
+        confirmLabel="Authorize Tier"
+      >
+        <div className="space-y-4">
+          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block italic">Scope Descriptor</label>
+          <div className="relative">
+            <Fingerprint className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-400" size={20} />
+            <input
+              type="text"
+              autoFocus
+              className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-black text-xl text-slate-900 uppercase tracking-tighter placeholder:text-slate-300"
+              value={newRoleName}
+              onChange={e => setNewRoleName(e.target.value)}
+              placeholder="E.G. TECHNICAL_UNIT"
+              onKeyDown={(e) => e.key === 'Enter' && handleAddRole()}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={!!isDeletingRole}
+        onClose={() => setIsDeletingRole(null)}
+        title="Revoke Tier?"
+        type="danger"
+        maxWidth="max-w-md"
+        onConfirm={() => isDeletingRole && handleDeleteRole(isDeletingRole)}
+        confirmLabel="Purge Identity"
+        confirmDanger
+        cancelLabel="Relinquish"
+        message={`Destroying the "${isDeletingRole}" scope tier will instantly purge system access for all node agents.`}
+      />
     </div>
   );
 };
 
-export default AccessControlPage;
-
+export default GovernanceDesk;

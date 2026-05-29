@@ -51,7 +51,7 @@ const adminRoutes: RoleRoute[] = [
   },
   {
     path: '/staff',
-    component: lazyWithRetry(() => import('../pages/AccessControlPage')),
+    component: lazyWithRetry(() => import('../pages/GovernanceDesk')),
     requiredRoles: [Role.SUPER_ADMIN, Role.BUSINESS_ADMIN, Role.ADMIN],
     layout: 'admin',
     label: 'Staff & Access Control',

@@ -8,6 +8,7 @@ import configManager from '../../services/config-manager.js';
 import StripeAdapter from './adapters/stripe-adapter.js';
 import JazzCashAdapter from './adapters/jazzcash-adapter.js';
 import logger from '../../utils/logger.js';
+import CryptoService from '../../services/cryptoService.js';
 
 class PaymentRouter {
   constructor() {
@@ -51,10 +52,13 @@ class PaymentRouter {
       .order('priority', { ascending: true });
 
     if (!error && data) {
-      this.gateways = data;
+      this.gateways = data.map(g => ({
+         ...g,
+         config: CryptoService.decryptConfig(g.config)
+      }));
       
       // Instantiate/Refresh Adapters
-      for (const g of data) {
+      for (const g of this.gateways) {
         if (g.enabled && !this.adapters[g.id]) {
             try {
                 let adapter = null;

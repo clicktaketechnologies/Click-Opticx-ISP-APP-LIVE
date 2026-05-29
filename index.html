@@ -12,9 +12,9 @@
         // Force refresh on version mismatch - DATA SAFE MODE
         const LATEST_VERSION = 'v9.6.3-LIVE';
         if (localStorage.getItem('app_deployment_v') !== LATEST_VERSION) {
-            // Targeted cleanup: Remove UI/Layout state but PRESERVE the core registry
+            // Targeted cleanup: Remove UI/Layout state but PRESERVE the core registry and theme settings
             Object.keys(localStorage).forEach(key => {
-                if (key !== 'clickopticx_v16_registry' && key !== 'click_opticx_theme') {
+                if (key !== 'clickopticx_v16_registry' && key !== 'clickopticx_theme' && key !== 'clickopticx_brand_color') {
                     localStorage.removeItem(key);
                 }
             });
@@ -50,10 +50,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/design-system.css">
     <script>
-        // Theme initialization
+        // Theme initialization to eliminate FOUC (Flash of Unstyled Content)
         (function() {
-            const theme = localStorage.getItem('click_opticx_theme') || 'light';
-            document.documentElement.setAttribute('data-theme', theme);
+            try {
+                const theme = localStorage.getItem('clickopticx_theme') || 'light';
+                let isDark = theme === 'dark';
+                if (theme === 'system') {
+                    isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                }
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+                const brandColor = localStorage.getItem('clickopticx_brand_color') || '#6366F1';
+                document.documentElement.style.setProperty('--bg-primary', brandColor);
+                document.documentElement.style.setProperty('--grad-primary', `linear-gradient(135deg, ${brandColor}, #4F46E5)`);
+            } catch (e) {
+                console.error('[Theme Init Error]', e);
+            }
         })();
     </script>
     <style>

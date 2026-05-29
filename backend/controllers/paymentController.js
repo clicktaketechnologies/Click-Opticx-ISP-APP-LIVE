@@ -1,11 +1,11 @@
-const logger = require('../utils/logger');
-const configManager = require('../services/config-manager');
-const admin = require('firebase-admin');
-const paymentRouter = require('../modules/payments/payment-router');
+import logger from '../utils/logger.js';
+import configManager from '../services/config-manager.js';
+import admin from 'firebase-admin';
+import paymentRouter from '../modules/payments/payment-router.js';
 
 const isFirebaseWriteEnabled = () => process.env.FIREBASE_MODE !== 'readonly';
 
-exports.processPayment = async (req, res) => {
+export const processPayment = async (req, res) => {
     const { amount, userId, invoiceId, userName } = req.body;
     const io = req.app.get('socketio');
     const supabase = configManager.getSupabaseClient();
@@ -75,7 +75,7 @@ exports.processPayment = async (req, res) => {
 };
 
 /** Webhook Handler for 3rd Party Notifications */
-exports.handleWebhook = async (req, res) => {
+export const handleWebhook = async (req, res) => {
     const { gatewayId } = req.params;
     const io = req.app.get('socketio');
     const supabase = configManager.getSupabaseClient();
@@ -90,7 +90,7 @@ exports.handleWebhook = async (req, res) => {
         }
 
         // 1. Verify Signature (Security)
-        const verification = await adapter.verifyWebhook(req.body, req.headers);
+        const verification = await adapter.verifyWebhook(req.body, req.headers, req.rawBody);
         if (!verification.success) {
             logger.warn(`[WEBHOOK] Signature verification failed for ${gatewayId}: ${verification.error}`);
             return res.status(401).send('Invalid Signature');

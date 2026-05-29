@@ -39,10 +39,8 @@ import packageRoutes from './routes/packages.js';
 import speedtestRoutes from './routes/speedtest.js';
 import nasRoutes from './routes/nas.js';
 import emailStatusRoutes from './routes/email-status.js';
-
-
-
-
+import paymentsRoutes from './routes/payments.js';
+import providerManagementRoutes from './routes/provider-management.js';
 // ESM dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -121,7 +119,11 @@ app.use(cors({
     }, 
     credentials: true 
 }));
-app.use(express.json());
+app.use(express.json({
+    verify: (req, res, buf) => {
+        req.rawBody = buf;
+    }
+}));
 
 // --- IMMEDIATE AUTH PATH (Before Limiter) ---
 app.use('/api/auth', authRoutes);
@@ -152,6 +154,8 @@ apiV1.use('/packages', packageRoutes);
 apiV1.use('/speedtest', speedtestRoutes);
 apiV1.use('/nas', nasRoutes);
 apiV1.use('/email', emailStatusRoutes);
+apiV1.use('/payments', paymentsRoutes);
+apiV1.use('/provider-mgmt', providerManagementRoutes);
 
 
 

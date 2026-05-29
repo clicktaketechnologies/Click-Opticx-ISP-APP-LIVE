@@ -631,7 +631,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
       )}
 
       {/* 5. Subscriber Data Registry */}
-      <div className="flex-1 flex flex-col relative w-full space-y-4">
+      <div className="flex-1 flex flex-col relative w-full min-w-0 space-y-4">
         <div className="flex items-center justify-between px-2 shrink-0">
            <div className="flex items-center gap-6">
               <button onClick={toggleSelectAll} className="flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-indigo-600 transition-all">

@@ -104,7 +104,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: Users,
       items: [
         { id: 'users', label: 'Subscriber Registry', icon: Users, badge: state.users?.length },
-        { id: 'find-users', label: 'Find Users', icon: Search },
         { id: 'user-app', label: 'Subscriber Relations', icon: UserCheck },
         { id: 'approval-desk', label: 'Approvals', icon: CheckCircle, badge: state.signupRequests?.length + state.topupRequests?.length },
         { id: 'reseller-management', label: 'Partners', icon: Handshake }
@@ -142,14 +141,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       ]
     },
     {
-      id: 'staff',
-      label: 'Staff & Roles',
-      icon: UserCheck,
-      items: [
-        { id: 'staff', label: 'Staff Management', icon: UserCheck }
-      ]
-    },
-    {
       id: 'compliance',
       label: 'Compliance & Identity',
       icon: Fingerprint,
@@ -164,7 +155,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: ShieldCheck,
       items: [
         { id: 'super-admin', label: 'SuperAdmin Command', icon: Key },
-        { id: 'permissions', label: 'Matrix Governance', icon: ShieldAlert }
+        { id: 'governance', label: 'Governance Desk', icon: ShieldAlert }
       ]
     },
 

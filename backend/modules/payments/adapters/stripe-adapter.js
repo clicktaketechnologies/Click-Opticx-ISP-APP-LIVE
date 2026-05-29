@@ -50,10 +50,11 @@ class StripeAdapter extends BasePaymentAdapter {
     }
   }
 
-  async verifyWebhook(body, headers, secret) {
+  async verifyWebhook(body, headers, rawBody, secret) {
     try {
       const sig = headers['stripe-signature'];
-      const event = this.client.webhooks.constructEvent(body, sig, secret || this.config.webhookSecret);
+      const payload = rawBody || JSON.stringify(body);
+      const event = this.client.webhooks.constructEvent(payload, sig, secret || this.config.webhookSecret);
       return { success: true, event };
     } catch (err) {
       return { success: false, error: err.message };

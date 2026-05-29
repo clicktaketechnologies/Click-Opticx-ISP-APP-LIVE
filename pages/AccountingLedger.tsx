@@ -152,7 +152,7 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
       </div>
 
       {/* 4. Audit Table */}
-      <div className="flex-1 flex flex-col relative w-full space-y-4">
+      <div className="flex-1 flex flex-col relative w-full min-w-0 space-y-4">
         <div className="flex items-center justify-between px-2">
            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Showing {filteredLedger.length} Transaction Records</p>
            <div className="flex items-center gap-2">

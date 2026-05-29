@@ -41,9 +41,8 @@ const SuperAdmin = lazyWithRetry(() => import('./pages/SuperAdmin'));
 const EmailControlCenter = lazyWithRetry(() => import('./pages/comm/EmailControlCenter'));
 const PackagesPage = lazyWithRetry(() => import('./pages/PackagesPage'));
 const ArchivePage = lazyWithRetry(() => import('./pages/ArchivePage'));
-const AccessControlPage = lazyWithRetry(() => import('./pages/AccessControlPage'));
+const GovernanceDesk = lazyWithRetry(() => import('./pages/GovernanceDesk'));
 const ResellerManagement = lazyWithRetry(() => import('./pages/ResellerManagement'));
-const PermissionsPage = lazyWithRetry(() => import('./pages/PermissionsPage'));
 const DataImportPage = lazyWithRetry(() => import('./pages/DataImportPage'));
 const DatabaseMonitor = lazyWithRetry(() => import('./pages/DatabaseMonitor'));
 const FiscalMonitor = lazyWithRetry(() => import('./pages/FiscalMonitor'));
@@ -262,12 +261,13 @@ const LegacyRoutes: React.FC<LegacyRoutesProps> = ({
       <Route path="/recovery-dashboard" element={<RecoveryDashboard state={dbState} />} />
       <Route path="/accounting" element={<AccountingLedger state={dbState} />} />
       <Route path="/archive" element={<ArchivePage state={dbState} />} />
-      <Route path="/staff" element={<AccessControlPage state={dbState} />} />
+      <Route path="/governance" element={<GovernanceDesk state={dbState} />} />
+      <Route path="/staff" element={<Navigate to="/governance" replace />} />
+      <Route path="/permissions" element={<Navigate to="/governance" replace />} />
       <Route path="/system-flash" element={<SystemFlash state={dbState} />} />
       <Route path="/system-config" element={<SystemConfig />} />
       <Route path="/system-readiness" element={<SystemReadiness />} />
       <Route path="/reseller-management" element={<ResellerManagement state={dbState} />} />
-      <Route path="/permissions" element={<PermissionsPage state={dbState} />} />
       <Route path="/import" element={<DataImportPage state={dbState} />} />
       <Route path="/monitor" element={<DatabaseMonitor state={dbState} />} />
       <Route path="/cache" element={<CacheManagement state={dbState} />} />
@@ -335,6 +335,28 @@ const App: React.FC = () => {
   const { success } = useToast();
 
   useEffect(() => {
+    const applyTheme = (theme: string, brandColor: string) => {
+      try {
+        let isDark = theme === 'dark';
+        if (theme === 'system') {
+          isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+        if (brandColor) {
+          document.documentElement.style.setProperty('--bg-primary', brandColor);
+          document.documentElement.style.setProperty('--grad-primary', `linear-gradient(135deg, ${brandColor}, #4F46E5)`);
+        }
+      } catch (e) {
+        console.error('[Theme apply error]', e);
+      }
+    };
+
     const unsubscribe = db.onStateChange((newState) => {
       startTransition(() => {
         setDbState(newState);
@@ -344,13 +366,29 @@ const App: React.FC = () => {
         const theme = (newState.settings?.appearance as any)?.theme || localStorage.getItem('clickopticx_theme') || 'light';
         const brandColor = (newState.settings?.appearance as any)?.primaryColor || localStorage.getItem('clickopticx_brand_color') || '#6366F1';
         
-        if (theme === 'dark') document.documentElement.classList.add('dark');
-        else document.documentElement.classList.remove('dark');
-        
-        document.documentElement.style.setProperty('--bg-primary', brandColor);
-        document.documentElement.style.setProperty('--grad-primary', `linear-gradient(135deg, ${brandColor}, #4F46E5)`);
+        applyTheme(theme, brandColor);
       });
     });
+
+    // Listen to OS theme changes when theme is set to 'system'
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = () => {
+      const currentTheme = localStorage.getItem('clickopticx_theme') || 'light';
+      if (currentTheme === 'system') {
+        applyTheme('system', localStorage.getItem('clickopticx_brand_color') || '#6366F1');
+      }
+    };
+    mediaQuery.addEventListener('change', handleSystemThemeChange);
+
+    // Multi-tab theme/brand color synchronization
+    const handleStorageThemeChange = (e: StorageEvent) => {
+      if (e.key === 'clickopticx_theme' || e.key === 'clickopticx_brand_color') {
+        const t = localStorage.getItem('clickopticx_theme') || 'light';
+        const c = localStorage.getItem('clickopticx_brand_color') || '#6366F1';
+        applyTheme(t, c);
+      }
+    };
+    window.addEventListener('storage', handleStorageThemeChange);
 
     // 2. Initial Background Audit & Proactive Backend Wake
     db.wakeBackend();
@@ -427,6 +465,8 @@ const App: React.FC = () => {
       clearInterval(cronInterval);
       clearInterval(keepAliveInterval);
       if (authChannel) authChannel.close();
+      mediaQuery.removeEventListener('change', handleSystemThemeChange);
+      window.removeEventListener('storage', handleStorageThemeChange);
     };
   }, []);
 
