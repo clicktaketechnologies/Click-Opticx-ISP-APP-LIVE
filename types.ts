@@ -1093,14 +1093,16 @@ export interface AppState {
   flashLogs: FlashLog[];
   speedTestHistory: SpeedTestResult[];
   missingData: MissingDataNode[];
-  auth: { 
-    isLoggedIn: boolean; 
-    role?: Role | 'Subscriber'; 
-    id?: string; 
-    email?: string;
-    name?: string;
-    lastLoginAt?: string;
-  };
+   auth: { 
+     isLoggedIn: boolean; 
+     role?: Role | 'Subscriber'; 
+     id?: string; 
+     email?: string;
+     name?: string;
+     lastLoginAt?: string;
+     isImpersonating?: boolean;
+     impersonatorId?: string;
+   };
   view: 'login' | 'admin' | 'portal';
   
   // V2 Dashboard & Operational Metrics

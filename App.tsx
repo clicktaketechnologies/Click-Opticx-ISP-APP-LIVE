@@ -163,10 +163,10 @@ class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasErr
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("[SYSTEM-FAULT]", error, errorInfo);
-    db.logAudit('System Fault', 'ERROR', `UI Crash detected: ${error.message}`, 'SYSTEM', 'UI_ENGINE');
-  }
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+     console.error("[SYSTEM-FAULT]", error, errorInfo);
+     db.logAudit('System Fault', 'System', `UI Crash detected: ${error.message}`, 'SYSTEM', 'UI_ENGINE');
+   }
 
   handleReset = () => {
     localStorage.clear();
@@ -552,7 +552,7 @@ const renderApp = () => {
           activeRoute={location.pathname}
           businessName={dbState?.settings?.branding?.businessName || 'ClickOptix'}
           businessLogo={(dbState?.settings?.branding as any)?.logoUrl}
-          isImpersonating={authState.isImpersonating}
+           isImpersonating={dbState.isImpersonating}
         >
           <Suspense fallback={<Mini5GMicroLoader size={40} />}>
             <SubscriberApp state={dbState} user={activeUser as any} onLogout={handleLogout} />

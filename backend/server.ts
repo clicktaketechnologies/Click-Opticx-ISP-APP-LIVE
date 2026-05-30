@@ -64,7 +64,7 @@ const io = new SocketIoServer(server, {
 
 // Make io accessible in req
 app.set('socketio', io);
-logger.streamToSocket(io);
+(logger as any).streamToSocket(io);
 
 // --- Firebase Admin Initialization ---
 try {

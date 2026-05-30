@@ -18,6 +18,13 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, onLogout, searchTerm, onSearch, isPending, onNavigate }) => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  const iconSize = windowWidth >= 768 ? 20 : 18;
   const notifRef = useRef<HTMLDivElement>(null);
   const state = db.getState();
   const branding = useBranding();
@@ -211,7 +218,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
             onClick={() => setShowNotifications(!showNotifications)}
             className={`relative p-2 md:p-2.5 rounded-xl md:rounded-2xl transition-all duration-300 ${showNotifications ? 'bg-slate-950 text-white shadow-xl shadow-slate-900/20' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50 border border-transparent hover:border-slate-100'}`}
           >
-            <Bell size={18} md:size={20} strokeWidth={showNotifications ? 3 : 2} />
+            <Bell size={iconSize} strokeWidth={showNotifications ? 3 : 2} />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-rose-600 text-white text-[7px] md:text-[8px] flex items-center justify-center rounded-lg font-black shadow-lg ring-2 md:ring-4 ring-white animate-bounce">
                 {unreadCount}
@@ -245,8 +252,8 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
                       className={`p-3 border-b border-slate-50 hover:bg-slate-50 transition-colors flex gap-2 cursor-pointer relative ${!n.read ? 'bg-green-50/20' : ''}`}
                       onClick={() => {
                         db.markNotificationRead(n.id);
-                        if (n.target && onNavigate) {
-                          onNavigate(n.target);
+                        if (n.targetId && onNavigate) {
+                          onNavigate(n.targetId);
                           setShowNotifications(false);
                         }
                       }}

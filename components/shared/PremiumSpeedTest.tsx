@@ -331,7 +331,7 @@ const PremiumSpeedTest: React.FC<Props> = ({ user, onComplete, onClose, classNam
                 testState === 'ERROR' ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'
              }`}
            >
-              {testState === 'TESTING' ? <Mini5GMicroLoader size={20} color="white" /> : <Play size={20} fill="currentColor" />}
+              {testState === 'TESTING' ? <Mini5GMicroLoader size={20} /> : <Play size={20} fill="currentColor" />}
               {testState === 'TESTING' ? 'Sampling Node' : testState === 'SUCCESS' ? 'Relaunch' : testState === 'ERROR' ? 'Retry Protocol' : 'Ignite Engine'}
            </button>
            

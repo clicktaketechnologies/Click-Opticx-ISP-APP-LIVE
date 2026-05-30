@@ -20,7 +20,9 @@ export interface EmailPayload {
 
 class NotificationManager {
     private static instance: NotificationManager;
-    private apiBase = (typeof window !== 'undefined' && window.location.hostname === 'localhost') ? 'http://127.0.0.1:5000/api' : 'https://click-opticx-isp-app-live.onrender.com/api';
+    private apiBase = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
+        ? 'http://localhost:5000'
+        : ((typeof import.meta !== 'undefined' && import.meta.env?.VITE_BACKEND_URL) || 'https://click-opticx-isp-app-live.onrender.com').replace(/\/$/, '');
 
     private constructor() { }
 
@@ -43,8 +45,8 @@ class NotificationManager {
         // Determine configuration to use based on mode
         const activeConfig = config.emailMode === 'PROVIDER_API' ? config.providerConfig : config.smtpConfig;
 
-        try {
-            const response = await fetch(`${this.apiBase}/communicate`, {
+            try {
+                const response = await fetch(`${this.apiBase}/api/communicate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -114,9 +116,9 @@ class NotificationManager {
                 <p style="margin: 0; color: #94a3b8; font-size: 10px; font-weight: 800; text-transform: uppercase;">Total Outstanding</p>
                 <h3 style="margin: 5px 0 0 0; font-size: 24px; font-weight: 900; color: #1e293b;">${amount}</h3>
              </div>
-             <div style="margin-top: 40px;">
-                <a href="http://localhost:3000/portal/invoices" style="display: block; width: 100%; padding: 16px; background: #1570ef; color: white; text-decoration: none; border-radius: 12px; font-weight: 900; text-align: center; text-transform: uppercase; font-size: 12px;">Login to Portal & Pay</a>
-             </div>
+            <div style="margin-top: 40px;">
+                 <a href="/portal/invoices" style="display: block; width: 100%; padding: 16px; background: #1570ef; color: white; text-decoration: none; border-radius: 12px; font-weight: 900; text-align: center; text-transform: uppercase; font-size: 12px;">Login to Portal & Pay</a>
+              </div>
           </div>
         </div>
       `
@@ -142,9 +144,9 @@ class NotificationManager {
              <div style="margin-top: 30px; padding: 20px; background: #fff7ed; border-radius: 12px; border: 1px solid #fed7aa;">
                 <p style="margin: 0; color: #9a3412; font-size: 10px; font-weight: 800; text-transform: uppercase;">Grace Expiry Imminent</p>
              </div>
-             <div style="margin-top: 40px;">
-                <a href="http://localhost:3000/portal/payment" style="display: block; width: 100%; padding: 16px; background: #ea580c; color: white; text-decoration: none; border-radius: 12px; font-weight: 900; text-align: center; text-transform: uppercase; font-size: 11px;">Settle Balance Now</a>
-             </div>
+            <div style="margin-top: 40px;">
+                 <a href="/portal/payment" style="display: block; width: 100%; padding: 16px; background: #ea580c; color: white; text-decoration: none; border-radius: 12px; font-weight: 900; text-align: center; text-transform: uppercase; font-size: 11px;">Settle Balance Now</a>
+              </div>
           </div>
         </div>
       `
@@ -167,9 +169,9 @@ class NotificationManager {
              </div>
              <p style="color: #450a0a; line-height: 1.6; font-weight: 600;">Dear ${userName},</p>
              <p style="color: #7f1d1d; line-height: 1.6;">Your internet service has been <b>Suspended</b> due to non-payment. Network access is now restricted.</p>
-             <div style="margin-top: 40px;">
-                <a href="http://localhost:3000/portal/support" style="display: block; width: 100%; padding: 16px; border: 2px solid #dc2626; color: #dc2626; text-decoration: none; border-radius: 12px; font-weight: 900; text-align: center; text-transform: uppercase; font-size: 11px;">Contact Support for Restoration</a>
-             </div>
+            <div style="margin-top: 40px;">
+                 <a href="/portal/support" style="display: block; width: 100%; padding: 16px; border: 2px solid #dc2626; color: #dc2626; text-decoration: none; border-radius: 12px; font-weight: 900; text-align: center; text-transform: uppercase; font-size: 11px;">Contact Support for Restoration</a>
+              </div>
           </div>
         </div>
       `

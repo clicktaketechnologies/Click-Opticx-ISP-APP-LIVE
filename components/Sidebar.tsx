@@ -42,7 +42,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, isOpen, onClose, isCollapsed, onToggleCollapse, businessName }) => {
   const state = db.getState();
   const branding = useBranding();
-  const appearance = state?.settings?.appearance || { sections: [] };
+  const appearance = state?.settings?.appearance || { showAICalling: false, sections: [] };
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');

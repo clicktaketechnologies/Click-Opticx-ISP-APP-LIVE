@@ -31,28 +31,28 @@ export const useGetLedger = () => {
 export const useCreateLedgerEntry = () => {
   const queryClient = useQueryClient();
   
-  return useMutation({
-    mutationFn: (data: any) => enterpriseApi.createLedgerEntry(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ledger'] });
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      useBSSStore.getState().triggerSync();
-    },
-  });
+return useMutation({
+     mutationFn: (data: any) => enterpriseApi.postLedgerEntry(data),
+     onSuccess: () => {
+       queryClient.invalidateQueries({ queryKey: ['ledger'] });
+       queryClient.invalidateQueries({ queryKey: ['users'] });
+       useBSSStore.getState().triggerSync();
+     },
+   });
 };
 
 // HARDWARE DIAGNOSTICS
 export const useTestDevice = () => {
-  return useMutation({
-    mutationFn: ({ deviceId, protocol }: { deviceId: string; protocol: string }) => 
-      enterpriseApi.testDevice(deviceId, protocol),
-  });
-};
+   return useMutation({
+     mutationFn: ({ deviceId, protocol, credentials }: { deviceId: string; protocol: 'SNMP' | 'SSH' | 'MIKROTIK'; credentials: any }) => 
+       enterpriseApi.testDevice(deviceId, protocol, credentials),
+   });
+ };
 
 // RADIUS
 export const useSendRadiusCoa = () => {
-  return useMutation({
-    mutationFn: ({ username, action, attributes }: { username: string; action: string; attributes?: string }) => 
-      enterpriseApi.sendRadiusCoa(username, action, attributes),
-  });
-};
+   return useMutation({
+     mutationFn: ({ username, action, attributes }: { username: string; action: 'disconnect' | 'coa'; attributes?: string }) => 
+       enterpriseApi.sendRadiusCoa(username, action, attributes),
+   });
+ };

@@ -9,16 +9,28 @@ import {
   Repeat, CreditCard, ChevronRight, Eye
 } from 'lucide-react';
 import { AppState, ISPUser as UserType, Role, Package } from '../../types';
+import { UserStatus } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
 import { usePermissions } from '../../src/hooks/usePermissions';
+
+// Lazy-import db to break circular dependency: db.ts → UserManagementV2 → db.ts
+// Using a getter pattern so db is resolved at call time, never at module evaluation time.
+let _db: any = null;
+const getDb = () => {
+  if (!_db) {
+    // Dynamic require to avoid circular import at module evaluation
+    _db = require('../db').db;
+  }
+  return _db;
+};
 
 const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
   const { canView, canEdit } = usePermissions(state);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<'all' | UserStatus.Active | UserStatus.Expired | UserStatus.Suspended | UserStatus.PENDING_VERIFICATION>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | UserStatus.ACTIVE | UserStatus.EXPIRED | UserStatus.SUSPENDED | UserStatus.PENDING_VERIFICATION>('all');
 
   // 1. Data Filtration (Parity with Legacy)
   const filteredUsers = useMemo(() => {
@@ -34,13 +46,13 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
     });
   }, [state.users, searchQuery, filterStatus]);
 
-   const stats = {
-     total: state.users.length,
-     active: state.users.filter(u => u.status === UserStatus.Active).length,
-     pending: state.users.filter(u => u.status === UserStatus.PENDING_VERIFICATION).length,
-     expired: state.users.filter(u => u.status === UserStatus.EXPIRED).length,
-     suspended: state.users.filter(u => u.status === UserStatus.SUSPENDED).length
-   };
+    const stats = {
+      total: state.users.length,
+      active: state.users.filter(u => u.status === UserStatus.ACTIVE).length,
+      pending: state.users.filter(u => u.status === UserStatus.PENDING_VERIFICATION).length,
+      expired: state.users.filter(u => u.status === UserStatus.EXPIRED).length,
+      suspended: state.users.filter(u => u.status === UserStatus.SUSPENDED).length
+    };
 
   return (
     <div className="space-y-10">
@@ -66,19 +78,25 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
                 onChange={e => setSearchQuery(e.target.value)}
               />
            </div>
-           <div className="flex gap-1.5 p-1.5 bg-slate-100 rounded-2xl shrink-0 overflow-x-auto no-scrollbar">
-              {(['all', 'Active', 'Pending Verification', 'Expired', 'Suspended'] as const).map(s => (
-                <button 
-                  key={s}
-                  onClick={() => setFilterStatus(s)}
-                  className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
-                    filterStatus === s ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                  }`}
-                >
-                  {s === 'Pending Verification' ? 'Pending' : s}
-                </button>
-              ))}
-           </div>
+            <div className="flex gap-1.5 p-1.5 bg-slate-100 rounded-2xl shrink-0 overflow-x-auto no-scrollbar">
+               {([
+                 'all', 
+                 UserStatus.Active, 
+                 UserStatus.PENDING_VERIFICATION, 
+                 UserStatus.EXPIRED, 
+                 UserStatus.SUSPENDED
+               ] as const).map(s => (
+                 <button 
+                   key={s}
+                   onClick={() => setFilterStatus(s)}
+                   className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
+                     filterStatus === s ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                   }`}
+                 >
+                   {s === UserStatus.PENDING_VERIFICATION ? 'Pending Verification' : s}
+                 </button>
+               ))}
+            </div>
         </div>
         {canEdit('users') && <V2Button label="Onboard User" icon={Plus} />}
       </div>
@@ -157,7 +175,7 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
                         <h4 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter mb-2">{selectedUser.name}</h4>
                          <div className="flex items-center gap-3">
                              <V2Badge label={selectedUser.role} color="indigo" />
-                             <V2Badge label={selectedUser.status} color={selectedUser.status === UserStatus.Active ? 'emerald' : 'rose'} />
+                             <V2Badge label={selectedUser.status} color={selectedUser.status === UserStatus.ACTIVE ? 'emerald' : 'rose'} />
                          </div>
                     </div>
                 </div>
@@ -195,15 +213,15 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
                     <ActionSquare icon={MessageSquare} label="Message" color="blue" />
                     <ActionSquare icon={ShieldAlert} label="Alert" color="rose" />
                     <ActionSquare icon={Repeat} label="Reset Pwd" color="slate" />
-                    <ActionSquare 
-                      icon={Eye} 
-                      label="Login As" 
-                      color="indigo" 
-                      onClick={() => {
-                        db.impersonateUser(selectedUser.id);
-                        setIsDetailOpen(false);
-                      }} 
-                    />
+                        <ActionSquare 
+                          icon={Eye} 
+                          label="Login As" 
+                          color="indigo" 
+                          onClick={() => {
+                            getDb().impersonateUser(selectedUser.id);
+                            setIsDetailOpen(false);
+                          }} 
+                        />
                 </div>
             </div>
         )}
