@@ -183,10 +183,10 @@ router.get('/diagnostics/run', async (req, res) => {
     res.json({ success: true, status: results });
 });
 
-router.post('/olt/:id/connect', oltController.testConnection);
-router.post('/olt/health', oltController.checkHealth);
-router.post('/olt/pulse', oltController.getPulse);
-router.post('/olt/:id/refresh', oltController.getOnuStatus);
-router.post('/olt/:id/reset-onu-password', oltController.resetOnuPassword);
+// router.post('/olt/:id/connect', oltController.testConnection);
+// router.post('/olt/health', oltController.checkHealth);
+// router.post('/olt/pulse', oltController.getPulse);
+// router.post('/olt/:id/refresh', oltController.getOnuStatus);
+// router.post('/olt/:id/reset-onu-password', oltController.resetOnuPassword);
 
 export default router;
