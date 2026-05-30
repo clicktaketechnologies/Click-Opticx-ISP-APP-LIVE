@@ -7,9 +7,9 @@ import {
   Cpu, HardDrive, Thermometer,
   Cloud, Globe, Wifi, Radio,
   ChevronRight, ArrowUpRight, ArrowDownRight,
-  Monitor, Play, Power, HelpCircle, XCircle, Clock
+  Monitor, Play, Power, HelpCircle, Clock
 } from 'lucide-react';
-import { AppState, NAS, OLT } from '../../types';
+import { AppState, NASConfig, OLTConfig } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
 import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../components/v2/TableAndSlide';
 import { usePermissions } from '../../src/hooks/usePermissions';
@@ -21,14 +21,14 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
   const { canEdit } = usePermissions(state);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [nodeType, setNodeType] = useState<'all' | 'NAS' | 'OLT'>('all');
+  const [nodeType, setNodeType] = useState<'all' | 'NASConfig' | 'OLTConfig'>('all');
   const [isTesting, setIsTesting] = useState(false);
 
   // 1. Data Consolidation
   const allNodes = useMemo(() => {
     const nodes = [
-      ...(state.nas || []).map(n => ({ ...n, type: 'NAS' as const })),
-      ...(state.oltNodes || []).map(o => ({ ...o, type: 'OLT' as const }))
+      ...(state.nas || []).map(n => ({ ...n, type: 'NASConfig' as const })),
+      ...(state.oltNodes || []).map(o => ({ ...o, type: 'OLTConfig' as const }))
     ];
     return nodes.filter(n => nodeType === 'all' || n.type === nodeType);
   }, [state.nas, state.oltNodes, nodeType]);
@@ -99,20 +99,20 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
                 onClick={() => { setSelectedNode(node); setIsDetailOpen(true); }}
             >
                 <div className="flex justify-between items-start mb-8">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${
-                        node.status === 'Connected' || node.status === 'Active' ? 'bg-blue-600 shadow-blue-500/20' : 'bg-slate-300'
-                    }`}>
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${
+            (node.status === 'Online' || node.status === 'Active') ? 'bg-blue-600 shadow-blue-500/20' : 'bg-slate-300'
+          }`}>
                         {node.type === 'NAS' ? <Server size={24} /> : <Database size={24} />}
                     </div>
                     <div className="flex items-center gap-2">
-                        {node.status === 'Connected' || node.status === 'Active' ? (
-                            <span className="flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[8px] font-black uppercase tracking-widest border border-emerald-100">
-                                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
-                                Online
-                            </span>
-                        ) : (
-                            <V2Badge label="Offline" color="rose" icon={XCircle} />
-                        )}
+                     {node.status === 'Online' || node.status === 'Active' ? (
+                             <span className="flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[8px] font-black uppercase tracking-widest border border-emerald-100">
+                                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                 Online
+                             </span>
+                         ) : (
+                             <V2Badge label="Offline" color="rose" icon={XCircle} />
+                         )}
                     </div>
                 </div>
                 <div className="mb-6">
@@ -284,9 +284,5 @@ const TelemetryBit = ({ icon: Icon, label, value, color }: any) => {
         </div>
     );
 };
-
-const XCircle = ({ className, size }: any) => (
-    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-);
 
 export default NetworkPlaneV2;

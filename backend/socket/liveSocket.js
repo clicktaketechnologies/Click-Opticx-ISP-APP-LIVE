@@ -1,15 +1,17 @@
 const LiveUsageService = require('../services/liveUsageService');
 const livePoller = require('../jobs/livePoller');
 const logger = require('../utils/logger');
-
 const OLTHealthAutomator = require('../jobs/oltHealthAutomator');
+const OLTTelemetryPoller = require('../services/oltTelemetryPoller');
 
 module.exports = (io) => {
   // We initialize the OLT automator but don't start it until requested
   const oltAutomator = new OLTHealthAutomator(io);
+  // Initialize the OLT telemetry poller
+  const oltTelemetryPoller = new OLTTelemetryPoller(io);
 
   io.on('connection', (socket) => {
-    
+     
     // --- AUTHENTICATION & ROOM JOINING ---
     socket.on('authenticate', (data) => {
       const { role, onuId } = data;
@@ -23,7 +25,7 @@ module.exports = (io) => {
         logger.info(`Socket ${socket.id} joined User ONU Room: ${onuId}`);
       }
     });
- 
+  
     socket.on('join-room', (room) => {
       socket.join(room);
       logger.info(`Socket ${socket.id} joined custom room: ${room}`);
@@ -34,11 +36,17 @@ module.exports = (io) => {
       // Receive the full active OLT list from the Admin frontend
       if (Array.isArray(olts)) {
         oltAutomator.updateRegistry(olts);
+        // Start telemetry polling for all OLTs
+        oltTelemetryPoller.startPollingAll(olts);
+        logger.info(`[TELEMETRY] Started polling for ${olts.length} OLTs`);
       }
     });
 
     socket.on('stop-automation-loop', () => {
       oltAutomator.stop();
+      // Stop telemetry polling when automation loop stops
+      oltTelemetryPoller.stopPollingAll();
+      logger.info('[TELEMETRY] Stopped all OLT polling');
     });
     
     // When a frontend component subscribes to listen to a specific username's traffic
@@ -82,15 +90,15 @@ module.exports = (io) => {
            livePoller.removeUserFromPoll(username);
            logger.info(`Socket client ${socket.id} unsubscribed from: ${username}`);
          }
-      });
-      
-      // Handle socket disconnect to clean up the interval securely
-      socket.on('disconnect', () => {
-        clearInterval(interval);
-        livePoller.removeUserFromPoll(username);
-        // Note: Disconnect already logged in server.js, no need to log twice excessively
-      });
-    });
+       });
+       
+       // Handle socket disconnect to clean up the interval securely
+       socket.on('disconnect', () => {
+         clearInterval(interval);
+         livePoller.removeUserFromPoll(username);
+         // Note: Disconnect already logged in server.js, no need to log twice excessively
+       });
+     });
 
     // --- GLOBAL CACHE CONTROL ---
     socket.on('trigger-global-wipe', () => {
@@ -98,5 +106,10 @@ module.exports = (io) => {
       io.emit('global-wipe', { timestamp: new Date().toISOString() });
     });
 
+    // --- TELEMETRY CONTROL ---
+    socket.on('get-telemetry-status', () => {
+      const status = oltTelemetryPoller.getStatus();
+      socket.emit('telemetry-status', status);
+    });
   });
 };

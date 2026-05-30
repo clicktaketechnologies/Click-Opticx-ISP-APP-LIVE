@@ -6,7 +6,7 @@ import {
   ArrowRight, Edit3, Trash2, ShieldAlert,
   UserCheck, XCircle, Clock, Database,
   ArrowUpRight, BarChart3, MessageSquare,
-  Repeat, CreditCard, ChevronRight
+  Repeat, CreditCard, ChevronRight, Eye
 } from 'lucide-react';
 import { AppState, ISPUser as UserType, Role, Package } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
@@ -18,7 +18,7 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'Active' | 'Expired' | 'Suspended' | 'Pending Verification'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | UserStatus.Active | UserStatus.Expired | UserStatus.Suspended | UserStatus.PENDING_VERIFICATION>('all');
 
   // 1. Data Filtration (Parity with Legacy)
   const filteredUsers = useMemo(() => {
@@ -34,13 +34,13 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
     });
   }, [state.users, searchQuery, filterStatus]);
 
-  const stats = {
-    total: state.users.length,
-    active: state.users.filter(u => u.status === 'Active').length,
-    pending: state.users.filter(u => u.status === 'Pending Verification').length,
-    expired: state.users.filter(u => u.status === 'Expired').length,
-    suspended: state.users.filter(u => u.status === 'Suspended').length
-  };
+   const stats = {
+     total: state.users.length,
+     active: state.users.filter(u => u.status === UserStatus.Active).length,
+     pending: state.users.filter(u => u.status === UserStatus.PENDING_VERIFICATION).length,
+     expired: state.users.filter(u => u.status === UserStatus.EXPIRED).length,
+     suspended: state.users.filter(u => u.status === UserStatus.SUSPENDED).length
+   };
 
   return (
     <div className="space-y-10">
@@ -105,12 +105,12 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
               </div>
             </V2TableCell>
             <V2TableCell>
-               <V2Badge 
-                 label={user.status} 
-                 color={user.status === 'Active' ? 'emerald' : user.status === 'Expired' ? 'amber' : 'rose'} 
-                 variant="ghost" 
-                 icon={user.status === 'Active' ? UserCheck : Clock}
-               />
+                <V2Badge 
+                  label={user.status} 
+                  color={user.status === UserStatus.Active ? 'emerald' : user.status === UserStatus.EXPIRED ? 'amber' : 'rose'} 
+                  variant="ghost" 
+                  icon={user.status === UserStatus.Active ? UserCheck : Clock}
+                />
             </V2TableCell>
             <V2TableCell>
                <div className="flex flex-col">
@@ -155,10 +155,10 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                     <div>
                         <h4 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter mb-2">{selectedUser.name}</h4>
-                        <div className="flex items-center gap-3">
-                            <V2Badge label={selectedUser.role} color="indigo" />
-                            <V2Badge label={selectedUser.status} color={selectedUser.status === 'Active' ? 'emerald' : 'rose'} />
-                        </div>
+                         <div className="flex items-center gap-3">
+                             <V2Badge label={selectedUser.role} color="indigo" />
+                             <V2Badge label={selectedUser.status} color={selectedUser.status === UserStatus.Active ? 'emerald' : 'rose'} />
+                         </div>
                     </div>
                 </div>
 
