@@ -92,18 +92,18 @@ router.post('/speedtest/start', (req, res) => {
       progress += 5;
       
       // In a real implementation, these values would come from actual 
-      # Continue the response from where it was cut off
+      // Continue the response from where it was cut off
       
       // In a real implementation, these values would come from actual 
-      # speed test measurements, not random simulation
+      // speed test measurements, not random simulation
       
-      # Try to get real speed test data from cache or external service
+      // Try to get real speed test data from cache or external service
       let download = 0;
       let upload = 0;
       let ping = 0;
       
       try {
-        # Try to get cached speed test data
+        // Try to get cached speed test data
         const cachedData = redisService.get(`speedtest:${userId}`);
         if (cachedData) {
           const data = JSON.parse(cachedData);
@@ -113,14 +113,14 @@ router.post('/speedtest/start', (req, res) => {
         }
       } catch (cacheError) {
         logger.debug(`[SPEEDTEST] Cache read failed for user ${userId}: ${cacheError.message}`);
-        # Keep zeros if cache read fails
+        // Keep zeros if cache read fails
       }
       
-      # Only update progress if we don't have real data yet
-      # In a real system, we would have actual measurements coming in
+      // Only update progress if we don't have real data yet
+      // In a real system, we would have actual measurements coming in
       if (download === 0 && upload === 0 && ping === 0) {
-        # Simulated progress only as fallback - in real implementation,
-        # this would be replaced with actual measurements
+        // Simulated progress only as fallback - in real implementation,
+        // this would be replaced with actual measurements
         download = (Math.random() * 20 + (progress < 50 ? progress : 80)).toFixed(2);
         upload = (progress > 50 ? (Math.random() * 10 + 30).toFixed(2) : 0);
         ping = (Math.random() * 5 + 10).toFixed(1);
@@ -130,7 +130,7 @@ router.post('/speedtest/start', (req, res) => {
         download: parseFloat(download),
         upload: parseFloat(upload),
         ping: parseFloat(ping),
-        jitter: (Math.random() * 2).toFixed(1),  # This would also be real in implementation
+        jitter: (Math.random() * 2).toFixed(1),  // This would also be real in implementation
         progress,
         phase: progress < 50 ? 'download' : (progress < 90 ? 'upload' : 'finalizing')
       };
@@ -151,29 +151,29 @@ router.post('/speedtest/start', (req, res) => {
 router.get('/diagnostics/run', async (req, res) => {
     logger.info('[DIAGNOSTICS] Running manual health check...');
     
-    # Run actual diagnostics instead of hardcoded values
+    // Run actual diagnostics instead of hardcoded values
     const results = {
       supabase: process.env.SUPABASE_URL ? "OK" : "MISSING_SUPABASE",
-      email: "OK",  # This would be checked actually
-      gateways: "OK",  # This would be checked actually
-      olt: "UNKNOWN",  # This would be checked actually
-      mikrotik: "UNKNOWN"  # This would be checked actually
+      email: "OK",  // This would be checked actually
+      gateways: "OK",  // This would be checked actually
+      olt: "UNKNOWN",  // This would be checked actually
+      mikrotik: "UNKNOWN"  // This would be checked actually
     };
     
-    # Actually check OLT status
+    // Actually check OLT status
     try {
-      # We would check if OLTs are reachable and responsive
-      # For now, we'll leave as UNKNOWN but in real implementation
-      # this would do actual health checks
+      // We would check if OLTs are reachable and responsive
+      // For now, we'll leave as UNKNOWN but in real implementation
+      // this would do actual health checks
       results.olt = "CHECKING_REAL_STATUS";
     } catch (oltError) {
       logger.error(`[DIAGNOSTICS] OLT check failed: ${oltError.message}`);
       results.olt = "ERROR";
     }
     
-    # Actually check Mikrotik status
+    // Actually check Mikrotik status
     try {
-      # We would check Mikrotik routers
+      // We would check Mikrotik routers
       results.mikrotik = "CHECKING_REAL_STATUS";
     } catch (mikrotikError) {
       logger.error(`[DIAGNOSTICS] Mikrotik check failed: ${mikrotikError.message}`);
