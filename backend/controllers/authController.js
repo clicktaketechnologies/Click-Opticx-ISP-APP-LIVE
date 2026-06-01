@@ -507,6 +507,14 @@ export const verifyOtp = async (req, res) => {
 
         if (updateError) throw updateError;
 
+        // Confirm email in Supabase Auth
+        try {
+            await supabase.auth.admin.updateUserById(userId, { email_confirm: true });
+        } catch (confirmErr) {
+            // Log but don't fail verification - user can still login with email confirmed in app DB
+            logger.warn(`[VERIFY-OTP] Failed to confirm email in Supabase Auth for user ${userId}: ${confirmErr.message}`);
+        }
+
         // Log audit
         try {
             const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
@@ -666,10 +674,13 @@ export const completeReset = async (req, res) => {
 
         const hashedPassword = await argon2.hash(newPassword, { type: argon2.argon2id });
 
+        let isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
+        let matchColumn = isUuid ? 'id' : 'email';
+
         let { data: userUpdateData, error } = await supabase
             .from('users')
             .update({ password: hashedPassword })
-            .eq('id', targetId)
+            .eq(matchColumn, targetId)
             .select('email');
 
         let user = userUpdateData?.[0];
@@ -678,7 +689,7 @@ export const completeReset = async (req, res) => {
             const { data: staffUpdateData, error: staffError } = await supabase
                 .from('staff')
                 .update({ password: hashedPassword })
-                .eq('id', targetId)
+                .eq(matchColumn, targetId)
                 .select('email');
             
             user = staffUpdateData?.[0];
@@ -836,6 +847,14 @@ export const verifyEmail = async (req, res) => {
             .eq('id', decoded.id);
 
         if (error) throw error;
+
+        // Confirm email in Supabase Auth
+        try {
+            await supabase.auth.admin.updateUserById(decoded.id, { email_confirm: true });
+        } catch (confirmErr) {
+            // Log but don't fail verification - user can still login with email confirmed in app DB
+            logger.warn(`[VERIFY-EMAIL] Failed to confirm email in Supabase Auth for user ${decoded.id}: ${confirmErr.message}`);
+        }
 
         logger.info(`[VERIFY-EMAIL] User ${decoded.id} activated.`);
         res.json({ success: true, message: 'Account successfully verified. You can now login.' });

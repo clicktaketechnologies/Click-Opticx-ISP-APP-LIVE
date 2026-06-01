@@ -11,6 +11,7 @@ if (!rootElement) {
 
 import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ErrorBoundary from './components/shared/ErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,13 +25,15 @@ const queryClient = new QueryClient({
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <QueryClientProvider client={queryClient}>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem storageKey="clickopticx_theme">
+        <QueryClientProvider client={queryClient}>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 

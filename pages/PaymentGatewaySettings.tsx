@@ -66,7 +66,12 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
       setIsTesting(true);
       setTestResult(null);
       try {
-         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment/test-gateway`, {
+         const backendUrl = import.meta.env.VITE_BACKEND_URL || '';
+         if (!backendUrl) {
+            throw new Error('System Configuration Error: VITE_BACKEND_URL is not defined in the environment.');
+         }
+
+         const res = await fetch(`${backendUrl}/api/payment/test-gateway`, {
             method: 'POST',
             headers: {
                'Content-Type': 'application/json',

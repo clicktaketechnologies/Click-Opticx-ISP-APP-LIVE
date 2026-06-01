@@ -650,7 +650,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
         </div>
         
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full min-w-full">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[1000px]">
             <thead>
               <tr className="!bg-slate-50 !border-b-2 !border-slate-100">
                 <th className="w-16 p-6"></th>

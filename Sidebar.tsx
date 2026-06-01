@@ -144,7 +144,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
           </div>
           <div>
             <h1 className="text-xl font-black tracking-tighter uppercase italic text-white leading-none">{businessName || 'CLICK OPTICX'}</h1>
-            <p className="text-[8px] font-black text-indigo-400 tracking-[0.4em] uppercase opacity-70 mt-2">v9.5.4 Core Engine</p>
+            <p className="text-[8px] font-black text-indigo-400 tracking-[0.4em] uppercase opacity-70 mt-2">v9.6.1-LIVE</p>
           </div>
         </div>
 

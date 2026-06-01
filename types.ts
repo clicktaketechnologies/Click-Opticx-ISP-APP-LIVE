@@ -1100,9 +1100,10 @@ export interface AppState {
      email?: string;
      name?: string;
      lastLoginAt?: string;
-     isImpersonating?: boolean;
-     impersonatorId?: string;
-   };
+    isImpersonating?: boolean;
+    impersonatorId?: string;
+    isPersistent?: boolean;
+  };
   view: 'login' | 'admin' | 'portal';
   
   // V2 Dashboard & Operational Metrics

@@ -84,17 +84,17 @@ const Header: React.FC<HeaderProps> = ({
           <Menu size={24} />
         </button>
 
-        <div className="hidden md:flex items-center gap-3 w-96 px-4 py-2.5 bg-slate-100 dark:bg-white/5 rounded-2xl border border-transparent focus-within:border-indigo-500/50 focus-within:bg-white dark:focus-within:bg-slate-900 transition-all group">
+        <div className="flex md:flex items-center gap-2 md:gap-3 w-full md:w-96 px-3 md:px-4 py-2 md:py-2.5 bg-slate-100 dark:bg-white/5 rounded-2xl border border-transparent focus-within:border-indigo-500/50 focus-within:bg-white dark:focus-within:bg-slate-900 transition-all group">
           <Search className={`transition-colors duration-300 ${searchTerm ? 'text-indigo-500' : 'text-slate-400'}`} size={18} />
           <input 
             type="text" 
             value={searchTerm}
             onChange={(e) => onSearch(e.target.value)}
-            placeholder="Search connections, invoices, or users..." 
-            className="w-full bg-transparent outline-none text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400"
+            placeholder="Search connections..." 
+            className="w-full bg-transparent outline-none text-[13px] md:text-sm font-medium text-slate-900 dark:text-white placeholder:text-slate-400"
           />
           {searchTerm && (
-            <button onClick={() => onSearch('')} className="text-slate-400 hover:text-rose-500">
+            <button onClick={() => onSearch('')} className="text-slate-400 hover:text-rose-500 shrink-0">
               <X size={14} />
             </button>
           )}
