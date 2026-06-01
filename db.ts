@@ -291,7 +291,7 @@ class DB {
   private firestore: Firestore | null = null;
   private app: FirebaseApp | null = null;
   private socket: any = null;
-  readonly backendUrl: string = 'https://isp-click-opticx.onrender.com';
+  readonly backendUrl: string = import.meta.env.VITE_BACKEND_URL || 'https://isp-click-opticx.onrender.com';
 
   constructor() {
     this.state = INITIAL_STATE;
@@ -491,33 +491,29 @@ class DB {
     this.state.users.push(newUser as any); await this.commit(); return { success: true, user: newUser };
   }
 
-  async submitSignupRequest(data: any) {
-    const now = new Date().toISOString();
-    const userId = 'USR-' + Date.now();
-    const request = {
-      id: 'SGN-' + Date.now(),
-      name: data.name,
-      username: data.username,
-      email: data.email,
-      phone: data.phone,
-      cnic: data.cnic,
-      password: data.password,
-      address: data.address,
-      area: data.area || 'Unassigned',
-      packageId: data.packageId,
-      connectionType: data.connectionType || 'Fiber',
-      status: 'Pending',
-      kyc_status: 'pending',
-      approval_status: 'pending',
-      timestamp: now,
-      userId,
-    };
+   async submitSignupRequest(data: any) {
+        try {
+            const response = await fetch(`${this.backendUrl}/api/auth/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
 
-    if (!Array.isArray(this.state.signupRequests)) this.state.signupRequests = [];
-    this.state.signupRequests.push(request as any);
-    await this.commit();
-    return { success: true, userId, request, message: 'Account handshake complete. Verify your email to continue.' };
-  }
+            const result = await response.json();
+
+            if (!response.ok) {
+                return { success: false, message: result.message || 'Signup failed' };
+            }
+
+            // Assuming the backend returns { success: true, userId, message, expiresAt }
+            return { success: true, userId: result.userId, message: result.message };
+        } catch (error) {
+            console.error('Signup error:', error);
+            return { success: false, message: 'Network error. Please try again.' };
+        }
+    }
 
   async updateUser(id: string, d: any) {
     const idx = this.state.users.findIndex(u => u.id === id);

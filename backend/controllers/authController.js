@@ -12,6 +12,25 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
+// Timeout helper for Supabase calls
+const timeoutPromise = (promise, ms) => {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`Operation timed out after ${ms}ms`));
+    }, ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timeoutId);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      }
+    );
+  });
+};
+
 // Zod Validation Schemas
 const signupSchema = z.object({
   name: z.string().min(1, "Full Name is required"),
@@ -102,31 +121,38 @@ export const signup = async (req, res) => {
             }
         }
 
-        // 3. Supabase Auth Registration
-        let supabaseUser;
-        try {
-            const authResult = await supabaseAuth.signUp({
-                email,
-                password,
-                metadata: { name, username, phone, role: 'Customer' }
-            });
-            
-            if (!authResult || !authResult.user) {
-                throw new Error("Supabase Auth sign up did not return user details.");
-            }
-            supabaseUser = authResult.user;
-        } catch (authError) {
-            logger.error(`[SIGNUP] Supabase Auth failure: ${authError.message}`);
-            if (authError.message && (authError.message.includes('already exists') || authError.code === 'user_already_exists')) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'CONFLICT_ERROR',
-                    field: 'email',
-                    message: 'An account with this email already exists in the identity provider.'
-                });
-            }
-            throw authError;
-        }
+         // 3. Supabase Auth Registration
+         let supabaseUser;
+         try {
+             const authResult = await supabaseAuth.signUp({
+                 email,
+                 password,
+                 metadata: { name, username, phone, role: 'Customer' }
+             });
+             
+             if (!authResult || !authResult.user) {
+                 throw new Error("Supabase Auth sign up did not return user details.");
+             }
+             supabaseUser = authResult.user;
+         } catch (authError) {
+             logger.error(`[SIGNUP] Supabase Auth failure: ${authError.message}`);
+             if (authError.message === 'AUTH_TIMEOUT') {
+                 return res.status(504).json({ 
+                     success: false, 
+                     error: 'AUTH_TIMEOUT', 
+                     message: 'Authentication service timeout. Please try again.' 
+                 });
+             }
+             if (authError.message && (authError.message.includes('already exists') || authError.code === 'user_already_exists')) {
+                 return res.status(400).json({
+                     success: false,
+                     error: 'CONFLICT_ERROR',
+                     field: 'email',
+                     message: 'An account with this email already exists in the identity provider.'
+                 });
+             }
+             throw authError;
+         }
 
         const userId = supabaseUser.id; // Use UUID from Supabase Auth!
 
@@ -327,35 +353,43 @@ export const login = async (req, res) => {
             return res.status(401).json({ success: false, error: 'INVALID_CREDENTIALS', message: 'Invalid username, email, phone or password.' });
         }
 
-        // 4. Authenticate via Supabase Auth (Single Source of Truth)
-        let authSession;
-        try {
-            const authResult = await supabaseAuth.signIn({
-                email: user.email,
-                password
-            });
-            authSession = authResult;
-        } catch (authError) {
-            trackLoginAttempt(identifier);
-            logger.warn(`[LOGIN] Supabase Auth authentication failed for ${user.email}: ${authError.message}`);
-            
-            const errMsg = authError.message ? authError.message.toLowerCase() : '';
-            if (errMsg.includes('confirm') || errMsg.includes('verified') || authError.code === 'email_not_confirmed') {
-                return res.status(403).json({ 
-                    success: false, 
-                    error: 'ACCOUNT_NOT_VERIFIED', 
-                    message: 'Please verify your email first.',
-                    status: 'PENDING_VERIFICATION',
-                    userId: user.id
-                });
-            }
-            
-            return res.status(401).json({ 
-                success: false, 
-                error: 'INVALID_CREDENTIALS', 
-                message: 'Invalid username, email, phone or password.' 
-            });
-        }
+         // 4. Authenticate via Supabase Auth (Single Source of Truth)
+         let authSession;
+         try {
+             const authResult = await supabaseAuth.signIn({
+                 email: user.email,
+                 password
+             });
+             authSession = authResult;
+         } catch (authError) {
+             trackLoginAttempt(identifier);
+             logger.warn(`[LOGIN] Supabase Auth authentication failed for ${user.email}: ${authError.message}`);
+             
+             if (authError.message === 'AUTH_TIMEOUT') {
+                 return res.status(504).json({ 
+                     success: false, 
+                     error: 'AUTH_TIMEOUT', 
+                     message: 'Authentication service timeout. Please try again.' 
+                 });
+             }
+             
+             const errMsg = authError.message ? authError.message.toLowerCase() : '';
+             if (errMsg.includes('confirm') || errMsg.includes('verified') || authError.code === 'email_not_confirmed') {
+                 return res.status(403).json({ 
+                     success: false, 
+                     error: 'ACCOUNT_NOT_VERIFIED', 
+                     message: 'Please verify your email first.',
+                     status: 'PENDING_VERIFICATION',
+                     userId: user.id
+                 });
+             }
+             
+             return res.status(401).json({ 
+                 success: false, 
+                 error: 'INVALID_CREDENTIALS', 
+                 message: 'Invalid username, email, phone or password.' 
+             });
+         }
 
         // 5. Account Status Enforcement
         const BLOCKED_STATUSES = ['PENDING_VERIFICATION', 'SUSPENDED', 'Locked', 'Disabled', 'Blocked'];
@@ -546,28 +580,34 @@ export const socialHandshake = async (req, res) => {
         
         logger.info(`[SOCIAL-HANDSHAKE] Verification for: ${email || phone} via ${provider}`);
         
-        let { data: user } = await supabase
-            .from('users')
-            .select('*')
-            .or(`email.eq.${email},phone.eq.${phone}`)
-            .maybeSingle();
+         let { data: user } = await timeoutPromise(
+           supabase
+             .from('users')
+             .select('*')
+             .or(`email.eq.${email},phone.eq.${phone}`)
+             .maybeSingle(),
+           10000 // 10 seconds timeout
+         );
 
-        if (!user) {
-            const userId = crypto.randomUUID();
-            user = {
-                id: userId,
-                name,
-                email,
-                phone,
-                role: 'Customer',
-                status: 'Active',
-                verification_status: 'Verified',
-                balance: 0,
-                created_at: new Date().toISOString()
-            };
-            await supabase.from('users').insert([user]);
-            logger.info(`[SOCIAL-HANDSHAKE] Created new user: ${userId}`);
-        }
+         if (!user) {
+             const userId = crypto.randomUUID();
+             user = {
+                 id: userId,
+                 name,
+                 email,
+                 phone,
+                 role: 'Customer',
+                 status: 'Active',
+                 verification_status: 'Verified',
+                 balance: 0,
+                 created_at: new Date().toISOString()
+             };
+             await timeoutPromise(
+               supabase.from('users').insert([user]),
+               10000 // 10 seconds timeout
+             );
+             logger.info(`[SOCIAL-HANDSHAKE] Created new user: ${userId}`);
+         }
 
         const token = jwt.sign(
             { id: user.id, role: user.role },
@@ -594,55 +634,64 @@ export const forgotPassword = async (req, res) => {
             user = staffUser;
         }
 
-        if (user) {
-            // Generate link manually to allow custom SMTP fallback (guaranteed delivery)
-            const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
-                type: 'recovery',
-                email: email,
-                options: {
-                    redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/reset-password`
-                }
-            });
+         if (user) {
+             // Generate link manually to allow custom SMTP fallback (guaranteed delivery)
+             const { data: linkData, error: linkError } = await timeoutPromise(
+               supabase.auth.admin.generateLink({
+                 type: 'recovery',
+                 email: email,
+                 options: {
+                   redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/reset-password`
+                 }
+               }),
+               10000 // 10 seconds timeout
+             );
 
-            if (linkError) {
-                logger.error(`[FORGOT-PASSWORD] Generate link failed: ${linkError.message}`);
-                // fallback to default reset
-                await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/reset-password`
-                });
-                logger.info(`[FORGOT-PASSWORD] Password reset Magic Link dispatched via Supabase to ${email}`);
-            } else {
-                const actionLink = linkData.properties.action_link;
-                // Send email manually
-                const emailHtml = `
-                    <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px;">
-                        <h2 style="color: #0f172a; margin-top: 0;">Password Reset Request</h2>
-                        <p style="color: #475569; font-size: 14px; line-height: 1.6;">Click the button below to reset your password:</p>
-                        <a href="${actionLink}" style="display: inline-block; padding: 12px 24px; background: #ea580c; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 16px 0;">Reset Password</a>
-                        <p style="color: #64748b; font-size: 12px;">If you didn't request this, you can safely ignore this email.</p>
-                    </div>
-                `;
+             if (linkError) {
+                 logger.error(`[FORGOT-PASSWORD] Generate link failed: ${linkError.message}`);
+                 // fallback to default reset
+                 await timeoutPromise(
+                   supabase.auth.resetPasswordForEmail(email, {
+                     redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/reset-password`
+                   }),
+                   10000 // 10 seconds timeout
+                 );
+                 logger.info(`[FORGOT-PASSWORD] Password reset Magic Link dispatched via Supabase to ${email}`);
+             } else {
+                 const actionLink = linkData.properties.action_link;
+                 // Send email manually
+                 const emailHtml = `
+                     <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px;">
+                         <h2 style="color: #0f172a; margin-top: 0;">Password Reset Request</h2>
+                         <p style="color: #475569; font-size: 14px; line-height: 1.6;">Click the button below to reset your password:</p>
+                         <a href="${actionLink}" style="display: inline-block; padding: 12px 24px; background: #ea580c; color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 16px 0;">Reset Password</a>
+                         <p style="color: #64748b; font-size: 12px;">If you didn't request this, you can safely ignore this email.</p>
+                     </div>
+                 `;
 
-                // Send via Resend (3× retry) → Gmail SMTP fallback
-                const resetEmailResult = await sendDirectEmail({
-                    to: email,
-                    subject: 'Reset Your Click Opticx Password',
-                    html: emailHtml,
-                    type: 'password_reset'
-                });
+                 // Send via Resend (3× retry) → Gmail SMTP fallback
+                 const resetEmailResult = await sendDirectEmail({
+                     to: email,
+                     subject: 'Reset Your Click Opticx Password',
+                     html: emailHtml,
+                     type: 'password_reset'
+                 });
 
-                if (resetEmailResult.success) {
-                    logger.info(`[FORGOT-PASSWORD] Reset email delivered | to=${email} | provider=${resetEmailResult.provider} | msgId=${resetEmailResult.messageId}`);
-                } else {
-                    logger.error(`[FORGOT-PASSWORD] Reset email failed | to=${email} | error=${resetEmailResult.error}`);
-                    // Final fallback: Supabase built-in delivery
-                    await supabase.auth.resetPasswordForEmail(email, {
-                        redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/reset-password`
-                    });
-                    logger.info(`[FORGOT-PASSWORD] Supabase fallback reset dispatched to ${email}`);
-                }
-            }
-        }
+                 if (resetEmailResult.success) {
+                     logger.info(`[FORGOT-PASSWORD] Reset email delivered | to=${email} | provider=${resetEmailResult.provider} | msgId=${resetEmailResult.messageId}`);
+                 } else {
+                     logger.error(`[FORGOT-PASSWORD] Reset email failed | to=${email} | error=${resetEmailResult.error}`);
+                     // Final fallback: Supabase built-in delivery
+                     await timeoutPromise(
+                       supabase.auth.resetPasswordForEmail(email, {
+                         redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/reset-password`
+                       }),
+                       10000 // 10 seconds timeout
+                     );
+                     logger.info(`[FORGOT-PASSWORD] Supabase fallback reset dispatched to ${email}`);
+                 }
+             }
+         }
 
         res.json({ success: true, message: 'If an account exists with this email, a reset link has been sent.' });
     } catch (error) {
@@ -677,20 +726,26 @@ export const completeReset = async (req, res) => {
         let isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
         let matchColumn = isUuid ? 'id' : 'email';
 
-        let { data: userUpdateData, error } = await supabase
+        let { data: userUpdateData, error } = await timeoutPromise(
+          supabase
             .from('users')
             .update({ password: hashedPassword })
             .eq(matchColumn, targetId)
-            .select('email');
+            .select('email'),
+          10000 // 10 seconds timeout
+        );
 
         let user = userUpdateData?.[0];
 
         if (!user || userUpdateData.length === 0) {
-            const { data: staffUpdateData, error: staffError } = await supabase
+            const { data: staffUpdateData, error: staffError } = await timeoutPromise(
+              supabase
                 .from('staff')
                 .update({ password: hashedPassword })
                 .eq(matchColumn, targetId)
-                .select('email');
+                .select('email'),
+              10000 // 10 seconds timeout
+            );
             
             user = staffUpdateData?.[0];
             if (staffError) throw staffError;
@@ -823,10 +878,29 @@ export const refreshToken = async (req, res) => {
 export const logout = async (req, res) => {
     try {
         logger.info('[LOGOUT] Server-side session invalidated for: ' + (req.user?.id || 'unknown'));
+        
+        // Clear sessions from database
+        const userId = req.user?.id;
+        if (userId) {
+            const supabase = configManager.getSupabaseClient();
+            let { data: user } = await supabase.from('users').select('raw_data').eq('id', userId).maybeSingle();
+            if (user) {
+                const updatedRawData = { ...user.raw_data, sessions: [] };
+                await supabase.from('users').update({ raw_data: updatedRawData }).eq('id', userId);
+            } else {
+                const { data: staffUser } = await supabase.from('staff').select('raw_data').eq('id', userId).maybeSingle();
+                if (staffUser) {
+                    const updatedRawData = { ...staffUser.raw_data, sessions: [] };
+                    await supabase.from('staff').update({ raw_data: updatedRawData }).eq('id', userId);
+                }
+            }
+        }
+        
         res.clearCookie('accessToken', { httpOnly: true, sameSite: 'none', secure: true });
         res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'none', secure: true });
         res.json({ success: true, message: 'Session invalidated' });
     } catch (error) {
+        logger.error(`[LOGOUT] Error: ${error.message}`);
         res.status(500).json({ success: false, error: 'INTERNAL_ERROR', message: error.message });
     }
 };
@@ -841,23 +915,29 @@ export const verifyEmail = async (req, res) => {
 
         const supabase = configManager.getSupabaseClient();
         
-        const { error } = await supabase
-            .from('users')
-            .update({ status: 'Active', verification_status: 'Verified' })
-            .eq('id', decoded.id);
+         const { error } = await timeoutPromise(
+           supabase
+             .from('users')
+             .update({ status: 'Active', verification_status: 'Verified' })
+             .eq('id', decoded.id),
+           10000 // 10 seconds timeout
+         );
 
-        if (error) throw error;
+         if (error) throw error;
 
-        // Confirm email in Supabase Auth
-        try {
-            await supabase.auth.admin.updateUserById(decoded.id, { email_confirm: true });
-        } catch (confirmErr) {
-            // Log but don't fail verification - user can still login with email confirmed in app DB
-            logger.warn(`[VERIFY-EMAIL] Failed to confirm email in Supabase Auth for user ${decoded.id}: ${confirmErr.message}`);
-        }
+         // Confirm email in Supabase Auth
+         try {
+             await timeoutPromise(
+               supabase.auth.admin.updateUserById(decoded.id, { email_confirm: true }),
+               10000 // 10 seconds timeout
+             );
+         } catch (confirmErr) {
+             // Log but don't fail verification - user can still login with email confirmed in app DB
+             logger.warn(`[VERIFY-EMAIL] Failed to confirm email in Supabase Auth for user ${decoded.id}: ${confirmErr.message}`);
+         }
 
-        logger.info(`[VERIFY-EMAIL] User ${decoded.id} activated.`);
-        res.json({ success: true, message: 'Account successfully verified. You can now login.' });
+         logger.info(`[VERIFY-EMAIL] User ${decoded.id} activated.`);
+         res.json({ success: true, message: 'Account successfully verified. You can now login.' });
     } catch (error) {
         logger.error(`[VERIFY-EMAIL] Error: ${error.message}`);
         res.status(400).json({ success: false, error: 'VERIFICATION_FAILED', message: 'Invalid or expired verification link.' });
@@ -868,9 +948,12 @@ export const checkVerificationStatus = async (req, res) => {
     try {
         const { userId } = req.query;
         const supabase = configManager.getSupabaseClient();
-        const { data: user } = await supabase.from('users').select('status').eq('id', userId).maybeSingle();
-        
-        res.json({ success: true, status: user?.status || 'NotFound' });
+         const { data: user } = await timeoutPromise(
+           supabase.from('users').select('status').eq('id', userId).maybeSingle(),
+           10000 // 10 seconds timeout
+         );
+
+         res.json({ success: true, status: user?.status || 'NotFound' });
     } catch (error) {
         res.status(500).json({ success: false, error: 'INTERNAL_ERROR', message: error.message });
     }
@@ -997,15 +1080,21 @@ export const verifySession = async (req, res) => {
         const ipHash = crypto.createHash('sha256').update(ip).digest('hex');
         const fingerprint = req.headers['x-device-fingerprint'] || req.body.fingerprint || 'unknown';
 
-        if (user.raw_data?.sessions && user.raw_data.sessions.length > 0) {
-            const activeSessions = user.raw_data.sessions.filter(s => new Date(s.expiresAt).getTime() > Date.now());
-            const currentSession = activeSessions.find(s => s.fingerprint === fingerprint);
-            if (!currentSession || currentSession.ipHash !== ipHash) {
-                res.clearCookie('accessToken', { httpOnly: true, sameSite: 'none', secure: true });
-                res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'none', secure: true });
-                return res.status(403).json({ success: false, error: 'DEVICE_MISMATCH', message: 'Session binding violation. Device/IP mismatch or unregistered device signature detected.' });
-            }
-        }
+         if (user.raw_data?.sessions && user.raw_data.sessions.length > 0) {
+             const activeSessions = user.raw_data.sessions.filter(s => new Date(s.expiresAt).getTime() > Date.now());
+             const currentSession = activeSessions.find(s => s.fingerprint === fingerprint);
+             if (!currentSession || currentSession.ipHash !== ipHash) {
+                 // Remove the mismatched session from the database
+                 const updatedRawData = { ...user.raw_data };
+                 updatedRawData.sessions = activeSessions.filter(s => s.refreshToken !== currentSession?.refreshToken);
+                 const targetTable = (user.role && user.role !== 'Customer') ? 'staff' : 'users';
+                 await supabase.from(targetTable).update({ raw_data: updatedRawData }).eq('id', user.id);
+                 
+                 res.clearCookie('accessToken', { httpOnly: true, sameSite: 'none', secure: true });
+                 res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'none', secure: true });
+                 return res.status(403).json({ success: false, error: 'DEVICE_MISMATCH', message: 'Session binding violation. Device/IP mismatch or unregistered device signature detected.' });
+             }
+         }
 
         res.json({ success: true, user });
     } catch (error) {

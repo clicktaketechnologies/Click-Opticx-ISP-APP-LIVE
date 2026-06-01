@@ -7,56 +7,120 @@ import bcrypt from 'bcryptjs';
  * Wraps Supabase Auth operations for the ISP app
  */
 
+// Timeout helper for Supabase calls
+const timeoutPromise = (promise, ms) => {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`Supabase operation timed out after ${ms}ms`));
+    }, ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timeoutId);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      }
+    );
+  });
+};
+
 export async function signUp({ email, password, phone, metadata }) {
    const supabase = configManager.getSupabaseClient();
    if (!supabase) throw new Error('Supabase client not initialized');
 
-   const { data, error } = await supabase.auth.signUp({
-     email,
-     password,
-     options: {
-       data: metadata || {},
-     }
-   });
+   try {
+     const { data, error } = await timeoutPromise(
+       supabase.auth.signUp({
+         email,
+         password,
+         options: {
+           data: metadata || {},
+         }
+       }),
+       10000 // 10 seconds timeout
+     );
 
-   if (error) throw error;
-   return data;
+     if (error) throw error;
+     return data;
+   } catch (err) {
+     if (err.message.includes('timed out')) {
+       logger.error(`[SIGNUP] Supabase Auth timeout: ${err.message}`);
+       throw new Error('AUTH_TIMEOUT');
+     }
+     throw err;
+   }
  }
 
 export async function signIn({ email, phone, password }) {
-  const supabase = configManager.getSupabaseClient();
-  if (!supabase) throw new Error('Supabase client not initialized');
+   const supabase = configManager.getSupabaseClient();
+   if (!supabase) throw new Error('Supabase client not initialized');
 
-  const credentials = email ? { email, password } : { phone, password };
-  const { data, error } = await supabase.auth.signInWithPassword(credentials);
+   const credentials = email ? { email, password } : { phone, password };
 
-  if (error) throw error;
-  return data;
-}
+   try {
+     const { data, error } = await timeoutPromise(
+       supabase.auth.signInWithPassword(credentials),
+       10000 // 10 seconds timeout
+     );
+
+     if (error) throw error;
+     return data;
+   } catch (err) {
+     if (err.message.includes('timed out')) {
+       logger.error(`[SIGNIN] Supabase Auth timeout: ${err.message}`);
+       throw new Error('AUTH_TIMEOUT');
+     }
+     throw err;
+   }
+ }
 
 export async function resetPassword(email) {
-  const supabase = configManager.getSupabaseClient();
-  if (!supabase) throw new Error('Supabase client not initialized');
+   const supabase = configManager.getSupabaseClient();
+   if (!supabase) throw new Error('Supabase client not initialized');
 
-  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/recovery`,
-  });
+   try {
+     const { data, error } = await timeoutPromise(
+       supabase.auth.resetPasswordForEmail(email, {
+         redirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/recovery`,
+       }),
+       10000 // 10 seconds timeout
+     );
 
-  if (error) throw error;
-  return data;
-}
+     if (error) throw error;
+     return data;
+   } catch (err) {
+     if (err.message.includes('timed out')) {
+       logger.error(`[RESET-PASSWORD] Supabase Auth timeout: ${err.message}`);
+       throw new Error('AUTH_TIMEOUT');
+     }
+     throw err;
+   }
+ }
 
 export async function updatePassword(newPassword) {
-  const supabase = configManager.getSupabaseClient();
-  if (!supabase) throw new Error('Supabase client not initialized');
+   const supabase = configManager.getSupabaseClient();
+   if (!supabase) throw new Error('Supabase client not initialized');
 
-  const { data, error } = await supabase.auth.updateUser({
-    password: newPassword
-  });
+   try {
+     const { data, error } = await timeoutPromise(
+       supabase.auth.updateUser({
+         password: newPassword
+       }),
+       10000 // 10 seconds timeout
+     );
 
-  if (error) throw error;
-  return data;
-}
+     if (error) throw error;
+     return data;
+   } catch (err) {
+     if (err.message.includes('timed out')) {
+       logger.error(`[UPDATE-PASSWORD] Supabase Auth timeout: ${err.message}`);
+       throw new Error('AUTH_TIMEOUT');
+     }
+     throw err;
+   }
+ }
 
 /**
  * Syncs a user to the Supabase 'users' table
