@@ -492,14 +492,20 @@ class DB {
   }
 
    async submitSignupRequest(data: any) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
+
         try {
             const response = await fetch(`${this.backendUrl}/api/auth/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                signal: controller.signal
             });
+
+            clearTimeout(timeoutId);
 
             const result = await response.json();
 
@@ -510,6 +516,10 @@ class DB {
             // Assuming the backend returns { success: true, userId, message, expiresAt }
             return { success: true, userId: result.userId, message: result.message };
         } catch (error) {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                return { success: false, message: 'Request timeout. Please try again.' };
+            }
             console.error('Signup error:', error);
             return { success: false, message: 'Network error. Please try again.' };
         }

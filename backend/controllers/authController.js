@@ -99,12 +99,15 @@ export const signup = async (req, res) => {
         if (username) orConditions.push(`username.eq.${username.trim()}`);
         if (phone) orConditions.push(`phone.eq.${phone}`);
         
-        if (orConditions.length > 0) {
-            const { data: existingUser } = await supabase
-                .from('users')
-                .select('id, email, phone, username')
-                .or(orConditions.join(','))
-                .maybeSingle();
+         if (orConditions.length > 0) {
+             const { data: existingUser } = await timeoutPromise(
+                 supabase
+                     .from('users')
+                     .select('id, email, phone, username')
+                     .or(orConditions.join(','))
+                     .maybeSingle(),
+                 10000 // 10 seconds timeout
+             );
 
             if (existingUser) {
                 let duplicateField = 'user';
@@ -123,12 +126,15 @@ export const signup = async (req, res) => {
 
          // 3. Supabase Auth Registration
          let supabaseUser;
-         try {
-             const authResult = await supabaseAuth.signUp({
-                 email,
-                 password,
-                 metadata: { name, username, phone, role: 'Customer' }
-             });
+          try {
+              const authResult = await timeoutPromise(
+                  supabaseAuth.signUp({
+                      email,
+                      password,
+                      metadata: { name, username, phone, role: 'Customer' }
+                  }),
+                  10000 // 10 seconds timeout
+              );
              
              if (!authResult || !authResult.user) {
                  throw new Error("Supabase Auth sign up did not return user details.");
@@ -187,7 +193,10 @@ export const signup = async (req, res) => {
         };
 
         // 6. Supabase Primary Write (Insert to public.users using UUID!)
-        const { error: sbError } = await supabase.from('users').insert([newUser]);
+         const { error: sbError } = await timeoutPromise(
+             supabase.from('users').insert([newUser]),
+             10000 // 10 seconds timeout
+         );
         if (sbError) {
             logger.error(`[SIGNUP] Profile creation failure in public.users: ${sbError.message}`);
             // Rollback auth if profile insert fails to avoid orphaned records
@@ -223,12 +232,15 @@ export const signup = async (req, res) => {
             `;
 
             // Direct Resend API (3× exponential retry) → Gmail SMTP fallback
-            const emailResult = await sendDirectEmail({
-                to: email,
-                subject: 'Verify Your Click Opticx Account',
-                html: emailHtml,
-                type: 'otp'
-            });
+             const emailResult = await timeoutPromise(
+                 sendDirectEmail({
+                     to: email,
+                     subject: 'Verify Your Click Opticx Account',
+                     html: emailHtml,
+                     type: 'otp'
+                 }),
+                 15000 // 15 seconds timeout for email
+             );
 
             if (emailResult.success) {
                 logger.info(`[SIGNUP] OTP email delivered | to=${email} | provider=${emailResult.provider} | msgId=${emailResult.messageId}`);
@@ -254,16 +266,19 @@ export const signup = async (req, res) => {
         // 9. Write Audit Log
         try {
             const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-            const { error: auditError } = await supabase.from('audit_logs').insert({
-                id: crypto.randomUUID(),
-                action: 'SIGNUP_PENDING',
-                user_id: userId,
-                user_name: name,
-                details: `User registration initialized with Supabase Auth UUID. OTP code queued to ${email}.`,
-                type: 'AUTH',
-                ip_address: ip,
-                metadata: { email, phone, timestamp: new Date().toISOString() }
-            });
+             const { error: auditError } = await timeoutPromise(
+                 supabase.from('audit_logs').insert({
+                     id: crypto.randomUUID(),
+                     action: 'SIGNUP_PENDING',
+                     user_id: userId,
+                     user_name: name,
+                     details: `User registration initialized with Supabase Auth UUID. OTP code queued to ${email}.`,
+                     type: 'AUTH',
+                     ip_address: ip,
+                     metadata: { email, phone, timestamp: new Date().toISOString() }
+                 }),
+                 10000 // 10 seconds timeout
+             );
             if (auditError) {
                 logger.error('[AUDIT-LOG] Failed to write SIGNUP_PENDING audit log:', auditError);
             }
