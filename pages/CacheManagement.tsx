@@ -115,7 +115,7 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         Cache Control Plane
                     </h2>
                     <p className="text-slate-500 font-medium max-w-2xl mt-1 uppercase text-[10px] tracking-widest">
-                        System Level Maintenance Node • <strong>v9.6.1-LIVE</strong>
+                        System Level Maintenance Node • <strong>v8.6.0 Stable</strong>
                     </p>
                 </div>
 
@@ -204,7 +204,7 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
                             <div className="space-y-3 pt-4">
                                 <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl">
                                     <CheckCircle2 className="text-green-500" size={16} />
-                                    <span className="text-[9px] font-black uppercase">Live Node Version: v9.6.1-LIVE</span>
+                                    <span className="text-[9px] font-black uppercase">Live Node Version: v8.6.0</span>
                                 </div>
                                 <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl">
                                     <Zap className="text-amber-500" size={16} />

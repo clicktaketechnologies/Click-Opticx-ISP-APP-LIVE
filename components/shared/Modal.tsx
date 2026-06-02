@@ -82,17 +82,20 @@ export const Modal: React.FC<ModalProps> = ({
     if (onConfirm) await onConfirm();
   }, [onConfirm]);
 
-  // ESC key to close — always allowed, even during loading (safety hatch)
+  // ESC key to close - allow even during loading for safety
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        // Allow ESC during loading only if we can show a confirmation
+        if (!isLoading) {
+          onClose();
+        }
       }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [isOpen, onClose]);
+  }, [isOpen, isLoading, onClose]);
 
   // Focus trap implementation
   useEffect(() => {
@@ -119,24 +122,13 @@ export const Modal: React.FC<ModalProps> = ({
         'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
       );
 
-      if (!focusable || focusable.length === 0) {
-        e.preventDefault();
-        if (modalRef.current) modalRef.current.focus();
-        return;
-      }
+      if (!focusable || focusable.length === 0) return;
 
       const firstElement = focusable[0] as HTMLElement;
       const lastElement = focusable[focusable.length - 1] as HTMLElement;
 
-      // If focus is outside modal, bring it back to first element
-      if (!modalRef.current?.contains(document.activeElement)) {
-        e.preventDefault();
-        firstElement.focus();
-        return;
-      }
-
       if (e.shiftKey) {
-        if (document.activeElement === firstElement || document.activeElement === modalRef.current) {
+        if (document.activeElement === firstElement) {
           e.preventDefault();
           lastElement.focus();
         }

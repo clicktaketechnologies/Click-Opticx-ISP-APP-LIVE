@@ -60,30 +60,32 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const tagline = branding.tagline || 'Welcome to the Next Gen Internet';
    const developer = branding.developer || 'ClickTake Technologies';
 
-    React.useEffect(() => {
-       // Proactively wake the backend if it's sleeping (mitigate Render cold starts)
-       db.wakeBackend();
+   React.useEffect(() => {
+      // Proactively wake the backend if it's sleeping (mitigate Render cold starts)
+      db.wakeBackend();
 
-       // Handle Password Reset Redirects
-       const hash = window.location.hash;
-       const params = new URLSearchParams(window.location.search);
-       const token = params.get('token');
-       const email = params.get('email');
+      // Handle Password Reset Redirects
+      const hash = window.location.hash;
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      const email = params.get('email');
 
-       const isRecovery = hash.includes('type=recovery') || params.get('type') === 'recovery' || hash.includes('recovery_token=') || hash.includes('access_token=');
+      const isRecovery = hash.includes('type=recovery') || params.get('type') === 'recovery' || hash.includes('recovery_token=') || hash.includes('access_token=');
 
-       if (isRecovery) {
-          setView('reset_finalize');
-          setResetToken('SUPABASE_RECOVERY');
-          // Don't try to get current user for recovery links - user isn't logged in yet
-          // The email will be handled during the password reset process
-          setResetIdentifier(email || '');
-       } else if (token) {
-          setResetToken(token);
-          if (email) setResetIdentifier(email);
-          setView('reset_finalize');
-       }
-    }, []);
+      if (isRecovery) {
+         setView('reset_finalize');
+         setResetToken('SUPABASE_RECOVERY');
+         supabase.auth.getUser().then(({ data }) => {
+            if (data?.user?.email) {
+               setResetIdentifier(data.user.email);
+            }
+         });
+      } else if (token) {
+         setResetToken(token);
+         if (email) setResetIdentifier(email);
+         setView('reset_finalize');
+      }
+   }, []);
 
    const handleLogin = async (e: React.FormEvent) => {
       e.preventDefault();

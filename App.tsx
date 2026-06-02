@@ -322,7 +322,7 @@ const LegacyRoutes: React.FC<LegacyRoutesProps> = ({
 
 const App: React.FC = () => {
   const [dbState, setDbState] = useState<AppState>(db.getState());
-  const [authState, setAuthState] = useState(db.getState().auth || { isLoggedIn: false });
+  const [authState, setAuthState] = useState(db.getState().auth);
   const location = useLocation();
   const navigate = useNavigate();
   const currentPage = location.pathname.substring(1) || 'dashboard';
@@ -360,7 +360,7 @@ const App: React.FC = () => {
     const unsubscribe = db.onStateChange((newState) => {
       startTransition(() => {
         setDbState(newState);
-        setAuthState(newState.auth || { isLoggedIn: false });
+        setAuthState(newState.auth);
         
         // Handle Theme Hydration from State / LocalStorage
         const theme = (newState.settings?.appearance as any)?.theme || localStorage.getItem('clickopticx_theme') || 'light';
@@ -408,9 +408,27 @@ const App: React.FC = () => {
       db.wakeBackend();
     }, 14 * 60 * 1000);
 
-
     // 4. Initialize Dual-Write Adapter (Phase 1-2)
     initDualWrite();
+
+    // Aggressive Cache Busting for v9.5.3
+    const currentAppVersion = '9.5.4';
+    if (localStorage.getItem('clickopticx_app_version') !== currentAppVersion) {
+      console.warn(`[UPDATE] New version detected: ${currentAppVersion}. Purging old caches...`);
+      localStorage.setItem('clickopticx_app_version', currentAppVersion);
+      if ('caches' in window) {
+        caches.keys().then(names => Promise.all(names.map(name => caches.delete(name))));
+      }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+      // Force reload once to fetch new files
+      setTimeout(() => window.location.reload(), 500);
+    }
 
     // 5. Multi-Tab Session Sync — listen for logout from other tabs
     let authChannel: BroadcastChannel | null = null;

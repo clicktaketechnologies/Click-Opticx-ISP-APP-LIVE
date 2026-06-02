@@ -14,9 +14,11 @@ const VerifyEmail: React.FC = () => {
   
   const [status, setStatus] = useState<'loading' | 'otp_entry' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Initializing verification sequence...');
-  const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [otpError, setOtpError] = useState<string | null>(null);
+const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [otpError, setOtpError] = useState<string | null>(null);
+    const [resendMessage, setResendMessage] = useState<string | null>(null);
+    const [isResending, setIsResending] = useState(false);
   
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -155,61 +157,93 @@ const VerifyEmail: React.FC = () => {
         </div>
 
         {status === 'otp_entry' ? (
-          <form onSubmit={handleOtpSubmit} className="space-y-6">
-            <div className="p-4 bg-slate-900/40 border border-slate-800 rounded-2xl flex items-center gap-3 text-left">
-              <Mail className="text-blue-400 flex-shrink-0" size={20} />
-              <div>
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Verification Target</p>
-                <p className="text-sm font-semibold text-slate-200 break-all">{email || 'your email'}</p>
-              </div>
-            </div>
+           <form onSubmit={handleOtpSubmit} className="space-y-6">
+             <div className="p-4 bg-slate-900/40 border border-slate-800 rounded-2xl flex items-center gap-3 text-left">
+               <Mail className="text-blue-400 flex-shrink-0" size={20} />
+               <div>
+                 <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Verification Target</p>
+                 <p className="text-sm font-semibold text-slate-200 break-all">{email || 'your email'}</p>
+               </div>
+             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">
-                6-Digit Security Handshake Code
-              </label>
-              
-              <div className="flex justify-between gap-2" onPaste={handlePaste}>
-                {otp.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    ref={(el) => { inputRefs.current[idx] = el; }}
-                    onChange={(e) => handleOtpChange(e, idx)}
-                    onKeyDown={(e) => handleKeyDown(e, idx)}
-                    className="w-12 h-14 bg-slate-950 border border-slate-800 text-center text-xl font-bold rounded-xl outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-white placeholder:text-slate-700"
-                    placeholder="•"
-                    required
-                  />
-                ))}
-              </div>
-            </div>
+             <div className="space-y-2">
+               <label className="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">
+                 6-Digit Security Handshake Code
+               </label>
+               
+               <div className="flex justify-between gap-2" onPaste={handlePaste}>
+                 {otp.map((digit, idx) => (
+                   <input
+                     key={idx}
+                     type="text"
+                     inputMode="numeric"
+                     maxLength={1}
+                     value={digit}
+                     ref={(el) => { inputRefs.current[idx] = el; }}
+                     onChange={(e) => handleOtpChange(e, idx)}
+                     onKeyDown={(e) => handleKeyDown(e, idx)}
+                     className="w-12 h-14 bg-slate-950 border border-slate-800 text-center text-xl font-bold rounded-xl outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-white placeholder:text-slate-700"
+                     placeholder="•"
+                     required
+                   />
+                 ))}
+               </div>
+             </div>
 
-            {otpError && (
-              <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs font-bold flex items-center justify-center gap-2 animate-in fade-in">
-                <XCircle size={14} />
-                {otpError}
-              </div>
-            )}
+             {otpError && (
+               <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs font-bold flex items-center justify-center gap-2 animate-in fade-in">
+                 <XCircle size={14} />
+                 {otpError}
+               </div>
+             )}
 
-            <button 
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
-            >
-              {isSubmitting ? (
-                <Mini5GMicroLoader size={16} />
-              ) : (
-                <>
-                  Verify Account
-                  <ArrowRight size={16} />
-                </>
-              )}
-            </button>
-          </form>
+             {resendMessage && (
+               <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400 text-xs font-bold flex items-center justify-center gap-2 animate-in fade-in">
+                 <ArrowRight size={14} />
+                 {resendMessage}
+               </div>
+             )}
+
+             <button 
+               type="button"
+               onClick={handleResendOtp}
+               disabled={isResending}
+               className="w-full py-3 bg-slate-500 text-white rounded-xl font-black text-xs uppercase tracking-[0.3em] shadow-lg hover:bg-slate-400 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+             >
+               {isResending ? (
+                 <Mini5GMicroLoader size={14} />
+               ) : (
+                 <>
+                   Resend Code
+                   <ArrowRight size={14} />
+                 </>
+               )}
+             </button>
+
+             <button 
+               type="submit"
+               disabled={isSubmitting}
+               className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-lg shadow-blue-600/20 hover:bg-blue-500 active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+             >
+               {isSubmitting ? (
+                 <Mini5GMicroLoader size={16} />
+               ) : (
+                 <>
+                   Verify Account
+                   <ArrowRight size={16} />
+                 </>
+               )}
+             </button>
+
+             <div className="mt-4 text-xs font-bold text-slate-400">
+               <a href="#" onClick={(e) => {
+                   e.preventDefault();
+                   navigate('/');
+               }} className="text-slate-400 hover:underline">
+                 Verify Later
+               </a>
+             </div>
+           </form>
         ) : (
           <div className="p-6 bg-slate-900/40 border border-slate-800 rounded-2xl">
             <p className={`text-xs font-bold leading-relaxed uppercase tracking-tight ${

@@ -588,6 +588,102 @@ export const verifyOtp = async (req, res) => {
     }
 };
 
+export const resendOtp = async (req, res) => {
+    try {
+        const { userId } = req.body;
+        if (!userId) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'VALIDATION_ERROR', 
+                message: 'User ID is required.' 
+            });
+        }
+
+        const supabase = configManager.getSupabaseClient();
+        const { data: user, error } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', userId)
+            .maybeSingle();
+
+        if (error || !user) {
+            return res.status(404).json({ success: false, error: 'USER_NOT_FOUND', message: 'User not found.' });
+        }
+
+        // Check if user is pending verification (optional)
+        // if (user.status !== 'PENDING_VERIFICATION') {
+        //     return res.status(400).json({ success: false, error: 'INVALID_STATE', message: 'User is not pending verification.' });
+        // }
+
+        // Generate new OTP
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const hashedOtp = await argon2.hash(otpCode, { type: argon2.argon2id });
+
+        // Update verification code in raw_data
+        const updatedRawData = { ...user.raw_data };
+        updatedRawData.verificationCode = {
+            hash: hashedOtp,
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutes
+            verified: false
+        };
+
+        const { error: updateError } = await supabase
+            .from('users')
+            .update({ raw_data: updatedRawData })
+            .eq('id', userId);
+
+        if (updateError) throw updateError;
+
+        // Send OTP email
+        if (user.email) {
+            const emailHtml = `
+                <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px;">
+                    <h2 style="color: #0f172a; margin-top: 0;">Your Click Opticx Vermentation Code</h2>
+                    <p style="color: #475569; font-size: 14px; line-height: 1.6;">Please use the following 6-digit verification code to activate your account:</p>
+                    <div style="font-size: 28px; font-weight: 800; letter-spacing: 6px; padding: 16px; background: #f1f5f9; display: inline-block; border-radius: 12px; margin: 16px 0; color: #000;">${otpCode}</div>
+                    <p style="color: #64748b; font-size: 12px;">This code expires in 10 minutes.</p>
+                </div>
+            `;
+
+            const emailResult = await sendDirectEmail({
+                to: user.email,
+                subject: 'Your Click Opticx Verification Code',
+                html: emailHtml,
+                type: 'otp'
+            });
+
+            if (emailResult.success) {
+                logger.info(`[RESEND-OTP] OTP email delivered | to=${user.email} | provider=${emailResult.provider} | msgId=${emailResult.messageId}`);
+            } else {
+                logger.error(`[RESEND-OTP] OTP email FAILED to deliver | to=${user.email} | error=${emailResult.error}`);
+                // Registration still succeeds — user can request resend again
+            }
+        }
+
+        // Log audit
+        try {
+            const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+            await supabase.from('audit_logs').insert({
+                id: crypto.randomUUID(),
+                action: 'RESEND_OTP',
+                user_id: userId,
+                user_name: user.name,
+                details: 'OTP resent via email.',
+                type: 'AUTH',
+                ip_address: ip,
+                metadata: { timestamp: new Date().toISOString() }
+            });
+        } catch (logErr) {
+            logger.warn(`[AUDIT-LOG] Failed to write resend OTP log: ${logErr.message}`);
+        }
+
+        res.json({ success: true, message: 'Verification code has been resent to your email.' });
+    } catch (err) {
+        logger.error(`[RESEND-OTP] Error: ${err.message}`);
+        res.status(500).json({ success: false, error: 'INTERNAL_ERROR', message: err.message || 'Internal Server Error' });
+    }
+};
+
 export const socialHandshake = async (req, res) => {
     try {
         const { email, phone, name, provider } = req.body;
@@ -1117,4 +1213,4 @@ export const verifySession = async (req, res) => {
     }
 };
 
-export default { signup, login, socialHandshake, forgotPassword, completeReset, loginAs, refreshToken, logout, verifySession, verifyEmail, checkVerificationStatus, verifyOtp, changePassword };
+export default { signup, login, socialHandshake, forgotPassword, completeReset, loginAs, refreshToken, logout, verifySession, verifyEmail, checkVerificationStatus, verifyOtp, resendOtp, changePassword };

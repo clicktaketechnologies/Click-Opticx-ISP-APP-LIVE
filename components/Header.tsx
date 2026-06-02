@@ -18,7 +18,6 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, onLogout, searchTerm, onSearch, isPending, onNavigate }) => {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 0);
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -177,13 +176,16 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
           </div>
         </div>
 
-        {/* Desktop search bar */}
         <div className="hidden lg:flex items-center gap-2 w-72 px-4 py-2 bg-slate-100/50 dark:bg-slate-800/50 border border-transparent focus-within:border-blue-500/50 rounded-2xl transition-all group shrink-0">
           <Search className={`transition-colors duration-300 shrink-0 ${searchTerm ? 'text-blue-500' : 'text-slate-400'}`} size={16} />
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => onSearch(e.target.value)}
+            onChange={(e) => {
+              // Note: Debounce could be added here if we had a local state, but since it's controlled via props
+              // we can just call onSearch. If a true debounce is needed, we'll need a local state.
+              onSearch(e.target.value);
+            }}
             placeholder="Search connections..."
             className="w-full bg-transparent outline-none text-sm font-medium transition-all text-slate-900 dark:text-white"
           />
@@ -198,17 +200,7 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
           )}
         </div>
 
-        {/* Mobile search toggle */}
-        <button
-          onClick={() => setShowMobileSearch(!showMobileSearch)}
-          className="lg:hidden p-2 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all shrink-0"
-          title="Search"
-        >
-          <Search size={18} />
-        </button>
-
-        {/* Connection badge — visible on all screens */}
-        <div className="hidden sm:block">
+        <div className="hidden 2xl:block">
           {renderConnectionBadge()}
         </div>
       </div>
@@ -312,29 +304,6 @@ const Header: React.FC<HeaderProps> = ({ user, toggleSidebar, onProfileClick, on
           </div>
         </button>
       </div>
-
-      {/* Mobile search overlay */}
-      {showMobileSearch && (
-        <div className="absolute top-full left-0 right-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 p-3 z-[61] shadow-lg lg:hidden animate-in slide-in-from-top-2 duration-200">
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <Search className={`shrink-0 ${searchTerm ? 'text-blue-500' : 'text-slate-400'}`} size={16} />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => onSearch(e.target.value)}
-              placeholder="Search connections..."
-              className="w-full bg-transparent outline-none text-sm font-medium text-slate-900 dark:text-white"
-              autoFocus
-            />
-            <button
-              onClick={() => { onSearch(''); setShowMobileSearch(false); }}
-              className="text-slate-400 hover:text-rose-500 transition-colors shrink-0"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        </div>
-      )}
     </header>
   );
 };

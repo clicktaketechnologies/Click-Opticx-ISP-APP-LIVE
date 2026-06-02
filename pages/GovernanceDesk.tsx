@@ -58,8 +58,6 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
   // Personnel State
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('All');
-  const [statusFilter, setStatusFilter] = useState<string>('All');
-  const [selectedStaff, setSelectedStaff] = useState<Set<string>>(new Set());
   const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any | null>(null);
   const [showPass, setShowPass] = useState(false);
@@ -82,10 +80,9 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
       const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRole = roleFilter === 'All' || s.role === roleFilter;
-      const matchesStatus = statusFilter === 'All' || s.status === statusFilter;
-      return matchesSearch && matchesRole && matchesStatus;
+      return matchesSearch && matchesRole;
     });
-  }, [state.staff, searchTerm, roleFilter, statusFilter]);
+  }, [state.staff, searchTerm, roleFilter]);
 
   const assignedStaffForRole = useMemo(() => {
     return (state.staff || []).filter(s => s.role === selectedRole);
@@ -146,35 +143,6 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
   const toggleStaffStatus = (email: string, currentStatus: string) => {
     const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
     db.updateStaff(email, { status: newStatus as 'Active' | 'Suspended' });
-  };
-
-  const toggleSelectStaff = (email: string) => {
-    setSelectedStaff(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(email)) newSet.delete(email);
-      else newSet.add(email);
-      return newSet;
-    });
-  };
-
-  const toggleSelectAll = () => {
-    if (selectedStaff.size === filteredStaff.length && filteredStaff.length > 0) {
-      setSelectedStaff(new Set());
-    } else {
-      setSelectedStaff(new Set(filteredStaff.map(s => s.email)));
-    }
-  };
-
-  const handleBulkAction = async (action: 'suspend' | 'activate') => {
-    if (selectedStaff.size === 0) return;
-    for (const email of Array.from(selectedStaff)) {
-      if (action === 'suspend') {
-        await db.updateStaff(email, { status: 'Suspended' });
-      } else if (action === 'activate') {
-        await db.updateStaff(email, { status: 'Active' });
-      }
-    }
-    setSelectedStaff(new Set());
   };
 
   // Governance Handlers
@@ -284,69 +252,16 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
                 {state.roles.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
-            <div className="relative flex-1">
-              <Activity className="absolute left-5 top-1/2 -translate-y-1/2 text-indigo-400" size={18} />
-              <select
-                className="w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs font-black text-slate-700 appearance-none uppercase tracking-[0.2em]"
-                value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
-              >
-                <option value="All">All Statuses</option>
-                <option value="Active">Active</option>
-                <option value="Suspended">Suspended</option>
-              </select>
-            </div>
           </div>
-
-          {/* BULK ACTIONS TOOLBAR */}
-          {filteredStaff.length > 0 && (
-            <div className="flex items-center justify-between bg-slate-50 p-4 rounded-[2rem] border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-4 pl-4">
-                <input 
-                  type="checkbox" 
-                  checked={selectedStaff.size === filteredStaff.length && filteredStaff.length > 0}
-                  onChange={toggleSelectAll}
-                  className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                />
-                <span className="text-xs font-black uppercase tracking-widest text-slate-500">
-                  {selectedStaff.size} Selected
-                </span>
-              </div>
-              {selectedStaff.size > 0 && (
-                <div className="flex items-center gap-3 pr-2">
-                  <button 
-                    onClick={() => handleBulkAction('activate')}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl transition-all text-[10px] font-black uppercase tracking-widest"
-                  >
-                    <Unlock size={14} /> Bulk Activate
-                  </button>
-                  <button 
-                    onClick={() => handleBulkAction('suspend')}
-                    className="flex items-center gap-2 px-4 py-2 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl transition-all text-[10px] font-black uppercase tracking-widest"
-                  >
-                    <Lock size={14} /> Bulk Suspend
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
 
           {/* PERSONNEL CARDS */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {filteredStaff.map(member => (
-              <div key={member.email} className={`bg-white rounded-[3rem] border-2 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 relative overflow-hidden group ${member.status === 'Suspended' ? 'border-rose-100 bg-rose-50/20' : 'border-slate-50'} ${selectedStaff.has(member.email) ? 'ring-4 ring-indigo-500/30' : ''}`}>
+              <div key={member.email} className={`bg-white rounded-[3rem] border-2 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 relative overflow-hidden group ${member.status === 'Suspended' ? 'border-rose-100 bg-rose-50/20' : 'border-slate-50'}`}>
                 <div className="p-8 space-y-6">
                   <div className="flex justify-between items-start relative z-10">
-                    <div className="flex items-center gap-4">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedStaff.has(member.email)}
-                        onChange={() => toggleSelectStaff(member.email)}
-                        className="w-5 h-5 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer mt-1"
-                      />
-                      <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-3xl flex items-center justify-center font-black text-2xl sm:text-3xl shadow-inner border-2 transition-all duration-500 group-hover:rotate-6 ${member.status === 'Suspended' ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-indigo-50 border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white'}`}>
-                        {member.name.charAt(0)}
-                      </div>
+                    <div className={`w-20 h-20 rounded-3xl flex items-center justify-center font-black text-3xl shadow-inner border-2 transition-all duration-500 group-hover:rotate-6 ${member.status === 'Suspended' ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-indigo-50 border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white'}`}>
+                      {member.name.charAt(0)}
                     </div>
                     <div className="text-right">
                       <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest mb-2 border ${member.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
@@ -497,7 +412,7 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
                 </div>
 
                 <div className="flex-1 overflow-auto custom-scrollbar">
-                  <table className="w-full text-left border-collapse min-w-[800px]">
+                  <table className="w-full text-left border-collapse">
                     <thead className="sticky top-0 z-10 bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-sm">
                       <tr>
                         <th className="px-12 py-8 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">Target System Modules</th>
