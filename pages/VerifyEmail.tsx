@@ -25,7 +25,7 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
   useEffect(() => {
     const performTokenVerification = async () => {
       try {
-        const response = await fetch(`${db.getBackendUrl()}/api/auth/verify-email?token=${token}`);
+        const response = await fetch(`${db.backendUrl}/api/auth/verify-email?token=${token}`);
         const res = await response.json();
         
         if (res.success) {
@@ -95,7 +95,7 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
     setOtpError(null);
 
     try {
-      const response = await fetch(`${db.getBackendUrl()}/api/auth/verify-otp`, {
+      const response = await fetch(`${db.backendUrl}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, otp: otpCode })
@@ -112,6 +112,39 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
       setOtpError('Network error: Unable to connect to authorization nodes.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (!userId) {
+      setOtpError('User identity context missing. Cannot resend verification code.');
+      return;
+    }
+
+    setIsResending(true);
+    setOtpError(null);
+    setResendMessage(null);
+
+    try {
+      const response = await fetch(`${db.backendUrl}/api/auth/resend-verification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      });
+      const res = await response.json();
+
+      if (response.ok && res.success) {
+        setResendMessage(res.message || 'Verification code resent successfully. Check your email.');
+        // Clear OTP inputs for fresh entry
+        setOtp(new Array(6).fill(''));
+        inputRefs.current[0]?.focus();
+      } else {
+        setOtpError(res.message || 'Failed to resend verification code. Please try again.');
+      }
+    } catch (err: any) {
+      setOtpError('Network error: Unable to reach verification node for resend.');
+    } finally {
+      setIsResending(false);
     }
   };
 

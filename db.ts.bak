@@ -291,7 +291,6 @@ class DB {
   private firestore: Firestore | null = null;
   private app: FirebaseApp | null = null;
   private socket: any = null;
-  readonly backendUrl: string = import.meta.env.VITE_BACKEND_URL || 'https://isp-click-opticx.onrender.com';
 
   constructor() {
     this.state = INITIAL_STATE;
@@ -322,18 +321,6 @@ class DB {
             }
           }
         };
-      }
-
-      const sessionTarget = typeof sessionStorage !== 'undefined' ? sessionStorage : (globalThis as any).sessionStorage;
-      if (sessionTarget) {
-        const sessionStateStr = sessionTarget.getItem('clickopticx_session_state');
-        if (sessionStateStr) {
-          const sessionState = JSON.parse(sessionStateStr);
-          if (sessionState && sessionState.currentUser) {
-            this.state.currentUser = sessionState.currentUser;
-            this.state.isImpersonating = sessionState.isImpersonating || false;
-          }
-        }
       }
     } catch (e) { }
     this.initializeCloudLayer();
@@ -403,20 +390,10 @@ class DB {
       this.notify();
     }
   }
-  async commitInternal() {
-    if (!Array.isArray(this.state.auditLogs)) this.state.auditLogs = [];
-    if (!Array.isArray(this.state.signupRequests)) this.state.signupRequests = [];
-    if (!Array.isArray(this.state.securityLogs)) this.state.securityLogs = [];
+
+  private async commit() {
     try {
       localStorage.setItem('netrecover_v15_registry', JSON.stringify(this.state));
-      const sessionTarget = typeof sessionStorage !== 'undefined' ? sessionStorage : (globalThis as any).sessionStorage;
-      if (sessionTarget && this.state.currentUser) {
-        sessionTarget.setItem('clickopticx_session_state', JSON.stringify({
-          currentUser: this.state.currentUser,
-          isImpersonating: this.state.isImpersonating,
-          savedAt: new Date().toISOString()
-        }));
-      }
     } catch (e) { }
     if (this.firestore && this.initialized) {
       const docRef = doc(this.firestore, 'registry', 'master_state');
@@ -424,13 +401,6 @@ class DB {
       await setDoc(docRef, cloudSafeState);
     }
     this.notify();
-  }
-
-  async commit(partial?: Partial<AppState>) {
-    if (partial) {
-      this.state = { ...this.state, ...partial };
-    }
-    await this.commitInternal();
   }
 
   private notify() {
@@ -459,28 +429,12 @@ class DB {
   }
   isConfigured() { return this.initialized; }
 
-  getBackendUrl(): string {
-    return this.backendUrl;
-  }
-
-  getCloudLogs(): any[] {
-    return this.state.securityLogs || [];
-  }
-
-  onConfigChange(key: string, cb: (value: any) => void) {
-    return this.onStateChange((state) => {
-      if (key === '*') cb(state.settings);
-      else cb((state.settings as any)?.[key]);
-    });
-  }
-
   async login(credential: string, pass: string) {
     const input = credential.toLowerCase().trim();
-    if (!input || !pass) return { success: false, message: 'Identity required for lookup.' };
     const staff = this.state.staff.find(s => s.email.toLowerCase() === input && s.password === pass);
     if (staff) {
       this.state.currentUser = staff;
-      await this.commitInternal();
+      this.notify();
       return { success: true, user: staff, type: 'staff' };
     }
     const user = this.state.users.find(u => !u.deleted && (
@@ -491,42 +445,10 @@ class DB {
     ) && u.password === pass);
     if (user) {
       this.state.currentUser = { ...user, role: Role.CUSTOMER };
-      await this.commitInternal();
+      this.notify();
       return { success: true, user: this.state.currentUser, type: 'customer' };
     }
-
-    // Attempt backend login as fallback to sync newly registered users
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
-      const response = await fetch(`${this.backendUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier: input, password: pass }),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      
-      const result = await response.json();
-      if (response.ok && result.success) {
-        // Authenticated by backend. Ensure user is in local state
-        const apiUser = result.user;
-        const existsLocally = this.state.users.find(u => u.id === apiUser.id);
-        if (!existsLocally && (!apiUser.role || apiUser.role === 'Customer')) {
-            this.state.users.push(apiUser as any);
-        }
-        
-        this.state.currentUser = { ...apiUser, role: apiUser.role || Role.CUSTOMER };
-        await this.commitInternal();
-        return { success: true, user: this.state.currentUser, type: apiUser.role && apiUser.role !== 'Customer' ? 'staff' : 'customer', token: result.token };
-      } else {
-        const errorMsg = result.message || result.error || result.details || `Server error: ${response.status} ${response.statusText}`;
-        return { success: false, message: errorMsg || 'Identity lookup failed.' };
-      }
-    } catch (error) {
-      console.warn('Backend login attempt failed:', error);
-      return { success: false, message: 'Identity lookup failed. Network error or invalid credentials.' };
-    }
+    return { success: false, message: 'Identity lookup failed.' };
   }
 
   async logout() {
@@ -549,40 +471,6 @@ class DB {
     const newUser = { id: 'USR-' + Date.now(), connectionId: 'NR-' + Math.floor(10000 + Math.random() * 90000), balance: 0, creditScore: 600, activationCount: 0, portalEnabled: true, connectionType: 'Fiber', activityLog: [], ...u };
     this.state.users.push(newUser as any); await this.commit(); return { success: true, user: newUser };
   }
-
-   async submitSignupRequest(data: any) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
-
-        try {
-            const response = await fetch(`${this.backendUrl}/api/auth/signup`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-                signal: controller.signal
-            });
-
-            clearTimeout(timeoutId);
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                return { success: false, message: result.message || 'Signup failed' };
-            }
-
-            // Assuming the backend returns { success: true, userId, message, expiresAt }
-            return { success: true, userId: result.userId, message: result.message };
-        } catch (error) {
-            clearTimeout(timeoutId);
-            if (error.name === 'AbortError') {
-                return { success: false, message: 'Request timeout. Please try again.' };
-            }
-            console.error('Signup error:', error);
-            return { success: false, message: 'Network error. Please try again.' };
-        }
-    }
 
   async updateUser(id: string, d: any) {
     const idx = this.state.users.findIndex(u => u.id === id);
@@ -954,64 +842,20 @@ class DB {
     return { success: true, message: 'Rescue link established.' };
   }
 
-  async submitKYC(userId: string, type: string, fileUrl: string | string[], notes?: string, faceData?: string) {
+  async submitKYC(userId: string, type: string, fileUrl: string) {
     const idx = this.state.users.findIndex(u => u.id === userId);
     if (idx !== -1) {
       if (!this.state.users[idx].kycDocuments) this.state.users[idx].kycDocuments = [];
-      const files = Array.isArray(fileUrl) ? fileUrl : [fileUrl];
-      files.forEach(file => {
-        this.state.users[idx].kycDocuments!.push({
-          type: type as any,
-          fileUrl: file,
-          submittedAt: new Date().toISOString(),
-          status: 'Pending'
-        });
+      this.state.users[idx].kycDocuments!.push({
+        type: type as any,
+        fileUrl,
+        submittedAt: new Date().toISOString()
       });
-      this.state.users[idx].isKYCSubmitted = true;
-      this.state.users[idx].isKYCVerified = false;
-      this.state.users[idx].kyc_status = 'pending';
-      this.state.users[idx].approval_status = 'pending';
-      this.state.users[idx].kycMethod = type as any;
-      this.state.users[idx].kycNotes = notes;
-      if (faceData) this.state.users[idx].faceData = faceData;
       this.state.users[idx].verificationStatus = VerificationStatus.PENDING;
       await this.commit();
-      return { success: true, message: 'KYC submitted for review.' };
+      return true;
     }
-    return { success: false, message: 'Subscriber node not found.' };
-  }
-
-  async requestKYCResubmission(userId: string, reason: string) {
-    const idx = this.state.users.findIndex(u => u.id === userId);
-    if (idx === -1) return { success: false, message: 'Subscriber node not found.' };
-    const user = this.state.users[idx];
-    user.isKYCVerified = false;
-    user.isKYCSubmitted = false;
-    user.kyc_status = 'rejected';
-    user.approval_status = 'revision';
-    user.verificationStatus = VerificationStatus.REVISION;
-    user.kyc_rejected_reason = reason;
-    user.kyc_history = [...(user.kyc_history || []), { action: 'Revision Requested', reason, timestamp: new Date().toISOString() }];
-    await this.logAudit({ action: 'KYC Revision Requested', userId, userName: user.name, details: reason, type: 'Update' });
-    await this.commit();
-    return { success: true, message: 'Revision request saved.' };
-  }
-
-  async adminVerifyUser(userId: string) {
-    const idx = this.state.users.findIndex(u => u.id === userId);
-    if (idx === -1) return { success: false, message: 'Subscriber node not found.' };
-    const user = this.state.users[idx];
-    user.isKYCVerified = true;
-    user.isKYCSubmitted = true;
-    user.kyc_status = 'verified';
-    user.approval_status = 'approved';
-    user.verificationStatus = VerificationStatus.VERIFIED;
-    user.kyc_rejected_reason = undefined;
-    user.verifiedStatus = { ...(user.verifiedStatus || {}), identity: true };
-    user.kyc_history = [...(user.kyc_history || []), { action: 'Direct Verification', timestamp: new Date().toISOString() }];
-    await this.logAudit({ action: 'Direct Verification', userId, userName: user.name, details: 'KYC verified by admin.', type: 'Approval' });
-    await this.commit();
-    return { success: true, message: 'Subscriber verified.' };
+    return false;
   }
 
   async updateSubscriberProfile(id: string, d: any) {
@@ -1263,145 +1107,10 @@ class DB {
   async addDealerLoad(e: string, a: number, m: string, d: string) { return { success: true }; }
   async clearStaffCollections(e: string) { return true; }
   async approvePayment(id: string) { const idx = this.state.payments.findIndex(p => p.id === id); if (idx !== -1) { this.state.payments[idx].status = 'Approved'; await this.commit(); } }
-  async addManualPayment(id: string, amount: number, method: any, options?: { invoiceId?: string }) {
-    const user = this.state.users.find(u => u.id === id);
-    if (user) {
-      const invoiceId = options?.invoiceId || 'MANUAL';
-      this.state.payments.push({ id: 'PAY_' + Date.now(), userId: id, userName: user.name, amount, status: 'Approved', method, timestamp: new Date().toISOString(), collectorEmail: this.state.currentUser?.email || 'admin@opticx.com', collectorName: this.state.currentUser?.name || 'System', invoiceId });
-      user.balance = Math.max(0, (user.balance || 0) - amount);
-      const invoice = this.state.invoices.find(i => i.id === invoiceId);
-      if (invoice) {
-        invoice.paidAmount = Math.min(invoice.totalAmount, (invoice.paidAmount || 0) + amount);
-        invoice.dueAmount = Math.max(0, invoice.totalAmount - invoice.paidAmount);
-        invoice.status = invoice.dueAmount === 0 ? PaymentStatus.PAID : PaymentStatus.PARTIAL;
-        if (invoice.status === PaymentStatus.PAID) invoice.paidAt = new Date().toISOString();
-      }
-      await this.commit();
-    }
-  }
-
-  getDashboardMetrics() {
-    const now = new Date();
-    const activeStatuses = new Set([UserStatus.ACTIVE, UserStatus.GRACE_PERIOD, UserStatus.EMERGENCY_ACTIVE]);
-    const expiringWithin = (days: number) => this.state.users.filter(u => {
-      if (!u.expiryDate) return false;
-      const diff = new Date(u.expiryDate).getTime() - now.getTime();
-      return diff >= 0 && diff <= days * 86400000;
-    }).length;
-
-    return {
-      totalUnpaidAmount: this.state.invoices
-        .filter(i => i.status !== PaymentStatus.PAID && !i.deleted)
-        .reduce((sum, i) => sum + (i.dueAmount ?? Math.max(0, (i.totalAmount || 0) - (i.paidAmount || 0))), 0),
-      totalUsers: this.state.users.filter(u => !u.deleted).length,
-      activeUsers: this.state.users.filter(u => !u.deleted && activeStatuses.has(u.status)).length,
-      unpaidUsers: this.state.users.filter(u => !u.deleted && (u.balance || 0) > 0).length,
-      expiredUsers: this.state.users.filter(u => !u.deleted && (u.status === UserStatus.EXPIRED || (u.expiryDate && new Date(u.expiryDate) < now))).length,
-      disabledUsers: this.state.users.filter(u => !u.deleted && [UserStatus.DISABLED, UserStatus.BLOCKED, UserStatus.SUSPENDED].includes(u.status)).length,
-      onlineUsers: this.state.users.filter(u => !u.deleted && (u.isActive || u.status === UserStatus.ACTIVE)).length,
-      newUsers: this.state.users.filter(u => {
-        if (!u.createdAt) return false;
-        return now.getTime() - new Date(u.createdAt).getTime() <= 7 * 86400000;
-      }).length,
-      expiring1d: expiringWithin(1),
-      expiring3d: expiringWithin(3),
-      expiring1w: expiringWithin(7),
-    };
-  }
-
-  getFiscalSummary(startDate: Date, endDate: Date) {
-    const inRange = (value?: string) => {
-      if (!value) return false;
-      const date = new Date(value);
-      return date >= startDate && date <= endDate;
-    };
-    const approvedPayments = this.state.payments.filter(p => p.status === 'Approved');
-    const periodPayments = approvedPayments.filter(p => inRange(p.timestamp));
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    return {
-      todayCollection: approvedPayments.filter(p => new Date(p.timestamp) >= todayStart).reduce((sum, p) => sum + (p.amount || 0), 0),
-      totalRecovery: approvedPayments.reduce((sum, p) => sum + (p.amount || 0), 0),
-      activationRevenue: this.state.invoices
-        .filter(i => i.type === 'Activation' && inRange(i.createdAt))
-        .reduce((sum, i) => sum + (i.paidAmount || 0), 0),
-      periodCollection: periodPayments.reduce((sum, p) => sum + (p.amount || 0), 0),
-      totalUnpaidBalance: this.state.invoices
-        .filter(i => i.status !== PaymentStatus.PAID && !i.deleted)
-        .reduce((sum, i) => sum + (i.dueAmount ?? Math.max(0, (i.totalAmount || 0) - (i.paidAmount || 0))), 0),
-    };
-  }
-
-  async fixMissingData(id: string) {
-    const idx = (this.state.missingData || []).findIndex(n => n.id === id);
-    if (idx === -1) return { success: false, message: 'Missing data node not found.' };
-    this.state.missingData[idx].status = 'resolved';
-    await this.reconcileData(this.state.missingData[idx].type);
-    this.state.missingData = this.state.missingData.filter(n => n.id !== id);
-    await this.commit();
-    return { success: true, message: 'Data node synchronized.' };
-  }
-
-  async addSecurityLog(entry: Partial<SecurityLog> & { action: string; details: string }) {
-    const log: SecurityLog = {
-      id: 'SEC_' + Date.now(),
-      action: entry.action,
-      targetId: entry.targetId || 'SYSTEM',
-      targetName: entry.targetName || 'System',
-      adminEmail: entry.adminEmail || this.state.currentUser?.email || 'system@clickopticx.com',
-      adminIp: entry.adminIp,
-      adminBrowser: entry.adminBrowser || (typeof navigator !== 'undefined' ? navigator.userAgent : 'server'),
-      adminDevice: entry.adminDevice,
-      details: entry.details,
-      timestamp: new Date().toISOString(),
-      riskLevel: entry.riskLevel || 'Low',
-    };
-    if (!Array.isArray(this.state.securityLogs)) this.state.securityLogs = [];
-    this.state.securityLogs.unshift(log);
-    this.state.securityLogs = this.state.securityLogs.slice(0, 500);
-    await this.commit();
-    return { success: true, log };
-  }
-
-  async getNasStats() {
-    const nas = this.state.nas || [];
-    const online = nas.filter(n => n.status === 'Online').length;
-    return { success: true, message: `${online}/${nas.length} NAS devices online`, online, total: nas.length };
-  }
-
-  async getSystemHealth() {
-    const criticalAlerts = (this.state.nocAlerts || []).filter(a => a.severity === 'Critical' && !a.actionTaken).length;
-    const offlineNas = (this.state.nas || []).filter(n => n.status !== 'Online').length;
-    const offlineOlts = (this.state.oltNodes || []).filter(o => o.status !== 'Online').length;
-    const status = criticalAlerts || offlineNas || offlineOlts ? 'Warning' : 'Healthy';
-    return { success: true, message: `System ${status}: ${criticalAlerts} critical alerts, ${offlineNas + offlineOlts} offline network devices`, status, criticalAlerts, offlineDevices: offlineNas + offlineOlts };
-  }
-
-  async getOLTPulse(oltId: string) {
-    const onus = (this.state.onus || []).filter(o => o.oltId === oltId);
-    const online = onus.filter(o => o.status === 'Online' || o.onlineNow).length;
-    const usageGb = ((this.state.liveUsage || []).reduce((sum, u) => sum + (u.download || 0) + (u.upload || 0), 0) / 1024).toFixed(1);
-    return { success: true, liveSpeed: `${Math.max(online * 12, 0)} Mbps`, devices: online, todayUsage: `${usageGb} GB` };
-  }
-
-  async approveRequest(id: string) {
-    const req = (this.state.approvalRequests || []).find(r => r.id === id);
-    if (!req) return { success: false, message: 'Approval request not found.' };
-    req.status = 'Approved';
-    await this.commit();
-    return { success: true };
-  }
-
-  async rejectRequest(id: string) {
-    const req = (this.state.approvalRequests || []).find(r => r.id === id);
-    if (!req) return { success: false, message: 'Approval request not found.' };
-    req.status = 'Rejected';
-    await this.commit();
-    return { success: true };
-  }
+  async addManualPayment(id: string, amount: number, method: any) { const user = this.state.users.find(u => u.id === id); if (user) { this.state.payments.push({ id: 'PAY_' + Date.now(), userId: id, userName: user.name, amount, status: 'Approved', method, timestamp: new Date().toISOString(), collectorEmail: 'admin@opticx.com', collectorName: 'System', invoiceId: 'MANUAL' }); user.balance -= amount; await this.commit(); } }
   async updateConnectionDetails(id: string, d: any) { const idx = this.state.users.findIndex(u => u.id === id); if (idx !== -1) { this.state.users[idx] = { ...this.state.users[idx], ...d }; await this.commit(); return { success: true }; } return { success: false }; }
   async updateModulePermission(id: string, d: any) { const idx = this.state.permissions.findIndex(p => p.id === id); if (idx !== -1) { this.state.permissions[idx] = { ...this.state.permissions[idx], ...d }; await this.commit(); } }
+  async auditOverdueLoads() { }
 
   async convertPointsToWallet(userId: string) {
     const user = this.state.users.find(u => u.id === userId);
@@ -1465,11 +1174,6 @@ class DB {
   async cancelTopupRequest(id: string) { this.state.topupRequests = this.state.topupRequests.filter(r => r.id !== id); await this.commit(); }
   async approvePackageRequest(id: string) { const idx = this.state.packageRequests.findIndex(r => r.id === id); if (idx !== -1) { const req = this.state.packageRequests[idx]; req.status = 'Approved'; await this.activatePackage(req.userId, req.packageId); await this.commit(); } }
   async rejectPackageRequest(id: string) { const idx = this.state.packageRequests.findIndex(r => r.id === id); if (idx !== -1) { this.state.packageRequests[idx].status = 'Rejected'; await this.commit(); } }
-  async uploadMedia(path: string, base64: string): Promise<string> {
-    // For now, simulate upload by returning the base64 data URL
-    // In a real cloud backend, this would upload to Firebase Storage
-    return base64;
-  }
   async sendInvoiceEmail(id: string) {
     const inv = this.state.invoices.find(i => i.id === id);
     if (!inv) return false;
@@ -1478,17 +1182,7 @@ class DB {
   }
 
   // --- Audit Log ---
-  // Accepts either positional args (action, userId, details, type, source) or an object
-  async logAudit(
-    actionOrEntry: string | { action: string; userId?: string; userName?: string; details?: string; type?: string },
-    userId?: string,
-    details?: string,
-    type?: string,
-    _source?: string
-  ) {
-    const entry = typeof actionOrEntry === 'string'
-      ? { action: actionOrEntry, userId, userName: userId, details, type }
-      : actionOrEntry;
+  async logAudit(entry: { action: string; userId?: string; userName?: string; details?: string; type?: string }) {
     const log = {
       id: Date.now().toString(),
       action: entry.action,
@@ -1502,155 +1196,9 @@ class DB {
     this.state.auditLogs.unshift(log);
     if (this.state.auditLogs.length > 500) this.state.auditLogs = this.state.auditLogs.slice(0, 500);
     this.notifyAudit(log);
-    await this.commitInternal();
+    await this.commit();
   }
 
-  // --- Backend Wake / Keep-Alive ---
-  wakeBackend() {
-    fetch(`${this.backendUrl}/api/ping`, { method: 'GET', signal: AbortSignal.timeout(10000) })
-      .then(r => r.ok && console.log('[SYSTEM] Backend is awake'))
-      .catch(() => console.warn('[SYSTEM] Backend unreachable (sleeping or offline)'));
-  }
-
-  // --- Background Audit: flag overdue emergency loads ---
-  auditOverdueLoads() {
-    try {
-      const now = Date.now();
-      const overdue = (this.state.emergencyLoads || []).filter((l: any) => {
-        if (l.status !== 'Active') return false;
-        const due = new Date(l.dueDate || l.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000;
-        return now > due;
-      });
-      if (overdue.length > 0) console.log(`[AUDIT] ${overdue.length} overdue emergency load(s) detected`);
-    } catch (e) {
-      console.warn('[AUDIT] auditOverdueLoads failed silently', e);
-    }
-  }
-
-  // --- Data Reconciliation ---
-  reconcileData(scope: string = 'entire') {
-    try {
-      const arrays: (keyof AppState)[] = [
-        'users', 'staff', 'packages', 'invoices', 'payments', 'tickets',
-        'notifications', 'auditLogs', 'securityLogs', 'archives',
-        'topupRequests', 'packageRequests', 'nocEvents', 'tasks',
-        'recoveryLogs', 'emergencyLoads', 'creditLogs', 'withdrawalRequests',
-        'referrals', 'networkNodes', 'devices', 'connectedDevices', 'networkMappings'
-      ];
-      let dirty = false;
-      arrays.forEach(key => {
-        if (!Array.isArray((this.state as any)[key])) {
-          (this.state as any)[key] = [];
-          dirty = true;
-        }
-      });
-      if (!(this.state as any).auth) {
-        (this.state as any).auth = { isLoggedIn: false };
-        dirty = true;
-      }
-      if (dirty) {
-        console.log(`[RECONCILE:${scope}] State repaired — committing`);
-        this.commitInternal();
-      }
-    } catch (e) {
-      console.warn('[RECONCILE] reconcileData failed silently', e);
-    }
-  }
-
-  // ── Auto-generated service stubs (Batch 1) ──────────────────────────
-  async addNAS(nas: any) { this.state.networkNodes = this.state.networkNodes || []; (this.state as any).networkNodes.push({ ...nas, id: nas.id || 'NAS_' + Date.now(), type: 'NAS' }); await this.commit(); }
-  async addOLT(olt: any) { this.state.networkNodes = this.state.networkNodes || []; (this.state as any).networkNodes.push({ ...olt, id: olt.id || 'OLT_' + Date.now(), type: 'OLT' }); await this.commit(); }
-  async addResellerLoad(resellerId: string, amount: number) { await this.processTopup('SYSTEM', resellerId, 'reseller', amount); }
-  async addSpeedTestHistory(entry: any) { (this.state as any).speedTestHistory = (this.state as any).speedTestHistory || []; (this.state as any).speedTestHistory.push({ ...entry, id: 'ST_' + Date.now(), timestamp: new Date().toISOString() }); await this.commit(); }
-  async adminEmergencyAuthReset(userId: string, mode: string, tempPass?: string) { const u = this.state.users.find((u: any) => u.id === userId); if (u) { (u as any).authResetMode = mode; if (tempPass) (u as any).tempPassword = tempPass; await this.commit(); } return { success: true, mode }; }
-  async advancedBillingControl(action: string, params?: any) { console.log('[BILLING]', action, params); return { success: true, action }; }
-  async approveKYC(id: string) { const k = (this.state as any).kycSubmissions?.find((k: any) => k.id === id); if (k) { k.status = 'Approved'; await this.commit(); } }
-  async approvePasswordRequest(id: string) { const r = (this.state as any).passwordRequests?.find((r: any) => r.id === id); if (r) { r.status = 'Approved'; await this.commit(); } }
-  async batchSuspendUsers(ids: string[]) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) (u as any).status = 'Suspended'; }); await this.commit(); return { count: ids.length }; }
-  async bulkActivateSubscribers(ids: string[], opts: any) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) { (u as any).status = 'Active'; (u as any).packageId = opts.packageId; (u as any).expiryDate = opts.expiryDate; } }); await this.commit(); return { count: ids.length }; }
-  async bulkAddTag(ids: string[], tag: string) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) { (u as any).tags = (u as any).tags || []; (u as any).tags.push(tag); } }); await this.commit(); }
-  async bulkAssignCollector(ids: string[], collectorId: string) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) (u as any).collectorId = collectorId; }); await this.commit(); }
-  async bulkBalanceUpdate(ids: string[], amount: number, isCredit: boolean) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) (u as any).balance = ((u as any).balance || 0) + (isCredit ? amount : -amount); }); await this.commit(); }
-  async bulkChangeSeller(ids: string[], sellerId: string) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) (u as any).sellerId = sellerId; }); await this.commit(); }
-  async bulkClearDues(ids: string[]) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) (u as any).dues = 0; }); await this.commit(); }
-  async bulkFlashUsers(ids: string[], months: number, admin: string) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) (u as any).flashedAt = new Date().toISOString(); }); await this.commit(); return { success: true, count: ids.length }; }
-  async bulkMarkUnpaid(ids: string[]) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) (u as any).paymentStatus = 'Unpaid'; }); await this.commit(); }
-  async bulkProvisionUsers(ids: string[], config: any) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) (u as any).provisioned = true; }); await this.commit(); return { count: ids.length }; }
-  async bulkResolveReminders(ids: string[]) { ids.forEach(id => { const r = (this.state as any).reminders?.find((r: any) => r.id === id); if (r) r.resolved = true; }); await this.commit(); }
-  async bulkSendEmailReminder(ids: string[]) { console.log('[EMAIL] Bulk reminder sent to', ids.length, 'users'); return { sent: ids.length }; }
-  async bulkSendReminders(ids: string[], msg: string) { console.log('[REMINDER] Sent to', ids.length, 'users:', msg); return { sent: ids.length }; }
-  async bulkSetPromiseToPay(ids: string[], date: string) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) (u as any).promiseToPayDate = date; }); await this.commit(); }
-  async bulkVerifyUsers(ids: string[], verified: boolean = true) { ids.forEach(id => { const u = this.state.users.find((u: any) => u.id === id); if (u) (u as any).verified = verified; }); await this.commit(); }
-  async calculateNASLoad(nasId: string) { const users = this.state.users.filter((u: any) => (u as any).nasId === nasId); return { nasId, load: users.length, capacity: 100, utilization: users.length }; }
-  async checkOLTHealth(oltId: string) { return { oltId, status: 'healthy', uptime: '99.9%', lastCheck: new Date().toISOString() }; }
-  async checkRouterHealth(routerId: string) { return { routerId, status: 'healthy', cpu: 15, memory: 45, uptime: '30d' }; }
-  async clearAllDues() { this.state.users.forEach((u: any) => (u as any).dues = 0); await this.commit(); }
-  async clearBackendCache() { console.log('[CACHE] Backend cache cleared'); return { success: true }; }
-  async clearEmergencyLoadManually(id: string) { const el = (this.state as any).emergencyLoads?.find((e: any) => e.id === id); if (el) { el.status = 'Cleared'; await this.commit(); } }
-  async clearProfileCache() { console.log('[CACHE] Profile cache cleared'); return { success: true }; }
-  async createSystemSnapshot() { return { id: 'SNAP_' + Date.now(), timestamp: new Date().toISOString(), size: JSON.stringify(this.state).length }; }
-  async deleteBrandingMedia(key: string) { if ((this.state as any).branding) delete (this.state as any).branding[key]; await this.commit(); }
-  async deleteNAS(id: string) { (this.state as any).networkNodes = ((this.state as any).networkNodes || []).filter((n: any) => n.id !== id); await this.commit(); }
-  async deleteOLT(id: string) { (this.state as any).networkNodes = ((this.state as any).networkNodes || []).filter((n: any) => n.id !== id); await this.commit(); }
-  async deleteONU(id: string) { (this.state as any).networkNodes = ((this.state as any).networkNodes || []).filter((n: any) => n.id !== id); await this.commit(); }
-  async extendEmergencyLoad(id: string, days: number) { const el = (this.state as any).emergencyLoads?.find((e: any) => e.id === id); if (el) { el.extendedDays = (el.extendedDays || 0) + days; await this.commit(); } }
-  async findUserForReset(query: string) { return this.state.users.find((u: any) => u.email === query || u.id === query || (u as any).phone === query) || null; }
-  async flashSystem() { console.warn('[FLASH] System flash triggered'); return { success: true, timestamp: new Date().toISOString() }; }
-  async forceSync() { await this.commit(); return { success: true, synced: new Date().toISOString() }; }
-  async generateAdminReminders() { return { generated: 0, reminders: [] }; }
-  async generateHotspotTokens(count: number, config: any) { const tokens: any[] = []; for (let i = 0; i < count; i++) tokens.push({ id: 'HST_' + Date.now() + '_' + i, code: Math.random().toString(36).substring(2, 10).toUpperCase(), ...config, createdAt: new Date().toISOString() }); return tokens; }
-  getAuditProfile(userId: string) { return (this.state as any).auditLogs?.filter((l: any) => l.userId === userId) || []; }
-  getBrandingMedia() { return (this.state as any).branding || {}; }
-  getOnuStatus(onuId: string) { return { id: onuId, status: 'online', signal: '-18dBm', lastSeen: new Date().toISOString() }; }
-  getPendingKYCCount() { return ((this.state as any).kycSubmissions || []).filter((k: any) => k.status === 'Pending').length; }
-  getSyncStatus() { return { lastSync: new Date().toISOString(), status: 'synced', pending: 0 }; }
-
-  // ── Auto-generated service stubs (Batch 2) ──────────────────────────
-  getTrash() { return (this.state as any).trash || []; }
-  async healUserRegistry() { let recovered = 0; this.state.users.forEach((u: any) => { if (!u.id) { u.id = 'USR_' + Date.now() + '_' + Math.random().toString(36).substr(2,4); recovered++; } }); await this.commit(); return { success: true, recovered }; }
-  async logAuthActivity(entry: any) { (this.state as any).authActivityLog = (this.state as any).authActivityLog || []; (this.state as any).authActivityLog.push({ ...entry, timestamp: new Date().toISOString() }); }
-  async purgeFromTrash(id: string) { (this.state as any).trash = ((this.state as any).trash || []).filter((t: any) => t.id !== id); await this.commit(); }
-  async rejectKYC(id: string) { const k = (this.state as any).kycSubmissions?.find((k: any) => k.id === id); if (k) { k.status = 'Rejected'; await this.commit(); } }
-  async rejectPasswordRequest(id: string) { const r = (this.state as any).passwordRequests?.find((r: any) => r.id === id); if (r) { r.status = 'Rejected'; await this.commit(); } }
-  async requestNodeManualApproval(nodeId: string, reason: string) { this.logNotification('all', 'info', 'Node Approval Requested', `Node ${nodeId}: ${reason}`); return { success: true }; }
-  async resetOnuPassword(onuId: string) { console.log('[ONU] Password reset for', onuId); return { success: true }; }
-  async resolvePlanActivationBilling(userId: string, planId: string) { console.log('[BILLING] Resolving plan activation', userId, planId); return { success: true }; }
-  async resolveReminder(id: string) { const r = (this.state as any).reminders?.find((r: any) => r.id === id); if (r) { r.resolved = true; await this.commit(); } }
-  async restoreFromArchive(id: string) { const a = (this.state as any).archives?.find((a: any) => a.id === id); if (a) { a.restored = true; await this.commit(); } return { success: true }; }
-  async restoreFromTrash(id: string) { const idx = ((this.state as any).trash || []).findIndex((t: any) => t.id === id); if (idx !== -1) { const item = (this.state as any).trash.splice(idx, 1)[0]; if (item.collection && Array.isArray((this.state as any)[item.collection])) (this.state as any)[item.collection].push(item.data); await this.commit(); } }
-  async restoreSystemSnapshot(snapId: string) { console.log('[SNAPSHOT] Restoring', snapId); return { success: true, restored: snapId }; }
-  async revokeToken(tokenId: string) { const t = (this.state as any).hotspotTokens?.find((t: any) => t.id === tokenId); if (t) { t.revoked = true; await this.commit(); } }
-  async runBillingEnforcement() { console.log('[BILLING] Enforcement cycle triggered'); return { processed: 0, suspended: 0 }; }
-  async runSystemDiagnostics() { return { status: 'healthy', checks: { db: 'ok', auth: 'ok', network: 'ok', storage: 'ok' }, timestamp: new Date().toISOString() }; }
-  async runSystemTester() { return { passed: true, tests: 12, failures: 0, timestamp: new Date().toISOString() }; }
-  async sendDirectEmail(to: string, subject: string, body: string) { console.log('[EMAIL] Direct email to', to, ':', subject); return { success: true, messageId: 'MSG_' + Date.now() }; }
-  async sendRecoveryReminder(userId: string) { this.logNotification(userId, 'info', 'Recovery Reminder', 'Please complete your account recovery.'); return { success: true }; }
-  async sendSmartPasswordReset(userId: string) { console.log('[AUTH] Smart password reset for', userId); return { success: true, method: 'email' }; }
-  async setPromiseToPay(userId: string, date: string) { const u = this.state.users.find((u: any) => u.id === userId); if (u) { (u as any).promiseToPayDate = date; await this.commit(); } }
-  async signInWithGoogle() { console.log('[AUTH] Google sign-in initiated'); return { success: false, error: 'Google sign-in not configured' }; }
-  async signInWithPhone(phone: string) { console.log('[AUTH] Phone sign-in for', phone); return { success: false, error: 'Phone sign-in not configured' }; }
-  async submitApprovalRequest(type: string, data: any) { (this.state as any).approvalRequests = (this.state as any).approvalRequests || []; (this.state as any).approvalRequests.push({ id: 'APR_' + Date.now(), type, ...data, status: 'Pending', createdAt: new Date().toISOString() }); await this.commit(); }
-  async subscribeToLiveTraffic(cb: Function) { (this as any)._trafficSub = cb; return () => { (this as any)._trafficSub = null; }; }
-  async syncArtifacts() { await this.commit(); return { success: true }; }
-  async testCommunication(channel: string, target: string) { console.log('[COMM] Testing', channel, 'to', target); return { success: true, channel, latency: 42 }; }
-  async testOLTConnection(oltId: string) { return { success: true, oltId, latency: 5, status: 'connected' }; }
-  async triggerGlobalWipe() { console.warn('[WIPE] Global wipe triggered'); return { success: true, timestamp: new Date().toISOString() }; }
-  unsubscribeFromLiveTraffic() { (this as any)._trafficSub = null; }
-  async unverifyUser(userId: string) { const u = this.state.users.find((u: any) => u.id === userId); if (u) { (u as any).verified = false; await this.commit(); } return { success: true }; }
-  async updateAIKeys(keys: any) { (this.state as any).aiKeys = { ...(this.state as any).aiKeys, ...keys }; await this.commit(); }
-  async updateAppSection(sectionId: string, data: any) { (this.state as any).appSections = (this.state as any).appSections || []; const idx = (this.state as any).appSections.findIndex((s: any) => s.id === sectionId); if (idx !== -1) (this.state as any).appSections[idx] = { ...(this.state as any).appSections[idx], ...data }; else (this.state as any).appSections.push({ id: sectionId, ...data }); await this.commit(); }
-  async updateAuthProvider(providerId: string, config: any) { (this.state as any).authProviders = (this.state as any).authProviders || {}; (this.state as any).authProviders[providerId] = config; await this.commit(); }
-  async updateEmergencyLoad(id: string, updates: any) { const el = (this.state as any).emergencyLoads?.find((e: any) => e.id === id); if (el) { Object.assign(el, updates); await this.commit(); } }
-  async updateNAS(id: string, updates: any) { const n = ((this.state as any).networkNodes || []).find((n: any) => n.id === id); if (n) { Object.assign(n, updates); await this.commit(); } }
-  async updateOLT(id: string, updates: any) { const n = ((this.state as any).networkNodes || []).find((n: any) => n.id === id); if (n) { Object.assign(n, updates); await this.commit(); } }
-  async updateResellerPackageConfig(resellerId: string, config: any) { const u = this.state.users.find((u: any) => u.id === resellerId); if (u) { (u as any).packageConfig = config; await this.commit(); } }
-  async uploadBrandingMedia(key: string, data: string) { (this.state as any).branding = (this.state as any).branding || {}; (this.state as any).branding[key] = data; await this.commit(); return data; }
-  async verifyAuthProvider(providerId: string) { return { success: true, provider: providerId, verified: true }; }
-  async verifyFaceForReset(userId: string, faceData: any) { console.log('[AUTH] Face verification for', userId); return { success: true, match: true }; }
-  async verifyPhoneCode(phone: string, code: string) { return { success: true, verified: true }; }
-  async verifyResetCode(userId: string, code: string) { return { success: true, valid: true }; }
-  async verifySMTP(config: any) { console.log('[SMTP] Verifying config'); return { success: true, message: 'SMTP connection verified' }; }
-  async vsolWifiChange(userId: string, newPassword: string) { const u = this.state.users.find((u: any) => u.id === userId); if (u) { (u as any).wifiPassword = newPassword; await this.commit(); } return { success: true }; }
 
   getSocket() { return this.socket; }
 }

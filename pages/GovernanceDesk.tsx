@@ -45,7 +45,7 @@ const MODULE_METADATA: Record<string, { label: string; icon: any }> = {
   'import': { label: 'Mass Operations', icon: FileInput },
   'archive': { label: 'Vault Archives', icon: Archive },
   'staff': { label: 'Personnel Registry', icon: UserCheck },
-  'permissions': { label: 'Matrix Governance', icon: ShieldAlert },
+  'permissions': { label: 'Access Control', icon: ShieldAlert },
   'business-settings': { label: 'Core Identity', icon: Globe },
   'about-us': { label: 'Brand Story', icon: Info },
   'tasks': { label: 'Mission Control', icon: ClipboardList },
@@ -412,11 +412,11 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
                 </div>
 
                 <div className="flex-1 overflow-auto custom-scrollbar">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full min-w-[800px] text-left border-collapse">
                     <thead className="sticky top-0 z-10 bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-sm">
                       <tr>
                         <th className="px-12 py-8 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">Target System Modules</th>
-                        <th className="px-12 py-8 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] text-center">Authority Matrix (Entry • Logic • Purge)</th>
+                        <th className="px-12 py-8 text-[11px] font-black text-slate-400 uppercase tracking-[0.4em] text-center">Permission Matrix (Entry • Logic • Purge)</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">

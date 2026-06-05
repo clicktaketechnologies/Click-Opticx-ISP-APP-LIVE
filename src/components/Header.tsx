@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 import { AppState, Role } from '../../types';
 import { db } from '../../db';
-import { useTheme } from 'next-themes';
 
 interface HeaderProps {
   user: { id?: string; email: string; role: Role; name: string; profileImage?: string };
@@ -25,7 +24,6 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const { theme, setTheme } = useTheme();
   
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -53,8 +51,24 @@ const Header: React.FC<HeaderProps> = ({
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+
   const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+    
+    localStorage.setItem('clickopticx_theme', newTheme);
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'clickopticx_theme',
+      newValue: newTheme
+    }));
   };
 
   const getNotifIcon = (type: string) => {
@@ -108,7 +122,7 @@ const Header: React.FC<HeaderProps> = ({
           onClick={toggleTheme}
           className="p-2.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 rounded-2xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-white/10"
         >
-          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          {currentTheme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
         </button>
 
         {/* Notifications */}
@@ -118,6 +132,11 @@ const Header: React.FC<HeaderProps> = ({
             className={`p-2.5 rounded-2xl transition-all relative border border-transparent 
               ${showNotifications ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 hover:border-slate-200 dark:hover:border-white/10'}
             `}
+            aria-haspopup="true"
+            aria-expanded={showNotifications}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setShowNotifications(false);
+            }}
           >
             <Bell size={20} strokeWidth={showNotifications ? 2.5 : 2} />
             {unreadCount > 0 && (
@@ -148,11 +167,22 @@ const Header: React.FC<HeaderProps> = ({
                   notifications.map(n => (
                     <div 
                       key={n.id} 
-                      className={`p-5 border-b border-slate-50 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer flex gap-4 ${!n.read ? 'bg-indigo-50/30 dark:bg-indigo-500/5' : ''}`}
+                      tabIndex={0}
+                      className={`p-5 border-b border-slate-50 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer flex gap-4 focus:outline-none focus:bg-slate-100 dark:focus:bg-white/10 ${!n.read ? 'bg-indigo-50/30 dark:bg-indigo-500/5' : ''}`}
                       onClick={() => {
                         db.markNotificationRead(n.id);
                         if (n.target && onNavigate) onNavigate(n.target);
                         setShowNotifications(false);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          db.markNotificationRead(n.id);
+                          if (n.target && onNavigate) onNavigate(n.target);
+                          setShowNotifications(false);
+                        } else if (e.key === 'Escape') {
+                          setShowNotifications(false);
+                        }
                       }}
                     >
                       <div className="shrink-0 mt-1">{getNotifIcon(n.type)}</div>

@@ -162,7 +162,7 @@ const AccountingLedger: React.FC<{ state: AppState }> = ({ state }) => {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full min-w-full">
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[1000px] text-sm">
             <thead>
               <tr className="!bg-slate-50 !border-b-2 !border-slate-100">
                 <th className="p-6">Registry Timestamp</th>

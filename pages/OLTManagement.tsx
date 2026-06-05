@@ -29,7 +29,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
       port: 22, snmpCommunity: 'public', location: '', ponPorts: 8
    });
 
-   const filteredOLTs = state.oltNodes.filter(n => 
+   const filteredOLTs = (state.oltNodes || []).filter(n => 
       n.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       n.ip.includes(searchTerm) || 
       n.location.toLowerCase().includes(searchTerm.toLowerCase())
@@ -37,10 +37,10 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
 
    useEffect(() => {
       // Synchronize backend OLT registry for real-time monitoring
-      if (state.oltNodes.length > 0) {
+      if ((state.oltNodes || []).length > 0) {
          db.getSocket()?.emit('olt-registry-update', state.oltNodes);
       }
-   }, [state.oltNodes.length]);
+   }, [state.oltNodes?.length]);
 
    const handleAddOLT = async () => {
       await db.addOLT(formData);
@@ -297,7 +297,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
          {activeTab === 'ONUs' && (
             <div className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
                {/* Fallback if no OLTs */}
-               {state.oltNodes.length === 0 && (
+               {(state.oltNodes || []).length === 0 && (
                   <div className="p-20 text-center">
                      <div className="flex flex-col items-center gap-6">
                         <div className="w-20 h-20 bg-amber-50 text-amber-400 rounded-full flex items-center justify-center">
@@ -310,7 +310,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      </div>
                   </div>
                )}
-               {state.oltNodes.length > 0 && (
+               {(state.oltNodes || []).length > 0 && (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                   <thead>
@@ -324,7 +324,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                      </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                     {state.onus.map(onu => {
+                     {(state.onus || []).map(onu => {
                         const olt = state.oltNodes.find(n => n.id === onu.oltId);
                         const user = state.users.find(u => u.id === onu.subscriberId);
                         return (
@@ -400,7 +400,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                            </tr>
                         );
                      })}
-                     {state.onus.length === 0 && (
+                     {(state.onus || []).length === 0 && (
                         <tr>
                            <td colSpan={6} className="p-20 text-center">
                               <div className="flex flex-col items-center gap-4">
@@ -454,7 +454,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                </div>
 
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {state.discoveredOnus.length === 0 && (
+                  {(state.discoveredOnus || []).length === 0 && (
                       <div className="col-span-full bg-white rounded-[2.5rem] border border-slate-100 p-20 text-center">
                         <div className="flex flex-col items-center gap-6">
                             <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
@@ -469,7 +469,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                         </div>
                       </div>
                   )}
-                  {state.discoveredOnus.map((onu, idx) => (
+                  {(state.discoveredOnus || []).map((onu, idx) => (
                     <div key={idx} className="bg-white rounded-[2rem] border-2 border-dashed border-blue-100 p-8 hover:border-blue-500 transition-all group animate-in zoom-in duration-300">
                         <div className="flex items-center justify-between mb-6">
                             <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">

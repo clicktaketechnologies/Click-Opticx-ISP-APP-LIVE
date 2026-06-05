@@ -17,7 +17,7 @@ const HotspotManager: React.FC<{ state: AppState }> = ({ state }) => {
   const [selectedToken, setSelectedToken] = useState<HotspotToken | null>(null);
 
   const [formData, setFormData] = useState({
-    nasId: state.nas[0]?.id || '',
+    nasId: (state.nas || [])[0]?.id || '',
     count: 10,
     price: 100,
     validityDays: 1,
@@ -49,7 +49,7 @@ const HotspotManager: React.FC<{ state: AppState }> = ({ state }) => {
   };
 
   const TokenVoucher = ({ token }: { token: HotspotToken }) => {
-    const nas = state.nas.find(n => n.id === token.nasId);
+    const nas = (state.nas || []).find(n => n.id === token.nasId);
     const portalUrl = nas?.hotspotUrlMode === 'DOMAIN' ? nas.customHotspotUrl : `http://${nas?.ip}/login`;
 
     return (
@@ -152,7 +152,7 @@ const HotspotManager: React.FC<{ state: AppState }> = ({ state }) => {
                        className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold text-xs outline-none focus:ring-2 focus:ring-blue-500/10"
                     >
                        <option value="all">All Gateways</option>
-                       {state.nas.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
+                       {(state.nas || []).map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
                     </select>
                  </div>
               </div>
@@ -198,7 +198,7 @@ const HotspotManager: React.FC<{ state: AppState }> = ({ state }) => {
                           </tr>
                        ) : (
                           filteredTokens.map(token => {
-                            const nas = state.nas.find(n => n.id === token.nasId);
+                            const nas = (state.nas || []).find(n => n.id === token.nasId);
                             return (
                              <tr key={token.id} className="hover:bg-slate-50 transition-colors group">
                                 <td className="px-8 py-5">
@@ -270,7 +270,7 @@ const HotspotManager: React.FC<{ state: AppState }> = ({ state }) => {
                   onChange={e => setFormData({...formData, nasId: e.target.value})}
                   className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10"
                >
-                  {state.nas.map(n => <option key={n.id} value={n.id}>{n.name} ({n.ip})</option>)}
+                  {(state.nas || []).map(n => <option key={n.id} value={n.id}>{n.name} ({n.ip})</option>)}
                </select>
             </div>
             <div className="space-y-1.5">

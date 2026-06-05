@@ -77,7 +77,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
     let interval: ReturnType<typeof setInterval> | null = null;
     const pollKYCStatus = async () => {
       try {
-        const res = await fetch(`${db.getBackendUrl()}/api/kyc/status?userId=${user.id}`);
+        const res = await fetch(`${db.backendUrl}/api/kyc/status?userId=${user.id}`);
         if (!res.ok) return;
         const data = await res.json();
         if (data.success && data.isKYCVerified) {

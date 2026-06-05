@@ -48,7 +48,7 @@ const SpeedTest: React.FC = () => {
       const pings = [];
       for (let i = 0; i < 10; i++) {
         const start = performance.now();
-        await fetch(`${db.getBackendUrl()}/api/speedtest/ping?cb=${Date.now()}`, { 
+        await fetch(`${db.backendUrl}/api/speedtest/ping?cb=${Date.now()}`, { 
           signal: abortControllerRef.current.signal 
         });
         pings.push(performance.now() - start);
@@ -64,7 +64,7 @@ const SpeedTest: React.FC = () => {
       const threadCount = 4;
       const chunks = await Promise.all(
         Array.from({ length: threadCount }).map(() => 
-          fetch(`${db.getBackendUrl()}/api/speedtest/download?cb=${Date.now()}`, { 
+          fetch(`${db.backendUrl}/api/speedtest/download?cb=${Date.now()}`, { 
             signal: abortControllerRef.current.signal 
           }).then(r => r.blob())
         )
@@ -79,7 +79,7 @@ const SpeedTest: React.FC = () => {
       setPhase('upload');
       const uploadData = new Blob([new Uint8Array(5 * 1024 * 1024)]); // 5MB payload
       const uploadStart = performance.now();
-      await fetch(`${db.getBackendUrl()}/api/speedtest/upload`, {
+      await fetch(`${db.backendUrl}/api/speedtest/upload`, {
         method: 'POST',
         body: uploadData,
         signal: abortControllerRef.current.signal

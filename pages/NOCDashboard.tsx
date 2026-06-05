@@ -28,7 +28,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 
    // Audible Alerts for Critical Faults
    useEffect(() => {
-      const latest = state.nocAlerts[0];
+      const latest = (state.nocAlerts || [])[0];
       if (latest && latest.severity === 'Critical') {
          const now = new Date().getTime();
          const alertTime = new Date(latest.timestamp).getTime();
@@ -94,22 +94,22 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
 
    // Derived Data
    const stats = useMemo(() => {
-      const onlineUsers = state.users.filter(u => u.status === 'Active').length;
-      const weakSignals = state.onus.filter(o => o.signalStrength < -27).length;
-      const offlineOlts = state.oltNodes.filter(o => o.status !== 'Online').length;
+      const onlineUsers = (state.users || []).filter(u => u.status === 'Active').length;
+      const weakSignals = (state.onus || []).filter(o => o.signalStrength < -27).length;
+      const offlineOlts = (state.oltNodes || []).filter(o => o.status !== 'Online').length;
       return {
-         totalSubscribers: state.users.length,
+         totalSubscribers: (state.users || []).length,
          onlineUsers,
-         offlineUsers: state.users.length - onlineUsers,
-         suspendedUsers: state.users.filter(u => u.status === 'Suspended').length,
-         routersOnline: state.nas.filter(n => n.status === 'Online').length,
-         oltDevices: state.oltNodes.length,
-         onusOnline: state.onus.filter(o => o.status === 'Online').length,
+         offlineUsers: (state.users || []).length - onlineUsers,
+         suspendedUsers: (state.users || []).filter(u => u.status === 'Suspended').length,
+         routersOnline: (state.nas || []).filter(n => n.status === 'Online').length,
+         oltDevices: (state.oltNodes || []).length,
+         onusOnline: (state.onus || []).filter(o => o.status === 'Online').length,
          weakSignals
       };
    }, [state]);
 
-   const filteredAlerts = state.nocAlerts.filter(a => 
+   const filteredAlerts = (state.nocAlerts || []).filter(a => 
       activeFilter === 'All' ? true : a.severity === activeFilter
    );
 
@@ -250,7 +250,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     {state.upstreamLinks.map(link => (
+                     {(state.upstreamLinks || []).map(link => (
                         <div key={link.id} className={`p-6 rounded-3xl relative overflow-hidden transition-all ${isNocMode ? 'bg-black/40 hover:bg-black/60' : 'bg-slate-50 hover:bg-slate-100 border border-slate-100'}`}>
                            <div className="flex items-start justify-between relative z-10">
                               <div>
@@ -302,10 +302,10 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            <Server className="text-blue-400" size={24} />
                            <h2 className="text-lg font-black uppercase tracking-tighter">MikroTik Routers</h2>
                         </div>
-                        <span className="text-2xl font-black text-blue-400/20 italic">{state.nas.length}</span>
+                        <span className="text-2xl font-black text-blue-400/20 italic">{(state.nas || []).length}</span>
                      </div>
                      <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                        {state.nas.map(nas => (
+                        {(state.nas || []).map(nas => (
                            <div key={nas.id} className={`p-5 rounded-3xl border transition-all ${isNocMode ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-slate-100 shadow-sm hover:shadow-md'}`}>
                               <div className="flex items-center justify-between mb-4">
                                  <div className="flex items-center gap-3">
@@ -350,10 +350,10 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            <Network className="text-cyan-400" size={24} />
                            <h2 className="text-lg font-black uppercase tracking-tighter">System Infrastructure</h2>
                         </div>
-                        <span className="text-2xl font-black text-cyan-400/20 italic">{state.oltNodes.length}</span>
+                        <span className="text-2xl font-black text-cyan-400/20 italic">{(state.oltNodes || []).length}</span>
                      </div>
                      <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                        {state.oltNodes.map(olt => (
+                        {(state.oltNodes || []).map(olt => (
                            <div key={olt.id} className={`p-5 rounded-3xl border transition-all ${isNocMode ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-slate-100 shadow-sm hover:shadow-md'}`}>
                               <div className="flex items-center justify-between mb-6">
                                  <div className="flex items-center gap-3">
@@ -377,7 +377,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                                     <p className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-1">Active ONUs</p>
                                     <div className="flex items-baseline gap-1">
                                        <span className="text-lg font-black text-green-400">
-                                          {state.onus.filter(o => o.oltId === olt.id && o.status === 'Online').length}
+                                          {(state.onus || []).filter(o => o.oltId === olt.id && o.status === 'Online').length}
                                        </span>
                                        <span className="text-[8px] font-black opacity-20">REGISTERED</span>
                                     </div>
@@ -386,7 +386,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                                     <p className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-1">Faults</p>
                                     <div className="flex items-baseline gap-1 justify-end">
                                        <span className="text-lg font-black text-rose-500">
-                                          {state.onus.filter(o => o.oltId === olt.id && o.status !== 'Online').length}
+                                          {(state.onus || []).filter(o => o.oltId === olt.id && o.status !== 'Online').length}
                                        </span>
                                        <span className="text-[8px] font-black opacity-20 text-rose-500/40">OFFLINE</span>
                                     </div>
@@ -421,14 +421,14 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                            </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                           {state.onus.filter(o => o.signalStrength < -25).map(onu => {
-                              const user = state.users.find(u => u.id === onu.subscriberId);
+                           {(state.onus || []).filter(o => o.signalStrength < -25).map(onu => {
+                              const user = (state.users || []).find(u => u.id === onu.subscriberId);
                               return (
                                  <tr key={onu.id} className="hover:bg-white/5 transition-colors group">
                                     <td className="p-4">
                                        <div className="flex items-center gap-3">
                                           <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center font-black text-[10px] group-hover:bg-blue-600 transition-colors">
-                                             {user?.name.charAt(0)}
+                                             {user?.name?.charAt(0) || '?'}
                                           </div>
                                           <div className="text-xs font-black">{user?.name}</div>
                                        </div>
@@ -613,7 +613,7 @@ const NOCDashboard: React.FC<{ state: AppState }> = ({ state }) => {
                      Activity Log
                   </h2>
                   <div className="space-y-6">
-                     {state.securityLogs.slice(0, 5).map(log => (
+                     {(state.securityLogs || []).slice(0, 5).map(log => (
                         <div key={log.id} className="flex gap-4 relative">
                            <div className="flex flex-col items-center">
                               <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">

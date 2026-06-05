@@ -13,6 +13,7 @@ router.post('/social-handshake', authController.socialHandshake);
 router.post('/complete-reset', authController.completeReset);
 router.get('/verify-email', authController.verifyEmail);
 router.post('/verify-otp', authController.verifyOtp);
+router.post('/resend-otp', authController.resendOtp);
 router.get('/check-verification-status', authController.checkVerificationStatus);
 
 

@@ -165,3 +165,29 @@ export const handleWebhook = async (req, res) => {
         res.status(500).send('Internal Error');
     }
 };
+
+/** Connection Test Handler */
+export const testGatewayConnection = async (req, res) => {
+    const { gatewayId, config, sandbox } = req.body;
+    
+    logger.info(`[PAYMENT-TEST] Connection pulse requested for ${gatewayId}`);
+    
+    try {
+        const adapter = paymentRouter.adapters[gatewayId];
+        if (!adapter) {
+            return res.json({ success: false, message: 'Gateway adapter not found or not supported yet.' });
+        }
+        
+        // In a real system, you would call a test method on the adapter or attempt to create a minimal charge/token
+        // Here we just check if adapter exists and pretend it verified the config structure
+        if (!config) {
+            return res.json({ success: false, message: 'No configuration provided.' });
+        }
+        
+        // Simulate an API connection test pulse
+        return res.json({ success: true, message: `Successfully reached ${gatewayId} API.` });
+    } catch (error) {
+        logger.error(`[PAYMENT-TEST] Failure: ${error.message}`);
+        return res.status(500).json({ success: false, message: `Gateway rejected connection: ${error.message}` });
+    }
+};

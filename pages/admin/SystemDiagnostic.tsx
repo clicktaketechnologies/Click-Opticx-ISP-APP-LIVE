@@ -105,7 +105,7 @@ export const SystemDiagnostic: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xl">
+            <div className="bg-white border border-slate-100 rounded-3xl overflow-x-auto shadow-xl">
                 <table className="w-full text-left">
                     <thead className="bg-slate-50 border-b border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400">
                         <tr>

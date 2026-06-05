@@ -37,6 +37,7 @@ export async function signUp({ email, password, phone, metadata }) {
          password,
          options: {
            data: metadata || {},
+           emailRedirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/verify-email`
          }
        }),
        10000 // 10 seconds timeout

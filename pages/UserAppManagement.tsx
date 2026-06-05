@@ -81,9 +81,13 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
       setIsProcessing(userId);
       try {
          const adminToken = localStorage.getItem('token');
-         const res = await fetch(`${db.getBackendUrl()}/api/admin/impersonate/${userId}`, {
+         const res = await fetch(`${db.backendUrl}/api/admin/impersonate/${userId}`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${adminToken}` }
+            credentials: 'include',
+            headers: { 
+               'Content-Type': 'application/json',
+               ...(adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {})
+            }
          });
          const data = await res.json();
          if (data.success) {

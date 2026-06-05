@@ -47,7 +47,7 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
    const [showSecret, setShowSecret]         = useState(false);
    const [formData, setFormData]             = useState<Partial<NASConfig>>(DEFAULT_FORM);
 
-   const filteredNodes = state.nas.filter(n =>
+   const filteredNodes = (state.nas || []).filter(n =>
       n.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       n.ip.includes(searchTerm) ||
       (n.location || '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -143,10 +143,10 @@ const NASManagement: React.FC<{ state: AppState }> = ({ state }) => {
          {/* STATS */}
          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-               { label: 'Total Routers', value: state.nas.length, icon: Server, color: 'blue' },
-               { label: 'Online', value: state.nas.filter(n => n.status === 'Online').length, icon: CheckCircle, color: 'green' },
-               { label: 'Active Users', value: state.users.filter(u => u.status === UserStatus.ACTIVE).length, icon: Activity, color: 'indigo' },
-               { label: 'API Enabled', value: state.nas.filter(n => n.apiEnabled).length, icon: Zap, color: 'amber' },
+               { label: 'Total Routers', value: (state.nas || []).length, icon: Server, color: 'blue' },
+               { label: 'Online', value: (state.nas || []).filter(n => n.status === 'Online').length, icon: CheckCircle, color: 'green' },
+               { label: 'Active Users', value: (state.users || []).filter(u => u.status === UserStatus.ACTIVE).length, icon: Activity, color: 'indigo' },
+               { label: 'API Enabled', value: (state.nas || []).filter(n => n.apiEnabled).length, icon: Zap, color: 'amber' },
             ].map((s, i) => (
                <div key={i} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between">
                   <div>

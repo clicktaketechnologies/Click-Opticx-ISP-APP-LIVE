@@ -88,7 +88,11 @@ export const Modal: React.FC<ModalProps> = ({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         // Allow ESC during loading only if we can show a confirmation
-        if (!isLoading) {
+        if (isLoading) {
+          if (window.confirm('A process is currently running. Are you sure you want to close this modal?')) {
+            onClose();
+          }
+        } else {
           onClose();
         }
       }

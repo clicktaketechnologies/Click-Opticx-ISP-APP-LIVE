@@ -91,7 +91,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
       // cannot proxy /api/* to the external Render backend — relative paths
       // hit the SPA catch-all rewrite and return index.html, which causes the
       // "Unexpected token '<'" JSON parse error).
-      const res = await fetch(`${db.getBackendUrl()}/api/kyc/upload`, {
+      const res = await fetch(`${db.backendUrl}/api/kyc/upload`, {
         method: 'POST',
         body: formData
       });

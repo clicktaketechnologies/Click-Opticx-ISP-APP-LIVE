@@ -9,4 +9,7 @@ router.post('/process', paymentController.processPayment);
 // POST /api/payments/webhooks/:gatewayId
 router.post('/webhooks/:gatewayId', paymentController.handleWebhook);
 
+// POST /api/payments/test-gateway
+router.post('/test-gateway', paymentController.testGatewayConnection);
+
 export default router;

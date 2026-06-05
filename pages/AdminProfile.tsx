@@ -83,7 +83,7 @@ const AdminProfile: React.FC<{ state: AppState }> = ({ state }) => {
       }
 
       try {
-        const response = await fetch(`${db.getBackendUrl()}/api/auth/change-password`, {
+        const response = await fetch(`${db.backendUrl}/api/auth/change-password`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

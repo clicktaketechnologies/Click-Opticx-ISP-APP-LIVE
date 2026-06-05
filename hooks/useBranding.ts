@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { db, INITIAL_COMM_CONFIG } from '../db';
+import { db } from '../db';
 import { BrandingConfig } from '../types';
 
 export const useBranding = (): BrandingConfig => {
   const [branding, setBranding] = useState<BrandingConfig>(() => {
     const s = db.getState();
-    return s?.settings?.branding || INITIAL_COMM_CONFIG.senderIdentities[0] as any; // Fallback
+    return s?.settings?.branding || { businessName: 'Click Opticx', logoUrl: '', primaryColor: '#6366F1' } as any; // Fallback
   });
 
   useEffect(() => {

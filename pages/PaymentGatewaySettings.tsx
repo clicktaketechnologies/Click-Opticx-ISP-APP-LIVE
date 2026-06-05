@@ -66,7 +66,8 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
       setIsTesting(true);
       setTestResult(null);
       try {
-         const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/payment/test-gateway`, {
+         const baseUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
+         const res = await fetch(`${baseUrl}/api/payments/test-gateway`, {
             method: 'POST',
             headers: {
                'Content-Type': 'application/json',

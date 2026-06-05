@@ -280,7 +280,7 @@ const PaymentMethodsIndex: React.FC<Props> = ({ state, onNavigate }) => {
                             <input 
                                 readOnly
                                 className="flex-1 p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-xs text-slate-400 cursor-not-allowed"
-                                value={selectedGateway.webhook_url || `${db.getBackendUrl()}/api/payments/webhooks/${selectedGateway.id}`}
+                                value={selectedGateway.webhook_url || `${db.backendUrl}/api/payments/webhooks/${selectedGateway.id}`}
                             />
                             <button className="px-4 bg-slate-800 text-blue-400 rounded-xl hover:bg-slate-700 transition-all"><Layers size={14}/></button>
                         </div>

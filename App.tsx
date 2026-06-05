@@ -412,7 +412,7 @@ const App: React.FC = () => {
     initDualWrite();
 
     // Aggressive Cache Busting for v9.5.3
-    const currentAppVersion = '9.5.4';
+    const currentAppVersion = '9.5.5';
     if (localStorage.getItem('clickopticx_app_version') !== currentAppVersion) {
       console.warn(`[UPDATE] New version detected: ${currentAppVersion}. Purging old caches...`);
       localStorage.setItem('clickopticx_app_version', currentAppVersion);

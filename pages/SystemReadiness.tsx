@@ -32,14 +32,14 @@ const SystemReadiness: React.FC = () => {
     runManualScan();
   }, []);
 
-  const keys = dbState.settings.technicalKeys;
+  const keys = dbState?.settings?.technicalKeys || {};
 
   const requirements = [
     {
       id: 'supabase',
       name: 'Supabase Cloud DB',
       desc: 'Primary data storage and Auth gateway.',
-      status: keys.supabaseUrl && keys.supabaseAnonKey ? 'Passed' : 'Missing',
+      status: keys?.supabaseUrl && keys?.supabaseAnonKey ? 'Passed' : 'Missing',
       impact: 'Critical',
       icon: Database,
       link: '#/business-settings'
@@ -84,7 +84,7 @@ const SystemReadiness: React.FC = () => {
       id: 'nas-registry',
       name: 'MikroTik / NAS Model',
       desc: 'Core networking hardware integration.',
-      status: dbState.nas.length > 0 ? 'Active' : 'Not Configured',
+      status: (dbState.nas?.length || 0) > 0 ? 'Active' : 'Not Configured',
       impact: 'High',
       icon: Server,
       link: '#/nas-management'
