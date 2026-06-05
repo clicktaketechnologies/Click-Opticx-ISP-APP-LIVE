@@ -87,7 +87,10 @@ const CacheManagement: React.FC<{ state: AppState }> = ({ state }) => {
             db.logNotification('all', 'error', 'Reset Error', 'Failed to synchronize cache layers.');
             toastError('Personal Cache', 'Failed to clear cache: ' + err.message);
         } finally {
-            setTimeout(() => setIsClearingStorage(false), 800);
+            setTimeout(() => {
+                setIsClearingStorage(false);
+                window.location.href = '/';
+            }, 800);
         }
     };
 

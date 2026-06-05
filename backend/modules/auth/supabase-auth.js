@@ -1,3 +1,4 @@
+import { createClient } from '@supabase/supabase-js';
 import configManager from '../../services/config-manager.js';
 import logger from '../../utils/logger.js';
 import bcrypt from 'bcryptjs';
@@ -6,6 +7,17 @@ import bcrypt from 'bcryptjs';
  * Supabase Auth Service
  * Wraps Supabase Auth operations for the ISP app
  */
+
+function getAnonClient() {
+  const supabaseUrl = process.env.SUPABASE_URL || 'https://snmsvixlskwstvpuksbw.supabase.co';
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Supabase URL or Anon Key is missing from environment');
+  }
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+  });
+}
 
 // Timeout helper for Supabase calls
 const timeoutPromise = (promise, ms) => {
@@ -27,8 +39,7 @@ const timeoutPromise = (promise, ms) => {
 };
 
 export async function signUp({ email, password, phone, metadata }) {
-   const supabase = configManager.getSupabaseClient();
-   if (!supabase) throw new Error('Supabase client not initialized');
+   const supabase = getAnonClient();
 
    try {
      const { data, error } = await timeoutPromise(
@@ -55,8 +66,7 @@ export async function signUp({ email, password, phone, metadata }) {
  }
 
 export async function signIn({ email, phone, password }) {
-   const supabase = configManager.getSupabaseClient();
-   if (!supabase) throw new Error('Supabase client not initialized');
+   const supabase = getAnonClient();
 
    const credentials = email ? { email, password } : { phone, password };
 
@@ -78,8 +88,7 @@ export async function signIn({ email, phone, password }) {
  }
 
 export async function resetPassword(email) {
-   const supabase = configManager.getSupabaseClient();
-   if (!supabase) throw new Error('Supabase client not initialized');
+   const supabase = getAnonClient();
 
    try {
      const { data, error } = await timeoutPromise(
@@ -101,8 +110,7 @@ export async function resetPassword(email) {
  }
 
 export async function updatePassword(newPassword) {
-   const supabase = configManager.getSupabaseClient();
-   if (!supabase) throw new Error('Supabase client not initialized');
+   const supabase = getAnonClient();
 
    try {
      const { data, error } = await timeoutPromise(

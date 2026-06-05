@@ -29,7 +29,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
    const [view, setView] = useState<'login' | 'signup' | 'reset_request' | 'reset_finalize' | 'phone_login' | 'otp_verify' | 'face_reset'>('login');
    const [credential, setCredential] = useState('');
    const [password, setPassword] = useState('');
-   const rememberMe = false;
+   const [rememberMe, setRememberMe] = useState(false);
 
    const [phone, setPhone] = useState('');
    const [otp, setOtp] = useState('');
@@ -305,7 +305,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
             required
          />
 
-         <div className="flex justify-end px-1 pt-2">
+         <div className="flex items-center justify-between px-1 pt-2">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+               <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500 transition-colors cursor-pointer"
+               />
+               <span className="text-sm font-semibold text-slate-600 hover:text-slate-700 transition-colors">Remember Me</span>
+            </label>
             <button type="button" onClick={() => setView('reset_request')} className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">Forgot Password?</button>
          </div>
 

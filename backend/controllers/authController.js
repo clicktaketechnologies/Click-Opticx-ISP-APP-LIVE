@@ -6,7 +6,7 @@ import supabaseAuth from '../modules/auth/supabase-auth.js';
 import roleSync from '../modules/auth/role-sync.js';
 import configManager from '../services/config-manager.js';
 import { sendDirectEmail } from '../modules/email/resend-direct.js';
-import argon2 from 'argon2';
+
 import { z } from 'zod';
 import crypto from 'crypto';
 import fs from 'fs';
@@ -163,11 +163,11 @@ export const signup = async (req, res) => {
         const userId = supabaseUser.id; // Use UUID from Supabase Auth!
 
         // 4. Create local password hash
-        const hashedPassword = await argon2.hash(password, { type: argon2.argon2id });
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // 5. Generate 6-digit OTP code & Hash it
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-        const hashedOtp = await argon2.hash(otpCode, { type: argon2.argon2id });
+        const hashedOtp = await bcrypt.hash(otpCode, 10);
 
         const newUser = {
             id: userId,
@@ -534,7 +534,7 @@ export const verifyOtp = async (req, res) => {
         }
 
         // Verify OTP code hash
-        const isMatch = await argon2.verify(verificationCode.hash, otp);
+        const isMatch = await bcrypt.compare(otp, verificationCode.hash);
         if (!isMatch) {
             return res.status(400).json({ success: false, error: 'INVALID_OTP', message: 'Invalid verification code. Please check again.' });
         }
@@ -617,7 +617,7 @@ export const resendOtp = async (req, res) => {
 
         // Generate new OTP
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-        const hashedOtp = await argon2.hash(otpCode, { type: argon2.argon2id });
+        const hashedOtp = await bcrypt.hash(otpCode, 10);
 
         // Update verification code in raw_data
         const updatedRawData = { ...user.raw_data };
@@ -832,7 +832,7 @@ export const completeReset = async (req, res) => {
             return res.status(400).json({ success: false, error: 'USER_ID_REQUIRED', message: 'Identity context missing.' });
         }
 
-        const hashedPassword = await argon2.hash(newPassword, { type: argon2.argon2id });
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         let isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
         let matchColumn = isUuid ? 'id' : 'email';
@@ -1106,13 +1106,13 @@ export const changePassword = async (req, res) => {
         }
 
         // Verify old password
-        const passwordMatches = await argon2.verify(user.password, oldPassword);
+        const passwordMatches = await bcrypt.compare(oldPassword, user.password);
         if (!passwordMatches) {
             return res.status(400).json({ success: false, error: 'INVALID_OLD_PASSWORD', message: 'The old password you entered is incorrect.' });
         }
 
         // Hash new password
-        const hashedPassword = await argon2.hash(newPassword, { type: argon2.argon2id });
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         // Update password and revoke all sessions
         const updatedRawData = {

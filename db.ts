@@ -299,6 +299,12 @@ class DB {
       const cached = localStorage.getItem('netrecover_v15_registry');
       if (cached) {
         const cachedData = JSON.parse(cached);
+        if (cachedData) {
+          if (!cachedData.auth || !cachedData.auth.isPersistent) {
+            cachedData.currentUser = undefined;
+            cachedData.auth = { isLoggedIn: false };
+          }
+        }
         this.state = {
           ...INITIAL_STATE,
           ...cachedData,
@@ -332,6 +338,14 @@ class DB {
           if (sessionState && sessionState.currentUser) {
             this.state.currentUser = sessionState.currentUser;
             this.state.isImpersonating = sessionState.isImpersonating || false;
+            this.state.auth = {
+              isLoggedIn: true,
+              id: sessionState.currentUser.id,
+              role: sessionState.currentUser.role || 'Subscriber',
+              email: sessionState.currentUser.email,
+              name: sessionState.currentUser.name,
+              isPersistent: false
+            };
           }
         }
       }
@@ -408,7 +422,12 @@ class DB {
     if (!Array.isArray(this.state.signupRequests)) this.state.signupRequests = [];
     if (!Array.isArray(this.state.securityLogs)) this.state.securityLogs = [];
     try {
-      localStorage.setItem('netrecover_v15_registry', JSON.stringify(this.state));
+      const stateToSave = { ...this.state };
+      if (!this.state.auth || !this.state.auth.isPersistent) {
+        stateToSave.currentUser = undefined;
+        stateToSave.auth = { isLoggedIn: false };
+      }
+      localStorage.setItem('netrecover_v15_registry', JSON.stringify(stateToSave));
       const sessionTarget = typeof sessionStorage !== 'undefined' ? sessionStorage : (globalThis as any).sessionStorage;
       if (sessionTarget && this.state.currentUser) {
         sessionTarget.setItem('clickopticx_session_state', JSON.stringify({
@@ -474,12 +493,20 @@ class DB {
     });
   }
 
-  async login(credential: string, pass: string) {
+  async login(credential: string, pass: string, rememberMe?: boolean) {
     const input = credential.toLowerCase().trim();
     if (!input || !pass) return { success: false, message: 'Identity required for lookup.' };
     const staff = this.state.staff.find(s => s.email.toLowerCase() === input && s.password === pass);
     if (staff) {
       this.state.currentUser = staff;
+      this.state.auth = {
+        isLoggedIn: true,
+        id: staff.email,
+        role: staff.role,
+        email: staff.email,
+        name: staff.name,
+        isPersistent: !!rememberMe
+      };
       await this.commitInternal();
       return { success: true, user: staff, type: 'staff' };
     }
@@ -491,6 +518,14 @@ class DB {
     ) && u.password === pass);
     if (user) {
       this.state.currentUser = { ...user, role: Role.CUSTOMER };
+      this.state.auth = {
+        isLoggedIn: true,
+        id: user.id,
+        role: Role.CUSTOMER,
+        email: user.email,
+        name: user.name,
+        isPersistent: !!rememberMe
+      };
       await this.commitInternal();
       return { success: true, user: this.state.currentUser, type: 'customer' };
     }
@@ -519,6 +554,14 @@ class DB {
         }
         
         this.state.currentUser = { ...apiUser, role: apiUser.role || Role.CUSTOMER };
+        this.state.auth = {
+          isLoggedIn: true,
+          id: apiUser.id,
+          role: apiUser.role || Role.CUSTOMER,
+          email: apiUser.email,
+          name: apiUser.name,
+          isPersistent: !!rememberMe
+        };
         await this.commitInternal();
         return { success: true, user: this.state.currentUser, type: apiUser.role && apiUser.role !== 'Customer' ? 'staff' : 'customer', token: result.token };
       } else {
@@ -1592,7 +1635,7 @@ class DB {
   async clearAllDues() { this.state.users.forEach((u: any) => (u as any).dues = 0); await this.commit(); }
   async clearBackendCache() { console.log('[CACHE] Backend cache cleared'); return { success: true }; }
   async clearEmergencyLoadManually(id: string) { const el = (this.state as any).emergencyLoads?.find((e: any) => e.id === id); if (el) { el.status = 'Cleared'; await this.commit(); } }
-  async clearProfileCache() { console.log('[CACHE] Profile cache cleared'); return { success: true }; }
+  async clearProfileCache(emailOrId?: string) { console.log('[CACHE] Profile cache cleared for:', emailOrId || 'all'); return { success: true }; }
   async createSystemSnapshot() { return { id: 'SNAP_' + Date.now(), timestamp: new Date().toISOString(), size: JSON.stringify(this.state).length }; }
   async deleteBrandingMedia(key: string) { if ((this.state as any).branding) delete (this.state as any).branding[key]; await this.commit(); }
   async deleteNAS(id: string) { (this.state as any).networkNodes = ((this.state as any).networkNodes || []).filter((n: any) => n.id !== id); await this.commit(); }
