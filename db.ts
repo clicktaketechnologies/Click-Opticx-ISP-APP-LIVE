@@ -291,7 +291,7 @@ class DB {
   private firestore: Firestore | null = null;
   private app: FirebaseApp | null = null;
   private socket: any = null;
-  readonly backendUrl: string = import.meta.env.VITE_BACKEND_URL || 'https://isp-click-opticx.onrender.com';
+  readonly backendUrl: string = import.meta.env.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com';
 
   constructor() {
     this.state = INITIAL_STATE;
@@ -497,8 +497,9 @@ class DB {
 
     // Attempt backend login as fallback to sync newly registered users
     try {
+      console.log('[DB.login] Attempting backend login at:', `${this.backendUrl}/api/auth/login`);
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout (Render cold start)
       const response = await fetch(`${this.backendUrl}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -507,6 +508,7 @@ class DB {
       });
       clearTimeout(timeoutId);
       
+      console.log('[DB.login] Backend responded with status:', response.status);
       const result = await response.json();
       if (response.ok && result.success) {
         // Authenticated by backend. Ensure user is in local state
@@ -520,12 +522,15 @@ class DB {
         await this.commitInternal();
         return { success: true, user: this.state.currentUser, type: apiUser.role && apiUser.role !== 'Customer' ? 'staff' : 'customer', token: result.token };
       } else {
-        const errorMsg = result.message || result.error || result.details || `Server error: ${response.status} ${response.statusText}`;
-        return { success: false, message: errorMsg || 'Identity lookup failed.' };
+        console.warn('[DB.login] Backend auth rejected:', result);
+        return { success: false, message: result.message || result.error || `Login failed (${response.status})` };
       }
-    } catch (error) {
-      console.warn('Backend login attempt failed:', error);
-      return { success: false, message: 'Identity lookup failed. Network error or invalid credentials.' };
+    } catch (error: any) {
+      console.error('[DB.login] Backend login fetch error:', error?.message || error);
+      if (error?.name === 'AbortError') {
+        return { success: false, message: 'Login timed out. The server may be starting up — please try again in 30 seconds.' };
+      }
+      return { success: false, message: `Connection error: ${error?.message || 'Network unavailable'}. Please check your internet connection.` };
     }
   }
 
