@@ -36,7 +36,7 @@ const SubscriberOnlinePayment: React.FC<Props> = ({ user, state, onSuccess }) =>
       setPaymentError(null);
 
       try {
-         const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:5000';
+         const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com';
          
          let gatewaysToTry = [selectedGateway, ...enabledGateways.filter(g => g.id !== selectedGateway.id && g.type === 'online')];
          let lastError: any = null;

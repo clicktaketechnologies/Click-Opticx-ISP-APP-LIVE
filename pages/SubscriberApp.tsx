@@ -2,6 +2,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { AppState, ISPUser, PaymentMethod, TopupRequest, Role, Invoice, AppPage, VerificationStatus, UserStatus } from '../types';
 import { db } from '../db';
+import { supabase } from '../lib/supabase';
 import { 
   Home, Wallet, Wifi, User, Headphones, Zap, Menu, Bell, MessageSquare, Megaphone, Share2, BarChart3, ShieldAlert, Lock, RotateCw, Eye, EyeOff, ShieldCheck, Smartphone, Network, Info, Globe, Monitor, Key, Gauge, AlertCircle, CheckCircle, X, ArrowRight, Clock, ChevronRight, LogOut, Cpu, Sparkles, History, Mic
 } from 'lucide-react';
@@ -77,10 +78,9 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
     let interval: ReturnType<typeof setInterval> | null = null;
     const pollKYCStatus = async () => {
       try {
-        const res = await fetch(`${db.backendUrl}/api/kyc/status?userId=${user.id}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data.success && data.isKYCVerified) {
+        const { data, error } = await supabase.from('profiles').select('kyc_status, face_verified').eq('id', user.id).single();
+        if (error) return;
+        if (data && data.kyc_status === 'APPROVED') {
           // Instant unlock — update user state without page refresh
           await db.updateUser(user.id, {
             isKYCVerified: true,

@@ -20,7 +20,7 @@ const FiscalMonitor: React.FC<{ state: AppState }> = ({ state }) => {
     fetchGateways();
 
     // 2. Connect to real-time socket
-    const socket = io(import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000');
+    const socket = io(import.meta.env.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com');
     
     socket.on('connect', () => {
         socket.emit('authenticate', { role: 'admin' });
@@ -45,7 +45,7 @@ const FiscalMonitor: React.FC<{ state: AppState }> = ({ state }) => {
 
   const fetchGateways = async () => {
     try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000'}/api/provider-mgmt/gateways`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com'}/api/provider-mgmt/gateways`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const data = await response.json();

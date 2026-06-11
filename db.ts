@@ -15,6 +15,7 @@ import {
 } from './types';
 
 import logger from './utils/logger.js';
+import { supabase } from './lib/supabase';
 // Add missing types for monitoring
 export interface DBHealth {
   documentSize: number;
@@ -532,47 +533,46 @@ class DB {
 
     // Attempt backend login as fallback to sync newly registered users
     try {
-      console.log('[DB.login] Attempting backend login at:', `${this.backendUrl}/api/auth/login`);
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout (Render cold start)
-      const response = await fetch(`${this.backendUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier: input, password: pass }),
-        signal: controller.signal
+      console.log('[DB.login] Attempting Supabase login');
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: input,
+        password: pass
       });
-      clearTimeout(timeoutId);
       
-      console.log('[DB.login] Backend responded with status:', response.status);
-      const result = await response.json();
-      if (response.ok && result.success) {
+      if (error) {
+        console.warn('[DB.login] Supabase auth rejected:', error.message);
+        return { success: false, message: error.message || `Login failed` };
+      }
+      
+      if (data?.user) {
         // Authenticated by backend. Ensure user is in local state
-        const apiUser = result.user;
+        const apiUser = {
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || '',
+          role: data.user.user_metadata?.role || Role.CUSTOMER,
+        };
         const existsLocally = this.state.users.find(u => u.id === apiUser.id);
         if (!existsLocally && (!apiUser.role || apiUser.role === 'Customer')) {
-            this.state.users.push(apiUser as any);
+            this.state.users.push({ ...apiUser, balance: 0, creditScore: 600, status: 'Active' } as any);
         }
         
-        this.state.currentUser = { ...apiUser, role: apiUser.role || Role.CUSTOMER };
+        this.state.currentUser = { ...apiUser, role: apiUser.role || Role.CUSTOMER } as any;
         this.state.auth = {
           isLoggedIn: true,
           id: apiUser.id,
           role: apiUser.role || Role.CUSTOMER,
-          email: apiUser.email,
+          email: apiUser.email || '',
           name: apiUser.name,
           isPersistent: !!rememberMe
         };
         await this.commitInternal();
-        return { success: true, user: this.state.currentUser, type: apiUser.role && apiUser.role !== 'Customer' ? 'staff' : 'customer', token: result.token };
+        return { success: true, user: this.state.currentUser, type: apiUser.role && apiUser.role !== 'Customer' ? 'staff' : 'customer', token: data.session?.access_token };
       } else {
-        console.warn('[DB.login] Backend auth rejected:', result);
-        return { success: false, message: result.message || result.error || `Login failed (${response.status})` };
+        return { success: false, message: 'Login failed. No user returned.' };
       }
     } catch (error: any) {
-      console.error('[DB.login] Backend login fetch error:', error?.message || error);
-      if (error?.name === 'AbortError') {
-        return { success: false, message: 'Login timed out. The server may be starting up — please try again in 30 seconds.' };
-      }
+      console.error('[DB.login] Supabase login error:', error?.message || error);
       return { success: false, message: `Connection error: ${error?.message || 'Network unavailable'}. Please check your internet connection.` };
     }
   }
@@ -599,34 +599,50 @@ class DB {
   }
 
    async submitSignupRequest(data: any) {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 seconds timeout
-
         try {
-            const response = await fetch(`${this.backendUrl}/api/auth/signup`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-                signal: controller.signal
+            const { data: authData, error } = await supabase.auth.signUp({
+                email: data.email,
+                password: data.password,
+                options: {
+                    data: {
+                        full_name: data.name,
+                        username: data.username,
+                        phone: data.phone,
+                        cnic: data.cnic,
+                        address: data.address,
+                        area: data.area,
+                        packageId: data.packageId,
+                        role: 'Customer',
+                        kyc_status: 'Pending'
+                    }
+                }
             });
 
-            clearTimeout(timeoutId);
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                return { success: false, message: result.message || 'Signup failed' };
+            if (error) {
+                return { success: false, message: error.message || 'Signup failed' };
             }
 
-            // Assuming the backend returns { success: true, userId, message, expiresAt }
-            return { success: true, userId: result.userId, message: result.message };
-        } catch (error) {
-            clearTimeout(timeoutId);
-            if (error.name === 'AbortError') {
-                return { success: false, message: 'Request timeout. Please try again.' };
+            if (authData.user) {
+              const { error: dbError } = await supabase.from('users').insert({
+                id: authData.user.id,
+                email: data.email,
+                name: data.name,
+                username: data.username,
+                phone: data.phone,
+                cnic: data.cnic,
+                address: data.address,
+                area: data.area,
+                package_id: data.packageId,
+                role: 'Customer',
+                status: 'Pending'
+              });
+              if (dbError) {
+                  console.warn("Could not insert user record directly into table, might be handled by trigger:", dbError.message);
+              }
+              return { success: true, userId: authData.user.id, message: 'Signup successful. Please verify your email.' };
             }
+            return { success: false, message: 'Signup failed. No user returned.' };
+        } catch (error: any) {
             console.error('Signup error:', error);
             return { success: false, message: 'Network error. Please try again.' };
         }

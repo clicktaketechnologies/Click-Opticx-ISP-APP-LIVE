@@ -6,6 +6,7 @@ import {
   Clock
 } from 'lucide-react';
 import { db } from '../../db';
+import { supabase } from '../../lib/supabase';
 import { ISPUser, KYCMethod, VerificationStatus } from '../../types';
 import { Mini5GMicroLoader } from '../Mini5GMicroLoader';
 import Modal from '../shared/Modal';
@@ -87,25 +88,27 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
       if (files.document) formData.append('files', files.document);
       if (files.selfie) formData.append('files', files.selfie);
 
-      // Use absolute backend URL so this works in production (Firebase Hosting
-      // cannot proxy /api/* to the external Render backend — relative paths
-      // hit the SPA catch-all rewrite and return index.html, which causes the
-      // "Unexpected token '<'" JSON parse error).
-      const res = await fetch(`${db.backendUrl}/api/kyc/upload`, {
-        method: 'POST',
-        body: formData
-      });
+      // Direct Supabase storage upload
+      const uploadFile = async (file: File, path: string) => {
+        const { data, error } = await supabase.storage.from('kyc_documents').upload(`${user.id}/${path}`, file, { upsert: true });
+        if (error) throw new Error(`Failed to upload ${path}: ${error.message}`);
+        return data?.path;
+      };
 
-      // Guard against HTML error pages (404/500) before parsing JSON
-      if (!res.ok) {
-        const text = await res.text();
-        const detail = text.startsWith('<') ? `Server returned HTTP ${res.status}` : text;
-        throw new Error(detail);
-      }
+      if (files.front) await uploadFile(files.front, `front_${Date.now()}`);
+      if (files.back) await uploadFile(files.back, `back_${Date.now()}`);
+      if (files.document) await uploadFile(files.document, `doc_${Date.now()}`);
+      if (files.selfie) await uploadFile(files.selfie, `selfie_${Date.now()}`);
 
-      const data = await res.json();
+      const { error: dbError } = await supabase.from('profiles').update({
+        kyc_status: 'SUBMITTED'
+      }).eq('id', user.id);
+
+      if (dbError) throw new Error(dbError.message);
       
-      if (data.success) {
+      const isSuccess = true;
+      
+      if (isSuccess) {
         await db.updateUser(user.id, {
           isKYCSubmitted: true,
           kyc_status: 'submitted',

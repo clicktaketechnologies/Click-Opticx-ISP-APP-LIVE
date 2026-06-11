@@ -35,6 +35,7 @@ const UserManagement = lazyWithRetry(() => import('./pages/UserManagement'));
 const Recovery = lazyWithRetry(() => import('./pages/Recovery'));
 const RecoveryDashboard = lazyWithRetry(() => import('./pages/RecoveryDashboard'));
 const AccountingLedger = lazyWithRetry(() => import('./pages/AccountingLedger'));
+const Signup = lazyWithRetry(() => import('./pages/Signup'));
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 const SuperAdmin = lazyWithRetry(() => import('./pages/SuperAdmin'));
@@ -536,6 +537,8 @@ const renderApp = () => {
         <Routes>
           <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="/reset-password" element={<Login onLogin={handleLogin} />} />
+          <Route path="/auth/signup" element={<Signup />} />
+          <Route path="/auth/login" element={<Login onLogin={handleLogin} />} />
           <Route path="*" element={<Login onLogin={handleLogin} />} />
         </Routes>
       );

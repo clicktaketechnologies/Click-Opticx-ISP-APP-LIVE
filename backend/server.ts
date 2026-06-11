@@ -84,6 +84,7 @@ try {
     logger.error(`❌ Firebase Admin Init Failed: ${error.message}`);
 }
 
+// @ts-ignore
 import emailRouter from './modules/email/email-router.js';
 
 // --- Supabase Config Manager Init ---
@@ -110,7 +111,7 @@ const allowedOrigins = [
 ];
 
 app.use(cors({ 
-    origin: (origin, callback) => {
+    origin: (origin: any, callback: any) => {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -120,7 +121,7 @@ app.use(cors({
     credentials: true 
 }));
 app.use(express.json({
-    verify: (req, res, buf) => {
+    verify: (req: any, res: any, buf: any) => {
         req.rawBody = buf;
     }
 }));
@@ -131,7 +132,7 @@ app.use('/api/auth', authRoutes);
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
-    skip: (req) => req.method === 'OPTIONS'
+    skip: (req: any) => req.method === 'OPTIONS'
 });
 app.use('/api/', limiter);
 
@@ -157,10 +158,17 @@ apiV1.use('/email', emailStatusRoutes);
 apiV1.use('/payments', paymentsRoutes);
 apiV1.use('/provider-mgmt', providerManagementRoutes);
 
-
+apiV1.get('/ping', (req: any, res: any) => {
+    res.json({
+        success: true,
+        status: 'pong',
+        message: 'API is reachable',
+        timestamp: new Date().toISOString()
+    });
+});
 
 // Error Handler
-apiV1.use((err, req, res, next) => {
+apiV1.use((err: any, req: any, res: any, next: any) => {
     logger.error(`[API-ERROR] ${err.stack}`);
     res.status(err.status || 500).json({
         success: false,
@@ -172,7 +180,7 @@ apiV1.use((err, req, res, next) => {
 app.use('/api/v1', apiV1);
 app.use('/api', apiV1);
 
-app.get('/', (req, res) => res.json({ status: 'Operational', recovery: true }));
+app.get('/', (req: any, res: any) => res.json({ status: 'Operational', recovery: true }));
 
 const PORT = Number(process.env.PORT) || 5000;
 server.listen(PORT, '0.0.0.0', () => {

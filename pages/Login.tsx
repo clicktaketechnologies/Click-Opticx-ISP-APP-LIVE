@@ -209,14 +209,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setError(null);
       setIsProcessing(true);
 
-      const res = await db.sendSmartPasswordReset(resetIdentifier);
+      const redirectUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+      const { error } = await supabase.auth.resetPasswordForEmail(resetIdentifier, {
+        redirectTo: `${redirectUrl}/login?type=recovery`
+      });
       
       setIsProcessing(false);
-      if (res.success) {
-         alert(`🔐 CSAE DISPATCH SUCCESS\n\nRecovery protocol initiated via ${res.provider}.\n\nPlease check your ${res.provider === 'Infobip' ? 'WhatsApp' : 'registered Email'} for the reset link.\n\nNote: Link expires in 1 hour.`);
+      if (!error) {
+         alert(`🔐 CSAE DISPATCH SUCCESS\n\nRecovery protocol initiated.\n\nPlease check your email for the reset link.\n\nNote: Link expires in 1 hour.`);
          setView('login');
       } else {
-         setError(res.message || "Recovery Protocol Fault: Handshake failed.");
+         setError(error.message || "Recovery Protocol Fault: Handshake failed.");
       }
     };
 
@@ -240,39 +243,23 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setIsProcessing(true);
       setError(null);
 
-      let isAllowed = false;
-      if (resetToken === 'BIOMETRIC_APPROVED' || resetToken === 'SUPABASE_RECOVERY') {
-         isAllowed = true;
-      } else {
-         const verify = await db.verifyResetCode(resetIdentifier, resetToken);
-         if (verify.success) isAllowed = true;
-      }
-
-      if (isAllowed) {
-         try {
-            if (resetToken === 'SUPABASE_RECOVERY') {
-               const { error: recoveryErr } = await supabase.auth.updateUser({ password: newPassword });
-               if (recoveryErr) throw recoveryErr;
-            }
-
-            const userAccount = await db.findUserForReset(resetIdentifier);
-            if (userAccount) {
-               await db.updateCustomerPassword(userAccount.id, newPassword, resetToken);
-               setIsProcessing(false);
-               setView('login');
-               setError(null);
-               alert("Success! Your password has been updated. You can now sign in.");
-            } else {
-               setIsProcessing(false);
-               setError("Login verification timed out. Please try again.");
-            }
-         } catch (err: any) {
-            setIsProcessing(false);
-            setError(err.message || "Failed to finalize password reset.");
+      try {
+         const { error } = await supabase.auth.updateUser({ password: newPassword });
+         if (error) throw error;
+         
+         // Optional: update custom profiles table or perform local sync
+         const { data: userRecord } = await supabase.auth.getUser();
+         if (userRecord?.user?.id) {
+             await supabase.from('users').update({ password_updated_at: new Date().toISOString() }).eq('id', userRecord.user.id);
          }
-      } else {
+
          setIsProcessing(false);
-         setError("INVALID_TOKEN: The verification code provided does not match the dispatch registry.");
+         setView('login');
+         setError(null);
+         alert("Success! Your password has been updated. You can now sign in.");
+      } catch (err: any) {
+         setIsProcessing(false);
+         setError(err.message || "Failed to finalize password reset.");
       }
    };
 

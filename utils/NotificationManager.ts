@@ -20,9 +20,9 @@ export interface EmailPayload {
 
 class NotificationManager {
     private static instance: NotificationManager;
-    private apiBase = (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-        ? 'http://localhost:5000'
-        : ((typeof import.meta !== 'undefined' && import.meta.env?.VITE_BACKEND_URL) || 'https://click-opticx-isp-app-live.onrender.com').replace(/\/$/, '');
+    private apiBase = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_BACKEND_URL) 
+        ? import.meta.env.VITE_BACKEND_URL.replace(/\/$/, '')
+        : 'https://click-opticx-isp-app-live.onrender.com';
 
     private constructor() { }
 

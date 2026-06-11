@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { db } from '../db';
+import { supabase } from '../lib/supabase';
 import { ShieldCheck, Loader2, XCircle, CheckCircle2, ArrowRight, Globe, KeyRound, Mail } from 'lucide-react';
 import { Mini5GMicroLoader } from '../components/Mini5GMicroLoader';
 
 const VerifyEmail: React.FC = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const tokenHash = searchParams.get('token_hash');
+  const type = searchParams.get('type') as any;
   const userId = searchParams.get('userId');
   const email = searchParams.get('email');
   
@@ -25,15 +28,31 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
   useEffect(() => {
     const performTokenVerification = async () => {
       try {
-        const response = await fetch(`${db.backendUrl}/api/auth/verify-email?token=${token}`);
-        const res = await response.json();
+        if (tokenHash && type) {
+          const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+          if (!error) {
+            setStatus('success');
+            setMessage('Account successfully activated in the master registry.');
+          } else {
+            setStatus('error');
+            setMessage(error.message || 'Verification handshake failed.');
+          }
+          return;
+        }
+
+        // Fallback for custom token if needed, or if supabase hash wasn't used
+        const { error } = await supabase.auth.verifyOtp({
+          email: email || '',
+          token: token!,
+          type: 'signup'
+        });
         
-        if (res.success) {
+        if (!error) {
           setStatus('success');
-          setMessage(res.message || 'Account successfully activated in the master registry.');
+          setMessage('Account successfully activated in the master registry.');
         } else {
           setStatus('error');
-          setMessage(res.message || 'Verification handshake failed.');
+          setMessage(error.message || 'Verification handshake failed.');
         }
       } catch (err: any) {
         setStatus('error');
@@ -41,16 +60,16 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
       }
     };
 
-    if (token) {
+    if (tokenHash || token) {
       performTokenVerification();
-    } else if (userId) {
+    } else if (userId || email) {
       setStatus('otp_entry');
       setMessage('Please enter the 6-digit verification code.');
     } else {
       setStatus('error');
       setMessage('Verification parameters are missing or malformed.');
     }
-  }, [token, userId]);
+  }, [token, tokenHash, type, userId, email]);
 
   const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const value = e.target.value;
@@ -95,18 +114,22 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
     setOtpError(null);
 
     try {
-      const response = await fetch(`${db.backendUrl}/api/auth/verify-otp`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, otp: otpCode })
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email || '',
+        token: otpCode,
+        type: 'signup'
       });
-      const res = await response.json();
 
-      if (response.ok && res.success) {
+      if (!error) {
         setStatus('success');
-        setMessage(res.message || 'Account successfully activated!');
+        setMessage('Account successfully activated!');
+        
+        // Update user status in DB
+        if (data.user) {
+          await supabase.from('users').update({ status: 'Active' }).eq('id', data.user.id);
+        }
       } else {
-        setOtpError(res.message || 'Verification failed. Please try again.');
+        setOtpError(error.message || 'Verification failed. Please try again.');
       }
     } catch (err: any) {
       setOtpError('Network error: Unable to connect to authorization nodes.');
@@ -116,8 +139,8 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
   };
 
   const handleResendOtp = async () => {
-    if (!userId) {
-      setOtpError('User identity context missing. Cannot resend verification code.');
+    if (!email) {
+      setOtpError('User email context missing. Cannot resend verification code.');
       return;
     }
 
@@ -126,20 +149,18 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
     setResendMessage(null);
 
     try {
-      const response = await fetch(`${db.backendUrl}/api/auth/resend-verification`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
       });
-      const res = await response.json();
 
-      if (response.ok && res.success) {
-        setResendMessage(res.message || 'Verification code resent successfully. Check your email.');
+      if (!error) {
+        setResendMessage('Verification code resent successfully. Check your email.');
         // Clear OTP inputs for fresh entry
         setOtp(new Array(6).fill(''));
         inputRefs.current[0]?.focus();
       } else {
-        setOtpError(res.message || 'Failed to resend verification code. Please try again.');
+        setOtpError(error.message || 'Failed to resend verification code. Please try again.');
       }
     } catch (err: any) {
       setOtpError('Network error: Unable to reach verification node for resend.');
