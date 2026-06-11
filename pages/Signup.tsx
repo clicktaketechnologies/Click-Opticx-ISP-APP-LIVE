@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+
 import { ShieldCheck, User, Mail, Phone, Lock, MapPin, Loader2 } from 'lucide-react';
 import { useToast } from '../components/shared/Toast';
 
@@ -69,6 +69,7 @@ const Signup = () => {
         email: formData.email,
         password: formData.password,
         options: {
+          emailRedirectTo: `${SUPABASE_REDIRECT_URL}/verify-email`,
           data: {
             full_name: formData.fullName,
             username: formData.username,

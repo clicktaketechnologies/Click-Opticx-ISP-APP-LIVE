@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { db } from '../db';
 import { useToast } from '../components/shared/Toast';
-import { supabase } from '../lib/supabase';
+import { supabase, SUPABASE_REDIRECT_URL } from '../lib/supabase';
 
 
 import PasswordInput from '../components/shared/PasswordInput';
@@ -209,9 +209,9 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setError(null);
       setIsProcessing(true);
 
-      const redirectUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+      const redirectUrl = SUPABASE_REDIRECT_URL;
       const { error } = await supabase.auth.resetPasswordForEmail(resetIdentifier, {
-        redirectTo: `${redirectUrl}/login?type=recovery`
+        redirectTo: `${redirectUrl}/login?type=recovery`,
       });
       
       setIsProcessing(false);

@@ -604,6 +604,7 @@ class DB {
                 email: data.email,
                 password: data.password,
                 options: {
+            emailRedirectTo: SUPABASE_REDIRECT_URL + '/verify-email',
                     data: {
                         full_name: data.name,
                         username: data.username,
