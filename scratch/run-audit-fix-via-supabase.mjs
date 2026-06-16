@@ -12,8 +12,8 @@ import path from 'path';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 config({ path: path.resolve(__dirname, '../backend/.env') });
 
-const SUPABASE_URL   = process.env.SUPABASE_URL;
-const SERVICE_KEY    = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error('❌ SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing from env!');
@@ -42,15 +42,15 @@ const { data: before, error: e1 } = await supabase.rpc('exec_sql', {
 if (e1) {
   // exec_sql may not be defined; try a simpler check via from()
   console.warn('  ⚠️  exec_sql RPC not available (expected). Using metadata query...');
-  
+
   // Insert a test row to check if default works
   const { data: testRow, error: insertErr } = await supabase
     .from('audit_logs')
     .insert({
-      action:      '_schema_check_',
+      action: '_schema_check_',
       target_type: 'system',
-      risk_level:  'Low',
-      details:     'Auto-generated schema validation row',
+      risk_level: 'Low',
+      details: 'Auto-generated schema validation row',
     })
     .select('id')
     .single();
@@ -81,11 +81,11 @@ if (e1) {
 console.log('\n── Step 2: Running final system health checks...');
 
 const checks = [
-  { label: 'system_configs',   table: 'system_configs' },
-  { label: 'email_logs',       table: 'email_logs' },
-  { label: 'audit_logs',       table: 'audit_logs' },
-  { label: 'users',            table: 'users' },
-  { label: 'packages',         table: 'packages' },
+  { label: 'system_configs', table: 'system_configs' },
+  { label: 'email_logs', table: 'email_logs' },
+  { label: 'audit_logs', table: 'audit_logs' },
+  { label: 'users', table: 'users' },
+  { label: 'packages', table: 'packages' },
 ];
 
 for (const check of checks) {

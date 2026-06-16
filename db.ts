@@ -15,7 +15,7 @@ import {
 } from './types';
 
 import logger from './utils/logger.js';
-import { supabase } from './lib/supabase';
+import { supabase, SUPABASE_REDIRECT_URL } from './lib/supabase';
 // Add missing types for monitoring
 export interface DBHealth {
   documentSize: number;

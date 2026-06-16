@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 
 import { ShieldCheck, User, Mail, Phone, Lock, MapPin, Loader2 } from 'lucide-react';
 import { useToast } from '../components/shared/Toast';
+import { supabase, SUPABASE_REDIRECT_URL } from '../lib/supabase';
 
 const Signup = () => {
   const navigate = useNavigate();
