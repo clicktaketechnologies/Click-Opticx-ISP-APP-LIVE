@@ -81,7 +81,7 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
             <div className="flex gap-1.5 p-1.5 bg-slate-100 rounded-2xl shrink-0 overflow-x-auto no-scrollbar">
                {([
                  'all', 
-                 UserStatus.Active, 
+                 UserStatus.ACTIVE, 
                  UserStatus.PENDING_VERIFICATION, 
                  UserStatus.EXPIRED, 
                  UserStatus.SUSPENDED
@@ -125,9 +125,9 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
             <V2TableCell>
                 <V2Badge 
                   label={user.status} 
-                  color={user.status === UserStatus.Active ? 'emerald' : user.status === UserStatus.EXPIRED ? 'amber' : 'rose'} 
+                  color={user.status === UserStatus.ACTIVE ? 'emerald' : user.status === UserStatus.EXPIRED ? 'amber' : 'rose'} 
                   variant="ghost" 
-                  icon={user.status === UserStatus.Active ? UserCheck : Clock}
+                  icon={user.status === UserStatus.ACTIVE ? UserCheck : Clock}
                 />
             </V2TableCell>
             <V2TableCell>

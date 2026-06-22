@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { db } from '../db';
-import { TechnicalKeys, PushConfig, Role } from '../types';
+import { TechnicalKeys, PushConfig, Role, BrandingConfig } from '../types';
 import { 
   Database, Shield, Cpu, Bell, Save, Key, Globe, Mail, 
   Settings, Server, Zap, Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Image as ImageIcon 
@@ -10,7 +10,7 @@ import BrandingMediaManager from '../components/admin/BrandingMediaManager';
 
 const SystemConfig: React.FC = () => {
   const [dbState, setDbState] = useState(db.getState());
-  const [branding, setBranding] = useState(dbState.settings?.branding || {});
+  const [branding, setBranding] = useState<Partial<BrandingConfig>>(dbState.settings?.branding || {});
   const [techKeys, setTechKeys] = useState<TechnicalKeys>(dbState.settings?.technicalKeys || {} as TechnicalKeys);
   const [pushConfig, setPushConfig] = useState<PushConfig>(dbState.settings?.pushConfig || {} as PushConfig);
   const [showSecrets, setShowSecrets] = useState(false);
@@ -23,7 +23,7 @@ const SystemConfig: React.FC = () => {
     try {
       const updatedSettings = {
         ...dbState.settings,
-        branding: branding,
+        branding: branding as BrandingConfig,
         technicalKeys: techKeys,
         pushConfig: pushConfig
       };

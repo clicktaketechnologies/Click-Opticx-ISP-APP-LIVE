@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, User, Mail, Phone, Lock, MapPin, Loader2 } from 'lucide-react';
 import { useToast } from '../components/shared/Toast';
 import { supabase, SUPABASE_REDIRECT_URL } from '../lib/supabase';
+import { db } from '../db';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -65,29 +66,28 @@ const Signup = () => {
     setIsSubmitting(true);
     
     try {
-      // Logic: On submit, call supabase.auth.signUp(). Pass extra fields in options.data.
-      const { error } = await supabase.auth.signUp({
+      const response = await db.submitSignupRequest({
         email: formData.email,
         password: formData.password,
-        options: {
-          emailRedirectTo: `${SUPABASE_REDIRECT_URL}/verify-email`,
-          data: {
-            full_name: formData.fullName,
-            username: formData.username,
-            phone: formData.phone,
-            address: formData.address,
-          }
-        }
+        name: formData.fullName,
+        username: formData.username,
+        phone: formData.phone,
+        address: formData.address,
       });
 
-      if (error) {
-        showError('Signup Failed', error.message);
+      if (!response.success) {
+        showError('Signup Failed', response.message);
         return;
       }
 
-      // Post-Signup: DO NOT auto-login. Show success message.
+      // Post-Signup: Redirect to verify-email
       setSuccessMessage("Account created. Please check email to verify, or proceed to login.");
       success("Success", "Account created successfully.");
+      
+      // Auto-redirect to verify screen
+      setTimeout(() => {
+        navigate(`/verify-email?userId=${response.userId}&email=${encodeURIComponent(formData.email)}`);
+      }, 1500);
       
     } catch (err: any) {
       showError('Error', err.message || "An unexpected error occurred.");

@@ -56,21 +56,27 @@ async function getProviderStatus(providerId) {
     return true; // Default to enabled if error
 }
 
-/**
- * Send an email directly via Resend REST API with retry.
- * @param {{ to: string, subject: string, html: string, type?: string }} opts
- * @returns {Promise<{ success: boolean, messageId?: string, error?: string, provider: string }>}
- */
 export async function sendDirectEmail({ to, subject, html, type = 'transactional' }) {
+  // 1st Priority: Try Gmail / SMTP
+  const gmailResult = await sendViaGmailFallback({ to, subject, html, type, lastError: null, isPrimary: true });
+  if (gmailResult.success) {
+    return gmailResult;
+  }
+
+  // 2nd Priority: Custom SMTP
+  const customSmtpResult = await sendViaGenericSmtp({ to, subject, html, type, lastError: gmailResult.error });
+  if (customSmtpResult.success) {
+    return customSmtpResult;
+  }
+
+  // 3rd Priority: Try Resend
   const isResendEnabled = await getProviderStatus('resend');
-  
   if (!isResendEnabled) {
       logger.info(`[RESEND-DIRECT] Resend provider is disabled by admin. Skipping direct Resend path.`);
-      return await sendViaGmailFallback({ to, subject, html, type, lastError: 'Provider disabled in admin' });
+      return { success: false, error: 'All paths failed or disabled', provider: 'none' };
   }
 
   const apiKey = process.env.RESEND_API_KEY;
-
   if (!apiKey) {
     const msg = 'RESEND_API_KEY is not set — cannot send email';
     logger.error(`[RESEND-DIRECT] ${msg}`);
@@ -120,29 +126,29 @@ export async function sendDirectEmail({ to, subject, html, type = 'transactional
     }
   }
 
-  // All attempts exhausted — try Gmail SMTP as last-resort fallback
-  logger.error(`[RESEND-DIRECT] All ${MAX_ATTEMPTS} Resend attempts failed for ${to}. Falling back to Gmail SMTP.`);
-  return await sendViaGmailFallback({ to, subject, html, type, lastError });
+  return { success: false, error: lastError, provider: 'resend' };
 }
 
 /**
- * Gmail SMTP last-resort fallback (nodemailer)
+ * Gmail SMTP path (nodemailer)
  */
-async function sendViaGmailFallback({ to, subject, html, type, lastError }) {
+async function sendViaGmailFallback({ to, subject, html, type, lastError, isPrimary = false }) {
   const isGmailEnabled = await getProviderStatus('gmail_smtp');
+  const label = isPrimary ? '[GMAIL-PRIMARY]' : '[GMAIL-FALLBACK]';
+
   if (!isGmailEnabled) {
-      const msg = `All primary delivery paths failed (or disabled). Gmail SMTP fallback is also disabled by admin.`;
-      logger.error(`[GMAIL-FALLBACK] ${msg}`);
-      await logEmailAttempt({ to, type, status: 'failed', error: msg, provider: 'none' });
+      const msg = isPrimary ? `Gmail SMTP is disabled by admin.` : `All primary delivery paths failed (or disabled). Gmail SMTP fallback is also disabled by admin.`;
+      logger.info(`${label} ${msg}`);
+      if (!isPrimary) await logEmailAttempt({ to, type, status: 'failed', error: msg, provider: 'none' });
       return { success: false, error: msg, provider: 'none' };
   }
   const gmailUser = process.env.GMAIL_USER;
   const gmailPass = process.env.GMAIL_APP_PASSWORD;
 
   if (!gmailUser || !gmailPass) {
-    const msg = `All delivery paths failed. Resend: ${lastError}. Gmail not configured.`;
-    logger.error(`[GMAIL-FALLBACK] ${msg}`);
-    await logEmailAttempt({ to, type, status: 'failed', error: msg, provider: 'gmail_smtp' });
+    const msg = isPrimary ? `Gmail credentials not configured.` : `All delivery paths failed. Resend: ${lastError}. Gmail not configured.`;
+    logger.error(`${label} ${msg}`);
+    if (!isPrimary) await logEmailAttempt({ to, type, status: 'failed', error: msg, provider: 'gmail_smtp' });
     return { success: false, error: msg, provider: 'none' };
   }
 
@@ -158,15 +164,54 @@ async function sendViaGmailFallback({ to, subject, html, type, lastError }) {
       subject,
       html
     });
-    logger.info(`[GMAIL-FALLBACK] ✅ Delivered via Gmail SMTP | to=${to} | messageId=${info.messageId}`);
+    logger.info(`${label} ✅ Delivered via Gmail SMTP | to=${to} | messageId=${info.messageId}`);
     await logEmailAttempt({ to, type, status: 'success', messageId: info.messageId, provider: 'gmail_smtp' });
     return { success: true, messageId: info.messageId, provider: 'gmail_smtp' };
   } catch (smtpErr) {
-    const msg = `Gmail SMTP also failed: ${smtpErr.message}`;
-    logger.error(`[GMAIL-FALLBACK] ${msg}`);
-    await logEmailAttempt({ to, type, status: 'failed', error: msg, provider: 'gmail_smtp' });
+    const msg = `Gmail SMTP failed: ${smtpErr.message}`;
+    logger.error(`${label} ${msg}`);
+    if (!isPrimary) await logEmailAttempt({ to, type, status: 'failed', error: msg, provider: 'gmail_smtp' });
     return { success: false, error: msg, provider: 'none' };
   }
 }
 
 export default { sendDirectEmail };
+
+/**
+ * Generic Custom SMTP path (nodemailer)
+ */
+async function sendViaGenericSmtp({ to, subject, html, type, lastError }) {
+  const isSmtpEnabled = await getProviderStatus('custom_smtp');
+  if (!isSmtpEnabled) {
+      return { success: false, error: 'Custom SMTP disabled by admin', provider: 'none' };
+  }
+
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
+      return { success: false, error: 'Custom SMTP not configured', provider: 'none' };
+  }
+
+  try {
+    const nodemailer = (await import('nodemailer')).default;
+    const transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: parseInt(SMTP_PORT, 10),
+      secure: parseInt(SMTP_PORT, 10) === 465,
+      auth: { user: SMTP_USER, pass: SMTP_PASS }
+    });
+    const info = await transporter.sendMail({
+      from: `"Click Opticx" <${SMTP_USER}>`,
+      to,
+      subject,
+      html
+    });
+    logger.info(`[CUSTOM-SMTP] ✅ Delivered via Custom SMTP | to=${to} | messageId=${info.messageId}`);
+    await logEmailAttempt({ to, type, status: 'success', messageId: info.messageId, provider: 'custom_smtp' });
+    return { success: true, messageId: info.messageId, provider: 'custom_smtp' };
+  } catch (smtpErr) {
+    const msg = `Custom SMTP failed: ${smtpErr.message}`;
+    logger.error(`[CUSTOM-SMTP] ${msg}`);
+    await logEmailAttempt({ to, type, status: 'failed', error: msg, provider: 'custom_smtp' });
+    return { success: false, error: msg, provider: 'none' };
+  }
+}

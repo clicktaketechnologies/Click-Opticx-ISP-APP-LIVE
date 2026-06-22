@@ -114,7 +114,7 @@ const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
                             <V2Badge label={c.type} color="blue" variant="ghost" />
                         </V2TableCell>
                         <V2TableCell>
-                            <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{c.targetCount} Nodes</p>
+                            <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest">{(c as any).targetCount} Nodes</p>
                         </V2TableCell>
                         <V2TableCell>
                             <div className="flex items-center gap-4">
@@ -141,7 +141,7 @@ const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
                  <V2Card key={p.id} className="hover:-translate-y-2">
                     <div className="flex justify-between items-start mb-8">
                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${
-                            p.enabled ? 'bg-blue-600 shadow-blue-500/20' : 'bg-slate-300'
+                            (p as any).enabled ? 'bg-blue-600 shadow-blue-500/20' : 'bg-slate-300'
                         }`}>
                             {p.name === 'Resend' ? <Zap size={24} /> : <Mail size={24} />}
                         </div>
@@ -200,13 +200,13 @@ const CommCenterV2: React.FC<{ state: AppState }> = ({ state }) => {
                     <V2TableRow key={j.id}>
                         <V2TableCell>
                             <p className="text-sm font-black text-slate-900 italic leading-none mb-1">#{j.id}</p>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{j.recipientName || 'Subscriber'}</p>
+                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{(j as any).recipientName || 'Subscriber'}</p>
                         </V2TableCell>
                         <V2TableCell>
-                            <p className="text-[11px] font-black text-slate-500 italic">{j.target || 'N/A'}</p>
+                            <p className="text-[11px] font-black text-slate-500 italic">{(j as any).target || 'N/A'}</p>
                         </V2TableCell>
                         <V2TableCell>
-                            <V2Badge label={`${j.attemptsMade || 0} Attempts`} color="amber" variant="ghost" />
+                            <V2Badge label={`${(j as any).attemptsMade || 0} Attempts`} color="amber" variant="ghost" />
                         </V2TableCell>
                         <V2TableCell>
                              <span className="flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-[8px] font-black uppercase tracking-widest border border-blue-100">

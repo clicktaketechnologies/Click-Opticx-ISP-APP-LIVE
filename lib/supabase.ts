@@ -3,7 +3,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const SUPABASE_URL = typeof import.meta.env !== 'undefined' ? (import.meta.env.VITE_SUPABASE_URL as string) : (process.env.VITE_SUPABASE_URL as string);
 const SUPABASE_ANON_KEY = typeof import.meta.env !== 'undefined' ? (import.meta.env.VITE_SUPABASE_ANON_KEY as string) : (process.env.VITE_SUPABASE_ANON_KEY as string);
 // Redirect URL used for email verification and password reset flows
-export const SUPABASE_REDIRECT_URL = typeof import.meta.env !== 'undefined' ? (import.meta.env.VITE_SUPABASE_REDIRECT_URL as string) : (process.env.VITE_SUPABASE_REDIRECT_URL as string) || (typeof window !== 'undefined' ? window.location.origin : '');
+export const SUPABASE_REDIRECT_URL = (typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_SUPABASE_REDIRECT_URL : process.env.VITE_SUPABASE_REDIRECT_URL) || (typeof window !== 'undefined' ? window.location.origin : '');
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   console.warn('[SUPABASE] Missing env vars. Client will be unavailable.');

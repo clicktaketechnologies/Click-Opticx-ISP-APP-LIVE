@@ -7,7 +7,7 @@ import {
   Cpu, HardDrive, Thermometer,
   Cloud, Globe, Wifi, Radio,
   ChevronRight, ArrowUpRight, ArrowDownRight,
-  Monitor, Play, Power, HelpCircle, Clock
+  Monitor, Play, Power, HelpCircle, Clock, XCircle
 } from 'lucide-react';
 import { AppState, NASConfig, OLTConfig } from '../../types';
 import { V2Badge, V2Button, V2Card } from '../../components/v2/UIAtoms';
@@ -34,8 +34,8 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
   }, [state.nas, state.oltNodes, nodeType]);
 
   const stats = {
-    online: allNodes.filter(n => n.status === 'Connected' || n.status === 'Active').length,
-    offline: allNodes.filter(n => n.status === 'Disconnected').length,
+    online: allNodes.filter(n => n.status === 'Online' || (n as any).status === 'Connected' || (n as any).status === 'Active').length,
+    offline: allNodes.filter(n => n.status === 'Offline' || n.status === 'Error' || (n as any).status === 'Disconnected').length,
     alerts: state.emergencyCount,
     load: state.networkStats?.avgLoad || 0
   };
@@ -63,7 +63,7 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-white p-8 rounded-[3rem] border border-slate-100 shadow-sm">
         <div className="flex items-center gap-4 flex-1 w-full max-w-xl">
            <div className="flex gap-1.5 p-1.5 bg-slate-100 rounded-2xl shrink-0">
-              {(['all', 'NAS', 'OLT'] as const).map(t => (
+              {(['all', 'NASConfig', 'OLTConfig'] as const).map(t => (
                 <button 
                   key={t}
                   onClick={() => setNodeType(t)}
@@ -71,7 +71,7 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
                     nodeType === t ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-400 hover:text-slate-600'
                   }`}
                 >
-                  {t}
+                  {t.replace('Config', '')}
                 </button>
               ))}
            </div>
@@ -93,11 +93,10 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
       {/* Topology Matrix */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
          {allNodes.map((node: any) => (
-            <V2Card 
-                key={node.id} 
-                className="hover:-translate-y-2 cursor-pointer"
-                onClick={() => { setSelectedNode(node); setIsDetailOpen(true); }}
-            >
+            <div key={node.id} onClick={() => { setSelectedNode(node); setIsDetailOpen(true); }} className="cursor-pointer">
+                <V2Card 
+                    className="hover:-translate-y-2 transition-transform h-full"
+                >
                 <div className="flex justify-between items-start mb-8">
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${
             (node.status === 'Online' || node.status === 'Active') ? 'bg-blue-600 shadow-blue-500/20' : 'bg-slate-300'
@@ -132,6 +131,7 @@ const NetworkPlaneV2: React.FC<{ state: AppState }> = ({ state }) => {
                     </div>
                 </div>
             </V2Card>
+            </div>
          ))}
       </div>
 

@@ -40,19 +40,20 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
           return;
         }
 
-        // Fallback for custom token if needed, or if supabase hash wasn't used
-        const { error } = await supabase.auth.verifyOtp({
-          email: email || '',
-          token: token!,
-          type: 'signup'
+        // Backend OTP Verification
+        const res = await fetch(`${db.getBackendUrl()}/api/auth/verify-otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, otp: token! })
         });
+        const json = await res.json();
         
-        if (!error) {
+        if (json.success) {
           setStatus('success');
           setMessage('Account successfully activated in the master registry.');
         } else {
           setStatus('error');
-          setMessage(error.message || 'Verification handshake failed.');
+          setMessage(json.message || 'Verification handshake failed.');
         }
       } catch (err: any) {
         setStatus('error');
@@ -114,22 +115,21 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
     setOtpError(null);
 
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email: email || '',
-        token: otpCode,
-        type: 'signup'
+      const res = await fetch(`${db.getBackendUrl()}/api/auth/verify-otp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, otp: otpCode })
       });
+      const json = await res.json();
 
-      if (!error) {
+      if (json.success) {
         setStatus('success');
         setMessage('Account successfully activated!');
         
         // Update user status in DB
-        if (data.user) {
-          await supabase.from('users').update({ status: 'Active' }).eq('id', data.user.id);
-        }
+        await db.updateUser(userId!, { status: 'Active', verification_status: 'Verified' });
       } else {
-        setOtpError(error.message || 'Verification failed. Please try again.');
+        setOtpError(json.message || 'Verification failed. Please try again.');
       }
     } catch (err: any) {
       setOtpError('Network error: Unable to connect to authorization nodes.');
@@ -149,18 +149,22 @@ const [otp, setOtp] = useState<string[]>(new Array(6).fill(''));
     setResendMessage(null);
 
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
+      const backendUrl = typeof db.getBackendUrl === 'function' ? db.getBackendUrl() : import.meta.env.VITE_BACKEND_URL || 'https://click-opticx-isp-app-live.onrender.com';
+      const response = await fetch(`${backendUrl}/api/auth/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userId, email: email })
       });
 
-      if (!error) {
+      const data = await response.json();
+
+      if (response.ok) {
         setResendMessage('Verification code resent successfully. Check your email.');
         // Clear OTP inputs for fresh entry
         setOtp(new Array(6).fill(''));
         inputRefs.current[0]?.focus();
       } else {
-        setOtpError(error.message || 'Failed to resend verification code. Please try again.');
+        setOtpError(data.error || 'Failed to resend verification code. Please try again.');
       }
     } catch (err: any) {
       setOtpError('Network error: Unable to reach verification node for resend.');

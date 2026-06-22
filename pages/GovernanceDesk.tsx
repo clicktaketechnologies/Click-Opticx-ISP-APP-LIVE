@@ -145,20 +145,13 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
     db.updateStaff(email, { status: newStatus as 'Active' | 'Suspended' });
   };
 
-  // Governance Handlers
-  const handleTogglePermission = (moduleId: string, action: 'view' | 'edit' | 'delete', role: string) => {
+  const handleTogglePermission = (moduleId: string, action: 'can_view' | 'can_edit' | 'can_delete', role: string) => {
     if (role === Role.SUPER_ADMIN) return;
-    const module = state.permissions.find(p => p.id === moduleId);
-    if (!module) return;
+    const perm = state.permissions?.find(p => p.role_id === role && p.page_id === moduleId);
 
-    const currentRoles = [...(module[action] || [])];
-    const hasRole = currentRoles.includes(role);
+    const currentValue = perm ? perm[action] : false;
 
-    const newRoles = hasRole
-      ? currentRoles.filter(r => r !== role)
-      : [...currentRoles, role];
-
-    db.updateModulePermission(moduleId, { [action]: newRoles });
+    db.updateModulePermission(role, moduleId, { [action]: !currentValue });
   };
 
   const handleAddRole = async () => {
@@ -420,16 +413,18 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
-                      {(state.permissions || []).map(perm => {
-                        const metadata = MODULE_METADATA[perm.id] || { label: perm.id, icon: Activity };
+                      {Object.keys(MODULE_METADATA).map(moduleId => {
+                        const metadata = MODULE_METADATA[moduleId];
                         const Icon = metadata.icon;
-                        const canView = perm.view?.includes(selectedRole) || false;
-                        const canEdit = perm.edit?.includes(selectedRole) || false;
-                        const canDelete = perm.delete?.includes(selectedRole) || false;
+                        const perm = state.permissions?.find(p => p.role_id === selectedRole && p.page_id === moduleId);
+                        
+                        const canView = (perm as any)?.can_view || false;
+                        const canEdit = (perm as any)?.can_edit || false;
+                        const canDelete = (perm as any)?.can_delete || false;
                         const isSuperAdmin = selectedRole === Role.SUPER_ADMIN;
 
                         return (
-                          <tr key={perm.id} className="hover:bg-slate-50 transition-all group/row">
+                          <tr key={moduleId} className="hover:bg-slate-50 transition-all group/row">
                             <td className="px-12 py-10">
                               <div className="flex items-center gap-6">
                                 <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover/row:bg-indigo-600 group-hover/row:text-white group-hover/row:shadow-xl group-hover/row:shadow-indigo-100 transition-all duration-500">
@@ -440,7 +435,7 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
                                   <div className="flex items-center gap-3">
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                                       <Lock size={10} className="text-indigo-500" />
-                                      {perm.id}
+                                      {moduleId}
                                     </span>
                                   </div>
                                 </div>
@@ -449,46 +444,48 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
                             <td className="px-12 py-10">
                               <div className="flex items-center justify-center gap-1.5 bg-slate-50/50 p-2 rounded-[2rem] border border-slate-100/50 w-fit mx-auto shadow-inner">
                                 <button
-                                  onClick={() => handleTogglePermission(perm.id, 'view', selectedRole)}
+                                  onClick={() => handleTogglePermission(moduleId, 'can_view', selectedRole)}
                                   disabled={isSuperAdmin}
-                                  className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
-                                    canView 
-                                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-100' 
-                                    : 'bg-white border-slate-100 text-slate-300'
-                                  } ${isSuperAdmin ? 'cursor-default' : 'hover:-translate-y-1 active:scale-95 hover:shadow-xl'}`}
+                                  className={`
+                                    w-14 h-12 rounded-2xl flex items-center justify-center transition-all border
+                                    ${isSuperAdmin || canView
+                                      ? 'bg-blue-500 text-white border-blue-500/20 shadow-lg shadow-blue-500/30'
+                                      : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-100'
+                                    }
+                                  `}
+                                  title="View Permission"
                                 >
-                                  <Eye size={14} strokeWidth={canView ? 3 : 2} />
-                                  Entry
+                                  {isSuperAdmin ? <Check size={16} /> : (canView ? <Check size={16} /> : <X size={16} />)}
+                                </button>
+                                
+                                <button
+                                  onClick={() => handleTogglePermission(moduleId, 'can_edit', selectedRole)}
+                                  disabled={isSuperAdmin}
+                                  className={`
+                                    w-14 h-12 rounded-2xl flex items-center justify-center transition-all border
+                                    ${isSuperAdmin || canEdit
+                                      ? 'bg-indigo-500 text-white border-indigo-500/20 shadow-lg shadow-indigo-500/30'
+                                      : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-100'
+                                    }
+                                  `}
+                                  title="Edit Permission"
+                                >
+                                  {isSuperAdmin ? <Check size={16} /> : (canEdit ? <Check size={16} /> : <X size={16} />)}
                                 </button>
 
-                                <div className="w-px h-6 bg-slate-200 mx-1"></div>
-
                                 <button
-                                  onClick={() => handleTogglePermission(perm.id, 'edit', selectedRole)}
-                                  disabled={isSuperAdmin || !canView}
-                                  className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
-                                    canEdit 
-                                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-100' 
-                                    : 'bg-white border-slate-100 text-slate-300'
-                                  } ${isSuperAdmin ? 'cursor-default' : 'hover:-translate-y-1 active:scale-95'}`}
+                                  onClick={() => handleTogglePermission(moduleId, 'can_delete', selectedRole)}
+                                  disabled={isSuperAdmin}
+                                  className={`
+                                    w-14 h-12 rounded-2xl flex items-center justify-center transition-all border
+                                    ${isSuperAdmin || canDelete
+                                      ? 'bg-rose-500 text-white border-rose-500/20 shadow-lg shadow-rose-500/30'
+                                      : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-100'
+                                    }
+                                  `}
+                                  title="Delete Permission"
                                 >
-                                  <Pencil size={14} strokeWidth={canEdit ? 3 : 2} />
-                                  Logic
-                                </button>
-
-                                <div className="w-px h-6 bg-slate-200 mx-1"></div>
-
-                                <button
-                                  onClick={() => handleTogglePermission(perm.id, 'delete', selectedRole)}
-                                  disabled={isSuperAdmin || !canView || !canEdit}
-                                  className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all border-2 font-black text-[10px] uppercase tracking-widest ${
-                                    canDelete 
-                                    ? 'bg-rose-600 border-rose-500 text-white shadow-lg shadow-rose-100' 
-                                    : 'bg-white border-slate-100 text-slate-300'
-                                  } ${isSuperAdmin ? 'cursor-default' : 'hover:-translate-y-1 active:scale-95'}`}
-                                >
-                                  <Trash2 size={14} strokeWidth={canDelete ? 3 : 2} />
-                                  Purge
+                                  {isSuperAdmin ? <Check size={16} /> : (canDelete ? <Check size={16} /> : <X size={16} />)}
                                 </button>
                               </div>
                             </td>

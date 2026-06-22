@@ -16,7 +16,7 @@ const TrashManagement: React.FC = () => {
   const fetchTrash = async () => {
     setLoading(true);
     try {
-      const res = await db.getTrash(); // I need to add this to db.ts
+      const res = await (db as any).getTrash(); // I need to add this to db.ts
       if (res.success) {
         setItems(res.items);
       } else {
@@ -37,7 +37,7 @@ const TrashManagement: React.FC = () => {
     if (!confirm('Confirm restoration of this record to production?')) return;
     
     try {
-      const res = await db.restoreFromTrash(id); // I need to add this to db.ts
+      const res = await (db as any).restoreFromTrash(id); // I need to add this to db.ts
       if (res.success) {
         setStatus({ type: 'success', msg: 'Record successfully re-integrated into production.' });
         fetchTrash();
@@ -53,7 +53,7 @@ const TrashManagement: React.FC = () => {
     if (!confirm('🚨 PERMANENT PURGE: This action cannot be undone. Proceed?')) return;
 
     try {
-      const res = await db.purgeFromTrash(id); // I need to add this to db.ts
+      const res = await (db as any).purgeFromTrash(id); // I need to add this to db.ts
       if (res.success) {
         setStatus({ type: 'success', msg: 'Record permanently purged from existence.' });
         fetchTrash();

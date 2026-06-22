@@ -669,7 +669,7 @@ const Dashboard: React.FC<{
            </div>
            
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <button disabled={isScanning} onClick={() => {setIsScanning(true); db.reconcileData(reconcileType).then(() => setIsScanning(false));}} className="flex flex-col items-center justify-center gap-4 p-10 rounded-[3rem] bg-slate-50 border border-slate-100 hover:border-indigo-500 hover:bg-white transition-all group">
+              <button disabled={isScanning} onClick={() => {setIsScanning(true); (async () => { await db.reconcileData(reconcileType); setIsScanning(false); })();}} className="flex flex-col items-center justify-center gap-4 p-10 rounded-[3rem] bg-slate-50 border border-slate-100 hover:border-indigo-500 hover:bg-white transition-all group">
                  <div className="w-16 h-16 rounded-[2rem] bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
                     {isScanning ? <RefreshCcw className="animate-spin" size={32} /> : <SearchCode size={32} />}
                  </div>

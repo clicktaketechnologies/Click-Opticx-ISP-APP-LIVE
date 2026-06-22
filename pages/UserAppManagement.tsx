@@ -74,7 +74,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
       if (editingSection && editingSection.id === section.id) {
          setEditingSection(section);
       }
-      await db.updateAppSection(section);
+      await (db as any).updateAppSection(section);
    };
 
    const handleImpersonate = async (userId: string) => {

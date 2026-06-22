@@ -96,7 +96,16 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       setIsProcessing(false);
 
       if (!res.success) {
-         toast.error('Login Error', (res as any).message || 'Login failed. Please check your credentials.');
+         const errorMessage = (res as any).message || 'Login failed. Please check your credentials.';
+         if (errorMessage.toLowerCase().includes('email not confirmed') || errorMessage.toLowerCase().includes('unverified')) {
+            toast.error('Verification Required', 'Please verify your email to log in.');
+            // Add a small delay so they see the toast, then redirect
+            setTimeout(() => {
+               navigate(`/verify-email?email=${encodeURIComponent(credential)}`);
+            }, 1500);
+         } else {
+            toast.error('Login Error', errorMessage);
+         }
       }
    };
 
@@ -106,7 +115,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       const res = await db.signInWithGoogle();
       setIsProcessing(false);
       if (!res.success) {
-         setError(res.message || 'Google Sign-In failed.');
+         setError((res as any).message || (res as any).error || 'Google Sign-In failed.');
       }
    };
 
@@ -121,14 +130,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          formattedPhone = '+92' + formattedPhone.replace(/^0/, '');
       }
 
-      const res = await db.signInWithPhone(formattedPhone, 'recaptcha-container');
+      const res = await db.signInWithPhone(formattedPhone);
       setIsProcessing(false);
       
       if (res.success) {
-         setConfirmationResult(res.confirmationResult);
+         setConfirmationResult((res as any).confirmationResult);
          setView('otp_verify');
       } else {
-         setError(res.message);
+         setError((res as any).message || (res as any).error);
       }
    };
 
@@ -143,7 +152,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       if (res.success) {
          // Logged in
       } else {
-         setError(res.message);
+         setError((res as any).message || (res as any).error);
       }
    };
 
@@ -195,7 +204,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
          if (res.success) {
             navigate(`/verify-email?userId=${res.userId}&email=${encodeURIComponent(signupData.email)}`);
          } else {
-            toast.error('Signup Error', res.message || 'Signup failed.');
+            toast.error('Signup Error', (res as any).message || (res as any).error || 'Signup failed.');
          }
       } catch (err: any) {
          setError(err.message || 'An unexpected error occurred.');
@@ -234,7 +243,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           setResetToken('BIOMETRIC_APPROVED');
           setView('reset_finalize');
        } else {
-          setError(res.message);
+          setError((res as any).message || (res as any).error);
        }
     };
 

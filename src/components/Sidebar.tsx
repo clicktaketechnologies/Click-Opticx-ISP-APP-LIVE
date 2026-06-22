@@ -86,7 +86,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: 'Network Management',
       icon: Monitor,
       items: [
-        { id: 'noc-dashboard', label: 'NOC Dashboard', icon: Monitor, badge: state.nocAlerts?.filter(a => a.status === 'Critical').length },
+        { id: 'noc-dashboard', label: 'NOC Dashboard', icon: Monitor, badge: state.nocAlerts?.filter(a => a.severity === 'Critical').length },
         { id: 'nas-management', label: 'NAS Control', icon: HardDrive },
         { id: 'olt-management', label: 'OLT Systems', icon: Cpu },
         { id: 'admin-live-monitoring', label: 'Live Traffic', icon: Activity },
@@ -137,7 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: Headset,
       items: [
         { id: 'tickets', label: 'Support Tickets', icon: Headset, badge: state.tickets?.filter(t => t.status === 'Open').length },
-        { id: 'tasks', label: 'Tasks', icon: ClipboardList, badge: state.tasks?.filter(t => t.status === 'Pending').length }
+        { id: 'tasks', label: 'Tasks', icon: ClipboardList, badge: state.tasks?.filter(t => !t.completed).length }
       ]
     },
     {

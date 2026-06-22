@@ -82,9 +82,9 @@ const SuperAdmin: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <span className={`px-2 py-1 rounded-md text-[8px] font-black uppercase ${perm.view?.length > 0 ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>Read</span>
-                  <span className={`px-2 py-1 rounded-md text-[8px] font-black uppercase ${perm.edit?.length > 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 text-slate-400'}`}>Write</span>
-                  <span className={`px-2 py-1 rounded-md text-[8px] font-black uppercase ${perm.delete?.length > 0 ? 'bg-rose-100 text-rose-600' : 'bg-slate-200 text-slate-400'}`}>Purge</span>
+                  <span className={`px-2 py-1 rounded-md text-[8px] font-black uppercase ${(perm.view?.length || 0) > 0 ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}`}>Read</span>
+                  <span className={`px-2 py-1 rounded-md text-[8px] font-black uppercase ${(perm.edit?.length || 0) > 0 ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 text-slate-400'}`}>Write</span>
+                  <span className={`px-2 py-1 rounded-md text-[8px] font-black uppercase ${(perm.delete?.length || 0) > 0 ? 'bg-rose-100 text-rose-600' : 'bg-slate-200 text-slate-400'}`}>Purge</span>
                 </div>
               </div>
             ))}

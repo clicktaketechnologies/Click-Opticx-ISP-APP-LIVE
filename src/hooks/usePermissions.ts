@@ -19,26 +19,26 @@ export const usePermissions = (state: AppState) => {
 
   const canView = (pageId: string) => {
     if (isSuperAdmin) return true;
-    const perm = permissions.find(p => p.page_id === pageId);
-    return perm?.can_view ?? false;
+    const perm = permissions.find(p => p.id === pageId);
+    return perm?.view?.includes(role) ?? false;
   };
 
   const canEdit = (pageId: string) => {
     if (isSuperAdmin) return true;
-    const perm = permissions.find(p => p.page_id === pageId);
-    return perm?.can_edit ?? false;
+    const perm = permissions.find(p => p.id === pageId);
+    return perm?.edit?.includes(role) ?? false;
   };
 
   const canDelete = (pageId: string) => {
     if (isSuperAdmin) return true;
-    const perm = permissions.find(p => p.page_id === pageId);
-    return perm?.can_delete ?? false;
+    const perm = permissions.find(p => p.id === pageId);
+    return perm?.delete?.includes(role) ?? false;
   };
 
   const canExport = (pageId: string) => {
     if (isSuperAdmin) return true;
-    const perm = permissions.find(p => p.page_id === pageId);
-    return perm?.can_export ?? false;
+    // Export might not be in the matrix yet, default to false for non-admins
+    return false; 
   };
 
   return { canView, canEdit, canDelete, canExport, role, isSuperAdmin };

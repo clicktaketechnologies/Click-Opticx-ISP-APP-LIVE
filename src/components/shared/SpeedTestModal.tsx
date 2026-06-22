@@ -56,11 +56,11 @@ const SpeedTestModal: React.FC<SpeedTestModalProps> = ({ isOpen, onClose, backen
             setProgress(100);
 
             // Log result to Audit Trail
-            await db.logAudit('speed_test', 'INFO', {
+            await db.logAudit('speed_test', 'INFO', JSON.stringify({
                 ...finalResult,
                 timestamp: new Date().toISOString(),
                 userAgent: navigator.userAgent
-            });
+            }));
 
         } catch (error: any) {
             setResult(prev => ({ ...prev, status: 'error', error: error.message }));

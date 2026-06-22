@@ -171,14 +171,14 @@ const Header: React.FC<HeaderProps> = ({
                       className={`p-5 border-b border-slate-50 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors cursor-pointer flex gap-4 focus:outline-none focus:bg-slate-100 dark:focus:bg-white/10 ${!n.read ? 'bg-indigo-50/30 dark:bg-indigo-500/5' : ''}`}
                       onClick={() => {
                         db.markNotificationRead(n.id);
-                        if (n.target && onNavigate) onNavigate(n.target);
+                        if ((n as any).target && onNavigate) onNavigate((n as any).target);
                         setShowNotifications(false);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === ' ') {
                           e.preventDefault();
                           db.markNotificationRead(n.id);
-                          if (n.target && onNavigate) onNavigate(n.target);
+                          if ((n as any).target && onNavigate) onNavigate((n as any).target);
                           setShowNotifications(false);
                         } else if (e.key === 'Escape') {
                           setShowNotifications(false);

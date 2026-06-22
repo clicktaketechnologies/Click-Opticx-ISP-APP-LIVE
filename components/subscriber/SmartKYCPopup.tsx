@@ -117,7 +117,7 @@ const SmartKYCPopup: React.FC<SmartKYCPopupProps> = ({ user, isOpen, onClose, on
         setStep('success');
         if (onSuccess) onSuccess();
       } else {
-        setError(data.message || "Failed to submit KYC.");
+        setError("Failed to submit KYC.");
         setStep('upload');
       }
     } catch (err: any) {

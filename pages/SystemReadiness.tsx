@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../db';
+import { TechnicalKeys } from '../types';
 import { 
   ShieldCheck, AlertTriangle, CheckCircle2, XCircle, 
   Terminal, Database, Globe, Bell, Mail, Server, 
@@ -32,7 +33,7 @@ const SystemReadiness: React.FC = () => {
     runManualScan();
   }, []);
 
-  const keys = dbState?.settings?.technicalKeys || {};
+  const keys = (dbState?.settings?.technicalKeys || {}) as Partial<TechnicalKeys>;
 
   const requirements = [
     {

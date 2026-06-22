@@ -161,12 +161,17 @@ export enum Role {
 }
 
 export interface RolePermission {
-  role_id: string;
-  page_id: string;
-  can_view: boolean;
-  can_edit: boolean;
-  can_delete: boolean;
-  can_export: boolean;
+  id?: string;
+  view?: string[];
+  edit?: string[];
+  delete?: string[];
+  // Supabase RBAC fields
+  role_id?: string;
+  page_id?: string;
+  can_view?: boolean;
+  can_edit?: boolean;
+  can_delete?: boolean;
+  can_export?: boolean;
 }
 
 export enum PaymentStatus {
@@ -303,8 +308,8 @@ export interface AuditLog {
   userName?: string;
   adminId?: string;
   adminName?: string;
-  details: string;
-  type: 'Request' | 'Approval' | 'Rejection' | 'View' | 'System' | 'Login' | 'Update' | 'Record';
+  details?: string;
+  type: 'Request' | 'Approval' | 'Rejection' | 'View' | 'System' | 'Login' | 'Update' | 'Record' | string;
   metadata?: any;
 }
 
@@ -1048,7 +1053,8 @@ export interface AppState {
   kycFiles: KYCFile[];
   cloudAccounts: CloudAccount[];
   cloudTransferLogs: CloudTransferLog[];
-
+  devices: ConnectedDevice[];
+  connectedDevices: ConnectedDevice[];
   networkMappings: NetworkMapping[];
   aiCallLogs: AICallLog[];
   aiCallRules: AICallRule[];
@@ -1161,6 +1167,7 @@ export interface PaymentRecord {
   amount: number;
   status: 'Pending' | 'Approved' | 'Rejected';
   method: PaymentMethod;
+  paymentMethod?: string;
   timestamp: string;
   collectorEmail: string;
   collectorName: string;
@@ -1321,7 +1328,7 @@ export interface InvoiceBranding {
   terms: string;
   privacy: string;
   refundPolicyUrl: string;
-  customNotes: string;
+  customNotes?: string;
 }
 
 export interface NotificationBranding {
@@ -1385,7 +1392,7 @@ export interface AppearanceConfig {
   showNews: boolean;
   showQuickActions: boolean;
   maintenanceMode: boolean;
-  show5GLaunchAnimation: boolean;
+  show5GLaunchAnimation?: boolean;
   loadingStyle?: '5G' | 'Pulse' | 'Orbit';
   appPages: AppPage[];
   homeCards: HomeCard[];
@@ -1536,8 +1543,8 @@ export interface SystemSettings {
   socialLinks: any[];
   appVersion: string;
   autoTaxPercentage: number;
-  enableTax: boolean;
-  taxLabel: string;
+  enableTax?: boolean;
+  taxLabel?: string;
   globalEmergencyLimit: number;
   paymentGateways: PaymentGateway[];
   techConfig: TechnicalConfig;
@@ -1545,28 +1552,28 @@ export interface SystemSettings {
   taxId: string;
   whiteLabelMode: boolean;
   allowWifiReset: boolean;
-  nasSystemEnabled: boolean;
+  nasSystemEnabled?: boolean;
   aiConfig: AIConfig;
   aiCallConfig: AICallConfig;
   commConfig: CommunicationSettings;
   infrastructure: InfrastructureConfig;
   legal: LegalConfig;
-  authSettings: AuthSettings;
-  technicalKeys: TechnicalKeys;
-  pushConfig: PushConfig;
-  cloudStorage: CloudStorageConfig;
-  terminology: SystemTerminology;
-  signupRequests: SignupRequest[];
-  auditLogs: AuditLog[];
+  authSettings?: AuthSettings;
+  technicalKeys?: TechnicalKeys;
+  pushConfig?: PushConfig;
+  cloudStorage?: CloudStorageConfig;
+  terminology?: SystemTerminology;
+  signupRequests?: SignupRequest[];
+  auditLogs?: AuditLog[];
   lastGlobalWipe?: string;
-  aiAgentEnabled: boolean;
-  autoCloudSync: boolean;
-  requiredKycDocs: number;
-  systemVersion: number;
-  lastUpdateDate: string;
-  systemSnapshots: SystemSnapshot[];
-  deploymentLogs: DeploymentLog[];
-  maintenanceMode: boolean;
+  aiAgentEnabled?: boolean;
+  autoCloudSync?: boolean;
+  requiredKycDocs?: number;
+  systemVersion?: number;
+  lastUpdateDate?: string;
+  systemSnapshots?: SystemSnapshot[];
+  deploymentLogs?: DeploymentLog[];
+  maintenanceMode?: boolean;
 }
 
 export interface CloudAccount {

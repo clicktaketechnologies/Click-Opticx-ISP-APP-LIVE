@@ -39,23 +39,21 @@ const timeoutPromise = (promise, ms) => {
 };
 
 export async function signUp({ email, password, phone, metadata }) {
-   const supabase = getAnonClient();
+   const supabase = configManager.getSupabaseClient(); // Use admin client to skip builtin confirmation email
 
    try {
      const { data, error } = await timeoutPromise(
-       supabase.auth.signUp({
+       supabase.auth.admin.createUser({
          email,
          password,
-         options: {
-           data: metadata || {},
-           emailRedirectTo: `${process.env.FRONTEND_URL || 'https://isp-click-opticx.web.app'}/verify-email`
-         }
+         email_confirm: false,
+         user_metadata: metadata || {}
        }),
        10000 // 10 seconds timeout
      );
 
      if (error) throw error;
-     return data;
+     return { user: data.user };
    } catch (err) {
      if (err.message.includes('timed out')) {
        logger.error(`[SIGNUP] Supabase Auth timeout: ${err.message}`);
