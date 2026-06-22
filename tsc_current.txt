@@ -1,0 +1,156 @@
+﻿components/admin/BrandingMediaManager.tsx(57,28): error TS2554: Expected 2 arguments, but got 1.
+components/admin/BrandingMediaManager.tsx(58,15): error TS2339: Property 'success' does not exist on type 'string'.
+components/admin/BrandingMediaManager.tsx(62,45): error TS2339: Property 'message' does not exist on type 'string'.
+components/admin/BrandingMediaManager.tsx(77,15): error TS2339: Property 'success' does not exist on type 'void'.
+components/admin/BrandingMediaManager.tsx(81,45): error TS2339: Property 'message' does not exist on type 'void'.
+components/admin/desks/BillingRequestDesk.tsx(59,17): error TS2339: Property 'message' does not exist on type '{ success: boolean; }'.
+components/admin/desks/KYCReviewDesk.tsx(58,13): error TS2339: Property 'success' does not exist on type 'void'.
+components/admin/desks/KYCReviewDesk.tsx(61,17): error TS2339: Property 'message' does not exist on type 'void'.
+components/admin/desks/KYCReviewDesk.tsx(71,44): error TS2554: Expected 1 arguments, but got 3.
+components/admin/desks/KYCReviewDesk.tsx(73,13): error TS2339: Property 'success' does not exist on type 'void'.
+components/admin/desks/KYCReviewDesk.tsx(77,17): error TS2339: Property 'message' does not exist on type 'void'.
+components/admin/desks/ProvisioningDesk.tsx(60,17): error TS2339: Property 'message' does not exist on type '{ success: boolean; }'.
+components/EmailComposer.tsx(77,34): error TS2554: Expected 3 arguments, but got 1.
+components/EmailComposer.tsx(92,30): error TS2551: Property 'message' does not exist on type '{ success: boolean; messageId: string; }'. Did you mean 'messageId'?
+components/Sidebar.tsx(270,54): error TS2339: Property 'id' does not exist on type 'RolePermission'.
+components/Sidebar.tsx(272,39): error TS2339: Property 'view' does not exist on type 'RolePermission'.
+components/subscriber/SmartKYCPopup.tsx(120,18): error TS2304: Cannot find name 'data'.
+db.ts(12,3): error TS2305: Module '"./types"' has no exported member 'Device'.
+db.ts(17,20): error TS2307: Cannot find module './utils/logger.js' or its corresponding type declarations.
+db.ts(76,14): error TS2740: Type '{ emailMode: "CUSTOM_SMTP"; emailProvider: "SMTP"; providerConfig: { apiKey: string; senderDomain: string; }; smtpConfig: { host: string; port: number; encryption: "TLS"; username: string; }; senderIdentities: ({ ...; } | { ...; })[]; ... 4 more ...; health: { ...; }; }' is missing the following properties from type 'CommunicationSettings': simulationMode, notificationMode, autoFallbackEnabled, globalNotificationEnabled, and 4 more.
+db.ts(203,5): error TS2741: Property 'customNotes' is missing in type '{ logoPreference: "primary"; headerText: string; footerDisclaimer: string; authorizedSignature: string; prefix: string; nextNumber: number; terms: string; privacy: string; refundPolicyUrl: string; }' but required in type 'InvoiceBranding'.
+db.ts(205,5): error TS2741: Property 'show5GLaunchAnimation' is missing in type '{ showWallet: true; showEmergencyLoad: true; showAIChat: true; showAICalling: true; showNews: true; showQuickActions: true; maintenanceMode: false; appPages: AppPage[]; homeCards: undefined[]; sections: AppSection[]; }' but required in type 'AppearanceConfig'.
+db.ts(234,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(235,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(236,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(237,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(238,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(239,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(240,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(241,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(242,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(243,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(244,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(245,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(246,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(247,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(248,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(249,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(250,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(251,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(252,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(253,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(254,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(255,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(256,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(257,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(258,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(259,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(260,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(261,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(262,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(263,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(264,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(265,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(266,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(267,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(268,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(269,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(270,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(271,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(272,7): error TS2353: Object literal may only specify known properties, and 'id' does not exist in type 'RolePermission'.
+db.ts(861,11): error TS2741: Property 'dueAmount' is missing in type '{ id: string; userId: string; userName: string; packageId: string; packageName: string; items: LineItem[]; subtotal: number; taxRate: number; taxAmount: number; discountAmount: number; ... 4 more ...; createdAt: string; }' but required in type 'Invoice'.
+db.ts(1206,40): error TS2339: Property 'devices' does not exist on type 'AppState'.
+db.ts(1207,67): error TS2339: Property 'devices' does not exist on type 'AppState'.
+db.ts(1207,133): error TS2339: Property 'devices' does not exist on type 'AppState'.
+db.ts(1207,164): error TS2339: Property 'devices' does not exist on type 'AppState'.
+db.ts(1208,47): error TS2339: Property 'devices' does not exist on type 'AppState'.
+db.ts(1208,68): error TS2339: Property 'devices' does not exist on type 'AppState'.
+db.ts(1560,34): error TS2345: Argument of type '{ id: string; action: string; userId: string; userName: string; details: string; type: string; timestamp: string; }' is not assignable to parameter of type 'AuditLog'.
+  Types of property 'type' are incompatible.
+    Type 'string' is not assignable to type '"Request" | "Approval" | "Rejection" | "View" | "System" | "Login" | "Update" | "Record"'.
+db.ts(1596,38): error TS2322: Type '"devices"' is not assignable to type 'keyof AppState'.
+db.ts(1596,49): error TS2322: Type '"connectedDevices"' is not assignable to type 'keyof AppState'.
+db.ts(1621,109): error TS2345: Argument of type '"reseller"' is not assignable to parameter of type '"staff" | "user"'.
+pages/AdminReminders.tsx(75,64): error TS2554: Expected 1 arguments, but got 3.
+pages/AdminReminders.tsx(110,38): error TS2554: Expected 1 arguments, but got 3.
+pages/AuthControlCenter.tsx(53,44): error TS2339: Property 'message' does not exist on type '{ success: boolean; provider: string; verified: boolean; }'.
+pages/AuthControlCenter.tsx(55,43): error TS2339: Property 'message' does not exist on type '{ success: boolean; provider: string; verified: boolean; }'.
+pages/AuthControlCenter.tsx(63,30): error TS2554: Expected 0 arguments, but got 1.
+pages/AuthControlCenter.tsx(246,70): error TS2554: Expected 2 arguments, but got 1.
+pages/AuthControlCenter.tsx(252,70): error TS2554: Expected 2 arguments, but got 1.
+pages/AuthControlCenter.tsx(266,73): error TS2554: Expected 2 arguments, but got 1.
+pages/AuthControlCenter.tsx(279,73): error TS2554: Expected 2 arguments, but got 1.
+pages/Dashboard.tsx(57,65): error TS2339: Property 'paymentMethod' does not exist on type 'PaymentRecord'.
+pages/Dashboard.tsx(672,114): error TS2339: Property 'then' does not exist on type 'void'.
+pages/EmailConfig.tsx(46,51): error TS2339: Property 'error' does not exist on type '{ success: boolean; message: string; }'.
+pages/EmergencyLoadAdmin.tsx(45,81): error TS2554: Expected 2 arguments, but got 3.
+pages/EmergencyLoadAdmin.tsx(46,13): error TS2339: Property 'success' does not exist on type 'void'.
+pages/GovernanceDesk.tsx(125,21): error TS2339: Property 'message' does not exist on type '{ success: boolean; }'.
+pages/HotspotManager.tsx(37,68): error TS2554: Expected 2 arguments, but got 3.
+pages/KYCManagement.tsx(87,88): error TS2554: Expected 3 arguments, but got 4.
+pages/KYCManagement.tsx(102,28): error TS2554: Expected 0 arguments, but got 3.
+pages/LiveUsage.tsx(19,31): error TS2345: Argument of type 'string' is not assignable to parameter of type 'Function'.
+pages/LiveUsage.tsx(46,37): error TS2554: Expected 0 arguments, but got 1.
+pages/Login.tsx(109,23): error TS2339: Property 'message' does not exist on type '{ success: boolean; error: string; }'.
+pages/Login.tsx(124,60): error TS2554: Expected 1 arguments, but got 2.
+pages/Login.tsx(128,36): error TS2339: Property 'confirmationResult' does not exist on type '{ success: boolean; error: string; }'.
+pages/Login.tsx(131,23): error TS2339: Property 'message' does not exist on type '{ success: boolean; error: string; }'.
+pages/Login.tsx(146,23): error TS2339: Property 'message' does not exist on type '{ success: boolean; verified: boolean; }'.
+pages/Login.tsx(237,24): error TS2339: Property 'message' does not exist on type '{ success: boolean; match: boolean; }'.
+pages/NASManagement.tsx(232,82): error TS2322: Type 'Promise<{ nasId: string; load: number; capacity: number; utilization: number; }>' is not assignable to type 'ReactNode'.
+  Type 'Promise<{ nasId: string; load: number; capacity: number; utilization: number; }>' is not assignable to type 'Promise<AwaitedReactNode>'.
+    Type '{ nasId: string; load: number; capacity: number; utilization: number; }' is not assignable to type 'AwaitedReactNode'.
+pages/NASManagement.tsx(236,83): error TS2365: Operator '>' cannot be applied to types 'Promise<{ nasId: string; load: number; capacity: number; utilization: number; }>' and 'number'.
+pages/NASManagement.tsx(236,134): error TS2365: Operator '>' cannot be applied to types 'Promise<{ nasId: string; load: number; capacity: number; utilization: number; }>' and 'number'.
+pages/NetworkIntegration.tsx(71,28): error TS2554: Expected 2 arguments, but got 1.
+pages/OLTManagement.tsx(390,84): error TS2554: Expected 1 arguments, but got 2.
+pages/OLTManagement.tsx(390,115): error TS2339: Property 'message' does not exist on type '{ success: boolean; }'.
+pages/OLTManagement.tsx(439,43): error TS2339: Property 'discoveredOnus' does not exist on type 'DB'.
+pages/OLTManagement.tsx(446,71): error TS2554: Expected 0 arguments, but got 1.
+pages/OLTManagement.tsx(447,38): error TS2339: Property 'message' does not exist on type '{ processed: number; suspended: number; }'.
+pages/OLTManagement.tsx(501,124): error TS2339: Property 'message' does not exist on type '{ count: number; }'.
+pages/PastRecords.tsx(27,70): error TS2554: Expected 1 arguments, but got 2.
+pages/PastRecords.tsx(32,17): error TS2339: Property 'message' does not exist on type '{ success: boolean; }'.
+pages/ResellerManagement.tsx(144,64): error TS2554: Expected 2 arguments, but got 5.
+pages/ResellerManagement.tsx(155,7): error TS2554: Expected 2 arguments, but got 4.
+pages/SubscriberApp.tsx(216,34): error TS2741: Property 'state' is missing in type '{}' but required in type 'Props'.
+pages/SystemConfig.tsx(30,31): error TS2345: Argument of type '{ branding: {}; technicalKeys: TechnicalKeys; pushConfig: PushConfig; profile: BusinessProfile; support: SupportConfig; ... 40 more ...; maintenanceMode: boolean; }' is not assignable to parameter of type 'SystemSettings'.
+  Types of property 'branding' are incompatible.
+    Type '{}' is missing the following properties from type 'BrandingConfig': businessName, shortName, logoLight, logoDark, and 9 more.
+pages/SystemConfig.tsx(114,33): error TS2339: Property 'appTitle' does not exist on type '{}'.
+pages/SystemConfig.tsx(121,33): error TS2339: Property 'appSubtitle' does not exist on type '{}'.
+pages/SystemDeploymentCenter.tsx(23,47): error TS2554: Expected 0 arguments, but got 1.
+pages/SystemDeploymentCenter.tsx(25,13): error TS2339: Property 'success' does not exist on type '{ id: string; timestamp: string; size: number; }'.
+pages/SystemDeploymentCenter.tsx(29,47): error TS2339: Property 'message' does not exist on type '{ id: string; timestamp: string; size: number; }'.
+pages/SystemDeploymentCenter.tsx(42,38): error TS2339: Property 'message' does not exist on type '{ success: boolean; restored: string; }'.
+pages/SystemFlash.tsx(34,46): error TS2554: Expected 0 arguments, but got 3.
+pages/SystemFlash.tsx(36,82): error TS2339: Property 'count' does not exist on type '{ success: boolean; timestamp: string; }'.
+pages/TrashManagement.tsx(41,15): error TS2339: Property 'success' does not exist on type 'void'.
+pages/TrashManagement.tsx(45,45): error TS2339: Property 'message' does not exist on type 'void'.
+pages/TrashManagement.tsx(57,15): error TS2339: Property 'success' does not exist on type 'void'.
+pages/TrashManagement.tsx(61,45): error TS2339: Property 'message' does not exist on type 'void'.
+pages/UserAppManagement.tsx(77,16): error TS2554: Expected 2 arguments, but got 1.
+pages/v2/CommCenterV2.tsx(117,111): error TS2339: Property 'targetCount' does not exist on type 'EmailCampaign'.
+pages/v2/CommCenterV2.tsx(144,31): error TS2339: Property 'enabled' does not exist on type 'AuthProvider'.
+pages/v2/CommCenterV2.tsx(203,109): error TS2339: Property 'recipientName' does not exist on type 'DeliveryLog'.
+pages/v2/CommCenterV2.tsx(206,92): error TS2339: Property 'target' does not exist on type 'DeliveryLog'.
+pages/v2/CommCenterV2.tsx(209,50): error TS2339: Property 'attemptsMade' does not exist on type 'DeliveryLog'.
+pages/v2/NetworkPlaneV2.tsx(37,34): error TS2367: This comparison appears to be unintentional because the types '"Warning" | "Online" | "Error" | "Offline"' and '"Connected"' have no overlap.
+pages/v2/NetworkPlaneV2.tsx(37,62): error TS2367: This comparison appears to be unintentional because the types '"Warning" | "Online" | "Error" | "Offline"' and '"Active"' have no overlap.
+pages/v2/NetworkPlaneV2.tsx(38,35): error TS2367: This comparison appears to be unintentional because the types '"Warning" | "Online" | "Error" | "Offline"' and '"Disconnected"' have no overlap.
+pages/v2/NetworkPlaneV2.tsx(69,46): error TS2345: Argument of type '"all" | "NAS" | "OLT"' is not assignable to parameter of type 'SetStateAction<"all" | "NASConfig" | "OLTConfig">'.
+  Type '"NAS"' is not assignable to type 'SetStateAction<"all" | "NASConfig" | "OLTConfig">'.
+pages/v2/NetworkPlaneV2.tsx(99,17): error TS2322: Type '{ children: Element[]; key: any; className: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & { children: ReactNode; className?: string; title?: string; subtitle?: string; headerAction?: ReactNode; }'.
+  Property 'onClick' does not exist on type 'IntrinsicAttributes & { children: ReactNode; className?: string; title?: string; subtitle?: string; headerAction?: ReactNode; }'.
+pages/v2/NetworkPlaneV2.tsx(114,74): error TS2304: Cannot find name 'XCircle'.
+pages/v2/UserManagementV2.tsx(84,29): error TS2551: Property 'Active' does not exist on type 'typeof UserStatus'. Did you mean 'ACTIVE'?
+pages/v2/UserManagementV2.tsx(128,53): error TS2551: Property 'Active' does not exist on type 'typeof UserStatus'. Did you mean 'ACTIVE'?
+pages/v2/UserManagementV2.tsx(130,52): error TS2551: Property 'Active' does not exist on type 'typeof UserStatus'. Did you mean 'ACTIVE'?
+scratch/test_router.ts(1,22): error TS2307: Cannot find module './types' or its corresponding type declarations.
+src/components/Header.tsx(174,31): error TS2551: Property 'target' does not exist on type 'SystemNotification'. Did you mean 'targetId'?
+src/components/Header.tsx(174,66): error TS2551: Property 'target' does not exist on type 'SystemNotification'. Did you mean 'targetId'?
+src/components/Header.tsx(181,33): error TS2551: Property 'target' does not exist on type 'SystemNotification'. Did you mean 'targetId'?
+src/components/Header.tsx(181,68): error TS2551: Property 'target' does not exist on type 'SystemNotification'. Did you mean 'targetId'?
+src/components/shared/SpeedTestModal.tsx(59,53): error TS2345: Argument of type '{ timestamp: string; userAgent: string; downloadMbps: number; uploadMbps: number; latencyMs: number; jitterMs: number; status: "idle" | "ping" | "download" | "upload" | "complete" | "error"; error?: string; }' is not assignable to parameter of type 'string'.
+src/layouts/AdminLayoutWrapper.tsx(4,26): error TS2307: Cannot find module '../types' or its corresponding type declarations.

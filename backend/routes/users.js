@@ -18,4 +18,12 @@ router.post('/:id/restore', protect, restrictTo('SuperAdmin'), userController.re
 router.post('/:id/transfer', protect, restrictTo('SuperAdmin', 'Admin'), userController.transferUser);
 router.post('/import', protect, restrictTo('SuperAdmin', 'Admin'), userController.importUsers);
 
+
+// Admin Actions
+router.post('/:id/verify', protect, restrictTo('SuperAdmin', 'Admin'), userController.verifyUser);
+router.post('/:id/unverify', protect, restrictTo('SuperAdmin', 'Admin'), userController.unverifyUser);
+router.post('/:id/disable-login', protect, restrictTo('SuperAdmin', 'Admin'), userController.disableLogin);
+router.post('/:id/enable-login', protect, restrictTo('SuperAdmin', 'Admin'), userController.enableLogin);
+router.post('/:id/resend-verification', protect, restrictTo('SuperAdmin', 'Admin'), userController.resendVerification);
+
 export default router;

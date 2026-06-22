@@ -388,18 +388,11 @@ export const login = async (req, res) => {
                  });
              }
 
-             if (user.status === 'PENDING_VERIFICATION') {
-                 return res.status(403).json({ 
-                     success: false, 
-                     error: 'ACCOUNT_NOT_VERIFIED', 
-                     message: 'Please verify your email first.',
-                     status: 'PENDING_VERIFICATION',
-                     userId: user.id
-                 });
-             }
+             // Removed PENDING_VERIFICATION strict block for Soft KYC
              
              const errMsg = authError.message ? authError.message.toLowerCase() : '';
              if (errMsg.includes('confirm') || errMsg.includes('verified') || authError.code === 'email_not_confirmed') {
+                 // Supabase block - we shouldn't hit this since email_confirm is true now
                  return res.status(403).json({ 
                      success: false, 
                      error: 'ACCOUNT_NOT_VERIFIED', 
@@ -779,7 +772,16 @@ export const forgotPassword = async (req, res) => {
                  );
                  logger.info(`[FORGOT-PASSWORD] Password reset Magic Link dispatched via Supabase to ${email}`);
              } else {
-                 const actionLink = linkData.properties.action_link;
+                 let actionLink = linkData.properties.action_link;
+                 try {
+                     const urlObj = new URL(actionLink);
+                     if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+                         urlObj.protocol = 'https:';
+                         urlObj.host = 'isp-click-opticx.web.app';
+                         urlObj.pathname = '/reset-password';
+                         actionLink = urlObj.toString();
+                     }
+                 } catch (e) {}
                  // Send email manually
                  const emailHtml = `
                      <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px;">

@@ -46,7 +46,7 @@ export async function signUp({ email, password, phone, metadata }) {
        supabase.auth.admin.createUser({
          email,
          password,
-         email_confirm: false,
+         email_confirm: true,
          user_metadata: metadata || {}
        }),
        10000 // 10 seconds timeout
