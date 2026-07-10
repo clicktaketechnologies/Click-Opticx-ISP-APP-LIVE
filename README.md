@@ -1,3 +1,6 @@
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
 # ClickOptix ISP Management Platform - Full Documentation
 
@@ -7,7 +10,7 @@
 
 ## 🔗 Live Deployments
 
-*   **Frontend (Firebase Hosting):** [https://ap-click-opticx.web.app](https://ap-click-opticx.web.app) / [https://click-opticx.firebaseapp.com](https://click-opticx.firebaseapp.com)
+*   **Frontend (Firebase Hosting):** [https://isp-click-opticx.web.app](https://isp-click-opticx.web.app) / [https://click-opticx.firebaseapp.com](https://click-opticx.firebaseapp.com)
 *   **Backend API (Render):** [https://click-opticx-isp-app-live.onrender.com](https://click-opticx-isp-app-live.onrender.com)
 *   **Database (Supabase):** Managed via Supabase Cloud PostgreSQL.
 
