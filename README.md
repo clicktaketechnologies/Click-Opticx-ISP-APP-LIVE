@@ -1,7 +1,7 @@
-
+<div align="center">
 
 # Click Opticx ISP Management Platform
-### v9.6.3-LIVE · Full-Stack ISP Operating System
+### v9.7.0-LIVE · Full-Stack ISP Operating System
 
 [![Live](https://img.shields.io/badge/Live-isp--click--opticx.web.app-blue?style=for-the-badge)](https://isp-click-opticx.web.app/)
 [![Backend](https://img.shields.io/badge/API-Render-green?style=for-the-badge)](https://click-opticx-isp-app-live.onrender.com)
@@ -155,7 +155,11 @@ click-opticx-isp-app-live/
 │   ├── supabase.ts             # Supabase client + redirect URL
 │   ├── roleRouter.ts           # Role-based route access control
 │   ├── db-adapter.ts           # Dual-write adapter (Firebase → Supabase)
-│   └── integrityCheck.ts       # Crash detection & recovery
+│   ├── integrityCheck.ts       # Crash detection & recovery
+│   └── telemetry.ts            # Client-side telemetry & error tracking
+│
+├── utils/
+│   └── env.ts                  # Environment variable validation & helpers
 │
 ├── hooks/                      # Custom React hooks
 ├── store/ & stores/            # Zustand stores
@@ -645,9 +649,35 @@ npm run test         # Run Vitest unit tests
 
 ---
 
+---
+
+## 📝 Changelog
+
+### v9.7.0-LIVE (2026-07-17)
+- **GovernanceDesk** — Major UI overhaul with expanded staff management, permission matrix, and role assignment workflows
+- **UnifiedCommunication** — Fully functional Web Push + Email module with audience segments, delivery analytics, and real-time delivery logs
+- **EmailControlCenter** — Enhanced email builder with template management, delivery tracking, and queue status
+- **db.ts** — Extended with 165+ lines of new Supabase operations for communication logs, push subscriptions, and staff management
+- **PremiumSpeedTest** — Revamped speed test UI with real-time chart animations and result history
+- **Header.tsx** — Improved notification badge, user menu, and responsive layout
+- **lib/telemetry.ts** — New: client-side telemetry module for error tracking and usage analytics
+- **utils/env.ts** — New: centralised environment variable validation with helpful startup warnings
+- **backend/communicationController.js** — Real push/email delivery replacing mock adapters
+- **backend/communication.js routes** — New endpoints for segment management and delivery logs
+- **lib/roleRouter.ts** — Refined access control with granular permission checks
+- **Modal.tsx / Toast.tsx** — Polish and animation improvements
+
+### v9.6.3-LIVE (2026-07-10)
+- Full deep-dive README documentation added
+- Communication infrastructure (Supabase Web Push/Email) stabilized
+- PWA offline queue and keep-alive improvements
+- Auth flow finalized: soft KYC, admin verify/unverify controls
+
+---
+
 <div align="center">
 
 **Built by ClickTake Technologies**  
-© 2025 Click Opticx Pvt Ltd · `v9.6.3-LIVE` · Pakistan 🇵🇰
+© 2025 Click Opticx Pvt Ltd · `v9.7.0-LIVE` · Pakistan 🇵🇰
 
 </div>

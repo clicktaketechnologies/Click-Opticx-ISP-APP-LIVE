@@ -47,6 +47,18 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const toast = useCallback((type: ToastType, title: string, message?: string) => {
     const id = `toast-${Date.now()}-${Math.random()}`;
     setToasts(prev => [...prev.slice(-4), { id, type, title, message }]);
+    
+    // Log errors to the audit mechanism
+    if (type === 'error') {
+      import('../../db').then(({ db }) => {
+        db.logAudit({
+          action: 'System Error Encountered',
+          details: `Title: ${title} | Message: ${message || 'N/A'}`,
+          type: 'Error'
+        }).catch(err => console.error('Failed to log audit:', err));
+      }).catch(err => console.error('Failed to import db:', err));
+    }
+
     timerRef.current[id] = setTimeout(() => dismiss(id), type === 'error' ? 5000 : 3000);
   }, [dismiss]);
 

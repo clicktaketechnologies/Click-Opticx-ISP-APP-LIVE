@@ -253,7 +253,7 @@ const KYCManagement: React.FC<KYCProps> = ({ state: propState }) => {
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full min-w-full">
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full max-w-full">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="!bg-slate-50 !border-b-2 !border-slate-100">

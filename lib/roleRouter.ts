@@ -250,16 +250,16 @@ export const ROLE_LAYOUT_MAP: Record<string, LayoutType> = {
 
 /** Returns the layout type for a given role. Defaults to 'admin' for unknown roles. */
 export function getLayoutForRole(role: string): LayoutType {
-  const cleanRole = role.toLowerCase().replace(/\s/g, '');
-  const entry = Object.entries(ROLE_LAYOUT_MAP).find(([r]) => r.toLowerCase().replace(/\s/g, '') === cleanRole);
+  const cleanRole = role.toLowerCase().replace(/[_\s]/g, '');
+  const entry = Object.entries(ROLE_LAYOUT_MAP).find(([r]) => r.toLowerCase().replace(/[_\s]/g, '') === cleanRole);
   return entry ? entry[1] : 'admin';
 }
 
 /** Returns all routes the given role is permitted to access. */
 export function getRoutesForRole(role: string): RoleRoute[] {
-  const cleanRole = role.toLowerCase().replace(/\s/g, '');
+  const cleanRole = role.toLowerCase().replace(/[_\s]/g, '');
   return ALL_ROLE_ROUTES.filter(r => 
-    r.requiredRoles.some(rr => rr.toLowerCase().replace(/\s/g, '') === cleanRole)
+    r.requiredRoles.some(rr => rr.toLowerCase().replace(/[_\s]/g, '') === cleanRole)
   );
 }
 
@@ -281,7 +281,7 @@ export function getDefaultPathForRole(role: string): string {
  */
 export function canRoleAccessPath(role: string, path: string): boolean {
   // Normalize  // Robust check for SuperAdmin or Admin (Case-insensitive, Handles spaces)
-  const isSuperAdmin = ['superadmin', 'admin'].includes(role.toLowerCase().replace(/\s/g, ''));
+  const isSuperAdmin = ['superadmin', 'admin'].includes(role.toLowerCase().replace(/[_\s]/g, ''));
   if (isSuperAdmin) return true;
 
   // Normalize path (remove trailing slash, except for root)
@@ -290,9 +290,9 @@ export function canRoleAccessPath(role: string, path: string): boolean {
   const route = ALL_ROLE_ROUTES.find(r => r.path === normalizedPath);
   if (!route) return false;
 
-  const cleanRole = role.toLowerCase().replace(/\s/g, '');
+  const cleanRole = role.toLowerCase().replace(/[_\s]/g, '');
   return route.requiredRoles.some(requiredRole => {
-    const cleanRequired = requiredRole.toLowerCase().replace(/\s/g, '');
+    const cleanRequired = requiredRole.toLowerCase().replace(/[_\s]/g, '');
     return cleanRequired === cleanRole;
   });
 }

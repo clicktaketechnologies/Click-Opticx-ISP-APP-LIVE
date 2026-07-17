@@ -23,6 +23,16 @@ const UnifiedCommunication: React.FC<{ state: AppState }> = ({ state }) => {
     const [logs, setLogs] = useState<CommLog[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSending, setIsSending] = useState(false);
+
+    // Notification toggles state
+    const [notifToggles, setNotifToggles] = useState({ auto_alerts: true, billing_reminders: true, mkt_updates: false });
+
+    // Push broadcast form
+    const [pushTitle, setPushTitle] = useState('');
+    const [pushBody, setPushBody] = useState('');
+    const [pushTarget, setPushTarget] = useState<'all' | 'specific'>('all');
+    const [pushRecipient, setPushRecipient] = useState('');
+    const [isBroadcasting, setIsBroadcasting] = useState(false);
     
     // Form States
     const [commType, setCommType] = useState<'email' | 'push'>('email');
@@ -369,6 +379,161 @@ const UnifiedCommunication: React.FC<{ state: AppState }> = ({ state }) => {
                             </div>
                         </div>
                     )}
+
+                    {activeTab === 'push' && (
+                        <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+                            {/* Push Header */}
+                            <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl">
+                                <div className="absolute -right-16 -top-16 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
+                                <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                                            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">Push Protocol Active</span>
+                                        </div>
+                                        <h3 className="text-3xl font-black uppercase italic tracking-tighter">Web Push Broadcast</h3>
+                                        <p className="text-[11px] text-white/60 font-bold uppercase tracking-widest">VAPID-Secured • FCM / APNS Routing</p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-5 bg-white/10 border border-white/20 rounded-2xl text-center">
+                                            <p className="text-2xl font-black">{state.users.filter(u => u.pushToken).length}</p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-white/50 mt-1">Subscribed</p>
+                                        </div>
+                                        <div className="p-5 bg-white/10 border border-white/20 rounded-2xl text-center">
+                                            <p className="text-2xl font-black">{state.users.length}</p>
+                                            <p className="text-[9px] font-black uppercase tracking-widest text-white/50 mt-1">Total Users</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Broadcast Form */}
+                            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50 p-10 space-y-8">
+                                <div className="flex items-center gap-5 border-b border-slate-50 pb-8">
+                                    <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center border border-indigo-100">
+                                        <Bell size={28} />
+                                    </div>
+                                    <div>
+                                        <h4 className="text-xl font-black uppercase italic tracking-tighter text-slate-900">Compose Broadcast</h4>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Push to all subscribers or a specific device</p>
+                                    </div>
+                                </div>
+
+                                {/* Target Selector */}
+                                <div className="space-y-3">
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Broadcast Target</label>
+                                    <div className="grid grid-cols-2 gap-3 p-1.5 bg-slate-50 border border-slate-200 rounded-2xl w-fit">
+                                        {(['all', 'specific'] as const).map(t => (
+                                            <button
+                                                key={t}
+                                                onClick={() => setPushTarget(t)}
+                                                className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${pushTarget === t ? 'bg-white shadow-md text-indigo-600' : 'text-slate-400'}`}
+                                            >
+                                                {t === 'all' ? '🌐 All Subscribers' : '🎯 Specific User'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {pushTarget === 'specific' && (
+                                    <div className="space-y-3">
+                                        <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Target User / Token</label>
+                                        <input
+                                            type="text"
+                                            placeholder="user@domain.com or push-token"
+                                            className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-xs"
+                                            value={pushRecipient}
+                                            onChange={e => setPushRecipient(e.target.value)}
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="space-y-3">
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Notification Title</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Your Invoice is Ready"
+                                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-xs"
+                                        value={pushTitle}
+                                        onChange={e => setPushTitle(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Notification Body</label>
+                                    <textarea
+                                        rows={5}
+                                        placeholder="Compose your push notification message..."
+                                        className="w-full px-6 py-5 bg-slate-50 border border-slate-200 rounded-[2rem] font-medium text-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm resize-none"
+                                        value={pushBody}
+                                        onChange={e => setPushBody(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="flex justify-end">
+                                    <button
+                                        disabled={isBroadcasting || !pushTitle || !pushBody}
+                                        onClick={async () => {
+                                            setIsBroadcasting(true);
+                                            try {
+                                                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/communication/send`, {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'Authorization': `Bearer ${localStorage.getItem('clickopticx_auth_token')}`
+                                                    },
+                                                    body: JSON.stringify({ type: 'push', recipient: pushTarget === 'all' ? 'all' : pushRecipient, subject: pushTitle, body: pushBody })
+                                                });
+                                                const data = await res.json();
+                                                if (data.success) {
+                                                    db.logNotification('all', 'success', 'Push Broadcast Sent', `"${pushTitle}" dispatched to ${pushTarget === 'all' ? 'all subscribers' : pushRecipient}`);
+                                                    setPushTitle(''); setPushBody(''); setPushRecipient('');
+                                                    alert('Push notification broadcast dispatched successfully.');
+                                                } else { alert(`Broadcast failed: ${data.message}`); }
+                                            } catch (e: any) { alert(`Network error: ${e.message}`); }
+                                            finally { setIsBroadcasting(false); }
+                                        }}
+                                        className="px-12 py-5 bg-indigo-600 text-white rounded-2xl font-black text-[12px] uppercase tracking-widest shadow-2xl shadow-indigo-500/30 hover:bg-indigo-700 active:scale-95 transition-all flex items-center gap-3 disabled:opacity-50"
+                                    >
+                                        {isBroadcasting ? <span className="animate-spin">⚡</span> : <Bell size={20} />}
+                                        {isBroadcasting ? 'Broadcasting...' : 'Fire Push Broadcast'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Subscriber List Preview */}
+                            <div className="bg-white rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-100/50 p-10 space-y-6">
+                                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <Smartphone size={14} className="text-indigo-500" /> Subscribed Device Nodes
+                                </h4>
+                                <div className="space-y-3">
+                                    {state.users.filter(u => u.pushToken).slice(0, 5).length > 0 ? (
+                                        state.users.filter(u => u.pushToken).slice(0, 5).map(u => (
+                                            <div key={u.id} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-indigo-200 transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-9 h-9 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xs font-black">{u.name.charAt(0)}</div>
+                                                    <div>
+                                                        <p className="text-[10px] font-black text-slate-900 uppercase">{u.name}</p>
+                                                        <p className="text-[9px] text-slate-400 font-bold uppercase">{u.connectionId}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                                    <span className="text-[8px] font-black text-green-600 uppercase">Subscribed</span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="py-16 text-center opacity-40">
+                                            <Bell className="mx-auto text-slate-300 mb-4" size={40} />
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No subscribed push devices found.</p>
+                                            <p className="text-[9px] text-slate-400 uppercase mt-1">Users must opt-in via the subscriber portal.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Sidebar Cards */}
@@ -425,18 +590,24 @@ const UnifiedCommunication: React.FC<{ state: AppState }> = ({ state }) => {
                         </div>
 
                         <div className="space-y-4">
-                            {[
-                                { id: 'auto_alerts', label: 'Auto Error Alerts', color: 'rose' },
-                                { id: 'billing_reminders', label: 'Billing Broadcasts', color: 'blue' },
-                                { id: 'mkt_updates', label: 'Marketing Streams', color: 'indigo' }
-                            ].map(toggle => (
-                                <div key={toggle.id} className="flex items-center justify-between p-5 bg-slate-50 border border-slate-200 rounded-2xl group hover:border-slate-300 transition-all">
-                                    <span className="text-[10px] font-black text-slate-600 uppercase italic tracking-widest">{toggle.label}</span>
-                                    <button className="w-12 h-6 bg-slate-200 rounded-full relative p-1 transition-all">
-                                        <div className="w-4 h-4 bg-white rounded-full shadow-md"></div>
-                                    </button>
-                                </div>
-                            ))}
+                            {([
+                                { id: 'auto_alerts' as const, label: 'Auto Error Alerts', color: 'rose' },
+                                { id: 'billing_reminders' as const, label: 'Billing Broadcasts', color: 'blue' },
+                                { id: 'mkt_updates' as const, label: 'Marketing Streams', color: 'indigo' }
+                            ]).map(toggle => {
+                                const isOn = notifToggles[toggle.id];
+                                return (
+                                    <div key={toggle.id} className="flex items-center justify-between p-5 bg-slate-50 border border-slate-200 rounded-2xl group hover:border-slate-300 transition-all">
+                                        <span className="text-[10px] font-black text-slate-600 uppercase italic tracking-widest">{toggle.label}</span>
+                                        <button
+                                            onClick={() => setNotifToggles(prev => ({ ...prev, [toggle.id]: !prev[toggle.id] }))}
+                                            className={`w-12 h-6 rounded-full relative p-1 transition-all duration-300 ${isOn ? 'bg-blue-600' : 'bg-slate-200'}`}
+                                        >
+                                            <div className={`w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${isOn ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                                        </button>
+                                    </div>
+                                );
+                            })}
                         </div>
 
                         <div className="p-6 bg-blue-50 border border-blue-100 rounded-[2rem] space-y-3">

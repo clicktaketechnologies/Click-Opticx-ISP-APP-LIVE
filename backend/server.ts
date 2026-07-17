@@ -41,6 +41,7 @@ import nasRoutes from './routes/nas.js';
 import emailStatusRoutes from './routes/email-status.js';
 import paymentsRoutes from './routes/payments.js';
 import providerManagementRoutes from './routes/provider-management.js';
+import communicationRoutes from './routes/communication.js';
 // ESM dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -157,6 +158,7 @@ apiV1.use('/nas', nasRoutes);
 apiV1.use('/email', emailStatusRoutes);
 apiV1.use('/payments', paymentsRoutes);
 apiV1.use('/provider-mgmt', providerManagementRoutes);
+apiV1.use('/communication', communicationRoutes);
 
 apiV1.get('/ping', (req: any, res: any) => {
     res.json({

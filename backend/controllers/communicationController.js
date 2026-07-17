@@ -1,12 +1,12 @@
-const nodemailer = require('nodemailer');
-const webpush = require('web-push');
-const logger = require('../utils/logger');
-const configManager = require('../services/config-manager');
+import nodemailer from 'nodemailer';
+import webpush from 'web-push';
+import logger from '../utils/logger.js';
+import configManager from '../services/config-manager.js';
 
 // In-memory or Redis-backed logs (Simplified for now)
 let commLogs = [];
 
-exports.saveConfig = async (req, res) => {
+const saveConfig = async (req, res) => {
     try {
         const { type, config } = req.body;
         const supabase = configManager.getSupabaseClient();
@@ -27,7 +27,7 @@ exports.saveConfig = async (req, res) => {
     }
 };
 
-exports.sendNotification = async (req, res) => {
+const sendNotification = async (req, res) => {
     try {
         const { type, recipient, subject, body, templateId, metadata } = req.body;
         let result;
@@ -73,14 +73,21 @@ async function sendPush(target, title, body, metadata) {
     }
 }
 
-exports.getLogs = async (req, res) => {
+const getLogs = async (req, res) => {
     res.json({ success: true, logs: commLogs.slice(0, 100) });
 };
 
-exports.verifyConnection = async (req, res) => {
+const verifyConnection = async (req, res) => {
     const { type, config } = req.body;
     // Simulate connection test
     setTimeout(() => {
         res.json({ success: true, message: `${type} connection verified successfully.` });
     }, 1000);
+};
+
+export default {
+    saveConfig,
+    sendNotification,
+    getLogs,
+    verifyConnection
 };

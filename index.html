@@ -11,14 +11,14 @@
     <script>
         // Force refresh on version mismatch - DATA SAFE MODE
         const LATEST_VERSION = 'v9.6.3-LIVE';
-        if (localStorage.getItem('app_deployment_v') !== LATEST_VERSION) {
+        if (localStorage.getItem('clickopticx_app_deployment_v') !== LATEST_VERSION) {
             // Targeted cleanup: Remove UI/Layout state but PRESERVE the core registry and theme settings
             Object.keys(localStorage).forEach(key => {
                 if (key !== 'clickopticx_v16_registry' && key !== 'clickopticx_theme' && key !== 'clickopticx_brand_color') {
                     localStorage.removeItem(key);
                 }
             });
-            localStorage.setItem('app_deployment_v', LATEST_VERSION);
+            localStorage.setItem('clickopticx_app_deployment_v', LATEST_VERSION);
             
             // Clear service workers aggressively
             if ('serviceWorker' in navigator) {

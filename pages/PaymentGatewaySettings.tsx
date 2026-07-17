@@ -12,6 +12,7 @@ import {
    HelpCircle, AlertTriangle, ExternalLink, Play, Activity, Server,
    Copy, Webhook, Wifi, WifiOff, Loader2
 } from 'lucide-react';
+import { getBackendUrl } from '../utils/env';
 
 const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
    const { success: toastSuccess, error: toastError, info: toastInfo } = useToast();
@@ -66,7 +67,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
       setIsTesting(true);
       setTestResult(null);
       try {
-         const baseUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
+         const baseUrl = getBackendUrl();
          const res = await fetch(`${baseUrl}/api/payments/test-gateway`, {
             method: 'POST',
             headers: {
@@ -96,7 +97,7 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
    }, [selectedGateway, toastSuccess, toastError]);
 
    const getWebhookUrl = (gatewayId: string) => {
-      const base = import.meta.env.VITE_BACKEND_URL || 'https://your-backend.com';
+      const base = getBackendUrl();
       return `${base}/api/webhooks/${gatewayId}`;
    };
 

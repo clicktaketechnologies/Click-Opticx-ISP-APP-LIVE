@@ -312,7 +312,7 @@ const InvoiceManagementAdmin: React.FC<Props> = ({ state, onNavigate }) => {
 
       {/* Main Content Area */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col w-full">
-        <div className="overflow-x-auto w-full min-w-full custom-scrollbar">
+        <div className="overflow-x-auto w-full max-w-full custom-scrollbar">
           {activeView === 'invoices' ? (
             <table className="w-full text-left min-w-[1100px]">
               <thead className="bg-slate-50 border-b border-slate-100">

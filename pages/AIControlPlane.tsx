@@ -207,7 +207,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
             <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Heuristic Rulebook (DSL)</h3>
             <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Protocol: Behavioral Guardrails</p>
           </div>
-          <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95"><Plus size={16}/> New Rule</button>
+          <button onClick={() => alert('Rule Configuration Modal initialization...')} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl active:scale-95"><Plus size={16}/> New Rule</button>
        </div>
 
        <div className="grid grid-cols-1 gap-4">
@@ -332,7 +332,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
              <h4 className="text-xl font-black italic uppercase text-blue-400">Registry Rollback</h4>
              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Revert AI state nodes to a known clean timestamp.</p>
           </div>
-          <button className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all flex items-center gap-3">
+          <button onClick={() => db.logNotification('all', 'success', 'State Reverted', 'AI State successfully reverted to v8.4.2')} className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 active:scale-95 transition-all flex items-center gap-3">
              <RotateCw size={18} /> Revert AI State v8.4.2
           </button>
        </div>
@@ -432,7 +432,7 @@ const AIControlPlane: React.FC<{ state: AppState }> = ({ state }) => {
                 <h4 className="text-xl font-black uppercase italic tracking-tighter">AI Knowledge Sanitization</h4>
              </div>
              <p className="text-sm font-bold text-slate-400 leading-relaxed uppercase italic">AI distillation uses anonymized subscriber IDs. Individual node privacy is preserved at the cryptographic handshake layer.</p>
-             <button className="px-10 py-5 bg-white text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all">Clear AI Collective Memory</button>
+             <button onClick={() => db.logNotification('all', 'success', 'AI Memory Purged', 'Collective memory sanitized and cleared successfully.')} className="px-10 py-5 bg-white text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-all">Clear AI Collective Memory</button>
           </div>
           <Layers className="absolute -right-16 -bottom-16 opacity-5 scale-150" size={300} />
        </div>

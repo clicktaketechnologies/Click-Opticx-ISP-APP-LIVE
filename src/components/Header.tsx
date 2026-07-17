@@ -51,24 +51,41 @@ const Header: React.FC<HeaderProps> = ({
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem('clickopticx_theme');
+    if (stored) return stored;
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      root.setAttribute('data-theme', 'dark');
+    } else {
+      root.classList.remove('dark');
+      root.setAttribute('data-theme', 'light');
+    }
+    localStorage.setItem('clickopticx_theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      const stored = localStorage.getItem('clickopticx_theme');
+      if (!stored || stored === 'system') {
+        setTheme(e.matches ? 'dark' : 'light');
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
 
   const toggleTheme = () => {
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-    
-    localStorage.setItem('clickopticx_theme', newTheme);
-    window.dispatchEvent(new StorageEvent('storage', {
-      key: 'clickopticx_theme',
-      newValue: newTheme
-    }));
+    setTheme((prev: string) => prev === 'light' ? 'dark' : 'light');
   };
 
   const getNotifIcon = (type: string) => {

@@ -357,7 +357,7 @@ const RecoveryDashboard: React.FC<{ state: AppState }> = ({ state }) => {
               </div>
            </div>
            
-           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full min-w-full">
+           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full max-w-full">
               <table className="w-full text-left">
                  <thead className="bg-slate-50 border-b">
                     <tr>

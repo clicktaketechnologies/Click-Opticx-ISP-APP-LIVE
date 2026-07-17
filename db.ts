@@ -408,11 +408,46 @@ class DB {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const cloudData = docSnap.data() as Partial<AppState>;
-        this.state = { ...this.state, ...cloudData };
+        const { users: _ignoredUsers, ...restCloudData } = cloudData as any;
+        this.state = { ...this.state, ...restCloudData };
       }
+
+      // Sync users from Supabase (Source of Truth)
+      try {
+        const fetchUsers = async () => {
+          const { data: supabaseUsers, error } = await supabase.from('users').select('*');
+          if (!error && supabaseUsers) {
+             const mappedUsers = supabaseUsers.map(u => ({
+                id: u.id,
+                connectionId: u.raw_data?.connectionId || u.id.substring(0,8),
+                name: u.name,
+                username: u.username || '',
+                email: u.email,
+                phone: u.phone,
+                role: u.role || 'Customer',
+                status: u.status,
+                verification_status: u.verification_status,
+                balance: u.balance || 0,
+                created_at: u.created_at,
+                ...(u.raw_data || {})
+             }));
+             
+             this.state.users = mappedUsers as any;
+             this.notify();
+          }
+        };
+        await fetchUsers();
+        
+        supabase.channel('users-channel')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'users' }, fetchUsers)
+          .subscribe();
+      } catch (err) {
+        console.error("Failed to fetch Supabase users", err);
+      }
+
       onSnapshot(docRef, (snapshot) => {
         if (snapshot.exists()) {
-          const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...persistedData } = snapshot.data() as AppState;
+          const { currentUser, originalAdminUser, isImpersonating, connectionStatus, users: _ignoredUsers2, ...persistedData } = snapshot.data() as any;
           this.state = { ...this.state, ...persistedData };
           this.notify();
         }
@@ -552,11 +587,24 @@ class DB {
       
       if (data?.user) {
         // Authenticated by backend. Ensure user is in local state
+        let dbRole = data.user.user_metadata?.role || Role.CUSTOMER;
+        let dbName = data.user.user_metadata?.full_name || data.user.user_metadata?.name || '';
+        
+        try {
+          const { data: profile } = await supabase.from('users').select('role, name').eq('id', data.user.id).single();
+          if (profile) {
+            if (profile.role) dbRole = profile.role;
+            if (profile.name) dbName = profile.name;
+          }
+        } catch (err) {
+          console.warn('[DB.login] Could not fetch profile from public.users', err);
+        }
+
         const apiUser = {
           id: data.user.id,
           email: data.user.email,
-          name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || '',
-          role: data.user.user_metadata?.role || Role.CUSTOMER,
+          name: dbName,
+          role: dbRole,
         };
         const existsLocally = this.state.users.find(u => u.id === apiUser.id);
         if (!existsLocally && (!apiUser.role || apiUser.role === 'Customer')) {
@@ -696,20 +744,38 @@ class DB {
   }
 
   async saveAudienceSegment(s: Partial<AudienceSegment>) {
-    const id = s.id || 'SEG-' + Date.now();
-    const idx = this.state.audienceSegments.findIndex(x => x.id === id);
-    const data = { ...s, id, subscriberCount: this.calculateSegmentSize(s.filters) } as AudienceSegment;
-    if (idx !== -1) this.state.audienceSegments[idx] = data;
-    else this.state.audienceSegments.push(data);
-    await this.commit();
-    return { success: true, data };
+    try {
+      const id = s.id || 'SEG-' + Date.now();
+      const idx = this.state.audienceSegments.findIndex(x => x.id === id);
+      const data = { ...s, id, subscriberCount: this.calculateSegmentSize(s.filters) } as AudienceSegment;
+      if (idx !== -1) this.state.audienceSegments[idx] = data;
+      else this.state.audienceSegments.push(data);
+      await this.commit();
+      return { success: true, data };
+    } catch (e: any) {
+      console.error("Failed to save audience segment:", e);
+      throw new Error(`Failed to save audience segment: ${e.message}`);
+    }
   }
 
   private calculateSegmentSize(filters: any) {
     if (!filters) return this.state.users.length;
     return this.state.users.filter(u => {
-      if (filters.status && u.status !== filters.status) return false;
-      if (filters.creditScore && filters.creditScore.$lt && u.creditScore >= filters.creditScore.$lt) return false;
+      for (const key of Object.keys(filters)) {
+        const filterVal = filters[key];
+        const userVal = (u as any)[key];
+
+        if (typeof filterVal === 'object' && filterVal !== null) {
+          if (filterVal.$lt !== undefined && userVal >= filterVal.$lt) return false;
+          if (filterVal.$gt !== undefined && userVal <= filterVal.$gt) return false;
+          if (filterVal.$eq !== undefined && userVal !== filterVal.$eq) return false;
+          if (filterVal.$ne !== undefined && userVal === filterVal.$ne) return false;
+          if (filterVal.$in !== undefined && Array.isArray(filterVal.$in) && !filterVal.$in.includes(userVal)) return false;
+          if (filterVal.$nin !== undefined && Array.isArray(filterVal.$nin) && filterVal.$nin.includes(userVal)) return false;
+        } else {
+           if (userVal !== filterVal) return false;
+        }
+      }
       return true;
     }).length;
   }
@@ -732,9 +798,23 @@ class DB {
     setTimeout(async () => {
       camp.status = 'Completed';
       camp.sentAt = new Date().toISOString();
-      camp.stats.sent = this.state.audienceSegments.find(s => s.id === camp.segmentId)?.subscriberCount || 100;
+      const audienceSize = this.state.audienceSegments.find(s => s.id === camp.segmentId)?.subscriberCount || 100;
+      camp.stats.sent = audienceSize;
+      
+      const log: DeliveryLog = {
+        id: 'LOG-' + Date.now(),
+        userId: 'SYSTEM',
+        userName: `Audience: ${camp.segmentId}`,
+        type: 'Email',
+        channel: 'Email',
+        status: 'Delivered',
+        timestamp: new Date().toISOString(),
+        triggerSource: 'Campaign'
+      };
+      this.state.deliveryLogs.unshift(log);
+
       await this.commit();
-      this.logNotification('all', 'success', 'Campaign Dispatched', `Email campaign "${camp.name}" has been successfully sent.`);
+      this.logNotification('all', 'success', 'Campaign Dispatched', `Email campaign "${camp.name}" has been successfully sent to ${audienceSize} subscribers.`);
     }, 2000);
   }
 
@@ -748,20 +828,35 @@ class DB {
   }
 
   async sendPushNotification(target: string, msg: string, priority: 'normal' | 'critical') {
-    const log: DeliveryLog = {
-      id: 'LOG-' + Date.now(),
-      userId: target === 'all' ? 'SYSTEM' : target,
-      userName: target === 'all' ? 'All Users' : (this.state.users.find(u => u.id === target)?.name || 'Unknown'),
-      type: 'Push',
-      channel: 'In-App/Web',
-      status: 'Delivered',
-      timestamp: new Date().toISOString(),
-      triggerSource: 'Manual'
-    };
-    this.state.deliveryLogs.unshift(log);
-    if (target === 'all') this.state.users.forEach(u => this.logNotification(u.id, 'info', 'Broadcast', msg));
-    else this.logNotification(target, priority === 'critical' ? 'error' : 'info', 'Alert', msg);
-    await this.commit();
+    try {
+      if (!target || !msg) throw new Error("Target and message are required.");
+
+      const log: DeliveryLog = {
+        id: 'LOG-' + Date.now(),
+        userId: target === 'all' ? 'SYSTEM' : target,
+        userName: target === 'all' ? 'All Users' : (this.state.users.find(u => u.id === target)?.name || 'Unknown'),
+        type: 'Push',
+        channel: 'In-App/Web',
+        status: 'Delivered',
+        timestamp: new Date().toISOString(),
+        triggerSource: 'Manual'
+      };
+      this.state.deliveryLogs.unshift(log);
+      
+      if (target === 'all') {
+        this.state.users.forEach(u => this.logNotification(u.id, 'info', 'Broadcast', msg));
+      } else {
+        const userExists = this.state.users.some(u => u.id === target);
+        if (!userExists) throw new Error("Target user not found.");
+        this.logNotification(target, priority === 'critical' ? 'error' : 'info', 'Alert', msg);
+      }
+      
+      await this.commit();
+      return { success: true };
+    } catch (e: any) {
+      console.error("Failed to send push notification:", e);
+      throw new Error(`Failed to send push notification: ${e.message}`);
+    }
   }
 
   logNotification(targetId: string, type: 'success' | 'warning' | 'info' | 'error', title: string, message: string) {
@@ -1715,6 +1810,18 @@ class DB {
   async verifyResetCode(userId: string, code: string) { return { success: true, valid: true }; }
   async verifySMTP(config: any) { console.log('[SMTP] Verifying config'); return { success: true, message: 'SMTP connection verified' }; }
   async vsolWifiChange(userId: string, newPassword: string) { const u = this.state.users.find((u: any) => u.id === userId); if (u) { (u as any).wifiPassword = newPassword; await this.commit(); } return { success: true }; }
+
+  async toggleAIKillSwitch(active: boolean) {
+    this.state.settings.aiConfig.killSwitchActive = active;
+    await this.commit();
+    return { success: true, message: 'Kill switch toggled' };
+  }
+
+  async updateAIConfig(config: AIConfig) {
+    this.state.settings.aiConfig = { ...this.state.settings.aiConfig, ...config };
+    await this.commit();
+    return { success: true, message: 'AI Config updated' };
+  }
 
   getSocket() { return this.socket; }
 }

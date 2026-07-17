@@ -58,6 +58,8 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
   // Personnel State
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('All');
+  const [statusFilter, setStatusFilter] = useState<string>('All');
+  const [selectedStaff, setSelectedStaff] = useState<string[]>([]);
   const [isStaffModalOpen, setIsStaffModalOpen] = useState(false);
   const [editingStaff, setEditingStaff] = useState<any | null>(null);
   const [showPass, setShowPass] = useState(false);
@@ -80,9 +82,10 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
       const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.email.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRole = roleFilter === 'All' || s.role === roleFilter;
-      return matchesSearch && matchesRole;
+      const matchesStatus = statusFilter === 'All' || s.status === statusFilter;
+      return matchesSearch && matchesRole && matchesStatus;
     });
-  }, [state.staff, searchTerm, roleFilter]);
+  }, [state.staff, searchTerm, roleFilter, statusFilter]);
 
   const assignedStaffForRole = useMemo(() => {
     return (state.staff || []).filter(s => s.role === selectedRole);
@@ -143,6 +146,13 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
   const toggleStaffStatus = (email: string, currentStatus: string) => {
     const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
     db.updateStaff(email, { status: newStatus as 'Active' | 'Suspended' });
+  };
+
+  const handleBulkStatusUpdate = (newStatus: 'Active' | 'Suspended') => {
+    selectedStaff.forEach(email => {
+      db.updateStaff(email, { status: newStatus });
+    });
+    setSelectedStaff([]);
   };
 
   const handleTogglePermission = (moduleId: string, action: 'can_view' | 'can_edit' | 'can_delete', role: string) => {
@@ -245,7 +255,52 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
                 {state.roles.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
+            <div className="relative flex-1">
+              <Activity className="absolute left-5 top-1/2 -translate-y-1/2 text-indigo-400" size={18} />
+              <select
+                className="w-full pl-14 pr-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all text-xs font-black text-slate-700 appearance-none uppercase tracking-[0.2em]"
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value)}
+              >
+                <option value="All">All Statuses</option>
+                <option value="Active">Active Nodes</option>
+                <option value="Suspended">Suspended Nodes</option>
+              </select>
+            </div>
           </div>
+
+          {/* BULK ACTIONS BAR */}
+          {selectedStaff.length > 0 && (
+            <div className="flex items-center justify-between bg-indigo-50 border border-indigo-100 p-4 rounded-2xl animate-in slide-in-from-top-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-black text-xs shadow-sm">
+                  {selectedStaff.length}
+                </div>
+                <span className="text-sm font-black text-indigo-900 uppercase tracking-widest hidden sm:inline">Identities Selected</span>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleBulkStatusUpdate('Active')}
+                  className="px-4 sm:px-6 py-2.5 bg-white text-emerald-600 border border-emerald-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-50 transition-all shadow-sm flex items-center gap-2"
+                >
+                  <Unlock size={14} className="hidden sm:inline" /> Activate
+                </button>
+                <button
+                  onClick={() => handleBulkStatusUpdate('Suspended')}
+                  className="px-4 sm:px-6 py-2.5 bg-white text-rose-600 border border-rose-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-rose-50 transition-all shadow-sm flex items-center gap-2"
+                >
+                  <Lock size={14} className="hidden sm:inline" /> Suspend
+                </button>
+                <button
+                  onClick={() => setSelectedStaff([])}
+                  className="p-2.5 bg-white text-slate-400 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm"
+                  title="Clear selection"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* PERSONNEL CARDS */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -253,8 +308,24 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
               <div key={member.email} className={`bg-white rounded-[3rem] border-2 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 relative overflow-hidden group ${member.status === 'Suspended' ? 'border-rose-100 bg-rose-50/20' : 'border-slate-50'}`}>
                 <div className="p-8 space-y-6">
                   <div className="flex justify-between items-start relative z-10">
-                    <div className={`w-20 h-20 rounded-3xl flex items-center justify-center font-black text-3xl shadow-inner border-2 transition-all duration-500 group-hover:rotate-6 ${member.status === 'Suspended' ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-indigo-50 border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white'}`}>
-                      {member.name.charAt(0)}
+                    <div className="flex items-start gap-4">
+                      <div className="pt-2">
+                        <input
+                          type="checkbox"
+                          className="w-5 h-5 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          checked={selectedStaff.includes(member.email)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedStaff(prev => [...prev, member.email]);
+                            } else {
+                              setSelectedStaff(prev => prev.filter(email => email !== member.email));
+                            }
+                          }}
+                        />
+                      </div>
+                      <div className={`w-20 h-20 rounded-3xl flex items-center justify-center font-black text-3xl shadow-inner border-2 transition-all duration-500 group-hover:rotate-6 ${member.status === 'Suspended' ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-indigo-50 border-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white'}`}>
+                        {member.name.charAt(0)}
+                      </div>
                     </div>
                     <div className="text-right">
                       <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest mb-2 border ${member.status === 'Active' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
@@ -441,51 +512,69 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
                                 </div>
                               </div>
                             </td>
-                            <td className="px-12 py-10">
-                              <div className="flex items-center justify-center gap-1.5 bg-slate-50/50 p-2 rounded-[2rem] border border-slate-100/50 w-fit mx-auto shadow-inner">
+                            <td className="px-4 py-6 sm:px-12 sm:py-10">
+                              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-1.5 bg-slate-50/50 p-2 rounded-[2rem] border border-slate-100/50 w-fit mx-auto shadow-inner">
                                 <button
                                   onClick={() => handleTogglePermission(moduleId, 'can_view', selectedRole)}
                                   disabled={isSuperAdmin}
                                   className={`
-                                    w-14 h-12 rounded-2xl flex items-center justify-center transition-all border
+                                    w-14 h-12 rounded-2xl flex items-center justify-center transition-all border relative group/tooltip
                                     ${isSuperAdmin || canView
                                       ? 'bg-blue-500 text-white border-blue-500/20 shadow-lg shadow-blue-500/30'
                                       : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-100'
                                     }
+                                    ${isSuperAdmin ? 'cursor-not-allowed opacity-80' : ''}
                                   `}
-                                  title="View Permission"
+                                  title={isSuperAdmin ? "Super Admin permissions cannot be modified" : "View Permission"}
                                 >
                                   {isSuperAdmin ? <Check size={16} /> : (canView ? <Check size={16} /> : <X size={16} />)}
+                                  {isSuperAdmin && (
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max p-2 bg-slate-900 text-white text-[9px] uppercase tracking-widest font-bold rounded-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-50 pointer-events-none">
+                                      Immutable
+                                    </div>
+                                  )}
                                 </button>
                                 
                                 <button
                                   onClick={() => handleTogglePermission(moduleId, 'can_edit', selectedRole)}
                                   disabled={isSuperAdmin}
                                   className={`
-                                    w-14 h-12 rounded-2xl flex items-center justify-center transition-all border
+                                    w-14 h-12 rounded-2xl flex items-center justify-center transition-all border relative group/tooltip
                                     ${isSuperAdmin || canEdit
                                       ? 'bg-indigo-500 text-white border-indigo-500/20 shadow-lg shadow-indigo-500/30'
                                       : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-100'
                                     }
+                                    ${isSuperAdmin ? 'cursor-not-allowed opacity-80' : ''}
                                   `}
-                                  title="Edit Permission"
+                                  title={isSuperAdmin ? "Super Admin permissions cannot be modified" : "Edit Permission"}
                                 >
                                   {isSuperAdmin ? <Check size={16} /> : (canEdit ? <Check size={16} /> : <X size={16} />)}
+                                  {isSuperAdmin && (
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max p-2 bg-slate-900 text-white text-[9px] uppercase tracking-widest font-bold rounded-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-50 pointer-events-none">
+                                      Immutable
+                                    </div>
+                                  )}
                                 </button>
 
                                 <button
                                   onClick={() => handleTogglePermission(moduleId, 'can_delete', selectedRole)}
                                   disabled={isSuperAdmin}
                                   className={`
-                                    w-14 h-12 rounded-2xl flex items-center justify-center transition-all border
+                                    w-14 h-12 rounded-2xl flex items-center justify-center transition-all border relative group/tooltip
                                     ${isSuperAdmin || canDelete
                                       ? 'bg-rose-500 text-white border-rose-500/20 shadow-lg shadow-rose-500/30'
                                       : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-100'
                                     }
+                                    ${isSuperAdmin ? 'cursor-not-allowed opacity-80' : ''}
                                   `}
-                                  title="Delete Permission"
+                                  title={isSuperAdmin ? "Super Admin permissions cannot be modified" : "Delete Permission"}
                                 >
                                   {isSuperAdmin ? <Check size={16} /> : (canDelete ? <Check size={16} /> : <X size={16} />)}
+                                  {isSuperAdmin && (
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max p-2 bg-slate-900 text-white text-[9px] uppercase tracking-widest font-bold rounded-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all z-50 pointer-events-none">
+                                      Immutable
+                                    </div>
+                                  )}
                                 </button>
                               </div>
                             </td>
@@ -592,7 +681,8 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
                   className="w-full pl-12 pr-14 py-5 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-black text-slate-900 focus:ring-4 focus:ring-indigo-500/10 transition-all text-lg tracking-widest" 
                   value={formData.password} 
                   onChange={e => setFormData({ ...formData, password: e.target.value })} 
-                  placeholder="••••••••" 
+                  placeholder="Enter access secret"
+                  aria-label="Access Secret Password"
                 />
                 <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-300 hover:text-indigo-600 transition-colors">
                   {showPass ? <EyeOff size={22} /> : <Eye size={22} />}

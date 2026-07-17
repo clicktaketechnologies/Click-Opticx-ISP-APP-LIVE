@@ -649,7 +649,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
            <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] italic">ClickOptix Registry Core • v9.5.4</p>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full min-w-full">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto w-full max-w-full">
           <table className="w-full min-w-[1200px] text-sm">
             <thead>
               <tr className="!bg-slate-50 !border-b-2 !border-slate-100">

@@ -38,6 +38,12 @@ const EmailControlCenter: React.FC<Props> = ({ state }) => {
   const [newDomainName, setNewDomainName] = useState('');
   const [selectedDomain, setSelectedDomain] = useState<any>(null);
 
+  // Push Notification State
+  const [pushTarget, setPushTarget] = useState('');
+  const [pushPriority, setPushPriority] = useState('normal');
+  const [pushMessage, setPushMessage] = useState('');
+  const [pushSending, setPushSending] = useState(false);
+
   // ─── Data Fetching ──────────────────────────────────────────────────────────
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -734,14 +740,214 @@ const EmailControlCenter: React.FC<Props> = ({ state }) => {
         </div>
       )}
 
-      {/* Pages 4-9: Placeholder logic with premium aesthetics */}
-      {['campaigns', 'push', 'audiences', 'logs', 'monitor', 'master'].includes(activeTab) && activeTab !== 'monitor' && activeTab !== 'master' && (
-        <div className="flex flex-col items-center justify-center h-[50vh] animate-in zoom-in-95">
-            <div className="w-24 h-24 rounded-3xl bg-blue-500/10 flex items-center justify-center text-blue-500 animate-pulse mb-8">
-                <Command size={48} />
+      {activeTab === 'campaigns' && (
+        <div className="space-y-8 animate-in slide-in-from-bottom-4">
+            <div className="bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm">
+                <div className="flex justify-between items-start mb-10">
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Campaign Orchestrator</h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Manage email marketing and broadcast campaigns</p>
+                    </div>
+                    <button className="flex items-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-200"
+                        onClick={() => {
+                            const name = prompt("Campaign Name?");
+                            const subject = prompt("Subject?");
+                            if (name && subject) {
+                                db.saveEmailCampaign({ name, subject, status: 'Draft', type: 'One-Time', templateId: state.emailTemplates[0]?.id || '', segmentId: state.audienceSegments[0]?.id || '', senderName: 'CO ISP', senderEmail: 'noreply@clickopticx.com' });
+                            }
+                        }}>
+                        <Plus size={18}/> New Campaign
+                    </button>
+                </div>
+
+                <div className="space-y-4">
+                    {state.emailCampaigns?.map((c: any) => (
+                        <div key={c.id} className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center group hover:bg-white hover:shadow-xl transition-all">
+                            <div className="flex gap-4 items-center">
+                                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"><Send size={20}/></div>
+                                <div>
+                                    <h4 className="text-sm font-black text-slate-900 uppercase italic">{c.name}</h4>
+                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Type: {c.type} • Status: {c.status}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                                    c.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-500' :
+                                    c.status === 'Sending' ? 'bg-amber-500/10 text-amber-500' :
+                                    'bg-slate-200 text-slate-600'
+                                }`}>{c.status}</span>
+                                {c.status === 'Draft' && (
+                                    <button onClick={() => db.sendCampaign(c.id)} className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-all">
+                                        <PlayCircle size={16} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                    {(!state.emailCampaigns || state.emailCampaigns.length === 0) && (
+                        <p className="text-sm text-slate-400 italic text-center py-8">No campaigns created yet.</p>
+                    )}
+                </div>
             </div>
-            <h3 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">{activeTab.replace('_', ' ')} Module</h3>
-            <p className="text-slate-500 font-bold uppercase text-[10px] tracking-[0.4em] mt-2">Provisioning in Progress • Phase 2 Deploy</p>
+        </div>
+      )}
+
+      {activeTab === 'push' && (
+        <div className="bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm animate-in slide-in-from-bottom-4">
+            <div className="flex justify-between items-start mb-10">
+                <div>
+                    <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Push Dispatch Center</h2>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Send real-time mobile push notifications</p>
+                </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4 md:col-span-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Target Device / User ID</label>
+                    <input 
+                        value={pushTarget}
+                        onChange={(e) => setPushTarget(e.target.value)}
+                        placeholder="e.g. USR-12345 or 'All'" 
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none" 
+                        disabled={pushSending}
+                    />
+                </div>
+                <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Priority</label>
+                    <select 
+                        value={pushPriority}
+                        onChange={(e) => setPushPriority(e.target.value)}
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-bold outline-none"
+                        disabled={pushSending}
+                    >
+                        <option value="normal">Normal</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div className="md:col-span-2 space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Notification Message</label>
+                    <textarea 
+                        value={pushMessage}
+                        onChange={(e) => setPushMessage(e.target.value)}
+                        rows={4} 
+                        placeholder="Enter your push notification message..." 
+                        className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm outline-none resize-none" 
+                        disabled={pushSending}
+                    />
+                </div>
+                <div className="md:col-span-2 flex justify-end">
+                    <button 
+                       onClick={async () => {
+                           if (!pushTarget || !pushMessage) return alert("Please fill all fields");
+                           setPushSending(true);
+                           try {
+                               await db.sendPushNotification(pushTarget, pushMessage, pushPriority as any);
+                               alert('Push Notification Sent!');
+                               setPushMessage('');
+                           } catch (e: any) { 
+                               alert(e.message); 
+                           } finally {
+                               setPushSending(false);
+                           }
+                       }}
+                       disabled={pushSending || !pushTarget || !pushMessage}
+                       className="flex items-center gap-2 px-8 py-4 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl disabled:opacity-50"
+                    >
+                        {pushSending ? (
+                            <>
+                                <Mini5GMicroLoader color="#fff" />
+                                Sending...
+                            </>
+                        ) : (
+                            'Send Push Notification'
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
+
+      {activeTab === 'audiences' && (
+        <div className="space-y-8 animate-in slide-in-from-bottom-4">
+            <div className="bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm">
+                <div className="flex justify-between items-start mb-10">
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Audience Segments</h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Manage subscriber targeting segments</p>
+                    </div>
+                    <button className="flex items-center gap-3 px-8 py-4 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-200"
+                        onClick={() => {
+                            const name = prompt("Segment Name?");
+                            const description = prompt("Description?");
+                            if (name && description) {
+                                db.saveAudienceSegment({ name, description, filters: {} });
+                            }
+                        }}>
+                        <Plus size={18}/> New Segment
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {state.audienceSegments?.map((s: any) => (
+                        <div key={s.id} className="p-6 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-xl transition-all">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"><Users size={20}/></div>
+                                <span className="px-3 py-1 bg-slate-200 text-slate-600 rounded-full text-[8px] font-black uppercase tracking-widest">
+                                    {s.subscriberCount} Subscribers
+                                </span>
+                            </div>
+                            <h4 className="text-lg font-black text-slate-900 uppercase italic">{s.name}</h4>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2">{s.description}</p>
+                        </div>
+                    ))}
+                    {(!state.audienceSegments || state.audienceSegments.length === 0) && (
+                        <p className="text-sm text-slate-400 italic py-8">No audience segments defined.</p>
+                    )}
+                </div>
+            </div>
+        </div>
+      )}
+
+      {activeTab === 'logs' && (
+        <div className="space-y-8 animate-in slide-in-from-bottom-4">
+            <div className="bg-white rounded-[3rem] border border-slate-100 p-10 shadow-sm">
+                <div className="flex justify-between items-start mb-10">
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900 uppercase italic tracking-tighter">Delivery Logs</h2>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Audit trail for all communications</p>
+                    </div>
+                </div>
+
+                <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2">
+                    {state.deliveryLogs?.slice().reverse().map((l: any) => (
+                        <div key={l.id} className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
+                            <div className="flex gap-4 items-center">
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                    l.channel === 'Email' ? 'bg-blue-100 text-blue-600' :
+                                    l.channel === 'Push' ? 'bg-indigo-100 text-indigo-600' :
+                                    'bg-slate-200 text-slate-600'
+                                }`}>
+                                    {l.channel === 'Email' ? <Mail size={16}/> : l.channel === 'Push' ? <Smartphone size={16}/> : <MessageSquare size={16}/>}
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-black text-slate-900 uppercase">{l.target}</h4>
+                                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">{new Date(l.timestamp).toLocaleString()}</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                                <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                                    l.status === 'Delivered' ? 'bg-emerald-500/10 text-emerald-500' :
+                                    l.status === 'Failed' ? 'bg-red-500/10 text-red-500' :
+                                    'bg-amber-500/10 text-amber-500'
+                                }`}>{l.status}</span>
+                                {l.provider && <span className="text-[8px] text-slate-400 uppercase font-bold tracking-widest">{l.provider}</span>}
+                            </div>
+                        </div>
+                    ))}
+                    {(!state.deliveryLogs || state.deliveryLogs.length === 0) && (
+                        <p className="text-sm text-slate-400 italic text-center py-8">No delivery logs found.</p>
+                    )}
+                </div>
+            </div>
         </div>
       )}
     </div>

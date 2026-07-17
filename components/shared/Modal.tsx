@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X, CheckCircle, AlertTriangle, XCircle, Info, Loader2, Trash2, Shield, ArrowRight
 } from 'lucide-react';
@@ -132,12 +133,12 @@ export const Modal: React.FC<ModalProps> = ({
       const lastElement = focusable[focusable.length - 1] as HTMLElement;
 
       if (e.shiftKey) {
-        if (document.activeElement === firstElement) {
+        if (document.activeElement === firstElement || !modalRef.current?.contains(document.activeElement)) {
           e.preventDefault();
           lastElement.focus();
         }
       } else {
-        if (document.activeElement === lastElement) {
+        if (document.activeElement === lastElement || !modalRef.current?.contains(document.activeElement)) {
           e.preventDefault();
           firstElement.focus();
         }
@@ -170,7 +171,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   const showDefaultFooter = !footer && (onConfirm || type === 'confirm' || type === 'danger');
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
@@ -182,6 +183,7 @@ export const Modal: React.FC<ModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
+        aria-describedby={message ? "modal-message" : undefined}
         tabIndex={-1}
         className={`modal relative w-full mx-4 ${maxWidth} rounded-[2rem] flex flex-col shadow-2xl transition-all duration-200 overflow-hidden bg-white border border-slate-100 outline-none`}
         style={{
@@ -221,7 +223,7 @@ export const Modal: React.FC<ModalProps> = ({
           style={{ minHeight: 0, maxHeight: '80vh' }}
         >
           {message && (
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed mb-6 italic border-l-2 border-blue-500 pl-4">{message}</p>
+            <p id="modal-message" className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed mb-6 italic border-l-2 border-blue-500 pl-4">{message}</p>
           )}
           {children}
         </div>
@@ -277,7 +279,8 @@ export const Modal: React.FC<ModalProps> = ({
           to   { opacity: 1; transform: scale(1); }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 };
 

@@ -571,7 +571,7 @@ const renderApp = () => {
       const defaultPath = getDefaultPathForRole(userRole);
       
       // Let SuperAdmins access any path, otherwise strict check against allowedRoutes
-      const isSuperAdmin = ['superadmin', 'admin'].includes(userRole.toLowerCase().replace(/\s/g, ''));
+      const isSuperAdmin = ['superadmin', 'admin'].includes(userRole.toLowerCase().replace(/[_\s]/g, ''));
       const isPathInRoutes = canRoleAccessPath(userRole, location.pathname);
       const pathAllowed = isSuperAdmin || isPathInRoutes;
 

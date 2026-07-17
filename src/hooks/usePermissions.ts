@@ -11,7 +11,7 @@ export const usePermissions = (state: AppState) => {
   const permissions = state.permissions || [];
 
   // Robust check for SuperAdmin or Admin (Case-insensitive, Handles spaces)
-  const isSuperAdmin = ['superadmin', 'admin'].includes(role.toLowerCase().replace(/\s/g, ''));
+  const isSuperAdmin = ['superadmin', 'admin'].includes(role.toLowerCase().replace(/[_\s]/g, ''));
 
   if (isSuperAdmin) {
     console.log(`[PERMISSIONS] Administrative role "${role}" detected — Granting total access.`);
