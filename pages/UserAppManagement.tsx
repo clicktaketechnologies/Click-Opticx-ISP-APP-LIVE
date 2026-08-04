@@ -381,7 +381,7 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
                {/* GLOBAL FEATURES */}
                <div className="bg-slate-900 rounded-[3rem] p-10 text-white space-y-10 shadow-2xl relative overflow-hidden">
                   <div className="relative z-10">
-                     <h3 className="text-xl font-black uppercase tracking-tighter italic leading-none">Global Scope Matrix</h3>
+                     <h3 className="text-xl font-black uppercase tracking-tighter italic leading-none">Global Access Control</h3>
                      <p className="text-[9px] text-slate-500 font-black uppercase mt-2 tracking-widest">Master Switches for App Modules</p>
                   </div>
 

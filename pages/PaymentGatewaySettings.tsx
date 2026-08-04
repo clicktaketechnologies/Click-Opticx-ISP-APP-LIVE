@@ -157,6 +157,14 @@ const PaymentGatewaySettings: React.FC<{ state: AppState }> = ({ state }) => {
                         {getGatewayIcon(gateway.id)}
                      </div>
                      <div className="flex items-center gap-3">
+                        {gateway.type !== 'offline' && (
+                           <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${
+                              !gateway.enabled ? 'bg-red-50 text-red-600 border border-red-100' :
+                              gateway.sandbox ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
+                           }`}>
+                              {!gateway.enabled ? '🔴 Disconnected' : gateway.sandbox ? '🟡 Sandbox' : '🟢 Production'}
+                           </div>
+                        )}
                         <div className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest ${gateway.enabled ? 'bg-green-50 text-green-600' : 'bg-slate-200 text-slate-500'}`}>
                            {gateway.enabled ? 'Operational' : 'Disabled'}
                         </div>

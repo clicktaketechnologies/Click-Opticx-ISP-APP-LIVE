@@ -209,7 +209,7 @@ const GovernanceDesk: React.FC<{ state: AppState }> = ({ state }) => {
               onClick={() => setActiveView('governance')}
               className={`flex items-center gap-3 px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${activeView === 'governance' ? 'bg-white text-indigo-600 shadow-xl' : 'text-slate-500 hover:text-slate-700'}`}
             >
-              <ShieldAlert size={16} /> Scope Matrix
+              <ShieldAlert size={16} /> Access Control
             </button>
           </div>
           {activeView === 'personnel' ? (

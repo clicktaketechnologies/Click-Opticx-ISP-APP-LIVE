@@ -208,7 +208,7 @@ const Sidebar: React.FC<SidebarProps> = ({ current, onNavigate, role, onLogout, 
       title: 'Staff & Roles',
       items: [
         { id: 'staff', label: 'Staff Management', icon: ShieldAlert },
-        { id: 'permissions', label: 'Roles & Permissions', icon: ShieldCheck },
+        { id: 'permissions', label: 'Access Control', icon: ShieldCheck },
       ]
     },
     {
