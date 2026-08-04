@@ -538,7 +538,9 @@ class DB {
   async login(credential: string, pass: string, rememberMe?: boolean) {
     const input = credential.toLowerCase().trim();
     if (!input || !pass) return { success: false, message: 'Identity required for lookup.' };
-    const staff = this.state.staff.find(s => s.email.toLowerCase() === input && s.password === pass);
+    const staff = this.state.staff.find(s =>
+      (((s.email || '').toLowerCase() === input || (s.username || '').toLowerCase() === input) && s.password === pass)
+    );
     if (staff) {
       this.state.currentUser = staff;
       this.state.auth = {
@@ -555,8 +557,8 @@ class DB {
     const user = this.state.users.find(u => !u.deleted && (
       (u.username || '').toLowerCase() === input ||
       (u.email || '').toLowerCase() === input ||
-      u.phone === input ||
-      u.connectionId === input
+      (u.phone || '').toString() === input ||
+      (u.connectionId || '').toString().toLowerCase() === input
     ) && u.password === pass);
     if (user) {
       this.state.currentUser = { ...user, role: Role.CUSTOMER };
@@ -595,9 +597,25 @@ class DB {
           if (profile) {
             if (profile.role) dbRole = profile.role;
             if (profile.name) dbName = profile.name;
+          } else {
+            // Try staff table
+            const { data: staffProfile } = await supabase.from('staff').select('role, name').eq('id', data.user.id).single();
+            if (staffProfile) {
+              if (staffProfile.role) dbRole = staffProfile.role;
+              if (staffProfile.name) dbName = staffProfile.name;
+            }
           }
         } catch (err) {
-          console.warn('[DB.login] Could not fetch profile from public.users', err);
+          console.warn('[DB.login] Could not fetch profile from public.users, attempting staff table fallback', err);
+          try {
+            const { data: staffProfile } = await supabase.from('staff').select('role, name').eq('id', data.user.id).single();
+            if (staffProfile) {
+              if (staffProfile.role) dbRole = staffProfile.role;
+              if (staffProfile.name) dbName = staffProfile.name;
+            }
+          } catch (staffErr) {
+            console.warn('[DB.login] Could not fetch profile from staff table either', staffErr);
+          }
         }
 
         const apiUser = {
@@ -606,9 +624,17 @@ class DB {
           name: dbName,
           role: dbRole,
         };
-        const existsLocally = this.state.users.find(u => u.id === apiUser.id);
-        if (!existsLocally && (!apiUser.role || apiUser.role === 'Customer')) {
+        const isStaff = apiUser.role && apiUser.role !== 'Customer';
+        if (isStaff) {
+          const existsLocallyInStaff = this.state.staff.find(s => s.id === apiUser.id || s.email === apiUser.email);
+          if (!existsLocallyInStaff) {
+            this.state.staff.push({ ...apiUser, status: 'Active' } as any);
+          }
+        } else {
+          const existsLocally = this.state.users.find(u => u.id === apiUser.id);
+          if (!existsLocally) {
             this.state.users.push({ ...apiUser, balance: 0, creditScore: 600, status: 'Active' } as any);
+          }
         }
         
         this.state.currentUser = { ...apiUser, role: apiUser.role || Role.CUSTOMER } as any;
@@ -673,7 +699,7 @@ class DB {
             if (!json.success) {
                 return { success: false, message: json.message || 'Signup failed' };
             }
-            return { success: true, userId: json.userId, message: 'Signup successful. Please verify your email.' };
+            return { success: true, userId: json.userId, message: 'Signup successful (Account handshake complete). Please verify your email.' };
         } catch (error: any) {
             console.error('Signup error:', error);
             return { success: false, message: error.message || 'Signup failed. Please try again.' };
@@ -1287,8 +1313,6 @@ class DB {
     await this.commit();
     return { success: true, message: 'Emergency debt settled.' };
   }
-  async updateAIConfig(c: AIConfig) { this.state.settings.aiConfig = c; await this.commit(); }
-  async toggleAIKillSwitch(active: boolean) { this.state.settings.aiConfig.killSwitchActive = active; await this.commit(); }
   async updateAICallConfig(c: any) { this.state.settings.aiCallConfig = c; await this.commit(); }
   async addCallLog(l: any) { this.state.aiCallLogs.push({ ...l, id: 'CALL_' + Date.now() }); await this.commit(); }
   async addNetworkNode(d: any) { this.state.networkNodes.push({ ...d, id: 'NODE_' + Date.now(), status: 'Connected', lastHeartbeat: new Date().toISOString() }); await this.commit(); return { success: true }; }

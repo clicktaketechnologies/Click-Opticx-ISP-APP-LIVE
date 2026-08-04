@@ -80,6 +80,10 @@ describe('ClickOptix Authentication Logic', () => {
       address: 'Unit Test St'
     };
     
+    globalThis.fetch = vi.fn().mockResolvedValueOnce({
+      json: async () => ({ success: true, userId: 'USR-123' })
+    } as any);
+
     const res = await db.submitSignupRequest(signupData);
     expect(res).toBeDefined();
     expect(res.success).toBe(true);
