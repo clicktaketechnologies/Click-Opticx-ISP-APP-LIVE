@@ -5,6 +5,8 @@ services:
     plan: free
     region: singapore
     rootDir: backend
+    branch: main
+    autoDeploy: true   # backend auto-deploys on every push to main
     buildCommand: npm install
     startCommand: npm start
     envVars:

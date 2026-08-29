@@ -1,0 +1,63 @@
+name: Deploy Frontend (Firebase Hosting)
+
+# Auto-deploys the Vite frontend to Firebase Hosting on every push to main.
+# Backend auto-deploys separately via Render (render.yaml, autoDeploy: true).
+#
+# ONE-TIME SETUP (repo → Settings):
+#   Secrets (Settings → Secrets and variables → Actions → Secrets):
+#     FIREBASE_SERVICE_ACCOUNT  = full service-account JSON with
+#                                 "Firebase Hosting Admin" + "Cloud Datastore" roles
+#     VITE_SUPABASE_ANON_KEY     = Supabase anon key
+#   Variables (same page → Variables tab):
+#     VITE_SUPABASE_URL          = https://YOUR-PROJECT.supabase.co
+#     VITE_BACKEND_URL           = https://click-opticx-isp-app-live.onrender.com
+#     VITE_SUPABASE_REDIRECT_URL = https://isp-click-opticx.web.app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-deploy
+  cancel-in-progress: false
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build production bundle
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_BACKEND_URL: ${{ vars.VITE_BACKEND_URL }}
+          VITE_SUPABASE_REDIRECT_URL: ${{ vars.VITE_SUPABASE_REDIRECT_URL }}
+
+      - name: Deploy to Firebase Hosting (live)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          projectId: ap-click-opticx
+
+      - name: Deploy locked-down Firestore rules
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/sa.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json
+          npx --yes firebase-tools@latest deploy --only firestore:rules --project ap-click-opticx --force
+        env:
+          CI: 'true'

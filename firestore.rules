@@ -1,8 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // SECURITY FIX: the previous rules ("allow read, write: if true") exposed the
+    // entire registry — including staff records and passwords — to the public and
+    // let any visitor overwrite the whole master_state document.
+    //
+    // The backend uses the Firebase Admin SDK, which BYPASSES these rules, so all
+    // server-side mirror reads/writes keep working unchanged. Browser clients get
+    // read-only access to public, non-sensitive config only.
+    match /registry/master_state {
+      // Public branding/packages/settings needed to render the login screen.
+      // NOTE: staff/user arrays must not be stored in this document anymore.
+      allow read: if true;
+      allow write: if false; // admin SDK only
+    }
+
+    // Everything else is denied for web clients by default.
     match /{document=**} {
-      allow read, write: if true; 
+      allow read, write: if false;
     }
   }
 }

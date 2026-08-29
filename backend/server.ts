@@ -49,6 +49,9 @@ const __dirname = dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 
+// Render sits behind a reverse proxy — required for correct req.ip (rate limiting + session IP binding)
+app.set('trust proxy', 1);
+
 // Initialize Directories
 const uploadDir = path.join(__dirname, 'uploads/kyc');
 const tempDir = path.join(__dirname, 'uploads/temp');
@@ -103,20 +106,27 @@ configManager.init().then(async () => {
 });
 
 // --- Middleware ---
-const allowedOrigins = [
-    'https://isp-click-opticx.web.app',
-    'https://isp-click-opticx.firebaseapp.com',
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'http://localhost:4173'
-];
+const allowedOrigins = (
+    (process.env.ALLOWED_ORIGINS || '').split(',').map((o: string) => o.trim()).filter(Boolean).length > 0
+        ? (process.env.ALLOWED_ORIGINS || '').split(',').map((o: string) => o.trim()).filter(Boolean)
+        : [
+            'https://isp-click-opticx.web.app',
+            'https://isp-click-opticx.firebaseapp.com',
+            'http://localhost:3000',
+            'http://localhost:5173',
+            'http://localhost:4173'
+        ]
+);
 
+// Security headers (helmet was previously imported but never enabled)
+app.use(helmet());
 app.use(cors({ 
     origin: (origin: any, callback: any) => {
+        // Allow non-browser clients (health checks, server-to-server) which send no Origin header
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            callback(null, false); // reject silently instead of throwing a 500
         }
     }, 
     credentials: true 
@@ -127,15 +137,15 @@ app.use(express.json({
     }
 }));
 
-// --- IMMEDIATE AUTH PATH (Before Limiter) ---
-app.use('/api/auth', authRoutes);
-
+// --- GLOBAL RATE LIMITER ---
+// NOTE: must run BEFORE auth routes. Previously /api/auth was mounted ahead of this
+// limiter, letting login/signup/reset requests bypass rate limiting entirely.
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 300,
     skip: (req: any) => req.method === 'OPTIONS'
 });
-app.use('/api/', limiter);
+app.use('/', limiter);
 
 // --- API Versioning (v1) ---
 const apiV1 = express.Router();
@@ -179,10 +189,16 @@ apiV1.use((err: any, req: any, res: any, next: any) => {
     });
 });
 
+// Single mount point — /api/auth previously got mounted twice with different middleware chains
 app.use('/api/v1', apiV1);
 app.use('/api', apiV1);
 
 app.get('/', (req: any, res: any) => res.json({ status: 'Operational', recovery: true }));
+
+// 404 catch-all for unknown routes
+app.use((req: any, res: any) => {
+    res.status(404).json({ success: false, error: 'NOT_FOUND', message: `Route ${req.method} ${req.originalUrl} does not exist.` });
+});
 
 const PORT = Number(process.env.PORT) || 5000;
 server.listen(PORT, '0.0.0.0', () => {

@@ -12,6 +12,49 @@ import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
+// ─── Shared helpers ───────────────────────────────────────────────────────────
+
+/** Get the configured Supabase admin client or fail with a clear 503. */
+function getClient() {
+    return configManager.requireSupabaseClient();
+}
+
+/** JWT signing secret — never fall back to a static value committed to source. */
+function getJwtSecret() {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+        logger.error('[AUTH] JWT_SECRET env var is NOT set! Sessions will be invalidated on every restart. Set it in backend/.env');
+        return crypto.randomBytes(32).toString('hex'); // random per-process fallback: fail-closed for attackers, degraded UX only
+    }
+    return secret;
+}
+
+/**
+ * Strip sensitive fields before returning a user/staff row to any client.
+ * Previously the login/verify endpoints returned the FULL row including the
+ * bcrypt password hash, OTP hashes and refresh-session tokens.
+ */
+function sanitizeUser(user) {
+    if (!user) return user;
+    const { password, raw_data, ...safe } = user;
+    if (raw_data && typeof raw_data === 'object') {
+        safe.raw_data = {
+            connectionId: raw_data.connectionId,
+            address: raw_data.address,
+            area: raw_data.area,
+            cnic: raw_data.cnic,
+            packageId: raw_data.packageId,
+            verificationCode: raw_data.verificationCode
+                ? { verified: !!raw_data.verificationCode.verified, expiresAt: raw_data.verificationCode.expiresAt }
+                : undefined
+        };
+    }
+    return safe;
+}
+
+/** Cookie options shared by all auth cookie writes — cross-site (Firebase Hosting → Render) requires SameSite=None; Secure. */
+const COOKIE_OPTS = { httpOnly: true, secure: true, sameSite: 'none' };
+
 // Timeout helper for Supabase calls
 const timeoutPromise = (promise, ms) => {
   return new Promise((resolve, reject) => {
@@ -49,6 +92,14 @@ const loginSchema = z.object({
   password: z.string().min(1, "Password is required")
 });
 
+const resetPasswordSchema = z.object({
+  newPassword: z.string()
+    .min(8, "Password must be at least 8 characters long")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^a-zA-Z0-9]/, "Password must contain at least one symbol")
+});
+
 // Login attempts tracker (in-memory rate limiter)
 const loginAttempts = new Map();
 
@@ -77,8 +128,8 @@ const isFirebaseWriteEnabled = () => process.env.FIREBASE_MODE !== 'readonly';
 export const signup = async (req, res) => {
     try {
         logger.info(`[SIGNUP] Attempt for: ${req.body?.email || req.body?.username}`);
+        const supabase = getClient();
         
-        // 1. Zod Validation
         const validation = signupSchema.safeParse(req.body);
         if (!validation.success) {
             const firstError = validation.error.issues[0];
@@ -91,7 +142,6 @@ export const signup = async (req, res) => {
         }
 
         const { name, username, email, phone, password, role = 'Customer', ...otherData } = req.body;
-        const supabase = configManager.getSupabaseClient();
         
         // 2. Supabase Duplicate Check
         const orConditions = [];
@@ -212,14 +262,16 @@ export const signup = async (req, res) => {
             });
         }
 
-        // 7. Send Verification OTP Email (Resend API with 3Ã— retry + Gmail SMTP fallback)
+        // 7. Send Verification OTP Email (Resend API with 3x retry + Gmail SMTP fallback)
         if (email) {
-            // Development Testability Hook â€” write OTP to file for local testing
-            try {
-                fs.writeFileSync(path.join(process.cwd(), 'latest_otp.txt'), otpCode);
-                logger.info(`[TEST-HOOK] Wrote latest signup OTP ${otpCode} to latest_otp.txt`);
-            } catch (e) {
-                logger.warn(`[TEST-HOOK] Failed to write OTP file: ${e.message}`);
+            // Development-only testability hook — OTPs must NEVER be written to disk in production
+            if (process.env.NODE_ENV !== 'production') {
+                try {
+                    fs.writeFileSync(path.join(process.cwd(), 'latest_otp.txt'), otpCode);
+                    logger.info(`[TEST-HOOK] Wrote latest signup OTP ${otpCode} to latest_otp.txt`);
+                } catch (e) {
+                    logger.warn(`[TEST-HOOK] Failed to write OTP file: ${e.message}`);
+                }
             }
 
             const emailHtml = `
@@ -294,7 +346,7 @@ export const signup = async (req, res) => {
         });
     } catch (error) {
         logger.error(`[SIGNUP] Error: ${error.message}`, { stack: error.stack });
-        res.status(500).json({ success: false, error: 'INTERNAL_ERROR', message: error.message || 'Internal Server Error' });
+        res.status(error.status || 500).json({ success: false, error: error.code || 'INTERNAL_ERROR', message: error.message || 'Internal Server Error' });
     }
 };
 
@@ -313,7 +365,7 @@ export const login = async (req, res) => {
         }
 
         const { identifier, password } = req.body;
-        const supabase = configManager.getSupabaseClient();
+        const supabase = getClient();
 
         // 2. Rate Limiting Check
         const attempts = getLoginAttemptCount(identifier);
@@ -323,25 +375,6 @@ export const login = async (req, res) => {
                 error: 'RATE_LIMITED', 
                 message: 'Too many failed login attempts. Please try again in 15 minutes.' 
             });
-        }
-
-        // Admin hardcoded fallback
-        const adminEmail = 'admin@clickopticx.com';
-        const adminPass = 'Click@Opticx2026';
-        if (identifier.toLowerCase() === adminEmail && (password === adminPass || password === 'superpass')) {
-            const adminUser = {
-                id: 'STAFF-ADMIN',
-                name: 'System Administrator',
-                email: adminEmail,
-                role: 'SuperAdmin',
-            };
-            const token = jwt.sign({ id: adminUser.id, role: adminUser.role }, process.env.JWT_SECRET || 'secret', { expiresIn: '15m' });
-            const refreshToken = crypto.randomUUID();
-
-            res.cookie('accessToken', token, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: 15 * 60 * 1000 });
-            res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
-
-            return res.json({ success: true, token, user: adminUser });
         }
 
         // 3. User Lookup
@@ -381,6 +414,24 @@ export const login = async (req, res) => {
                  if (authResult && authResult.user) {
                      isAuthenticated = true;
                      authSession = authResult;
+
+                     // Hash convergence: keep the local DB hash in sync with Supabase Auth
+                     // so a password changed via Supabase recovery stops working with an old local hash.
+                     try {
+                         const hashMatches = user.password
+                             ? await bcrypt.compare(password, user.password).catch(() => false)
+                             : false;
+                         if (!hashMatches) {
+                             const rehash = await bcrypt.hash(password, 10);
+                             await supabase.from((user.role && user.role !== 'Customer') ? 'staff' : 'users')
+                                 .update({ password: rehash })
+                                 .eq('id', user.id);
+                             user.password = rehash;
+                             logger.info(`[LOGIN] Local hash re-synced from Supabase Auth for ${user.id}`);
+                         }
+                     } catch (convErr) {
+                         logger.warn(`[LOGIN] Hash convergence skipped: ${convErr.message}`);
+                     }
                  }
              } catch (authError) {
                  logger.warn(`[LOGIN] Supabase Auth signIn failed for ${user.email}: ${authError.message}`);
@@ -405,9 +456,8 @@ export const login = async (req, res) => {
                      }
                  } else if (user.password.startsWith('$2a$') || user.password.startsWith('$2b$') || user.password.startsWith('$2y$')) {
                      isAuthenticated = await bcrypt.compare(password, user.password);
-                 } else if (user.password === password) {
-                     isAuthenticated = true;
                  }
+                 // SECURITY: plaintext comparison fallback removed — passwords are only accepted via hash verification or Supabase Auth.
              } catch (pwdErr) {
                  logger.warn(`[LOGIN] Password hash check failed: ${pwdErr.message}`);
              }
@@ -482,7 +532,7 @@ export const login = async (req, res) => {
         // 6. Double Cookies + IP & Fingerprint Bindings
         const token = jwt.sign(
             { id: user.id, role: user.role },
-            process.env.JWT_SECRET || 'secret',
+            getJwtSecret(),
             { expiresIn: '15m' }
         );
 
@@ -507,9 +557,9 @@ export const login = async (req, res) => {
         const targetTable = (user.role && user.role !== 'Customer') ? 'staff' : 'users';
         await supabase.from(targetTable).update({ raw_data: updatedRawData }).eq('id', user.id);
 
-        // Emit cookies
-        res.cookie('accessToken', token, { httpOnly: true, secure: true, sameSite: 'none', maxAge: 15 * 60 * 1000 });
-        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true, sameSite: 'none', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        // Emit cookies — SameSite=None + Secure is required for the cross-site Firebase Hosting → Render flow
+        res.cookie('accessToken', token, { ...COOKIE_OPTS, maxAge: 15 * 60 * 1000 });
+        res.cookie('refreshToken', refreshToken, { ...COOKIE_OPTS, maxAge: 7 * 24 * 60 * 60 * 1000 });
 
         // Audit Log
         try {
@@ -532,12 +582,39 @@ export const login = async (req, res) => {
             logger.warn(`[AUDIT-LOG] Failed to write login log: ${logErr.message}`);
         }
 
-        res.json({ success: true, token, user });
+        // SECURITY: never return the password hash, OTP hashes or refresh tokens to the client
+        res.json({ success: true, token, user: sanitizeUser(user) });
     } catch (error) {
         logger.error(`[LOGIN] Error: ${error.message}`);
-        res.status(500).json({ success: false, error: 'INTERNAL_ERROR', message: error.message });
+        res.status(error.status || 500).json({ success: false, error: error.code || 'INTERNAL_ERROR', message: error.message });
     }
 };
+
+// OTP brute-force protection (6-digit code = 1M combinations, so cap attempts per user)
+const otpAttempts = new Map();
+function trackOtpAttempt(userId) {
+    const now = Date.now();
+    const attempts = (otpAttempts.get(userId) || []).filter(t => now - t < 15 * 60 * 1000);
+    attempts.push(now);
+    otpAttempts.set(userId, attempts);
+    return attempts.length;
+}
+function clearOtpAttempts(userId) {
+    otpAttempts.delete(userId);
+}
+// Periodically purge stale entries so the Maps do not grow unbounded
+setInterval(() => {
+    const now = Date.now();
+    const cutoff = 15 * 60 * 1000;
+    for (const [k, v] of loginAttempts) {
+        const recent = v.filter(t => now - t < cutoff);
+        if (recent.length === 0) loginAttempts.delete(k); else loginAttempts.set(k, recent);
+    }
+    for (const [k, v] of otpAttempts) {
+        const recent = v.filter(t => now - t < cutoff);
+        if (recent.length === 0) otpAttempts.delete(k); else otpAttempts.set(k, recent);
+    }
+}, 10 * 60 * 1000).unref();
 
 export const verifyOtp = async (req, res) => {
     try {
@@ -550,7 +627,11 @@ export const verifyOtp = async (req, res) => {
             });
         }
 
-        const supabase = configManager.getSupabaseClient();
+        if (trackOtpAttempt(userId) > 8) {
+            return res.status(429).json({ success: false, error: 'RATE_LIMITED', message: 'Too many OTP attempts. Please request a new code in 15 minutes.' });
+        }
+
+        const supabase = getClient();
         const { data: user, error } = await supabase.from('users').select('*').eq('id', userId).maybeSingle();
 
         if (error || !user) {
@@ -572,6 +653,8 @@ export const verifyOtp = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ success: false, error: 'INVALID_OTP', message: 'Invalid verification code. Please check again.' });
         }
+
+        clearOtpAttempts(userId);
 
         // Update database
         const updatedRawData = { ...user.raw_data };
@@ -633,7 +716,7 @@ export const resendOtp = async (req, res) => {
             });
         }
 
-        const supabase = configManager.getSupabaseClient();
+        const supabase = getClient();
         const { data: user, error } = await supabase
             .from('users')
             .select('*')
@@ -720,27 +803,54 @@ export const resendOtp = async (req, res) => {
 
 export const socialHandshake = async (req, res) => {
     try {
-        const { email, phone, name, provider } = req.body;
-        const supabase = configManager.getSupabaseClient();
-        
+        const { email, phone, name, provider, accessToken } = req.body;
+        const supabase = getClient();
+
         logger.info(`[SOCIAL-HANDSHAKE] Verification for: ${email || phone} via ${provider}`);
-        
+
+        // SECURITY FIX: this endpoint previously issued a valid session JWT for ANY
+        // email/phone with zero proof of identity (complete account-takeover vector).
+        // The client must now present a Supabase OAuth access token issued by a real
+        // social sign-in, and that token is verified server-side before anything else.
+        if (!accessToken) {
+            return res.status(401).json({
+                success: false,
+                error: 'OAUTH_TOKEN_REQUIRED',
+                message: 'A valid OAuth access token from the social provider sign-in is required.'
+            });
+        }
+
+        const { data: tokenData, error: tokenError } = await supabase.auth.getUser(accessToken);
+        if (tokenError || !tokenData?.user) {
+            return res.status(401).json({
+                success: false,
+                error: 'OAUTH_TOKEN_INVALID',
+                message: 'Social sign-in token is invalid or expired.'
+            });
+        }
+        const verifiedEmail = tokenData.user.email;
+        const verifiedPhone = tokenData.user.phone;
+
+        // Only use identity attributes that the provider actually verified
+        const safeEmail = verifiedEmail || null;
+        const safePhone = verifiedPhone || phone || null;
+
          let { data: user } = await timeoutPromise(
            supabase
              .from('users')
              .select('*')
-             .or(`email.eq.${email},phone.eq.${phone}`)
+             .or([safeEmail ? `email.eq.${safeEmail}` : null, safePhone ? `phone.eq.${safePhone}` : null].filter(Boolean).join(',') || 'id.is.null')
              .maybeSingle(),
            10000 // 10 seconds timeout
          );
 
          if (!user) {
-             const userId = crypto.randomUUID();
+             const userId = tokenData.user.id; // reuse the OAuth identity UUID
              user = {
                  id: userId,
-                 name,
-                 email,
-                 phone,
+                 name: name || tokenData.user.user_metadata?.full_name || safeEmail,
+                 email: safeEmail,
+                 phone: safePhone,
                  role: 'Customer',
                  status: 'Active',
                  verification_status: 'Verified',
@@ -756,11 +866,11 @@ export const socialHandshake = async (req, res) => {
 
         const token = jwt.sign(
             { id: user.id, role: user.role },
-            process.env.JWT_SECRET || 'secret',
+            getJwtSecret(),
             { expiresIn: '7d' }
         );
 
-        res.json({ success: true, token, user });
+        res.json({ success: true, token, user: sanitizeUser(user) });
     } catch (error) {
         logger.error(`[SOCIAL-HANDSHAKE] Error: ${error.message}`);
         res.status(500).json({ success: false, error: 'INTERNAL_ERROR', message: error.message });
@@ -770,7 +880,7 @@ export const socialHandshake = async (req, res) => {
 export const forgotPassword = async (req, res) => {
     try {
         const { email } = req.body;
-        const supabase = configManager.getSupabaseClient();
+        const supabase = getClient();
 
         // Check if user exists in public.users or staff
         let { data: user } = await supabase.from('users').select('id, name').eq('email', email).maybeSingle();
@@ -856,36 +966,74 @@ export const forgotPassword = async (req, res) => {
 
 export const completeReset = async (req, res) => {
     try {
-        const { token, newPassword, userId } = req.body;
-        const supabase = configManager.getSupabaseClient();
+        const { token, newPassword, userId, supabaseAccessToken } = req.body;
+        const supabase = getClient();
 
-        let targetId = userId;
+        // SECURITY FIX: this endpoint previously accepted the magic strings
+        // 'BIOMETRIC_APPROVED' / 'SUPABASE_RECOVERY' plus a bare userId — allowing
+        // anyone to reset ANY account's password. Identity must now come from one of:
+        //   1. a valid Supabase recovery session access token (sent by the reset page
+        //      after the user clicks the email link), or
+        //   2. a signed JWT issued by this backend with type === 'password_reset'.
+        // Magic-string tokens are no longer honoured, and the target user is always
+        // derived from the verified identity (never from a client-supplied userId).
 
-        // If legacy token is provided, decode it to get user ID
-        if (token && token !== 'BIOMETRIC_APPROVED' && token !== 'SUPABASE_RECOVERY') {
+        if (!newPassword) {
+            return res.status(400).json({ success: false, error: 'VALIDATION_ERROR', message: 'New password is required.' });
+        }
+
+        const pwCheck = resetPasswordSchema.safeParse({ newPassword });
+        if (!pwCheck.success) {
+            return res.status(400).json({
+                success: false,
+                error: 'WEAK_PASSWORD',
+                message: pwCheck.error.issues[0].message
+            });
+        }
+
+        let targetId = null;
+        let verifiedEmail = null;
+
+        // Path 1: Supabase recovery session (preferred — used by /reset-password page)
+        if (supabaseAccessToken) {
+            const { data: tokenData, error: tokenError } = await supabase.auth.getUser(supabaseAccessToken);
+            if (tokenError || !tokenData?.user) {
+                return res.status(401).json({ success: false, error: 'INVALID_TOKEN', message: 'Recovery session is invalid or expired.' });
+            }
+            targetId = tokenData.user.id;
+            verifiedEmail = tokenData.user.email;
+        }
+
+        // Path 2: backend-issued password-reset JWT
+        if (!targetId && token) {
             try {
-                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+                const decoded = jwt.verify(token, getJwtSecret());
+                if (decoded.type !== 'password_reset') {
+                    return res.status(401).json({ success: false, error: 'INVALID_TOKEN', message: 'Invalid reset token type.' });
+                }
                 targetId = decoded.id;
+                verifiedEmail = decoded.email || null;
             } catch (err) {
-                // Ignore and fallback to userId
+                return res.status(401).json({ success: false, error: 'INVALID_TOKEN', message: 'Invalid or expired reset token.' });
             }
         }
 
-        if (!targetId) {
-            return res.status(400).json({ success: false, error: 'USER_ID_REQUIRED', message: 'Identity context missing.' });
+        if (!targetId && !verifiedEmail) {
+            return res.status(401).json({ success: false, error: 'IDENTITY_REQUIRED', message: 'A verified recovery identity is required to reset a password.' });
         }
 
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-        let isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
+        let isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId || '');
         let matchColumn = isUuid ? 'id' : 'email';
+        let matchValue = isUuid ? targetId : verifiedEmail;
 
         let { data: userUpdateData, error } = await timeoutPromise(
           supabase
             .from('users')
             .update({ password: hashedPassword })
-            .eq(matchColumn, targetId)
-            .select('email'),
+            .eq(matchColumn, matchValue)
+            .select('id, email'),
           10000 // 10 seconds timeout
         );
 
@@ -896,8 +1044,8 @@ export const completeReset = async (req, res) => {
               supabase
                 .from('staff')
                 .update({ password: hashedPassword })
-                .eq(matchColumn, targetId)
-                .select('email'),
+                .eq(matchColumn, matchValue)
+                .select('id, email'),
               10000 // 10 seconds timeout
             );
             
@@ -907,7 +1055,26 @@ export const completeReset = async (req, res) => {
             if (error) throw error;
         }
 
-        logger.info(`[RESET-COMPLETE] Password rotated locally for user: ${targetId}`);
+        if (!user) {
+            return res.status(404).json({ success: false, error: 'USER_NOT_FOUND', message: 'No account matches the verified identity.' });
+        }
+
+        // Keep Supabase Auth credentials in sync so BOTH passwords never diverge
+        try {
+            await supabase.auth.admin.updateUserById(user.id, { password: newPassword });
+        } catch (syncErr) {
+            logger.warn(`[RESET-COMPLETE] Supabase Auth password sync failed for ${user.id}: ${syncErr.message}`);
+        }
+
+        // Revoke all existing refresh sessions after a reset
+        try {
+            const { data: victim } = await supabase.from('users').select('raw_data').eq('id', user.id).maybeSingle();
+            if (victim) {
+                await supabase.from('users').update({ raw_data: { ...(victim.raw_data || {}), sessions: [] } }).eq('id', user.id);
+            }
+        } catch (e) { /* non-fatal */ }
+
+        logger.info(`[RESET-COMPLETE] Password rotated for user: ${user.id}`);
         res.json({ success: true, message: 'Password updated successfully.' });
     } catch (error) {
         logger.error(`[RESET-COMPLETE] Error: ${error.message}`);
@@ -920,12 +1087,12 @@ export const loginAs = async (req, res) => {
         const { token } = req.body;
         if (!token) return res.status(400).json({ success: false, error: 'TOKEN_REQUIRED', message: 'Token required' });
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const decoded = jwt.verify(token, getJwtSecret());
         if (decoded.scope !== 'user_only') {
             return res.status(403).json({ success: false, error: 'INVALID_SCOPE', message: 'Invalid token scope' });
         }
 
-        const supabase = configManager.getSupabaseClient();
+        const supabase = getClient();
         const { data: user } = await supabase.from('users').select('*').eq('id', decoded.id).maybeSingle();
 
         if (!user) return res.status(404).json({ success: false, error: 'USER_NOT_FOUND', message: 'User not found' });
@@ -952,7 +1119,7 @@ export const refreshToken = async (req, res) => {
         if (cookieHeader) {
             cookieHeader.split(';').forEach(cookie => {
                 let parts = cookie.split('=');
-                cookies[parts.shift().trim()] = decodeURI(parts.join('='));
+                cookies[parts.shift().trim()] = decodeURIComponent(parts.join('='));
             });
         }
 
@@ -961,7 +1128,7 @@ export const refreshToken = async (req, res) => {
             return res.status(401).json({ success: false, error: 'NO_REFRESH_TOKEN', message: 'No refresh token provided.' });
         }
 
-        const supabase = configManager.getSupabaseClient();
+        const supabase = getClient();
         
         let userId = req.body.userId;
         if (!userId) {
@@ -972,7 +1139,7 @@ export const refreshToken = async (req, res) => {
             }
             if (oldToken) {
                 try {
-                    const decoded = jwt.verify(oldToken, process.env.JWT_SECRET || 'secret', { ignoreExpiration: true });
+                    const decoded = jwt.verify(oldToken, getJwtSecret(), { ignoreExpiration: true });
                     userId = decoded.id;
                 } catch (e) {
                     // ignore
@@ -1019,7 +1186,7 @@ export const refreshToken = async (req, res) => {
             return res.status(403).json({ success: false, error: 'DEVICE_MISMATCH', message: 'Session binding violation. Device/IP mismatch detected during token refresh.' });
         }
 
-        const newToken = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET || 'secret', { expiresIn: '15m' });
+        const newToken = jwt.sign({ id: user.id, role: user.role }, getJwtSecret(), { expiresIn: '15m' });
         res.cookie('accessToken', newToken, { httpOnly: true, secure: true, sameSite: 'none', maxAge: 15 * 60 * 1000 });
 
         logger.info('[TOKEN-REFRESH] Rotated access token via httpOnly cookie for: ' + user.id);
@@ -1036,7 +1203,7 @@ export const logout = async (req, res) => {
         // Clear sessions from database
         const userId = req.user?.id;
         if (userId) {
-            const supabase = configManager.getSupabaseClient();
+            const supabase = getClient();
             let { data: user } = await supabase.from('users').select('raw_data').eq('id', userId).maybeSingle();
             if (user) {
                 const updatedRawData = { ...user.raw_data, sessions: [] };
@@ -1064,10 +1231,10 @@ export const verifyEmail = async (req, res) => {
         const { token } = req.query;
         if (!token) return res.status(400).json({ success: false, error: 'TOKEN_REQUIRED', message: 'Verification token required' });
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const decoded = jwt.verify(token, getJwtSecret());
         if (decoded.type !== 'email_verification') throw new Error('Invalid token type');
 
-        const supabase = configManager.getSupabaseClient();
+        const supabase = getClient();
         
          const { error } = await timeoutPromise(
            supabase
@@ -1101,7 +1268,7 @@ export const verifyEmail = async (req, res) => {
 export const checkVerificationStatus = async (req, res) => {
     try {
         const { userId } = req.query;
-        const supabase = configManager.getSupabaseClient();
+        const supabase = getClient();
          const { data: user } = await timeoutPromise(
            supabase.from('users').select('status').eq('id', userId).maybeSingle(),
            10000 // 10 seconds timeout
@@ -1133,7 +1300,7 @@ export const changePassword = async (req, res) => {
             return res.status(400).json({ success: false, error: 'WEAK_NEW_PASSWORD', message: 'Password must be at least 8 characters, and contain at least one uppercase letter, one number, and one symbol.' });
         }
 
-        const supabase = configManager.getSupabaseClient();
+        const supabase = getClient();
         
         // Find user
         let userTable = 'users';
@@ -1172,6 +1339,16 @@ export const changePassword = async (req, res) => {
             return res.status(500).json({ success: false, error: 'NETWORK_ERROR', message: 'Database update failed' });
         }
 
+        // Keep Supabase Auth credentials in sync (previously only the local hash was
+        // rotated, so the OLD password kept working through Supabase Auth sign-in)
+        if (user.email) {
+            try {
+                await supabase.auth.admin.updateUserById(userId, { password: newPassword });
+            } catch (syncErr) {
+                logger.warn(`[CHANGE-PASSWORD] Supabase Auth password sync failed for ${userId}: ${syncErr.message}`);
+            }
+        }
+
         // Write Audit Log
         try {
             const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
@@ -1203,7 +1380,7 @@ export const verifySession = async (req, res) => {
         if (cookieHeader) {
             cookieHeader.split(';').forEach(cookie => {
                 let parts = cookie.split('=');
-                cookies[parts.shift().trim()] = decodeURI(parts.join('='));
+                cookies[parts.shift().trim()] = decodeURIComponent(parts.join('='));
             });
         }
 
@@ -1217,9 +1394,9 @@ export const verifySession = async (req, res) => {
             return res.status(401).json({ success: false, error: 'NOT_AUTHENTICATED', message: 'Not authenticated' });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const decoded = jwt.verify(token, getJwtSecret());
         
-        const supabase = configManager.getSupabaseClient();
+        const supabase = getClient();
         let { data: user } = await supabase.from('users').select('*').eq('id', decoded.id).maybeSingle();
         
         if (!user) {
@@ -1230,9 +1407,12 @@ export const verifySession = async (req, res) => {
         if (!user) return res.status(404).json({ success: false, error: 'USER_NOT_FOUND', message: 'User not found' });
 
         // Session Binding Security Verification
+        // FIX: this is a GET route — req.body is undefined on GET requests without a
+        // body parser, and the old `req.body.fingerprint` access threw a TypeError,
+        // making EVERY /verify call fail with 401. Read fingerprint safely.
         const ip = req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-        const ipHash = crypto.createHash('sha256').update(ip).digest('hex');
-        const fingerprint = req.headers['x-device-fingerprint'] || req.body.fingerprint || 'unknown';
+        const ipHash = crypto.createHash('sha256').update(String(ip)).digest('hex');
+        const fingerprint = req.headers['x-device-fingerprint'] || (req.body && req.body.fingerprint) || 'unknown';
 
          if (user.raw_data?.sessions && user.raw_data.sessions.length > 0) {
              const activeSessions = user.raw_data.sessions.filter(s => new Date(s.expiresAt).getTime() > Date.now());
@@ -1250,7 +1430,8 @@ export const verifySession = async (req, res) => {
              }
          }
 
-        res.json({ success: true, user });
+        // SECURITY: strip password hash / OTP hashes / refresh tokens before responding
+        res.json({ success: true, user: sanitizeUser(user) });
     } catch (error) {
         res.status(401).json({ success: false, error: 'INVALID_SESSION', message: 'Invalid session' });
     }

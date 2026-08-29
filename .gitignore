@@ -22,3 +22,19 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# ─── Secrets & environment files (NEVER commit) ─────────────────────────────
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# ─── Runtime artifacts with sensitive data ──────────────────────────────────
+latest_otp.txt
+*.pem
+serviceAccount*.json
+firebase-service-account.json
+backend/backups/
+backend/uploads/

@@ -262,6 +262,23 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
              await supabase.from('users').update({ password_updated_at: new Date().toISOString() }).eq('id', userRecord.user.id);
          }
 
+         // Converge the backend DB hash with the new Supabase Auth password so the
+         // old password stops working on every login path (Supabase + local hash).
+         try {
+            const { data: sessionData } = await supabase.auth.getSession();
+            const accessToken = sessionData?.session?.access_token;
+            if (accessToken) {
+               await fetch(`${db.getBackendUrl()}/api/auth/complete-reset`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ supabaseAccessToken: accessToken, newPassword })
+               });
+            }
+         } catch (syncErr) {
+            console.warn('[RESET] Backend hash sync skipped:', syncErr);
+         }
+
          setIsProcessing(false);
          setView('login');
          setError(null);

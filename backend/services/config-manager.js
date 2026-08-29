@@ -14,10 +14,15 @@ const listeners = {};
 // ─── Initialize ───────────────────────────────────────────────────────────────
 export async function init() {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  // Accept both common spellings so local setups following older docs still work
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.warn('[CONFIG-MGR] Supabase env vars missing. Config manager disabled.');
+    console.warn(
+      '[CONFIG-MGR] Supabase env vars missing (need SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY). ' +
+      'All /api/auth/* and DB-backed endpoints will fail until these are set. ' +
+      'See backend/.env.example.'
+    );
     initialized = true;
     return;
   }
@@ -135,6 +140,22 @@ export async function testProvider(providerType, providerId) {
 }
 
 export function isReady() { return initialized; }
-export function getSupabaseClient() { return supabase; }
+export function getSupabaseClient() {
+  if (!supabase) {
+    console.warn('[CONFIG-MGR] getSupabaseClient() called but Supabase is not initialized — check SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY env vars.');
+  }
+  return supabase;
+}
 
-export default { init, getConfig, getAllConfigs, setConfig, onConfigChange, testProvider, isReady, getSupabaseClient };
+/** Throws a descriptive error when the Supabase admin client is unavailable. */
+export function requireSupabaseClient() {
+  if (!supabase) {
+    const err = new Error('Database client unavailable: SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY env vars are not configured.');
+    err.status = 503;
+    err.code = 'DB_NOT_CONFIGURED';
+    throw err;
+  }
+  return supabase;
+}
+
+export default { init, getConfig, getAllConfigs, setConfig, onConfigChange, testProvider, isReady, getSupabaseClient, requireSupabaseClient };

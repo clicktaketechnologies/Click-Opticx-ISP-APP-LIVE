@@ -157,7 +157,10 @@ const INITIAL_STATE: AppState = {
   },
   users: [],
   staff: [
-    { email: 'admin@clickopticx.com', name: 'System Administrator', role: Role.SUPER_ADMIN, status: 'Active', password: 'superpass', balance: 1000000 },
+    // SECURITY: no plaintext password here. The real Super Admin account lives in
+    // the Supabase 'staff' table (create it via backend/scripts/seed-admin.js) and
+    // authenticates through the backend API.
+    { email: 'admin@clickopticx.com', name: 'System Administrator', role: Role.SUPER_ADMIN, status: 'Active', balance: 1000000 },
   ],
   packages: [
     { id: 'PKG-1', name: 'Home Basic 15M', subtitle: 'Standard Tier', speed: '15 Mbps', uploadSpeed: '10 Mbps', dataLimit: 'Unlimited', price: 1500, taxRate: 15, duration: 30, color: '#3b82f6', isRecommended: true },
@@ -413,24 +416,30 @@ class DB {
       }
 
       // Sync users from Supabase (Source of Truth)
+      // SECURITY: map ONLY non-sensitive fields. select('*') also returns the
+      // bcrypt password hash and raw_data (OTP hashes, refresh tokens) — none of
+      // that may ever reach the browser.
       try {
         const fetchUsers = async () => {
-          const { data: supabaseUsers, error } = await supabase.from('users').select('*');
+          const { data: supabaseUsers, error } = await supabase.from('users').select('id, name, username, email, phone, role, status, verification_status, balance, created_at, raw_data');
           if (!error && supabaseUsers) {
-             const mappedUsers = supabaseUsers.map(u => ({
-                id: u.id,
-                connectionId: u.raw_data?.connectionId || u.id.substring(0,8),
-                name: u.name,
-                username: u.username || '',
-                email: u.email,
-                phone: u.phone,
-                role: u.role || 'Customer',
-                status: u.status,
-                verification_status: u.verification_status,
-                balance: u.balance || 0,
-                created_at: u.created_at,
-                ...(u.raw_data || {})
-             }));
+             const mappedUsers = supabaseUsers.map((u: any) => {
+                const { password: _pw, sessions: _sessions, verificationCode: _otp, ...safeRaw } = (u.raw_data || {});
+                return {
+                   id: u.id,
+                   connectionId: safeRaw.connectionId || String(u.id).substring(0, 8),
+                   name: u.name,
+                   username: u.username || '',
+                   email: u.email,
+                   phone: u.phone,
+                   role: u.role || 'Customer',
+                   status: u.status,
+                   verification_status: u.verification_status,
+                   balance: u.balance || 0,
+                   created_at: u.created_at,
+                   ...safeRaw
+                };
+             });
              
              this.state.users = mappedUsers as any;
              this.notify();
@@ -481,7 +490,10 @@ class DB {
     } catch (e) { }
     if (this.firestore && this.initialized) {
       const docRef = doc(this.firestore, 'registry', 'master_state');
-      const { currentUser, originalAdminUser, isImpersonating, connectionStatus, ...cloudSafeState } = this.state;
+      // SECURITY: never mirror auth-sensitive collections to a publicly-readable
+      // document. Staff/user records (with credentials), audit trails and signup
+      // queues live in Supabase and are served through the authenticated API.
+      const { currentUser, originalAdminUser, isImpersonating, connectionStatus, users, staff, signupRequests, auditLogs, securityLogs, ...cloudSafeState } = this.state;
       await setDoc(docRef, cloudSafeState);
     }
     this.notify();
@@ -538,48 +550,18 @@ class DB {
   async login(credential: string, pass: string, rememberMe?: boolean) {
     const input = credential.toLowerCase().trim();
     if (!input || !pass) return { success: false, message: 'Identity required for lookup.' };
-    const staff = this.state.staff.find(s => s.email.toLowerCase() === input && (
-      s.password === pass || (s.email.toLowerCase() === 'admin@clickopticx.com' && (pass === 'Click@Opticx2026' || pass === 'superpass'))
-    ));
-    if (staff) {
-      this.state.currentUser = staff;
-      this.state.auth = {
-        isLoggedIn: true,
-        id: staff.email,
-        role: staff.role,
-        email: staff.email,
-        name: staff.name,
-        isPersistent: !!rememberMe
-      };
-      await this.commitInternal();
-      return { success: true, user: staff, type: 'staff' };
-    }
-    const user = this.state.users.find(u => !u.deleted && (
-      (u.username || '').toLowerCase() === input ||
-      (u.email || '').toLowerCase() === input ||
-      u.phone === input ||
-      u.connectionId === input
-    ) && u.password === pass);
-    if (user) {
-      this.state.currentUser = { ...user, role: Role.CUSTOMER };
-      this.state.auth = {
-        isLoggedIn: true,
-        id: user.id,
-        role: Role.CUSTOMER,
-        email: user.email,
-        name: user.name,
-        isPersistent: !!rememberMe
-      };
-      await this.commitInternal();
-      return { success: true, user: this.state.currentUser, type: 'customer' };
-    }
 
-    // Attempt backend login as fallback to sync newly registered users
+    // SECURITY FIX: authentication is now performed exclusively by the backend.
+    // Previously this method matched credentials against plaintext passwords held
+    // in the browser registry (including a hardcoded admin backdoor), which meant:
+    //   1. stale local data could silently log users in with old passwords, and
+    //   2. every visitor downloaded the full users table with password material.
     try {
       console.log('[DB.login] Attempting backend API login');
       const res = await fetch(`${this.getBackendUrl()}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // send/receive httpOnly auth cookies (cross-site Render ↔ Firebase)
         body: JSON.stringify({ identifier: input, password: pass })
       });
       
@@ -600,6 +582,9 @@ class DB {
       
       if (json.user) {
         const apiUser = json.user;
+        // Persist the session token for API calls that need a Bearer header
+        try { localStorage.setItem('clickopticx_auth_token', json.token || ''); } catch (e) {}
+
         const existsLocally = this.state.users.find(u => u.id === apiUser.id);
         if (!existsLocally && (!apiUser.role || apiUser.role === 'Customer')) {
             this.state.users.push({ ...apiUser, balance: 0, creditScore: 600, status: 'Active' } as any);
@@ -651,6 +636,7 @@ class DB {
             const res = await fetch(`${this.getBackendUrl()}/api/auth/signup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({
                     name: data.name,
                     username: data.username,
@@ -1799,7 +1785,13 @@ class DB {
   async updateResellerPackageConfig(resellerId: string, config: any) { const u = this.state.users.find((u: any) => u.id === resellerId); if (u) { (u as any).packageConfig = config; await this.commit(); } }
   async uploadBrandingMedia(file: File) { const key = file.name; const data = URL.createObjectURL(file); (this.state as any).branding = (this.state as any).branding || {}; (this.state as any).branding[key] = data; await this.commit(); return { success: true, message: 'Uploaded' }; }
   async verifyAuthProvider(providerId: string) { return { success: true, provider: providerId, verified: true, message: 'Provider verified successfully' }; }
-  async verifyFaceForReset(userId: string, faceData: any) { console.log('[AUTH] Face verification for', userId); return { success: true, match: true }; }
+  async verifyFaceForReset(userId: string, faceData: any) {
+    // SECURITY: this was a stub that ALWAYS returned success, letting any user
+    // reach the reset-finalize step without proving identity. Fail closed until a
+    // real liveness/face-match backend (compare against stored KYC selfie) exists.
+    console.warn('[AUTH] Face verification requested for', userId, '— not implemented; denying.');
+    return { success: false, match: false, message: 'Face verification is currently unavailable. Please use email recovery instead.' };
+  }
   async verifyPhoneCode(phone: string, code: string) { return { success: true, verified: true }; }
   async verifyResetCode(userId: string, code: string) { return { success: true, valid: true }; }
   async verifySMTP(config: any) { console.log('[SMTP] Verifying config'); return { success: true, message: 'SMTP connection verified' }; }
