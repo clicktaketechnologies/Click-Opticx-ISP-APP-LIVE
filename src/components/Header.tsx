@@ -139,7 +139,10 @@ const Header: React.FC<HeaderProps> = ({
           onClick={toggleTheme}
           className="p-2.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 rounded-2xl transition-all border border-transparent hover:border-slate-200 dark:hover:border-white/10"
         >
-          {currentTheme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+          {/* FIX: was 'currentTheme' — an undeclared identifier (ReferenceError that
+              crashed the whole app on load with "System Fault Detected"). The theme
+              state above is the source of truth. */}
+          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
         </button>
 
         {/* Notifications */}
