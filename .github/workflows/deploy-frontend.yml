@@ -59,9 +59,13 @@ jobs:
           channelId: live
           projectId: ap-click-opticx
 
-      # NOTE: needs the service account to hold "Firebase Rules Admin" (or Editor).
-      # Until IAM is updated this must not block the frontend deploy above.
+      # Runs ONLY when repo Variable DEPLOY_FIRESTORE_RULES=true (set it after
+      # granting the service account "Firebase Rules" permissions in GCP IAM).
+      # Skipped (grey) by default so it never blocks or alarms — the frontend
+      # deploy above is the critical step. Rules can also be published manually:
+      # Firebase Console → Firestore Database → Rules.
       - name: Deploy locked-down Firestore rules
+        if: vars.DEPLOY_FIRESTORE_RULES == 'true'
         continue-on-error: true
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_AP_CLICK_OPTICX }}' > /tmp/sa.json
