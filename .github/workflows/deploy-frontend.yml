@@ -59,7 +59,10 @@ jobs:
           channelId: live
           projectId: ap-click-opticx
 
+      # NOTE: needs the service account to hold "Firebase Rules Admin" (or Editor).
+      # Until IAM is updated this must not block the frontend deploy above.
       - name: Deploy locked-down Firestore rules
+        continue-on-error: true
         run: |
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_AP_CLICK_OPTICX }}' > /tmp/sa.json
           export GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json
