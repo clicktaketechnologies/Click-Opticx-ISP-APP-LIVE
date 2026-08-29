@@ -9,6 +9,7 @@ import logger from '../utils/logger.js';
 import paymentRouter from '../modules/payments/payment-router.js';
 import emailRouter from '../modules/email/email-router.js';
 import configManager from '../services/config-manager.js';
+import { protect } from '../middleware/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -101,32 +102,32 @@ router.get('/', async (req, res) => {
     }
 });
 
-// 2. Component: AI Core
-router.get('/ai', async (req, res) => {
+// 2. Component: AI Core — diagnostics are auth-gated (infra detail leak)
+router.get('/ai', protect, async (req, res) => {
     const health = await checkAIHealth();
     res.json(health);
 });
 
-// 3. Component: Cloud DB
-router.get('/db', async (req, res) => {
+// 3. Component: Cloud DB — auth-gated
+router.get('/db', protect, async (req, res) => {
     const health = await checkDBHealth();
     res.json(health);
 });
 
-// 4. Component: Email Gateway
-router.get('/email', async (req, res) => {
+// 4. Component: Email Gateway — auth-gated
+router.get('/email', protect, async (req, res) => {
     const health = await checkEmailHealth();
     res.json(health);
 });
 
-// 5. Component: Fiscal Node (Payments)
-router.get('/payments', async (req, res) => {
+// 5. Component: Fiscal Node (Payments) — auth-gated
+router.get('/payments', protect, async (req, res) => {
     const health = await checkPaymentHealth();
     res.json(health);
 });
 
-// 6. Component: Deployment / CI/CD
-router.get('/deploy', async (req, res) => {
+// 6. Component: Deployment / CI/CD — auth-gated
+router.get('/deploy', protect, async (req, res) => {
     res.json({
         status: 'idle',
         last_build: new Date().toISOString(),
@@ -136,8 +137,8 @@ router.get('/deploy', async (req, res) => {
     });
 });
 
-// GET /api/health-monitor/logs
-router.get('/logs', async (req, res) => {
+// GET /api/health-monitor/logs — LOG CONTENT STREAM, strictly auth-gated
+router.get('/logs', protect, async (req, res) => {
     const logPath = path.join(__dirname, '../logs/combined.log');
     if (!fs.existsSync(logPath)) {
         return res.json({ success: true, logs: [] });

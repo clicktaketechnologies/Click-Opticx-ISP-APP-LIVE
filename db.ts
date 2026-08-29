@@ -865,7 +865,11 @@ class DB {
   }
 
   async addStaff(s: Partial<StaffUser>) {
-    const next = { ...s, status: s.status || 'Active', password: s.password || 'superpass', balance: s.balance || 0 } as StaffUser;
+    // SECURITY FIX: never seed a known default password. If none is provided,
+    // the field is omitted — the account stays unusable until a real password
+    // is set through the admin reset / Supabase Auth flow.
+    const next = { ...s, status: s.status || 'Active', balance: s.balance || 0 } as StaffUser;
+    if (!next.password) delete (next as any).password;
     this.state.staff.push(next);
     await this.commit();
     return { success: true };

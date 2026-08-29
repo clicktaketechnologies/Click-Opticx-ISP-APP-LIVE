@@ -378,10 +378,13 @@ export const login = async (req, res) => {
         }
 
         // 3. User Lookup
+        // SECURITY: strip PostgREST filter metacharacters ( , ( ) ) from the
+        // user-supplied identifier so it cannot alter the .or() filter shape.
+        const safeIdentifier = String(identifier).replace(/[,()\s]/g, '');
         let { data: user, error } = await supabase
             .from('users')
             .select('*')
-            .or(`email.eq.${identifier},username.eq.${identifier},phone.eq.${identifier}`)
+            .or(`email.eq.${safeIdentifier},username.eq.${safeIdentifier},phone.eq.${safeIdentifier}`)
             .maybeSingle();
 
         // Staff Check if not in users

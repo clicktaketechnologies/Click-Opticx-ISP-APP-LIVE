@@ -1,6 +1,7 @@
 import express from 'express';
 import crypto from 'crypto';
 import logger from '../utils/logger.js';
+import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -22,10 +23,10 @@ router.get('/ping', (req, res) => {
 });
 
 /**
- * @route GET /api/speedtest/download
+ * @route GET /api/speedtest/download — auth-gated (bandwidth-abusable)
  * @desc Stream raw binary data for download speed measurement
  */
-router.get('/download', (req, res) => {
+router.get('/download', protect, (req, res) => {
     // Prevent browser caching at all costs
     res.set({
         'Content-Type': 'application/octet-stream',
@@ -40,10 +41,10 @@ router.get('/download', (req, res) => {
 });
 
 /**
- * @route POST /api/speedtest/upload
+ * @route POST /api/speedtest/upload — auth-gated (bandwidth-abusable)
  * @desc Receive chunked data for upload speed measurement
  */
-router.post('/upload', (req, res) => {
+router.post('/upload', protect, (req, res) => {
     let receivedBytes = 0;
 
     req.on('data', (chunk) => {

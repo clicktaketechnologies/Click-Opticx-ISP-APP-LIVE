@@ -9,7 +9,11 @@ export const listUsers = async (req, res) => {
         let query = supabase.from('users').select('*').is('deleted', false);
 
         if (search) {
-            query = query.or(`email.ilike.%${search}%,phone.ilike.%${search}%,name.ilike.%${search}%,username.ilike.%${search}%`);
+            // SECURITY: strip PostgREST filter metacharacters from the search
+            // term so it cannot alter the .or() filter shape (% stays allowed
+            // as a legitimate wildcard).
+            const safeSearch = String(search).replace(/[,()]/g, '');
+            query = query.or(`email.ilike.%${safeSearch}%,phone.ilike.%${safeSearch}%,name.ilike.%${safeSearch}%,username.ilike.%${safeSearch}%`);
         }
         if (status) {
             query = query.eq('status', status);
