@@ -32,11 +32,14 @@ jobs:
           node-version: 22
           cache: npm
 
-      # npm ci breaks on Windows-generated lock files (rollup optional native deps,
-      # npm/cli#4828): "Cannot find module @rollup/rollup-linux-x64-gnu".
-      # npm install resolves the correct platform-specific optional dependencies.
+      # package-lock.json is Windows-generated: its optional-deps resolution omits
+      # linux rollup natives (npm/cli#4828), breaking BOTH npm ci and npm install
+      # ("Cannot find module @rollup/rollup-linux-x64-gnu"). Resolve fresh on the
+      # CI platform instead; local dev keeps its own lock file.
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: |
+          rm -f package-lock.json
+          npm install --legacy-peer-deps --no-audit --no-fund
 
       - name: Build production bundle
         run: npm run build
