@@ -6,11 +6,15 @@ interface LoaderProps {
     size?: number;
     className?: string;
     style?: '5G' | 'Pulse' | 'Orbit';
+    /** Optional accent color override (any CSS color). Applied to icon glyphs and rings. */
+    color?: string;
 }
 
-export const Mini5GMicroLoader: React.FC<LoaderProps> = ({ size = 20, className = '', style: propStyle }) => {
+export const Mini5GMicroLoader: React.FC<LoaderProps> = ({ size = 20, className = '', style: propStyle, color }) => {
     const settings = db.getState().settings;
     const activeStyle = propStyle || settings?.appearance?.loadingStyle || '5G';
+    // When a color override is supplied, drop the hardcoded tint classes so the
+    // explicit color wins (icons use currentColor).
 
     const renderStyle = () => {
         switch (activeStyle) {
@@ -27,8 +31,8 @@ export const Mini5GMicroLoader: React.FC<LoaderProps> = ({ size = 20, className 
                     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
                         <div className="absolute inset-0 border-2 border-dashed border-blue-400/30 rounded-full animate-[spin_10s_linear_infinite]" />
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-fuchsia-500 rounded-full blur-[1px] animate-[bounce_1s_ease-in-out_infinite]" />
-                        <Loader2 size={size * 0.8} className="text-blue-400 animate-spin" />
-                        <Wifi size={size * 0.4} className="absolute text-fuchsia-400" />
+                        <Loader2 size={size * 0.8} style={color ? { color } : undefined} className={color ? 'animate-spin' : 'text-blue-400 animate-spin'} />
+                        <Wifi size={size * 0.4} style={color ? { color } : undefined} className="absolute" />
                     </div>
                 );
             case '5G':
@@ -42,7 +46,7 @@ export const Mini5GMicroLoader: React.FC<LoaderProps> = ({ size = 20, className 
                         
                         {/* 5G Symbol & Core Icon */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <Wifi size={size * 0.45} className="text-fuchsia-400 animate-pulse drop-shadow-[0_0_8px_rgba(217,70,239,0.7)]" />
+                            <Wifi size={size * 0.45} style={color ? { color } : undefined} className={color ? 'animate-pulse drop-shadow-[0_0_8px_rgba(217,70,239,0.7)]' : 'text-fuchsia-400 animate-pulse drop-shadow-[0_0_8px_rgba(217,70,239,0.7)]'} />
                         </div>
                         
                         {/* Label (only for larger sizes) */}

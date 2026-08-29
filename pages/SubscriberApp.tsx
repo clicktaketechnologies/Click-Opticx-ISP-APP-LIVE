@@ -213,7 +213,7 @@ const SubscriberApp: React.FC<{ state: AppState; user: ISPUser; onLogout: () => 
       case 'live-usage': return <LiveUsage user={user} />;
       case 'connected-devices': return <ConnectedDevices user={user} />;
       case 'reset-password': return <ResetDevicePassword user={user} />;
-      case 'speed-test': return <SpeedTestPage />;
+      case 'speed-test': return <SpeedTestPage state={state} />;
       case 'about-us': return <AboutUs state={state} />;
       case 'ai-control': return <AICentralDashboard state={state} />;
       case 'ai-home': return <SubscriberAIHome user={user} state={state} onNavigate={(t) => handleTabChange(t as SubTab)} />;

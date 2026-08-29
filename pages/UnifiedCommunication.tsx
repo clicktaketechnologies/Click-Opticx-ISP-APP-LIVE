@@ -396,7 +396,7 @@ const UnifiedCommunication: React.FC<{ state: AppState }> = ({ state }) => {
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="p-5 bg-white/10 border border-white/20 rounded-2xl text-center">
-                                            <p className="text-2xl font-black">{state.users.filter(u => u.pushToken).length}</p>
+                                            <p className="text-2xl font-black">{state.users.filter(u => u.fcmToken).length}</p>
                                             <p className="text-[9px] font-black uppercase tracking-widest text-white/50 mt-1">Subscribed</p>
                                         </div>
                                         <div className="p-5 bg-white/10 border border-white/20 rounded-2xl text-center">
@@ -507,8 +507,8 @@ const UnifiedCommunication: React.FC<{ state: AppState }> = ({ state }) => {
                                     <Smartphone size={14} className="text-indigo-500" /> Subscribed Device Nodes
                                 </h4>
                                 <div className="space-y-3">
-                                    {state.users.filter(u => u.pushToken).slice(0, 5).length > 0 ? (
-                                        state.users.filter(u => u.pushToken).slice(0, 5).map(u => (
+                                    {state.users.filter(u => u.fcmToken).slice(0, 5).length > 0 ? (
+                                        state.users.filter(u => u.fcmToken).slice(0, 5).map(u => (
                                             <div key={u.id} className="p-5 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-indigo-200 transition-all">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-9 h-9 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center text-xs font-black">{u.name.charAt(0)}</div>

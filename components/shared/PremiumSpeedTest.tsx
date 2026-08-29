@@ -129,7 +129,7 @@ const PremiumSpeedTest: React.FC<Props> = ({ user, onComplete, onClose, classNam
                 <Globe size={20} className="text-[#0ea5e9]" />
                 <div className="flex flex-col">
                     <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">{networkInfo?.isp || 'ISP'}</span>
-                    <span className="text-sm font-bold text-white">{networkInfo?.ip || 'Connecting...'}</span>
+                    <span className="text-sm font-bold text-white">{networkInfo?.publicIp || 'Connecting...'}</span>
                 </div>
             </div>
             <div className="relative group">

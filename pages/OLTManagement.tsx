@@ -435,7 +435,7 @@ const OLTManagement: React.FC<{ state: AppState }> = ({ state }) => {
                   </div>
                   <div className="flex items-center gap-3">
                      <button 
-                        onClick={async () => { (db.state as any).discoveredOnus = []; await (db as any).commit(); }} // Clear local cache (with re-render + persist)
+                        onClick={async () => { await db.clearDiscoveredOnus(); }} // Clear local cache (with re-render + persist)
                         className="px-6 py-4 bg-slate-50 text-slate-400 hover:text-rose-500 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
                      >
                         Clear List

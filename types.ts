@@ -840,7 +840,7 @@ export interface DeliveryLog {
   retryCount?: number;
   timestamp: string;
   campaignId?: string;
-  triggerSource: 'Manual' | 'Automation' | 'System';
+  triggerSource: 'Manual' | 'Automation' | 'System' | 'Campaign';
 }
 
 export type NotificationMasterMode = 'Push_Only' | 'SMS_Only' | 'Push_And_SMS' | 'Auto_Fallback';
