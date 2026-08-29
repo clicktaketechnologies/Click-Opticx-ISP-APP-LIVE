@@ -966,7 +966,7 @@ const UserManagement: React.FC<{ state: AppState; searchTerm?: string; autoOpenA
                             onChange={e => setEditUserData({...editUserData, nasId: e.target.value})}
                           >
                             <option value="">Select NAS</option>
-                            {state.nas.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
+                            {(state.nas || []).map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
                           </select>
                         </div>
 

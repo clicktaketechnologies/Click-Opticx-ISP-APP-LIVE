@@ -13,17 +13,13 @@ import express from 'express';
 import configManager from '../services/config-manager.js';
 import logger from '../utils/logger.js';
 import CryptoService from '../services/cryptoService.js';
+import { protect, restrictTo } from '../middleware/auth.js';
 
 const router = express.Router();
 
-function adminGuard(req, res, next) {
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith('Bearer ')) {
-    return res.status(401).json({ success: false, message: 'Authorization required' });
-  }
-  // Simplified guard for provider configuration
-  next();
-}
+// SECURITY FIX: the previous "adminGuard" accepted ANY 'Bearer <anything>' header.
+// All gateway/email-provider/mapping endpoints now require a verified admin JWT.
+const adminGuard = [protect, restrictTo('SuperAdmin', 'Admin', 'FinanceAdmin')];
 
 // ─── Payment Gateways ────────────────────────────────────────────────────────
 router.get('/gateways', adminGuard, async (req, res) => {

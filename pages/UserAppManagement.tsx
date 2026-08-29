@@ -74,7 +74,9 @@ const UserAppManagement: React.FC<{ state: AppState }> = ({ state }) => {
       if (editingSection && editingSection.id === section.id) {
          setEditingSection(section);
       }
-      await (db as any).updateAppSection(section);
+      // FIX: was called with the whole section object but the method expects
+      // (sectionId, data) — the mismatch corrupted state.appSections.
+      await (db as any).updateAppSection(section.id, section);
    };
 
    const handleImpersonate = async (userId: string) => {

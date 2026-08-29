@@ -103,8 +103,10 @@ router.get('/invoices', protect, async (req, res) => {
 /**
  * @route POST /api/billing/webhook/simulate
  * @desc Simulate a payment gateway webhook
+ * SECURITY FIX: this marks invoices PAID for an arbitrary body-supplied userId —
+ * it must never be callable by normal (Customer) accounts.
  */
-router.post('/webhook/simulate', protect, handleWebhookSimulate);
+router.post('/webhook/simulate', protect, restrictTo('SuperAdmin', 'Admin', 'FinanceAdmin', 'Accountant'), handleWebhookSimulate);
 
 /**
  * @route POST /api/billing/invoice/generate

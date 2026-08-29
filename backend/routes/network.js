@@ -2,14 +2,16 @@ import express from 'express';
 import logger from '../utils/logger.js';
 import * as oltController from '../controllers/oltController.js';
 import redisService from '../services/redisService.js';
+import { protect, restrictTo } from '../middleware/auth.js';
 
 const router = express.Router();
 
 /**
  * @route GET /api/network/monitoring/live
  * @desc Server-Sent Events for live monitoring - REAL DATA VERSION
+ * SECURITY FIX: was public (anyone could open the SSE stream)
  */
-router.get('/monitoring/live', (req, res) => {
+router.get('/monitoring/live', protect, restrictTo('SuperAdmin', 'Admin', 'NetworkAdmin', 'SupportAdmin'), (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -69,13 +71,21 @@ router.get('/monitoring/live', (req, res) => {
 /**
  * @route POST /api/network/speedtest/start
  * @desc Start a speed test - REAL DATA VERSION
+ * SECURITY FIX: was unauthenticated and let callers trigger streams for ARBITRARY userIds
  */
-router.post('/speedtest/start', (req, res) => {
+router.post('/speedtest/start', protect, (req, res) => {
     const io = req.app.get('socketio');
     const { userId } = req.body;
     
     if (!userId) {
       return res.status(400).json({ success: false, message: 'User ID required' });
+    }
+
+    // Only the owner (or staff) may start a speed test for a given user
+    const isSelf = req.user.id === userId;
+    const isStaff = ['SuperAdmin', 'Admin', 'NetworkAdmin', 'SupportAdmin'].includes(req.user.role);
+    if (!isSelf && !isStaff) {
+      return res.status(403).json({ success: false, message: 'Cannot start a speed test for another user.' });
     }
     
     logger.info(`[SPEEDTEST] Starting live telemetry stream for User: ${userId}`);
@@ -88,7 +98,7 @@ router.post('/speedtest/start', (req, res) => {
     // This would integrate with actual speed test services or ONT/OLT measurements
     
     let progress = 0;
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       progress += 5;
       
       // In a real implementation, these values would come from actual 
@@ -103,8 +113,8 @@ router.post('/speedtest/start', (req, res) => {
       let ping = 0;
       
       try {
-        // Try to get cached speed test data
-        const cachedData = redisService.get(`speedtest:${userId}`);
+        // Try to get cached speed test data — FIX: missing await (Promise is always truthy)
+        const cachedData = await redisService.get(`speedtest:${userId}`);
         if (cachedData) {
           const data = JSON.parse(cachedData);
           download = data.download || 0;
@@ -148,7 +158,7 @@ router.post('/speedtest/start', (req, res) => {
     }, 200);
 });
 
-router.get('/diagnostics/run', async (req, res) => {
+router.get('/diagnostics/run', protect, restrictTo('SuperAdmin', 'Admin', 'NetworkAdmin'), async (req, res) => {
     logger.info('[DIAGNOSTICS] Running manual health check...');
     
     // Run actual diagnostics instead of hardcoded values

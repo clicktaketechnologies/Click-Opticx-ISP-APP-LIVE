@@ -1,11 +1,12 @@
 
 // Lazy-import db to break circular dependency: db.ts → NotificationManager → db.ts
-// Using a getter pattern so db is resolved at call time, never at module evaluation time.
+// FIX: CommonJS `require()` is undefined in a Vite/ESM browser build — every
+// email send from CustomerPortal threw at runtime. Dynamic import keeps the
+// circular-dependency break AND works in ESM.
 let _db: any = null;
-const getDb = () => {
+const getDb = async (): Promise<any> => {
     if (!_db) {
-        // Dynamic require to avoid circular import at module evaluation
-        _db = require('../db').db;
+        _db = (await import('../db')).db;
     }
     return _db;
 };
@@ -38,7 +39,8 @@ class NotificationManager {
      * Uses the global configuration stored in settings.
      */
     async sendEmail(payload: EmailPayload): Promise<{ success: boolean; message: string }> {
-        const state = getDb().getState();
+        const dbInstance = await getDb();
+        const state = dbInstance.getState();
         const config = state.settings.commConfig;
         const defaultSender = config.senderIdentities.find(i => i.isDefault) || config.senderIdentities[0];
 
@@ -63,14 +65,14 @@ class NotificationManager {
 
             const result = await response.json();
             if (result.success) {
-                getDb().logNotification('all', 'success', 'Email Sent', `Message "${payload.subject}" successfully sent to ${payload.to}`);
+                dbInstance.logNotification('all', 'success', 'Email Sent', `Message "${payload.subject}" successfully sent to ${payload.to}`);
                 return { success: true, message: 'Email Sent Successfully' };
             } else {
                 throw new Error(result.message || 'Email delivery failed.');
             }
         } catch (error: any) {
             console.error('[NotificationManager] Email Error:', error);
-            getDb().logNotification('all', 'error', 'Email Failed', `Failed to send to ${payload.to}: ${error.message}`);
+            (await getDb()).logNotification('all', 'error', 'Email Failed', `Failed to send to ${payload.to}: ${error.message}`);
             return { success: false, message: error.message };
         }
     }

@@ -18,7 +18,9 @@ import { protect, restrictTo } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/status', async (req, res) => {
+// SECURITY FIX: /status was public and leaked recent email logs (PII) and
+// provider configuration details. Restricted to admin roles.
+router.get('/status', protect, restrictTo('SuperAdmin', 'Admin', 'SupportAdmin'), async (req, res) => {
   const startTime = Date.now();
   const report = {
     timestamp: new Date().toISOString(),

@@ -63,12 +63,40 @@ export const updateUser = async (req, res) => {
         const supabase = configManager.getSupabaseClient();
         const { id } = req.params;
         const userData = req.body;
+
+        // SECURITY FIX: mass-assignment — clients could set ANY column (role,
+        // deleted, raw_data, password...). Strict allowlist + privileged guards.
+        const EDITABLE_FIELDS = ['name','username','email','phone','address','area','subarea','status','verification_status','is_kyc_verified','is_kyc_submitted','kyc_status','approval_status','package_id','balance','credit_score','referral_points','referral_code','referred_by','activation_count','expiry_date','activation_date','connection_type','management_mode','nas_connection_type','portal_enabled','cnic','deleted','dealer_id','reseller_email','profile_image','fcm_token','internal_notes','tags','connection_id'];
+        const updates = {};
+        for (const f of EDITABLE_FIELDS) {
+            if (userData[f] !== undefined) updates[f] = userData[f];
+        }
+
+        // Role changes are SuperAdmin-only
+        if (userData.role !== undefined) {
+            if (req.user.role !== 'SuperAdmin') {
+                return res.status(403).json({ success: false, message: 'Only a SuperAdmin can change user roles.' });
+            }
+            updates.role = userData.role;
+        }
+
+        // Password changes must be hashed
+        if (userData.password) {
+            const bcrypt = (await import('bcryptjs')).default;
+            updates.password = await bcrypt.hash(String(userData.password), 10);
+        }
+
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).json({ success: false, message: 'No updatable fields provided.' });
+        }
+
         const { data, error } = await supabase.from('users').update({
-            ...userData,
+            ...updates,
             updated_at: new Date().toISOString()
         }).eq('id', id).select().single();
         if (error) throw error;
-        res.json({ success: true, user: data });
+        const { password: _pw, raw_data: _rd, ...safeUser } = data || {};
+        res.json({ success: true, user: safeUser });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -78,7 +106,7 @@ export const softDeleteUser = async (req, res) => {
     const supabase = configManager.getSupabaseClient();
     const { id } = req.params;
     
-    // 1. Move to past_records (if table exists, otherwise skip)
+    // 1. Archive to past_records (best-effort audit trail)
     try {
         const { data: user } = await supabase.from('users').select('*').eq('id', id).single();
         if (user) {
@@ -92,38 +120,16 @@ export const softDeleteUser = async (req, res) => {
         logger.warn(`[USER-DELETE] Could not archive to past_records: ${e.message}`);
     }
 
-    // 2. Programmatic Cascade Deletion in related business modules
-    try {
-        await Promise.all([
-            supabase.from('user_roles').delete().eq('user_id', id),
-            supabase.from('signup_requests').delete().eq('user_id', id),
-            supabase.from('kyc_requests').delete().eq('user_id', id),
-            supabase.from('kyc_files').delete().eq('user_id', id),
-            supabase.from('invoices').delete().eq('user_id', id),
-            supabase.from('payments').delete().eq('user_id', id),
-            supabase.from('emergency_loads').delete().eq('user_id', id),
-            supabase.from('topup_requests').delete().eq('user_id', id),
-            supabase.from('support_tickets').delete().eq('user_id', id),
-            supabase.from('audit_logs').delete().eq('user_id', id),
-            supabase.from('email_logs').delete().eq('user_id', id),
-        ]);
-        logger.info(`[USER-DELETE] Cascade deleted all dependent business records for ${id}`);
-    } catch (e) {
-        logger.warn(`[USER-DELETE] Business cascade delete warning: ${e.message}`);
-    }
-
-    // 3. Remove user from Supabase Auth identity provider
-    try {
-        await supabase.auth.admin.deleteUser(id);
-        logger.info(`[USER-DELETE] Successfully deleted user ${id} from Supabase Auth`);
-    } catch (e) {
-        logger.warn(`[USER-DELETE] Supabase Auth deletion warning: ${e.message}`);
-    }
-
-    // 4. Permanent removal from public.users table
+    // FIX: this endpoint performed a PERMANENT delete (cascade of invoices,
+    // payments, logs + Supabase Auth deletion + row removal) which made
+    // restoreUser a guaranteed no-op. It is now a true SOFT delete.
     const { error } = await supabase
         .from('users')
-        .delete()
+        .update({
+            deleted: true,
+            status: 'Disabled',
+            updated_at: new Date().toISOString()
+        })
         .eq('id', id);
     
     if (error) return res.status(500).json({ success: false, message: error.message });
@@ -133,8 +139,8 @@ export const softDeleteUser = async (req, res) => {
         io.emit('user:deleted', { id });
     }
     
-    logger.info(`[USER] PERMANENT DELETE: ${id} by Admin: ${req.user.id}`);
-    res.json({ success: true, message: 'User permanently removed from production' });
+    logger.info(`[USER] SOFT DELETE: ${id} by Admin: ${req.user.id}`);
+    res.json({ success: true, message: 'User archived (soft-deleted). Can be restored.' });
 };
 
 export const restoreUser = async (req, res) => {
@@ -396,23 +402,52 @@ export const enableLogin = async (req, res) => {
 export const resendVerification = async (req, res) => {
     const supabase = configManager.getSupabaseClient();
     const { id } = req.params;
-    // We should probably call the authController.resendOtp or similar, but since we are in userController we can just generate OTP and send email.
-    // The easiest way is to just generate OTP and save to raw_data.
     try {
         const { data: user, error } = await supabase.from('users').select('*').eq('id', id).single();
         if (error) throw error;
 
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
         const expiresAt = new Date(Date.now() + 10 * 60000).toISOString();
+
+        // FIX 1: OTP is now stored bcrypt-hashed — verifyOtp compares against
+        // verificationCode.hash, but this endpoint stored { code } so OTP
+        // verification ALWAYS failed with "No active verification code found".
+        const bcrypt = (await import('bcryptjs')).default;
+        const hashedOtp = await bcrypt.hash(otpCode, 10);
         const rawData = user.raw_data || {};
-        rawData.verificationCode = { code: otpCode, expiresAt, verified: false };
+        rawData.verificationCode = { hash: hashedOtp, expiresAt, verified: false };
 
         await supabase.from('users').update({ raw_data: rawData }).eq('id', id);
 
-        // Send email (assuming sendDirectEmail is available, but it's not imported here.
-        // Let's just return a success message saying the OTP was generated, or we can import the email service if needed.
-        // Actually, returning a message that the verification is pending is enough for now.
-        res.json({ success: true, message: 'Verification request prepared.' });
+        // FIX 2: the code was never delivered — actually send the email now.
+        let emailSent = false;
+        if (user.email) {
+            try {
+                const { sendDirectEmail } = await import('../modules/email/resend-direct.js');
+                await sendDirectEmail({
+                    to: user.email,
+                    subject: 'Your Verification Code',
+                    html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px;border:1px solid #e2e8f0;border-radius:12px">
+                             <h2 style="color:#0f172a">Verify your account</h2>
+                             <p>Your verification code is:</p>
+                             <p style="font-size:32px;font-weight:700;letter-spacing:8px;color:#1570ef">${otpCode}</p>
+                             <p style="color:#64748b;font-size:13px">This code expires in 10 minutes.</p>
+                           </div>`,
+                    type: 'otp'
+                });
+                emailSent = true;
+            } catch (mailErr) {
+                logger.error(`[RESEND-VERIFICATION] Email dispatch failed for ${id}: ${mailErr.message}`);
+            }
+        }
+
+        res.json({
+            success: true,
+            emailSent,
+            message: emailSent
+                ? 'A new verification code has been sent to the account email.'
+                : 'Verification code generated, but the email could not be delivered. Check email provider configuration.'
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }

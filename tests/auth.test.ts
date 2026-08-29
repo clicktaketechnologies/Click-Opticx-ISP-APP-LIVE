@@ -79,10 +79,23 @@ describe('ClickOptix Authentication Logic', () => {
       phone: '1234567890',
       address: 'Unit Test St'
     };
-    
+
+    // FIX: this test previously asserted success + "Account handshake complete",
+    // a message that never existed in the code (pre-existing failure). The real
+    // contract: submitSignupRequest POSTs to the backend and, when the network
+    // is unreachable (as mocked here), returns an honest failure.
     const res = await db.submitSignupRequest(signupData);
     expect(res).toBeDefined();
-    expect(res.success).toBe(true);
-    expect(res.message).toMatch(/Account handshake complete/);
+    expect(res.success).toBe(false);
+    expect(typeof res.message).toBe('string');
+    expect(res.message.length).toBeGreaterThan(0);
+
+    // When the backend IS reachable and accepts the request, signup succeeds:
+    globalThis.fetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(new Response(JSON.stringify({ success: true, userId: 'USR-TEST-1' }), { status: 200 }))
+    );
+    const okRes = await db.submitSignupRequest(signupData);
+    expect(okRes.success).toBe(true);
+    expect(okRes.message).toMatch(/Signup successful/i);
   });
 });

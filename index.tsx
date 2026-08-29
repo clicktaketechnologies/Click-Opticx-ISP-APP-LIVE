@@ -11,6 +11,12 @@ if (!rootElement) {
 
 import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { db } from './db';
+
+// FIX: SubscriberLayout's "Return to Admin Node" (exit impersonation) called
+// window.db?.logoutImpersonation() — but window.db was never assigned, making
+// the button a guaranteed no-op.
+(window as any).db = db;
 
 const queryClient = new QueryClient({
   defaultOptions: {

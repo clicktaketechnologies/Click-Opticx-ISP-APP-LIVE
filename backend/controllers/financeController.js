@@ -9,23 +9,58 @@ import crypto from 'crypto';
  * Centralized Finance & Ledger Controller (v1)
  */
 
+/** Constant-time string comparison to avoid timing attacks. */
+function safeEqual(a, b) {
+    const bufA = Buffer.from(String(a));
+    const bufB = Buffer.from(String(b));
+    if (bufA.length !== bufB.length) return false;
+    return crypto.timingSafeEqual(bufA, bufB);
+}
+
 async function verifySignature(provider, body, headers, rawBody) {
+    const payload = Buffer.isBuffer(rawBody) ? rawBody : Buffer.from(String(rawBody || JSON.stringify(body)));
+
     if (provider === 'stripe') {
+        // Official Stripe scheme: "t=timestamp,v1=signature" where
+        // signature = HMAC_SHA256(secret, `${timestamp}.${payload}`)
         const signature = headers['stripe-signature'];
         const secret = process.env.STRIPE_WEBHOOK_SECRET;
         if (!signature || !secret) return false;
-        
+
         try {
-            const crypto = await import('crypto');
-            const hmac = crypto.createHmac('sha256', secret);
-            const expectedSignature = hmac.update(rawBody).digest('hex');
-            // Simplified for this environment, real stripe uses constructEvent
-            return true; 
+            const parts = String(signature).split(',').reduce((acc, kv) => {
+                const [k, v] = kv.split('=');
+                if (k && v) acc[k.trim()] = v.trim();
+                return acc;
+            }, {});
+            if (!parts.t || !parts.v1) return false;
+
+            // Replay protection: reject events older than 5 minutes
+            const age = Math.abs(Date.now() / 1000 - Number(parts.t));
+            if (Number.isFinite(age) && age > 300) return false;
+
+            const expected = crypto.createHmac('sha256', secret)
+                .update(`${parts.t}.${payload.toString('utf8')}`)
+                .digest('hex');
+            // FIX: the computed signature was never compared — every request passed.
+            return safeEqual(expected, parts.v1);
         } catch (e) {
             return false;
         }
     }
-    return true; // Other providers
+
+    // Generic providers: HMAC-SHA256 over the raw body using the provider secret
+    // (STRIPE_WEBHOOK_SECRET-style per-provider env: <PROVIDER>_WEBHOOK_SECRET).
+    const genericHeader = headers['x-webhook-signature'] || headers['x-signature'];
+    const genericSecret = process.env[`${String(provider).toUpperCase()}_WEBHOOK_SECRET`];
+    if (!genericSecret) {
+        // No secret configured for this provider — reject in production, allow in dev.
+        logger.warn(`[FINANCE-WEBHOOK] No webhook secret configured for provider "${provider}"`);
+        return process.env.NODE_ENV !== 'production';
+    }
+    if (!genericHeader) return false;
+    const expectedGeneric = crypto.createHmac('sha256', genericSecret).update(payload).digest('hex');
+    return safeEqual(expectedGeneric, genericHeader);
 }
 
 export const handleWebhook = async (req, res) => {

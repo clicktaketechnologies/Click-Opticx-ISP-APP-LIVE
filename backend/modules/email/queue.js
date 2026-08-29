@@ -108,11 +108,16 @@ class InMemoryQueue {
         // Attempt SMTP direct fallback
         try {
           logger.info(`[IN-MEMORY-QUEUE-DLQ] Attempting SMTP Fallback directly for ${nextJob.data.to}...`);
+          // SECURITY FIX: a live Gmail app password was hardcoded as fallback here.
+          // Credentials now come strictly from the environment.
+          if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+            throw new Error('GMAIL_USER/GMAIL_APP_PASSWORD not configured — cannot use SMTP fallback');
+          }
           const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-              user: process.env.GMAIL_USER || 'clickopticx@gmail.com',
-              pass: process.env.GMAIL_APP_PASSWORD || 'kxpu dgdx hewz rfyi'
+              user: process.env.GMAIL_USER,
+              pass: process.env.GMAIL_APP_PASSWORD
             }
           });
           await transporter.sendMail({

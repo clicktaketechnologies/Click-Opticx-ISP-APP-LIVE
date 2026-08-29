@@ -96,8 +96,13 @@ export const handleWebhook = async (req, res) => {
             return res.status(401).send('Invalid Signature');
         }
 
-        const event = verification.event;
-        const transactionId = event.id || event.transactionId || (event.data?.object?.id);
+        // FIX: JazzCash adapter returns { status } without an event object —
+        // fall back to top-level webhook body fields to avoid a TypeError 500.
+        const event = verification.event || {};
+        const body0 = req.body?.data?.object || req.body || {};
+        const transactionId = event.id || event.transactionId || body0.id
+            || (event.data?.object?.id)
+            || req.body?.pp_TxnRefNo || req.body?.pp_TxnID;
         
         if (!transactionId) {
             return res.status(400).send('No transaction ID found in payload');
@@ -116,10 +121,21 @@ export const handleWebhook = async (req, res) => {
         }
 
         // 3. Process the standardized event
-        // In a real system, we'd use responseMapper here. For now, let's assume successful payment.
-        const amount = event.amount || event.data?.object?.amount / 100 || 0;
-        const userId = event.metadata?.userId || event.data?.object?.metadata?.userId;
-        const invoiceId = event.metadata?.invoiceId || event.data?.object?.metadata?.invoiceId;
+        // FIX: Stripe Checkout events carry amount_total / amount_received (minor
+        // units), NOT `amount` — the previous code computed 0 and silently
+        // dropped every payment (no ledger entry, no balance credit).
+        const stripeObj = event.data?.object || req.body?.data?.object || {};
+        const minorUnits = event.amount ?? stripeObj.amount_total ?? stripeObj.amount_received ?? req.body?.pp_Amount;
+        let amount = Number(minorUnits) || 0;
+        // Stripe/JazzCash minor units → major units when amount > 1000 looks like paisa
+        if (gatewayId === 'stripe' && amount > 0 && amount < 10_000_000) {
+            // amounts from Stripe are always in minor units
+            amount = amount / 100;
+        } else if (gatewayId === 'jazzcash' && amount > 0) {
+            amount = amount / 100; // JazzCash sends paisa
+        }
+        const userId = event.metadata?.userId || stripeObj.metadata?.userId || req.body?.metadata?.userId;
+        const invoiceId = event.metadata?.invoiceId || stripeObj.metadata?.invoiceId || req.body?.metadata?.invoiceId;
 
         if (userId && amount > 0) {
             const paymentData = {

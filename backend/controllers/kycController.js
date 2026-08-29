@@ -95,11 +95,13 @@ export const approveKYC = async (req, res) => {
         logger.info(`[KYC-APPROVE] Approving for user: ${userId}`);
 
         // 1. Update User Status in Postgres
+        // FIX: column names were camelCase but the schema (supabase_schema.sql) is
+        // snake_case — approve/reject/status/queue all threw unknown-column errors.
         const { error: userError } = await supabase
             .from('users')
             .update({ 
-                verificationStatus: 'VERIFIED',
-                isKYCVerified: true,
+                verification_status: 'Verified',
+                is_kyc_verified: true,
                 status: 'Active'
             })
             .eq('id', userId);
@@ -152,8 +154,8 @@ export const rejectKYC = async (req, res) => {
         await supabase
             .from('users')
             .update({ 
-                verificationStatus: 'REVISION',
-                isKYCVerified: false,
+                verification_status: 'Revision',
+                is_kyc_verified: false,
                 kyc_rejected_reason: reason
             })
             .eq('id', userId);
@@ -177,7 +179,7 @@ export const getKYCStatus = async (req, res) => {
         const supabase = configManager.getSupabaseClient();
         const { data: user, error } = await supabase
             .from('users')
-            .select('kyc_status, verificationStatus, isKYCVerified, isKYCSubmitted, kyc_rejected_reason')
+            .select('kyc_status, verification_status, is_kyc_verified, is_kyc_submitted, kyc_rejected_reason')
             .eq('id', userId)
             .single();
 
@@ -188,9 +190,9 @@ export const getKYCStatus = async (req, res) => {
         res.json({
             success: true,
             kyc_status: user.kyc_status || 'unverified',
-            verificationStatus: user.verificationStatus || 'UNVERIFIED',
-            isKYCVerified: user.isKYCVerified || false,
-            isKYCSubmitted: user.isKYCSubmitted || false,
+            verificationStatus: user.verification_status || 'Unverified',
+            isKYCVerified: user.is_kyc_verified || false,
+            isKYCSubmitted: user.is_kyc_submitted || false,
             rejectedReason: user.kyc_rejected_reason || null
         });
     } catch (error) {
@@ -207,8 +209,8 @@ export const getKYCQueue = async (req, res) => {
         
         let query = supabase
             .from('users')
-            .select('id, name, email, phone, kyc_status, verificationStatus, isKYCSubmitted, isKYCVerified, created_at')
-            .eq('isKYCSubmitted', true);
+            .select('id, name, email, phone, kyc_status, verification_status, is_kyc_submitted, is_kyc_verified, created_at')
+            .eq('is_kyc_submitted', true);
         
         if (status !== 'all') {
             query = query.eq('kyc_status', status);

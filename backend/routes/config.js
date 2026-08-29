@@ -21,6 +21,29 @@ router.get('/', protect, restrictTo('SuperAdmin', 'Admin'), (req, res) => {
   res.json({ success: true, configs: all });
 });
 
+// ─── App access settings (MUST be declared before /:key — Express matches in
+// registration order and "app" was previously swallowed by GET/PUT /:key) ──────
+router.get('/app', protect, (req, res) => {
+    const portal_access = configManager.getConfig('portal_access') ?? true;
+    const app_access = configManager.getConfig('app_access') ?? true;
+    res.json({ success: true, portal_access, app_access });
+});
+
+router.put('/app', protect, restrictTo('SuperAdmin', 'Admin'), async (req, res) => {
+    try {
+        const { portal_access, app_access } = req.body;
+        if (portal_access !== undefined) await configManager.setConfig('portal_access', portal_access, req.user.id);
+        if (app_access !== undefined) await configManager.setConfig('app_access', app_access, req.user.id);
+        
+        const io = req.app.get('socketio');
+        if (io) io.emit('config_updated', { portal_access, app_access });
+
+        res.json({ success: true, message: 'App access settings updated.' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 // ─── GET single config ────────────────────────────────────────────────────────
 router.get('/:key', protect, (req, res) => {
   const value = configManager.getConfig(req.params.key);
@@ -200,26 +223,5 @@ async function testStorageProvider(providerId) {
 
   return { success: false, message: `Unknown storage provider: ${providerId}` };
 }
-
-router.get('/app', protect, (req, res) => {
-    const portal_access = configManager.getConfig('portal_access') ?? true;
-    const app_access = configManager.getConfig('app_access') ?? true;
-    res.json({ success: true, portal_access, app_access });
-});
-
-router.put('/app', protect, restrictTo('SuperAdmin', 'Admin'), async (req, res) => {
-    try {
-        const { portal_access, app_access } = req.body;
-        if (portal_access !== undefined) await configManager.setConfig('portal_access', portal_access, req.user.id);
-        if (app_access !== undefined) await configManager.setConfig('app_access', app_access, req.user.id);
-        
-        const io = req.app.get('socketio');
-        if (io) io.emit('config_updated', { portal_access, app_access });
-
-        res.json({ success: true, message: 'App access settings updated.' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
 
 export default router;

@@ -15,12 +15,13 @@ import { V2SmartTable, V2SlideOver, V2TableRow, V2TableCell } from '../../compon
 import { usePermissions } from '../../src/hooks/usePermissions';
 
 // Lazy-import db to break circular dependency: db.ts → UserManagementV2 → db.ts
-// Using a getter pattern so db is resolved at call time, never at module evaluation time.
+// FIX: CommonJS `require()` is undefined in a Vite/ESM browser build — the
+// Impersonate button threw "ReferenceError: require is not defined". A dynamic
+// import at call time keeps the circular-dependency break AND works in ESM.
 let _db: any = null;
-const getDb = () => {
+const getDb = async (): Promise<any> => {
   if (!_db) {
-    // Dynamic require to avoid circular import at module evaluation
-    _db = require('../db').db;
+    _db = (await import('../../db')).db;
   }
   return _db;
 };
@@ -217,8 +218,8 @@ const UserManagementV2: React.FC<{ state: AppState }> = ({ state }) => {
                           icon={Eye} 
                           label="Login As" 
                           color="indigo" 
-                          onClick={() => {
-                            getDb().impersonateUser(selectedUser.id);
+                          onClick={async () => {
+                            (await getDb()).impersonateUser(selectedUser.id);
                             setIsDetailOpen(false);
                           }} 
                         />

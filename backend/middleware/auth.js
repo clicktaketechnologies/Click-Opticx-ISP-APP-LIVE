@@ -2,6 +2,19 @@ import jwt from 'jsonwebtoken';
 import logger from '../utils/logger.js';
 import configManager from '../services/config-manager.js';
 
+/** JWT secret — production refuses the missing/insecure default (see authController.getJwtSecret). */
+const getJwtSecret = () => {
+    const secret = process.env.JWT_SECRET;
+    if (!secret || secret === 'secret') {
+        if (process.env.NODE_ENV === 'production') {
+            logger.error('[AUTH-MIDDLEWARE] FATAL: JWT_SECRET missing/insecure in production. All token verification will fail.');
+            throw new Error('Server misconfiguration: JWT_SECRET must be set in production.');
+        }
+        return 'insecure-dev-secret-do-not-use-in-production';
+    }
+    return secret;
+};
+
 export const protect = (req, res, next) => {
     let token;
 
@@ -25,7 +38,7 @@ export const protect = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        const decoded = jwt.verify(token, getJwtSecret());
         req.user = decoded;
         next();
     } catch (error) {

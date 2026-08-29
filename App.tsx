@@ -396,6 +396,12 @@ const App: React.FC = () => {
     db.auditOverdueLoads();
     db.reconcileData('entire');
 
+    // 2b. Session validation — FIX: persisted sessions were trusted blindly and
+    // never re-checked against the backend. A stored session that the backend
+    // has invalidated (password change, deleted user, revoked session) now
+    // force-logs-out once the backend explicitly rejects it.
+    db.verifySessionOnBoot();
+
     // 3. Background Cron (Audit & Reconciliation every 5 mins)
     const cronInterval = setInterval(() => {
       console.log('[SYSTEM] Running 5-min background health & data audit...');

@@ -41,7 +41,7 @@ const UserDeviceMapping: React.FC<{ state: AppState }> = ({ state }) => {
       setMapping({
         userId: user.id,
         connectionType: user.connectionType,
-        deviceId: user.connectionType === 'Fiber' ? state.oltNodes[0]?.id || '' : state.nas[0]?.id || '',
+        deviceId: user.connectionType === 'Fiber' ? (state.oltNodes || [])[0]?.id || '' : (state.nas || [])[0]?.id || '',
         configured: false,
         ssidName: user.username ? user.username + "_WIFI" : "CLICKOPTICX_NODE"
       });

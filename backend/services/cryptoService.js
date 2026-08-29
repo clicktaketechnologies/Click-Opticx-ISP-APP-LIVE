@@ -2,7 +2,11 @@ import crypto from 'crypto';
 import logger from '../utils/logger.js';
 
 const ALGORITHM = 'aes-256-cbc';
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || crypto.randomBytes(32).toString('hex'); // 32 bytes
+// FIX: the fallback was a random per-process key — every server restart made
+// all previously encrypted gateway configs permanently undecryptable.
+// The fallback is now a stable value derived from JWT_SECRET (or a fixed dev key).
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY
+  || crypto.createHash('sha256').update(`co-crypto:${process.env.JWT_SECRET || 'insecure-dev-secret-do-not-use-in-production'}`).digest('hex'); // 64 hex chars = 32 bytes
 const IV_LENGTH = 16;
 
 class CryptoService {

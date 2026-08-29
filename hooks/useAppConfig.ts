@@ -42,14 +42,22 @@ export function useAppConfig() {
         };
     }, []);
 
+    // FIX: the dependency was `db.getState().auth` — a fresh deep-cloned object
+    // on every render → infinite re-render loop. Subscribe to state changes
+    // properly via db.onStateChange instead.
     useEffect(() => {
-        const auth = db.getState().auth as any;
-        setConfig(prev => ({ 
-            ...prev, 
-            isImpersonating: !!auth?.isImpersonating,
-            impersonatorId: auth?.impersonatorId || null
-        }));
-    }, [db.getState().auth]);
+        const syncAuth = (state: any) => {
+            const auth = state?.auth;
+            setConfig(prev => {
+                const isImpersonating = !!auth?.isImpersonating;
+                const impersonatorId = auth?.impersonatorId || null;
+                if (prev.isImpersonating === isImpersonating && prev.impersonatorId === impersonatorId) return prev;
+                return { ...prev, isImpersonating, impersonatorId };
+            });
+        };
+        syncAuth(db.getState());
+        return db.onStateChange(syncAuth);
+    }, []);
 
     return config;
 }
